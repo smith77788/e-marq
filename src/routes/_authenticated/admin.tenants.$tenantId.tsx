@@ -397,20 +397,18 @@ function TenantDetailPage() {
             <CardHeader>
               <CardTitle>Tenant config</CardTitle>
               <CardDescription>
-                UI / Features / Bot / SEO. Read-only preview. Editor coming next loop.
+                Brand, UI theme, feature flags, AI bot, and SEO metadata.
               </CardDescription>
             </CardHeader>
             <CardContent>
               {configQuery.isLoading ? (
                 <p className="text-sm text-muted-foreground">Loading…</p>
               ) : configQuery.data ? (
-                <div className="space-y-4">
-                  <ConfigBlock title="Brand name" value={configQuery.data.brand_name} />
-                  <ConfigBlock title="UI" value={configQuery.data.ui} />
-                  <ConfigBlock title="Features" value={configQuery.data.features} />
-                  <ConfigBlock title="Bot" value={configQuery.data.bot} />
-                  <ConfigBlock title="SEO" value={configQuery.data.seo} />
-                </div>
+                <TenantConfigForm
+                  initialValues={normalizeConfig(configQuery.data)}
+                  onSubmit={(values) => saveConfigMutation.mutate(values)}
+                  isPending={saveConfigMutation.isPending}
+                />
               ) : (
                 <p className="text-sm text-muted-foreground">No config found.</p>
               )}
