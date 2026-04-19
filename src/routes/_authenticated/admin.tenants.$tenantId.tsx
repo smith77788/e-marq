@@ -35,6 +35,11 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ProductForm, type ProductFormValues } from "@/components/admin/ProductForm";
+import {
+  TenantConfigForm,
+  normalizeConfig,
+  type TenantConfigValues,
+} from "@/components/admin/TenantConfigForm";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants/$tenantId")({
   component: TenantDetailPage,
