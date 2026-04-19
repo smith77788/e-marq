@@ -210,6 +210,27 @@ function TenantDetailPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const saveConfigMutation = useMutation({
+    mutationFn: async (values: TenantConfigValues) => {
+      const { error } = await supabase
+        .from("tenant_configs")
+        .update({
+          brand_name: values.brand_name,
+          ui: values.ui,
+          features: values.features,
+          bot: values.bot,
+          seo: values.seo,
+        })
+        .eq("tenant_id", tenantId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Config saved");
+      queryClient.invalidateQueries({ queryKey: ["tenant-config", tenantId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   if (loading) {
     return <p className="text-sm text-muted-foreground">Loading…</p>;
   }
