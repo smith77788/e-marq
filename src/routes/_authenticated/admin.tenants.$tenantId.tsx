@@ -35,6 +35,11 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ProductForm, type ProductFormValues } from "@/components/admin/ProductForm";
+import {
+  TenantConfigForm,
+  normalizeConfig,
+  type TenantConfigValues,
+} from "@/components/admin/TenantConfigForm";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants/$tenantId")({
   component: TenantDetailPage,
@@ -205,6 +210,27 @@ function TenantDetailPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const saveConfigMutation = useMutation({
+    mutationFn: async (values: TenantConfigValues) => {
+      const { error } = await supabase
+        .from("tenant_configs")
+        .update({
+          brand_name: values.brand_name,
+          ui: values.ui,
+          features: values.features,
+          bot: values.bot,
+          seo: values.seo,
+        })
+        .eq("tenant_id", tenantId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Config saved");
+      queryClient.invalidateQueries({ queryKey: ["tenant-config", tenantId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   if (loading) {
     return <p className="text-sm text-muted-foreground">Loading…</p>;
   }
@@ -371,20 +397,18 @@ function TenantDetailPage() {
             <CardHeader>
               <CardTitle>Tenant config</CardTitle>
               <CardDescription>
-                UI / Features / Bot / SEO. Read-only preview. Editor coming next loop.
+                Brand, UI theme, feature flags, AI bot, and SEO metadata.
               </CardDescription>
             </CardHeader>
             <CardContent>
               {configQuery.isLoading ? (
                 <p className="text-sm text-muted-foreground">Loading…</p>
               ) : configQuery.data ? (
-                <div className="space-y-4">
-                  <ConfigBlock title="Brand name" value={configQuery.data.brand_name} />
-                  <ConfigBlock title="UI" value={configQuery.data.ui} />
-                  <ConfigBlock title="Features" value={configQuery.data.features} />
-                  <ConfigBlock title="Bot" value={configQuery.data.bot} />
-                  <ConfigBlock title="SEO" value={configQuery.data.seo} />
-                </div>
+                <TenantConfigForm
+                  initialValues={normalizeConfig(configQuery.data)}
+                  onSubmit={(values) => saveConfigMutation.mutate(values)}
+                  isPending={saveConfigMutation.isPending}
+                />
               ) : (
                 <p className="text-sm text-muted-foreground">No config found.</p>
               )}
@@ -480,13 +504,3 @@ function StatCard({ label, value, loading }: { label: string; value: number; loa
   );
 }
 
-function ConfigBlock({ title, value }: { title: string; value: unknown }) {
-  return (
-    <div className="space-y-1">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</p>
-      <pre className="overflow-x-auto rounded-md border border-border bg-muted/40 p-3 text-xs text-foreground">
-        {typeof value === "string" ? value : JSON.stringify(value, null, 2)}
-      </pre>
-    </div>
-  );
-}
