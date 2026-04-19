@@ -504,13 +504,3 @@ function StatCard({ label, value, loading }: { label: string; value: number; loa
   );
 }
 
-function ConfigBlock({ title, value }: { title: string; value: unknown }) {
-  return (
-    <div className="space-y-1">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</p>
-      <pre className="overflow-x-auto rounded-md border border-border bg-muted/40 p-3 text-xs text-foreground">
-        {typeof value === "string" ? value : JSON.stringify(value, null, 2)}
-      </pre>
-    </div>
-  );
-}
