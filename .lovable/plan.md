@@ -1,54 +1,56 @@
 
-ACOS-ULTRA Loop Status: Foundation + Auth + Tenant Detail shell готові. Тепер потрібен наступний high-impact крок.
+Goal: fix the “Invalid login credentials” loop without resetting data again.
 
-Decision filter (3 агенти):
-- GROWTH: без продуктів немає чого продавати → Product CRUD = direct revenue enabler
-- UX: tenant admin зараз не може нічого зробити з tenant → CRUD усуває friction
-- SYSTEM: products таблиця + RLS вже готові, потрібен лише UI шар
+What I found:
+- Backend auth is working: the logs show signup succeeded and the app immediately logged in that same new user successfully.
+- So this is not a broken database/auth backend issue.
+- The weak spots are in the app UX/flow:
+  1. signup assumes instant login and has no confirm-password protection,
+  2. login gives only the raw error,
+  3. there is no password recovery path,
+  4. auth guarding is still client-side and can be cleaned up.
 
-Top action: **Step 5 — Product CRUD** на вкладці Products у `/admin/tenants/$tenantId`.
+Plan
 
-## Plan: Product CRUD
+1. Harden signup/login UX
+- Add `confirm password` on `/signup`
+- Normalize email before submit (`trim().toLowerCase()`)
+- Keep password exactly as typed
+- Add show/hide password toggle on signup + login
+- Improve error copy for invalid credentials so users get a clearer message
 
-### 1. Create reusable ProductForm component
-File: `src/components/admin/ProductForm.tsx`
-- Поля: name, sku, price (у доларах, конвертація в cents), currency, stock, description, image_url, is_active
-- Валідація: name required, price >= 0, stock >= 0
-- Працює і для create, і для edit (props: initialValues, onSubmit, isPending)
+2. Add recovery flow
+- Add “Forgot password?” link on `/login`
+- Create `/reset-password-request` page to send reset email
+- Create `/reset-password` page to set a new password after recovery link
+- Wire it through the existing backend auth
 
-### 2. Update Products tab in `admin.tenants.$tenantId.tsx`
-- Додати кнопку **"+ New product"** у CardHeader
-- Dialog з ProductForm для створення (insert у `products` з tenant_id)
-- В кожному рядку таблиці — actions column:
-  - **Edit** (Dialog з ProductForm, prefilled)
-  - **Toggle active** (Switch у колонці Status — інлайн оновлення is_active)
-  - **Delete** (AlertDialog для підтвердження)
-- Mutations через TanStack Query + invalidate `["tenant-products", tenantId]`
-- Toast feedback (sonner) для всіх операцій
+3. Make signup flow robust
+- Update `signUp` handling so it does not blindly assume auto-login
+- If signup returns a live session: continue to dashboard
+- If signup requires confirmation: show a success message with next steps instead of trying to log in again
+- This removes the fragile “auto-confirm is on” assumption in the current code
 
-### 3. Mutations (всі через supabase client + RLS)
-- `createProduct`: insert {tenant_id, name, sku, price_cents, currency, stock, description, image_url, is_active}
-- `updateProduct`: update by id
-- `deleteProduct`: delete by id (потрібна tenant_admin роль — RLS вже це enforce)
-- `toggleActive`: update {is_active}
+4. Tighten route auth behavior
+- Replace the current component-level redirect pattern in `_authenticated.tsx` with proper route guard logic
+- Prevent edge cases where the app sits in loading/redirect states awkwardly
 
-### 4. UX details
-- Price input у форматі "12.99" (number step 0.01) → store як `Math.round(value * 100)`
-- При відкритті форми редагування: `price_cents / 100` показати у dollars
-- Empty state у таблиці залишається як є
-- Loading states на кнопках через `isPending`
+5. Verify end-to-end
+- Fresh signup with a new email
+- Sign out → sign back in with same password
+- Trigger forgot-password → reset password → log in with new password
+- Confirm super-admin bootstrap still works for the first fresh user
 
-### Files affected
-- NEW: `src/components/admin/ProductForm.tsx`
-- EDIT: `src/routes/_authenticated/admin.tenants.$tenantId.tsx` (Products tab + mutations)
+Files to update
+- `src/hooks/useAuth.tsx`
+- `src/routes/login.tsx`
+- `src/routes/signup.tsx`
+- `src/routes/_authenticated.tsx`
+- new public route for reset request
+- new public route for reset password
 
-### Unchanged
-- Schema, RLS, auth, інші вкладки (Overview, Config), routing
-
-### Expected impact
-- Tenant admin може заповнити каталог → прямий unlock для orders → revenue
-- Усуває залежність від manual SQL для seed-даних
-
-### Next loop focus
-- Step 6: Config editor (JSON editor для ui/features/bot/seo)
-- Step 7: Seed-кнопка "Generate demo events" для funnel-аналітики
+Expected result
+- No more dead-end when a user cannot sign in
+- Much clearer auth UX
+- Safe recovery path instead of wiping the database
+- More reliable protected-route behavior
