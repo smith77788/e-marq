@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { createFileRoute, Outlet, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,18 +12,18 @@ function AuthenticatedLayout() {
   const navigate = useNavigate();
   const router = useRouter();
 
-  if (loading) {
+  useEffect(() => {
+    if (!loading && !user) {
+      void navigate({ to: "/login" });
+    }
+  }, [loading, user, navigate]);
+
+  if (loading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-sm text-muted-foreground">Loading…</div>
       </div>
     );
-  }
-
-  if (!user) {
-    // client-side guard (auth state is client-only)
-    void navigate({ to: "/login" });
-    return null;
   }
 
   async function handleSignOut() {
