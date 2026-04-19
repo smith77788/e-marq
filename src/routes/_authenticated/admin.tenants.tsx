@@ -184,7 +184,15 @@ function AdminTenantsPage() {
               <TableBody>
                 {tenantsQuery.data.map((t) => (
                   <TableRow key={t.id}>
-                    <TableCell className="font-medium">{t.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link
+                        to="/admin/tenants/$tenantId"
+                        params={{ tenantId: t.id }}
+                        className="hover:underline"
+                      >
+                        {t.name}
+                      </Link>
+                    </TableCell>
                     <TableCell className="text-muted-foreground">/{t.slug}</TableCell>
                     <TableCell>
                       <Badge variant={t.status === "active" ? "default" : "outline"}>
