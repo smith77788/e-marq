@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -11,16 +15,52 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { ProductForm, type ProductFormValues } from "@/components/admin/ProductForm";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants/$tenantId")({
   component: TenantDetailPage,
 });
 
+type ProductRow = {
+  id: string;
+  name: string;
+  sku: string | null;
+  price_cents: number;
+  currency: string;
+  stock: number;
+  is_active: boolean;
+  description: string | null;
+  image_url: string | null;
+  created_at: string;
+};
+
 function TenantDetailPage() {
   const { tenantId } = Route.useParams();
   const { isSuperAdmin, loading } = useAuth();
+  const queryClient = useQueryClient();
+
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editing, setEditing] = useState<ProductRow | null>(null);
+  const [deleting, setDeleting] = useState<ProductRow | null>(null);
 
   const tenantQuery = useQuery({
     queryKey: ["tenant", tenantId],
@@ -56,11 +96,13 @@ function TenantDetailPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("id, name, sku, price_cents, currency, stock, is_active, created_at")
+        .select(
+          "id, name, sku, price_cents, currency, stock, is_active, description, image_url, created_at",
+        )
         .eq("tenant_id", tenantId)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data;
+      return data as ProductRow[];
     },
   });
 
@@ -88,6 +130,79 @@ function TenantDetailPage() {
       if (error) throw error;
       return count ?? 0;
     },
+  });
+
+  const invalidateProducts = () =>
+    queryClient.invalidateQueries({ queryKey: ["tenant-products", tenantId] });
+
+  const createMutation = useMutation({
+    mutationFn: async (values: ProductFormValues) => {
+      const { error } = await supabase.from("products").insert({
+        tenant_id: tenantId,
+        name: values.name,
+        sku: values.sku || null,
+        price_cents: values.price_cents,
+        currency: values.currency,
+        stock: values.stock,
+        description: values.description || null,
+        image_url: values.image_url || null,
+        is_active: values.is_active,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Product created");
+      setCreateOpen(false);
+      invalidateProducts();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, values }: { id: string; values: ProductFormValues }) => {
+      const { error } = await supabase
+        .from("products")
+        .update({
+          name: values.name,
+          sku: values.sku || null,
+          price_cents: values.price_cents,
+          currency: values.currency,
+          stock: values.stock,
+          description: values.description || null,
+          image_url: values.image_url || null,
+          is_active: values.is_active,
+        })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Product updated");
+      setEditing(null);
+      invalidateProducts();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+      const { error } = await supabase.from("products").update({ is_active }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidateProducts(),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("products").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Product deleted");
+      setDeleting(null);
+      invalidateProducts();
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   if (loading) {
@@ -154,7 +269,11 @@ function TenantDetailPage() {
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard label="Products" value={productsQuery.data?.length ?? 0} loading={productsQuery.isLoading} />
+            <StatCard
+              label="Products"
+              value={productsQuery.data?.length ?? 0}
+              loading={productsQuery.isLoading}
+            />
             <StatCard label="Orders" value={ordersQuery.data ?? 0} loading={ordersQuery.isLoading} />
             <StatCard label="Events" value={eventsQuery.data ?? 0} loading={eventsQuery.isLoading} />
           </div>
@@ -178,11 +297,16 @@ function TenantDetailPage() {
 
         <TabsContent value="products" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Products</CardTitle>
-              <CardDescription>
-                {productsQuery.data?.length ?? 0} total. Product CRUD coming next loop.
-              </CardDescription>
+            <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
+              <div>
+                <CardTitle>Products</CardTitle>
+                <CardDescription>
+                  {productsQuery.data?.length ?? 0} total. Manage catalog for this tenant.
+                </CardDescription>
+              </div>
+              <Button size="sm" onClick={() => setCreateOpen(true)}>
+                + New product
+              </Button>
             </CardHeader>
             <CardContent>
               {productsQuery.isLoading ? (
@@ -195,7 +319,8 @@ function TenantDetailPage() {
                       <TableHead>SKU</TableHead>
                       <TableHead className="text-right">Price</TableHead>
                       <TableHead className="text-right">Stock</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>Active</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -208,9 +333,27 @@ function TenantDetailPage() {
                         </TableCell>
                         <TableCell className="text-right">{p.stock}</TableCell>
                         <TableCell>
-                          <Badge variant={p.is_active ? "default" : "outline"}>
-                            {p.is_active ? "active" : "draft"}
-                          </Badge>
+                          <Switch
+                            checked={p.is_active}
+                            disabled={toggleMutation.isPending}
+                            onCheckedChange={(checked) =>
+                              toggleMutation.mutate({ id: p.id, is_active: checked })
+                            }
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button size="sm" variant="outline" onClick={() => setEditing(p)}>
+                              Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => setDeleting(p)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -249,6 +392,75 @@ function TenantDetailPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Create dialog */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New product</DialogTitle>
+            <DialogDescription>Add a product to this tenant catalog.</DialogDescription>
+          </DialogHeader>
+          <ProductForm
+            onSubmit={(values) => createMutation.mutate(values)}
+            onCancel={() => setCreateOpen(false)}
+            isPending={createMutation.isPending}
+            submitLabel="Create"
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit dialog */}
+      <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit product</DialogTitle>
+            <DialogDescription>{editing?.name}</DialogDescription>
+          </DialogHeader>
+          {editing && (
+            <ProductForm
+              initialValues={{
+                name: editing.name,
+                sku: editing.sku ?? "",
+                price_cents: editing.price_cents,
+                currency: editing.currency,
+                stock: editing.stock,
+                description: editing.description ?? "",
+                image_url: editing.image_url ?? "",
+                is_active: editing.is_active,
+              }}
+              onSubmit={(values) => updateMutation.mutate({ id: editing.id, values })}
+              onCancel={() => setEditing(null)}
+              isPending={updateMutation.isPending}
+              submitLabel="Save changes"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete confirm */}
+      <AlertDialog open={!!deleting} onOpenChange={(open) => !open && setDeleting(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete product?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-medium">{deleting?.name}</span>.
+              This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteMutation.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                if (deleting) deleteMutation.mutate(deleting.id);
+              }}
+            >
+              {deleteMutation.isPending ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
