@@ -22,10 +22,23 @@ type InboundRow = {
   created_at: string;
 };
 
-type ProductLite = { name: string; price_cents: number; currency: string; stock: number };
+type ProductLite = { id: string; name: string; price_cents: number; currency: string; stock: number };
+
+/** Fuzzy match: does the reply mention a product name (case-insensitive substring)? */
+function findMentionedProduct(reply: string, catalogue: ProductLite[]): ProductLite | null {
+  const lower = reply.toLowerCase();
+  // Prefer longest name match first (avoids "Tee" matching when "Tee Shirt" is the real one)
+  const sorted = [...catalogue].sort((a, b) => b.name.length - a.name.length);
+  for (const p of sorted) {
+    const n = p.name.toLowerCase();
+    if (n.length >= 3 && lower.includes(n)) return p;
+  }
+  return null;
+}
 
 async function aiReply(opts: {
   brandName: string;
+  storefrontBase: string | null;
   customerName: string | null;
   history: { direction: string; body: string }[];
   catalogue: ProductLite[];
@@ -36,9 +49,10 @@ async function aiReply(opts: {
   const sys = [
     `You are the autonomous sales assistant for D2C brand "${opts.brandName}".`,
     `Goal: be warm, concise, close the sale. Reply in 1-3 short sentences max. Use customer's first name if known.`,
-    `If they ask about products, recommend from the catalogue with price.`,
-    `If unsure, ask one focused clarifying question.`,
-    `Never say you are an AI. Never make up products or prices.`,
+    `If they ask "how much" / "price" / "available" / "what do you have" — name the product and price clearly from the catalogue.`,
+    `If they pick a specific product, confirm it and tell them you'll send a checkout link.`,
+    `If unsure what they want, ask one focused clarifying question.`,
+    `Never say you are an AI. Never make up products or prices. Never invent links.`,
     opts.lastBought ? `Customer's last purchase: ${opts.lastBought}.` : "",
     `Catalogue (max 8 shown):`,
     ...opts.catalogue.slice(0, 8).map((p) => `- ${p.name} — ${(p.price_cents / 100).toFixed(0)} ${p.currency}${p.stock > 0 ? "" : " (out of stock)"}`),
@@ -61,8 +75,17 @@ async function aiReply(opts: {
   const json = (await res.json().catch(() => ({}))) as {
     choices?: { message?: { content?: string } }[];
   };
-  const out = json.choices?.[0]?.message?.content?.trim();
-  return out && out.length > 0 ? out : null;
+  let out = json.choices?.[0]?.message?.content?.trim();
+  if (!out) return null;
+
+  // Auto-append shop link when AI mentioned a real product and we know the storefront
+  if (opts.storefrontBase) {
+    const product = findMentionedProduct(out, opts.catalogue);
+    if (product && product.stock > 0 && !out.includes(opts.storefrontBase)) {
+      out += `\n\n👉 ${opts.storefrontBase}`;
+    }
+  }
+  return out;
 }
 
 /** Process pending inbound conversations for a tenant. Returns reply count. */
