@@ -138,7 +138,7 @@ export const Route = createFileRoute("/hooks/agents/customer-segments-auto")({
                   segment_key: s.key,
                   name: s.name,
                   description: s.description,
-                  rules: s.rules,
+                  rules: s.rules as never,
                   customer_count: matches.length,
                   avg_ltv_cents: avgLtv,
                   is_auto_generated: true,

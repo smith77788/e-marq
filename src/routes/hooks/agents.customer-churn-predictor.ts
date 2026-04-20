@@ -98,15 +98,17 @@ export const Route = createFileRoute("/hooks/agents/customer-churn-predictor")({
             await supabaseAdmin
               .from("customer_ltv_scores")
               .upsert(
-                {
-                  tenant_id: tenantId!,
-                  customer_id: c.id,
-                  churn_probability: prob,
-                  churn_reason: reason,
-                  predicted_ltv_cents: c.total_spent_cents ?? 0,
-                  predicted_orders_12m: prob > 0.7 ? 0 : Math.max(1, Math.round(12 / Math.max(cycle ?? 60, 30))),
-                  computed_at: new Date().toISOString(),
-                },
+                [
+                  {
+                    tenant_id: tenantId!,
+                    customer_id: c.id,
+                    churn_probability: prob,
+                    churn_reason: reason,
+                    predicted_ltv_cents: c.total_spent_cents ?? 0,
+                    predicted_orders_12m: prob > 0.7 ? 0 : Math.max(1, Math.round(12 / Math.max(cycle ?? 60, 30))),
+                    computed_at: new Date().toISOString(),
+                  },
+                ],
                 { onConflict: "tenant_id,customer_id", ignoreDuplicates: false },
               );
             scored++;
