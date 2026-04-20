@@ -14,6 +14,7 @@ import { TrackingSnippet } from "@/components/owner/TrackingSnippet";
 import { KpiDashboard } from "@/components/owner/KpiDashboard";
 import { RevenueTrendChart } from "@/components/owner/RevenueTrendChart";
 import { TopCustomers } from "@/components/owner/TopCustomers";
+import { AgentTimeline } from "@/components/owner/AgentTimeline";
 
 type Search = { tenant?: string };
 
@@ -103,6 +104,8 @@ function BrandPage() {
       <RevenueFeed tenantId={current.id} />
 
       <InsightsPanel tenantId={current.id} />
+
+      <AgentTimeline tenantId={current.id} />
 
       <TopCustomers tenantId={current.id} />
 
