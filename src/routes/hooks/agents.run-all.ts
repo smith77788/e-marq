@@ -58,6 +58,12 @@ const AGENTS = [
   "product-affinity",
   "customer-churn-predictor",
   "first-order-funnel",
+  // Batch 7: ops/safety
+  "inventory-forecast",
+  "restock-alert",
+  "anti-fraud",
+  "action-watchdog",
+  "conflict-resolver",
 ] as const;
 
 export const Route = createFileRoute("/hooks/agents/run-all")({
