@@ -370,6 +370,7 @@ function TenantDetailPage() {
         <TabsContent value="acos" className="space-y-4">
           <AcosOverviewTab tenantId={tenantId} />
           <AcosInsightsQueue tenantId={tenantId} />
+          <AcosAgentRuns tenantId={tenantId} />
         </TabsContent>
 
         <TabsContent value="overview" className="space-y-4">
