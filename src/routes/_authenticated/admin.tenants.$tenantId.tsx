@@ -56,6 +56,7 @@ import {
   clearDemoData,
   DEMO_PRODUCT_COUNT,
 } from "@/lib/demoData";
+import { TenantAnalytics } from "@/components/admin/TenantAnalytics";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants/$tenantId")({
   component: TenantDetailPage,
