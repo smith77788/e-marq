@@ -94,6 +94,25 @@ function Index() {
 
   return (
     <main className="min-h-screen bg-background">
+      {/* Top nav */}
+      <header className="border-b border-border bg-background/70 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+          <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
+            <Sparkles className="h-4 w-4 text-primary" />
+            ACOS
+          </Link>
+          <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">
+            <Link to="/how-it-works" className="hover:text-foreground transition-colors">How it works</Link>
+            <Link to="/agents" className="hover:text-foreground transition-colors">Agents</Link>
+            <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+          </nav>
+          <div className="flex items-center gap-2">
+            <Button asChild size="sm" variant="ghost"><Link to="/login">Sign in</Link></Button>
+            <Button asChild size="sm"><Link to="/signup">Start free</Link></Button>
+          </div>
+        </div>
+      </header>
+
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-background" />
@@ -260,11 +279,27 @@ function Index() {
               <Link to="/signup">Get started</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/login">Sign in</Link>
+              <Link to="/how-it-works">See how it works</Link>
             </Button>
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="border-t border-border bg-background">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 text-xs text-muted-foreground sm:flex-row">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            <span>ACOS — Autonomous Revenue OS</span>
+          </div>
+          <nav className="flex flex-wrap items-center gap-4">
+            <Link to="/how-it-works" className="hover:text-foreground">How it works</Link>
+            <Link to="/agents" className="hover:text-foreground">Agents</Link>
+            <Link to="/pricing" className="hover:text-foreground">Pricing</Link>
+            <Link to="/login" className="hover:text-foreground">Sign in</Link>
+          </nav>
+        </div>
+      </footer>
     </main>
   );
 }
