@@ -251,6 +251,98 @@ function TenantDetailPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const scaleMultiplier = demoScale === "small" ? 1 : demoScale === "medium" ? 3 : 10;
+  const sessionsToCreate = 50 * scaleMultiplier;
+  const ordersToCreate = 5 * scaleMultiplier;
+
+  const generateDemoMutation = useMutation({
+    mutationFn: async () => {
+      const existingProducts = productsQuery.data ?? [];
+      const hasData = existingProducts.length > 0;
+
+      if (demoSkipExisting && hasData) {
+        throw new Error(
+          "Tenant already has data. Disable 'Skip if data exists' or clear demo data first.",
+        );
+      }
+
+      // 1) Products
+      toast.loading("Creating products… (1/3)", { id: "demo-gen" });
+      let productIds: string[];
+      const productMeta = new Map<string, { name: string; price_cents: number }>();
+
+      if (existingProducts.length >= DEMO_PRODUCT_COUNT) {
+        productIds = existingProducts.map((p) => p.id);
+        for (const p of existingProducts) {
+          productMeta.set(p.id, { name: p.name, price_cents: p.price_cents });
+        }
+      } else {
+        productIds = await generateDemoProducts(tenantId, supabase);
+        const { data: fresh, error } = await supabase
+          .from("products")
+          .select("id, name, price_cents")
+          .in("id", productIds);
+        if (error) throw error;
+        for (const p of fresh ?? []) {
+          productMeta.set(p.id, { name: p.name, price_cents: p.price_cents });
+        }
+      }
+
+      // 2) Orders
+      toast.loading("Creating orders… (2/3)", { id: "demo-gen" });
+      const orders = await generateDemoOrders(
+        tenantId,
+        productIds,
+        productMeta,
+        ordersToCreate,
+        supabase,
+      );
+
+      // 3) Events
+      toast.loading("Generating events… (3/3)", { id: "demo-gen" });
+      const eventCount = await generateDemoEvents(
+        tenantId,
+        productIds,
+        orders.map((o) => o.orderId),
+        sessionsToCreate,
+        supabase,
+      );
+
+      return {
+        products: productIds.length,
+        orders: orders.length,
+        events: eventCount,
+      };
+    },
+    onSuccess: (result) => {
+      toast.success(
+        `Created ${result.products} products, ${result.orders} orders, ${result.events} events`,
+        { id: "demo-gen" },
+      );
+      setDemoConfirmOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["tenant-products", tenantId] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-orders-count", tenantId] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-events-count", tenantId] });
+    },
+    onError: (e: Error) => {
+      toast.error(e.message, { id: "demo-gen" });
+    },
+  });
+
+  const clearDemoMutation = useMutation({
+    mutationFn: async () => {
+      await clearDemoData(tenantId, supabase);
+    },
+    onSuccess: () => {
+      toast.success("Demo data cleared");
+      setClearConfirmOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["tenant-products", tenantId] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-orders-count", tenantId] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-events-count", tenantId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   if (loading) {
     return <p className="text-sm text-muted-foreground">Loading…</p>;
   }
