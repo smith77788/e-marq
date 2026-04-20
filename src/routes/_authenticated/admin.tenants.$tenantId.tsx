@@ -58,6 +58,7 @@ import {
 } from "@/lib/demoData";
 import { TenantAnalytics } from "@/components/admin/TenantAnalytics";
 import { TenantOrders } from "@/components/admin/TenantOrders";
+import { AcosOverviewTab } from "@/components/admin/AcosOverviewTab";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants/$tenantId")({
   component: TenantDetailPage,
@@ -404,13 +405,18 @@ function TenantDetailPage() {
         <p className="text-sm text-muted-foreground">/{tenant.slug}</p>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs defaultValue="acos" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="acos">ACOS</TabsTrigger>
+          <TabsTrigger value="overview">Commerce</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
           <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="config">Config</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="acos" className="space-y-4">
+          <AcosOverviewTab tenantId={tenantId} />
+        </TabsContent>
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-3">
