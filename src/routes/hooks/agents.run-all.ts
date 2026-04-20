@@ -40,6 +40,12 @@ const AGENTS = [
   "funnel-healer",
   "browse-abandonment",
   "second-order-nurture",
+  // Batch 4: messaging
+  "bot-sequences",
+  "broadcast-composer",
+  "best-time-to-send",
+  "csat-dispatcher",
+  "nurture-roi",
 ] as const;
 
 export const Route = createFileRoute("/hooks/agents/run-all")({
