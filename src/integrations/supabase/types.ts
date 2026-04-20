@@ -136,6 +136,9 @@ export type Database = {
           customer_user_id: string | null
           id: string
           metadata: Json
+          paid_at: string | null
+          payment_method: string
+          payment_ref: string | null
           status: Database["public"]["Enums"]["order_status"]
           tenant_id: string
           total_cents: number
@@ -149,6 +152,9 @@ export type Database = {
           customer_user_id?: string | null
           id?: string
           metadata?: Json
+          paid_at?: string | null
+          payment_method?: string
+          payment_ref?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           tenant_id: string
           total_cents?: number
@@ -162,6 +168,9 @@ export type Database = {
           customer_user_id?: string | null
           id?: string
           metadata?: Json
+          paid_at?: string | null
+          payment_method?: string
+          payment_ref?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           tenant_id?: string
           total_cents?: number
@@ -362,6 +371,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_order: {
+        Args: { _order_id: string }
+        Returns: {
+          created_at: string
+          currency: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_user_id: string | null
+          id: string
+          metadata: Json
+          paid_at: string | null
+          payment_method: string
+          payment_ref: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          tenant_id: string
+          total_cents: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -372,6 +406,31 @@ export type Database = {
       is_super_admin: { Args: never; Returns: boolean }
       is_tenant_admin: { Args: { _tenant_id: string }; Returns: boolean }
       is_tenant_member: { Args: { _tenant_id: string }; Returns: boolean }
+      mark_order_paid: {
+        Args: { _order_id: string; _payment_ref?: string }
+        Returns: {
+          created_at: string
+          currency: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_user_id: string | null
+          id: string
+          metadata: Json
+          paid_at: string | null
+          payment_method: string
+          payment_ref: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          tenant_id: string
+          total_cents: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       app_role: "super_admin"
