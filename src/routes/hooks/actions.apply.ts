@@ -118,14 +118,22 @@ export const Route = createFileRoute("/hooks/actions/apply")({
           agent_id: "orchestrator",
         };
 
-        const m = ins.metrics as { product_id?: string; email?: string; search_term?: string };
+        const m = ins.metrics as {
+          product_id?: string;
+          email?: string;
+          search_term?: string;
+          current_price_cents?: number;
+          suggested_price_cents?: number;
+        };
         const targetId = mapping.target_entity === "product" ? m.product_id ?? null : null;
 
-        // For vip_product_nudge: actually queue messages to VIP customers
+        // Side effects per action_type
         let sideEffect: Record<string, unknown> = { note: "Action recorded." };
         if (mapping.action_type === "vip_product_nudge" && targetId) {
           const queued = await queueVipProductNudges(ins.tenant_id, targetId, ins.id);
           sideEffect = { queued_messages: queued };
+        } else if (mapping.action_type === "update_price" && targetId) {
+          sideEffect = await applyPriceUpdate(ins.tenant_id, targetId, m);
         }
 
         const insertRow = {
