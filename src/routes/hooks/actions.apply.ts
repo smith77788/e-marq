@@ -136,7 +136,7 @@ export const Route = createFileRoute("/hooks/actions/apply")({
           sideEffect = { queued_messages: queued };
         } else if ((mapping.action_type === "update_price" || mapping.action_type === "revert_price") && targetId) {
           sideEffect = await applyPriceUpdate(ins.tenant_id, targetId, m);
-          if (mapping.action_type === "revert_price" && m["source_action_id"]) {
+          if (mapping.action_type === "revert_price" && m.source_action_id) {
             // Mark the original update_price action as reverted
             await supabaseAdmin
               .from("ai_actions")
@@ -144,7 +144,7 @@ export const Route = createFileRoute("/hooks/actions/apply")({
                 reverted_at: new Date().toISOString(),
                 reverted_reason: `Conversion drop detected by ${mapping.agent_id}`,
               })
-              .eq("id", m["source_action_id"] as string);
+              .eq("id", m.source_action_id);
           }
         }
 
