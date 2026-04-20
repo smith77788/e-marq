@@ -1,41 +1,40 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/hooks/useAuth";
+import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Sign in — ACOS" },
-      { name: "description", content: "Sign in to your ACOS workspace." },
+      { name: "description", content: "Sign in to your ACOS workspace with Google." },
     ],
   }),
   component: LoginPage,
 });
 
 function LoginPage() {
-  const { signIn } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
+  async function onGoogle() {
     setSubmitting(true);
     try {
-      await signIn(email, password);
-      toast.success("Welcome back");
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error(result.error instanceof Error ? result.error.message : "Не вдалось увійти через Google");
+        setSubmitting(false);
+        return;
+      }
+      if (result.redirected) return;
+      toast.success("Вітаємо!");
       navigate({ to: "/dashboard" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Sign in failed");
-    } finally {
       setSubmitting(false);
     }
   }
@@ -45,63 +44,29 @@ function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Sign in</CardTitle>
-          <CardDescription>Access your ACOS workspace.</CardDescription>
+          <CardDescription>Увійдіть до ACOS через Google.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link
-                  to="/reset-password-request"
-                  className="text-xs text-muted-foreground hover:text-foreground hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "Signing in…" : "Sign in"}
-            </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              No account?{" "}
-              <Link to="/signup" className="font-medium text-primary hover:underline">
-                Create one
-              </Link>
-            </p>
-          </form>
+        <CardContent className="space-y-4">
+          <Button type="button" variant="outline" className="w-full" onClick={onGoogle} disabled={submitting}>
+            <GoogleIcon />
+            {submitting ? "Перенаправлення…" : "Continue with Google"}
+          </Button>
+          <p className="text-center text-sm text-muted-foreground">
+            Немає акаунту?{" "}
+            <Link to="/signup" className="font-medium text-primary hover:underline">
+              Створити
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </main>
+  );
+}
+
+function GoogleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+      <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.7 3.4 14.6 2.4 12 2.4 6.7 2.4 2.5 6.6 2.5 12s4.2 9.6 9.5 9.6c5.5 0 9.1-3.9 9.1-9.3 0-.6-.1-1.1-.2-1.6H12z"/>
+    </svg>
   );
 }
