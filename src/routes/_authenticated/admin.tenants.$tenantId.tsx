@@ -431,9 +431,74 @@ function TenantDetailPage() {
               </dl>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                Demo data
+              </CardTitle>
+              <CardDescription>
+                Populate this tenant with realistic demo products, orders, and funnel events
+                spread across the last 30 days.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="demo-scale">Scale</Label>
+                  <Select
+                    value={demoScale}
+                    onValueChange={(v) => setDemoScale(v as "small" | "medium" | "large")}
+                  >
+                    <SelectTrigger id="demo-scale">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="small">Small — 50 sessions, 5 orders</SelectItem>
+                      <SelectItem value="medium">Medium — 150 sessions, 15 orders</SelectItem>
+                      <SelectItem value="large">Large — 500 sessions, 50 orders</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-end gap-3">
+                  <div className="flex-1 space-y-1">
+                    <Label htmlFor="demo-skip">Skip if data exists</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Avoid duplicating data on existing tenants.
+                    </p>
+                  </div>
+                  <Switch
+                    id="demo-skip"
+                    checked={demoSkipExisting}
+                    onCheckedChange={setDemoSkipExisting}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setDemoConfirmOpen(true)}
+                  disabled={generateDemoMutation.isPending}
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  {generateDemoMutation.isPending ? "Generating…" : "Generate demo data"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => setClearConfirmOpen(true)}
+                  disabled={clearDemoMutation.isPending}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {clearDemoMutation.isPending ? "Clearing…" : "Clear demo data"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        <TabsContent value="products" className="space-y-4">
           <Card>
             <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
               <div>
