@@ -254,6 +254,187 @@ export type Database = {
           },
         ]
       }
+      conversations: {
+        Row: {
+          body: string
+          channel: string
+          created_at: string
+          customer_id: string | null
+          direction: string
+          external_thread_id: string | null
+          id: string
+          intent: string | null
+          metadata: Json
+          tenant_id: string
+        }
+        Insert: {
+          body: string
+          channel: string
+          created_at?: string
+          customer_id?: string | null
+          direction: string
+          external_thread_id?: string | null
+          id?: string
+          intent?: string | null
+          metadata?: Json
+          tenant_id: string
+        }
+        Update: {
+          body?: string
+          channel?: string
+          created_at?: string
+          customer_id?: string | null
+          direction?: string
+          external_thread_id?: string | null
+          id?: string
+          intent?: string | null
+          metadata?: Json
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          avg_cycle_days: number | null
+          avg_order_cents: number
+          consent_marketing: boolean
+          created_at: string
+          email: string | null
+          first_order_at: string | null
+          id: string
+          last_contacted_at: string | null
+          last_order_at: string | null
+          lifecycle_stage: string
+          metadata: Json
+          name: string | null
+          predicted_next_order_at: string | null
+          telegram_chat_id: string | null
+          telegram_username: string | null
+          tenant_id: string
+          total_orders: number
+          total_spent_cents: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          avg_cycle_days?: number | null
+          avg_order_cents?: number
+          consent_marketing?: boolean
+          created_at?: string
+          email?: string | null
+          first_order_at?: string | null
+          id?: string
+          last_contacted_at?: string | null
+          last_order_at?: string | null
+          lifecycle_stage?: string
+          metadata?: Json
+          name?: string | null
+          predicted_next_order_at?: string | null
+          telegram_chat_id?: string | null
+          telegram_username?: string | null
+          tenant_id: string
+          total_orders?: number
+          total_spent_cents?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          avg_cycle_days?: number | null
+          avg_order_cents?: number
+          consent_marketing?: boolean
+          created_at?: string
+          email?: string | null
+          first_order_at?: string | null
+          id?: string
+          last_contacted_at?: string | null
+          last_order_at?: string | null
+          lifecycle_stage?: string
+          metadata?: Json
+          name?: string | null
+          predicted_next_order_at?: string | null
+          telegram_chat_id?: string | null
+          telegram_username?: string | null
+          tenant_id?: string
+          total_orders?: number
+          total_spent_cents?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decision_policies: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          policy_key: string
+          reason: string | null
+          tenant_id: string
+          total_revenue_cents: number
+          trial_count: number
+          updated_at: string
+          value: Json
+          win_count: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          policy_key: string
+          reason?: string | null
+          tenant_id: string
+          total_revenue_cents?: number
+          trial_count?: number
+          updated_at?: string
+          value: Json
+          win_count?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          policy_key?: string
+          reason?: string | null
+          tenant_id?: string
+          total_revenue_cents?: number
+          trial_count?: number
+          updated_at?: string
+          value?: Json
+          win_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_policies_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           created_at: string
@@ -419,6 +600,103 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "orders_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outbound_messages: {
+        Row: {
+          actual_revenue_cents: number | null
+          body: string
+          channel: string
+          channel_message_id: string | null
+          converted_at: string | null
+          created_at: string
+          customer_id: string | null
+          error: string | null
+          expected_impact_cents: number | null
+          id: string
+          metadata: Json
+          related_product_id: string | null
+          replied_at: string | null
+          scheduled_for: string
+          sent_at: string | null
+          source_action_id: string | null
+          source_insight_id: string | null
+          status: string
+          template_key: string | null
+          tenant_id: string
+          trigger_kind: string
+          updated_at: string
+        }
+        Insert: {
+          actual_revenue_cents?: number | null
+          body: string
+          channel: string
+          channel_message_id?: string | null
+          converted_at?: string | null
+          created_at?: string
+          customer_id?: string | null
+          error?: string | null
+          expected_impact_cents?: number | null
+          id?: string
+          metadata?: Json
+          related_product_id?: string | null
+          replied_at?: string | null
+          scheduled_for?: string
+          sent_at?: string | null
+          source_action_id?: string | null
+          source_insight_id?: string | null
+          status?: string
+          template_key?: string | null
+          tenant_id: string
+          trigger_kind: string
+          updated_at?: string
+        }
+        Update: {
+          actual_revenue_cents?: number | null
+          body?: string
+          channel?: string
+          channel_message_id?: string | null
+          converted_at?: string | null
+          created_at?: string
+          customer_id?: string | null
+          error?: string | null
+          expected_impact_cents?: number | null
+          id?: string
+          metadata?: Json
+          related_product_id?: string | null
+          replied_at?: string | null
+          scheduled_for?: string
+          sent_at?: string | null
+          source_action_id?: string | null
+          source_insight_id?: string | null
+          status?: string
+          template_key?: string | null
+          tenant_id?: string
+          trigger_kind?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outbound_messages_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbound_messages_related_product_id_fkey"
+            columns: ["related_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbound_messages_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -683,6 +961,11 @@ export type Database = {
         | "reorder_clicked"
         | "bot_interaction"
         | "content_viewed"
+        | "inactivity_detected"
+        | "message_sent"
+        | "message_received"
+        | "session_start"
+        | "reorder_triggered"
       order_status: "pending" | "paid" | "fulfilled" | "cancelled" | "refunded"
       tenant_role: "owner" | "admin" | "member"
       tenant_status: "active" | "suspended" | "archived"
@@ -822,6 +1105,11 @@ export const Constants = {
         "reorder_clicked",
         "bot_interaction",
         "content_viewed",
+        "inactivity_detected",
+        "message_sent",
+        "message_received",
+        "session_start",
+        "reorder_triggered",
       ],
       order_status: ["pending", "paid", "fulfilled", "cancelled", "refunded"],
       tenant_role: ["owner", "admin", "member"],
