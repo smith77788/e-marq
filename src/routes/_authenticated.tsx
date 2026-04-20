@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { createFileRoute, Outlet, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 import { useAuth } from "@/hooks/useAuth";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
@@ -9,6 +11,7 @@ export const Route = createFileRoute("/_authenticated")({
 
 function AuthenticatedLayout() {
   const { user, loading, isSuperAdmin, signOut } = useAuth();
+  const { t } = useT();
   const navigate = useNavigate();
   const router = useRouter();
 
@@ -45,14 +48,14 @@ function AuthenticatedLayout() {
               activeProps={{ className: "text-foreground" }}
               className="text-sm text-muted-foreground hover:text-foreground"
             >
-              My brand
+              {t("nav.brand")}
             </Link>
             <Link
               to="/dashboard"
               activeProps={{ className: "text-foreground" }}
               className="text-sm text-muted-foreground hover:text-foreground"
             >
-              Dashboard
+              {t("nav.dashboard")}
             </Link>
             {isSuperAdmin && (
               <Link
@@ -60,12 +63,13 @@ function AuthenticatedLayout() {
                 activeProps={{ className: "text-foreground" }}
                 className="text-sm text-muted-foreground hover:text-foreground"
               >
-                Tenants
+                {t("nav.tenants")}
               </Link>
             )}
+            <LanguageSwitcher />
             <span className="hidden text-xs text-muted-foreground sm:inline">{user.email}</span>
             <Button size="sm" variant="outline" onClick={handleSignOut}>
-              Sign out
+              {t("nav.signout")}
             </Button>
           </nav>
         </div>

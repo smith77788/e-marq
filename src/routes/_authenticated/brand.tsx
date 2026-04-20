@@ -16,6 +16,7 @@ import { RevenueTrendChart } from "@/components/owner/RevenueTrendChart";
 import { TopCustomers } from "@/components/owner/TopCustomers";
 import { AgentTimeline } from "@/components/owner/AgentTimeline";
 import { MemoryInspector } from "@/components/owner/MemoryInspector";
+import { SetupChecklist } from "@/components/owner/SetupChecklist";
 import { AnalyticsWindowProvider, AnalyticsWindowToggle } from "@/components/owner/AnalyticsWindow";
 
 type Search = { tenant?: string };
@@ -98,6 +99,8 @@ function BrandPage() {
           </select>
         )}
       </div>
+
+      <SetupChecklist tenantId={current.id} tenantSlug={current.slug} />
 
       <AnalyticsWindowProvider initial={30}>
         <div className="flex items-center justify-end">
