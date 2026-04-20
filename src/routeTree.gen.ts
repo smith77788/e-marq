@@ -43,6 +43,7 @@ import { Route as HooksAgentsSearchGapRouteImport } from './routes/hooks/agents.
 import { Route as HooksAgentsSalesBotAllRouteImport } from './routes/hooks/agents.sales-bot-all'
 import { Route as HooksAgentsSalesBotRouteImport } from './routes/hooks/agents.sales-bot'
 import { Route as HooksAgentsRunAllRouteImport } from './routes/hooks/agents.run-all'
+import { Route as HooksAgentsRestockAlertRouteImport } from './routes/hooks/agents.restock-alert'
 import { Route as HooksAgentsPromoPortfolioRouteImport } from './routes/hooks/agents.promo-portfolio'
 import { Route as HooksAgentsPromoFatigueRouteImport } from './routes/hooks/agents.promo-fatigue'
 import { Route as HooksAgentsProgrammaticSeoRouteImport } from './routes/hooks/agents.programmatic-seo'
@@ -57,6 +58,7 @@ import { Route as HooksAgentsMemoryFeedbackRouteImport } from './routes/hooks/ag
 import { Route as HooksAgentsMarginOptimizerRouteImport } from './routes/hooks/agents.margin-optimizer'
 import { Route as HooksAgentsLtvPredictorRouteImport } from './routes/hooks/agents.ltv-predictor'
 import { Route as HooksAgentsLoyaltyTiersRouteImport } from './routes/hooks/agents.loyalty-tiers'
+import { Route as HooksAgentsInventoryForecastRouteImport } from './routes/hooks/agents.inventory-forecast'
 import { Route as HooksAgentsFunnelHealerRouteImport } from './routes/hooks/agents.funnel-healer'
 import { Route as HooksAgentsFirstOrderFunnelRouteImport } from './routes/hooks/agents.first-order-funnel'
 import { Route as HooksAgentsFeedbackLoopAllRouteImport } from './routes/hooks/agents.feedback-loop-all'
@@ -67,6 +69,7 @@ import { Route as HooksAgentsCustomerChurnPredictorRouteImport } from './routes/
 import { Route as HooksAgentsCsatDispatcherRouteImport } from './routes/hooks/agents.csat-dispatcher'
 import { Route as HooksAgentsCronAllRouteImport } from './routes/hooks/agents.cron-all'
 import { Route as HooksAgentsContentVelocityRouteImport } from './routes/hooks/agents.content-velocity'
+import { Route as HooksAgentsConflictResolverRouteImport } from './routes/hooks/agents.conflict-resolver'
 import { Route as HooksAgentsCohortEngineRouteImport } from './routes/hooks/agents.cohort-engine'
 import { Route as HooksAgentsChurnRiskRouteImport } from './routes/hooks/agents.churn-risk'
 import { Route as HooksAgentsCartRecoveryRouteImport } from './routes/hooks/agents.cart-recovery'
@@ -79,7 +82,9 @@ import { Route as HooksAgentsBestTimeToSendRouteImport } from './routes/hooks/ag
 import { Route as HooksAgentsAttributionRouteImport } from './routes/hooks/agents.attribution'
 import { Route as HooksAgentsAovOptimizerRouteImport } from './routes/hooks/agents.aov-optimizer'
 import { Route as HooksAgentsAovLeakRouteImport } from './routes/hooks/agents.aov-leak'
+import { Route as HooksAgentsAntiFraudRouteImport } from './routes/hooks/agents.anti-fraud'
 import { Route as HooksAgentsAnomalyDetectorRouteImport } from './routes/hooks/agents.anomaly-detector'
+import { Route as HooksAgentsActionWatchdogRouteImport } from './routes/hooks/agents.action-watchdog'
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin.tenants'
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
@@ -258,6 +263,11 @@ const HooksAgentsRunAllRoute = HooksAgentsRunAllRouteImport.update({
   path: '/hooks/agents/run-all',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsRestockAlertRoute = HooksAgentsRestockAlertRouteImport.update({
+  id: '/hooks/agents/restock-alert',
+  path: '/hooks/agents/restock-alert',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsPromoPortfolioRoute =
   HooksAgentsPromoPortfolioRouteImport.update({
     id: '/hooks/agents/promo-portfolio',
@@ -335,6 +345,12 @@ const HooksAgentsLoyaltyTiersRoute = HooksAgentsLoyaltyTiersRouteImport.update({
   path: '/hooks/agents/loyalty-tiers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsInventoryForecastRoute =
+  HooksAgentsInventoryForecastRouteImport.update({
+    id: '/hooks/agents/inventory-forecast',
+    path: '/hooks/agents/inventory-forecast',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsFunnelHealerRoute = HooksAgentsFunnelHealerRouteImport.update({
   id: '/hooks/agents/funnel-healer',
   path: '/hooks/agents/funnel-healer',
@@ -390,6 +406,12 @@ const HooksAgentsContentVelocityRoute =
   HooksAgentsContentVelocityRouteImport.update({
     id: '/hooks/agents/content-velocity',
     path: '/hooks/agents/content-velocity',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsConflictResolverRoute =
+  HooksAgentsConflictResolverRouteImport.update({
+    id: '/hooks/agents/conflict-resolver',
+    path: '/hooks/agents/conflict-resolver',
     getParentRoute: () => rootRouteImport,
   } as any)
 const HooksAgentsCohortEngineRoute = HooksAgentsCohortEngineRouteImport.update({
@@ -456,10 +478,21 @@ const HooksAgentsAovLeakRoute = HooksAgentsAovLeakRouteImport.update({
   path: '/hooks/agents/aov-leak',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsAntiFraudRoute = HooksAgentsAntiFraudRouteImport.update({
+  id: '/hooks/agents/anti-fraud',
+  path: '/hooks/agents/anti-fraud',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsAnomalyDetectorRoute =
   HooksAgentsAnomalyDetectorRouteImport.update({
     id: '/hooks/agents/anomaly-detector',
     path: '/hooks/agents/anomaly-detector',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsActionWatchdogRoute =
+  HooksAgentsActionWatchdogRouteImport.update({
+    id: '/hooks/agents/action-watchdog',
+    path: '/hooks/agents/action-watchdog',
     getParentRoute: () => rootRouteImport,
   } as any)
 const HooksActionsApplyRoute = HooksActionsApplyRouteImport.update({
@@ -499,7 +532,9 @@ export interface FileRoutesByFullPath {
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
+  '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
+  '/hooks/agents/anti-fraud': typeof HooksAgentsAntiFraudRoute
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/aov-optimizer': typeof HooksAgentsAovOptimizerRoute
   '/hooks/agents/attribution': typeof HooksAgentsAttributionRoute
@@ -512,6 +547,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/cart-recovery': typeof HooksAgentsCartRecoveryRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cohort-engine': typeof HooksAgentsCohortEngineRoute
+  '/hooks/agents/conflict-resolver': typeof HooksAgentsConflictResolverRoute
   '/hooks/agents/content-velocity': typeof HooksAgentsContentVelocityRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/csat-dispatcher': typeof HooksAgentsCsatDispatcherRoute
@@ -522,6 +558,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
   '/hooks/agents/first-order-funnel': typeof HooksAgentsFirstOrderFunnelRoute
   '/hooks/agents/funnel-healer': typeof HooksAgentsFunnelHealerRoute
+  '/hooks/agents/inventory-forecast': typeof HooksAgentsInventoryForecastRoute
   '/hooks/agents/loyalty-tiers': typeof HooksAgentsLoyaltyTiersRoute
   '/hooks/agents/ltv-predictor': typeof HooksAgentsLtvPredictorRoute
   '/hooks/agents/margin-optimizer': typeof HooksAgentsMarginOptimizerRoute
@@ -536,6 +573,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/programmatic-seo': typeof HooksAgentsProgrammaticSeoRoute
   '/hooks/agents/promo-fatigue': typeof HooksAgentsPromoFatigueRoute
   '/hooks/agents/promo-portfolio': typeof HooksAgentsPromoPortfolioRoute
+  '/hooks/agents/restock-alert': typeof HooksAgentsRestockAlertRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
@@ -575,7 +613,9 @@ export interface FileRoutesByTo {
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
+  '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
+  '/hooks/agents/anti-fraud': typeof HooksAgentsAntiFraudRoute
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/aov-optimizer': typeof HooksAgentsAovOptimizerRoute
   '/hooks/agents/attribution': typeof HooksAgentsAttributionRoute
@@ -588,6 +628,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/cart-recovery': typeof HooksAgentsCartRecoveryRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cohort-engine': typeof HooksAgentsCohortEngineRoute
+  '/hooks/agents/conflict-resolver': typeof HooksAgentsConflictResolverRoute
   '/hooks/agents/content-velocity': typeof HooksAgentsContentVelocityRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/csat-dispatcher': typeof HooksAgentsCsatDispatcherRoute
@@ -598,6 +639,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
   '/hooks/agents/first-order-funnel': typeof HooksAgentsFirstOrderFunnelRoute
   '/hooks/agents/funnel-healer': typeof HooksAgentsFunnelHealerRoute
+  '/hooks/agents/inventory-forecast': typeof HooksAgentsInventoryForecastRoute
   '/hooks/agents/loyalty-tiers': typeof HooksAgentsLoyaltyTiersRoute
   '/hooks/agents/ltv-predictor': typeof HooksAgentsLtvPredictorRoute
   '/hooks/agents/margin-optimizer': typeof HooksAgentsMarginOptimizerRoute
@@ -612,6 +654,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/programmatic-seo': typeof HooksAgentsProgrammaticSeoRoute
   '/hooks/agents/promo-fatigue': typeof HooksAgentsPromoFatigueRoute
   '/hooks/agents/promo-portfolio': typeof HooksAgentsPromoPortfolioRoute
+  '/hooks/agents/restock-alert': typeof HooksAgentsRestockAlertRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
@@ -653,7 +696,9 @@ export interface FileRoutesById {
   '/s/$slug': typeof SSlugRouteWithChildren
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
+  '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
+  '/hooks/agents/anti-fraud': typeof HooksAgentsAntiFraudRoute
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/aov-optimizer': typeof HooksAgentsAovOptimizerRoute
   '/hooks/agents/attribution': typeof HooksAgentsAttributionRoute
@@ -666,6 +711,7 @@ export interface FileRoutesById {
   '/hooks/agents/cart-recovery': typeof HooksAgentsCartRecoveryRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cohort-engine': typeof HooksAgentsCohortEngineRoute
+  '/hooks/agents/conflict-resolver': typeof HooksAgentsConflictResolverRoute
   '/hooks/agents/content-velocity': typeof HooksAgentsContentVelocityRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/csat-dispatcher': typeof HooksAgentsCsatDispatcherRoute
@@ -676,6 +722,7 @@ export interface FileRoutesById {
   '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
   '/hooks/agents/first-order-funnel': typeof HooksAgentsFirstOrderFunnelRoute
   '/hooks/agents/funnel-healer': typeof HooksAgentsFunnelHealerRoute
+  '/hooks/agents/inventory-forecast': typeof HooksAgentsInventoryForecastRoute
   '/hooks/agents/loyalty-tiers': typeof HooksAgentsLoyaltyTiersRoute
   '/hooks/agents/ltv-predictor': typeof HooksAgentsLtvPredictorRoute
   '/hooks/agents/margin-optimizer': typeof HooksAgentsMarginOptimizerRoute
@@ -690,6 +737,7 @@ export interface FileRoutesById {
   '/hooks/agents/programmatic-seo': typeof HooksAgentsProgrammaticSeoRoute
   '/hooks/agents/promo-fatigue': typeof HooksAgentsPromoFatigueRoute
   '/hooks/agents/promo-portfolio': typeof HooksAgentsPromoPortfolioRoute
+  '/hooks/agents/restock-alert': typeof HooksAgentsRestockAlertRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
@@ -731,7 +779,9 @@ export interface FileRouteTypes {
     | '/s/$slug'
     | '/admin/tenants'
     | '/hooks/actions/apply'
+    | '/hooks/agents/action-watchdog'
     | '/hooks/agents/anomaly-detector'
+    | '/hooks/agents/anti-fraud'
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/aov-optimizer'
     | '/hooks/agents/attribution'
@@ -744,6 +794,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/cart-recovery'
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cohort-engine'
+    | '/hooks/agents/conflict-resolver'
     | '/hooks/agents/content-velocity'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/csat-dispatcher'
@@ -754,6 +805,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/feedback-loop-all'
     | '/hooks/agents/first-order-funnel'
     | '/hooks/agents/funnel-healer'
+    | '/hooks/agents/inventory-forecast'
     | '/hooks/agents/loyalty-tiers'
     | '/hooks/agents/ltv-predictor'
     | '/hooks/agents/margin-optimizer'
@@ -768,6 +820,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/programmatic-seo'
     | '/hooks/agents/promo-fatigue'
     | '/hooks/agents/promo-portfolio'
+    | '/hooks/agents/restock-alert'
     | '/hooks/agents/run-all'
     | '/hooks/agents/sales-bot'
     | '/hooks/agents/sales-bot-all'
@@ -807,7 +860,9 @@ export interface FileRouteTypes {
     | '/s/$slug'
     | '/admin/tenants'
     | '/hooks/actions/apply'
+    | '/hooks/agents/action-watchdog'
     | '/hooks/agents/anomaly-detector'
+    | '/hooks/agents/anti-fraud'
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/aov-optimizer'
     | '/hooks/agents/attribution'
@@ -820,6 +875,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/cart-recovery'
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cohort-engine'
+    | '/hooks/agents/conflict-resolver'
     | '/hooks/agents/content-velocity'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/csat-dispatcher'
@@ -830,6 +886,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/feedback-loop-all'
     | '/hooks/agents/first-order-funnel'
     | '/hooks/agents/funnel-healer'
+    | '/hooks/agents/inventory-forecast'
     | '/hooks/agents/loyalty-tiers'
     | '/hooks/agents/ltv-predictor'
     | '/hooks/agents/margin-optimizer'
@@ -844,6 +901,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/programmatic-seo'
     | '/hooks/agents/promo-fatigue'
     | '/hooks/agents/promo-portfolio'
+    | '/hooks/agents/restock-alert'
     | '/hooks/agents/run-all'
     | '/hooks/agents/sales-bot'
     | '/hooks/agents/sales-bot-all'
@@ -884,7 +942,9 @@ export interface FileRouteTypes {
     | '/s/$slug'
     | '/_authenticated/admin/tenants'
     | '/hooks/actions/apply'
+    | '/hooks/agents/action-watchdog'
     | '/hooks/agents/anomaly-detector'
+    | '/hooks/agents/anti-fraud'
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/aov-optimizer'
     | '/hooks/agents/attribution'
@@ -897,6 +957,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/cart-recovery'
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cohort-engine'
+    | '/hooks/agents/conflict-resolver'
     | '/hooks/agents/content-velocity'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/csat-dispatcher'
@@ -907,6 +968,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/feedback-loop-all'
     | '/hooks/agents/first-order-funnel'
     | '/hooks/agents/funnel-healer'
+    | '/hooks/agents/inventory-forecast'
     | '/hooks/agents/loyalty-tiers'
     | '/hooks/agents/ltv-predictor'
     | '/hooks/agents/margin-optimizer'
@@ -921,6 +983,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/programmatic-seo'
     | '/hooks/agents/promo-fatigue'
     | '/hooks/agents/promo-portfolio'
+    | '/hooks/agents/restock-alert'
     | '/hooks/agents/run-all'
     | '/hooks/agents/sales-bot'
     | '/hooks/agents/sales-bot-all'
@@ -958,7 +1021,9 @@ export interface RootRouteChildren {
   HooksIngestRoute: typeof HooksIngestRoute
   SSlugRoute: typeof SSlugRouteWithChildren
   HooksActionsApplyRoute: typeof HooksActionsApplyRoute
+  HooksAgentsActionWatchdogRoute: typeof HooksAgentsActionWatchdogRoute
   HooksAgentsAnomalyDetectorRoute: typeof HooksAgentsAnomalyDetectorRoute
+  HooksAgentsAntiFraudRoute: typeof HooksAgentsAntiFraudRoute
   HooksAgentsAovLeakRoute: typeof HooksAgentsAovLeakRoute
   HooksAgentsAovOptimizerRoute: typeof HooksAgentsAovOptimizerRoute
   HooksAgentsAttributionRoute: typeof HooksAgentsAttributionRoute
@@ -971,6 +1036,7 @@ export interface RootRouteChildren {
   HooksAgentsCartRecoveryRoute: typeof HooksAgentsCartRecoveryRoute
   HooksAgentsChurnRiskRoute: typeof HooksAgentsChurnRiskRoute
   HooksAgentsCohortEngineRoute: typeof HooksAgentsCohortEngineRoute
+  HooksAgentsConflictResolverRoute: typeof HooksAgentsConflictResolverRoute
   HooksAgentsContentVelocityRoute: typeof HooksAgentsContentVelocityRoute
   HooksAgentsCronAllRoute: typeof HooksAgentsCronAllRoute
   HooksAgentsCsatDispatcherRoute: typeof HooksAgentsCsatDispatcherRoute
@@ -981,6 +1047,7 @@ export interface RootRouteChildren {
   HooksAgentsFeedbackLoopAllRoute: typeof HooksAgentsFeedbackLoopAllRoute
   HooksAgentsFirstOrderFunnelRoute: typeof HooksAgentsFirstOrderFunnelRoute
   HooksAgentsFunnelHealerRoute: typeof HooksAgentsFunnelHealerRoute
+  HooksAgentsInventoryForecastRoute: typeof HooksAgentsInventoryForecastRoute
   HooksAgentsLoyaltyTiersRoute: typeof HooksAgentsLoyaltyTiersRoute
   HooksAgentsLtvPredictorRoute: typeof HooksAgentsLtvPredictorRoute
   HooksAgentsMarginOptimizerRoute: typeof HooksAgentsMarginOptimizerRoute
@@ -995,6 +1062,7 @@ export interface RootRouteChildren {
   HooksAgentsProgrammaticSeoRoute: typeof HooksAgentsProgrammaticSeoRoute
   HooksAgentsPromoFatigueRoute: typeof HooksAgentsPromoFatigueRoute
   HooksAgentsPromoPortfolioRoute: typeof HooksAgentsPromoPortfolioRoute
+  HooksAgentsRestockAlertRoute: typeof HooksAgentsRestockAlertRoute
   HooksAgentsRunAllRoute: typeof HooksAgentsRunAllRoute
   HooksAgentsSalesBotRoute: typeof HooksAgentsSalesBotRoute
   HooksAgentsSalesBotAllRoute: typeof HooksAgentsSalesBotAllRoute
@@ -1259,6 +1327,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsRunAllRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/restock-alert': {
+      id: '/hooks/agents/restock-alert'
+      path: '/hooks/agents/restock-alert'
+      fullPath: '/hooks/agents/restock-alert'
+      preLoaderRoute: typeof HooksAgentsRestockAlertRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/promo-portfolio': {
       id: '/hooks/agents/promo-portfolio'
       path: '/hooks/agents/promo-portfolio'
@@ -1357,6 +1432,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsLoyaltyTiersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/inventory-forecast': {
+      id: '/hooks/agents/inventory-forecast'
+      path: '/hooks/agents/inventory-forecast'
+      fullPath: '/hooks/agents/inventory-forecast'
+      preLoaderRoute: typeof HooksAgentsInventoryForecastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/funnel-healer': {
       id: '/hooks/agents/funnel-healer'
       path: '/hooks/agents/funnel-healer'
@@ -1425,6 +1507,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/content-velocity'
       fullPath: '/hooks/agents/content-velocity'
       preLoaderRoute: typeof HooksAgentsContentVelocityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/conflict-resolver': {
+      id: '/hooks/agents/conflict-resolver'
+      path: '/hooks/agents/conflict-resolver'
+      fullPath: '/hooks/agents/conflict-resolver'
+      preLoaderRoute: typeof HooksAgentsConflictResolverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/cohort-engine': {
@@ -1511,11 +1600,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsAovLeakRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/anti-fraud': {
+      id: '/hooks/agents/anti-fraud'
+      path: '/hooks/agents/anti-fraud'
+      fullPath: '/hooks/agents/anti-fraud'
+      preLoaderRoute: typeof HooksAgentsAntiFraudRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/anomaly-detector': {
       id: '/hooks/agents/anomaly-detector'
       path: '/hooks/agents/anomaly-detector'
       fullPath: '/hooks/agents/anomaly-detector'
       preLoaderRoute: typeof HooksAgentsAnomalyDetectorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/action-watchdog': {
+      id: '/hooks/agents/action-watchdog'
+      path: '/hooks/agents/action-watchdog'
+      fullPath: '/hooks/agents/action-watchdog'
+      preLoaderRoute: typeof HooksAgentsActionWatchdogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/actions/apply': {
@@ -1603,7 +1706,9 @@ const rootRouteChildren: RootRouteChildren = {
   HooksIngestRoute: HooksIngestRoute,
   SSlugRoute: SSlugRouteWithChildren,
   HooksActionsApplyRoute: HooksActionsApplyRoute,
+  HooksAgentsActionWatchdogRoute: HooksAgentsActionWatchdogRoute,
   HooksAgentsAnomalyDetectorRoute: HooksAgentsAnomalyDetectorRoute,
+  HooksAgentsAntiFraudRoute: HooksAgentsAntiFraudRoute,
   HooksAgentsAovLeakRoute: HooksAgentsAovLeakRoute,
   HooksAgentsAovOptimizerRoute: HooksAgentsAovOptimizerRoute,
   HooksAgentsAttributionRoute: HooksAgentsAttributionRoute,
@@ -1616,6 +1721,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsCartRecoveryRoute: HooksAgentsCartRecoveryRoute,
   HooksAgentsChurnRiskRoute: HooksAgentsChurnRiskRoute,
   HooksAgentsCohortEngineRoute: HooksAgentsCohortEngineRoute,
+  HooksAgentsConflictResolverRoute: HooksAgentsConflictResolverRoute,
   HooksAgentsContentVelocityRoute: HooksAgentsContentVelocityRoute,
   HooksAgentsCronAllRoute: HooksAgentsCronAllRoute,
   HooksAgentsCsatDispatcherRoute: HooksAgentsCsatDispatcherRoute,
@@ -1627,6 +1733,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsFeedbackLoopAllRoute: HooksAgentsFeedbackLoopAllRoute,
   HooksAgentsFirstOrderFunnelRoute: HooksAgentsFirstOrderFunnelRoute,
   HooksAgentsFunnelHealerRoute: HooksAgentsFunnelHealerRoute,
+  HooksAgentsInventoryForecastRoute: HooksAgentsInventoryForecastRoute,
   HooksAgentsLoyaltyTiersRoute: HooksAgentsLoyaltyTiersRoute,
   HooksAgentsLtvPredictorRoute: HooksAgentsLtvPredictorRoute,
   HooksAgentsMarginOptimizerRoute: HooksAgentsMarginOptimizerRoute,
@@ -1641,6 +1748,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsProgrammaticSeoRoute: HooksAgentsProgrammaticSeoRoute,
   HooksAgentsPromoFatigueRoute: HooksAgentsPromoFatigueRoute,
   HooksAgentsPromoPortfolioRoute: HooksAgentsPromoPortfolioRoute,
+  HooksAgentsRestockAlertRoute: HooksAgentsRestockAlertRoute,
   HooksAgentsRunAllRoute: HooksAgentsRunAllRoute,
   HooksAgentsSalesBotRoute: HooksAgentsSalesBotRoute,
   HooksAgentsSalesBotAllRoute: HooksAgentsSalesBotAllRoute,

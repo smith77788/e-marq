@@ -1081,4 +1081,90 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       },
     };
   },
+
+  // ---------- Batch 7: ops/safety ----------
+  inventory_forecast_warn: (m) => {
+    const name = str(m, "product_name", "товар");
+    const days = num(m, "days_until_stockout");
+    const reorder = num(m, "recommended_reorder_qty");
+    return {
+      ua: {
+        headline: `${name}: запас закінчується через ~${days.toFixed(1)} дн.`,
+        why: `Прогноз попиту на 30 днів = ${num(m, "predicted_demand_30d")} шт., поточний залишок = ${num(m, "stock")} шт.`,
+        what_to_do: `Замовте ще ~${reorder} шт. у постачальника, щоб покрити наступний місяць без розривів.`,
+      },
+      en: {
+        headline: `${name}: runs out in ~${days.toFixed(1)} days`,
+        why: `30-day demand forecast = ${num(m, "predicted_demand_30d")} units, current stock = ${num(m, "stock")} units.`,
+        what_to_do: `Reorder ~${reorder} units to cover the next month without gaps.`,
+      },
+    };
+  },
+  restock_alert_urgent: (m) => {
+    const name = str(m, "product_name", "товар");
+    const days = num(m, "days_until_stockout");
+    const reorder = num(m, "recommended_reorder_qty");
+    const lost = num(m, "potential_lost_revenue_cents");
+    return {
+      ua: {
+        headline: `🚨 ${name}: терміновий restock (${days.toFixed(1)} дн.)`,
+        why: `Залишок ${num(m, "stock")} шт. До stockout ≤ 7 днів. Без дії втратите ~${cents(lost)} продажів.`,
+        what_to_do: `Створіть PO на ${reorder} шт. сьогодні — Apply відкриває чернетку замовлення.`,
+      },
+      en: {
+        headline: `🚨 ${name}: urgent restock (${days.toFixed(1)} days)`,
+        why: `Stock ${num(m, "stock")} units. Stockout in ≤ 7 days. Without action you lose ~${cents(lost)} in sales.`,
+        what_to_do: `Create a PO for ${reorder} units today — Apply opens the order draft.`,
+      },
+    };
+  },
+  fraud_risk_high: (m) => {
+    const score = num(m, "risk_score");
+    const total = num(m, "total_cents");
+    const sigs = (m.signals as Array<{ kind: string }> | undefined)?.map((s) => s.kind) ?? [];
+    return {
+      ua: {
+        headline: `⚠️ Замовлення на ${cents(total)}: підозра на fraud (${(score * 100).toFixed(0)}%)`,
+        why: `Триггери: ${sigs.join(", ")}. Це не блокує, але вимагає ручного огляду — ризик chargeback.`,
+        what_to_do: "Перевірте замовлення вручну до виконання. Якщо ОК — позначте reviewed=approved.",
+      },
+      en: {
+        headline: `⚠️ Order ${cents(total)}: fraud suspicion (${(score * 100).toFixed(0)}%)`,
+        why: `Triggers: ${sigs.join(", ")}. Not blocking, but needs manual review — chargeback risk.`,
+        what_to_do: "Review the order manually before fulfillment. If OK — mark reviewed=approved.",
+      },
+    };
+  },
+  action_loop_unclosed: (m) => {
+    const agent = str(m, "agent_id", "agent");
+    const n = num(m, "stale_count");
+    return {
+      ua: {
+        headline: `${agent}: ${n} дій без вимірювання ≥ 7 днів`,
+        why: "Agent застосував зміни, але impact не виміряно. Без feedback ШІ не вчиться — ризик повторення помилок.",
+        what_to_do: "Apply → запускає feedback-loop, що визначає реальний impact кожної дії.",
+      },
+      en: {
+        headline: `${agent}: ${n} actions unmeasured for ≥ 7 days`,
+        why: "Agent applied changes, but impact wasn't measured. Without feedback the AI can't learn — risk of repeating mistakes.",
+        what_to_do: "Apply → runs the feedback-loop that measures real impact for each action.",
+      },
+    };
+  },
+  agent_conflict_detected: (m) => {
+    const entity = str(m, "target_entity", "target");
+    const agents = (m.agents as string[] | undefined) ?? [];
+    return {
+      ua: {
+        headline: `Конфлікт: ${agents.length} агенти на одному ${entity}`,
+        why: `${agents.join(", ")} одночасно діють на той самий ${entity}. ROI вимірювання буде спотворене — невідомо, чий ефект.`,
+        what_to_do: "Виберіть pick-a-winner: який agent залишити активним для цього target.",
+      },
+      en: {
+        headline: `Conflict: ${agents.length} agents on the same ${entity}`,
+        why: `${agents.join(", ")} simultaneously act on the same ${entity}. ROI measurement gets distorted — unclear whose effect.`,
+        what_to_do: "Pick-a-winner: choose which agent stays active for this target.",
+      },
+    };
+  },
 };
