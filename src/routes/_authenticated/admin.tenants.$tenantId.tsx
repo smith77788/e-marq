@@ -49,13 +49,13 @@ import {
   normalizeConfig,
   type TenantConfigValues,
 } from "@/components/admin/TenantConfigForm";
+import { clearDemoData } from "@/lib/demoData";
 import {
-  generateDemoProducts,
-  generateDemoOrders,
-  generateDemoEvents,
-  clearDemoData,
-  DEMO_PRODUCT_COUNT,
-} from "@/lib/demoData";
+  generateAcosDataset,
+  ACOS_CATALOG_SIZE,
+  type AcosScale,
+  type AcosGenerationResult,
+} from "@/lib/acosDataset";
 import { TenantAnalytics } from "@/components/admin/TenantAnalytics";
 import { TenantOrders } from "@/components/admin/TenantOrders";
 import { AcosOverviewTab } from "@/components/admin/AcosOverviewTab";
@@ -85,10 +85,11 @@ function TenantDetailPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<ProductRow | null>(null);
   const [deleting, setDeleting] = useState<ProductRow | null>(null);
-  const [demoScale, setDemoScale] = useState<"small" | "medium" | "large">("small");
-  const [demoSkipExisting, setDemoSkipExisting] = useState(true);
-  const [demoConfirmOpen, setDemoConfirmOpen] = useState(false);
+  const [acosScale, setAcosScale] = useState<AcosScale>("medium");
+  const [acosSkipExisting, setAcosSkipExisting] = useState(true);
+  const [acosConfirmOpen, setAcosConfirmOpen] = useState(false);
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
+  const [lastAcosResult, setLastAcosResult] = useState<AcosGenerationResult | null>(null);
 
   const tenantQuery = useQuery({
     queryKey: ["tenant", tenantId],
@@ -254,75 +255,25 @@ function TenantDetailPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const scaleMultiplier = demoScale === "small" ? 1 : demoScale === "medium" ? 3 : 10;
-  const sessionsToCreate = 50 * scaleMultiplier;
-  const ordersToCreate = 5 * scaleMultiplier;
-
-  const generateDemoMutation = useMutation({
+  const generateAcosMutation = useMutation({
     mutationFn: async () => {
       const existingProducts = productsQuery.data ?? [];
-      const hasData = existingProducts.length > 0;
-
-      if (demoSkipExisting && hasData) {
+      if (acosSkipExisting && existingProducts.length > 0) {
         throw new Error(
-          "Tenant already has data. Disable 'Skip if data exists' or clear demo data first.",
+          "Tenant already has data. Disable 'Skip if data exists' or clear it first.",
         );
       }
-
-      // 1) Products
-      toast.loading("Creating products… (1/3)", { id: "demo-gen" });
-      let productIds: string[];
-      const productMeta = new Map<string, { name: string; price_cents: number }>();
-
-      if (existingProducts.length >= DEMO_PRODUCT_COUNT) {
-        productIds = existingProducts.map((p) => p.id);
-        for (const p of existingProducts) {
-          productMeta.set(p.id, { name: p.name, price_cents: p.price_cents });
-        }
-      } else {
-        productIds = await generateDemoProducts(tenantId, supabase);
-        const { data: fresh, error } = await supabase
-          .from("products")
-          .select("id, name, price_cents")
-          .in("id", productIds);
-        if (error) throw error;
-        for (const p of fresh ?? []) {
-          productMeta.set(p.id, { name: p.name, price_cents: p.price_cents });
-        }
-      }
-
-      // 2) Orders
-      toast.loading("Creating orders… (2/3)", { id: "demo-gen" });
-      const orders = await generateDemoOrders(
-        tenantId,
-        productIds,
-        productMeta,
-        ordersToCreate,
-        supabase,
-      );
-
-      // 3) Events
-      toast.loading("Generating events… (3/3)", { id: "demo-gen" });
-      const eventCount = await generateDemoEvents(
-        tenantId,
-        productIds,
-        orders.map((o) => o.orderId),
-        sessionsToCreate,
-        supabase,
-      );
-
-      return {
-        products: productIds.length,
-        orders: orders.length,
-        events: eventCount,
-      };
+      toast.loading("Generating ACOS dataset…", { id: "acos-gen" });
+      const result = await generateAcosDataset(tenantId, acosScale, supabase);
+      return result;
     },
     onSuccess: (result) => {
+      setLastAcosResult(result);
       toast.success(
-        `Created ${result.products} products, ${result.orders} orders, ${result.events} events`,
-        { id: "demo-gen" },
+        `${result.products} products · ${result.customers} customers · ${result.orders} orders · ${result.events} events`,
+        { id: "acos-gen", duration: 6000 },
       );
-      setDemoConfirmOpen(false);
+      setAcosConfirmOpen(false);
       queryClient.invalidateQueries({ queryKey: ["tenant-products", tenantId] });
       queryClient.invalidateQueries({ queryKey: ["tenant-orders-count", tenantId] });
       queryClient.invalidateQueries({ queryKey: ["tenant-events-count", tenantId] });
@@ -330,7 +281,7 @@ function TenantDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["tenant-revenue", tenantId] });
     },
     onError: (e: Error) => {
-      toast.error(e.message, { id: "demo-gen" });
+      toast.error(e.message, { id: "acos-gen" });
     },
   });
 
@@ -452,54 +403,55 @@ function TenantDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
-                Demo data
+                ACOS-rich synthetic dataset
               </CardTitle>
               <CardDescription>
-                Populate this tenant with realistic demo products, orders, and funnel events
-                spread across the last 30 days.
+                90 days of realistic D2C signals: cohorts (new / returning / VIP-active /
+                VIP-churning), weekly seasonality, product affinity, stockout-risk SKUs,
+                cart-abandonment, and search-no-results events. Designed so ACOS agents can find
+                real insights — not just placeholder data.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="demo-scale">Scale</Label>
+                  <Label htmlFor="acos-scale">Scale</Label>
                   <Select
-                    value={demoScale}
-                    onValueChange={(v) => setDemoScale(v as "small" | "medium" | "large")}
+                    value={acosScale}
+                    onValueChange={(v) => setAcosScale(v as AcosScale)}
                   >
-                    <SelectTrigger id="demo-scale">
+                    <SelectTrigger id="acos-scale">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="small">Small — 50 sessions, 5 orders</SelectItem>
-                      <SelectItem value="medium">Medium — 150 sessions, 15 orders</SelectItem>
-                      <SelectItem value="large">Large — 500 sessions, 50 orders</SelectItem>
+                      <SelectItem value="small">Small — 120 customers</SelectItem>
+                      <SelectItem value="medium">Medium — 250 customers</SelectItem>
+                      <SelectItem value="large">Large — 600 customers</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="flex items-end gap-3">
                   <div className="flex-1 space-y-1">
-                    <Label htmlFor="demo-skip">Skip if data exists</Label>
+                    <Label htmlFor="acos-skip">Skip if data exists</Label>
                     <p className="text-xs text-muted-foreground">
-                      Avoid duplicating data on existing tenants.
+                      Avoid duplicating data on tenants that already have a catalog.
                     </p>
                   </div>
                   <Switch
-                    id="demo-skip"
-                    checked={demoSkipExisting}
-                    onCheckedChange={setDemoSkipExisting}
+                    id="acos-skip"
+                    checked={acosSkipExisting}
+                    onCheckedChange={setAcosSkipExisting}
                   />
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2">
                 <Button
-                  variant="outline"
-                  onClick={() => setDemoConfirmOpen(true)}
-                  disabled={generateDemoMutation.isPending}
+                  onClick={() => setAcosConfirmOpen(true)}
+                  disabled={generateAcosMutation.isPending}
                 >
                   <Sparkles className="mr-2 h-4 w-4" />
-                  {generateDemoMutation.isPending ? "Generating…" : "Generate demo data"}
+                  {generateAcosMutation.isPending ? "Generating…" : "Generate ACOS dataset"}
                 </Button>
                 <Button
                   variant="ghost"
@@ -508,9 +460,40 @@ function TenantDetailPage() {
                   disabled={clearDemoMutation.isPending}
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  {clearDemoMutation.isPending ? "Clearing…" : "Clear demo data"}
+                  {clearDemoMutation.isPending ? "Clearing…" : "Clear all data"}
                 </Button>
               </div>
+
+              {lastAcosResult && (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                  <p className="text-xs font-medium text-foreground">Last generation</p>
+                  <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-4">
+                    <div>
+                      <span className="text-muted-foreground">Products: </span>
+                      <span className="font-medium text-foreground">{lastAcosResult.products}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Customers: </span>
+                      <span className="font-medium text-foreground">{lastAcosResult.customers}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Orders: </span>
+                      <span className="font-medium text-foreground">{lastAcosResult.orders}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Events: </span>
+                      <span className="font-medium text-foreground">{lastAcosResult.events}</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {Object.entries(lastAcosResult.cohorts).map(([cohort, count]) => (
+                      <Badge key={cohort} variant="outline" className="text-[10px]">
+                        {cohort.replace("_", " ")}: {count}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -684,42 +667,44 @@ function TenantDetailPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Generate demo confirm */}
-      <AlertDialog open={demoConfirmOpen} onOpenChange={setDemoConfirmOpen}>
+      {/* Generate ACOS dataset confirm */}
+      <AlertDialog open={acosConfirmOpen} onOpenChange={setAcosConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Generate demo data?</AlertDialogTitle>
+            <AlertDialogTitle>Generate ACOS dataset?</AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-2 text-sm">
-                <p>This will create:</p>
+                <p>This will create a 90-day synthetic dataset with:</p>
                 <ul className="ml-4 list-disc space-y-1">
                   <li>
-                    Up to <span className="font-medium">{DEMO_PRODUCT_COUNT} products</span>{" "}
-                    (skipped if tenant already has them)
+                    <span className="font-medium">{ACOS_CATALOG_SIZE} products</span> across
+                    apparel, footwear, accessories, audio (incl. 2 stockout-risk SKUs)
                   </li>
                   <li>
-                    <span className="font-medium">{ordersToCreate} paid orders</span> with line
-                    items
+                    {acosScale === "small" ? "120" : acosScale === "medium" ? "250" : "600"}{" "}
+                    <span className="font-medium">customers</span> across 5 cohorts
+                    (new / one-time / returning / VIP-active / VIP-churning)
                   </li>
-                  <li>
-                    Funnel events from{" "}
-                    <span className="font-medium">{sessionsToCreate} sessions</span> spread across
-                    the last 30 days
-                  </li>
+                  <li>Paid orders with realistic affinity bundles and weekly seasonality</li>
+                  <li>Funnel + search events (~18% search-no-results signal)</li>
                 </ul>
+                <p className="text-xs text-muted-foreground">
+                  Generation runs entirely client-side and may take 10-30 seconds for the larger
+                  scales.
+                </p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={generateDemoMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={generateAcosMutation.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              disabled={generateDemoMutation.isPending}
+              disabled={generateAcosMutation.isPending}
               onClick={(e) => {
                 e.preventDefault();
-                generateDemoMutation.mutate();
+                generateAcosMutation.mutate();
               }}
             >
-              {generateDemoMutation.isPending ? "Generating…" : "Generate"}
+              {generateAcosMutation.isPending ? "Generating…" : "Generate"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
