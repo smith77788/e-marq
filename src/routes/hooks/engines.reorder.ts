@@ -20,6 +20,7 @@ import {
   failAgentRun,
 } from "@/lib/acos/agentRuntime";
 import { dispatchTenantOutbound, pickChannelForCustomer } from "@/lib/acos/channels";
+import { getCadenceMultiplier } from "@/lib/acos/policyTuning";
 
 const AGENT_ID = "reorder_engine";
 
@@ -56,7 +57,10 @@ export const Route = createFileRoute("/hooks/engines/reorder")({
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
           const cutoff = new Date().toISOString();
-          const recentlyContactedCutoff = new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString();
+          // Self-tuning: cadence multiplier shifts the recency cooldown.
+          const cadence = await getCadenceMultiplier(tenantId, "reorder");
+          const cooldownDays = 14 * cadence;
+          const recentlyContactedCutoff = new Date(Date.now() - cooldownDays * 24 * 3600 * 1000).toISOString();
 
           const { data: candidates, error } = await supabaseAdmin
             .from("customers")
