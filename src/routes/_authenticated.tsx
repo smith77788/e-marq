@@ -1,7 +1,11 @@
 import { useEffect } from "react";
-import { createFileRoute, Outlet, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { LiveStatus } from "@/components/layout/LiveStatus";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
 
@@ -24,7 +28,9 @@ function AuthenticatedLayout() {
   if (loading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="text-sm text-muted-foreground">Loading…</div>
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <span className="pulse-dot" /> Booting cockpit…
+        </div>
       </div>
     );
   }
@@ -36,47 +42,36 @@ function AuthenticatedLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-          <Link to="/dashboard" className="font-semibold text-foreground">
-            ACOS
-          </Link>
-          <nav className="flex items-center gap-4">
-            <Link
-              to="/brand"
-              activeProps={{ className: "text-foreground" }}
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              {t("nav.brand")}
-            </Link>
-            <Link
-              to="/dashboard"
-              activeProps={{ className: "text-foreground" }}
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              {t("nav.dashboard")}
-            </Link>
+    <SidebarProvider defaultOpen>
+      <AppSidebar isSuperAdmin={isSuperAdmin} />
+      <SidebarInset className="bg-background">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
+          <div className="hidden items-center gap-2 sm:flex">
+            <LiveStatus />
             {isSuperAdmin && (
-              <Link
-                to="/admin/tenants"
-                activeProps={{ className: "text-foreground" }}
-                className="text-sm text-muted-foreground hover:text-foreground"
-              >
-                {t("nav.tenants")}
-              </Link>
+              <span className="rounded-full border border-accent/40 bg-accent/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent">
+                Super-admin
+              </span>
             )}
+          </div>
+          <div className="ml-auto flex items-center gap-2">
             <LanguageSwitcher />
-            <span className="hidden text-xs text-muted-foreground sm:inline">{user.email}</span>
+            <ThemeToggle />
+            <span className="hidden max-w-[180px] truncate text-xs text-muted-foreground md:inline">
+              {user.email}
+            </span>
             <Button size="sm" variant="outline" onClick={handleSignOut}>
               {t("nav.signout")}
             </Button>
-          </nav>
-        </div>
-      </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">
-        <Outlet />
-      </main>
-    </div>
+          </div>
+        </header>
+        <main className="min-h-[calc(100vh-3.5rem)] px-4 py-6 sm:px-6 sm:py-8">
+          <div className="mx-auto max-w-7xl">
+            <Outlet />
+          </div>
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
