@@ -1167,4 +1167,249 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       },
     };
   },
+  social_proof_trust_gap: (m) => {
+    const n = num(m, "trust_gap_count");
+    return {
+      ua: {
+        headline: `${n} товарів дивляться, але не купують`,
+        why: "Покупці бачать сторінку, але не довіряють — типово через відсутність відгуків чи фото.",
+        what_to_do: "Додай real-time social proof ('X купили цього тижня') або відгуки.",
+      },
+      en: {
+        headline: `${n} products viewed but not purchased`,
+        why: "Buyers see the page but don't trust enough — usually missing reviews or photos.",
+        what_to_do: "Add real-time social proof ('X bought this week') or reviews.",
+      },
+    };
+  },
+  social_proof_hidden_gem: (m) => {
+    const n = num(m, "hidden_gem_count");
+    return {
+      ua: {
+        headline: `${n} приховані бестселери`,
+        why: "Купують навіть з мізерним трафіком — більше показів = більше продажів.",
+        what_to_do: "Підняти у featured-секції або згенерувати SEO-сторінку.",
+      },
+      en: {
+        headline: `${n} hidden bestsellers`,
+        why: "They sell even with tiny traffic — more visibility = more sales.",
+        what_to_do: "Promote to featured section or generate SEO landing page.",
+      },
+    };
+  },
+  broadcast_winner: (m) => {
+    const tmpl = str(m, "template_key", "broadcast");
+    const roi = num(m, "roi_per_msg_cents");
+    return {
+      ua: {
+        headline: `Broadcast "${tmpl}" — переможець (ROI ${(roi / 100).toFixed(2)}/msg)`,
+        why: "ROI у 2× вищий за середнє — шаблон зачепив аудиторію.",
+        what_to_do: "Перевипусти на ширшу аудиторію або сегмент-двійник.",
+      },
+      en: {
+        headline: `Broadcast "${tmpl}" is a winner (ROI ${(roi / 100).toFixed(2)}/msg)`,
+        why: "2× higher ROI than average — the message resonates.",
+        what_to_do: "Re-run with a wider audience or look-alike segment.",
+      },
+    };
+  },
+  broadcast_dud: (m) => {
+    const tmpl = str(m, "template_key", "broadcast");
+    return {
+      ua: {
+        headline: `Broadcast "${tmpl}" не працює`,
+        why: "Низька конверсія і reply rate — це шум, що знижує trust бренду.",
+        what_to_do: "Призупини або переписати hook першого рядка через ШІ.",
+      },
+      en: {
+        headline: `Broadcast "${tmpl}" not working`,
+        why: "Low conversion and reply rate — pure noise that erodes brand trust.",
+        what_to_do: "Pause or rewrite the first-line hook via AI.",
+      },
+    };
+  },
+  winback_high_roi: (m) => {
+    const conv = num(m, "winback_conversion_rate") * 100;
+    return {
+      ua: {
+        headline: `Winback працює: ${conv.toFixed(1)}% конверсія`,
+        why: "Engine окупає себе у кілька разів — масштабування дасть більше revenue.",
+        what_to_do: "Збільш cadence (наприклад, no-order trigger з 90 до 60 днів).",
+      },
+      en: {
+        headline: `Winback is working: ${conv.toFixed(1)}% conversion`,
+        why: "Engine pays off several-fold — scaling will lift revenue.",
+        what_to_do: "Increase cadence (e.g. no-order trigger from 90 to 60 days).",
+      },
+    };
+  },
+  winback_low_roi: (m) => {
+    const conv = num(m, "winback_conversion_rate") * 100;
+    return {
+      ua: {
+        headline: `Winback слабкий: ${conv.toFixed(2)}% конверсія`,
+        why: "Нижче за інші nurture-канали — таргетинг або шаблон не цикає.",
+        what_to_do: "Знизь cadence, додай discount для першого повторного замовлення.",
+      },
+      en: {
+        headline: `Winback is weak: ${conv.toFixed(2)}% conversion`,
+        why: "Below other nurture channels — targeting or template misses.",
+        what_to_do: "Reduce cadence, add a first-reorder discount.",
+      },
+    };
+  },
+  elasticity_meta_bias: (m) => {
+    const agent = str(m, "agent", "agent");
+    const bias = num(m, "mean_bias_pct") * 100;
+    return {
+      ua: {
+        headline: `${agent}: bias ${bias.toFixed(0)}% у прогнозах`,
+        why: `Модель ${bias > 0 ? "недооцінює" : "переоцінює"} реальний ефект цінових змін.`,
+        what_to_do: bias > 0 ? "Можна сміливіше коригувати ціни." : "Зменши aggressiveness, додай довший A/B.",
+      },
+      en: {
+        headline: `${agent}: ${bias.toFixed(0)}% bias in predictions`,
+        why: `Model ${bias > 0 ? "underestimates" : "overestimates"} real price-change impact.`,
+        what_to_do: bias > 0 ? "You can adjust prices more boldly." : "Reduce aggressiveness, run longer A/B.",
+      },
+    };
+  },
+  pricing_high_revert_rate: (m) => {
+    const agent = str(m, "agent", "agent");
+    const rate = num(m, "revert_rate") * 100;
+    return {
+      ua: {
+        headline: `${agent}: ${rate.toFixed(0)}% рішень відкочено`,
+        why: "Агент діє занадто ризиковано — багато змін довелось скасувати.",
+        what_to_do: "Підняти confidence threshold і подовжити A/B-період до 14 днів.",
+      },
+      en: {
+        headline: `${agent}: ${rate.toFixed(0)}% decisions reverted`,
+        why: "Agent acts too aggressively — many changes had to be rolled back.",
+        what_to_do: "Raise confidence threshold and extend A/B period to 14 days.",
+      },
+    };
+  },
+  learning_loop_silent_agents: (m) => {
+    const agents = (m.silent_agents as string[] | undefined) ?? [];
+    return {
+      ua: {
+        headline: `${agents.length} агентів не вчаться`,
+        why: "Не мають активних ai_memory — feedback-loop не запускався або не знаходить патернів.",
+        what_to_do: "Запусти agents/feedback-loop-all і перевір measured_at у actions.",
+      },
+      en: {
+        headline: `${agents.length} agents aren't learning`,
+        why: "No active ai_memory — feedback-loop didn't run or finds no patterns.",
+        what_to_do: "Run agents/feedback-loop-all and verify measured_at on actions.",
+      },
+    };
+  },
+  learning_loop_negative_rules: (m) => {
+    const n = num(m, "count");
+    return {
+      ua: {
+        headline: `${n} активних правил систематично провалюються`,
+        why: "Failure ≥ 2× success — ШІ продовжує робити те, що шкодить.",
+        what_to_do: "Деактивуй або інвертуй ці правила.",
+      },
+      en: {
+        headline: `${n} active rules consistently fail`,
+        why: "Failure ≥ 2× success — AI keeps doing things that hurt.",
+        what_to_do: "Deactivate or invert these rules.",
+      },
+    };
+  },
+  learning_loop_stale_memories: (m) => {
+    const n = num(m, "count");
+    return {
+      ua: {
+        headline: `${n} застарілих ai_memory-правил`,
+        why: "Не оновлювались >60 днів і мають низьку впевненість — патерн змінився.",
+        what_to_do: "Запусти переоцінку або деактивуй застарілі правила.",
+      },
+      en: {
+        headline: `${n} stale ai_memory rules`,
+        why: "Not updated for 60+ days with low confidence — pattern shifted.",
+        what_to_do: "Re-evaluate or archive the stale rules.",
+      },
+    };
+  },
+  notification_noise_detected: (m) => {
+    const kind = str(m, "kind", "notification");
+    const c = num(m, "count_24h");
+    return {
+      ua: {
+        headline: `Notification "${kind}" шумить (${c} за 24 год)`,
+        why: "Власник перестане їх читати — потрібен рідший канал або дайджест.",
+        what_to_do: "Підвищ severity threshold або згрупуй у dailyDigest.",
+      },
+      en: {
+        headline: `Notification "${kind}" is noisy (${c} in 24h)`,
+        why: "Owner will start ignoring them — needs throttling or digest grouping.",
+        what_to_do: "Raise severity threshold or batch into daily digest.",
+      },
+    };
+  },
+  owner_playbook: (m) => {
+    const fix = num(m, "fix_count");
+    const grow = num(m, "grow_count");
+    return {
+      ua: {
+        headline: `Playbook на тиждень: ${fix} fix + ${grow} grow`,
+        why: "Згенерований план з топ-критичних правок та найвпливовіших можливостей зростання.",
+        what_to_do: "Огляньте і застосуйте по черзі — більшість 1-click.",
+      },
+      en: {
+        headline: `Weekly playbook: ${fix} fix + ${grow} grow`,
+        why: "Auto-generated plan from top critical fixes and highest-impact growth opportunities.",
+        what_to_do: "Review and apply in order — most are 1-click.",
+      },
+    };
+  },
+  meta_priors_injected: (m) => {
+    const n = num(m, "upserts");
+    return {
+      ua: {
+        headline: `${n} перевірених policies стали priors`,
+        why: "Найкращі рішення тепер служать стартовою точкою для агентів на нових SKU/сегментах.",
+        what_to_do: "Огляньте у Memory Inspector — можна вимкнути окремі priors якщо потрібно.",
+      },
+      en: {
+        headline: `${n} validated policies became priors`,
+        why: "Best policies now seed agents on new SKUs/segments — fewer expensive exploration mistakes.",
+        what_to_do: "Review in Memory Inspector — disable individual priors if needed.",
+      },
+    };
+  },
+  seo_loop_winners: (m) => {
+    const n = num(m, "winners_count");
+    return {
+      ua: {
+        headline: `${n} автогенерованих сторінок дають конверсії`,
+        why: "Автоконтент працює — час масштабувати cadence генерації.",
+        what_to_do: "Подвоїти content-velocity / programmatic-seo cadence.",
+      },
+      en: {
+        headline: `${n} auto-generated pages converting`,
+        why: "Auto-content works — time to scale generation cadence.",
+        what_to_do: "Double content-velocity / programmatic-seo cadence.",
+      },
+    };
+  },
+  seo_loop_duds: (m) => {
+    const n = num(m, "duds_count");
+    return {
+      ua: {
+        headline: `${n} agent-сторінок без трафіку >30 днів`,
+        why: "Тема порожня або заголовки не цікаві Google — лише шум для домену.",
+        what_to_do: "Unpublish або переписати title/description через ШІ.",
+      },
+      en: {
+        headline: `${n} agent pages without traffic for 30+ days`,
+        why: "Topic empty or titles unattractive to Google — just domain noise.",
+        what_to_do: "Unpublish or rewrite title/description via AI.",
+      },
+    };
+  },
 };

@@ -32,9 +32,11 @@ import { Route as HooksEnginesDispatchRouteImport } from './routes/hooks/engines
 import { Route as HooksEnginesAbandonedCartAllRouteImport } from './routes/hooks/engines.abandoned-cart-all'
 import { Route as HooksEnginesAbandonedCartRouteImport } from './routes/hooks/engines.abandoned-cart'
 import { Route as HooksDemoSeedRouteImport } from './routes/hooks/demo.seed'
+import { Route as HooksAgentsWinbackRoiRouteImport } from './routes/hooks/agents.winback-roi'
 import { Route as HooksAgentsUgcHarvesterRouteImport } from './routes/hooks/agents.ugc-harvester'
 import { Route as HooksAgentsTickRouteImport } from './routes/hooks/agents.tick'
 import { Route as HooksAgentsStockoutRouteImport } from './routes/hooks/agents.stockout'
+import { Route as HooksAgentsSocialProofLiveRouteImport } from './routes/hooks/agents.social-proof-live'
 import { Route as HooksAgentsSeoRewriterRouteImport } from './routes/hooks/agents.seo-rewriter'
 import { Route as HooksAgentsSegmentationRouteImport } from './routes/hooks/agents.segmentation'
 import { Route as HooksAgentsSecondOrderNurtureRouteImport } from './routes/hooks/agents.second-order-nurture'
@@ -51,19 +53,25 @@ import { Route as HooksAgentsProductAffinityRouteImport } from './routes/hooks/a
 import { Route as HooksAgentsPriceRevertRouteImport } from './routes/hooks/agents.price-revert'
 import { Route as HooksAgentsPriceOptimizerRouteImport } from './routes/hooks/agents.price-optimizer'
 import { Route as HooksAgentsPredictivePricingRouteImport } from './routes/hooks/agents.predictive-pricing'
+import { Route as HooksAgentsOwnerPlaybookRouteImport } from './routes/hooks/agents.owner-playbook'
 import { Route as HooksAgentsOnboardingRouteImport } from './routes/hooks/agents.onboarding'
 import { Route as HooksAgentsNurtureRoiRouteImport } from './routes/hooks/agents.nurture-roi'
+import { Route as HooksAgentsNotificationRouterRouteImport } from './routes/hooks/agents.notification-router'
 import { Route as HooksAgentsMorningBriefRouteImport } from './routes/hooks/agents.morning-brief'
+import { Route as HooksAgentsMetaPriorInjectorRouteImport } from './routes/hooks/agents.meta-prior-injector'
 import { Route as HooksAgentsMemoryFeedbackRouteImport } from './routes/hooks/agents.memory-feedback'
 import { Route as HooksAgentsMarginOptimizerRouteImport } from './routes/hooks/agents.margin-optimizer'
 import { Route as HooksAgentsLtvPredictorRouteImport } from './routes/hooks/agents.ltv-predictor'
 import { Route as HooksAgentsLoyaltyTiersRouteImport } from './routes/hooks/agents.loyalty-tiers'
+import { Route as HooksAgentsLearningLoopMonitorRouteImport } from './routes/hooks/agents.learning-loop-monitor'
 import { Route as HooksAgentsInventoryForecastRouteImport } from './routes/hooks/agents.inventory-forecast'
 import { Route as HooksAgentsFunnelHealerRouteImport } from './routes/hooks/agents.funnel-healer'
 import { Route as HooksAgentsFirstOrderFunnelRouteImport } from './routes/hooks/agents.first-order-funnel'
 import { Route as HooksAgentsFeedbackLoopAllRouteImport } from './routes/hooks/agents.feedback-loop-all'
 import { Route as HooksAgentsFeedbackLoopRouteImport } from './routes/hooks/agents.feedback-loop'
+import { Route as HooksAgentsElasticityMetaLoopRouteImport } from './routes/hooks/agents.elasticity-meta-loop'
 import { Route as HooksAgentsDiscountElasticityRouteImport } from './routes/hooks/agents.discount-elasticity'
+import { Route as HooksAgentsDailyDigestV2RouteImport } from './routes/hooks/agents.daily-digest-v2'
 import { Route as HooksAgentsCustomerSegmentsAutoRouteImport } from './routes/hooks/agents.customer-segments-auto'
 import { Route as HooksAgentsCustomerChurnPredictorRouteImport } from './routes/hooks/agents.customer-churn-predictor'
 import { Route as HooksAgentsCsatDispatcherRouteImport } from './routes/hooks/agents.csat-dispatcher'
@@ -75,10 +83,12 @@ import { Route as HooksAgentsChurnRiskRouteImport } from './routes/hooks/agents.
 import { Route as HooksAgentsCartRecoveryRouteImport } from './routes/hooks/agents.cart-recovery'
 import { Route as HooksAgentsBundleRecommenderRouteImport } from './routes/hooks/agents.bundle-recommender'
 import { Route as HooksAgentsBrowseAbandonmentRouteImport } from './routes/hooks/agents.browse-abandonment'
+import { Route as HooksAgentsBroadcastRoiRouteImport } from './routes/hooks/agents.broadcast-roi'
 import { Route as HooksAgentsBroadcastComposerRouteImport } from './routes/hooks/agents.broadcast-composer'
 import { Route as HooksAgentsBotSequencesRouteImport } from './routes/hooks/agents.bot-sequences'
 import { Route as HooksAgentsBotQualityRouteImport } from './routes/hooks/agents.bot-quality'
 import { Route as HooksAgentsBestTimeToSendRouteImport } from './routes/hooks/agents.best-time-to-send'
+import { Route as HooksAgentsAutonomousSeoLoopRouteImport } from './routes/hooks/agents.autonomous-seo-loop'
 import { Route as HooksAgentsAttributionRouteImport } from './routes/hooks/agents.attribution'
 import { Route as HooksAgentsAovOptimizerRouteImport } from './routes/hooks/agents.aov-optimizer'
 import { Route as HooksAgentsAovLeakRouteImport } from './routes/hooks/agents.aov-leak'
@@ -206,6 +216,11 @@ const HooksDemoSeedRoute = HooksDemoSeedRouteImport.update({
   path: '/hooks/demo/seed',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsWinbackRoiRoute = HooksAgentsWinbackRoiRouteImport.update({
+  id: '/hooks/agents/winback-roi',
+  path: '/hooks/agents/winback-roi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsUgcHarvesterRoute = HooksAgentsUgcHarvesterRouteImport.update({
   id: '/hooks/agents/ugc-harvester',
   path: '/hooks/agents/ugc-harvester',
@@ -221,6 +236,12 @@ const HooksAgentsStockoutRoute = HooksAgentsStockoutRouteImport.update({
   path: '/hooks/agents/stockout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsSocialProofLiveRoute =
+  HooksAgentsSocialProofLiveRouteImport.update({
+    id: '/hooks/agents/social-proof-live',
+    path: '/hooks/agents/social-proof-live',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsSeoRewriterRoute = HooksAgentsSeoRewriterRouteImport.update({
   id: '/hooks/agents/seo-rewriter',
   path: '/hooks/agents/seo-rewriter',
@@ -308,6 +329,12 @@ const HooksAgentsPredictivePricingRoute =
     path: '/hooks/agents/predictive-pricing',
     getParentRoute: () => rootRouteImport,
   } as any)
+const HooksAgentsOwnerPlaybookRoute =
+  HooksAgentsOwnerPlaybookRouteImport.update({
+    id: '/hooks/agents/owner-playbook',
+    path: '/hooks/agents/owner-playbook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsOnboardingRoute = HooksAgentsOnboardingRouteImport.update({
   id: '/hooks/agents/onboarding',
   path: '/hooks/agents/onboarding',
@@ -318,11 +345,23 @@ const HooksAgentsNurtureRoiRoute = HooksAgentsNurtureRoiRouteImport.update({
   path: '/hooks/agents/nurture-roi',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsNotificationRouterRoute =
+  HooksAgentsNotificationRouterRouteImport.update({
+    id: '/hooks/agents/notification-router',
+    path: '/hooks/agents/notification-router',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsMorningBriefRoute = HooksAgentsMorningBriefRouteImport.update({
   id: '/hooks/agents/morning-brief',
   path: '/hooks/agents/morning-brief',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsMetaPriorInjectorRoute =
+  HooksAgentsMetaPriorInjectorRouteImport.update({
+    id: '/hooks/agents/meta-prior-injector',
+    path: '/hooks/agents/meta-prior-injector',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsMemoryFeedbackRoute =
   HooksAgentsMemoryFeedbackRouteImport.update({
     id: '/hooks/agents/memory-feedback',
@@ -345,6 +384,12 @@ const HooksAgentsLoyaltyTiersRoute = HooksAgentsLoyaltyTiersRouteImport.update({
   path: '/hooks/agents/loyalty-tiers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsLearningLoopMonitorRoute =
+  HooksAgentsLearningLoopMonitorRouteImport.update({
+    id: '/hooks/agents/learning-loop-monitor',
+    path: '/hooks/agents/learning-loop-monitor',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsInventoryForecastRoute =
   HooksAgentsInventoryForecastRouteImport.update({
     id: '/hooks/agents/inventory-forecast',
@@ -373,10 +418,22 @@ const HooksAgentsFeedbackLoopRoute = HooksAgentsFeedbackLoopRouteImport.update({
   path: '/hooks/agents/feedback-loop',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsElasticityMetaLoopRoute =
+  HooksAgentsElasticityMetaLoopRouteImport.update({
+    id: '/hooks/agents/elasticity-meta-loop',
+    path: '/hooks/agents/elasticity-meta-loop',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsDiscountElasticityRoute =
   HooksAgentsDiscountElasticityRouteImport.update({
     id: '/hooks/agents/discount-elasticity',
     path: '/hooks/agents/discount-elasticity',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsDailyDigestV2Route =
+  HooksAgentsDailyDigestV2RouteImport.update({
+    id: '/hooks/agents/daily-digest-v2',
+    path: '/hooks/agents/daily-digest-v2',
     getParentRoute: () => rootRouteImport,
   } as any)
 const HooksAgentsCustomerSegmentsAutoRoute =
@@ -441,6 +498,11 @@ const HooksAgentsBrowseAbandonmentRoute =
     path: '/hooks/agents/browse-abandonment',
     getParentRoute: () => rootRouteImport,
   } as any)
+const HooksAgentsBroadcastRoiRoute = HooksAgentsBroadcastRoiRouteImport.update({
+  id: '/hooks/agents/broadcast-roi',
+  path: '/hooks/agents/broadcast-roi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsBroadcastComposerRoute =
   HooksAgentsBroadcastComposerRouteImport.update({
     id: '/hooks/agents/broadcast-composer',
@@ -461,6 +523,12 @@ const HooksAgentsBestTimeToSendRoute =
   HooksAgentsBestTimeToSendRouteImport.update({
     id: '/hooks/agents/best-time-to-send',
     path: '/hooks/agents/best-time-to-send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsAutonomousSeoLoopRoute =
+  HooksAgentsAutonomousSeoLoopRouteImport.update({
+    id: '/hooks/agents/autonomous-seo-loop',
+    path: '/hooks/agents/autonomous-seo-loop',
     getParentRoute: () => rootRouteImport,
   } as any)
 const HooksAgentsAttributionRoute = HooksAgentsAttributionRouteImport.update({
@@ -538,10 +606,12 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/aov-optimizer': typeof HooksAgentsAovOptimizerRoute
   '/hooks/agents/attribution': typeof HooksAgentsAttributionRoute
+  '/hooks/agents/autonomous-seo-loop': typeof HooksAgentsAutonomousSeoLoopRoute
   '/hooks/agents/best-time-to-send': typeof HooksAgentsBestTimeToSendRoute
   '/hooks/agents/bot-quality': typeof HooksAgentsBotQualityRoute
   '/hooks/agents/bot-sequences': typeof HooksAgentsBotSequencesRoute
   '/hooks/agents/broadcast-composer': typeof HooksAgentsBroadcastComposerRoute
+  '/hooks/agents/broadcast-roi': typeof HooksAgentsBroadcastRoiRoute
   '/hooks/agents/browse-abandonment': typeof HooksAgentsBrowseAbandonmentRoute
   '/hooks/agents/bundle-recommender': typeof HooksAgentsBundleRecommenderRoute
   '/hooks/agents/cart-recovery': typeof HooksAgentsCartRecoveryRoute
@@ -553,19 +623,25 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/csat-dispatcher': typeof HooksAgentsCsatDispatcherRoute
   '/hooks/agents/customer-churn-predictor': typeof HooksAgentsCustomerChurnPredictorRoute
   '/hooks/agents/customer-segments-auto': typeof HooksAgentsCustomerSegmentsAutoRoute
+  '/hooks/agents/daily-digest-v2': typeof HooksAgentsDailyDigestV2Route
   '/hooks/agents/discount-elasticity': typeof HooksAgentsDiscountElasticityRoute
+  '/hooks/agents/elasticity-meta-loop': typeof HooksAgentsElasticityMetaLoopRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
   '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
   '/hooks/agents/first-order-funnel': typeof HooksAgentsFirstOrderFunnelRoute
   '/hooks/agents/funnel-healer': typeof HooksAgentsFunnelHealerRoute
   '/hooks/agents/inventory-forecast': typeof HooksAgentsInventoryForecastRoute
+  '/hooks/agents/learning-loop-monitor': typeof HooksAgentsLearningLoopMonitorRoute
   '/hooks/agents/loyalty-tiers': typeof HooksAgentsLoyaltyTiersRoute
   '/hooks/agents/ltv-predictor': typeof HooksAgentsLtvPredictorRoute
   '/hooks/agents/margin-optimizer': typeof HooksAgentsMarginOptimizerRoute
   '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
+  '/hooks/agents/meta-prior-injector': typeof HooksAgentsMetaPriorInjectorRoute
   '/hooks/agents/morning-brief': typeof HooksAgentsMorningBriefRoute
+  '/hooks/agents/notification-router': typeof HooksAgentsNotificationRouterRoute
   '/hooks/agents/nurture-roi': typeof HooksAgentsNurtureRoiRoute
   '/hooks/agents/onboarding': typeof HooksAgentsOnboardingRoute
+  '/hooks/agents/owner-playbook': typeof HooksAgentsOwnerPlaybookRoute
   '/hooks/agents/predictive-pricing': typeof HooksAgentsPredictivePricingRoute
   '/hooks/agents/price-optimizer': typeof HooksAgentsPriceOptimizerRoute
   '/hooks/agents/price-revert': typeof HooksAgentsPriceRevertRoute
@@ -582,9 +658,11 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/second-order-nurture': typeof HooksAgentsSecondOrderNurtureRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/seo-rewriter': typeof HooksAgentsSeoRewriterRoute
+  '/hooks/agents/social-proof-live': typeof HooksAgentsSocialProofLiveRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/agents/tick': typeof HooksAgentsTickRoute
   '/hooks/agents/ugc-harvester': typeof HooksAgentsUgcHarvesterRoute
+  '/hooks/agents/winback-roi': typeof HooksAgentsWinbackRoiRoute
   '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
@@ -619,10 +697,12 @@ export interface FileRoutesByTo {
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/aov-optimizer': typeof HooksAgentsAovOptimizerRoute
   '/hooks/agents/attribution': typeof HooksAgentsAttributionRoute
+  '/hooks/agents/autonomous-seo-loop': typeof HooksAgentsAutonomousSeoLoopRoute
   '/hooks/agents/best-time-to-send': typeof HooksAgentsBestTimeToSendRoute
   '/hooks/agents/bot-quality': typeof HooksAgentsBotQualityRoute
   '/hooks/agents/bot-sequences': typeof HooksAgentsBotSequencesRoute
   '/hooks/agents/broadcast-composer': typeof HooksAgentsBroadcastComposerRoute
+  '/hooks/agents/broadcast-roi': typeof HooksAgentsBroadcastRoiRoute
   '/hooks/agents/browse-abandonment': typeof HooksAgentsBrowseAbandonmentRoute
   '/hooks/agents/bundle-recommender': typeof HooksAgentsBundleRecommenderRoute
   '/hooks/agents/cart-recovery': typeof HooksAgentsCartRecoveryRoute
@@ -634,19 +714,25 @@ export interface FileRoutesByTo {
   '/hooks/agents/csat-dispatcher': typeof HooksAgentsCsatDispatcherRoute
   '/hooks/agents/customer-churn-predictor': typeof HooksAgentsCustomerChurnPredictorRoute
   '/hooks/agents/customer-segments-auto': typeof HooksAgentsCustomerSegmentsAutoRoute
+  '/hooks/agents/daily-digest-v2': typeof HooksAgentsDailyDigestV2Route
   '/hooks/agents/discount-elasticity': typeof HooksAgentsDiscountElasticityRoute
+  '/hooks/agents/elasticity-meta-loop': typeof HooksAgentsElasticityMetaLoopRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
   '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
   '/hooks/agents/first-order-funnel': typeof HooksAgentsFirstOrderFunnelRoute
   '/hooks/agents/funnel-healer': typeof HooksAgentsFunnelHealerRoute
   '/hooks/agents/inventory-forecast': typeof HooksAgentsInventoryForecastRoute
+  '/hooks/agents/learning-loop-monitor': typeof HooksAgentsLearningLoopMonitorRoute
   '/hooks/agents/loyalty-tiers': typeof HooksAgentsLoyaltyTiersRoute
   '/hooks/agents/ltv-predictor': typeof HooksAgentsLtvPredictorRoute
   '/hooks/agents/margin-optimizer': typeof HooksAgentsMarginOptimizerRoute
   '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
+  '/hooks/agents/meta-prior-injector': typeof HooksAgentsMetaPriorInjectorRoute
   '/hooks/agents/morning-brief': typeof HooksAgentsMorningBriefRoute
+  '/hooks/agents/notification-router': typeof HooksAgentsNotificationRouterRoute
   '/hooks/agents/nurture-roi': typeof HooksAgentsNurtureRoiRoute
   '/hooks/agents/onboarding': typeof HooksAgentsOnboardingRoute
+  '/hooks/agents/owner-playbook': typeof HooksAgentsOwnerPlaybookRoute
   '/hooks/agents/predictive-pricing': typeof HooksAgentsPredictivePricingRoute
   '/hooks/agents/price-optimizer': typeof HooksAgentsPriceOptimizerRoute
   '/hooks/agents/price-revert': typeof HooksAgentsPriceRevertRoute
@@ -663,9 +749,11 @@ export interface FileRoutesByTo {
   '/hooks/agents/second-order-nurture': typeof HooksAgentsSecondOrderNurtureRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/seo-rewriter': typeof HooksAgentsSeoRewriterRoute
+  '/hooks/agents/social-proof-live': typeof HooksAgentsSocialProofLiveRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/agents/tick': typeof HooksAgentsTickRoute
   '/hooks/agents/ugc-harvester': typeof HooksAgentsUgcHarvesterRoute
+  '/hooks/agents/winback-roi': typeof HooksAgentsWinbackRoiRoute
   '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
@@ -702,10 +790,12 @@ export interface FileRoutesById {
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/aov-optimizer': typeof HooksAgentsAovOptimizerRoute
   '/hooks/agents/attribution': typeof HooksAgentsAttributionRoute
+  '/hooks/agents/autonomous-seo-loop': typeof HooksAgentsAutonomousSeoLoopRoute
   '/hooks/agents/best-time-to-send': typeof HooksAgentsBestTimeToSendRoute
   '/hooks/agents/bot-quality': typeof HooksAgentsBotQualityRoute
   '/hooks/agents/bot-sequences': typeof HooksAgentsBotSequencesRoute
   '/hooks/agents/broadcast-composer': typeof HooksAgentsBroadcastComposerRoute
+  '/hooks/agents/broadcast-roi': typeof HooksAgentsBroadcastRoiRoute
   '/hooks/agents/browse-abandonment': typeof HooksAgentsBrowseAbandonmentRoute
   '/hooks/agents/bundle-recommender': typeof HooksAgentsBundleRecommenderRoute
   '/hooks/agents/cart-recovery': typeof HooksAgentsCartRecoveryRoute
@@ -717,19 +807,25 @@ export interface FileRoutesById {
   '/hooks/agents/csat-dispatcher': typeof HooksAgentsCsatDispatcherRoute
   '/hooks/agents/customer-churn-predictor': typeof HooksAgentsCustomerChurnPredictorRoute
   '/hooks/agents/customer-segments-auto': typeof HooksAgentsCustomerSegmentsAutoRoute
+  '/hooks/agents/daily-digest-v2': typeof HooksAgentsDailyDigestV2Route
   '/hooks/agents/discount-elasticity': typeof HooksAgentsDiscountElasticityRoute
+  '/hooks/agents/elasticity-meta-loop': typeof HooksAgentsElasticityMetaLoopRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
   '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
   '/hooks/agents/first-order-funnel': typeof HooksAgentsFirstOrderFunnelRoute
   '/hooks/agents/funnel-healer': typeof HooksAgentsFunnelHealerRoute
   '/hooks/agents/inventory-forecast': typeof HooksAgentsInventoryForecastRoute
+  '/hooks/agents/learning-loop-monitor': typeof HooksAgentsLearningLoopMonitorRoute
   '/hooks/agents/loyalty-tiers': typeof HooksAgentsLoyaltyTiersRoute
   '/hooks/agents/ltv-predictor': typeof HooksAgentsLtvPredictorRoute
   '/hooks/agents/margin-optimizer': typeof HooksAgentsMarginOptimizerRoute
   '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
+  '/hooks/agents/meta-prior-injector': typeof HooksAgentsMetaPriorInjectorRoute
   '/hooks/agents/morning-brief': typeof HooksAgentsMorningBriefRoute
+  '/hooks/agents/notification-router': typeof HooksAgentsNotificationRouterRoute
   '/hooks/agents/nurture-roi': typeof HooksAgentsNurtureRoiRoute
   '/hooks/agents/onboarding': typeof HooksAgentsOnboardingRoute
+  '/hooks/agents/owner-playbook': typeof HooksAgentsOwnerPlaybookRoute
   '/hooks/agents/predictive-pricing': typeof HooksAgentsPredictivePricingRoute
   '/hooks/agents/price-optimizer': typeof HooksAgentsPriceOptimizerRoute
   '/hooks/agents/price-revert': typeof HooksAgentsPriceRevertRoute
@@ -746,9 +842,11 @@ export interface FileRoutesById {
   '/hooks/agents/second-order-nurture': typeof HooksAgentsSecondOrderNurtureRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/seo-rewriter': typeof HooksAgentsSeoRewriterRoute
+  '/hooks/agents/social-proof-live': typeof HooksAgentsSocialProofLiveRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/agents/tick': typeof HooksAgentsTickRoute
   '/hooks/agents/ugc-harvester': typeof HooksAgentsUgcHarvesterRoute
+  '/hooks/agents/winback-roi': typeof HooksAgentsWinbackRoiRoute
   '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
@@ -785,10 +883,12 @@ export interface FileRouteTypes {
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/aov-optimizer'
     | '/hooks/agents/attribution'
+    | '/hooks/agents/autonomous-seo-loop'
     | '/hooks/agents/best-time-to-send'
     | '/hooks/agents/bot-quality'
     | '/hooks/agents/bot-sequences'
     | '/hooks/agents/broadcast-composer'
+    | '/hooks/agents/broadcast-roi'
     | '/hooks/agents/browse-abandonment'
     | '/hooks/agents/bundle-recommender'
     | '/hooks/agents/cart-recovery'
@@ -800,19 +900,25 @@ export interface FileRouteTypes {
     | '/hooks/agents/csat-dispatcher'
     | '/hooks/agents/customer-churn-predictor'
     | '/hooks/agents/customer-segments-auto'
+    | '/hooks/agents/daily-digest-v2'
     | '/hooks/agents/discount-elasticity'
+    | '/hooks/agents/elasticity-meta-loop'
     | '/hooks/agents/feedback-loop'
     | '/hooks/agents/feedback-loop-all'
     | '/hooks/agents/first-order-funnel'
     | '/hooks/agents/funnel-healer'
     | '/hooks/agents/inventory-forecast'
+    | '/hooks/agents/learning-loop-monitor'
     | '/hooks/agents/loyalty-tiers'
     | '/hooks/agents/ltv-predictor'
     | '/hooks/agents/margin-optimizer'
     | '/hooks/agents/memory-feedback'
+    | '/hooks/agents/meta-prior-injector'
     | '/hooks/agents/morning-brief'
+    | '/hooks/agents/notification-router'
     | '/hooks/agents/nurture-roi'
     | '/hooks/agents/onboarding'
+    | '/hooks/agents/owner-playbook'
     | '/hooks/agents/predictive-pricing'
     | '/hooks/agents/price-optimizer'
     | '/hooks/agents/price-revert'
@@ -829,9 +935,11 @@ export interface FileRouteTypes {
     | '/hooks/agents/second-order-nurture'
     | '/hooks/agents/segmentation'
     | '/hooks/agents/seo-rewriter'
+    | '/hooks/agents/social-proof-live'
     | '/hooks/agents/stockout'
     | '/hooks/agents/tick'
     | '/hooks/agents/ugc-harvester'
+    | '/hooks/agents/winback-roi'
     | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/abandoned-cart-all'
@@ -866,10 +974,12 @@ export interface FileRouteTypes {
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/aov-optimizer'
     | '/hooks/agents/attribution'
+    | '/hooks/agents/autonomous-seo-loop'
     | '/hooks/agents/best-time-to-send'
     | '/hooks/agents/bot-quality'
     | '/hooks/agents/bot-sequences'
     | '/hooks/agents/broadcast-composer'
+    | '/hooks/agents/broadcast-roi'
     | '/hooks/agents/browse-abandonment'
     | '/hooks/agents/bundle-recommender'
     | '/hooks/agents/cart-recovery'
@@ -881,19 +991,25 @@ export interface FileRouteTypes {
     | '/hooks/agents/csat-dispatcher'
     | '/hooks/agents/customer-churn-predictor'
     | '/hooks/agents/customer-segments-auto'
+    | '/hooks/agents/daily-digest-v2'
     | '/hooks/agents/discount-elasticity'
+    | '/hooks/agents/elasticity-meta-loop'
     | '/hooks/agents/feedback-loop'
     | '/hooks/agents/feedback-loop-all'
     | '/hooks/agents/first-order-funnel'
     | '/hooks/agents/funnel-healer'
     | '/hooks/agents/inventory-forecast'
+    | '/hooks/agents/learning-loop-monitor'
     | '/hooks/agents/loyalty-tiers'
     | '/hooks/agents/ltv-predictor'
     | '/hooks/agents/margin-optimizer'
     | '/hooks/agents/memory-feedback'
+    | '/hooks/agents/meta-prior-injector'
     | '/hooks/agents/morning-brief'
+    | '/hooks/agents/notification-router'
     | '/hooks/agents/nurture-roi'
     | '/hooks/agents/onboarding'
+    | '/hooks/agents/owner-playbook'
     | '/hooks/agents/predictive-pricing'
     | '/hooks/agents/price-optimizer'
     | '/hooks/agents/price-revert'
@@ -910,9 +1026,11 @@ export interface FileRouteTypes {
     | '/hooks/agents/second-order-nurture'
     | '/hooks/agents/segmentation'
     | '/hooks/agents/seo-rewriter'
+    | '/hooks/agents/social-proof-live'
     | '/hooks/agents/stockout'
     | '/hooks/agents/tick'
     | '/hooks/agents/ugc-harvester'
+    | '/hooks/agents/winback-roi'
     | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/abandoned-cart-all'
@@ -948,10 +1066,12 @@ export interface FileRouteTypes {
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/aov-optimizer'
     | '/hooks/agents/attribution'
+    | '/hooks/agents/autonomous-seo-loop'
     | '/hooks/agents/best-time-to-send'
     | '/hooks/agents/bot-quality'
     | '/hooks/agents/bot-sequences'
     | '/hooks/agents/broadcast-composer'
+    | '/hooks/agents/broadcast-roi'
     | '/hooks/agents/browse-abandonment'
     | '/hooks/agents/bundle-recommender'
     | '/hooks/agents/cart-recovery'
@@ -963,19 +1083,25 @@ export interface FileRouteTypes {
     | '/hooks/agents/csat-dispatcher'
     | '/hooks/agents/customer-churn-predictor'
     | '/hooks/agents/customer-segments-auto'
+    | '/hooks/agents/daily-digest-v2'
     | '/hooks/agents/discount-elasticity'
+    | '/hooks/agents/elasticity-meta-loop'
     | '/hooks/agents/feedback-loop'
     | '/hooks/agents/feedback-loop-all'
     | '/hooks/agents/first-order-funnel'
     | '/hooks/agents/funnel-healer'
     | '/hooks/agents/inventory-forecast'
+    | '/hooks/agents/learning-loop-monitor'
     | '/hooks/agents/loyalty-tiers'
     | '/hooks/agents/ltv-predictor'
     | '/hooks/agents/margin-optimizer'
     | '/hooks/agents/memory-feedback'
+    | '/hooks/agents/meta-prior-injector'
     | '/hooks/agents/morning-brief'
+    | '/hooks/agents/notification-router'
     | '/hooks/agents/nurture-roi'
     | '/hooks/agents/onboarding'
+    | '/hooks/agents/owner-playbook'
     | '/hooks/agents/predictive-pricing'
     | '/hooks/agents/price-optimizer'
     | '/hooks/agents/price-revert'
@@ -992,9 +1118,11 @@ export interface FileRouteTypes {
     | '/hooks/agents/second-order-nurture'
     | '/hooks/agents/segmentation'
     | '/hooks/agents/seo-rewriter'
+    | '/hooks/agents/social-proof-live'
     | '/hooks/agents/stockout'
     | '/hooks/agents/tick'
     | '/hooks/agents/ugc-harvester'
+    | '/hooks/agents/winback-roi'
     | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/abandoned-cart-all'
@@ -1027,10 +1155,12 @@ export interface RootRouteChildren {
   HooksAgentsAovLeakRoute: typeof HooksAgentsAovLeakRoute
   HooksAgentsAovOptimizerRoute: typeof HooksAgentsAovOptimizerRoute
   HooksAgentsAttributionRoute: typeof HooksAgentsAttributionRoute
+  HooksAgentsAutonomousSeoLoopRoute: typeof HooksAgentsAutonomousSeoLoopRoute
   HooksAgentsBestTimeToSendRoute: typeof HooksAgentsBestTimeToSendRoute
   HooksAgentsBotQualityRoute: typeof HooksAgentsBotQualityRoute
   HooksAgentsBotSequencesRoute: typeof HooksAgentsBotSequencesRoute
   HooksAgentsBroadcastComposerRoute: typeof HooksAgentsBroadcastComposerRoute
+  HooksAgentsBroadcastRoiRoute: typeof HooksAgentsBroadcastRoiRoute
   HooksAgentsBrowseAbandonmentRoute: typeof HooksAgentsBrowseAbandonmentRoute
   HooksAgentsBundleRecommenderRoute: typeof HooksAgentsBundleRecommenderRoute
   HooksAgentsCartRecoveryRoute: typeof HooksAgentsCartRecoveryRoute
@@ -1042,19 +1172,25 @@ export interface RootRouteChildren {
   HooksAgentsCsatDispatcherRoute: typeof HooksAgentsCsatDispatcherRoute
   HooksAgentsCustomerChurnPredictorRoute: typeof HooksAgentsCustomerChurnPredictorRoute
   HooksAgentsCustomerSegmentsAutoRoute: typeof HooksAgentsCustomerSegmentsAutoRoute
+  HooksAgentsDailyDigestV2Route: typeof HooksAgentsDailyDigestV2Route
   HooksAgentsDiscountElasticityRoute: typeof HooksAgentsDiscountElasticityRoute
+  HooksAgentsElasticityMetaLoopRoute: typeof HooksAgentsElasticityMetaLoopRoute
   HooksAgentsFeedbackLoopRoute: typeof HooksAgentsFeedbackLoopRoute
   HooksAgentsFeedbackLoopAllRoute: typeof HooksAgentsFeedbackLoopAllRoute
   HooksAgentsFirstOrderFunnelRoute: typeof HooksAgentsFirstOrderFunnelRoute
   HooksAgentsFunnelHealerRoute: typeof HooksAgentsFunnelHealerRoute
   HooksAgentsInventoryForecastRoute: typeof HooksAgentsInventoryForecastRoute
+  HooksAgentsLearningLoopMonitorRoute: typeof HooksAgentsLearningLoopMonitorRoute
   HooksAgentsLoyaltyTiersRoute: typeof HooksAgentsLoyaltyTiersRoute
   HooksAgentsLtvPredictorRoute: typeof HooksAgentsLtvPredictorRoute
   HooksAgentsMarginOptimizerRoute: typeof HooksAgentsMarginOptimizerRoute
   HooksAgentsMemoryFeedbackRoute: typeof HooksAgentsMemoryFeedbackRoute
+  HooksAgentsMetaPriorInjectorRoute: typeof HooksAgentsMetaPriorInjectorRoute
   HooksAgentsMorningBriefRoute: typeof HooksAgentsMorningBriefRoute
+  HooksAgentsNotificationRouterRoute: typeof HooksAgentsNotificationRouterRoute
   HooksAgentsNurtureRoiRoute: typeof HooksAgentsNurtureRoiRoute
   HooksAgentsOnboardingRoute: typeof HooksAgentsOnboardingRoute
+  HooksAgentsOwnerPlaybookRoute: typeof HooksAgentsOwnerPlaybookRoute
   HooksAgentsPredictivePricingRoute: typeof HooksAgentsPredictivePricingRoute
   HooksAgentsPriceOptimizerRoute: typeof HooksAgentsPriceOptimizerRoute
   HooksAgentsPriceRevertRoute: typeof HooksAgentsPriceRevertRoute
@@ -1071,9 +1207,11 @@ export interface RootRouteChildren {
   HooksAgentsSecondOrderNurtureRoute: typeof HooksAgentsSecondOrderNurtureRoute
   HooksAgentsSegmentationRoute: typeof HooksAgentsSegmentationRoute
   HooksAgentsSeoRewriterRoute: typeof HooksAgentsSeoRewriterRoute
+  HooksAgentsSocialProofLiveRoute: typeof HooksAgentsSocialProofLiveRoute
   HooksAgentsStockoutRoute: typeof HooksAgentsStockoutRoute
   HooksAgentsTickRoute: typeof HooksAgentsTickRoute
   HooksAgentsUgcHarvesterRoute: typeof HooksAgentsUgcHarvesterRoute
+  HooksAgentsWinbackRoiRoute: typeof HooksAgentsWinbackRoiRoute
   HooksDemoSeedRoute: typeof HooksDemoSeedRoute
   HooksEnginesAbandonedCartRoute: typeof HooksEnginesAbandonedCartRoute
   HooksEnginesAbandonedCartAllRoute: typeof HooksEnginesAbandonedCartAllRoute
@@ -1250,6 +1388,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksDemoSeedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/winback-roi': {
+      id: '/hooks/agents/winback-roi'
+      path: '/hooks/agents/winback-roi'
+      fullPath: '/hooks/agents/winback-roi'
+      preLoaderRoute: typeof HooksAgentsWinbackRoiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/ugc-harvester': {
       id: '/hooks/agents/ugc-harvester'
       path: '/hooks/agents/ugc-harvester'
@@ -1269,6 +1414,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/stockout'
       fullPath: '/hooks/agents/stockout'
       preLoaderRoute: typeof HooksAgentsStockoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/social-proof-live': {
+      id: '/hooks/agents/social-proof-live'
+      path: '/hooks/agents/social-proof-live'
+      fullPath: '/hooks/agents/social-proof-live'
+      preLoaderRoute: typeof HooksAgentsSocialProofLiveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/seo-rewriter': {
@@ -1383,6 +1535,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsPredictivePricingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/owner-playbook': {
+      id: '/hooks/agents/owner-playbook'
+      path: '/hooks/agents/owner-playbook'
+      fullPath: '/hooks/agents/owner-playbook'
+      preLoaderRoute: typeof HooksAgentsOwnerPlaybookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/onboarding': {
       id: '/hooks/agents/onboarding'
       path: '/hooks/agents/onboarding'
@@ -1397,11 +1556,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsNurtureRoiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/notification-router': {
+      id: '/hooks/agents/notification-router'
+      path: '/hooks/agents/notification-router'
+      fullPath: '/hooks/agents/notification-router'
+      preLoaderRoute: typeof HooksAgentsNotificationRouterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/morning-brief': {
       id: '/hooks/agents/morning-brief'
       path: '/hooks/agents/morning-brief'
       fullPath: '/hooks/agents/morning-brief'
       preLoaderRoute: typeof HooksAgentsMorningBriefRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/meta-prior-injector': {
+      id: '/hooks/agents/meta-prior-injector'
+      path: '/hooks/agents/meta-prior-injector'
+      fullPath: '/hooks/agents/meta-prior-injector'
+      preLoaderRoute: typeof HooksAgentsMetaPriorInjectorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/memory-feedback': {
@@ -1430,6 +1603,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/loyalty-tiers'
       fullPath: '/hooks/agents/loyalty-tiers'
       preLoaderRoute: typeof HooksAgentsLoyaltyTiersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/learning-loop-monitor': {
+      id: '/hooks/agents/learning-loop-monitor'
+      path: '/hooks/agents/learning-loop-monitor'
+      fullPath: '/hooks/agents/learning-loop-monitor'
+      preLoaderRoute: typeof HooksAgentsLearningLoopMonitorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/inventory-forecast': {
@@ -1467,11 +1647,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsFeedbackLoopRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/elasticity-meta-loop': {
+      id: '/hooks/agents/elasticity-meta-loop'
+      path: '/hooks/agents/elasticity-meta-loop'
+      fullPath: '/hooks/agents/elasticity-meta-loop'
+      preLoaderRoute: typeof HooksAgentsElasticityMetaLoopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/discount-elasticity': {
       id: '/hooks/agents/discount-elasticity'
       path: '/hooks/agents/discount-elasticity'
       fullPath: '/hooks/agents/discount-elasticity'
       preLoaderRoute: typeof HooksAgentsDiscountElasticityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/daily-digest-v2': {
+      id: '/hooks/agents/daily-digest-v2'
+      path: '/hooks/agents/daily-digest-v2'
+      fullPath: '/hooks/agents/daily-digest-v2'
+      preLoaderRoute: typeof HooksAgentsDailyDigestV2RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/customer-segments-auto': {
@@ -1551,6 +1745,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsBrowseAbandonmentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/broadcast-roi': {
+      id: '/hooks/agents/broadcast-roi'
+      path: '/hooks/agents/broadcast-roi'
+      fullPath: '/hooks/agents/broadcast-roi'
+      preLoaderRoute: typeof HooksAgentsBroadcastRoiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/broadcast-composer': {
       id: '/hooks/agents/broadcast-composer'
       path: '/hooks/agents/broadcast-composer'
@@ -1577,6 +1778,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/best-time-to-send'
       fullPath: '/hooks/agents/best-time-to-send'
       preLoaderRoute: typeof HooksAgentsBestTimeToSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/autonomous-seo-loop': {
+      id: '/hooks/agents/autonomous-seo-loop'
+      path: '/hooks/agents/autonomous-seo-loop'
+      fullPath: '/hooks/agents/autonomous-seo-loop'
+      preLoaderRoute: typeof HooksAgentsAutonomousSeoLoopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/attribution': {
@@ -1712,10 +1920,12 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsAovLeakRoute: HooksAgentsAovLeakRoute,
   HooksAgentsAovOptimizerRoute: HooksAgentsAovOptimizerRoute,
   HooksAgentsAttributionRoute: HooksAgentsAttributionRoute,
+  HooksAgentsAutonomousSeoLoopRoute: HooksAgentsAutonomousSeoLoopRoute,
   HooksAgentsBestTimeToSendRoute: HooksAgentsBestTimeToSendRoute,
   HooksAgentsBotQualityRoute: HooksAgentsBotQualityRoute,
   HooksAgentsBotSequencesRoute: HooksAgentsBotSequencesRoute,
   HooksAgentsBroadcastComposerRoute: HooksAgentsBroadcastComposerRoute,
+  HooksAgentsBroadcastRoiRoute: HooksAgentsBroadcastRoiRoute,
   HooksAgentsBrowseAbandonmentRoute: HooksAgentsBrowseAbandonmentRoute,
   HooksAgentsBundleRecommenderRoute: HooksAgentsBundleRecommenderRoute,
   HooksAgentsCartRecoveryRoute: HooksAgentsCartRecoveryRoute,
@@ -1728,19 +1938,25 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsCustomerChurnPredictorRoute:
     HooksAgentsCustomerChurnPredictorRoute,
   HooksAgentsCustomerSegmentsAutoRoute: HooksAgentsCustomerSegmentsAutoRoute,
+  HooksAgentsDailyDigestV2Route: HooksAgentsDailyDigestV2Route,
   HooksAgentsDiscountElasticityRoute: HooksAgentsDiscountElasticityRoute,
+  HooksAgentsElasticityMetaLoopRoute: HooksAgentsElasticityMetaLoopRoute,
   HooksAgentsFeedbackLoopRoute: HooksAgentsFeedbackLoopRoute,
   HooksAgentsFeedbackLoopAllRoute: HooksAgentsFeedbackLoopAllRoute,
   HooksAgentsFirstOrderFunnelRoute: HooksAgentsFirstOrderFunnelRoute,
   HooksAgentsFunnelHealerRoute: HooksAgentsFunnelHealerRoute,
   HooksAgentsInventoryForecastRoute: HooksAgentsInventoryForecastRoute,
+  HooksAgentsLearningLoopMonitorRoute: HooksAgentsLearningLoopMonitorRoute,
   HooksAgentsLoyaltyTiersRoute: HooksAgentsLoyaltyTiersRoute,
   HooksAgentsLtvPredictorRoute: HooksAgentsLtvPredictorRoute,
   HooksAgentsMarginOptimizerRoute: HooksAgentsMarginOptimizerRoute,
   HooksAgentsMemoryFeedbackRoute: HooksAgentsMemoryFeedbackRoute,
+  HooksAgentsMetaPriorInjectorRoute: HooksAgentsMetaPriorInjectorRoute,
   HooksAgentsMorningBriefRoute: HooksAgentsMorningBriefRoute,
+  HooksAgentsNotificationRouterRoute: HooksAgentsNotificationRouterRoute,
   HooksAgentsNurtureRoiRoute: HooksAgentsNurtureRoiRoute,
   HooksAgentsOnboardingRoute: HooksAgentsOnboardingRoute,
+  HooksAgentsOwnerPlaybookRoute: HooksAgentsOwnerPlaybookRoute,
   HooksAgentsPredictivePricingRoute: HooksAgentsPredictivePricingRoute,
   HooksAgentsPriceOptimizerRoute: HooksAgentsPriceOptimizerRoute,
   HooksAgentsPriceRevertRoute: HooksAgentsPriceRevertRoute,
@@ -1757,9 +1973,11 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsSecondOrderNurtureRoute: HooksAgentsSecondOrderNurtureRoute,
   HooksAgentsSegmentationRoute: HooksAgentsSegmentationRoute,
   HooksAgentsSeoRewriterRoute: HooksAgentsSeoRewriterRoute,
+  HooksAgentsSocialProofLiveRoute: HooksAgentsSocialProofLiveRoute,
   HooksAgentsStockoutRoute: HooksAgentsStockoutRoute,
   HooksAgentsTickRoute: HooksAgentsTickRoute,
   HooksAgentsUgcHarvesterRoute: HooksAgentsUgcHarvesterRoute,
+  HooksAgentsWinbackRoiRoute: HooksAgentsWinbackRoiRoute,
   HooksDemoSeedRoute: HooksDemoSeedRoute,
   HooksEnginesAbandonedCartRoute: HooksEnginesAbandonedCartRoute,
   HooksEnginesAbandonedCartAllRoute: HooksEnginesAbandonedCartAllRoute,
