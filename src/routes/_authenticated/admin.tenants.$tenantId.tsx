@@ -499,6 +499,7 @@ function TenantDetailPage() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="products" className="space-y-4">
           <Card>
             <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
               <div>
