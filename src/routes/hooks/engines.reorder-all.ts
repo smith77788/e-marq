@@ -62,7 +62,9 @@ async function runReorderForTenant(tenantId: string): Promise<{ queued: number }
 
   let queued = 0;
   for (const c of candidates ?? []) {
-    if (!c.telegram_chat_id) continue;
+    const { pickChannelForCustomer } = await import("@/lib/acos/channels");
+    const channel = await pickChannelForCustomer(c.id);
+    if (!channel) continue;
 
     const { data: lastItems } = await supabaseAdmin
       .from("order_items")
@@ -80,7 +82,7 @@ async function runReorderForTenant(tenantId: string): Promise<{ queued: number }
     const { error: insErr } = await supabaseAdmin.from("outbound_messages").insert({
       tenant_id: tenantId,
       customer_id: c.id,
-      channel: "telegram",
+      channel,
       trigger_kind: "reorder",
       template_key: "reorder.v1",
       body,

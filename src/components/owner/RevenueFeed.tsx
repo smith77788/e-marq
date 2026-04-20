@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Bot, CheckCircle2, Clock, Loader2, MessageCircle, Send, TrendingUp, XCircle, Zap } from "lucide-react";
 import { toast } from "sonner";
@@ -75,8 +76,24 @@ export function RevenueFeed({ tenantId }: Props) {
       if (error) throw error;
       return (data ?? []) as unknown as OutboundRow[];
     },
-    refetchInterval: 15_000,
+    refetchInterval: 30_000,
   });
+
+  // Realtime: refresh feed instantly when outbound rows change for this tenant.
+  useEffect(() => {
+    if (!tenantId) return;
+    const channel = supabase
+      .channel(`revenue-feed-${tenantId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "outbound_messages", filter: `tenant_id=eq.${tenantId}` },
+        () => qc.invalidateQueries({ queryKey: ["revenue-feed", tenantId] }),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [tenantId, qc]);
 
   const runReorder = useMutation({
     mutationFn: () => authedFetch("/hooks/engines/reorder", { tenant_id: tenantId }),
