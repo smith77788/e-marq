@@ -873,4 +873,212 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       },
     };
   },
+
+  // ---------- Batch 5: SEO/Content ----------
+  seo_rewrite_opportunity: (m) => {
+    const slug = str(m, "slug", "page");
+    const ctr = num(m, "ctr") * 100;
+    const impr = num(m, "impressions_30d");
+    const reason = str(m, "reason", "low_ctr");
+    return {
+      ua: {
+        headline:
+          reason === "low_ctr"
+            ? `/${slug}: CTR ${ctr.toFixed(2)}% — title не "продає"`
+            : `/${slug}: пусті SEO-поля`,
+        why:
+          reason === "low_ctr"
+            ? `${impr} показів у Google за місяць, але клікають мало. Title/description не цікавлять — прокручують далі.`
+            : `Опубліковано без seo_title/description — Google генерує власну версію, часто гіршу.`,
+        what_to_do: "Apply → ШІ перепише title (≤60 chars) + description (≤155) під реальний намір.",
+      },
+      en: {
+        headline:
+          reason === "low_ctr"
+            ? `/${slug}: ${ctr.toFixed(2)}% CTR — title doesn't sell`
+            : `/${slug}: SEO fields empty`,
+        why:
+          reason === "low_ctr"
+            ? `${impr} Google impressions / month but few clicks. Title/description don't grab — they scroll past.`
+            : `Published with no seo_title/description — Google fabricates its own, usually worse.`,
+        what_to_do: "Apply → AI rewrites title (≤60 chars) + description (≤155) for real intent.",
+      },
+    };
+  },
+
+  content_velocity_low: (m) => {
+    const last30 = num(m, "published_30d");
+    const last90 = num(m, "published_90d");
+    return {
+      ua: {
+        headline: `Темп контенту просів: ${last30} постів за місяць`,
+        why: `За 90 днів — лише ${last90} публікацій. Алгоритм Google "забуває" сайти без свіжого контенту, рейтинги падають.`,
+        what_to_do: "Запланувати ≥4 публікації/місяць (1/тиж). Apply створить контент-план з ідеями.",
+      },
+      en: {
+        headline: `Content velocity dropped: ${last30} posts in 30d`,
+        why: `Only ${last90} pages in 90 days. Google's algorithm "forgets" sites without fresh content — rankings slide.`,
+        what_to_do: "Schedule ≥4 posts/month (1/wk). Apply generates a content plan with ideas.",
+      },
+    };
+  },
+
+  content_stale_topperformer: (m) => {
+    const age = num(m, "age_days");
+    const views = num(m, "views_30d");
+    const slug = str(m, "slug", "page");
+    return {
+      ua: {
+        headline: `/${slug}: топ-сторінка, але ${age} днів без апдейту`,
+        why: `${views} переглядів/міс — це твоя робоча "конячка". Refresh (нові дані, скрін, рік у title) часто дає +20-40%.`,
+        what_to_do: "Apply → ШІ запропонує що оновити (sections, dates, examples).",
+      },
+      en: {
+        headline: `/${slug}: top page, ${age} days stale`,
+        why: `${views} views/month — your workhorse. Refresh (new data, screenshot, year in title) usually adds 20-40%.`,
+        what_to_do: "Apply → AI suggests what to refresh (sections, dates, examples).",
+      },
+    };
+  },
+
+  ugc_harvest_opportunity: (m) => {
+    const n = num(m, "eligible_count");
+    const exp = num(m, "expected_responses");
+    return {
+      ua: {
+        headline: `${n} лояльних клієнтів — час просити відгук`,
+        why: `2+ замовлення за 60 днів = вони люблять продукт. Цей момент гасне через 7-14 днів.`,
+        what_to_do: `Apply → відправляється запит на відгук + фото. Очікувано ~${exp} нових social proof.`,
+      },
+      en: {
+        headline: `${n} loyal customers ready for review ask`,
+        why: `2+ orders in 60 days = they love the product. This window fades in 7-14 days.`,
+        what_to_do: `Apply → sends a review + photo request. ~${exp} new social-proof items expected.`,
+      },
+    };
+  },
+
+  ugc_low_volume: (m) => {
+    const n = num(m, "ugc_count");
+    return {
+      ua: {
+        headline: `Лише ${n} відгуків — мало для довіри новачків`,
+        why: "Бренди з 20+ відгуків мають у 1.4× вищу конверсію. Без social proof новий покупець вагається.",
+        what_to_do: "Запусти автоматичний post-purchase запит для кожного оплаченого замовлення.",
+      },
+      en: {
+        headline: `Only ${n} reviews — too thin for new-buyer trust`,
+        why: "Brands with 20+ reviews convert ~1.4× better. Without social proof, first-time buyers hesitate.",
+        what_to_do: "Turn on automatic post-purchase review requests for every paid order.",
+      },
+    };
+  },
+
+  search_intent_unmet: (m) => {
+    const q = str(m, "query", "запит");
+    const total = num(m, "searches_30d");
+    const clicks = num(m, "clicks");
+    return {
+      ua: {
+        headline: `"${q}": ${clicks}/${total} кліків, 0 покупок`,
+        why: `Високий інтерес — клікають у пів випадків. Але сторінка не закриває намір (ціна, опис, фото, наявність).`,
+        what_to_do: "Apply → ШІ перевірить landing і запропонує що поміняти, або редирект на правильний продукт.",
+      },
+      en: {
+        headline: `"${q}": ${clicks}/${total} clicks, 0 purchases`,
+        why: `Strong intent — clicked half the time. But the landing doesn't close the intent (price, description, photo, stock).`,
+        what_to_do: "Apply → AI audits the page and suggests what to change, or redirects to the right product.",
+      },
+    };
+  },
+
+  search_zero_results_cluster: (m) => {
+    const q = str(m, "query", "запит");
+    const zero = num(m, "zero_results");
+    const total = num(m, "total_searches");
+    return {
+      ua: {
+        headline: `"${q}": ${zero}/${total} пошуків — порожньо`,
+        why: "Гарячий попит, але немає що показати. Кожен такий запит — втрачений продаж.",
+        what_to_do: "Додай товар АБО створи SEO-landing з alternative recommendations.",
+      },
+      en: {
+        headline: `"${q}": ${zero}/${total} searches return nothing`,
+        why: "Hot demand with nothing to show. Each one is a lost sale.",
+        what_to_do: "Add a matching product OR build a SEO landing with alternative recommendations.",
+      },
+    };
+  },
+
+  programmatic_seo_opportunity: (m) => {
+    const proposed = (m.proposed_pages as { slug: string; title: string }[] | undefined) ?? [];
+    const n = proposed.length;
+    return {
+      ua: {
+        headline: `${n} programmatic landing-сторінок готові`,
+        why: "Знайдені gap між пошуковими запитами і існуючими сторінками. Шаблонна генерація закриє довгий хвіст SEO.",
+        what_to_do: `Apply → ШІ згенерує ${n} сторінок (≈300 слів кожна) і опублікує як draft для рев'ю.`,
+      },
+      en: {
+        headline: `${n} programmatic landings ready`,
+        why: "Found gaps between search queries and existing pages. Template-based generation closes the long-tail SEO.",
+        what_to_do: `Apply → AI generates ${n} pages (~300 words each) and publishes as drafts for review.`,
+      },
+    };
+  },
+
+  // ---------- Batch 6: Customer/Loyalty ----------
+  loyalty_tier_proposal: (m) => {
+    const silver = num(m, "silver_threshold_cents") / 100;
+    const gold = num(m, "gold_threshold_cents") / 100;
+    const platinum = num(m, "platinum_threshold_cents") / 100;
+    return {
+      ua: {
+        headline: `Loyalty-tiers готові: Silver $${silver.toFixed(0)} / Gold $${gold.toFixed(0)} / Platinum $${platinum.toFixed(0)}`,
+        why: "Природні breakpoints за розподілом LTV. Tier-програма дає 10-20% росту retention через статусний ефект.",
+        what_to_do: "Apply → створює 4 рівні з цими порогами і вмикає авто-присвоєння.",
+      },
+      en: {
+        headline: `Loyalty tiers ready: Silver $${silver.toFixed(0)} / Gold $${gold.toFixed(0)} / Platinum $${platinum.toFixed(0)}`,
+        why: "Natural breakpoints from your LTV distribution. Tiers usually lift retention 10-20% via status effect.",
+        what_to_do: "Apply → creates 4 tiers with these thresholds and enables auto-assignment.",
+      },
+    };
+  },
+
+  next_best_product: (m) => {
+    const from = str(m, "from_name", "товар А");
+    const to = str(m, "to_name", "товар Б");
+    const count = num(m, "transition_count");
+    return {
+      ua: {
+        headline: `Після "${from}" беруть "${to}" (${count}× за 90д)`,
+        why: "Стійкий sequential паттерн — клієнти самі вибирають це. Auto-recommend закриває цикл без зусиль.",
+        what_to_do: `Додати "${to}" у post-purchase / reorder-нагадування для покупців "${from}".`,
+      },
+      en: {
+        headline: `After "${from}" they buy "${to}" (${count}× in 90d)`,
+        why: "Stable sequential pattern — customers choose it themselves. Auto-recommend closes the loop effortlessly.",
+        what_to_do: `Add "${to}" to post-purchase / reorder reminders for "${from}" buyers.`,
+      },
+    };
+  },
+  first_order_funnel_weak: (m) => {
+    const conv = num(m, "conversion") * 100;
+    const from = str(m, "weakest_from", "step");
+    const to = str(m, "weakest_to", "step");
+    const drop = num(m, "weakest_drop") * 100;
+    return {
+      ua: {
+        headline: `First-order конверсія: ${conv.toFixed(2)}% — слабка`,
+        why: `Найбільша втрата: ${from} → ${to} (-${drop.toFixed(0)}%). Це місце де нові відвідувачі найчастіше "відвалюються".`,
+        what_to_do: "Apply → ШІ перевірить цей крок (UX, ціна, довіра) і запропонує 2-3 fix.",
+      },
+      en: {
+        headline: `First-order conversion: ${conv.toFixed(2)}% — weak`,
+        why: `Biggest drop: ${from} → ${to} (-${drop.toFixed(0)}%). This is where first-time visitors bail most.`,
+        what_to_do: "Apply → AI audits this step (UX, price, trust) and suggests 2-3 fixes.",
+      },
+    };
+  },
 };
