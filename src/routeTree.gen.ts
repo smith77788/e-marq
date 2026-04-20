@@ -20,9 +20,11 @@ import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBrandRouteImport } from './routes/_authenticated/brand'
+import { Route as HooksEnginesWinbackRouteImport } from './routes/hooks/engines.winback'
 import { Route as HooksEnginesReorderAllRouteImport } from './routes/hooks/engines.reorder-all'
 import { Route as HooksEnginesReorderRouteImport } from './routes/hooks/engines.reorder'
 import { Route as HooksEnginesDispatchRouteImport } from './routes/hooks/engines.dispatch'
+import { Route as HooksEnginesAbandonedCartRouteImport } from './routes/hooks/engines.abandoned-cart'
 import { Route as HooksAgentsStockoutRouteImport } from './routes/hooks/agents.stockout'
 import { Route as HooksAgentsSearchGapRouteImport } from './routes/hooks/agents.search-gap'
 import { Route as HooksAgentsSalesBotAllRouteImport } from './routes/hooks/agents.sales-bot-all'
@@ -94,6 +96,11 @@ const AuthenticatedBrandRoute = AuthenticatedBrandRouteImport.update({
   path: '/brand',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const HooksEnginesWinbackRoute = HooksEnginesWinbackRouteImport.update({
+  id: '/hooks/engines/winback',
+  path: '/hooks/engines/winback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksEnginesReorderAllRoute = HooksEnginesReorderAllRouteImport.update({
   id: '/hooks/engines/reorder-all',
   path: '/hooks/engines/reorder-all',
@@ -109,6 +116,12 @@ const HooksEnginesDispatchRoute = HooksEnginesDispatchRouteImport.update({
   path: '/hooks/engines/dispatch',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksEnginesAbandonedCartRoute =
+  HooksEnginesAbandonedCartRouteImport.update({
+    id: '/hooks/engines/abandoned-cart',
+    path: '/hooks/engines/abandoned-cart',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsStockoutRoute = HooksAgentsStockoutRouteImport.update({
   id: '/hooks/agents/stockout',
   path: '/hooks/agents/stockout',
@@ -219,9 +232,11 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
+  '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
   '/hooks/engines/reorder': typeof HooksEnginesReorderRoute
   '/hooks/engines/reorder-all': typeof HooksEnginesReorderAllRoute
+  '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -250,9 +265,11 @@ export interface FileRoutesByTo {
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
+  '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
   '/hooks/engines/reorder': typeof HooksEnginesReorderRoute
   '/hooks/engines/reorder-all': typeof HooksEnginesReorderAllRoute
+  '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -283,9 +300,11 @@ export interface FileRoutesById {
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
+  '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
   '/hooks/engines/reorder': typeof HooksEnginesReorderRoute
   '/hooks/engines/reorder-all': typeof HooksEnginesReorderAllRoute
+  '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -316,9 +335,11 @@ export interface FileRouteTypes {
     | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
+    | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/dispatch'
     | '/hooks/engines/reorder'
     | '/hooks/engines/reorder-all'
+    | '/hooks/engines/winback'
     | '/admin/tenants/$tenantId'
     | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
@@ -347,9 +368,11 @@ export interface FileRouteTypes {
     | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
+    | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/dispatch'
     | '/hooks/engines/reorder'
     | '/hooks/engines/reorder-all'
+    | '/hooks/engines/winback'
     | '/admin/tenants/$tenantId'
     | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
@@ -379,9 +402,11 @@ export interface FileRouteTypes {
     | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
+    | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/dispatch'
     | '/hooks/engines/reorder'
     | '/hooks/engines/reorder-all'
+    | '/hooks/engines/winback'
     | '/_authenticated/admin/tenants/$tenantId'
     | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
@@ -409,9 +434,11 @@ export interface RootRouteChildren {
   HooksAgentsSalesBotAllRoute: typeof HooksAgentsSalesBotAllRoute
   HooksAgentsSearchGapRoute: typeof HooksAgentsSearchGapRoute
   HooksAgentsStockoutRoute: typeof HooksAgentsStockoutRoute
+  HooksEnginesAbandonedCartRoute: typeof HooksEnginesAbandonedCartRoute
   HooksEnginesDispatchRoute: typeof HooksEnginesDispatchRoute
   HooksEnginesReorderRoute: typeof HooksEnginesReorderRoute
   HooksEnginesReorderAllRoute: typeof HooksEnginesReorderAllRoute
+  HooksEnginesWinbackRoute: typeof HooksEnginesWinbackRoute
   HooksTelegramWebhookTenantRoute: typeof HooksTelegramWebhookTenantRoute
 }
 
@@ -494,6 +521,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBrandRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/hooks/engines/winback': {
+      id: '/hooks/engines/winback'
+      path: '/hooks/engines/winback'
+      fullPath: '/hooks/engines/winback'
+      preLoaderRoute: typeof HooksEnginesWinbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/engines/reorder-all': {
       id: '/hooks/engines/reorder-all'
       path: '/hooks/engines/reorder-all'
@@ -513,6 +547,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/engines/dispatch'
       fullPath: '/hooks/engines/dispatch'
       preLoaderRoute: typeof HooksEnginesDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/engines/abandoned-cart': {
+      id: '/hooks/engines/abandoned-cart'
+      path: '/hooks/engines/abandoned-cart'
+      fullPath: '/hooks/engines/abandoned-cart'
+      preLoaderRoute: typeof HooksEnginesAbandonedCartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/stockout': {
@@ -693,9 +734,11 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsSalesBotAllRoute: HooksAgentsSalesBotAllRoute,
   HooksAgentsSearchGapRoute: HooksAgentsSearchGapRoute,
   HooksAgentsStockoutRoute: HooksAgentsStockoutRoute,
+  HooksEnginesAbandonedCartRoute: HooksEnginesAbandonedCartRoute,
   HooksEnginesDispatchRoute: HooksEnginesDispatchRoute,
   HooksEnginesReorderRoute: HooksEnginesReorderRoute,
   HooksEnginesReorderAllRoute: HooksEnginesReorderAllRoute,
+  HooksEnginesWinbackRoute: HooksEnginesWinbackRoute,
   HooksTelegramWebhookTenantRoute: HooksTelegramWebhookTenantRoute,
 }
 export const routeTree = rootRouteImport

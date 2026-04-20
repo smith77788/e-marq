@@ -109,6 +109,10 @@ export async function runWinbackForTenant(tenantId: string): Promise<{ queued: n
     });
     const body = aiBody ?? `Hey ${firstName}, it's been a while! ${favorite ? `Your ${favorite} must be running low — ` : ""}can I sort you out with something nice this week?`;
 
+    // Expected impact = average historical AOV
+    const { data: stats } = await supabaseAdmin.from("customers").select("total_orders, avg_order_cents").eq("id", c.id).maybeSingle();
+    const expected = stats?.avg_order_cents ?? null;
+
     const { error: insErr } = await supabaseAdmin.from("outbound_messages").insert({
       tenant_id: tenantId,
       customer_id: c.id,
@@ -117,7 +121,7 @@ export async function runWinbackForTenant(tenantId: string): Promise<{ queued: n
       template_key: "winback.ai.v1",
       body,
       status: "pending",
-      expected_impact_cents: Math.floor(c.total_spent_cents / Math.max(1, await tally_count(c.id))) || null,
+      expected_impact_cents: expected,
       metadata: { days_since_last_order: daysSince, favorite_product: favorite } as never,
     });
     if (!insErr) {
