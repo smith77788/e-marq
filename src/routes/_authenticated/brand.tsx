@@ -9,6 +9,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { RevenueFeed } from "@/components/owner/RevenueFeed";
 import { CustomerRoster } from "@/components/owner/CustomerRoster";
 import { ChannelSetup } from "@/components/owner/ChannelSetup";
+import { InsightsPanel } from "@/components/owner/InsightsPanel";
+import { TrackingSnippet } from "@/components/owner/TrackingSnippet";
 
 type Search = { tenant?: string };
 
@@ -93,10 +95,14 @@ function BrandPage() {
 
       <RevenueFeed tenantId={current.id} />
 
+      <InsightsPanel tenantId={current.id} />
+
       <div className="grid gap-6 lg:grid-cols-2">
         <CustomerRoster tenantId={current.id} />
         <ChannelSetup tenantId={current.id} tenantSlug={current.slug} />
       </div>
+
+      <TrackingSnippet tenantSlug={current.slug} />
 
       <Card className="border-dashed">
         <CardHeader>

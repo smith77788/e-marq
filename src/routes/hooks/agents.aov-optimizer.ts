@@ -89,7 +89,7 @@ export const Route = createFileRoute("/hooks/agents/aov-optimizer")({
                 expected_impact: `Lifting cart-add rate to 8% could mean ~${Math.round((v * 0.08 - c) * (p.price_cents / 100))} extra revenue / month`,
                 confidence: 0.7,
                 risk_level: "low",
-                metrics: { views: v, carts: c, purchases: pu, ctr: c / Math.max(v, 1) },
+                metrics: { product_id: p.id, product_name: p.name, views: v, carts: c, purchases: pu, ctr: c / Math.max(v, 1) },
                 dedup_key: `low_engagement::${p.id}`,
               });
             }
@@ -103,7 +103,7 @@ export const Route = createFileRoute("/hooks/agents/aov-optimizer")({
                 expected_impact: `Recovering 30% of these carts = ~${Math.round((c * 0.3 - pu) * (p.price_cents / 100))} revenue uplift`,
                 confidence: 0.75,
                 risk_level: "medium",
-                metrics: { views: v, carts: c, purchases: pu, conversion: pu / Math.max(c, 1) },
+                metrics: { product_id: p.id, product_name: p.name, views: v, carts: c, purchases: pu, conversion: pu / Math.max(c, 1) },
                 dedup_key: `cart_abandon::${p.id}`,
               });
             }
