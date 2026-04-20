@@ -30,24 +30,30 @@ export function SetupChecklist({ tenantId, tenantSlug }: Props) {
     queryKey: ["setup-checklist", tenantId],
     enabled: !!tenantId,
     queryFn: async (): Promise<Status> => {
-      const [tenantRes, configRes, productsRes, customersRes, eventsRes, membersRes] = await Promise.all([
-        supabase.from("tenants").select("id, name").eq("id", tenantId).maybeSingle(),
-        supabase.from("tenant_configs").select("bot, features").eq("tenant_id", tenantId).maybeSingle(),
-        supabase.from("products").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).limit(1),
-        supabase.from("customers").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).limit(1),
-        supabase
-          .from("events")
-          .select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId)
-          .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-          .limit(1),
-        supabase.from("tenant_memberships").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).limit(1),
-      ]);
-      const bot = (configRes.data?.bot ?? {}) as Record<string, unknown>;
+      const [tenantRes, configRes, productsRes, customersRes, eventsRes, membersRes, routingRes] =
+        await Promise.all([
+          supabase.from("tenants").select("id, name").eq("id", tenantId).maybeSingle(),
+          supabase.from("tenant_configs").select("bot, features").eq("tenant_id", tenantId).maybeSingle(),
+          supabase.from("products").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).limit(1),
+          supabase.from("customers").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).limit(1),
+          supabase
+            .from("events")
+            .select("id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId)
+            .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+            .limit(1),
+          supabase.from("tenant_memberships").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).limit(1),
+          supabase
+            .from("telegram_chat_routing")
+            .select("chat_id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId)
+            .limit(1),
+        ]);
       const features = (configRes.data?.features ?? {}) as Record<string, unknown>;
       return {
         brand: !!tenantRes.data,
-        channel: typeof bot.telegram_token === "string" && (bot.telegram_token as string).length > 0,
+        // Channel = at least one Telegram chat bound to this tenant via shared bot
+        channel: (routingRes.count ?? 0) > 0,
         product: (productsRes.count ?? 0) > 0,
         customers: (customersRes.count ?? 0) > 0,
         tracking: (eventsRes.count ?? 0) > 0,

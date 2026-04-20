@@ -189,46 +189,46 @@ function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
   );
 }
 
-function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
-  const { t } = useT();
-  const { data: cfg } = useQuery({
-    queryKey: ["tenant-config", tenantId],
+function Step2Channel({ tenantId, qc: _qc }: { tenantId: string; qc: QC }) {
+  const { data: tenant } = useQuery({
+    queryKey: ["tenant-slug", tenantId],
     queryFn: async () => {
-      const { data } = await supabase.from("tenant_configs").select("bot").eq("tenant_id", tenantId).maybeSingle();
+      const { data } = await supabase.from("tenants").select("slug").eq("id", tenantId).maybeSingle();
       return data;
     },
   });
-  const [token, setToken] = useState("");
-  useEffect(() => {
-    const bot = (cfg?.bot ?? {}) as Record<string, unknown>;
-    if (typeof bot.telegram_token === "string") setToken(bot.telegram_token);
-  }, [cfg]);
-
-  const save = useMutation({
-    mutationFn: async () => {
-      const bot = { ...((cfg?.bot ?? {}) as Record<string, unknown>), telegram_token: token };
-      const { error } = await supabase.from("tenant_configs").update({ bot: bot as never }).eq("tenant_id", tenantId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success(t("common.save") + " ✓");
-      qc.invalidateQueries({ queryKey: ["tenant-config", tenantId] });
-      qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
+  const slug = tenant?.slug ?? "";
+  const deepLink = slug ? `https://t.me/Oauther_bot?start=${slug}` : "";
 
   return (
     <div className="space-y-3">
-      <div className="rounded-md border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground">
-        💡 {t("onb.s2.help")}
+      <div className="rounded-md border border-success/30 bg-success/10 p-3 text-xs text-success">
+        ✅ Telegram-бот <strong>@Oauther_bot</strong> вже працює. Не треба створювати власного.
       </div>
-      <Label>{t("onb.s2.tokenLabel")}</Label>
-      <Input value={token} onChange={(e) => setToken(e.target.value)} placeholder="123456:ABC-DEF..." />
-      <Button size="sm" onClick={() => save.mutate()} disabled={save.isPending}>
-        {save.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-        {t("common.save")}
-      </Button>
+      <p className="text-xs text-muted-foreground">
+        Поширюйте посилання нижче — клієнти натискають його, бот вітає від імені вашого бренду
+        і автоматично прив&apos;язується до вашого магазину.
+      </p>
+      <div className="flex gap-2">
+        <Input readOnly value={deepLink} className="font-mono text-xs" />
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            navigator.clipboard.writeText(deepLink).then(() => toast.success("Скопійовано"));
+          }}
+          disabled={!deepLink}
+        >
+          Copy
+        </Button>
+      </div>
+      {deepLink && (
+        <Button size="sm" asChild>
+          <a href={deepLink} target="_blank" rel="noreferrer">
+            Відкрити бота для тесту →
+          </a>
+        </Button>
+      )}
     </div>
   );
 }

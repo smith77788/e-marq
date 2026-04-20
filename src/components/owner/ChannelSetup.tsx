@@ -1,83 +1,40 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, ExternalLink, Loader2, MessageCircle } from "lucide-react";
+import { CheckCircle2, Copy, ExternalLink, MessageCircle, Users } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 
 type Props = { tenantId: string; tenantSlug: string };
 
-type BotConfig = { telegram?: { bot_token?: string; bot_username?: string } };
+const SHARED_BOT_USERNAME = "Oauther_bot"; // Lovable shared connector bot
 
 export function ChannelSetup({ tenantId, tenantSlug }: Props) {
-  const qc = useQueryClient();
-  const [token, setToken] = useState("");
-  const [botUsername, setBotUsername] = useState("");
-  const [registering, setRegistering] = useState(false);
+  const [origin, setOrigin] = useState<string>("");
+  useEffect(() => {
+    if (typeof window !== "undefined") setOrigin(window.location.origin);
+  }, []);
 
-  const { data: cfg } = useQuery({
-    queryKey: ["tenant-bot", tenantId],
+  const deepLink = `https://t.me/${SHARED_BOT_USERNAME}?start=${tenantSlug}`;
+
+  // Count how many customers have already bound a Telegram chat
+  const { data: connectedCount } = useQuery({
+    queryKey: ["tg-routing-count", tenantId],
     enabled: !!tenantId,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("tenant_configs")
-        .select("bot")
-        .eq("tenant_id", tenantId)
-        .maybeSingle();
-      return (data?.bot as BotConfig) ?? {};
-    },
-  });
-
-  const existingToken = cfg?.telegram?.bot_token;
-  const existingUsername = cfg?.telegram?.bot_username;
-
-  const save = useMutation({
-    mutationFn: async () => {
-      const next = {
-        ...(cfg ?? {}),
-        telegram: {
-          ...(cfg?.telegram ?? {}),
-          bot_token: token || existingToken || "",
-          bot_username: botUsername || existingUsername || "",
-        },
-      };
-      const { error } = await supabase
-        .from("tenant_configs")
-        .update({ bot: next as never })
+      const { count } = await supabase
+        .from("telegram_chat_routing")
+        .select("*", { count: "exact", head: true })
         .eq("tenant_id", tenantId);
-      if (error) throw error;
+      return count ?? 0;
     },
-    onSuccess: () => {
-      toast.success("Telegram bot saved");
-      setToken("");
-      setBotUsername("");
-      qc.invalidateQueries({ queryKey: ["tenant-bot", tenantId] });
-    },
-    onError: (e: Error) => toast.error(e.message),
+    refetchInterval: 15_000,
   });
 
-  async function registerWebhook() {
-    const t = token || existingToken;
-    if (!t) return toast.error("Save bot token first");
-    setRegistering(true);
-    try {
-      const url = `${window.location.origin}/hooks/telegram/webhook/${tenantSlug}`;
-      const res = await fetch(`https://api.telegram.org/bot${t}/setWebhook`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url, allowed_updates: ["message"] }),
-      });
-      const json = (await res.json()) as { ok?: boolean; description?: string };
-      if (!json.ok) throw new Error(json.description ?? "Telegram rejected webhook");
-      toast.success(`Webhook registered → ${url}`);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : String(e));
-    } finally {
-      setRegistering(false);
-    }
+  function copy(text: string, label: string) {
+    navigator.clipboard.writeText(text).then(() => toast.success(`${label} скопійовано`));
   }
 
   return (
@@ -85,59 +42,64 @@ export function ChannelSetup({ tenantId, tenantSlug }: Props) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageCircle className="h-5 w-5 text-primary" />
-          Telegram channel
+          Telegram канал
         </CardTitle>
         <CardDescription>
-          Once connected, the system will message your customers directly on Telegram. No human in the loop.
+          Ваші клієнти спілкуються з вашим брендом через спільного безпечного бота Lovable.
+          Не треба створювати власного бота — просто поширюйте посилання.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {existingToken && (
-          <div className="flex items-center gap-2 rounded-md border border-success/30 bg-success/10 p-2 text-xs text-success">
-            <CheckCircle2 className="h-4 w-4" />
-            Bot token configured{existingUsername ? ` (@${existingUsername})` : ""}
+        <div className="flex items-center gap-2 rounded-md border border-success/30 bg-success/10 p-3 text-sm text-success">
+          <CheckCircle2 className="h-4 w-4" />
+          <span>
+            Бот <strong>@{SHARED_BOT_USERNAME}</strong> готовий приймати клієнтів.
+            {typeof connectedCount === "number" && (
+              <>
+                {" "}
+                <Users className="inline h-3.5 w-3.5" /> Підключено клієнтів: <strong>{connectedCount}</strong>
+              </>
+            )}
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          <div className="text-xs font-medium text-muted-foreground">
+            1. Поширюйте це посилання у соцмережах / на сайті / у чек-аутах:
+          </div>
+          <div className="flex gap-2">
+            <Input readOnly value={deepLink} className="font-mono text-xs" />
+            <Button size="sm" variant="outline" onClick={() => copy(deepLink, "Посилання")}>
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+            <Button size="sm" variant="outline" asChild>
+              <a href={deepLink} target="_blank" rel="noreferrer">
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Коли клієнт натискає це посилання та натискає <code>START</code> у боті —
+            він автоматично прив&apos;язується до вашого магазину. Усі майбутні нагадування,
+            відповіді на питання та чек-аут-лінки приходять до нього.
+          </p>
+        </div>
+
+        <div className="rounded-md border border-border/50 bg-muted/30 p-3 text-xs text-muted-foreground space-y-1">
+          <div className="font-medium text-foreground">Як це виглядає для клієнта:</div>
+          <ol className="list-decimal pl-4 space-y-1">
+            <li>Клік на посилання → відкривається бот <code>@{SHARED_BOT_USERNAME}</code></li>
+            <li>Кнопка «START» → бот вітає від імені вашого бренду</li>
+            <li>Можна писати запитання — sales-bot відповідає за хвилину</li>
+            <li>Бот сам пропонує повторні замовлення, нагадує покинутий кошик</li>
+          </ol>
+        </div>
+
+        {origin && (
+          <div className="text-[10px] text-muted-foreground/70 font-mono break-all">
+            Tracking endpoint: {origin}/track/{tenantSlug}.js
           </div>
         )}
-
-        <ol className="list-inside list-decimal space-y-2 text-xs text-muted-foreground">
-          <li>
-            Open <a className="font-medium text-primary underline" href="https://t.me/BotFather" target="_blank" rel="noreferrer">@BotFather <ExternalLink className="inline h-3 w-3" /></a> and create a new bot with <code>/newbot</code>.
-          </li>
-          <li>Copy the HTTP API token BotFather gives you.</li>
-          <li>Paste it below and save.</li>
-          <li>Click "Register webhook" — done.</li>
-        </ol>
-
-        <div className="space-y-2">
-          <Label htmlFor="bot-token">Bot HTTP API token</Label>
-          <Input
-            id="bot-token"
-            type="password"
-            placeholder={existingToken ? "•••••••• (already saved — paste to overwrite)" : "123456:ABC-DEF..."}
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="bot-username">Bot username (optional, without @)</Label>
-          <Input
-            id="bot-username"
-            placeholder={existingUsername ?? "AcmeShopBot"}
-            value={botUsername}
-            onChange={(e) => setBotUsername(e.target.value)}
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={() => save.mutate()} disabled={save.isPending || (!token && !botUsername)}>
-            {save.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-            Save
-          </Button>
-          <Button variant="outline" onClick={registerWebhook} disabled={registering || !(token || existingToken)}>
-            {registering && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-            Register webhook
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );
