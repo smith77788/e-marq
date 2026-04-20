@@ -417,6 +417,9 @@ function TenantDetailPage() {
             <StatCard label="Events" value={eventsQuery.data ?? 0} loading={eventsQuery.isLoading} />
           </div>
 
+          <TenantAnalytics tenantId={tenantId} />
+
+
           <Card>
             <CardHeader>
               <CardTitle>Tenant info</CardTitle>
