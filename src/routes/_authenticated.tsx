@@ -41,6 +41,13 @@ function AuthenticatedLayout() {
           </Link>
           <nav className="flex items-center gap-4">
             <Link
+              to="/brand"
+              activeProps={{ className: "text-foreground" }}
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              My brand
+            </Link>
+            <Link
               to="/dashboard"
               activeProps={{ className: "text-foreground" }}
               className="text-sm text-muted-foreground hover:text-foreground"
