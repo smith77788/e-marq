@@ -33,50 +33,29 @@ type PaymentsConfig = {
 };
 
 async function loadOrder(slug: string, orderId: string) {
-  // Tenant by slug
-  const { data: tenant, error: tErr } = await supabase
-    .from("tenants")
-    .select("id, name, slug")
-    .eq("slug", slug)
-    .eq("status", "active")
-    .maybeSingle();
-  if (tErr) throw tErr;
-  if (!tenant) throw notFound();
+  const { data, error } = await supabase.rpc("get_public_order", { _order_id: orderId });
+  if (error) throw error;
+  if (!data) throw notFound();
 
-  // Order — публічний lookup за id (RLS дозволяє SELECT customer_user_id або tenant_member; для гостей читаємо anon шляхом, тому впадемо)
-  // Для public order status сторінки використаємо обхід через head:false і подивимось на події. Натомість тут просто пробуємо і якщо нема прав — показуємо мінімум.
-  const { data: order, error: oErr } = await supabase
-    .from("orders")
-    .select(
-      "id, status, payment_method, payment_ref, total_cents, currency, customer_email, customer_name, created_at, paid_at, tenant_id",
-    )
-    .eq("id", orderId)
-    .eq("tenant_id", tenant.id)
-    .maybeSingle();
-  if (oErr) throw oErr;
-  if (!order) throw notFound();
+  const payload = data as {
+    order: OrderRow;
+    items: OrderItem[];
+    tenant: { id: string; slug: string; name: string } | null;
+    config: { brand_name: string; features: { payments?: PaymentsConfig } } | null;
+  };
 
-  const [{ data: items, error: iErr }, { data: config }] = await Promise.all([
-    supabase
-      .from("order_items")
-      .select("id, product_name, quantity, unit_price_cents")
-      .eq("order_id", orderId),
-    supabase
-      .from("tenant_configs")
-      .select("brand_name, features")
-      .eq("tenant_id", tenant.id)
-      .maybeSingle(),
-  ]);
-  if (iErr) throw iErr;
+  if (!payload.tenant || payload.tenant.slug !== slug) {
+    throw notFound();
+  }
 
-  const features = (config?.features ?? {}) as { payments?: PaymentsConfig };
+  const features = payload.config?.features ?? {};
   const payments = features.payments ?? {};
 
   return {
-    tenant,
-    order: order as OrderRow,
-    items: (items ?? []) as OrderItem[],
-    brand: config?.brand_name ?? tenant.name,
+    tenant: payload.tenant,
+    order: payload.order,
+    items: payload.items,
+    brand: payload.config?.brand_name ?? payload.tenant.name,
     payments,
   };
 }
