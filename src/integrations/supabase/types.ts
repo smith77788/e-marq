@@ -14,6 +14,246 @@ export type Database = {
   }
   public: {
     Tables: {
+      acos_agent_runs: {
+        Row: {
+          agent_id: string
+          error: string | null
+          finished_at: string | null
+          id: string
+          insights_created: number
+          metadata: Json
+          started_at: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          agent_id: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          insights_created?: number
+          metadata?: Json
+          started_at?: string
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          agent_id?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          insights_created?: number
+          metadata?: Json
+          started_at?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acos_agent_runs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_actions: {
+        Row: {
+          action_type: string
+          actual_result: Json
+          agent_id: string
+          applied_at: string | null
+          created_at: string
+          expected_impact: string | null
+          id: string
+          measured_at: string | null
+          parameters: Json
+          reverted_at: string | null
+          reverted_reason: string | null
+          source_insight_id: string | null
+          status: string
+          target_entity: string | null
+          target_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          actual_result?: Json
+          agent_id: string
+          applied_at?: string | null
+          created_at?: string
+          expected_impact?: string | null
+          id?: string
+          measured_at?: string | null
+          parameters?: Json
+          reverted_at?: string | null
+          reverted_reason?: string | null
+          source_insight_id?: string | null
+          status?: string
+          target_entity?: string | null
+          target_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          actual_result?: Json
+          agent_id?: string
+          applied_at?: string | null
+          created_at?: string
+          expected_impact?: string | null
+          id?: string
+          measured_at?: string | null
+          parameters?: Json
+          reverted_at?: string | null
+          reverted_reason?: string | null
+          source_insight_id?: string | null
+          status?: string
+          target_entity?: string | null
+          target_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_actions_source_insight_id_fkey"
+            columns: ["source_insight_id"]
+            isOneToOne: false
+            referencedRelation: "ai_insights"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_actions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_insights: {
+        Row: {
+          affected_layer: string | null
+          confidence: number
+          created_at: string
+          dedup_bucket: number | null
+          description: string
+          expected_impact: string | null
+          id: string
+          insight_type: string
+          metrics: Json
+          risk_level: string
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          affected_layer?: string | null
+          confidence?: number
+          created_at?: string
+          dedup_bucket?: number | null
+          description?: string
+          expected_impact?: string | null
+          id?: string
+          insight_type: string
+          metrics?: Json
+          risk_level?: string
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          affected_layer?: string | null
+          confidence?: number
+          created_at?: string
+          dedup_bucket?: number | null
+          description?: string
+          expected_impact?: string | null
+          id?: string
+          insight_type?: string
+          metrics?: Json
+          risk_level?: string
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_insights_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_memory: {
+        Row: {
+          agent: string
+          avg_impact: number
+          category: string
+          confidence: number
+          created_at: string
+          evidence: Json
+          failure_count: number
+          id: string
+          is_active: boolean
+          last_observed_at: string
+          learned_rule: string
+          pattern_key: string
+          success_count: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          agent: string
+          avg_impact?: number
+          category: string
+          confidence?: number
+          created_at?: string
+          evidence?: Json
+          failure_count?: number
+          id?: string
+          is_active?: boolean
+          last_observed_at?: string
+          learned_rule?: string
+          pattern_key: string
+          success_count?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          agent?: string
+          avg_impact?: number
+          category?: string
+          confidence?: number
+          created_at?: string
+          evidence?: Json
+          failure_count?: number
+          id?: string
+          is_active?: boolean
+          last_observed_at?: string
+          learned_rule?: string
+          pattern_key?: string
+          success_count?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_memory_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           created_at: string
