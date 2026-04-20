@@ -11,7 +11,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { jsonError, jsonOk } from "@/lib/acos/agentRuntime";
-import { dispatchTenantOutbound } from "@/lib/acos/channels";
+import { dispatchTenantOutbound, pickChannelForCustomer } from "@/lib/acos/channels";
+import { getCadenceMultiplier } from "@/lib/acos/policyTuning";
 import type { Database } from "@/integrations/supabase/types";
 
 async function isAuthorized(token: string): Promise<boolean> {
@@ -46,7 +47,9 @@ type TenantOutcome = {
 
 async function runReorderForTenant(tenantId: string): Promise<{ queued: number }> {
   const cutoff = new Date().toISOString();
-  const recentlyContactedCutoff = new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString();
+  const cadence = await getCadenceMultiplier(tenantId, "reorder");
+  const cooldownDays = 14 * cadence;
+  const recentlyContactedCutoff = new Date(Date.now() - cooldownDays * 24 * 3600 * 1000).toISOString();
 
   const { data: candidates, error } = await supabaseAdmin
     .from("customers")
@@ -62,7 +65,6 @@ async function runReorderForTenant(tenantId: string): Promise<{ queued: number }
 
   let queued = 0;
   for (const c of candidates ?? []) {
-    const { pickChannelForCustomer } = await import("@/lib/acos/channels");
     const channel = await pickChannelForCustomer(c.id);
     if (!channel) continue;
 
