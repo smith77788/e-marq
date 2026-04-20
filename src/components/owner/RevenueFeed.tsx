@@ -42,6 +42,13 @@ const TRIGGER_LABEL: Record<string, string> = {
   sales_reply: "Sales reply",
 };
 
+type EngineButton = { kind: "reorder" | "abandoned-cart" | "winback"; label: string; toast: string };
+const ENGINES: EngineButton[] = [
+  { kind: "reorder", label: "Reorder", toast: "Reorder engine" },
+  { kind: "abandoned-cart", label: "Recover carts", toast: "Cart recovery" },
+  { kind: "winback", label: "Winback", toast: "Winback" },
+];
+
 async function authedFetch(path: string, body: unknown) {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
@@ -95,14 +102,16 @@ export function RevenueFeed({ tenantId }: Props) {
     };
   }, [tenantId, qc]);
 
-  const runReorder = useMutation({
-    mutationFn: () => authedFetch("/hooks/engines/reorder", { tenant_id: tenantId }),
-    onSuccess: (r) => {
-      const sent = (r as { sent?: number }).sent ?? 0;
-      const queued = (r as { queued?: number }).queued ?? 0;
-      toast.success(`Reorder engine: ${queued} queued, ${sent} sent`);
+  const runEngine = useMutation({
+    mutationFn: async (kind: EngineButton["kind"]) => {
+      const r = await authedFetch(`/hooks/engines/${kind}`, { tenant_id: tenantId });
+      return { kind, result: r };
+    },
+    onSuccess: ({ kind, result }) => {
+      const r = result as { sent?: number; queued?: number };
+      const eng = ENGINES.find((e) => e.kind === kind);
+      toast.success(`${eng?.toast}: ${r.queued ?? 0} queued, ${r.sent ?? 0} sent`);
       qc.invalidateQueries({ queryKey: ["revenue-feed", tenantId] });
-      qc.invalidateQueries({ queryKey: ["revenue-stats", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -138,11 +147,23 @@ export function RevenueFeed({ tenantId }: Props) {
             </CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button onClick={() => runReorder.mutate()} disabled={runReorder.isPending} size="sm">
-              {runReorder.isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Zap className="mr-2 h-3.5 w-3.5" />}
-              Run reorder engine now
-            </Button>
-            <Button onClick={() => dispatch.mutate()} disabled={dispatch.isPending} size="sm" variant="outline">
+            {ENGINES.map((e) => (
+              <Button
+                key={e.kind}
+                onClick={() => runEngine.mutate(e.kind)}
+                disabled={runEngine.isPending}
+                size="sm"
+                variant={e.kind === "reorder" ? "default" : "outline"}
+              >
+                {runEngine.isPending && runEngine.variables === e.kind ? (
+                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Zap className="mr-2 h-3.5 w-3.5" />
+                )}
+                {e.label}
+              </Button>
+            ))}
+            <Button onClick={() => dispatch.mutate()} disabled={dispatch.isPending} size="sm" variant="ghost">
               {dispatch.isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Send className="mr-2 h-3.5 w-3.5" />}
               Send queued
             </Button>
