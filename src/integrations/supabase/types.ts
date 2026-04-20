@@ -396,6 +396,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_public_order: { Args: { _order_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

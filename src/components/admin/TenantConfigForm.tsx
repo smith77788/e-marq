@@ -29,6 +29,13 @@ export type TenantConfigValues = {
     description: string;
     og_image_url: string;
   };
+  payments: {
+    manual_enabled: boolean;
+    stripe_enabled: boolean;
+    manual_instructions: string;
+    manual_contact: string;
+    currency: string;
+  };
 };
 
 type AnyRecord = Record<string, unknown>;
@@ -51,6 +58,7 @@ export function normalizeConfig(input: {
   const features = obj(input.features);
   const bot = obj(input.bot);
   const seo = obj(input.seo);
+  const payments = obj((features as AnyRecord).payments ?? (input as AnyRecord & { payments?: unknown }).payments);
   const theme = str(ui.theme, "system");
   return {
     brand_name: str(input.brand_name, ""),
@@ -74,6 +82,16 @@ export function normalizeConfig(input: {
       title: str(seo.title, ""),
       description: str(seo.description, ""),
       og_image_url: str(seo.og_image_url, ""),
+    },
+    payments: {
+      manual_enabled: bool(payments.manual_enabled, true),
+      stripe_enabled: bool(payments.stripe_enabled, false),
+      manual_instructions: str(
+        payments.manual_instructions,
+        "Bank transfer: IBAN UA00 0000 0000 0000 0000 0000 000\nReference your order ID in the payment description.",
+      ),
+      manual_contact: str(payments.manual_contact, ""),
+      currency: str(payments.currency, "USD"),
     },
   };
 }
@@ -277,6 +295,68 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
             placeholder="https://…"
           />
         </div>
+      </section>
+
+      <Separator />
+
+      {/* Payments */}
+      <section className="space-y-3">
+        <SectionHeader
+          title="Payments"
+          description="Configure how customers pay. Manual = bank transfer confirmed by you. Stripe = automatic card payment (requires API keys)."
+        />
+        <div className="grid gap-2">
+          <Label htmlFor="payments_currency">Currency (ISO 4217)</Label>
+          <Input
+            id="payments_currency"
+            value={values.payments.currency}
+            onChange={(e) =>
+              update("payments", { currency: e.target.value.toUpperCase().slice(0, 3) })
+            }
+            placeholder="USD"
+            maxLength={3}
+          />
+        </div>
+        <FeatureToggle
+          label="Manual payment (bank transfer)"
+          description="Customer places order, you confirm payment manually after receiving funds."
+          checked={values.payments.manual_enabled}
+          onChange={(v) => update("payments", { manual_enabled: v })}
+        />
+        <FeatureToggle
+          label="Stripe card payment"
+          description="Automatic card processing via Stripe. Requires STRIPE_SECRET_KEY (BYOK)."
+          checked={values.payments.stripe_enabled}
+          onChange={(v) => update("payments", { stripe_enabled: v })}
+        />
+        {values.payments.manual_enabled && (
+          <>
+            <div className="grid gap-2">
+              <Label htmlFor="manual_instructions">Manual payment instructions</Label>
+              <Textarea
+                id="manual_instructions"
+                value={values.payments.manual_instructions}
+                onChange={(e) =>
+                  update("payments", { manual_instructions: e.target.value })
+                }
+                rows={5}
+                placeholder="Bank transfer: IBAN ..."
+              />
+              <p className="text-xs text-muted-foreground">
+                Shown to customer after they place a manual order.
+              </p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="manual_contact">Contact for payment questions</Label>
+              <Input
+                id="manual_contact"
+                value={values.payments.manual_contact}
+                onChange={(e) => update("payments", { manual_contact: e.target.value })}
+                placeholder="payments@yourbrand.com or +380…"
+              />
+            </div>
+          </>
+        )}
       </section>
 
       <div className="flex justify-end">

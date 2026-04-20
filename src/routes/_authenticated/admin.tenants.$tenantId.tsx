@@ -57,6 +57,7 @@ import {
   DEMO_PRODUCT_COUNT,
 } from "@/lib/demoData";
 import { TenantAnalytics } from "@/components/admin/TenantAnalytics";
+import { TenantOrders } from "@/components/admin/TenantOrders";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants/$tenantId")({
   component: TenantDetailPage,
@@ -238,7 +239,7 @@ function TenantDetailPage() {
         .update({
           brand_name: values.brand_name,
           ui: values.ui,
-          features: values.features,
+          features: { ...values.features, payments: values.payments },
           bot: values.bot,
           seo: values.seo,
         })
@@ -407,6 +408,7 @@ function TenantDetailPage() {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
+          <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="config">Config</TabsTrigger>
         </TabsList>
 
@@ -576,6 +578,10 @@ function TenantDetailPage() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="orders" className="space-y-4">
+          <TenantOrders tenantId={tenantId} />
         </TabsContent>
 
         <TabsContent value="config" className="space-y-4">

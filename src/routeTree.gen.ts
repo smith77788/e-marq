@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin.tenants'
+import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
 
 const SignupRoute = SignupRouteImport.update({
@@ -53,6 +54,11 @@ const AuthenticatedAdminTenantsRoute =
     path: '/admin/tenants',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const SSlugOrdersOrderIdRoute = SSlugOrdersOrderIdRouteImport.update({
+  id: '/orders/$orderId',
+  path: '/orders/$orderId',
+  getParentRoute: () => SSlugRoute,
+} as any)
 const AuthenticatedAdminTenantsTenantIdRoute =
   AuthenticatedAdminTenantsTenantIdRouteImport.update({
     id: '/$tenantId',
@@ -65,18 +71,20 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/s/$slug': typeof SSlugRoute
+  '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
+  '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/s/$slug': typeof SSlugRoute
+  '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
+  '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -85,9 +93,10 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/s/$slug': typeof SSlugRoute
+  '/s/$slug': typeof SSlugRouteWithChildren
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
+  '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/s/$slug'
     | '/admin/tenants'
     | '/admin/tenants/$tenantId'
+    | '/s/$slug/orders/$orderId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/s/$slug'
     | '/admin/tenants'
     | '/admin/tenants/$tenantId'
+    | '/s/$slug/orders/$orderId'
   id:
     | '__root__'
     | '/'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/s/$slug'
     | '/_authenticated/admin/tenants'
     | '/_authenticated/admin/tenants/$tenantId'
+    | '/s/$slug/orders/$orderId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -125,7 +137,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
-  SSlugRoute: typeof SSlugRoute
+  SSlugRoute: typeof SSlugRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -179,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTenantsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/s/$slug/orders/$orderId': {
+      id: '/s/$slug/orders/$orderId'
+      path: '/orders/$orderId'
+      fullPath: '/s/$slug/orders/$orderId'
+      preLoaderRoute: typeof SSlugOrdersOrderIdRouteImport
+      parentRoute: typeof SSlugRoute
+    }
     '/_authenticated/admin/tenants/$tenantId': {
       id: '/_authenticated/admin/tenants/$tenantId'
       path: '/$tenantId'
@@ -218,12 +237,22 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface SSlugRouteChildren {
+  SSlugOrdersOrderIdRoute: typeof SSlugOrdersOrderIdRoute
+}
+
+const SSlugRouteChildren: SSlugRouteChildren = {
+  SSlugOrdersOrderIdRoute: SSlugOrdersOrderIdRoute,
+}
+
+const SSlugRouteWithChildren = SSlugRoute._addFileChildren(SSlugRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
-  SSlugRoute: SSlugRoute,
+  SSlugRoute: SSlugRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
