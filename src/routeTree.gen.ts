@@ -27,6 +27,7 @@ import { Route as HooksEnginesReorderRouteImport } from './routes/hooks/engines.
 import { Route as HooksEnginesDispatchRouteImport } from './routes/hooks/engines.dispatch'
 import { Route as HooksEnginesAbandonedCartAllRouteImport } from './routes/hooks/engines.abandoned-cart-all'
 import { Route as HooksEnginesAbandonedCartRouteImport } from './routes/hooks/engines.abandoned-cart'
+import { Route as HooksDemoSeedRouteImport } from './routes/hooks/demo.seed'
 import { Route as HooksAgentsStockoutRouteImport } from './routes/hooks/agents.stockout'
 import { Route as HooksAgentsSearchGapRouteImport } from './routes/hooks/agents.search-gap'
 import { Route as HooksAgentsSalesBotAllRouteImport } from './routes/hooks/agents.sales-bot-all'
@@ -136,6 +137,11 @@ const HooksEnginesAbandonedCartRoute =
     path: '/hooks/engines/abandoned-cart',
     getParentRoute: () => rootRouteImport,
   } as any)
+const HooksDemoSeedRoute = HooksDemoSeedRouteImport.update({
+  id: '/hooks/demo/seed',
+  path: '/hooks/demo/seed',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsStockoutRoute = HooksAgentsStockoutRouteImport.update({
   id: '/hooks/agents/stockout',
   path: '/hooks/agents/stockout',
@@ -252,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
+  '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
@@ -288,6 +295,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
+  '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
@@ -326,6 +334,7 @@ export interface FileRoutesById {
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
+  '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
@@ -364,6 +373,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
+    | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/abandoned-cart-all'
     | '/hooks/engines/dispatch'
@@ -400,6 +410,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
+    | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/abandoned-cart-all'
     | '/hooks/engines/dispatch'
@@ -437,6 +448,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
+    | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/abandoned-cart-all'
     | '/hooks/engines/dispatch'
@@ -472,6 +484,7 @@ export interface RootRouteChildren {
   HooksAgentsSalesBotAllRoute: typeof HooksAgentsSalesBotAllRoute
   HooksAgentsSearchGapRoute: typeof HooksAgentsSearchGapRoute
   HooksAgentsStockoutRoute: typeof HooksAgentsStockoutRoute
+  HooksDemoSeedRoute: typeof HooksDemoSeedRoute
   HooksEnginesAbandonedCartRoute: typeof HooksEnginesAbandonedCartRoute
   HooksEnginesAbandonedCartAllRoute: typeof HooksEnginesAbandonedCartAllRoute
   HooksEnginesDispatchRoute: typeof HooksEnginesDispatchRoute
@@ -608,6 +621,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/engines/abandoned-cart'
       fullPath: '/hooks/engines/abandoned-cart'
       preLoaderRoute: typeof HooksEnginesAbandonedCartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/demo/seed': {
+      id: '/hooks/demo/seed'
+      path: '/hooks/demo/seed'
+      fullPath: '/hooks/demo/seed'
+      preLoaderRoute: typeof HooksDemoSeedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/stockout': {
@@ -796,6 +816,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsSalesBotAllRoute: HooksAgentsSalesBotAllRoute,
   HooksAgentsSearchGapRoute: HooksAgentsSearchGapRoute,
   HooksAgentsStockoutRoute: HooksAgentsStockoutRoute,
+  HooksDemoSeedRoute: HooksDemoSeedRoute,
   HooksEnginesAbandonedCartRoute: HooksEnginesAbandonedCartRoute,
   HooksEnginesAbandonedCartAllRoute: HooksEnginesAbandonedCartAllRoute,
   HooksEnginesDispatchRoute: HooksEnginesDispatchRoute,
