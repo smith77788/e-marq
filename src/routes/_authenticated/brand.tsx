@@ -18,6 +18,11 @@ import { AgentTimeline } from "@/components/owner/AgentTimeline";
 import { MemoryInspector } from "@/components/owner/MemoryInspector";
 import { SetupChecklist } from "@/components/owner/SetupChecklist";
 import { AnalyticsWindowProvider, AnalyticsWindowToggle } from "@/components/owner/AnalyticsWindow";
+import { CockpitHero } from "@/components/owner/CockpitHero";
+import { FunnelChart } from "@/components/owner/FunnelChart";
+import { CohortRetention } from "@/components/owner/CohortRetention";
+import { AgentHealthHeatmap } from "@/components/owner/AgentHealthHeatmap";
+import { LifecycleDistribution } from "@/components/owner/LifecycleDistribution";
 
 type Search = { tenant?: string };
 
