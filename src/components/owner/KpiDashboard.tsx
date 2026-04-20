@@ -1,12 +1,6 @@
 /**
  * Owner KPI dashboard — top-of-page summary cards.
- *
- * Pulls last 30d of:
- *   - paid orders  → total revenue, AOV, order count
- *   - outbound_messages with actual_revenue_cents → AI-attributed revenue per trigger_kind
- *   - customers → active count + at-risk count
- *
- * Two windows side by side: "Last 7d" vs "Last 30d" so trends are visible.
+ * Window-aware (7d / 30d / 90d) via AnalyticsWindowProvider.
  */
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -15,6 +9,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { useAnalyticsWindow } from "./AnalyticsWindow";
 
 type Props = { tenantId: string };
 
@@ -46,24 +41,27 @@ function within(dateIso: string | null, sinceMs: number) {
 }
 
 export function KpiDashboard({ tenantId }: Props) {
+  const { days, sinceMs, sinceIso } = useAnalyticsWindow();
+  const compareDays = Math.max(1, Math.floor(days / 4)); // shorter sub-window for context
+  const compareSinceMs = Date.now() - compareDays * 24 * 3600 * 1000;
+
   const { data, isLoading } = useQuery({
-    queryKey: ["kpi-dashboard", tenantId],
+    queryKey: ["kpi-dashboard", tenantId, days],
     enabled: !!tenantId,
     refetchInterval: 60_000,
     queryFn: async () => {
-      const since30 = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
       const [ordersRes, outboundRes, customersRes] = await Promise.all([
         supabase
           .from("orders")
           .select("total_cents, paid_at")
           .eq("tenant_id", tenantId)
           .eq("status", "paid")
-          .gte("paid_at", since30),
+          .gte("paid_at", sinceIso),
         supabase
           .from("outbound_messages")
           .select("trigger_kind, status, actual_revenue_cents, sent_at, converted_at")
           .eq("tenant_id", tenantId)
-          .gte("created_at", since30),
+          .gte("created_at", sinceIso),
         supabase
           .from("customers")
           .select("lifecycle_stage, last_order_at, predicted_next_order_at")
@@ -88,32 +86,27 @@ export function KpiDashboard({ tenantId }: Props) {
   }
 
   const now = Date.now();
-  const ms7 = now - 7 * 24 * 3600 * 1000;
-  const ms30 = now - 30 * 24 * 3600 * 1000;
 
-  // Revenue
-  const revenue7 = data.orders.filter((o) => within(o.paid_at, ms7)).reduce((s, o) => s + o.total_cents, 0);
-  const revenue30 = data.orders.filter((o) => within(o.paid_at, ms30)).reduce((s, o) => s + o.total_cents, 0);
-  const orders7 = data.orders.filter((o) => within(o.paid_at, ms7)).length;
-  const orders30 = data.orders.filter((o) => within(o.paid_at, ms30)).length;
-  const aov30 = orders30 > 0 ? revenue30 / orders30 : 0;
+  const revenueWin = data.orders.filter((o) => within(o.paid_at, sinceMs)).reduce((s, o) => s + o.total_cents, 0);
+  const revenueCmp = data.orders.filter((o) => within(o.paid_at, compareSinceMs)).reduce((s, o) => s + o.total_cents, 0);
+  const ordersWin = data.orders.filter((o) => within(o.paid_at, sinceMs)).length;
+  const ordersCmp = data.orders.filter((o) => within(o.paid_at, compareSinceMs)).length;
+  const aovWin = ordersWin > 0 ? revenueWin / ordersWin : 0;
 
-  // AI attribution: revenue from outbound where conversion happened
-  const aiRev7 = data.outbound
-    .filter((m) => within(m.converted_at, ms7))
+  const aiRevWin = data.outbound
+    .filter((m) => within(m.converted_at, sinceMs))
     .reduce((s, m) => s + (m.actual_revenue_cents ?? 0), 0);
-  const aiRev30 = data.outbound
-    .filter((m) => within(m.converted_at, ms30))
+  const aiRevCmp = data.outbound
+    .filter((m) => within(m.converted_at, compareSinceMs))
     .reduce((s, m) => s + (m.actual_revenue_cents ?? 0), 0);
-  const aiShare30 = revenue30 > 0 ? Math.round((aiRev30 / revenue30) * 100) : 0;
+  const aiShareWin = revenueWin > 0 ? Math.round((aiRevWin / revenueWin) * 100) : 0;
 
-  // Per-trigger breakdown (30d)
   const byTrigger = new Map<string, { sent: number; converted: number; revenue: number }>();
   for (const m of data.outbound) {
     const t = m.trigger_kind || "other";
     const cur = byTrigger.get(t) ?? { sent: 0, converted: 0, revenue: 0 };
-    if (m.sent_at && within(m.sent_at, ms30)) cur.sent++;
-    if (m.converted_at && within(m.converted_at, ms30)) {
+    if (m.sent_at && within(m.sent_at, sinceMs)) cur.sent++;
+    if (m.converted_at && within(m.converted_at, sinceMs)) {
       cur.converted++;
       cur.revenue += m.actual_revenue_cents ?? 0;
     }
@@ -123,39 +116,40 @@ export function KpiDashboard({ tenantId }: Props) {
     .filter(([, v]) => v.sent > 0 || v.converted > 0)
     .sort((a, b) => b[1].revenue - a[1].revenue);
 
-  // Customers
   const totalCustomers = data.customers.length;
   const activeCustomers = data.customers.filter((c) => c.lifecycle_stage === "active" || c.lifecycle_stage === "vip").length;
   const overdue = data.customers.filter(
     (c) => c.predicted_next_order_at && new Date(c.predicted_next_order_at).getTime() < now,
   ).length;
 
-  // Conversion rate
-  const sent30 = data.outbound.filter((m) => m.sent_at && within(m.sent_at, ms30)).length;
-  const conv30 = data.outbound.filter((m) => m.converted_at && within(m.converted_at, ms30)).length;
-  const convRate = sent30 > 0 ? ((conv30 / sent30) * 100).toFixed(1) : "0.0";
+  const sentWin = data.outbound.filter((m) => m.sent_at && within(m.sent_at, sinceMs)).length;
+  const convWin = data.outbound.filter((m) => m.converted_at && within(m.converted_at, sinceMs)).length;
+  const convRate = sentWin > 0 ? ((convWin / sentWin) * 100).toFixed(1) : "0.0";
+
+  const winLabel = `${days}d`;
+  const cmpLabel = `${compareDays}d`;
 
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           icon={BadgeDollarSign}
-          label="Revenue (30d)"
-          value={fmtUsd(revenue30)}
-          sub={`${fmtUsd(revenue7)} last 7d · ${orders30} orders`}
+          label={`Revenue (${winLabel})`}
+          value={fmtUsd(revenueWin)}
+          sub={`${fmtUsd(revenueCmp)} last ${cmpLabel} · ${ordersWin} orders`}
         />
         <KpiCard
           icon={Sparkles}
-          label="AI-attributed (30d)"
-          value={fmtUsd(aiRev30)}
-          sub={`${fmtUsd(aiRev7)} last 7d · ${aiShare30}% of total`}
+          label={`AI-attributed (${winLabel})`}
+          value={fmtUsd(aiRevWin)}
+          sub={`${fmtUsd(aiRevCmp)} last ${cmpLabel} · ${aiShareWin}% of total`}
           accent="primary"
         />
         <KpiCard
           icon={ShoppingBag}
-          label="AOV (30d)"
-          value={fmtUsd(aov30)}
-          sub={`${orders7} orders last 7d`}
+          label={`AOV (${winLabel})`}
+          value={fmtUsd(aovWin)}
+          sub={`${ordersCmp} orders last ${cmpLabel}`}
         />
         <KpiCard
           icon={Users}
@@ -169,10 +163,10 @@ export function KpiDashboard({ tenantId }: Props) {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-sm">
             <Bot className="h-4 w-4 text-primary" />
-            What the agents earned (last 30 days)
+            What the agents earned (last {winLabel})
           </CardTitle>
           <CardDescription className="text-xs">
-            Attribution per trigger. Conversion rate overall: <span className="font-semibold text-foreground">{convRate}%</span> ({conv30} of {sent30} sent).
+            Attribution per trigger. Conversion rate overall: <span className="font-semibold text-foreground">{convRate}%</span> ({convWin} of {sentWin} sent).
           </CardDescription>
         </CardHeader>
         <CardContent>
