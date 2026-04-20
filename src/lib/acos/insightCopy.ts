@@ -750,4 +750,127 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       },
     };
   },
+
+  // ---------- Batch 4: Messaging ----------
+  bot_sequence_stuck: (m) => {
+    const name = str(m, "customer_name") || str(m, "customer_email", "клієнт");
+    const cnt = num(m, "inbound_count");
+    return {
+      ua: {
+        headline: `${name}: ${cnt} повідомлень — без відповіді`,
+        why: `Клієнт сам пише — це найгарячіший лід. Якщо не відповісти за добу, він шукає альтернативу. Втрачаємо живий інтерес.`,
+        what_to_do: `Дай боту контекст і відправ коротку відповідь — конверсія таких розмов ~25%.`,
+      },
+      en: {
+        headline: `${name}: ${cnt} messages — no reply`,
+        why: `Customer is writing first — hottest possible lead. Skip a day and they look elsewhere. Live intent lost.`,
+        what_to_do: `Resume the bot or reply manually — conversion of stuck threads is ~25%.`,
+      },
+    };
+  },
+
+  faq_candidate: (m) => {
+    const intent = str(m, "intent", "тема");
+    const cnt = num(m, "customer_count");
+    return {
+      ua: {
+        headline: `"${intent}" питають ${cnt} клієнтів/тиждень`,
+        why: `Один і той самий запит повторюється — значить це біль не одного клієнта, а всіх. Ручні відповіді = трата часу і ризик розбіжностей.`,
+        what_to_do: `Додай FAQ-блок або auto-reply на цю тему — закриє раз і назавжди.`,
+      },
+      en: {
+        headline: `"${intent}" asked by ${cnt} customers/week`,
+        why: `Same question repeats — it's a shared pain, not a one-off. Manual replies waste time and risk inconsistency.`,
+        what_to_do: `Add a FAQ entry or auto-reply for this topic — closes it permanently.`,
+      },
+    };
+  },
+
+  broadcast_suggestion: (m) => {
+    const theme = str(m, "theme", "розсилка");
+    const draftUa = str(m, "draft_ua", "");
+    const draftEn = str(m, "draft_en", "");
+    return {
+      ua: {
+        headline: `Готова ідея для розсилки: ${theme}`,
+        why: `Зараз є ситуація, яка добре конвертить у broadcast. Драфт нижче — лише натисни "Apply".`,
+        what_to_do: draftUa || `Розгорни деталі і відправ на сегмент.`,
+      },
+      en: {
+        headline: `Broadcast idea ready: ${theme}`,
+        why: `Current conditions favor a broadcast. Draft below — just hit "Apply".`,
+        what_to_do: draftEn || `Expand details and send to segment.`,
+      },
+    };
+  },
+
+  best_send_window: (m) => {
+    const top = (m.top_hours_utc as number[] | undefined) ?? [];
+    const topRate = num(m, "top_rate") * 100;
+    const avg = num(m, "avg_rate") * 100;
+    return {
+      ua: {
+        headline: `Найкращі години розсилки: ${top.map((h) => `${h}:00`).join(", ")} UTC`,
+        why: `Конверсія в ці години ~${topRate.toFixed(1)}% vs середнє ${avg.toFixed(1)}%. Просто переніс розсилки — і отримуєш більше без додаткових витрат.`,
+        what_to_do: `Налаштуй scheduler автоматично класти розсилки в це вікно.`,
+      },
+      en: {
+        headline: `Best send hours: ${top.map((h) => `${h}:00`).join(", ")} UTC`,
+        why: `Conversion in these hours ~${topRate.toFixed(1)}% vs ${avg.toFixed(1)}% avg. Just moving sends here = more revenue, zero extra cost.`,
+        what_to_do: `Configure scheduler to auto-place sends in this window.`,
+      },
+    };
+  },
+
+  csat_request: (m) => {
+    const name = str(m, "customer_name") || str(m, "customer_email", "клієнт");
+    return {
+      ua: {
+        headline: `Час просити фідбек: ${name}`,
+        why: `Замовлення доставлено ~5 днів тому — це "теплий момент". Запит зараз дає 30-40% response, через тиждень — <10%. І це шанс зловити проблему до refund.`,
+        what_to_do: `Apply → відправляється короткий 1-5⭐ запит з draft нижче.`,
+      },
+      en: {
+        headline: `Time to ask for feedback: ${name}`,
+        why: `Order delivered ~5 days ago — the warm window. Asking now gets 30-40% response vs <10% later. Also catches issues before refunds.`,
+        what_to_do: `Apply → sends a short 1-5⭐ request using the draft below.`,
+      },
+    };
+  },
+
+  nurture_low_roi: (m) => {
+    const trig = str(m, "trigger", "trigger");
+    const roi = num(m, "roi_per_msg_cents") / 100;
+    const avg = num(m, "avg_roi_per_msg_cents") / 100;
+    return {
+      ua: {
+        headline: `Trigger "${trig}" втрачає гроші ($${roi.toFixed(2)}/msg)`,
+        why: `ROI у 2× нижче середнього ($${avg.toFixed(2)}). Ці повідомлення жеруть attention клієнта, ризикують unsubscribe, і не повертають витрат.`,
+        what_to_do: `Поставити на паузу або переписати hook — звільнить квоту для триггерів, що працюють.`,
+      },
+      en: {
+        headline: `Trigger "${trig}" loses money ($${roi.toFixed(2)}/msg)`,
+        why: `ROI is half of average ($${avg.toFixed(2)}). These messages eat customer attention, risk unsubs, return nothing.`,
+        what_to_do: `Pause or rewrite the hook — frees quota for triggers that work.`,
+      },
+    };
+  },
+
+  nurture_high_roi: (m) => {
+    const trig = str(m, "trigger", "trigger");
+    const roi = num(m, "roi_per_msg_cents") / 100;
+    const ratio = num(m, "ratio");
+    return {
+      ua: {
+        headline: `Trigger "${trig}" — зірка ($${roi.toFixed(2)}/msg, ${ratio.toFixed(1)}× середнього)`,
+        why: `Цей нурт-сценарій працює у рази краще за інші. Кожне додаткове надсилання — чистий прибуток.`,
+        what_to_do: `Розширити охоплення цього trigger: збільшити сегмент або частоту.`,
+      },
+      en: {
+        headline: `Trigger "${trig}" is a winner ($${roi.toFixed(2)}/msg, ${ratio.toFixed(1)}× average)`,
+        why: `This nurture scenario beats others by a wide margin. Every extra send = pure profit.`,
+        what_to_do: `Scale this trigger: enlarge segment or increase frequency.`,
+      },
+    };
+  },
 };
