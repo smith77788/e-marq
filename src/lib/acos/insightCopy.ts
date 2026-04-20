@@ -220,4 +220,117 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       },
     };
   },
+
+  // ---------- Onboarding / Setup ----------
+  setup_no_products: () => ({
+    ua: {
+      headline: "Каталог порожній — додай перший товар",
+      why: "Без товарів ні бот, ні агенти не можуть нічого продавати чи рекомендувати.",
+      what_to_do: "Додай мінімум 3 SKU у розділі Products.",
+    },
+    en: {
+      headline: "Catalog is empty — add your first product",
+      why: "Without products neither the bot nor any agent has anything to sell or recommend.",
+      what_to_do: "Add at least 3 SKUs in Products.",
+    },
+  }),
+  setup_thin_catalog: (m) => {
+    const n = num(m, "product_count");
+    return {
+      ua: {
+        headline: `Лише ${n} товар${n === 1 ? "" : "ів"} — додай ще 2-3`,
+        why: "Бренди з 3+ SKU мають у ~2× вищий середній чек завдяки крос-селлу.",
+        what_to_do: "Додай ще декілька товарів — це відкриє AOV optimizer і бандли.",
+      },
+      en: {
+        headline: `Only ${n} active product${n === 1 ? "" : "s"} — add 2-3 more`,
+        why: "Brands with 3+ SKUs see ~2× higher AOV thanks to cross-sell.",
+        what_to_do: "Add a couple more products — unlocks AOV optimizer and bundles.",
+      },
+    };
+  },
+  setup_no_orders: (m) => {
+    const slug = str(m, "slug", "");
+    return {
+      ua: {
+        headline: "Жодного замовлення — час на перший продаж",
+        why: "Каталог працює, але ніхто ще не оформив. Перший платіж активує агентів churn/winback.",
+        what_to_do: `Поділись посиланням /s/${slug} у соцмережах або з існуючою базою клієнтів.`,
+      },
+      en: {
+        headline: "Zero orders so far — drive the first sale",
+        why: "Storefront is live but no one checked out. First paid order activates churn/winback agents.",
+        what_to_do: `Share /s/${slug} on social or with your existing customer list.`,
+      },
+    };
+  },
+  setup_pending_only: (m) => {
+    const pending = num(m, "pending");
+    return {
+      ua: {
+        headline: `${pending} замовлень у статусі pending — жодного оплаченого`,
+        why: "Клієнти додають у кошик, але не завершують оплату. Найчастіша причина — немає реального процесора карток.",
+        what_to_do: "Підключи Stripe — pending буде автоматично переходити в paid.",
+      },
+      en: {
+        headline: `${pending} pending order${pending === 1 ? "" : "s"} — none paid yet`,
+        why: "Customers add items but don't complete payment. Most common cause: no real card processor connected.",
+        what_to_do: "Enable Stripe so pending orders auto-convert to paid.",
+      },
+    };
+  },
+  setup_no_telegram: (m) => {
+    const slug = str(m, "slug", "");
+    return {
+      ua: {
+        headline: "Telegram-бот не підв'язаний",
+        why: "Без бота агенти win-back і reorder не мають як достукатися до клієнтів.",
+        what_to_do: `Зі свого Telegram надішли /start ${slug} боту @Oauther_bot — це активує канал.`,
+      },
+      en: {
+        headline: "Telegram bot not connected",
+        why: "Without the bot, win-back & reorder agents have no way to reach customers.",
+        what_to_do: `From your Telegram, send /start ${slug} to @Oauther_bot to activate the channel.`,
+      },
+    };
+  },
+  setup_no_tracking: () => ({
+    ua: {
+      headline: "Немає подій з сайту за 7 днів",
+      why: "Без трекінгу не видно які товари дивляться, де клієнти йдуть і що рекомендувати.",
+      what_to_do: "Встав однорядковий tracking-snippet на свій сайт (готовий код у Setup).",
+    },
+    en: {
+      headline: "No site events in last 7 days",
+      why: "Without tracking we can't see what customers view, where they bounce or what to recommend.",
+      what_to_do: "Paste the 1-line tracking snippet on your site (ready in Setup).",
+    },
+  }),
+  setup_no_emails: (m) => {
+    const c = num(m, "customers");
+    return {
+      ua: {
+        headline: `${c} клієнт${c === 1 ? "" : "ів"}, але email не зібрано`,
+        why: "Без email win-back / abandoned-cart можуть писати тільки в Telegram. Це урізає аудиторію вдвічі.",
+        what_to_do: "Додай поле email у форму checkout.",
+      },
+      en: {
+        headline: `${c} customer${c === 1 ? "" : "s"} but no email captured`,
+        why: "Without email, win-back / abandoned-cart can only reach Telegram. Cuts reachable audience in half.",
+        what_to_do: "Add an email field to your checkout form.",
+      },
+    };
+  },
+  milestone_first_sale: () => ({
+    ua: {
+      headline: "🎉 Перший платний продаж — пора масштабуватися",
+      why: "Перша угода закрилась. Кожна наступна робить агентів розумнішими — після ~5 замовлень почнуть з'являтися реальні pattern-insights.",
+      what_to_do: "Увімкни Telegram-бот, abandoned-cart і reorder-reminders — це працює саме на твоїх даних.",
+    },
+    en: {
+      headline: "🎉 First paid order — time to scale",
+      why: "Your first sale closed. Each new order makes agents smarter — after ~5 orders real pattern insights start appearing.",
+      what_to_do: "Turn on Telegram bot, abandoned-cart and reorder-reminders — they compound on your real data.",
+    },
+  }),
 };

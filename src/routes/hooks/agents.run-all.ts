@@ -10,6 +10,7 @@ import {
 } from "@/lib/acos/agentRuntime";
 
 const AGENTS = [
+  "onboarding",
   "churn-risk",
   "stockout",
   "aov-leak",
