@@ -21,22 +21,22 @@ import {
 
 const AGENT_ID = "funnel-healer";
 
-const STEPS = ["page_view", "product_view", "add_to_cart", "checkout_started", "purchase_completed"] as const;
+const STEPS = ["session_start", "product_viewed", "add_to_cart", "checkout_started", "purchase_completed"] as const;
 type Step = (typeof STEPS)[number];
 
 const BENCHMARKS: Record<string, number> = {
-  "page_view->product_view": 0.25,
-  "product_view->add_to_cart": 0.08,
+  "session_start->product_viewed": 0.25,
+  "product_viewed->add_to_cart": 0.08,
   "add_to_cart->checkout_started": 0.4,
   "checkout_started->purchase_completed": 0.6,
 };
 
 const COPY: Record<string, { ua: string; en: string }> = {
-  "page_view->product_view": {
+  "session_start->product_viewed": {
     ua: "Заходять на сайт, але не клікають у картку товару. Перевір categories/збільш hero CTA.",
     en: "Visit the site but don't open product cards. Improve hero CTA / categories.",
   },
-  "product_view->add_to_cart": {
+  "product_viewed->add_to_cart": {
     ua: "Дивляться картку, але не додають у кошик. Слабкі фото, опис або ціна.",
     en: "View product but don't add to cart. Weak photos, copy or price.",
   },
@@ -95,8 +95,8 @@ export const Route = createFileRoute("/hooks/agents/funnel-healer")({
           }
 
           const counts: Record<Step, number> = {
-            page_view: 0,
-            product_view: 0,
+            session_start: 0,
+            product_viewed: 0,
             add_to_cart: 0,
             checkout_started: 0,
             purchase_completed: 0,

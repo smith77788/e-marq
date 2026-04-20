@@ -46,7 +46,7 @@ export const Route = createFileRoute("/hooks/agents/browse-abandonment")({
             .from("events")
             .select("user_id, product_id, type")
             .eq("tenant_id", tenantId)
-            .in("type", ["product_view", "add_to_cart", "purchase_completed"])
+            .in("type", ["product_viewed", "add_to_cart", "purchase_completed"])
             .gte("created_at", since)
             .not("user_id", "is", null)
             .not("product_id", "is", null)
@@ -65,7 +65,7 @@ export const Route = createFileRoute("/hooks/agents/browse-abandonment")({
             if (!e.user_id || !e.product_id) continue;
             const k = `${e.user_id}::${e.product_id}`;
             const p = pairs.get(k) ?? { views: 0, cart: false, purchased: false };
-            if (e.type === "product_view") p.views++;
+            if (e.type === "product_viewed") p.views++;
             else if (e.type === "add_to_cart") p.cart = true;
             else if (e.type === "purchase_completed") p.purchased = true;
             pairs.set(k, p);
