@@ -175,12 +175,19 @@ function StorefrontPage() {
   const brand = config?.brand_name ?? tenant.name;
 
   const ui = (config?.ui ?? {}) as { primary?: string; accent?: string };
+  const features = (config?.features ?? {}) as { payments?: PaymentsConfig };
+  const payments: PaymentsConfig = features.payments ?? {
+    manual_enabled: true,
+    stripe_enabled: false,
+  };
   const themeStyle = useMemo(() => {
     const style: Record<string, string> = {};
     if (ui.primary) style["--primary"] = ui.primary;
     if (ui.accent) style["--accent"] = ui.accent;
     return style as React.CSSProperties;
   }, [ui.primary, ui.accent]);
+
+  const navigate = useNavigate();
 
   // Cart state synced with localStorage per tenant
   const [cart, setCart] = useState<Cart>({});
