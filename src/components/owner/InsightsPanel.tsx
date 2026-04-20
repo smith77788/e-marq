@@ -63,11 +63,11 @@ export function InsightsPanel({ tenantId }: Props) {
   });
 
   const apply = useMutation({
-    mutationFn: (insightId: string) => authedFetch("/hooks/actions/apply", { tenant_id: tenantId, insight_id: insightId }),
+    mutationFn: (insightId: string) => authedFetch("/hooks/actions/apply", { insight_id: insightId }),
     onSuccess: (r) => {
-      const queued = (r.outcome as { queued?: number } | undefined)?.queued ?? 0;
-      const sent = (r.dispatch as { sent?: number } | undefined)?.sent ?? 0;
-      toast.success(queued > 0 ? `Applied — ${queued} customers queued, ${sent} sent` : "Insight acknowledged");
+      const result = r as { actual_result?: { queued_messages?: number }; action_type?: string };
+      const queued = result.actual_result?.queued_messages ?? 0;
+      toast.success(queued > 0 ? `Applied — ${queued} customers queued` : `Action logged: ${result.action_type ?? "applied"}`);
       qc.invalidateQueries({ queryKey: ["insights", tenantId] });
       qc.invalidateQueries({ queryKey: ["revenue-feed", tenantId] });
     },
