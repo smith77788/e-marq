@@ -165,8 +165,51 @@ export const Route = createFileRoute("/hooks/agents/price-revert")({
           }
 
           const created = await insertInsightsDedup(candidates);
-          await finishAgentRun(handle, created, { analyzed: actions?.length ?? 0, candidates: candidates.length });
-          return jsonOk({ insights_created: created, analyzed: actions?.length ?? 0, candidates: candidates.length });
+
+          // Auto-apply: для кожного свіжого price_revert insight одразу викликаємо
+          // actions.apply, щоб ціна реально відкотилася без участі власника.
+          let autoApplied = 0;
+          if (created > 0) {
+            const dedupKeys = candidates.map((c) => `revert::${(c.metrics as { source_action_id?: string }).source_action_id}`);
+            const { data: freshInsights } = await supabaseAdmin
+              .from("ai_insights")
+              .select("id, metrics")
+              .eq("tenant_id", tenantId)
+              .eq("insight_type", "price_revert")
+              .eq("status", "new")
+              .order("created_at", { ascending: false })
+              .limit(candidates.length);
+            const sourceIds = new Set(
+              candidates.map((c) => (c.metrics as { source_action_id?: string }).source_action_id),
+            );
+            const origin = new URL(request.url).origin;
+            for (const ins of freshInsights ?? []) {
+              const sid = (ins.metrics as { source_action_id?: string } | null)?.source_action_id;
+              if (!sid || !sourceIds.has(sid)) continue;
+              try {
+                const res = await fetch(`${origin}/hooks/actions/apply`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                  body: JSON.stringify({ insight_id: ins.id }),
+                });
+                if (res.ok) autoApplied++;
+              } catch {
+                // best-effort — наступний прогін cron повторить
+              }
+            }
+          }
+
+          await finishAgentRun(handle, created, {
+            analyzed: actions?.length ?? 0,
+            candidates: candidates.length,
+            auto_applied: autoApplied,
+          });
+          return jsonOk({
+            insights_created: created,
+            analyzed: actions?.length ?? 0,
+            candidates: candidates.length,
+            auto_applied: autoApplied,
+          });
         } catch (err) {
           await failAgentRun(handle, err);
           return jsonError("Price revert agent failed", 500, { details: err instanceof Error ? err.message : String(err) });
