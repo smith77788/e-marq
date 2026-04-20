@@ -655,4 +655,99 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       },
     };
   },
+
+  // ---------- Batch 3: Cohort / Attribution / Funnel / Browse / Second-order ----------
+  cohort_low_retention: (m) => {
+    const cm = str(m, "cohort_month", "недавня");
+    const pct = num(m, "m1_retention_pct") * 100;
+    const cnt = num(m, "customer_count");
+    return {
+      ua: {
+        headline: `Когорта ${cm}: повертається лише ${pct.toFixed(0)}%`,
+        why: `З ${cnt} нових клієнтів цієї когорти більшість не зробила 2-ге замовлення наступного місяця. Слабкий retention = ти весь час платиш за нових замість заробляти на старих.`,
+        what_to_do: `Запустити second-order nurture: персональний follow-up через 14-30 днів після першої покупки.`,
+      },
+      en: {
+        headline: `Cohort ${cm}: only ${pct.toFixed(0)}% return`,
+        why: `Of ${cnt} new customers in this cohort, most didn't place a 2nd order next month. Weak retention = you keep paying for new instead of earning from old.`,
+        what_to_do: `Launch second-order nurture: personal follow-up 14-30 days after first purchase.`,
+      },
+    };
+  },
+
+  channel_concentration_risk: (m) => {
+    const ch = str(m, "dominant_channel", "один канал");
+    const share = num(m, "share") * 100;
+    return {
+      ua: {
+        headline: `${share.toFixed(0)}% виторгу з одного каналу (${ch})`,
+        why: `Якщо ${ch} зламається — алгоритм забанить, ціни виростуть, конкурент зайде, — впаде половина бізнесу за тиждень. Концентраційний ризик найвища категорія.`,
+        what_to_do: `Запустити 2-й канал у тестовому бюджеті. Цільова частка домінуючого — нижче 50%.`,
+      },
+      en: {
+        headline: `${share.toFixed(0)}% of revenue from one channel (${ch})`,
+        why: `If ${ch} breaks — algorithm change, price hike, competitor entry — half the business is gone in a week. Concentration risk is the worst kind.`,
+        what_to_do: `Test a 2nd channel with a small budget. Target dominant share below 50%.`,
+      },
+    };
+  },
+
+  funnel_weak_step: (m) => {
+    const step = str(m, "weak_step", "крок воронки");
+    const rate = num(m, "rate") * 100;
+    const bench = num(m, "benchmark") * 100;
+    const ua = str(m, "copy_ua", "Слабка ланка у воронці.");
+    const en = str(m, "copy_en", "Weak step in the funnel.");
+    const recoverable = num(m, "potential_recoverable");
+    return {
+      ua: {
+        headline: `Воронка тече на "${step}": ${rate.toFixed(1)}% (норма ${bench.toFixed(0)}%)`,
+        why: ua,
+        what_to_do: `Полагодити цей крок — поверне ~${recoverable} клієнтів далі по воронці за 14 днів.`,
+      },
+      en: {
+        headline: `Funnel leak at "${step}": ${rate.toFixed(1)}% (benchmark ${bench.toFixed(0)}%)`,
+        why: en,
+        what_to_do: `Fix this step — recovers ~${recoverable} customers further down the funnel in 14 days.`,
+      },
+    };
+  },
+
+  browse_abandoned: (m) => {
+    const name = str(m, "customer_name") || str(m, "customer_email", "клієнт");
+    const prod = str(m, "product_name", "товар");
+    const views = num(m, "view_count");
+    const price = num(m, "product_price_cents");
+    return {
+      ua: {
+        headline: `${name} дивився "${prod}" ${views}× — і не купив`,
+        why: `${views} переглядів картки за тиждень — це чіткий інтерес. Щось одне зупиняє: ціна, доставка, або сумнів. Без нагадування — забуде.`,
+        what_to_do: `Надіслати nudge з 10% знижкою або відгуками на цей товар. Ціна референс: ${cents(price)}.`,
+      },
+      en: {
+        headline: `${name} viewed "${prod}" ${views}× — didn't buy`,
+        why: `${views} card views in a week is clear intent. Price, shipping or doubt is blocking. Without a nudge — they forget.`,
+        what_to_do: `Send a nudge with 10% off or social proof for this product. Price ref: ${cents(price)}.`,
+      },
+    };
+  },
+
+  second_order_gap: (m) => {
+    const name = str(m, "customer_name") || str(m, "customer_email", "клієнт");
+    const days = num(m, "days_since_first_order");
+    const prod = str(m, "first_order_product_name", "товар");
+    const ret = num(m, "expected_return_cents");
+    return {
+      ua: {
+        headline: `${name}: 1 замовлення ${days} днів тому, мовчить`,
+        why: `Купив "${prod}" і зник. 60-70% таких клієнтів ніколи не повернуться без нагадування — це найбільша діра retention. Зараз ще пам'ятає бренд.`,
+        what_to_do: `Особистий follow-up з cross-sell — потенційно ${cents(ret)} return.`,
+      },
+      en: {
+        headline: `${name}: 1 order ${days} days ago, silent`,
+        why: `Bought "${prod}" and disappeared. 60-70% never come back without a nudge — biggest retention hole. Brand is still in their memory now.`,
+        what_to_do: `Personal follow-up with cross-sell — potentially ${cents(ret)} return.`,
+      },
+    };
+  },
 };
