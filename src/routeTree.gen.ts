@@ -31,6 +31,7 @@ import { Route as HooksEnginesAbandonedCartAllRouteImport } from './routes/hooks
 import { Route as HooksEnginesAbandonedCartRouteImport } from './routes/hooks/engines.abandoned-cart'
 import { Route as HooksDemoSeedRouteImport } from './routes/hooks/demo.seed'
 import { Route as HooksAgentsStockoutRouteImport } from './routes/hooks/agents.stockout'
+import { Route as HooksAgentsSegmentationRouteImport } from './routes/hooks/agents.segmentation'
 import { Route as HooksAgentsSearchGapRouteImport } from './routes/hooks/agents.search-gap'
 import { Route as HooksAgentsSalesBotAllRouteImport } from './routes/hooks/agents.sales-bot-all'
 import { Route as HooksAgentsSalesBotRouteImport } from './routes/hooks/agents.sales-bot'
@@ -42,6 +43,7 @@ import { Route as HooksAgentsFeedbackLoopAllRouteImport } from './routes/hooks/a
 import { Route as HooksAgentsFeedbackLoopRouteImport } from './routes/hooks/agents.feedback-loop'
 import { Route as HooksAgentsCronAllRouteImport } from './routes/hooks/agents.cron-all'
 import { Route as HooksAgentsChurnRiskRouteImport } from './routes/hooks/agents.churn-risk'
+import { Route as HooksAgentsBotQualityRouteImport } from './routes/hooks/agents.bot-quality'
 import { Route as HooksAgentsAovOptimizerRouteImport } from './routes/hooks/agents.aov-optimizer'
 import { Route as HooksAgentsAovLeakRouteImport } from './routes/hooks/agents.aov-leak'
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
@@ -161,6 +163,11 @@ const HooksAgentsStockoutRoute = HooksAgentsStockoutRouteImport.update({
   path: '/hooks/agents/stockout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsSegmentationRoute = HooksAgentsSegmentationRouteImport.update({
+  id: '/hooks/agents/segmentation',
+  path: '/hooks/agents/segmentation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsSearchGapRoute = HooksAgentsSearchGapRouteImport.update({
   id: '/hooks/agents/search-gap',
   path: '/hooks/agents/search-gap',
@@ -219,6 +226,11 @@ const HooksAgentsChurnRiskRoute = HooksAgentsChurnRiskRouteImport.update({
   path: '/hooks/agents/churn-risk',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsBotQualityRoute = HooksAgentsBotQualityRouteImport.update({
+  id: '/hooks/agents/bot-quality',
+  path: '/hooks/agents/bot-quality',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsAovOptimizerRoute = HooksAgentsAovOptimizerRouteImport.update({
   id: '/hooks/agents/aov-optimizer',
   path: '/hooks/agents/aov-optimizer',
@@ -273,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/aov-optimizer': typeof HooksAgentsAovOptimizerRoute
+  '/hooks/agents/bot-quality': typeof HooksAgentsBotQualityRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
@@ -284,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
+  '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
@@ -314,6 +328,7 @@ export interface FileRoutesByTo {
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/aov-optimizer': typeof HooksAgentsAovOptimizerRoute
+  '/hooks/agents/bot-quality': typeof HooksAgentsBotQualityRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
@@ -325,6 +340,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
+  '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
@@ -357,6 +373,7 @@ export interface FileRoutesById {
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/aov-optimizer': typeof HooksAgentsAovOptimizerRoute
+  '/hooks/agents/bot-quality': typeof HooksAgentsBotQualityRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
@@ -368,6 +385,7 @@ export interface FileRoutesById {
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
+  '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
@@ -400,6 +418,7 @@ export interface FileRouteTypes {
     | '/hooks/actions/apply'
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/aov-optimizer'
+    | '/hooks/agents/bot-quality'
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/feedback-loop'
@@ -411,6 +430,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/sales-bot'
     | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
+    | '/hooks/agents/segmentation'
     | '/hooks/agents/stockout'
     | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
@@ -441,6 +461,7 @@ export interface FileRouteTypes {
     | '/hooks/actions/apply'
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/aov-optimizer'
+    | '/hooks/agents/bot-quality'
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/feedback-loop'
@@ -452,6 +473,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/sales-bot'
     | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
+    | '/hooks/agents/segmentation'
     | '/hooks/agents/stockout'
     | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
@@ -483,6 +505,7 @@ export interface FileRouteTypes {
     | '/hooks/actions/apply'
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/aov-optimizer'
+    | '/hooks/agents/bot-quality'
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/feedback-loop'
@@ -494,6 +517,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/sales-bot'
     | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
+    | '/hooks/agents/segmentation'
     | '/hooks/agents/stockout'
     | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
@@ -523,6 +547,7 @@ export interface RootRouteChildren {
   HooksActionsApplyRoute: typeof HooksActionsApplyRoute
   HooksAgentsAovLeakRoute: typeof HooksAgentsAovLeakRoute
   HooksAgentsAovOptimizerRoute: typeof HooksAgentsAovOptimizerRoute
+  HooksAgentsBotQualityRoute: typeof HooksAgentsBotQualityRoute
   HooksAgentsChurnRiskRoute: typeof HooksAgentsChurnRiskRoute
   HooksAgentsCronAllRoute: typeof HooksAgentsCronAllRoute
   HooksAgentsFeedbackLoopRoute: typeof HooksAgentsFeedbackLoopRoute
@@ -534,6 +559,7 @@ export interface RootRouteChildren {
   HooksAgentsSalesBotRoute: typeof HooksAgentsSalesBotRoute
   HooksAgentsSalesBotAllRoute: typeof HooksAgentsSalesBotAllRoute
   HooksAgentsSearchGapRoute: typeof HooksAgentsSearchGapRoute
+  HooksAgentsSegmentationRoute: typeof HooksAgentsSegmentationRoute
   HooksAgentsStockoutRoute: typeof HooksAgentsStockoutRoute
   HooksDemoSeedRoute: typeof HooksDemoSeedRoute
   HooksEnginesAbandonedCartRoute: typeof HooksEnginesAbandonedCartRoute
@@ -704,6 +730,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsStockoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/segmentation': {
+      id: '/hooks/agents/segmentation'
+      path: '/hooks/agents/segmentation'
+      fullPath: '/hooks/agents/segmentation'
+      preLoaderRoute: typeof HooksAgentsSegmentationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/search-gap': {
       id: '/hooks/agents/search-gap'
       path: '/hooks/agents/search-gap'
@@ -779,6 +812,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/churn-risk'
       fullPath: '/hooks/agents/churn-risk'
       preLoaderRoute: typeof HooksAgentsChurnRiskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/bot-quality': {
+      id: '/hooks/agents/bot-quality'
+      path: '/hooks/agents/bot-quality'
+      fullPath: '/hooks/agents/bot-quality'
+      preLoaderRoute: typeof HooksAgentsBotQualityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/aov-optimizer': {
@@ -887,6 +927,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksActionsApplyRoute: HooksActionsApplyRoute,
   HooksAgentsAovLeakRoute: HooksAgentsAovLeakRoute,
   HooksAgentsAovOptimizerRoute: HooksAgentsAovOptimizerRoute,
+  HooksAgentsBotQualityRoute: HooksAgentsBotQualityRoute,
   HooksAgentsChurnRiskRoute: HooksAgentsChurnRiskRoute,
   HooksAgentsCronAllRoute: HooksAgentsCronAllRoute,
   HooksAgentsFeedbackLoopRoute: HooksAgentsFeedbackLoopRoute,
@@ -898,6 +939,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsSalesBotRoute: HooksAgentsSalesBotRoute,
   HooksAgentsSalesBotAllRoute: HooksAgentsSalesBotAllRoute,
   HooksAgentsSearchGapRoute: HooksAgentsSearchGapRoute,
+  HooksAgentsSegmentationRoute: HooksAgentsSegmentationRoute,
   HooksAgentsStockoutRoute: HooksAgentsStockoutRoute,
   HooksDemoSeedRoute: HooksDemoSeedRoute,
   HooksEnginesAbandonedCartRoute: HooksEnginesAbandonedCartRoute,

@@ -9,7 +9,18 @@ import {
   jsonOk,
 } from "@/lib/acos/agentRuntime";
 
-const AGENTS = ["churn-risk", "stockout", "aov-leak", "search-gap", "aov-optimizer", "price-optimizer", "price-revert", "memory-feedback"] as const;
+const AGENTS = [
+  "churn-risk",
+  "stockout",
+  "aov-leak",
+  "search-gap",
+  "aov-optimizer",
+  "price-optimizer",
+  "price-revert",
+  "bot-quality",
+  "segmentation",
+  "memory-feedback",
+] as const;
 
 export const Route = createFileRoute("/hooks/agents/run-all")({
   server: {
