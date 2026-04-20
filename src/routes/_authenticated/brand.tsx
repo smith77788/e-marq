@@ -13,6 +13,7 @@ import { InsightsPanel } from "@/components/owner/InsightsPanel";
 import { TrackingSnippet } from "@/components/owner/TrackingSnippet";
 import { KpiDashboard } from "@/components/owner/KpiDashboard";
 import { RevenueTrendChart } from "@/components/owner/RevenueTrendChart";
+import { TopCustomers } from "@/components/owner/TopCustomers";
 
 type Search = { tenant?: string };
 
@@ -102,6 +103,8 @@ function BrandPage() {
       <RevenueFeed tenantId={current.id} />
 
       <InsightsPanel tenantId={current.id} />
+
+      <TopCustomers tenantId={current.id} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <CustomerRoster tenantId={current.id} />
