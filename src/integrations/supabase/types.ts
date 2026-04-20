@@ -14,6 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      ab_tests: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          metric: string
+          name: string
+          results: Json
+          started_at: string
+          status: string
+          tenant_id: string
+          test_key: string
+          updated_at: string
+          variants: Json
+          winner_variant: string | null
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          metric?: string
+          name: string
+          results?: Json
+          started_at?: string
+          status?: string
+          tenant_id: string
+          test_key: string
+          updated_at?: string
+          variants?: Json
+          winner_variant?: string | null
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          metric?: string
+          name?: string
+          results?: Json
+          started_at?: string
+          status?: string
+          tenant_id?: string
+          test_key?: string
+          updated_at?: string
+          variants?: Json
+          winner_variant?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ab_tests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       acos_agent_runs: {
         Row: {
           agent_id: string
@@ -51,6 +107,103 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "acos_agent_runs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_conflicts: {
+        Row: {
+          conflict_type: string
+          conflicting_action_ids: string[]
+          created_at: string
+          id: string
+          reason: string | null
+          resolution: string
+          resolved_at: string | null
+          tenant_id: string
+          winning_action_id: string | null
+        }
+        Insert: {
+          conflict_type: string
+          conflicting_action_ids?: string[]
+          created_at?: string
+          id?: string
+          reason?: string | null
+          resolution?: string
+          resolved_at?: string | null
+          tenant_id: string
+          winning_action_id?: string | null
+        }
+        Update: {
+          conflict_type?: string
+          conflicting_action_ids?: string[]
+          created_at?: string
+          id?: string
+          reason?: string | null
+          resolution?: string
+          resolved_at?: string | null
+          tenant_id?: string
+          winning_action_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_conflicts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_health: {
+        Row: {
+          agent_id: string
+          created_at: string
+          health_score: number
+          id: string
+          insights_approved: number
+          insights_created: number
+          insights_dismissed: number
+          measured_on: string
+          measured_revenue_lift_cents: number
+          runs_failed: number
+          runs_total: number
+          tenant_id: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          health_score?: number
+          id?: string
+          insights_approved?: number
+          insights_created?: number
+          insights_dismissed?: number
+          measured_on?: string
+          measured_revenue_lift_cents?: number
+          runs_failed?: number
+          runs_total?: number
+          tenant_id: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          health_score?: number
+          id?: string
+          insights_approved?: number
+          insights_created?: number
+          insights_dismissed?: number
+          measured_on?: string
+          measured_revenue_lift_cents?: number
+          runs_failed?: number
+          runs_total?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_health_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -254,6 +407,264 @@ export type Database = {
           },
         ]
       }
+      cart_recovery_attempts: {
+        Row: {
+          abandoned_at: string
+          attempt_number: number
+          cart_items: Json
+          cart_value_cents: number
+          channel: string
+          created_at: string
+          customer_id: string | null
+          id: string
+          outbound_message_id: string | null
+          recovered: boolean
+          recovered_at: string | null
+          recovered_revenue_cents: number | null
+          session_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          abandoned_at?: string
+          attempt_number?: number
+          cart_items?: Json
+          cart_value_cents?: number
+          channel?: string
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          outbound_message_id?: string | null
+          recovered?: boolean
+          recovered_at?: string | null
+          recovered_revenue_cents?: number | null
+          session_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          abandoned_at?: string
+          attempt_number?: number
+          cart_items?: Json
+          cart_value_cents?: number
+          channel?: string
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          outbound_message_id?: string | null
+          recovered?: boolean
+          recovered_at?: string | null
+          recovered_revenue_cents?: number | null
+          session_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cart_recovery_attempts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_recovery_attempts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channel_attribution: {
+        Row: {
+          attributed_revenue: Json
+          attribution_model: string
+          created_at: string
+          customer_id: string | null
+          first_touch_channel: string | null
+          id: string
+          last_touch_channel: string | null
+          order_id: string | null
+          tenant_id: string
+          touchpoints: Json
+        }
+        Insert: {
+          attributed_revenue?: Json
+          attribution_model?: string
+          created_at?: string
+          customer_id?: string | null
+          first_touch_channel?: string | null
+          id?: string
+          last_touch_channel?: string | null
+          order_id?: string | null
+          tenant_id: string
+          touchpoints?: Json
+        }
+        Update: {
+          attributed_revenue?: Json
+          attribution_model?: string
+          created_at?: string
+          customer_id?: string | null
+          first_touch_channel?: string | null
+          id?: string
+          last_touch_channel?: string | null
+          order_id?: string | null
+          tenant_id?: string
+          touchpoints?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_attribution_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_attribution_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_attribution_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_pages: {
+        Row: {
+          agent: string | null
+          agent_generated: boolean
+          body_md: string | null
+          content_type: string
+          created_at: string
+          id: string
+          is_published: boolean
+          metadata: Json
+          published_at: string | null
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agent?: string | null
+          agent_generated?: boolean
+          body_md?: string | null
+          content_type?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          metadata?: Json
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agent?: string | null
+          agent_generated?: boolean
+          body_md?: string | null
+          content_type?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          metadata?: Json
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_pages_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_performance: {
+        Row: {
+          avg_time_on_page_seconds: number
+          bounce_rate: number
+          conversions: number
+          created_at: string
+          id: string
+          measured_on: string
+          page_id: string | null
+          search_clicks: number
+          search_impressions: number
+          search_position: number | null
+          tenant_id: string
+          unique_visitors: number
+          url: string
+          views: number
+        }
+        Insert: {
+          avg_time_on_page_seconds?: number
+          bounce_rate?: number
+          conversions?: number
+          created_at?: string
+          id?: string
+          measured_on?: string
+          page_id?: string | null
+          search_clicks?: number
+          search_impressions?: number
+          search_position?: number | null
+          tenant_id: string
+          unique_visitors?: number
+          url: string
+          views?: number
+        }
+        Update: {
+          avg_time_on_page_seconds?: number
+          bounce_rate?: number
+          conversions?: number
+          created_at?: string
+          id?: string
+          measured_on?: string
+          page_id?: string | null
+          search_clicks?: number
+          search_impressions?: number
+          search_position?: number | null
+          tenant_id?: string
+          unique_visitors?: number
+          url?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_performance_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "content_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_performance_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           body: string
@@ -301,6 +712,160 @@ export type Database = {
           },
           {
             foreignKeyName: "conversations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_cohorts: {
+        Row: {
+          cohort_month: string
+          computed_at: string
+          created_at: string
+          customer_count: number
+          id: string
+          retention_curve: Json
+          revenue_curve: Json
+          tenant_id: string
+        }
+        Insert: {
+          cohort_month: string
+          computed_at?: string
+          created_at?: string
+          customer_count?: number
+          id?: string
+          retention_curve?: Json
+          revenue_curve?: Json
+          tenant_id: string
+        }
+        Update: {
+          cohort_month?: string
+          computed_at?: string
+          created_at?: string
+          customer_count?: number
+          id?: string
+          retention_curve?: Json
+          revenue_curve?: Json
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_cohorts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_ltv_scores: {
+        Row: {
+          cac_cents: number | null
+          churn_probability: number
+          churn_reason: string | null
+          computed_at: string
+          created_at: string
+          customer_id: string
+          id: string
+          ltv_cac_ratio: number | null
+          predicted_ltv_cents: number
+          predicted_orders_12m: number
+          segment: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          cac_cents?: number | null
+          churn_probability?: number
+          churn_reason?: string | null
+          computed_at?: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          ltv_cac_ratio?: number | null
+          predicted_ltv_cents?: number
+          predicted_orders_12m?: number
+          segment?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          cac_cents?: number | null
+          churn_probability?: number
+          churn_reason?: string | null
+          computed_at?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          ltv_cac_ratio?: number | null
+          predicted_ltv_cents?: number
+          predicted_orders_12m?: number
+          segment?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_ltv_scores_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_ltv_scores_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_segments: {
+        Row: {
+          avg_ltv_cents: number
+          created_at: string
+          customer_count: number
+          description: string | null
+          id: string
+          is_auto_generated: boolean
+          name: string
+          rules: Json
+          segment_key: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          avg_ltv_cents?: number
+          created_at?: string
+          customer_count?: number
+          description?: string | null
+          id?: string
+          is_auto_generated?: boolean
+          name: string
+          rules?: Json
+          segment_key: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          avg_ltv_cents?: number
+          created_at?: string
+          customer_count?: number
+          description?: string | null
+          id?: string
+          is_auto_generated?: boolean
+          name?: string
+          rules?: Json
+          segment_key?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_segments_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -378,6 +943,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "customers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_digests: {
+        Row: {
+          created_at: string
+          delivered_at: string | null
+          delivered_channels: string[] | null
+          digest_date: string
+          highlights: Json
+          id: string
+          metrics: Json
+          recommended_actions: Json
+          summary: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          delivered_at?: string | null
+          delivered_channels?: string[] | null
+          digest_date: string
+          highlights?: Json
+          id?: string
+          metrics?: Json
+          recommended_actions?: Json
+          summary: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          delivered_at?: string | null
+          delivered_channels?: string[] | null
+          digest_date?: string
+          highlights?: Json
+          id?: string
+          metrics?: Json
+          recommended_actions?: Json
+          summary?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_digests_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -486,6 +1098,114 @@ export type Database = {
           },
           {
             foreignKeyName: "events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_forecasts: {
+        Row: {
+          computed_at: string
+          confidence: number
+          created_at: string
+          forecast_for_date: string
+          id: string
+          predicted_demand: number
+          predicted_stockout_at: string | null
+          product_id: string
+          recommended_reorder_qty: number
+          tenant_id: string
+        }
+        Insert: {
+          computed_at?: string
+          confidence?: number
+          created_at?: string
+          forecast_for_date: string
+          id?: string
+          predicted_demand?: number
+          predicted_stockout_at?: string | null
+          product_id: string
+          recommended_reorder_qty?: number
+          tenant_id: string
+        }
+        Update: {
+          computed_at?: string
+          confidence?: number
+          created_at?: string
+          forecast_for_date?: string
+          id?: string
+          predicted_demand?: number
+          predicted_stockout_at?: string | null
+          product_id?: string
+          recommended_reorder_qty?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_forecasts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_forecasts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_fraud_signals: {
+        Row: {
+          created_at: string
+          flagged: boolean
+          id: string
+          order_id: string
+          reviewed: boolean
+          reviewed_at: string | null
+          reviewer_decision: string | null
+          risk_score: number
+          signals: Json
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          flagged?: boolean
+          id?: string
+          order_id: string
+          reviewed?: boolean
+          reviewed_at?: string | null
+          reviewer_decision?: string | null
+          risk_score?: number
+          signals?: Json
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          flagged?: boolean
+          id?: string
+          order_id?: string
+          reviewed?: boolean
+          reviewed_at?: string | null
+          reviewer_decision?: string | null
+          risk_score?: number
+          signals?: Json
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_fraud_signals_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_fraud_signals_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -704,6 +1424,350 @@ export type Database = {
           },
         ]
       }
+      owner_notifications: {
+        Row: {
+          body: string | null
+          channel: string
+          created_at: string
+          id: string
+          is_read: boolean
+          kind: string
+          link: string | null
+          metadata: Json
+          severity: string
+          tenant_id: string
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          body?: string | null
+          channel?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          kind: string
+          link?: string | null
+          metadata?: Json
+          severity?: string
+          tenant_id: string
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          body?: string | null
+          channel?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          kind?: string
+          link?: string | null
+          metadata?: Json
+          severity?: string
+          tenant_id?: string
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_notifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      price_elasticity: {
+        Row: {
+          computed_at: string
+          confidence: number
+          created_at: string
+          data_window_days: number
+          elasticity: number
+          id: string
+          optimal_price_cents: number | null
+          product_id: string
+          sample_size: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          computed_at?: string
+          confidence?: number
+          created_at?: string
+          data_window_days?: number
+          elasticity?: number
+          id?: string
+          optimal_price_cents?: number | null
+          product_id: string
+          sample_size?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          computed_at?: string
+          confidence?: number
+          created_at?: string
+          data_window_days?: number
+          elasticity?: number
+          id?: string
+          optimal_price_cents?: number | null
+          product_id?: string
+          sample_size?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_elasticity_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "price_elasticity_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pricing_decisions: {
+        Row: {
+          agent: string
+          applied_at: string
+          created_at: string
+          elasticity_estimate: number | null
+          expected_margin_lift_pct: number | null
+          expected_volume_lift_pct: number | null
+          id: string
+          measured_revenue_lift_cents: number | null
+          new_price_cents: number
+          old_price_cents: number
+          product_id: string
+          reason: string
+          reverted_at: string | null
+          tenant_id: string
+        }
+        Insert: {
+          agent: string
+          applied_at?: string
+          created_at?: string
+          elasticity_estimate?: number | null
+          expected_margin_lift_pct?: number | null
+          expected_volume_lift_pct?: number | null
+          id?: string
+          measured_revenue_lift_cents?: number | null
+          new_price_cents: number
+          old_price_cents: number
+          product_id: string
+          reason: string
+          reverted_at?: string | null
+          tenant_id: string
+        }
+        Update: {
+          agent?: string
+          applied_at?: string
+          created_at?: string
+          elasticity_estimate?: number | null
+          expected_margin_lift_pct?: number | null
+          expected_volume_lift_pct?: number | null
+          id?: string
+          measured_revenue_lift_cents?: number | null
+          new_price_cents?: number
+          old_price_cents?: number
+          product_id?: string
+          reason?: string
+          reverted_at?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_decisions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pricing_decisions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_affinity: {
+        Row: {
+          co_purchase_count: number
+          computed_at: string
+          id: string
+          lift_score: number
+          product_a_id: string
+          product_b_id: string
+          tenant_id: string
+        }
+        Insert: {
+          co_purchase_count?: number
+          computed_at?: string
+          id?: string
+          lift_score?: number
+          product_a_id: string
+          product_b_id: string
+          tenant_id: string
+        }
+        Update: {
+          co_purchase_count?: number
+          computed_at?: string
+          id?: string
+          lift_score?: number
+          product_a_id?: string
+          product_b_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_affinity_product_a_id_fkey"
+            columns: ["product_a_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_affinity_product_b_id_fkey"
+            columns: ["product_b_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_affinity_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_bundles: {
+        Row: {
+          affinity_score: number
+          agent: string | null
+          bundle_price_cents: number
+          created_at: string
+          id: string
+          individual_price_cents: number
+          is_active: boolean
+          is_auto_generated: boolean
+          name: string
+          product_ids: string[]
+          revenue_cents: number
+          tenant_id: string
+          times_purchased: number
+          updated_at: string
+        }
+        Insert: {
+          affinity_score?: number
+          agent?: string | null
+          bundle_price_cents?: number
+          created_at?: string
+          id?: string
+          individual_price_cents?: number
+          is_active?: boolean
+          is_auto_generated?: boolean
+          name: string
+          product_ids?: string[]
+          revenue_cents?: number
+          tenant_id: string
+          times_purchased?: number
+          updated_at?: string
+        }
+        Update: {
+          affinity_score?: number
+          agent?: string | null
+          bundle_price_cents?: number
+          created_at?: string
+          id?: string
+          individual_price_cents?: number
+          is_active?: boolean
+          is_auto_generated?: boolean
+          name?: string
+          product_ids?: string[]
+          revenue_cents?: number
+          tenant_id?: string
+          times_purchased?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_bundles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_costs: {
+        Row: {
+          cost_cents: number
+          created_at: string
+          effective_from: string
+          effective_to: string | null
+          fulfillment_cost_cents: number
+          id: string
+          notes: string | null
+          product_id: string
+          shipping_cost_cents: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          cost_cents?: number
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          fulfillment_cost_cents?: number
+          id?: string
+          notes?: string | null
+          product_id: string
+          shipping_cost_cents?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          cost_cents?: number
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          fulfillment_cost_cents?: number
+          id?: string
+          notes?: string | null
+          product_id?: string
+          shipping_cost_cents?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_costs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_costs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           created_at: string
@@ -753,6 +1817,185 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "products_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promotions: {
+        Row: {
+          agent: string | null
+          applies_to_product_ids: string[] | null
+          applies_to_segment: string | null
+          code: string | null
+          cost_cents: number
+          created_at: string
+          ends_at: string | null
+          fatigue_score: number
+          id: string
+          is_active: boolean
+          name: string
+          promo_type: string
+          revenue_cents: number
+          starts_at: string
+          tenant_id: string
+          times_used: number
+          updated_at: string
+          usage_limit: number | null
+          value: number
+        }
+        Insert: {
+          agent?: string | null
+          applies_to_product_ids?: string[] | null
+          applies_to_segment?: string | null
+          code?: string | null
+          cost_cents?: number
+          created_at?: string
+          ends_at?: string | null
+          fatigue_score?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          promo_type?: string
+          revenue_cents?: number
+          starts_at?: string
+          tenant_id: string
+          times_used?: number
+          updated_at?: string
+          usage_limit?: number | null
+          value?: number
+        }
+        Update: {
+          agent?: string | null
+          applies_to_product_ids?: string[] | null
+          applies_to_segment?: string | null
+          code?: string | null
+          cost_cents?: number
+          created_at?: string
+          ends_at?: string | null
+          fatigue_score?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          promo_type?: string
+          revenue_cents?: number
+          starts_at?: string
+          tenant_id?: string
+          times_used?: number
+          updated_at?: string
+          usage_limit?: number | null
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      search_queries: {
+        Row: {
+          clicked: boolean
+          created_at: string
+          customer_id: string | null
+          id: string
+          led_to_purchase: boolean
+          occurred_at: string
+          query: string
+          result_count: number | null
+          source: string
+          tenant_id: string
+        }
+        Insert: {
+          clicked?: boolean
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          led_to_purchase?: boolean
+          occurred_at?: string
+          query: string
+          result_count?: number | null
+          source?: string
+          tenant_id: string
+        }
+        Update: {
+          clicked?: boolean
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          led_to_purchase?: boolean
+          occurred_at?: string
+          query?: string
+          result_count?: number | null
+          source?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_queries_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "search_queries_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_proof_events: {
+        Row: {
+          created_at: string
+          display_text: string
+          event_type: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          metadata: Json
+          product_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_text: string
+          event_type: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          product_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          display_text?: string
+          event_type?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          product_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_proof_events_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_proof_events_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -909,6 +2152,70 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      ugc_items: {
+        Row: {
+          body: string | null
+          created_at: string
+          customer_id: string | null
+          id: string
+          is_approved: boolean
+          is_featured: boolean
+          media_urls: string[] | null
+          product_id: string | null
+          rating: number | null
+          source: string
+          tenant_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          is_approved?: boolean
+          is_featured?: boolean
+          media_urls?: string[] | null
+          product_id?: string | null
+          rating?: number | null
+          source?: string
+          tenant_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          is_approved?: boolean
+          is_featured?: boolean
+          media_urls?: string[] | null
+          product_id?: string | null
+          rating?: number | null
+          source?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ugc_items_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
