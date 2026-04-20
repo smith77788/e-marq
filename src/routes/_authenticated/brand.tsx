@@ -15,6 +15,7 @@ import { KpiDashboard } from "@/components/owner/KpiDashboard";
 import { RevenueTrendChart } from "@/components/owner/RevenueTrendChart";
 import { TopCustomers } from "@/components/owner/TopCustomers";
 import { AgentTimeline } from "@/components/owner/AgentTimeline";
+import { MemoryInspector } from "@/components/owner/MemoryInspector";
 import { AnalyticsWindowProvider, AnalyticsWindowToggle } from "@/components/owner/AnalyticsWindow";
 
 type Search = { tenant?: string };
@@ -113,6 +114,8 @@ function BrandPage() {
       <InsightsPanel tenantId={current.id} />
 
       <AgentTimeline tenantId={current.id} />
+
+      <MemoryInspector tenantId={current.id} />
 
       <TopCustomers tenantId={current.id} />
 
