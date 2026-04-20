@@ -134,10 +134,6 @@ export async function runWinbackForTenant(tenantId: string): Promise<{ queued: n
   return { queued, skipped };
 }
 
-async function tally_count(customerId: string): Promise<number> {
-  const { data } = await supabaseAdmin.from("customers").select("total_orders").eq("id", customerId).maybeSingle();
-  return data?.total_orders ?? 1;
-}
 
 export const Route = createFileRoute("/hooks/engines/winback")({
   server: {
