@@ -77,7 +77,7 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
             .eq("is_active", true);
 
           if (!products || products.length === 0) {
-            await finishAgentRun(handle.runId, 0, { skipped: "no_products" });
+            await finishAgentRun(handle, 0, { skipped: "no_products" });
             return jsonOk({ insights_created: 0, reason: "no_products" });
           }
 
@@ -170,7 +170,7 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
                   monthly_revenue_cents: monthlyRev,
                   expected_uplift_cents: upliftMonthly,
                 },
-                dedupKey: `price_opt:up:${p.id}`,
+                dedup_key: `price_opt:up:${p.id}`,
               });
               continue;
             }
@@ -206,20 +206,20 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
                   monthly_revenue_cents: monthlyRev,
                   expected_uplift_cents: upliftMonthly,
                 },
-                dedupKey: `price_opt:down:${p.id}`,
+                dedup_key: `price_opt:down:${p.id}`,
               });
               continue;
             }
           }
 
           const inserted = await insertInsightsDedup(insights);
-          await finishAgentRun(handle.runId, inserted, {
+          await finishAgentRun(handle, inserted, {
             products_evaluated: products.length,
             candidates: insights.length,
           });
           return jsonOk({ insights_created: inserted, candidates: insights.length });
         } catch (e) {
-          await failAgentRun(handle.runId, (e as Error).message);
+          await failAgentRun(handle, (e as Error).message);
           return jsonError((e as Error).message, 500);
         }
       },
