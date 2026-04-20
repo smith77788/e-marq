@@ -22,6 +22,7 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBrandRouteImport } from './routes/_authenticated/brand'
 import { Route as TrackSlugJsRouteImport } from './routes/track.$slug.js'
+import { Route as HooksTelegramPollRouteImport } from './routes/hooks/telegram.poll'
 import { Route as HooksEnginesWinbackOneRouteImport } from './routes/hooks/engines.winback-one'
 import { Route as HooksEnginesWinbackAllRouteImport } from './routes/hooks/engines.winback-all'
 import { Route as HooksEnginesWinbackRouteImport } from './routes/hooks/engines.winback'
@@ -31,6 +32,7 @@ import { Route as HooksEnginesDispatchRouteImport } from './routes/hooks/engines
 import { Route as HooksEnginesAbandonedCartAllRouteImport } from './routes/hooks/engines.abandoned-cart-all'
 import { Route as HooksEnginesAbandonedCartRouteImport } from './routes/hooks/engines.abandoned-cart'
 import { Route as HooksDemoSeedRouteImport } from './routes/hooks/demo.seed'
+import { Route as HooksAgentsTickRouteImport } from './routes/hooks/agents.tick'
 import { Route as HooksAgentsStockoutRouteImport } from './routes/hooks/agents.stockout'
 import { Route as HooksAgentsSegmentationRouteImport } from './routes/hooks/agents.segmentation'
 import { Route as HooksAgentsSearchGapRouteImport } from './routes/hooks/agents.search-gap'
@@ -117,6 +119,11 @@ const TrackSlugJsRoute = TrackSlugJsRouteImport.update({
   path: '/track/$slug/js',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksTelegramPollRoute = HooksTelegramPollRouteImport.update({
+  id: '/hooks/telegram/poll',
+  path: '/hooks/telegram/poll',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksEnginesWinbackOneRoute = HooksEnginesWinbackOneRouteImport.update({
   id: '/hooks/engines/winback-one',
   path: '/hooks/engines/winback-one',
@@ -162,6 +169,11 @@ const HooksEnginesAbandonedCartRoute =
 const HooksDemoSeedRoute = HooksDemoSeedRouteImport.update({
   id: '/hooks/demo/seed',
   path: '/hooks/demo/seed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HooksAgentsTickRoute = HooksAgentsTickRouteImport.update({
+  id: '/hooks/agents/tick',
+  path: '/hooks/agents/tick',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HooksAgentsStockoutRoute = HooksAgentsStockoutRouteImport.update({
@@ -306,6 +318,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
+  '/hooks/agents/tick': typeof HooksAgentsTickRoute
   '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
@@ -315,6 +328,7 @@ export interface FileRoutesByFullPath {
   '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
   '/hooks/engines/winback-all': typeof HooksEnginesWinbackAllRoute
   '/hooks/engines/winback-one': typeof HooksEnginesWinbackOneRoute
+  '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
@@ -350,6 +364,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
+  '/hooks/agents/tick': typeof HooksAgentsTickRoute
   '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
@@ -359,6 +374,7 @@ export interface FileRoutesByTo {
   '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
   '/hooks/engines/winback-all': typeof HooksEnginesWinbackAllRoute
   '/hooks/engines/winback-one': typeof HooksEnginesWinbackOneRoute
+  '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
@@ -396,6 +412,7 @@ export interface FileRoutesById {
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
+  '/hooks/agents/tick': typeof HooksAgentsTickRoute
   '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
@@ -405,6 +422,7 @@ export interface FileRoutesById {
   '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
   '/hooks/engines/winback-all': typeof HooksEnginesWinbackAllRoute
   '/hooks/engines/winback-one': typeof HooksEnginesWinbackOneRoute
+  '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
@@ -442,6 +460,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/search-gap'
     | '/hooks/agents/segmentation'
     | '/hooks/agents/stockout'
+    | '/hooks/agents/tick'
     | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/abandoned-cart-all'
@@ -451,6 +470,7 @@ export interface FileRouteTypes {
     | '/hooks/engines/winback'
     | '/hooks/engines/winback-all'
     | '/hooks/engines/winback-one'
+    | '/hooks/telegram/poll'
     | '/track/$slug/js'
     | '/admin/tenants/$tenantId'
     | '/hooks/telegram/webhook/$tenant'
@@ -486,6 +506,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/search-gap'
     | '/hooks/agents/segmentation'
     | '/hooks/agents/stockout'
+    | '/hooks/agents/tick'
     | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/abandoned-cart-all'
@@ -495,6 +516,7 @@ export interface FileRouteTypes {
     | '/hooks/engines/winback'
     | '/hooks/engines/winback-all'
     | '/hooks/engines/winback-one'
+    | '/hooks/telegram/poll'
     | '/track/$slug/js'
     | '/admin/tenants/$tenantId'
     | '/hooks/telegram/webhook/$tenant'
@@ -531,6 +553,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/search-gap'
     | '/hooks/agents/segmentation'
     | '/hooks/agents/stockout'
+    | '/hooks/agents/tick'
     | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/abandoned-cart-all'
@@ -540,6 +563,7 @@ export interface FileRouteTypes {
     | '/hooks/engines/winback'
     | '/hooks/engines/winback-all'
     | '/hooks/engines/winback-one'
+    | '/hooks/telegram/poll'
     | '/track/$slug/js'
     | '/_authenticated/admin/tenants/$tenantId'
     | '/hooks/telegram/webhook/$tenant'
@@ -573,6 +597,7 @@ export interface RootRouteChildren {
   HooksAgentsSearchGapRoute: typeof HooksAgentsSearchGapRoute
   HooksAgentsSegmentationRoute: typeof HooksAgentsSegmentationRoute
   HooksAgentsStockoutRoute: typeof HooksAgentsStockoutRoute
+  HooksAgentsTickRoute: typeof HooksAgentsTickRoute
   HooksDemoSeedRoute: typeof HooksDemoSeedRoute
   HooksEnginesAbandonedCartRoute: typeof HooksEnginesAbandonedCartRoute
   HooksEnginesAbandonedCartAllRoute: typeof HooksEnginesAbandonedCartAllRoute
@@ -582,6 +607,7 @@ export interface RootRouteChildren {
   HooksEnginesWinbackRoute: typeof HooksEnginesWinbackRoute
   HooksEnginesWinbackAllRoute: typeof HooksEnginesWinbackAllRoute
   HooksEnginesWinbackOneRoute: typeof HooksEnginesWinbackOneRoute
+  HooksTelegramPollRoute: typeof HooksTelegramPollRoute
   TrackSlugJsRoute: typeof TrackSlugJsRoute
   HooksTelegramWebhookTenantRoute: typeof HooksTelegramWebhookTenantRoute
 }
@@ -679,6 +705,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackSlugJsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/telegram/poll': {
+      id: '/hooks/telegram/poll'
+      path: '/hooks/telegram/poll'
+      fullPath: '/hooks/telegram/poll'
+      preLoaderRoute: typeof HooksTelegramPollRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/engines/winback-one': {
       id: '/hooks/engines/winback-one'
       path: '/hooks/engines/winback-one'
@@ -740,6 +773,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/demo/seed'
       fullPath: '/hooks/demo/seed'
       preLoaderRoute: typeof HooksDemoSeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/tick': {
+      id: '/hooks/agents/tick'
+      path: '/hooks/agents/tick'
+      fullPath: '/hooks/agents/tick'
+      preLoaderRoute: typeof HooksAgentsTickRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/stockout': {
@@ -962,6 +1002,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsSearchGapRoute: HooksAgentsSearchGapRoute,
   HooksAgentsSegmentationRoute: HooksAgentsSegmentationRoute,
   HooksAgentsStockoutRoute: HooksAgentsStockoutRoute,
+  HooksAgentsTickRoute: HooksAgentsTickRoute,
   HooksDemoSeedRoute: HooksDemoSeedRoute,
   HooksEnginesAbandonedCartRoute: HooksEnginesAbandonedCartRoute,
   HooksEnginesAbandonedCartAllRoute: HooksEnginesAbandonedCartAllRoute,
@@ -971,6 +1012,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksEnginesWinbackRoute: HooksEnginesWinbackRoute,
   HooksEnginesWinbackAllRoute: HooksEnginesWinbackAllRoute,
   HooksEnginesWinbackOneRoute: HooksEnginesWinbackOneRoute,
+  HooksTelegramPollRoute: HooksTelegramPollRoute,
   TrackSlugJsRoute: TrackSlugJsRoute,
   HooksTelegramWebhookTenantRoute: HooksTelegramWebhookTenantRoute,
 }
