@@ -84,12 +84,18 @@ function BrandPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <Bot className="h-5 w-5 text-primary" />
+            <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
+              <Bot className="h-4 w-4 text-primary-foreground" />
+            </span>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">{current.name}</h1>
-            <Badge variant="outline">/{current.slug}</Badge>
+            <Badge variant="outline" className="font-mono text-[10px]">/{current.slug}</Badge>
+            <Badge variant="outline" className="border-success/40 text-success text-[10px]">
+              <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+              LIVE
+            </Badge>
           </div>
-          <p className="text-sm text-muted-foreground">
-            What the system did for you, who it knows, and how to plug in your channel.
+          <p className="mt-1 text-sm text-muted-foreground">
+            Mission cockpit · what the autonomous fleet did, who it knows, what it earned.
           </p>
         </div>
         {tenants.length > 1 && (
@@ -107,15 +113,30 @@ function BrandPage() {
 
       <SetupChecklist tenantId={current.id} tenantSlug={current.slug} />
 
+      <CockpitHero tenantId={current.id} />
+
       <AnalyticsWindowProvider initial={30}>
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Revenue performance</h2>
           <AnalyticsWindowToggle />
         </div>
 
-        <KpiDashboard tenantId={current.id} />
+        <div className="grid gap-4 lg:grid-cols-3">
+          <div className="lg:col-span-2"><RevenueTrendChart tenantId={current.id} /></div>
+          <FunnelChart tenantId={current.id} />
+        </div>
 
-        <RevenueTrendChart tenantId={current.id} />
+        <KpiDashboard tenantId={current.id} />
       </AnalyticsWindowProvider>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <LifecycleDistribution tenantId={current.id} />
+        <CohortRetention tenantId={current.id} />
+      </div>
+
+      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Autonomous fleet</h2>
+
+      <AgentHealthHeatmap tenantId={current.id} />
 
       <RevenueFeed tenantId={current.id} />
 
@@ -124,6 +145,8 @@ function BrandPage() {
       <AgentTimeline tenantId={current.id} />
 
       <MemoryInspector tenantId={current.id} />
+
+      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Customers & channels</h2>
 
       <TopCustomers tenantId={current.id} />
 
