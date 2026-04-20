@@ -104,6 +104,8 @@ function BrandPage() {
 
       <InsightsPanel tenantId={current.id} />
 
+      <TopCustomers tenantId={current.id} />
+
       <div className="grid gap-6 lg:grid-cols-2">
         <CustomerRoster tenantId={current.id} />
         <ChannelSetup tenantId={current.id} tenantSlug={current.slug} />
