@@ -29,6 +29,13 @@ export type TenantConfigValues = {
     description: string;
     og_image_url: string;
   };
+  payments: {
+    manual_enabled: boolean;
+    stripe_enabled: boolean;
+    manual_instructions: string;
+    manual_contact: string;
+    currency: string;
+  };
 };
 
 type AnyRecord = Record<string, unknown>;
@@ -51,6 +58,7 @@ export function normalizeConfig(input: {
   const features = obj(input.features);
   const bot = obj(input.bot);
   const seo = obj(input.seo);
+  const payments = obj((features as AnyRecord).payments ?? (input as AnyRecord & { payments?: unknown }).payments);
   const theme = str(ui.theme, "system");
   return {
     brand_name: str(input.brand_name, ""),
@@ -74,6 +82,16 @@ export function normalizeConfig(input: {
       title: str(seo.title, ""),
       description: str(seo.description, ""),
       og_image_url: str(seo.og_image_url, ""),
+    },
+    payments: {
+      manual_enabled: bool(payments.manual_enabled, true),
+      stripe_enabled: bool(payments.stripe_enabled, false),
+      manual_instructions: str(
+        payments.manual_instructions,
+        "Bank transfer: IBAN UA00 0000 0000 0000 0000 0000 000\nReference your order ID in the payment description.",
+      ),
+      manual_contact: str(payments.manual_contact, ""),
+      currency: str(payments.currency, "USD"),
     },
   };
 }
