@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { lovable } from "@/integrations/lovable";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -17,7 +19,15 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+
+  // If we already have a session (e.g. OAuth completed in background), redirect.
+  useEffect(() => {
+    if (!loading && user) {
+      void navigate({ to: "/dashboard", replace: true });
+    }
+  }, [loading, user, navigate]);
 
   async function onGoogle() {
     setSubmitting(true);
@@ -25,14 +35,28 @@ function LoginPage() {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
+      if (result.redirected) return;
+
+      // Even if lovable reports an error, the underlying supabase session may have
+      // been established (the OAuth broker delivered tokens). Re-check before failing.
       if (result.error) {
-        toast.error(result.error instanceof Error ? result.error.message : "Не вдалось увійти через Google");
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          toast.success("Вітаємо!");
+          navigate({ to: "/dashboard", replace: true });
+          return;
+        }
+        const msg = result.error instanceof Error ? result.error.message : String(result.error);
+        // Suppress noisy "cancelled" message if user actually closed the popup.
+        if (!/cancel/i.test(msg)) {
+          toast.error(msg || "Не вдалось увійти через Google");
+        }
         setSubmitting(false);
         return;
       }
-      if (result.redirected) return;
+
       toast.success("Вітаємо!");
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/dashboard", replace: true });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Sign in failed");
       setSubmitting(false);
