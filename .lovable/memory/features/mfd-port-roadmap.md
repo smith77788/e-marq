@@ -4,7 +4,7 @@ description: Mapping 88 MFD acos-* edge functions to 45 generalized ACOS agents 
 type: feature
 ---
 **Strategy**: 40-50 generalized agents (not 1:1 port). Full MFD-stack tables (22) added in batch 0.
-**Done**: Batch 0 (22 tables + RLS), Batch 1 (margin-optimizer, ltv-predictor, cart-recovery, anomaly-detector, morning-brief).
+**Done**: Batch 0 (22 tables + RLS), Batch 1 (margin-optimizer, ltv-predictor, cart-recovery, anomaly-detector, morning-brief), Batch 2 (bundle-recommender, promo-fatigue, promo-portfolio, discount-elasticity, predictive-pricing).
 **Remaining batches** (5 agents each):
 - B2: bundle-recommender, promo-fatigue, promo-portfolio, discount-elasticity, predictive-pricing
 - B3: cohort-engine, attribution, funnel-healer, browse-abandonment, second-order-nurture

@@ -1,5 +1,3 @@
-# Memory: index.md
-
 # Project Memory
 
 ## Core
@@ -13,3 +11,4 @@ First pilot tenant = MFD-like синтетичний 90-day dataset.
 
 ## Memories
 - [MFD port roadmap](mem://features/mfd-port-roadmap) — мапа 88 MFD-функцій → 45 generalized агентів, прогрес по батчах
+- [Visual roadmap](mem://preferences/visual-roadmap) — dark/light toggle + charts з insights/БД, поступовий polish UI
