@@ -17,7 +17,10 @@ import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SSlugRouteImport } from './routes/s.$slug'
+import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as HooksEnginesReorderRouteImport } from './routes/hooks/engines.reorder'
+import { Route as HooksEnginesDispatchRouteImport } from './routes/hooks/engines.dispatch'
 import { Route as HooksAgentsStockoutRouteImport } from './routes/hooks/agents.stockout'
 import { Route as HooksAgentsSearchGapRouteImport } from './routes/hooks/agents.search-gap'
 import { Route as HooksAgentsRunAllRouteImport } from './routes/hooks/agents.run-all'
@@ -28,6 +31,7 @@ import { Route as HooksAgentsAovLeakRouteImport } from './routes/hooks/agents.ao
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin.tenants'
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
+import { Route as HooksTelegramWebhookTenantRouteImport } from './routes/hooks/telegram.webhook.$tenant'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
 
 const SignupRoute = SignupRouteImport.update({
@@ -69,10 +73,25 @@ const SSlugRoute = SSlugRouteImport.update({
   path: '/s/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksIngestRoute = HooksIngestRouteImport.update({
+  id: '/hooks/ingest',
+  path: '/hooks/ingest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const HooksEnginesReorderRoute = HooksEnginesReorderRouteImport.update({
+  id: '/hooks/engines/reorder',
+  path: '/hooks/engines/reorder',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HooksEnginesDispatchRoute = HooksEnginesDispatchRouteImport.update({
+  id: '/hooks/engines/dispatch',
+  path: '/hooks/engines/dispatch',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const HooksAgentsStockoutRoute = HooksAgentsStockoutRouteImport.update({
   id: '/hooks/agents/stockout',
@@ -126,6 +145,12 @@ const SSlugOrdersOrderIdRoute = SSlugOrdersOrderIdRouteImport.update({
   path: '/orders/$orderId',
   getParentRoute: () => SSlugRoute,
 } as any)
+const HooksTelegramWebhookTenantRoute =
+  HooksTelegramWebhookTenantRouteImport.update({
+    id: '/hooks/telegram/webhook/$tenant',
+    path: '/hooks/telegram/webhook/$tenant',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAdminTenantsTenantIdRoute =
   AuthenticatedAdminTenantsTenantIdRouteImport.update({
     id: '/$tenantId',
@@ -141,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/signup': typeof SignupRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
@@ -151,7 +177,10 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
+  '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
+  '/hooks/engines/reorder': typeof HooksEnginesReorderRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
+  '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
 export interface FileRoutesByTo {
@@ -162,6 +191,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/signup': typeof SignupRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
@@ -172,7 +202,10 @@ export interface FileRoutesByTo {
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
+  '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
+  '/hooks/engines/reorder': typeof HooksEnginesReorderRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
+  '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
 export interface FileRoutesById {
@@ -185,6 +218,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/signup': typeof SignupRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
@@ -195,7 +229,10 @@ export interface FileRoutesById {
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
+  '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
+  '/hooks/engines/reorder': typeof HooksEnginesReorderRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
+  '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
 export interface FileRouteTypes {
@@ -208,6 +245,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/signup'
     | '/dashboard'
+    | '/hooks/ingest'
     | '/s/$slug'
     | '/admin/tenants'
     | '/hooks/actions/apply'
@@ -218,7 +256,10 @@ export interface FileRouteTypes {
     | '/hooks/agents/run-all'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
+    | '/hooks/engines/dispatch'
+    | '/hooks/engines/reorder'
     | '/admin/tenants/$tenantId'
+    | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -229,6 +270,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/signup'
     | '/dashboard'
+    | '/hooks/ingest'
     | '/s/$slug'
     | '/admin/tenants'
     | '/hooks/actions/apply'
@@ -239,7 +281,10 @@ export interface FileRouteTypes {
     | '/hooks/agents/run-all'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
+    | '/hooks/engines/dispatch'
+    | '/hooks/engines/reorder'
     | '/admin/tenants/$tenantId'
+    | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
   id:
     | '__root__'
@@ -251,6 +296,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/signup'
     | '/_authenticated/dashboard'
+    | '/hooks/ingest'
     | '/s/$slug'
     | '/_authenticated/admin/tenants'
     | '/hooks/actions/apply'
@@ -261,7 +307,10 @@ export interface FileRouteTypes {
     | '/hooks/agents/run-all'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
+    | '/hooks/engines/dispatch'
+    | '/hooks/engines/reorder'
     | '/_authenticated/admin/tenants/$tenantId'
+    | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
   fileRoutesById: FileRoutesById
 }
@@ -273,6 +322,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
   SignupRoute: typeof SignupRoute
+  HooksIngestRoute: typeof HooksIngestRoute
   SSlugRoute: typeof SSlugRouteWithChildren
   HooksActionsApplyRoute: typeof HooksActionsApplyRoute
   HooksAgentsAovLeakRoute: typeof HooksAgentsAovLeakRoute
@@ -282,6 +332,9 @@ export interface RootRouteChildren {
   HooksAgentsRunAllRoute: typeof HooksAgentsRunAllRoute
   HooksAgentsSearchGapRoute: typeof HooksAgentsSearchGapRoute
   HooksAgentsStockoutRoute: typeof HooksAgentsStockoutRoute
+  HooksEnginesDispatchRoute: typeof HooksEnginesDispatchRoute
+  HooksEnginesReorderRoute: typeof HooksEnginesReorderRoute
+  HooksTelegramWebhookTenantRoute: typeof HooksTelegramWebhookTenantRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -342,12 +395,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/ingest': {
+      id: '/hooks/ingest'
+      path: '/hooks/ingest'
+      fullPath: '/hooks/ingest'
+      preLoaderRoute: typeof HooksIngestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/hooks/engines/reorder': {
+      id: '/hooks/engines/reorder'
+      path: '/hooks/engines/reorder'
+      fullPath: '/hooks/engines/reorder'
+      preLoaderRoute: typeof HooksEnginesReorderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/engines/dispatch': {
+      id: '/hooks/engines/dispatch'
+      path: '/hooks/engines/dispatch'
+      fullPath: '/hooks/engines/dispatch'
+      preLoaderRoute: typeof HooksEnginesDispatchRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/stockout': {
       id: '/hooks/agents/stockout'
@@ -419,6 +493,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SSlugOrdersOrderIdRouteImport
       parentRoute: typeof SSlugRoute
     }
+    '/hooks/telegram/webhook/$tenant': {
+      id: '/hooks/telegram/webhook/$tenant'
+      path: '/hooks/telegram/webhook/$tenant'
+      fullPath: '/hooks/telegram/webhook/$tenant'
+      preLoaderRoute: typeof HooksTelegramWebhookTenantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/tenants/$tenantId': {
       id: '/_authenticated/admin/tenants/$tenantId'
       path: '/$tenantId'
@@ -476,6 +557,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
   SignupRoute: SignupRoute,
+  HooksIngestRoute: HooksIngestRoute,
   SSlugRoute: SSlugRouteWithChildren,
   HooksActionsApplyRoute: HooksActionsApplyRoute,
   HooksAgentsAovLeakRoute: HooksAgentsAovLeakRoute,
@@ -485,6 +567,9 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsRunAllRoute: HooksAgentsRunAllRoute,
   HooksAgentsSearchGapRoute: HooksAgentsSearchGapRoute,
   HooksAgentsStockoutRoute: HooksAgentsStockoutRoute,
+  HooksEnginesDispatchRoute: HooksEnginesDispatchRoute,
+  HooksEnginesReorderRoute: HooksEnginesReorderRoute,
+  HooksTelegramWebhookTenantRoute: HooksTelegramWebhookTenantRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
