@@ -255,75 +255,25 @@ function TenantDetailPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const scaleMultiplier = demoScale === "small" ? 1 : demoScale === "medium" ? 3 : 10;
-  const sessionsToCreate = 50 * scaleMultiplier;
-  const ordersToCreate = 5 * scaleMultiplier;
-
-  const generateDemoMutation = useMutation({
+  const generateAcosMutation = useMutation({
     mutationFn: async () => {
       const existingProducts = productsQuery.data ?? [];
-      const hasData = existingProducts.length > 0;
-
-      if (demoSkipExisting && hasData) {
+      if (acosSkipExisting && existingProducts.length > 0) {
         throw new Error(
-          "Tenant already has data. Disable 'Skip if data exists' or clear demo data first.",
+          "Tenant already has data. Disable 'Skip if data exists' or clear it first.",
         );
       }
-
-      // 1) Products
-      toast.loading("Creating products… (1/3)", { id: "demo-gen" });
-      let productIds: string[];
-      const productMeta = new Map<string, { name: string; price_cents: number }>();
-
-      if (existingProducts.length >= DEMO_PRODUCT_COUNT) {
-        productIds = existingProducts.map((p) => p.id);
-        for (const p of existingProducts) {
-          productMeta.set(p.id, { name: p.name, price_cents: p.price_cents });
-        }
-      } else {
-        productIds = await generateDemoProducts(tenantId, supabase);
-        const { data: fresh, error } = await supabase
-          .from("products")
-          .select("id, name, price_cents")
-          .in("id", productIds);
-        if (error) throw error;
-        for (const p of fresh ?? []) {
-          productMeta.set(p.id, { name: p.name, price_cents: p.price_cents });
-        }
-      }
-
-      // 2) Orders
-      toast.loading("Creating orders… (2/3)", { id: "demo-gen" });
-      const orders = await generateDemoOrders(
-        tenantId,
-        productIds,
-        productMeta,
-        ordersToCreate,
-        supabase,
-      );
-
-      // 3) Events
-      toast.loading("Generating events… (3/3)", { id: "demo-gen" });
-      const eventCount = await generateDemoEvents(
-        tenantId,
-        productIds,
-        orders.map((o) => o.orderId),
-        sessionsToCreate,
-        supabase,
-      );
-
-      return {
-        products: productIds.length,
-        orders: orders.length,
-        events: eventCount,
-      };
+      toast.loading("Generating ACOS dataset…", { id: "acos-gen" });
+      const result = await generateAcosDataset(tenantId, acosScale, supabase);
+      return result;
     },
     onSuccess: (result) => {
+      setLastAcosResult(result);
       toast.success(
-        `Created ${result.products} products, ${result.orders} orders, ${result.events} events`,
-        { id: "demo-gen" },
+        `${result.products} products · ${result.customers} customers · ${result.orders} orders · ${result.events} events`,
+        { id: "acos-gen", duration: 6000 },
       );
-      setDemoConfirmOpen(false);
+      setAcosConfirmOpen(false);
       queryClient.invalidateQueries({ queryKey: ["tenant-products", tenantId] });
       queryClient.invalidateQueries({ queryKey: ["tenant-orders-count", tenantId] });
       queryClient.invalidateQueries({ queryKey: ["tenant-events-count", tenantId] });
@@ -331,7 +281,7 @@ function TenantDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["tenant-revenue", tenantId] });
     },
     onError: (e: Error) => {
-      toast.error(e.message, { id: "demo-gen" });
+      toast.error(e.message, { id: "acos-gen" });
     },
   });
 
