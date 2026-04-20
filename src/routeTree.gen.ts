@@ -52,7 +52,6 @@ import { Route as HooksAgentsAovLeakRouteImport } from './routes/hooks/agents.ao
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin.tenants'
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
-import { Route as HooksTelegramWebhookTenantRouteImport } from './routes/hooks/telegram.webhook.$tenant'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
 
 const SignupRoute = SignupRouteImport.update({
@@ -275,12 +274,6 @@ const SSlugOrdersOrderIdRoute = SSlugOrdersOrderIdRouteImport.update({
   path: '/orders/$orderId',
   getParentRoute: () => SSlugRoute,
 } as any)
-const HooksTelegramWebhookTenantRoute =
-  HooksTelegramWebhookTenantRouteImport.update({
-    id: '/hooks/telegram/webhook/$tenant',
-    path: '/hooks/telegram/webhook/$tenant',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const AuthenticatedAdminTenantsTenantIdRoute =
   AuthenticatedAdminTenantsTenantIdRouteImport.update({
     id: '/$tenantId',
@@ -331,7 +324,6 @@ export interface FileRoutesByFullPath {
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
-  '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
 export interface FileRoutesByTo {
@@ -377,7 +369,6 @@ export interface FileRoutesByTo {
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
-  '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
 export interface FileRoutesById {
@@ -425,7 +416,6 @@ export interface FileRoutesById {
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
-  '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
 export interface FileRouteTypes {
@@ -473,7 +463,6 @@ export interface FileRouteTypes {
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
     | '/admin/tenants/$tenantId'
-    | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -519,7 +508,6 @@ export interface FileRouteTypes {
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
     | '/admin/tenants/$tenantId'
-    | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
   id:
     | '__root__'
@@ -566,7 +554,6 @@ export interface FileRouteTypes {
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
     | '/_authenticated/admin/tenants/$tenantId'
-    | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
   fileRoutesById: FileRoutesById
 }
@@ -609,7 +596,6 @@ export interface RootRouteChildren {
   HooksEnginesWinbackOneRoute: typeof HooksEnginesWinbackOneRoute
   HooksTelegramPollRoute: typeof HooksTelegramPollRoute
   TrackSlugJsRoute: typeof TrackSlugJsRoute
-  HooksTelegramWebhookTenantRoute: typeof HooksTelegramWebhookTenantRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -915,13 +901,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SSlugOrdersOrderIdRouteImport
       parentRoute: typeof SSlugRoute
     }
-    '/hooks/telegram/webhook/$tenant': {
-      id: '/hooks/telegram/webhook/$tenant'
-      path: '/hooks/telegram/webhook/$tenant'
-      fullPath: '/hooks/telegram/webhook/$tenant'
-      preLoaderRoute: typeof HooksTelegramWebhookTenantRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/admin/tenants/$tenantId': {
       id: '/_authenticated/admin/tenants/$tenantId'
       path: '/$tenantId'
@@ -1014,7 +993,6 @@ const rootRouteChildren: RootRouteChildren = {
   HooksEnginesWinbackOneRoute: HooksEnginesWinbackOneRoute,
   HooksTelegramPollRoute: HooksTelegramPollRoute,
   TrackSlugJsRoute: TrackSlugJsRoute,
-  HooksTelegramWebhookTenantRoute: HooksTelegramWebhookTenantRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
