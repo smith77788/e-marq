@@ -74,7 +74,7 @@ export const Route = createFileRoute("/hooks/agents/loyalty-tiers")({
               title: `Loyalty-tiers: 4 рівня готові до запуску`,
               description: `Аналіз LTV ${n} клієнтів дає природні breakpoints для Bronze/Silver/Gold/Platinum.`,
               expected_impact:
-                "Запуск tier-програми зазвичай підвищує retention на 10-20% через "статусний" ефект.",
+                'Запуск tier-програми зазвичай підвищує retention на 10-20% через "статусний" ефект.',
               confidence: 0.7,
               risk_level: "low",
               metrics: {
