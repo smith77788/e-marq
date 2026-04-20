@@ -15,6 +15,7 @@ import { KpiDashboard } from "@/components/owner/KpiDashboard";
 import { RevenueTrendChart } from "@/components/owner/RevenueTrendChart";
 import { TopCustomers } from "@/components/owner/TopCustomers";
 import { AgentTimeline } from "@/components/owner/AgentTimeline";
+import { AnalyticsWindowProvider, AnalyticsWindowToggle } from "@/components/owner/AnalyticsWindow";
 
 type Search = { tenant?: string };
 
