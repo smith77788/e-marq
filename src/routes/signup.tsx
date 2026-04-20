@@ -1,55 +1,40 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/hooks/useAuth";
+import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
       { title: "Create account — ACOS" },
-      { name: "description", content: "Create your ACOS workspace account." },
+      { name: "description", content: "Create your ACOS workspace with Google." },
     ],
   }),
   component: SignupPage,
 });
 
 function SignupPage() {
-  const { signUp } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      toast.error("Паролі не співпадають");
-      return;
-    }
-    if (password.length < 8) {
-      toast.error("Пароль має містити мінімум 8 символів");
-      return;
-    }
+  async function onGoogle() {
     setSubmitting(true);
     try {
-      const { needsEmailConfirmation } = await signUp(email, password);
-      if (needsEmailConfirmation) {
-        toast.success("Перевірте пошту для підтвердження акаунту");
-        navigate({ to: "/login" });
-      } else {
-        toast.success("Account created");
-        navigate({ to: "/dashboard" });
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error(result.error instanceof Error ? result.error.message : "Не вдалось зареєструватись через Google");
+        setSubmitting(false);
+        return;
       }
+      if (result.redirected) return;
+      toast.success("Account created");
+      navigate({ to: "/dashboard" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Sign up failed");
-    } finally {
       setSubmitting(false);
     }
   }
@@ -59,69 +44,29 @@ function SignupPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Create account</CardTitle>
-          <CardDescription>Spin up your ACOS workspace in seconds.</CardDescription>
+          <CardDescription>Зареєструйтесь у ACOS через Google за секунду.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  minLength={8}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="new-password"
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              <p className="text-xs text-muted-foreground">Мінімум 8 символів.</p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm password</Label>
-              <Input
-                id="confirmPassword"
-                type={showPassword ? "text" : "password"}
-                required
-                minLength={8}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                autoComplete="new-password"
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "Creating…" : "Create account"}
-            </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <Link to="/login" className="font-medium text-primary hover:underline">
-                Sign in
-              </Link>
-            </p>
-          </form>
+        <CardContent className="space-y-4">
+          <Button type="button" variant="outline" className="w-full" onClick={onGoogle} disabled={submitting}>
+            <GoogleIcon />
+            {submitting ? "Перенаправлення…" : "Sign up with Google"}
+          </Button>
+          <p className="text-center text-sm text-muted-foreground">
+            Вже маєте акаунт?{" "}
+            <Link to="/login" className="font-medium text-primary hover:underline">
+              Увійти
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </main>
+  );
+}
+
+function GoogleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+      <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.7 3.4 14.6 2.4 12 2.4 6.7 2.4 2.5 6.6 2.5 12s4.2 9.6 9.5 9.6c5.5 0 9.1-3.9 9.1-9.3 0-.6-.1-1.1-.2-1.6H12z"/>
+    </svg>
   );
 }
