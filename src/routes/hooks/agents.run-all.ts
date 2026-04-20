@@ -46,6 +46,12 @@ const AGENTS = [
   "best-time-to-send",
   "csat-dispatcher",
   "nurture-roi",
+  // Batch 5: SEO/content
+  "seo-rewriter",
+  "content-velocity",
+  "ugc-harvester",
+  "search-intent-miner",
+  "programmatic-seo",
 ] as const;
 
 export const Route = createFileRoute("/hooks/agents/run-all")({
