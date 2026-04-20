@@ -35,6 +35,7 @@ import { Route as HooksAgentsSearchGapRouteImport } from './routes/hooks/agents.
 import { Route as HooksAgentsSalesBotAllRouteImport } from './routes/hooks/agents.sales-bot-all'
 import { Route as HooksAgentsSalesBotRouteImport } from './routes/hooks/agents.sales-bot'
 import { Route as HooksAgentsRunAllRouteImport } from './routes/hooks/agents.run-all'
+import { Route as HooksAgentsPriceRevertRouteImport } from './routes/hooks/agents.price-revert'
 import { Route as HooksAgentsPriceOptimizerRouteImport } from './routes/hooks/agents.price-optimizer'
 import { Route as HooksAgentsMemoryFeedbackRouteImport } from './routes/hooks/agents.memory-feedback'
 import { Route as HooksAgentsFeedbackLoopAllRouteImport } from './routes/hooks/agents.feedback-loop-all'
@@ -180,6 +181,11 @@ const HooksAgentsRunAllRoute = HooksAgentsRunAllRouteImport.update({
   path: '/hooks/agents/run-all',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsPriceRevertRoute = HooksAgentsPriceRevertRouteImport.update({
+  id: '/hooks/agents/price-revert',
+  path: '/hooks/agents/price-revert',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsPriceOptimizerRoute =
   HooksAgentsPriceOptimizerRouteImport.update({
     id: '/hooks/agents/price-optimizer',
@@ -273,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
   '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
   '/hooks/agents/price-optimizer': typeof HooksAgentsPriceOptimizerRoute
+  '/hooks/agents/price-revert': typeof HooksAgentsPriceRevertRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
@@ -313,6 +320,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
   '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
   '/hooks/agents/price-optimizer': typeof HooksAgentsPriceOptimizerRoute
+  '/hooks/agents/price-revert': typeof HooksAgentsPriceRevertRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
@@ -355,6 +363,7 @@ export interface FileRoutesById {
   '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
   '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
   '/hooks/agents/price-optimizer': typeof HooksAgentsPriceOptimizerRoute
+  '/hooks/agents/price-revert': typeof HooksAgentsPriceRevertRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
@@ -397,6 +406,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/feedback-loop-all'
     | '/hooks/agents/memory-feedback'
     | '/hooks/agents/price-optimizer'
+    | '/hooks/agents/price-revert'
     | '/hooks/agents/run-all'
     | '/hooks/agents/sales-bot'
     | '/hooks/agents/sales-bot-all'
@@ -437,6 +447,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/feedback-loop-all'
     | '/hooks/agents/memory-feedback'
     | '/hooks/agents/price-optimizer'
+    | '/hooks/agents/price-revert'
     | '/hooks/agents/run-all'
     | '/hooks/agents/sales-bot'
     | '/hooks/agents/sales-bot-all'
@@ -478,6 +489,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/feedback-loop-all'
     | '/hooks/agents/memory-feedback'
     | '/hooks/agents/price-optimizer'
+    | '/hooks/agents/price-revert'
     | '/hooks/agents/run-all'
     | '/hooks/agents/sales-bot'
     | '/hooks/agents/sales-bot-all'
@@ -517,6 +529,7 @@ export interface RootRouteChildren {
   HooksAgentsFeedbackLoopAllRoute: typeof HooksAgentsFeedbackLoopAllRoute
   HooksAgentsMemoryFeedbackRoute: typeof HooksAgentsMemoryFeedbackRoute
   HooksAgentsPriceOptimizerRoute: typeof HooksAgentsPriceOptimizerRoute
+  HooksAgentsPriceRevertRoute: typeof HooksAgentsPriceRevertRoute
   HooksAgentsRunAllRoute: typeof HooksAgentsRunAllRoute
   HooksAgentsSalesBotRoute: typeof HooksAgentsSalesBotRoute
   HooksAgentsSalesBotAllRoute: typeof HooksAgentsSalesBotAllRoute
@@ -719,6 +732,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsRunAllRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/price-revert': {
+      id: '/hooks/agents/price-revert'
+      path: '/hooks/agents/price-revert'
+      fullPath: '/hooks/agents/price-revert'
+      preLoaderRoute: typeof HooksAgentsPriceRevertRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/price-optimizer': {
       id: '/hooks/agents/price-optimizer'
       path: '/hooks/agents/price-optimizer'
@@ -873,6 +893,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsFeedbackLoopAllRoute: HooksAgentsFeedbackLoopAllRoute,
   HooksAgentsMemoryFeedbackRoute: HooksAgentsMemoryFeedbackRoute,
   HooksAgentsPriceOptimizerRoute: HooksAgentsPriceOptimizerRoute,
+  HooksAgentsPriceRevertRoute: HooksAgentsPriceRevertRoute,
   HooksAgentsRunAllRoute: HooksAgentsRunAllRoute,
   HooksAgentsSalesBotRoute: HooksAgentsSalesBotRoute,
   HooksAgentsSalesBotAllRoute: HooksAgentsSalesBotAllRoute,

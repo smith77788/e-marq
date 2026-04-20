@@ -57,6 +57,7 @@ const ACTION_BY_TYPE: Record<string, { action_type: string; agent_id: string; ta
   low_engagement_product: { action_type: "vip_product_nudge", agent_id: "aov_optimizer", target_entity: "product" },
   cart_abandon: { action_type: "vip_product_nudge", agent_id: "aov_optimizer", target_entity: "product" },
   price_optimization: { action_type: "update_price", agent_id: "price_optimizer", target_entity: "product" },
+  price_revert: { action_type: "revert_price", agent_id: "price_revert_safety", target_entity: "product" },
 };
 
 async function applyPriceUpdate(
@@ -124,6 +125,7 @@ export const Route = createFileRoute("/hooks/actions/apply")({
           search_term?: string;
           current_price_cents?: number;
           suggested_price_cents?: number;
+          source_action_id?: string;
         };
         const targetId = mapping.target_entity === "product" ? m.product_id ?? null : null;
 
@@ -132,8 +134,18 @@ export const Route = createFileRoute("/hooks/actions/apply")({
         if (mapping.action_type === "vip_product_nudge" && targetId) {
           const queued = await queueVipProductNudges(ins.tenant_id, targetId, ins.id);
           sideEffect = { queued_messages: queued };
-        } else if (mapping.action_type === "update_price" && targetId) {
+        } else if ((mapping.action_type === "update_price" || mapping.action_type === "revert_price") && targetId) {
           sideEffect = await applyPriceUpdate(ins.tenant_id, targetId, m);
+          if (mapping.action_type === "revert_price" && m.source_action_id) {
+            // Mark the original update_price action as reverted
+            await supabaseAdmin
+              .from("ai_actions")
+              .update({
+                reverted_at: new Date().toISOString(),
+                reverted_reason: `Conversion drop detected by ${mapping.agent_id}`,
+              })
+              .eq("id", m.source_action_id);
+          }
         }
 
         const insertRow = {
