@@ -20,10 +20,12 @@ import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBrandRouteImport } from './routes/_authenticated/brand'
+import { Route as HooksEnginesWinbackAllRouteImport } from './routes/hooks/engines.winback-all'
 import { Route as HooksEnginesWinbackRouteImport } from './routes/hooks/engines.winback'
 import { Route as HooksEnginesReorderAllRouteImport } from './routes/hooks/engines.reorder-all'
 import { Route as HooksEnginesReorderRouteImport } from './routes/hooks/engines.reorder'
 import { Route as HooksEnginesDispatchRouteImport } from './routes/hooks/engines.dispatch'
+import { Route as HooksEnginesAbandonedCartAllRouteImport } from './routes/hooks/engines.abandoned-cart-all'
 import { Route as HooksEnginesAbandonedCartRouteImport } from './routes/hooks/engines.abandoned-cart'
 import { Route as HooksAgentsStockoutRouteImport } from './routes/hooks/agents.stockout'
 import { Route as HooksAgentsSearchGapRouteImport } from './routes/hooks/agents.search-gap'
@@ -35,6 +37,7 @@ import { Route as HooksAgentsFeedbackLoopAllRouteImport } from './routes/hooks/a
 import { Route as HooksAgentsFeedbackLoopRouteImport } from './routes/hooks/agents.feedback-loop'
 import { Route as HooksAgentsCronAllRouteImport } from './routes/hooks/agents.cron-all'
 import { Route as HooksAgentsChurnRiskRouteImport } from './routes/hooks/agents.churn-risk'
+import { Route as HooksAgentsAovOptimizerRouteImport } from './routes/hooks/agents.aov-optimizer'
 import { Route as HooksAgentsAovLeakRouteImport } from './routes/hooks/agents.aov-leak'
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin.tenants'
@@ -96,6 +99,11 @@ const AuthenticatedBrandRoute = AuthenticatedBrandRouteImport.update({
   path: '/brand',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const HooksEnginesWinbackAllRoute = HooksEnginesWinbackAllRouteImport.update({
+  id: '/hooks/engines/winback-all',
+  path: '/hooks/engines/winback-all',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksEnginesWinbackRoute = HooksEnginesWinbackRouteImport.update({
   id: '/hooks/engines/winback',
   path: '/hooks/engines/winback',
@@ -116,6 +124,12 @@ const HooksEnginesDispatchRoute = HooksEnginesDispatchRouteImport.update({
   path: '/hooks/engines/dispatch',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksEnginesAbandonedCartAllRoute =
+  HooksEnginesAbandonedCartAllRouteImport.update({
+    id: '/hooks/engines/abandoned-cart-all',
+    path: '/hooks/engines/abandoned-cart-all',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksEnginesAbandonedCartRoute =
   HooksEnginesAbandonedCartRouteImport.update({
     id: '/hooks/engines/abandoned-cart',
@@ -174,6 +188,11 @@ const HooksAgentsChurnRiskRoute = HooksAgentsChurnRiskRouteImport.update({
   path: '/hooks/agents/churn-risk',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsAovOptimizerRoute = HooksAgentsAovOptimizerRouteImport.update({
+  id: '/hooks/agents/aov-optimizer',
+  path: '/hooks/agents/aov-optimizer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsAovLeakRoute = HooksAgentsAovLeakRouteImport.update({
   id: '/hooks/agents/aov-leak',
   path: '/hooks/agents/aov-leak',
@@ -222,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
+  '/hooks/agents/aov-optimizer': typeof HooksAgentsAovOptimizerRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
@@ -233,10 +253,12 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
+  '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
   '/hooks/engines/reorder': typeof HooksEnginesReorderRoute
   '/hooks/engines/reorder-all': typeof HooksEnginesReorderAllRoute
   '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
+  '/hooks/engines/winback-all': typeof HooksEnginesWinbackAllRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -255,6 +277,7 @@ export interface FileRoutesByTo {
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
+  '/hooks/agents/aov-optimizer': typeof HooksAgentsAovOptimizerRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
@@ -266,10 +289,12 @@ export interface FileRoutesByTo {
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
+  '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
   '/hooks/engines/reorder': typeof HooksEnginesReorderRoute
   '/hooks/engines/reorder-all': typeof HooksEnginesReorderAllRoute
   '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
+  '/hooks/engines/winback-all': typeof HooksEnginesWinbackAllRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -290,6 +315,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
+  '/hooks/agents/aov-optimizer': typeof HooksAgentsAovOptimizerRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
@@ -301,10 +327,12 @@ export interface FileRoutesById {
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
+  '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
   '/hooks/engines/reorder': typeof HooksEnginesReorderRoute
   '/hooks/engines/reorder-all': typeof HooksEnginesReorderAllRoute
   '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
+  '/hooks/engines/winback-all': typeof HooksEnginesWinbackAllRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -325,6 +353,7 @@ export interface FileRouteTypes {
     | '/admin/tenants'
     | '/hooks/actions/apply'
     | '/hooks/agents/aov-leak'
+    | '/hooks/agents/aov-optimizer'
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/feedback-loop'
@@ -336,10 +365,12 @@ export interface FileRouteTypes {
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
     | '/hooks/engines/abandoned-cart'
+    | '/hooks/engines/abandoned-cart-all'
     | '/hooks/engines/dispatch'
     | '/hooks/engines/reorder'
     | '/hooks/engines/reorder-all'
     | '/hooks/engines/winback'
+    | '/hooks/engines/winback-all'
     | '/admin/tenants/$tenantId'
     | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
@@ -358,6 +389,7 @@ export interface FileRouteTypes {
     | '/admin/tenants'
     | '/hooks/actions/apply'
     | '/hooks/agents/aov-leak'
+    | '/hooks/agents/aov-optimizer'
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/feedback-loop'
@@ -369,10 +401,12 @@ export interface FileRouteTypes {
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
     | '/hooks/engines/abandoned-cart'
+    | '/hooks/engines/abandoned-cart-all'
     | '/hooks/engines/dispatch'
     | '/hooks/engines/reorder'
     | '/hooks/engines/reorder-all'
     | '/hooks/engines/winback'
+    | '/hooks/engines/winback-all'
     | '/admin/tenants/$tenantId'
     | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
@@ -392,6 +426,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tenants'
     | '/hooks/actions/apply'
     | '/hooks/agents/aov-leak'
+    | '/hooks/agents/aov-optimizer'
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/feedback-loop'
@@ -403,10 +438,12 @@ export interface FileRouteTypes {
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
     | '/hooks/engines/abandoned-cart'
+    | '/hooks/engines/abandoned-cart-all'
     | '/hooks/engines/dispatch'
     | '/hooks/engines/reorder'
     | '/hooks/engines/reorder-all'
     | '/hooks/engines/winback'
+    | '/hooks/engines/winback-all'
     | '/_authenticated/admin/tenants/$tenantId'
     | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
@@ -424,6 +461,7 @@ export interface RootRouteChildren {
   SSlugRoute: typeof SSlugRouteWithChildren
   HooksActionsApplyRoute: typeof HooksActionsApplyRoute
   HooksAgentsAovLeakRoute: typeof HooksAgentsAovLeakRoute
+  HooksAgentsAovOptimizerRoute: typeof HooksAgentsAovOptimizerRoute
   HooksAgentsChurnRiskRoute: typeof HooksAgentsChurnRiskRoute
   HooksAgentsCronAllRoute: typeof HooksAgentsCronAllRoute
   HooksAgentsFeedbackLoopRoute: typeof HooksAgentsFeedbackLoopRoute
@@ -435,10 +473,12 @@ export interface RootRouteChildren {
   HooksAgentsSearchGapRoute: typeof HooksAgentsSearchGapRoute
   HooksAgentsStockoutRoute: typeof HooksAgentsStockoutRoute
   HooksEnginesAbandonedCartRoute: typeof HooksEnginesAbandonedCartRoute
+  HooksEnginesAbandonedCartAllRoute: typeof HooksEnginesAbandonedCartAllRoute
   HooksEnginesDispatchRoute: typeof HooksEnginesDispatchRoute
   HooksEnginesReorderRoute: typeof HooksEnginesReorderRoute
   HooksEnginesReorderAllRoute: typeof HooksEnginesReorderAllRoute
   HooksEnginesWinbackRoute: typeof HooksEnginesWinbackRoute
+  HooksEnginesWinbackAllRoute: typeof HooksEnginesWinbackAllRoute
   HooksTelegramWebhookTenantRoute: typeof HooksTelegramWebhookTenantRoute
 }
 
@@ -521,6 +561,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBrandRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/hooks/engines/winback-all': {
+      id: '/hooks/engines/winback-all'
+      path: '/hooks/engines/winback-all'
+      fullPath: '/hooks/engines/winback-all'
+      preLoaderRoute: typeof HooksEnginesWinbackAllRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/engines/winback': {
       id: '/hooks/engines/winback'
       path: '/hooks/engines/winback'
@@ -547,6 +594,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/engines/dispatch'
       fullPath: '/hooks/engines/dispatch'
       preLoaderRoute: typeof HooksEnginesDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/engines/abandoned-cart-all': {
+      id: '/hooks/engines/abandoned-cart-all'
+      path: '/hooks/engines/abandoned-cart-all'
+      fullPath: '/hooks/engines/abandoned-cart-all'
+      preLoaderRoute: typeof HooksEnginesAbandonedCartAllRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/engines/abandoned-cart': {
@@ -624,6 +678,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/churn-risk'
       fullPath: '/hooks/agents/churn-risk'
       preLoaderRoute: typeof HooksAgentsChurnRiskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/aov-optimizer': {
+      id: '/hooks/agents/aov-optimizer'
+      path: '/hooks/agents/aov-optimizer'
+      fullPath: '/hooks/agents/aov-optimizer'
+      preLoaderRoute: typeof HooksAgentsAovOptimizerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/aov-leak': {
@@ -724,6 +785,7 @@ const rootRouteChildren: RootRouteChildren = {
   SSlugRoute: SSlugRouteWithChildren,
   HooksActionsApplyRoute: HooksActionsApplyRoute,
   HooksAgentsAovLeakRoute: HooksAgentsAovLeakRoute,
+  HooksAgentsAovOptimizerRoute: HooksAgentsAovOptimizerRoute,
   HooksAgentsChurnRiskRoute: HooksAgentsChurnRiskRoute,
   HooksAgentsCronAllRoute: HooksAgentsCronAllRoute,
   HooksAgentsFeedbackLoopRoute: HooksAgentsFeedbackLoopRoute,
@@ -735,12 +797,23 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsSearchGapRoute: HooksAgentsSearchGapRoute,
   HooksAgentsStockoutRoute: HooksAgentsStockoutRoute,
   HooksEnginesAbandonedCartRoute: HooksEnginesAbandonedCartRoute,
+  HooksEnginesAbandonedCartAllRoute: HooksEnginesAbandonedCartAllRoute,
   HooksEnginesDispatchRoute: HooksEnginesDispatchRoute,
   HooksEnginesReorderRoute: HooksEnginesReorderRoute,
   HooksEnginesReorderAllRoute: HooksEnginesReorderAllRoute,
   HooksEnginesWinbackRoute: HooksEnginesWinbackRoute,
+  HooksEnginesWinbackAllRoute: HooksEnginesWinbackAllRoute,
   HooksTelegramWebhookTenantRoute: HooksTelegramWebhookTenantRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
