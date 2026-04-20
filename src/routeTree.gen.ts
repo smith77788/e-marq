@@ -32,16 +32,20 @@ import { Route as HooksEnginesDispatchRouteImport } from './routes/hooks/engines
 import { Route as HooksEnginesAbandonedCartAllRouteImport } from './routes/hooks/engines.abandoned-cart-all'
 import { Route as HooksEnginesAbandonedCartRouteImport } from './routes/hooks/engines.abandoned-cart'
 import { Route as HooksDemoSeedRouteImport } from './routes/hooks/demo.seed'
+import { Route as HooksAgentsUgcHarvesterRouteImport } from './routes/hooks/agents.ugc-harvester'
 import { Route as HooksAgentsTickRouteImport } from './routes/hooks/agents.tick'
 import { Route as HooksAgentsStockoutRouteImport } from './routes/hooks/agents.stockout'
+import { Route as HooksAgentsSeoRewriterRouteImport } from './routes/hooks/agents.seo-rewriter'
 import { Route as HooksAgentsSegmentationRouteImport } from './routes/hooks/agents.segmentation'
 import { Route as HooksAgentsSecondOrderNurtureRouteImport } from './routes/hooks/agents.second-order-nurture'
+import { Route as HooksAgentsSearchIntentMinerRouteImport } from './routes/hooks/agents.search-intent-miner'
 import { Route as HooksAgentsSearchGapRouteImport } from './routes/hooks/agents.search-gap'
 import { Route as HooksAgentsSalesBotAllRouteImport } from './routes/hooks/agents.sales-bot-all'
 import { Route as HooksAgentsSalesBotRouteImport } from './routes/hooks/agents.sales-bot'
 import { Route as HooksAgentsRunAllRouteImport } from './routes/hooks/agents.run-all'
 import { Route as HooksAgentsPromoPortfolioRouteImport } from './routes/hooks/agents.promo-portfolio'
 import { Route as HooksAgentsPromoFatigueRouteImport } from './routes/hooks/agents.promo-fatigue'
+import { Route as HooksAgentsProgrammaticSeoRouteImport } from './routes/hooks/agents.programmatic-seo'
 import { Route as HooksAgentsPriceRevertRouteImport } from './routes/hooks/agents.price-revert'
 import { Route as HooksAgentsPriceOptimizerRouteImport } from './routes/hooks/agents.price-optimizer'
 import { Route as HooksAgentsPredictivePricingRouteImport } from './routes/hooks/agents.predictive-pricing'
@@ -57,6 +61,7 @@ import { Route as HooksAgentsFeedbackLoopRouteImport } from './routes/hooks/agen
 import { Route as HooksAgentsDiscountElasticityRouteImport } from './routes/hooks/agents.discount-elasticity'
 import { Route as HooksAgentsCsatDispatcherRouteImport } from './routes/hooks/agents.csat-dispatcher'
 import { Route as HooksAgentsCronAllRouteImport } from './routes/hooks/agents.cron-all'
+import { Route as HooksAgentsContentVelocityRouteImport } from './routes/hooks/agents.content-velocity'
 import { Route as HooksAgentsCohortEngineRouteImport } from './routes/hooks/agents.cohort-engine'
 import { Route as HooksAgentsChurnRiskRouteImport } from './routes/hooks/agents.churn-risk'
 import { Route as HooksAgentsCartRecoveryRouteImport } from './routes/hooks/agents.cart-recovery'
@@ -191,6 +196,11 @@ const HooksDemoSeedRoute = HooksDemoSeedRouteImport.update({
   path: '/hooks/demo/seed',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsUgcHarvesterRoute = HooksAgentsUgcHarvesterRouteImport.update({
+  id: '/hooks/agents/ugc-harvester',
+  path: '/hooks/agents/ugc-harvester',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsTickRoute = HooksAgentsTickRouteImport.update({
   id: '/hooks/agents/tick',
   path: '/hooks/agents/tick',
@@ -199,6 +209,11 @@ const HooksAgentsTickRoute = HooksAgentsTickRouteImport.update({
 const HooksAgentsStockoutRoute = HooksAgentsStockoutRouteImport.update({
   id: '/hooks/agents/stockout',
   path: '/hooks/agents/stockout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HooksAgentsSeoRewriterRoute = HooksAgentsSeoRewriterRouteImport.update({
+  id: '/hooks/agents/seo-rewriter',
+  path: '/hooks/agents/seo-rewriter',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HooksAgentsSegmentationRoute = HooksAgentsSegmentationRouteImport.update({
@@ -210,6 +225,12 @@ const HooksAgentsSecondOrderNurtureRoute =
   HooksAgentsSecondOrderNurtureRouteImport.update({
     id: '/hooks/agents/second-order-nurture',
     path: '/hooks/agents/second-order-nurture',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsSearchIntentMinerRoute =
+  HooksAgentsSearchIntentMinerRouteImport.update({
+    id: '/hooks/agents/search-intent-miner',
+    path: '/hooks/agents/search-intent-miner',
     getParentRoute: () => rootRouteImport,
   } as any)
 const HooksAgentsSearchGapRoute = HooksAgentsSearchGapRouteImport.update({
@@ -243,6 +264,12 @@ const HooksAgentsPromoFatigueRoute = HooksAgentsPromoFatigueRouteImport.update({
   path: '/hooks/agents/promo-fatigue',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsProgrammaticSeoRoute =
+  HooksAgentsProgrammaticSeoRouteImport.update({
+    id: '/hooks/agents/programmatic-seo',
+    path: '/hooks/agents/programmatic-seo',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsPriceRevertRoute = HooksAgentsPriceRevertRouteImport.update({
   id: '/hooks/agents/price-revert',
   path: '/hooks/agents/price-revert',
@@ -325,6 +352,12 @@ const HooksAgentsCronAllRoute = HooksAgentsCronAllRouteImport.update({
   path: '/hooks/agents/cron-all',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsContentVelocityRoute =
+  HooksAgentsContentVelocityRouteImport.update({
+    id: '/hooks/agents/content-velocity',
+    path: '/hooks/agents/content-velocity',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsCohortEngineRoute = HooksAgentsCohortEngineRouteImport.update({
   id: '/hooks/agents/cohort-engine',
   path: '/hooks/agents/cohort-engine',
@@ -445,6 +478,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/cart-recovery': typeof HooksAgentsCartRecoveryRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cohort-engine': typeof HooksAgentsCohortEngineRoute
+  '/hooks/agents/content-velocity': typeof HooksAgentsContentVelocityRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/csat-dispatcher': typeof HooksAgentsCsatDispatcherRoute
   '/hooks/agents/discount-elasticity': typeof HooksAgentsDiscountElasticityRoute
@@ -460,16 +494,20 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/predictive-pricing': typeof HooksAgentsPredictivePricingRoute
   '/hooks/agents/price-optimizer': typeof HooksAgentsPriceOptimizerRoute
   '/hooks/agents/price-revert': typeof HooksAgentsPriceRevertRoute
+  '/hooks/agents/programmatic-seo': typeof HooksAgentsProgrammaticSeoRoute
   '/hooks/agents/promo-fatigue': typeof HooksAgentsPromoFatigueRoute
   '/hooks/agents/promo-portfolio': typeof HooksAgentsPromoPortfolioRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
+  '/hooks/agents/search-intent-miner': typeof HooksAgentsSearchIntentMinerRoute
   '/hooks/agents/second-order-nurture': typeof HooksAgentsSecondOrderNurtureRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
+  '/hooks/agents/seo-rewriter': typeof HooksAgentsSeoRewriterRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/agents/tick': typeof HooksAgentsTickRoute
+  '/hooks/agents/ugc-harvester': typeof HooksAgentsUgcHarvesterRoute
   '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
@@ -511,6 +549,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/cart-recovery': typeof HooksAgentsCartRecoveryRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cohort-engine': typeof HooksAgentsCohortEngineRoute
+  '/hooks/agents/content-velocity': typeof HooksAgentsContentVelocityRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/csat-dispatcher': typeof HooksAgentsCsatDispatcherRoute
   '/hooks/agents/discount-elasticity': typeof HooksAgentsDiscountElasticityRoute
@@ -526,16 +565,20 @@ export interface FileRoutesByTo {
   '/hooks/agents/predictive-pricing': typeof HooksAgentsPredictivePricingRoute
   '/hooks/agents/price-optimizer': typeof HooksAgentsPriceOptimizerRoute
   '/hooks/agents/price-revert': typeof HooksAgentsPriceRevertRoute
+  '/hooks/agents/programmatic-seo': typeof HooksAgentsProgrammaticSeoRoute
   '/hooks/agents/promo-fatigue': typeof HooksAgentsPromoFatigueRoute
   '/hooks/agents/promo-portfolio': typeof HooksAgentsPromoPortfolioRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
+  '/hooks/agents/search-intent-miner': typeof HooksAgentsSearchIntentMinerRoute
   '/hooks/agents/second-order-nurture': typeof HooksAgentsSecondOrderNurtureRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
+  '/hooks/agents/seo-rewriter': typeof HooksAgentsSeoRewriterRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/agents/tick': typeof HooksAgentsTickRoute
+  '/hooks/agents/ugc-harvester': typeof HooksAgentsUgcHarvesterRoute
   '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
@@ -579,6 +622,7 @@ export interface FileRoutesById {
   '/hooks/agents/cart-recovery': typeof HooksAgentsCartRecoveryRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cohort-engine': typeof HooksAgentsCohortEngineRoute
+  '/hooks/agents/content-velocity': typeof HooksAgentsContentVelocityRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/csat-dispatcher': typeof HooksAgentsCsatDispatcherRoute
   '/hooks/agents/discount-elasticity': typeof HooksAgentsDiscountElasticityRoute
@@ -594,16 +638,20 @@ export interface FileRoutesById {
   '/hooks/agents/predictive-pricing': typeof HooksAgentsPredictivePricingRoute
   '/hooks/agents/price-optimizer': typeof HooksAgentsPriceOptimizerRoute
   '/hooks/agents/price-revert': typeof HooksAgentsPriceRevertRoute
+  '/hooks/agents/programmatic-seo': typeof HooksAgentsProgrammaticSeoRoute
   '/hooks/agents/promo-fatigue': typeof HooksAgentsPromoFatigueRoute
   '/hooks/agents/promo-portfolio': typeof HooksAgentsPromoPortfolioRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
+  '/hooks/agents/search-intent-miner': typeof HooksAgentsSearchIntentMinerRoute
   '/hooks/agents/second-order-nurture': typeof HooksAgentsSecondOrderNurtureRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
+  '/hooks/agents/seo-rewriter': typeof HooksAgentsSeoRewriterRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/agents/tick': typeof HooksAgentsTickRoute
+  '/hooks/agents/ugc-harvester': typeof HooksAgentsUgcHarvesterRoute
   '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
@@ -647,6 +695,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/cart-recovery'
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cohort-engine'
+    | '/hooks/agents/content-velocity'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/csat-dispatcher'
     | '/hooks/agents/discount-elasticity'
@@ -662,16 +711,20 @@ export interface FileRouteTypes {
     | '/hooks/agents/predictive-pricing'
     | '/hooks/agents/price-optimizer'
     | '/hooks/agents/price-revert'
+    | '/hooks/agents/programmatic-seo'
     | '/hooks/agents/promo-fatigue'
     | '/hooks/agents/promo-portfolio'
     | '/hooks/agents/run-all'
     | '/hooks/agents/sales-bot'
     | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
+    | '/hooks/agents/search-intent-miner'
     | '/hooks/agents/second-order-nurture'
     | '/hooks/agents/segmentation'
+    | '/hooks/agents/seo-rewriter'
     | '/hooks/agents/stockout'
     | '/hooks/agents/tick'
+    | '/hooks/agents/ugc-harvester'
     | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/abandoned-cart-all'
@@ -713,6 +766,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/cart-recovery'
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cohort-engine'
+    | '/hooks/agents/content-velocity'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/csat-dispatcher'
     | '/hooks/agents/discount-elasticity'
@@ -728,16 +782,20 @@ export interface FileRouteTypes {
     | '/hooks/agents/predictive-pricing'
     | '/hooks/agents/price-optimizer'
     | '/hooks/agents/price-revert'
+    | '/hooks/agents/programmatic-seo'
     | '/hooks/agents/promo-fatigue'
     | '/hooks/agents/promo-portfolio'
     | '/hooks/agents/run-all'
     | '/hooks/agents/sales-bot'
     | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
+    | '/hooks/agents/search-intent-miner'
     | '/hooks/agents/second-order-nurture'
     | '/hooks/agents/segmentation'
+    | '/hooks/agents/seo-rewriter'
     | '/hooks/agents/stockout'
     | '/hooks/agents/tick'
+    | '/hooks/agents/ugc-harvester'
     | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/abandoned-cart-all'
@@ -780,6 +838,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/cart-recovery'
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cohort-engine'
+    | '/hooks/agents/content-velocity'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/csat-dispatcher'
     | '/hooks/agents/discount-elasticity'
@@ -795,16 +854,20 @@ export interface FileRouteTypes {
     | '/hooks/agents/predictive-pricing'
     | '/hooks/agents/price-optimizer'
     | '/hooks/agents/price-revert'
+    | '/hooks/agents/programmatic-seo'
     | '/hooks/agents/promo-fatigue'
     | '/hooks/agents/promo-portfolio'
     | '/hooks/agents/run-all'
     | '/hooks/agents/sales-bot'
     | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
+    | '/hooks/agents/search-intent-miner'
     | '/hooks/agents/second-order-nurture'
     | '/hooks/agents/segmentation'
+    | '/hooks/agents/seo-rewriter'
     | '/hooks/agents/stockout'
     | '/hooks/agents/tick'
+    | '/hooks/agents/ugc-harvester'
     | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/abandoned-cart-all'
@@ -844,6 +907,7 @@ export interface RootRouteChildren {
   HooksAgentsCartRecoveryRoute: typeof HooksAgentsCartRecoveryRoute
   HooksAgentsChurnRiskRoute: typeof HooksAgentsChurnRiskRoute
   HooksAgentsCohortEngineRoute: typeof HooksAgentsCohortEngineRoute
+  HooksAgentsContentVelocityRoute: typeof HooksAgentsContentVelocityRoute
   HooksAgentsCronAllRoute: typeof HooksAgentsCronAllRoute
   HooksAgentsCsatDispatcherRoute: typeof HooksAgentsCsatDispatcherRoute
   HooksAgentsDiscountElasticityRoute: typeof HooksAgentsDiscountElasticityRoute
@@ -859,16 +923,20 @@ export interface RootRouteChildren {
   HooksAgentsPredictivePricingRoute: typeof HooksAgentsPredictivePricingRoute
   HooksAgentsPriceOptimizerRoute: typeof HooksAgentsPriceOptimizerRoute
   HooksAgentsPriceRevertRoute: typeof HooksAgentsPriceRevertRoute
+  HooksAgentsProgrammaticSeoRoute: typeof HooksAgentsProgrammaticSeoRoute
   HooksAgentsPromoFatigueRoute: typeof HooksAgentsPromoFatigueRoute
   HooksAgentsPromoPortfolioRoute: typeof HooksAgentsPromoPortfolioRoute
   HooksAgentsRunAllRoute: typeof HooksAgentsRunAllRoute
   HooksAgentsSalesBotRoute: typeof HooksAgentsSalesBotRoute
   HooksAgentsSalesBotAllRoute: typeof HooksAgentsSalesBotAllRoute
   HooksAgentsSearchGapRoute: typeof HooksAgentsSearchGapRoute
+  HooksAgentsSearchIntentMinerRoute: typeof HooksAgentsSearchIntentMinerRoute
   HooksAgentsSecondOrderNurtureRoute: typeof HooksAgentsSecondOrderNurtureRoute
   HooksAgentsSegmentationRoute: typeof HooksAgentsSegmentationRoute
+  HooksAgentsSeoRewriterRoute: typeof HooksAgentsSeoRewriterRoute
   HooksAgentsStockoutRoute: typeof HooksAgentsStockoutRoute
   HooksAgentsTickRoute: typeof HooksAgentsTickRoute
+  HooksAgentsUgcHarvesterRoute: typeof HooksAgentsUgcHarvesterRoute
   HooksDemoSeedRoute: typeof HooksDemoSeedRoute
   HooksEnginesAbandonedCartRoute: typeof HooksEnginesAbandonedCartRoute
   HooksEnginesAbandonedCartAllRoute: typeof HooksEnginesAbandonedCartAllRoute
@@ -1045,6 +1113,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksDemoSeedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/ugc-harvester': {
+      id: '/hooks/agents/ugc-harvester'
+      path: '/hooks/agents/ugc-harvester'
+      fullPath: '/hooks/agents/ugc-harvester'
+      preLoaderRoute: typeof HooksAgentsUgcHarvesterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/tick': {
       id: '/hooks/agents/tick'
       path: '/hooks/agents/tick'
@@ -1059,6 +1134,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsStockoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/seo-rewriter': {
+      id: '/hooks/agents/seo-rewriter'
+      path: '/hooks/agents/seo-rewriter'
+      fullPath: '/hooks/agents/seo-rewriter'
+      preLoaderRoute: typeof HooksAgentsSeoRewriterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/segmentation': {
       id: '/hooks/agents/segmentation'
       path: '/hooks/agents/segmentation'
@@ -1071,6 +1153,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/second-order-nurture'
       fullPath: '/hooks/agents/second-order-nurture'
       preLoaderRoute: typeof HooksAgentsSecondOrderNurtureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/search-intent-miner': {
+      id: '/hooks/agents/search-intent-miner'
+      path: '/hooks/agents/search-intent-miner'
+      fullPath: '/hooks/agents/search-intent-miner'
+      preLoaderRoute: typeof HooksAgentsSearchIntentMinerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/search-gap': {
@@ -1113,6 +1202,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/promo-fatigue'
       fullPath: '/hooks/agents/promo-fatigue'
       preLoaderRoute: typeof HooksAgentsPromoFatigueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/programmatic-seo': {
+      id: '/hooks/agents/programmatic-seo'
+      path: '/hooks/agents/programmatic-seo'
+      fullPath: '/hooks/agents/programmatic-seo'
+      preLoaderRoute: typeof HooksAgentsProgrammaticSeoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/price-revert': {
@@ -1218,6 +1314,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/cron-all'
       fullPath: '/hooks/agents/cron-all'
       preLoaderRoute: typeof HooksAgentsCronAllRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/content-velocity': {
+      id: '/hooks/agents/content-velocity'
+      path: '/hooks/agents/content-velocity'
+      fullPath: '/hooks/agents/content-velocity'
+      preLoaderRoute: typeof HooksAgentsContentVelocityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/cohort-engine': {
@@ -1409,6 +1512,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsCartRecoveryRoute: HooksAgentsCartRecoveryRoute,
   HooksAgentsChurnRiskRoute: HooksAgentsChurnRiskRoute,
   HooksAgentsCohortEngineRoute: HooksAgentsCohortEngineRoute,
+  HooksAgentsContentVelocityRoute: HooksAgentsContentVelocityRoute,
   HooksAgentsCronAllRoute: HooksAgentsCronAllRoute,
   HooksAgentsCsatDispatcherRoute: HooksAgentsCsatDispatcherRoute,
   HooksAgentsDiscountElasticityRoute: HooksAgentsDiscountElasticityRoute,
@@ -1424,16 +1528,20 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsPredictivePricingRoute: HooksAgentsPredictivePricingRoute,
   HooksAgentsPriceOptimizerRoute: HooksAgentsPriceOptimizerRoute,
   HooksAgentsPriceRevertRoute: HooksAgentsPriceRevertRoute,
+  HooksAgentsProgrammaticSeoRoute: HooksAgentsProgrammaticSeoRoute,
   HooksAgentsPromoFatigueRoute: HooksAgentsPromoFatigueRoute,
   HooksAgentsPromoPortfolioRoute: HooksAgentsPromoPortfolioRoute,
   HooksAgentsRunAllRoute: HooksAgentsRunAllRoute,
   HooksAgentsSalesBotRoute: HooksAgentsSalesBotRoute,
   HooksAgentsSalesBotAllRoute: HooksAgentsSalesBotAllRoute,
   HooksAgentsSearchGapRoute: HooksAgentsSearchGapRoute,
+  HooksAgentsSearchIntentMinerRoute: HooksAgentsSearchIntentMinerRoute,
   HooksAgentsSecondOrderNurtureRoute: HooksAgentsSecondOrderNurtureRoute,
   HooksAgentsSegmentationRoute: HooksAgentsSegmentationRoute,
+  HooksAgentsSeoRewriterRoute: HooksAgentsSeoRewriterRoute,
   HooksAgentsStockoutRoute: HooksAgentsStockoutRoute,
   HooksAgentsTickRoute: HooksAgentsTickRoute,
+  HooksAgentsUgcHarvesterRoute: HooksAgentsUgcHarvesterRoute,
   HooksDemoSeedRoute: HooksDemoSeedRoute,
   HooksEnginesAbandonedCartRoute: HooksEnginesAbandonedCartRoute,
   HooksEnginesAbandonedCartAllRoute: HooksEnginesAbandonedCartAllRoute,
