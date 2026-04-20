@@ -57,6 +57,7 @@ const ACTION_BY_TYPE: Record<string, { action_type: string; agent_id: string; ta
   low_engagement_product: { action_type: "vip_product_nudge", agent_id: "aov_optimizer", target_entity: "product" },
   cart_abandon: { action_type: "vip_product_nudge", agent_id: "aov_optimizer", target_entity: "product" },
   price_optimization: { action_type: "update_price", agent_id: "price_optimizer", target_entity: "product" },
+  price_revert: { action_type: "revert_price", agent_id: "price_revert_safety", target_entity: "product" },
 };
 
 async function applyPriceUpdate(
