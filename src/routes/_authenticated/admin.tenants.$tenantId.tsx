@@ -403,54 +403,55 @@ function TenantDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
-                Demo data
+                ACOS-rich synthetic dataset
               </CardTitle>
               <CardDescription>
-                Populate this tenant with realistic demo products, orders, and funnel events
-                spread across the last 30 days.
+                90 days of realistic D2C signals: cohorts (new / returning / VIP-active /
+                VIP-churning), weekly seasonality, product affinity, stockout-risk SKUs,
+                cart-abandonment, and search-no-results events. Designed so ACOS agents can find
+                real insights — not just placeholder data.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="demo-scale">Scale</Label>
+                  <Label htmlFor="acos-scale">Scale</Label>
                   <Select
-                    value={demoScale}
-                    onValueChange={(v) => setDemoScale(v as "small" | "medium" | "large")}
+                    value={acosScale}
+                    onValueChange={(v) => setAcosScale(v as AcosScale)}
                   >
-                    <SelectTrigger id="demo-scale">
+                    <SelectTrigger id="acos-scale">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="small">Small — 50 sessions, 5 orders</SelectItem>
-                      <SelectItem value="medium">Medium — 150 sessions, 15 orders</SelectItem>
-                      <SelectItem value="large">Large — 500 sessions, 50 orders</SelectItem>
+                      <SelectItem value="small">Small — 120 customers</SelectItem>
+                      <SelectItem value="medium">Medium — 250 customers</SelectItem>
+                      <SelectItem value="large">Large — 600 customers</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="flex items-end gap-3">
                   <div className="flex-1 space-y-1">
-                    <Label htmlFor="demo-skip">Skip if data exists</Label>
+                    <Label htmlFor="acos-skip">Skip if data exists</Label>
                     <p className="text-xs text-muted-foreground">
-                      Avoid duplicating data on existing tenants.
+                      Avoid duplicating data on tenants that already have a catalog.
                     </p>
                   </div>
                   <Switch
-                    id="demo-skip"
-                    checked={demoSkipExisting}
-                    onCheckedChange={setDemoSkipExisting}
+                    id="acos-skip"
+                    checked={acosSkipExisting}
+                    onCheckedChange={setAcosSkipExisting}
                   />
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2">
                 <Button
-                  variant="outline"
-                  onClick={() => setDemoConfirmOpen(true)}
-                  disabled={generateDemoMutation.isPending}
+                  onClick={() => setAcosConfirmOpen(true)}
+                  disabled={generateAcosMutation.isPending}
                 >
                   <Sparkles className="mr-2 h-4 w-4" />
-                  {generateDemoMutation.isPending ? "Generating…" : "Generate demo data"}
+                  {generateAcosMutation.isPending ? "Generating…" : "Generate ACOS dataset"}
                 </Button>
                 <Button
                   variant="ghost"
@@ -459,9 +460,40 @@ function TenantDetailPage() {
                   disabled={clearDemoMutation.isPending}
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  {clearDemoMutation.isPending ? "Clearing…" : "Clear demo data"}
+                  {clearDemoMutation.isPending ? "Clearing…" : "Clear all data"}
                 </Button>
               </div>
+
+              {lastAcosResult && (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                  <p className="text-xs font-medium text-foreground">Last generation</p>
+                  <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-4">
+                    <div>
+                      <span className="text-muted-foreground">Products: </span>
+                      <span className="font-medium text-foreground">{lastAcosResult.products}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Customers: </span>
+                      <span className="font-medium text-foreground">{lastAcosResult.customers}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Orders: </span>
+                      <span className="font-medium text-foreground">{lastAcosResult.orders}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Events: </span>
+                      <span className="font-medium text-foreground">{lastAcosResult.events}</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {Object.entries(lastAcosResult.cohorts).map(([cohort, count]) => (
+                      <Badge key={cohort} variant="outline" className="text-[10px]">
+                        {cohort.replace("_", " ")}: {count}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
