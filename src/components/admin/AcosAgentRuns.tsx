@@ -74,7 +74,7 @@ export function AcosAgentRuns({ tenantId }: Props) {
                       <>
                         <div className="mt-1 flex items-center gap-1">
                           {r.status === "success" ? (
-                            <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                            <CheckCircle2 className="h-3 w-3 text-success" />
                           ) : r.status === "running" ? (
                             <Loader2 className="h-3 w-3 animate-spin text-primary" />
                           ) : (
@@ -101,7 +101,7 @@ export function AcosAgentRuns({ tenantId }: Props) {
               {runs.slice(0, 12).map((r) => (
                 <div key={r.id} className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/20 px-2.5 py-1.5 text-xs">
                   <Badge variant="outline" className="text-[10px]">{AGENT_LABEL[r.agent_id] ?? r.agent_id}</Badge>
-                  <span className={`text-[10px] font-medium ${r.status === "success" ? "text-emerald-600" : r.status === "running" ? "text-primary" : "text-destructive"}`}>
+                  <span className={`text-[10px] font-medium ${r.status === "success" ? "text-success" : r.status === "running" ? "text-primary" : "text-destructive"}`}>
                     {r.status}
                   </span>
                   <span className="text-[10px] text-muted-foreground">

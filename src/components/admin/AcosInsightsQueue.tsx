@@ -39,7 +39,7 @@ type InsightRow = {
 
 const RISK_STYLES: Record<string, string> = {
   high: "bg-destructive/10 text-destructive border-destructive/30",
-  medium: "bg-amber-500/10 text-amber-600 border-amber-500/30 dark:text-amber-400",
+  medium: "bg-warning/15 text-warning-foreground border-warning/40",
   low: "bg-muted text-muted-foreground border-border",
 };
 
