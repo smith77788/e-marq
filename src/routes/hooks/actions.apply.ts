@@ -56,7 +56,35 @@ const ACTION_BY_TYPE: Record<string, { action_type: string; agent_id: string; ta
   search_gap: { action_type: "create_seo_page", agent_id: "search_gap_detector", target_entity: "search_term" },
   low_engagement_product: { action_type: "vip_product_nudge", agent_id: "aov_optimizer", target_entity: "product" },
   cart_abandon: { action_type: "vip_product_nudge", agent_id: "aov_optimizer", target_entity: "product" },
+  price_optimization: { action_type: "update_price", agent_id: "price_optimizer", target_entity: "product" },
 };
+
+async function applyPriceUpdate(
+  tenantId: string,
+  productId: string,
+  metrics: { current_price_cents?: number; suggested_price_cents?: number },
+): Promise<Record<string, unknown>> {
+  if (!metrics.suggested_price_cents) return { error: "missing suggested_price_cents in metrics" };
+  // Fetch live price first so we record the actual baseline (not stale insight metric)
+  const { data: prod } = await supabaseAdmin
+    .from("products")
+    .select("price_cents")
+    .eq("id", productId)
+    .eq("tenant_id", tenantId)
+    .maybeSingle();
+  const oldPrice = prod?.price_cents ?? metrics.current_price_cents ?? null;
+  const { error } = await supabaseAdmin
+    .from("products")
+    .update({ price_cents: metrics.suggested_price_cents })
+    .eq("id", productId)
+    .eq("tenant_id", tenantId);
+  if (error) return { error: error.message };
+  return {
+    old_price_cents: oldPrice,
+    new_price_cents: metrics.suggested_price_cents,
+    delta_cents: oldPrice != null ? metrics.suggested_price_cents - oldPrice : null,
+  };
+}
 
 export const Route = createFileRoute("/hooks/actions/apply")({
   server: {
