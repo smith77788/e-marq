@@ -45,10 +45,10 @@ export const Route = createFileRoute("/hooks/agents/run-all")({
         const summary = results.map((r, i) =>
           r.status === "fulfilled" ? r.value : { agent: AGENTS[i], ok: false, error: String(r.reason) },
         );
-        const totalCreated = summary.reduce(
-          (s, r) => s + (typeof (r as { insights_created?: number }).insights_created === "number" ? (r as { insights_created: number }).insights_created : 0),
-          0,
-        );
+        const totalCreated = summary.reduce((s, r) => {
+          const v = (r as Record<string, unknown>).insights_created;
+          return s + (typeof v === "number" ? v : 0);
+        }, 0);
 
         return jsonOk({ insights_created: totalCreated, agents: summary });
       },
