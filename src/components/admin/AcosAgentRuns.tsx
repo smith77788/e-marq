@@ -23,6 +23,12 @@ const AGENT_LABEL: Record<string, string> = {
   stockout_predictor: "Stockout",
   aov_leak_detector: "AOV Leak",
   search_gap_detector: "Search Gap",
+  aov_optimizer: "AOV Optimizer",
+  price_optimizer: "Price Optimizer",
+  price_revert_safety: "Price Revert",
+  bot_quality_audit: "Bot Quality",
+  customer_segmentation: "Segmentation",
+  sales_bot: "Sales Bot",
 };
 
 export function AcosAgentRuns({ tenantId }: Props) {
