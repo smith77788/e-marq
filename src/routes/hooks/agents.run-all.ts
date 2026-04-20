@@ -10,6 +10,7 @@ import {
 } from "@/lib/acos/agentRuntime";
 
 const AGENTS = [
+  // Original ACOS agents
   "onboarding",
   "churn-risk",
   "stockout",
@@ -21,6 +22,12 @@ const AGENTS = [
   "bot-quality",
   "segmentation",
   "memory-feedback",
+  // Batch 1: ported from MFD
+  "margin-optimizer",
+  "ltv-predictor",
+  "cart-recovery",
+  "anomaly-detector",
+  "morning-brief",
 ] as const;
 
 export const Route = createFileRoute("/hooks/agents/run-all")({
