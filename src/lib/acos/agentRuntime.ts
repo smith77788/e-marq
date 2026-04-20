@@ -10,6 +10,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
+import { buildInsightCopy } from "@/lib/acos/insightCopy";
 
 export type AgentInsightInput = {
   tenant_id: string;
@@ -143,19 +144,25 @@ export async function insertInsightsDedup(rows: AgentInsightInput[]): Promise<nu
   const fresh = withBucket.filter((r) => !taken.has(String(r.bucket)));
   if (fresh.length === 0) return 0;
 
-  const insertRows = fresh.map((r) => ({
-    tenant_id: r.tenant_id,
-    insight_type: r.insight_type,
-    affected_layer: r.affected_layer,
-    title: r.title,
-    description: r.description,
-    expected_impact: r.expected_impact ?? null,
-    confidence: r.confidence,
-    risk_level: r.risk_level,
-    status: "new",
-    metrics: r.metrics as never,
-    dedup_bucket: r.bucket,
-  }));
+  const insertRows = fresh.map((r) => {
+    // Прикріплюємо людську версію (UA + EN) до metrics, щоб UI міг показати
+    // власнику зрозумілий headline/why/what_to_do замість сирого тексту.
+    const copy = buildInsightCopy(r.insight_type, r.metrics);
+    const enrichedMetrics = copy ? { ...r.metrics, _copy: copy } : r.metrics;
+    return {
+      tenant_id: r.tenant_id,
+      insight_type: r.insight_type,
+      affected_layer: r.affected_layer,
+      title: r.title,
+      description: r.description,
+      expected_impact: r.expected_impact ?? null,
+      confidence: r.confidence,
+      risk_level: r.risk_level,
+      status: "new",
+      metrics: enrichedMetrics as never,
+      dedup_bucket: r.bucket,
+    };
+  });
 
   let inserted = 0;
   for (let i = 0; i < insertRows.length; i += 100) {
