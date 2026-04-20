@@ -10,7 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SSlugRouteImport } from './routes/s.$slug'
@@ -18,6 +21,8 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as HooksAgentsStockoutRouteImport } from './routes/hooks/agents.stockout'
 import { Route as HooksAgentsSearchGapRouteImport } from './routes/hooks/agents.search-gap'
 import { Route as HooksAgentsRunAllRouteImport } from './routes/hooks/agents.run-all'
+import { Route as HooksAgentsMemoryFeedbackRouteImport } from './routes/hooks/agents.memory-feedback'
+import { Route as HooksAgentsCronAllRouteImport } from './routes/hooks/agents.cron-all'
 import { Route as HooksAgentsChurnRiskRouteImport } from './routes/hooks/agents.churn-risk'
 import { Route as HooksAgentsAovLeakRouteImport } from './routes/hooks/agents.aov-leak'
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
@@ -30,9 +35,24 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentsRoute = AgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -67,6 +87,17 @@ const HooksAgentsSearchGapRoute = HooksAgentsSearchGapRouteImport.update({
 const HooksAgentsRunAllRoute = HooksAgentsRunAllRouteImport.update({
   id: '/hooks/agents/run-all',
   path: '/hooks/agents/run-all',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HooksAgentsMemoryFeedbackRoute =
+  HooksAgentsMemoryFeedbackRouteImport.update({
+    id: '/hooks/agents/memory-feedback',
+    path: '/hooks/agents/memory-feedback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsCronAllRoute = HooksAgentsCronAllRouteImport.update({
+  id: '/hooks/agents/cron-all',
+  path: '/hooks/agents/cron-all',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HooksAgentsChurnRiskRoute = HooksAgentsChurnRiskRouteImport.update({
@@ -104,7 +135,10 @@ const AuthenticatedAdminTenantsTenantIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agents': typeof AgentsRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
   '/signup': typeof SignupRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/s/$slug': typeof SSlugRouteWithChildren
@@ -112,6 +146,8 @@ export interface FileRoutesByFullPath {
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
+  '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
+  '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
@@ -120,7 +156,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agents': typeof AgentsRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
   '/signup': typeof SignupRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/s/$slug': typeof SSlugRouteWithChildren
@@ -128,6 +167,8 @@ export interface FileRoutesByTo {
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
+  '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
+  '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
@@ -138,7 +179,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/agents': typeof AgentsRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
   '/signup': typeof SignupRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/s/$slug': typeof SSlugRouteWithChildren
@@ -146,6 +190,8 @@ export interface FileRoutesById {
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
+  '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
+  '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
@@ -156,7 +202,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/agents'
+    | '/how-it-works'
     | '/login'
+    | '/pricing'
     | '/signup'
     | '/dashboard'
     | '/s/$slug'
@@ -164,6 +213,8 @@ export interface FileRouteTypes {
     | '/hooks/actions/apply'
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/churn-risk'
+    | '/hooks/agents/cron-all'
+    | '/hooks/agents/memory-feedback'
     | '/hooks/agents/run-all'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
@@ -172,7 +223,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/agents'
+    | '/how-it-works'
     | '/login'
+    | '/pricing'
     | '/signup'
     | '/dashboard'
     | '/s/$slug'
@@ -180,6 +234,8 @@ export interface FileRouteTypes {
     | '/hooks/actions/apply'
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/churn-risk'
+    | '/hooks/agents/cron-all'
+    | '/hooks/agents/memory-feedback'
     | '/hooks/agents/run-all'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
@@ -189,7 +245,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/agents'
+    | '/how-it-works'
     | '/login'
+    | '/pricing'
     | '/signup'
     | '/_authenticated/dashboard'
     | '/s/$slug'
@@ -197,6 +256,8 @@ export interface FileRouteTypes {
     | '/hooks/actions/apply'
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/churn-risk'
+    | '/hooks/agents/cron-all'
+    | '/hooks/agents/memory-feedback'
     | '/hooks/agents/run-all'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
@@ -207,12 +268,17 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AgentsRoute: typeof AgentsRoute
+  HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
+  PricingRoute: typeof PricingRoute
   SignupRoute: typeof SignupRoute
   SSlugRoute: typeof SSlugRouteWithChildren
   HooksActionsApplyRoute: typeof HooksActionsApplyRoute
   HooksAgentsAovLeakRoute: typeof HooksAgentsAovLeakRoute
   HooksAgentsChurnRiskRoute: typeof HooksAgentsChurnRiskRoute
+  HooksAgentsCronAllRoute: typeof HooksAgentsCronAllRoute
+  HooksAgentsMemoryFeedbackRoute: typeof HooksAgentsMemoryFeedbackRoute
   HooksAgentsRunAllRoute: typeof HooksAgentsRunAllRoute
   HooksAgentsSearchGapRoute: typeof HooksAgentsSearchGapRoute
   HooksAgentsStockoutRoute: typeof HooksAgentsStockoutRoute
@@ -227,11 +293,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agents': {
+      id: '/agents'
+      path: '/agents'
+      fullPath: '/agents'
+      preLoaderRoute: typeof AgentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -281,6 +368,20 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/run-all'
       fullPath: '/hooks/agents/run-all'
       preLoaderRoute: typeof HooksAgentsRunAllRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/memory-feedback': {
+      id: '/hooks/agents/memory-feedback'
+      path: '/hooks/agents/memory-feedback'
+      fullPath: '/hooks/agents/memory-feedback'
+      preLoaderRoute: typeof HooksAgentsMemoryFeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/cron-all': {
+      id: '/hooks/agents/cron-all'
+      path: '/hooks/agents/cron-all'
+      fullPath: '/hooks/agents/cron-all'
+      preLoaderRoute: typeof HooksAgentsCronAllRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/churn-risk': {
@@ -370,12 +471,17 @@ const SSlugRouteWithChildren = SSlugRoute._addFileChildren(SSlugRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AgentsRoute: AgentsRoute,
+  HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
+  PricingRoute: PricingRoute,
   SignupRoute: SignupRoute,
   SSlugRoute: SSlugRouteWithChildren,
   HooksActionsApplyRoute: HooksActionsApplyRoute,
   HooksAgentsAovLeakRoute: HooksAgentsAovLeakRoute,
   HooksAgentsChurnRiskRoute: HooksAgentsChurnRiskRoute,
+  HooksAgentsCronAllRoute: HooksAgentsCronAllRoute,
+  HooksAgentsMemoryFeedbackRoute: HooksAgentsMemoryFeedbackRoute,
   HooksAgentsRunAllRoute: HooksAgentsRunAllRoute,
   HooksAgentsSearchGapRoute: HooksAgentsSearchGapRoute,
   HooksAgentsStockoutRoute: HooksAgentsStockoutRoute,
