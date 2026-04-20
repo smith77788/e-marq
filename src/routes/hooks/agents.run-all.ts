@@ -34,6 +34,12 @@ const AGENTS = [
   "promo-portfolio",
   "discount-elasticity",
   "predictive-pricing",
+  // Batch 3: analytics
+  "cohort-engine",
+  "attribution",
+  "funnel-healer",
+  "browse-abandonment",
+  "second-order-nurture",
 ] as const;
 
 export const Route = createFileRoute("/hooks/agents/run-all")({
