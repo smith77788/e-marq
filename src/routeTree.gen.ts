@@ -21,6 +21,7 @@ import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBrandRouteImport } from './routes/_authenticated/brand'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as TrackSlugJsRouteImport } from './routes/track.$slug.js'
 import { Route as HooksTelegramPollRouteImport } from './routes/hooks/telegram.poll'
 import { Route as HooksEnginesWinbackOneRouteImport } from './routes/hooks/engines.winback-one'
@@ -157,6 +158,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
 const AuthenticatedBrandRoute = AuthenticatedBrandRouteImport.update({
   id: '/brand',
   path: '/brand',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const TrackSlugJsRoute = TrackSlugJsRouteImport.update({
@@ -674,6 +680,7 @@ export interface FileRoutesByFullPath {
   '/hooks/engines/winback-one': typeof HooksEnginesWinbackOneRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
@@ -765,6 +772,7 @@ export interface FileRoutesByTo {
   '/hooks/engines/winback-one': typeof HooksEnginesWinbackOneRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
@@ -858,6 +866,7 @@ export interface FileRoutesById {
   '/hooks/engines/winback-one': typeof HooksEnginesWinbackOneRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
@@ -951,6 +960,7 @@ export interface FileRouteTypes {
     | '/hooks/engines/winback-one'
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
+    | '/admin/'
     | '/admin/tenants/$tenantId'
     | '/s/$slug/orders/$orderId'
   fileRoutesByTo: FileRoutesByTo
@@ -1042,6 +1052,7 @@ export interface FileRouteTypes {
     | '/hooks/engines/winback-one'
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
+    | '/admin'
     | '/admin/tenants/$tenantId'
     | '/s/$slug/orders/$orderId'
   id:
@@ -1134,6 +1145,7 @@ export interface FileRouteTypes {
     | '/hooks/engines/winback-one'
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
+    | '/_authenticated/admin/'
     | '/_authenticated/admin/tenants/$tenantId'
     | '/s/$slug/orders/$orderId'
   fileRoutesById: FileRoutesById
@@ -1309,6 +1321,13 @@ declare module '@tanstack/react-router' {
       path: '/brand'
       fullPath: '/brand'
       preLoaderRoute: typeof AuthenticatedBrandRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/track/$slug/js': {
@@ -1880,6 +1899,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedAdminTenantsRoute: typeof AuthenticatedAdminTenantsRouteWithChildren
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -1887,6 +1907,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedAdminTenantsRoute: AuthenticatedAdminTenantsRouteWithChildren,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

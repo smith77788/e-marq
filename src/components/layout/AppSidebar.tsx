@@ -66,7 +66,7 @@ const ADMIN_NAV: { label: string; items: NavItem[] }[] = [
   {
     label: "System",
     items: [
-      { label: "Mission Control", to: "/admin/tenants", icon: ShieldCheck, exact: true },
+      { label: "Mission Control", to: "/admin", icon: ShieldCheck, exact: true },
       { label: "All Tenants", to: "/admin/tenants", icon: Building2 },
     ],
   },
@@ -75,7 +75,7 @@ const ADMIN_NAV: { label: string; items: NavItem[] }[] = [
     items: [
       { label: "Live Runs", to: "/agents", icon: Activity },
       { label: "Agent Library", to: "/agents", icon: Cpu },
-      { label: "Insight Stream", to: "/admin/tenants", icon: Radio },
+      { label: "Insight Stream", to: "/admin", icon: Radio },
     ],
   },
 ];
@@ -95,7 +95,7 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border">
         <Link
-          to={isSuperAdmin ? "/admin/tenants" : "/brand"}
+          to={isSuperAdmin ? "/admin" : "/brand"}
           className="flex items-center gap-2 px-2 py-1.5"
         >
           <span className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
