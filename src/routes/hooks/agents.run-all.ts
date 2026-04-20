@@ -64,6 +64,18 @@ const AGENTS = [
   "anti-fraud",
   "action-watchdog",
   "conflict-resolver",
+  // Batch 8: ROI/learning
+  "social-proof-live",
+  "broadcast-roi",
+  "winback-roi",
+  "elasticity-meta-loop",
+  "learning-loop-monitor",
+  // Batch 9: orchestration
+  "notification-router",
+  "daily-digest-v2",
+  "owner-playbook",
+  "meta-prior-injector",
+  "autonomous-seo-loop",
 ] as const;
 
 export const Route = createFileRoute("/hooks/agents/run-all")({
