@@ -1,0 +1,465 @@
+/**
+ * 7-step Onboarding wizard. Доступний за /onboarding?tenant=...&slug=...
+ * Якщо tenant не передано — показуємо selector серед моїх tenants.
+ *
+ * Кожен крок зберігає прогрес одразу (idempotent), тому користувач може
+ * вийти і повернутися без втрат.
+ */
+import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, ArrowRight, Check, Copy, Loader2, Sparkles } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useT, type TKey } from "@/lib/i18n";
+
+type Search = { tenant?: string; slug?: string };
+
+export const Route = createFileRoute("/_authenticated/onboarding")({
+  validateSearch: (s: Record<string, unknown>): Search => ({
+    tenant: typeof s.tenant === "string" ? s.tenant : undefined,
+    slug: typeof s.slug === "string" ? s.slug : undefined,
+  }),
+  component: OnboardingPage,
+});
+
+function OnboardingPage() {
+  const search = useSearch({ from: "/_authenticated/onboarding" });
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { t, lang } = useT();
+  const qc = useQueryClient();
+
+  const { data: tenants } = useQuery({
+    queryKey: ["my-tenants", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("tenants").select("id, name, slug").order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  // Auto-select tenant from URL or first one
+  const tenantId = search.tenant ?? tenants?.[0]?.id;
+  const tenantSlug = search.slug ?? tenants?.find((t) => t.id === tenantId)?.slug;
+
+  useEffect(() => {
+    if (!search.tenant && tenants && tenants[0]) {
+      navigate({ to: "/onboarding", search: { tenant: tenants[0].id, slug: tenants[0].slug }, replace: true });
+    }
+  }, [search.tenant, tenants, navigate]);
+
+  const [step, setStep] = useState(0);
+
+  if (!tenantId || !tenantSlug) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("onb.title")}</CardTitle>
+          <CardDescription>
+            {lang === "ua" ? "Спочатку створи бренд або попроси super-admin." : "Create a brand first or ask a super-admin."}
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  const steps: Array<{ titleKey: TKey; descKey: TKey; render: () => JSX.Element }> = [
+    { titleKey: "onb.s1.title", descKey: "onb.s1.desc", render: () => <Step1Brand tenantId={tenantId} qc={qc} /> },
+    { titleKey: "onb.s2.title", descKey: "onb.s2.desc", render: () => <Step2Channel tenantId={tenantId} qc={qc} /> },
+    { titleKey: "onb.s3.title", descKey: "onb.s3.desc", render: () => <Step3Product tenantId={tenantId} qc={qc} /> },
+    { titleKey: "onb.s4.title", descKey: "onb.s4.desc", render: () => <Step4Customers tenantId={tenantId} qc={qc} /> },
+    { titleKey: "onb.s5.title", descKey: "onb.s5.desc", render: () => <Step5Tracking tenantSlug={tenantSlug} /> },
+    { titleKey: "onb.s6.title", descKey: "onb.s6.desc", render: () => <Step6Payment tenantId={tenantId} qc={qc} /> },
+    { titleKey: "onb.s7.title", descKey: "onb.s7.desc", render: () => <Step7Team tenantId={tenantId} /> },
+  ];
+
+  const pct = Math.round(((step + 1) / steps.length) * 100);
+  const isLast = step === steps.length - 1;
+
+  return (
+    <div className="mx-auto max-w-2xl space-y-6">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">{t("onb.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("onb.subtitle")}</p>
+        </div>
+        <LanguageSwitcher />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>
+            {t("onb.step")} {step + 1} {t("onb.of")} {steps.length}
+          </span>
+          <span>{pct}%</span>
+        </div>
+        <Progress value={pct} className="h-2" />
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            {t(steps[step].titleKey)}
+          </CardTitle>
+          <CardDescription>{t(steps[step].descKey)}</CardDescription>
+        </CardHeader>
+        <CardContent>{steps[step].render()}</CardContent>
+      </Card>
+
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0}>
+          <ArrowLeft className="mr-1 h-4 w-4" />
+          {t("onb.back")}
+        </Button>
+        <div className="flex items-center gap-2">
+          {!isLast && (
+            <Button variant="outline" onClick={() => setStep((s) => s + 1)}>
+              {t("onb.skip")}
+            </Button>
+          )}
+          {isLast ? (
+            <Button asChild>
+              <Link to="/brand" search={{ tenant: tenantId }}>
+                <Check className="mr-1 h-4 w-4" />
+                {t("onb.finish")}
+              </Link>
+            </Button>
+          ) : (
+            <Button onClick={() => setStep((s) => Math.min(steps.length - 1, s + 1))}>
+              {t("onb.next")}
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// -------------------- STEPS --------------------
+
+type QC = ReturnType<typeof useQueryClient>;
+
+function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
+  const { t } = useT();
+  const { data: tenant } = useQuery({
+    queryKey: ["tenant", tenantId],
+    queryFn: async () => {
+      const { data } = await supabase.from("tenants").select("name, slug").eq("id", tenantId).maybeSingle();
+      return data;
+    },
+  });
+  const [name, setName] = useState("");
+  useEffect(() => {
+    if (tenant?.name) setName(tenant.name);
+  }, [tenant?.name]);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("tenants").update({ name }).eq("id", tenantId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(t("common.save") + " ✓");
+      qc.invalidateQueries({ queryKey: ["tenant", tenantId] });
+      qc.invalidateQueries({ queryKey: ["my-tenants"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-3">
+      <Label>{t("onb.s1.title")}</Label>
+      <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("onb.s1.placeholder")} />
+      <Button size="sm" onClick={() => save.mutate()} disabled={save.isPending || !name}>
+        {save.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+        {t("common.save")}
+      </Button>
+    </div>
+  );
+}
+
+function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
+  const { t } = useT();
+  const { data: cfg } = useQuery({
+    queryKey: ["tenant-config", tenantId],
+    queryFn: async () => {
+      const { data } = await supabase.from("tenant_configs").select("bot").eq("tenant_id", tenantId).maybeSingle();
+      return data;
+    },
+  });
+  const [token, setToken] = useState("");
+  useEffect(() => {
+    const bot = (cfg?.bot ?? {}) as Record<string, unknown>;
+    if (typeof bot.telegram_token === "string") setToken(bot.telegram_token);
+  }, [cfg]);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const bot = { ...((cfg?.bot ?? {}) as Record<string, unknown>), telegram_token: token };
+      const { error } = await supabase.from("tenant_configs").update({ bot: bot as never }).eq("tenant_id", tenantId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(t("common.save") + " ✓");
+      qc.invalidateQueries({ queryKey: ["tenant-config", tenantId] });
+      qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-md border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+        💡 {t("onb.s2.help")}
+      </div>
+      <Label>{t("onb.s2.tokenLabel")}</Label>
+      <Input value={token} onChange={(e) => setToken(e.target.value)} placeholder="123456:ABC-DEF..." />
+      <Button size="sm" onClick={() => save.mutate()} disabled={save.isPending}>
+        {save.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+        {t("common.save")}
+      </Button>
+    </div>
+  );
+}
+
+function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
+  const { t } = useT();
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("");
+
+  const create = useMutation({
+    mutationFn: async () => {
+      const priceCents = Math.round(Number(price) * 100);
+      const stockNum = Math.max(0, parseInt(stock || "0", 10));
+      if (!name || !Number.isFinite(priceCents) || priceCents <= 0) throw new Error("Name and price required");
+      const { error } = await supabase.from("products").insert({
+        tenant_id: tenantId,
+        name,
+        price_cents: priceCents,
+        stock: stockNum,
+        is_active: true,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Product created ✓");
+      setName("");
+      setPrice("");
+      setStock("");
+      qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-3">
+      <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("onb.s3.namePh")} />
+      <div className="grid grid-cols-2 gap-3">
+        <Input
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          placeholder={t("onb.s3.pricePh")}
+          type="number"
+          step="0.01"
+          min="0"
+        />
+        <Input
+          value={stock}
+          onChange={(e) => setStock(e.target.value)}
+          placeholder={t("onb.s3.stockPh")}
+          type="number"
+          min="0"
+        />
+      </div>
+      <Button size="sm" onClick={() => create.mutate()} disabled={create.isPending}>
+        {create.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+        {t("common.save")}
+      </Button>
+    </div>
+  );
+}
+
+function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
+  const { t, lang } = useT();
+  const [csv, setCsv] = useState("");
+
+  const importCsv = useMutation({
+    mutationFn: async () => {
+      const lines = csv.trim().split(/\r?\n/);
+      const rows = lines
+        .slice(1) // skip header
+        .map((l) => {
+          const [email, name] = l.split(",").map((s) => s.trim());
+          return email ? { tenant_id: tenantId, email, name: name || null } : null;
+        })
+        .filter(Boolean) as { tenant_id: string; email: string; name: string | null }[];
+      if (rows.length === 0) throw new Error("No valid rows");
+      const { error } = await supabase.from("customers").insert(rows as never);
+      if (error) throw error;
+      return rows.length;
+    },
+    onSuccess: (n) => {
+      toast.success(`Imported ${n} customers ✓`);
+      setCsv("");
+      qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground">{t("onb.s4.csvHint")}</p>
+      <textarea
+        value={csv}
+        onChange={(e) => setCsv(e.target.value)}
+        placeholder={"email,name\nalice@example.com,Alice\nbob@example.com,Bob"}
+        className="min-h-32 w-full rounded-md border border-border bg-background p-3 font-mono text-xs"
+      />
+      <div className="flex gap-2">
+        <Button size="sm" onClick={() => importCsv.mutate()} disabled={importCsv.isPending || !csv.trim()}>
+          {importCsv.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+          {t("onb.s4.csv")}
+        </Button>
+        <Button size="sm" variant="outline" asChild>
+          <Link to="/admin/tenants/$tenantId" params={{ tenantId }}>
+            {lang === "ua" ? "Адмін-панель тенанта" : "Tenant admin"}
+          </Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function Step5Tracking({ tenantSlug }: { tenantSlug: string }) {
+  const { t } = useT();
+  const [copied, setCopied] = useState(false);
+  const snippet = useMemo(
+    () => `<script async src="${typeof window !== "undefined" ? window.location.origin : ""}/track/${tenantSlug}.js"></script>`,
+    [tenantSlug],
+  );
+  return (
+    <div className="space-y-3">
+      <pre className="overflow-x-auto rounded-md bg-muted/40 p-3 text-xs">{snippet}</pre>
+      <Button
+        size="sm"
+        onClick={async () => {
+          await navigator.clipboard.writeText(snippet);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        }}
+      >
+        <Copy className="mr-2 h-3.5 w-3.5" />
+        {copied ? t("onb.s5.copied") : t("onb.s5.copy")}
+      </Button>
+    </div>
+  );
+}
+
+function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
+  const { t } = useT();
+  const { data: cfg } = useQuery({
+    queryKey: ["tenant-config", tenantId],
+    queryFn: async () => {
+      const { data } = await supabase.from("tenant_configs").select("features").eq("tenant_id", tenantId).maybeSingle();
+      return data;
+    },
+  });
+  const current = ((cfg?.features ?? {}) as Record<string, unknown>).payment_method as string | undefined;
+
+  const setMethod = useMutation({
+    mutationFn: async (method: "manual" | "stripe") => {
+      const features = { ...((cfg?.features ?? {}) as Record<string, unknown>), payment_method: method };
+      const { error } = await supabase.from("tenant_configs").update({ features: features as never }).eq("tenant_id", tenantId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(t("common.save") + " ✓");
+      qc.invalidateQueries({ queryKey: ["tenant-config", tenantId] });
+      qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="grid gap-2">
+      {(["manual", "stripe"] as const).map((m) => (
+        <button
+          key={m}
+          type="button"
+          onClick={() => setMethod.mutate(m)}
+          className={`rounded-md border p-3 text-left text-sm transition-colors ${
+            current === m ? "border-primary bg-primary/5" : "border-border hover:bg-muted/30"
+          }`}
+        >
+          <div className="font-medium">{m === "manual" ? t("onb.s6.manual") : t("onb.s6.stripe")}</div>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function Step7Team({ tenantId }: { tenantId: string }) {
+  const { t, lang } = useT();
+  const [emails, setEmails] = useState<string[]>([]);
+  const [email, setEmail] = useState("");
+  return (
+    <div className="space-y-3">
+      <div className="flex gap-2">
+        <Input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder={t("onb.s7.emailPh")}
+          type="email"
+        />
+        <Button
+          size="sm"
+          onClick={() => {
+            if (email && /\S+@\S+/.test(email)) {
+              setEmails((arr) => [...arr, email]);
+              setEmail("");
+              toast.info(
+                lang === "ua"
+                  ? "Запрошення збережено локально (надсилання в наступному релізі)."
+                  : "Invite saved locally (delivery in next release).",
+              );
+            }
+          }}
+        >
+          {t("onb.s7.add")}
+        </Button>
+      </div>
+      {emails.length > 0 && (
+        <ul className="space-y-1 text-sm">
+          {emails.map((e, i) => (
+            <li key={i} className="flex items-center gap-2 rounded-md border border-border bg-muted/20 px-2 py-1">
+              <Check className="h-3.5 w-3.5 text-success" /> {e}
+              <span className="ml-auto text-xs text-muted-foreground">{t("onb.s7.invited")}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="text-xs text-muted-foreground">
+        💡{" "}
+        {lang === "ua"
+          ? "Поки що ми зберігаємо email-и; після підключення auth-invitations надішлемо запрошення автоматично. Можна пропустити."
+          : "Emails are stored locally for now. We'll wire auth invitations next; safe to skip."}
+      </p>
+    </div>
+  );
+}
+
+// Vite-friendly typing for JSX in non-tsx-default-export files
+type JSXEl = ReturnType<typeof Sparkles>;
+export type { JSXEl };
