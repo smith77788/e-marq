@@ -406,9 +406,12 @@ function StorefrontPage() {
         cartLines={cartLines}
         totalCents={totalCents}
         currency={currency}
-        onSuccess={() => {
+        payments={payments}
+        onSuccess={(orderId) => {
           setCart({});
           clearCart(tenant.id);
+          setCheckoutOpen(false);
+          navigate({ to: "/s/$slug/orders/$orderId", params: { slug, orderId } });
         }}
       />
     </div>
