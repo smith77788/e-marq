@@ -125,6 +125,7 @@ export const Route = createFileRoute("/hooks/actions/apply")({
           search_term?: string;
           current_price_cents?: number;
           suggested_price_cents?: number;
+          source_action_id?: string;
         };
         const targetId = mapping.target_entity === "product" ? m.product_id ?? null : null;
 
