@@ -20,6 +20,7 @@ import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBrandRouteImport } from './routes/_authenticated/brand'
+import { Route as TrackSlugJsRouteImport } from './routes/track.$slug.js'
 import { Route as HooksEnginesWinbackAllRouteImport } from './routes/hooks/engines.winback-all'
 import { Route as HooksEnginesWinbackRouteImport } from './routes/hooks/engines.winback'
 import { Route as HooksEnginesReorderAllRouteImport } from './routes/hooks/engines.reorder-all'
@@ -99,6 +100,11 @@ const AuthenticatedBrandRoute = AuthenticatedBrandRouteImport.update({
   id: '/brand',
   path: '/brand',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const TrackSlugJsRoute = TrackSlugJsRouteImport.update({
+  id: '/track/$slug/js',
+  path: '/track/$slug/js',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const HooksEnginesWinbackAllRoute = HooksEnginesWinbackAllRouteImport.update({
   id: '/hooks/engines/winback-all',
@@ -266,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/hooks/engines/reorder-all': typeof HooksEnginesReorderAllRoute
   '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
   '/hooks/engines/winback-all': typeof HooksEnginesWinbackAllRoute
+  '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -303,6 +310,7 @@ export interface FileRoutesByTo {
   '/hooks/engines/reorder-all': typeof HooksEnginesReorderAllRoute
   '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
   '/hooks/engines/winback-all': typeof HooksEnginesWinbackAllRoute
+  '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -342,6 +350,7 @@ export interface FileRoutesById {
   '/hooks/engines/reorder-all': typeof HooksEnginesReorderAllRoute
   '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
   '/hooks/engines/winback-all': typeof HooksEnginesWinbackAllRoute
+  '/track/$slug/js': typeof TrackSlugJsRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -381,6 +390,7 @@ export interface FileRouteTypes {
     | '/hooks/engines/reorder-all'
     | '/hooks/engines/winback'
     | '/hooks/engines/winback-all'
+    | '/track/$slug/js'
     | '/admin/tenants/$tenantId'
     | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
@@ -418,6 +428,7 @@ export interface FileRouteTypes {
     | '/hooks/engines/reorder-all'
     | '/hooks/engines/winback'
     | '/hooks/engines/winback-all'
+    | '/track/$slug/js'
     | '/admin/tenants/$tenantId'
     | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
@@ -456,6 +467,7 @@ export interface FileRouteTypes {
     | '/hooks/engines/reorder-all'
     | '/hooks/engines/winback'
     | '/hooks/engines/winback-all'
+    | '/track/$slug/js'
     | '/_authenticated/admin/tenants/$tenantId'
     | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
@@ -492,6 +504,7 @@ export interface RootRouteChildren {
   HooksEnginesReorderAllRoute: typeof HooksEnginesReorderAllRoute
   HooksEnginesWinbackRoute: typeof HooksEnginesWinbackRoute
   HooksEnginesWinbackAllRoute: typeof HooksEnginesWinbackAllRoute
+  TrackSlugJsRoute: typeof TrackSlugJsRoute
   HooksTelegramWebhookTenantRoute: typeof HooksTelegramWebhookTenantRoute
 }
 
@@ -573,6 +586,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/brand'
       preLoaderRoute: typeof AuthenticatedBrandRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/track/$slug/js': {
+      id: '/track/$slug/js'
+      path: '/track/$slug/js'
+      fullPath: '/track/$slug/js'
+      preLoaderRoute: typeof TrackSlugJsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/hooks/engines/winback-all': {
       id: '/hooks/engines/winback-all'
@@ -824,8 +844,18 @@ const rootRouteChildren: RootRouteChildren = {
   HooksEnginesReorderAllRoute: HooksEnginesReorderAllRoute,
   HooksEnginesWinbackRoute: HooksEnginesWinbackRoute,
   HooksEnginesWinbackAllRoute: HooksEnginesWinbackAllRoute,
+  TrackSlugJsRoute: TrackSlugJsRoute,
   HooksTelegramWebhookTenantRoute: HooksTelegramWebhookTenantRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
