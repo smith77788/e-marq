@@ -350,4 +350,167 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       what_to_do: "Turn on Telegram bot, abandoned-cart and reorder-reminders — they compound on your real data.",
     },
   }),
+
+  // ---------- Margin Optimizer ----------
+  margin_negative: (m) => {
+    const name = str(m, "product_name", "товар");
+    const loss = num(m, "monthly_loss_cents");
+    const suggested = num(m, "suggested_price_cents");
+    return {
+      ua: {
+        headline: `${name}: продаєш у збиток`,
+        why: `Ціна нижче собівартості. За поточного volume втрачаєш приблизно ${cents(loss)} на місяць.`,
+        what_to_do: `Підняти ціну до ${cents(suggested)} (беззбитковість + 20% маржі).`,
+      },
+      en: {
+        headline: `${name}: selling below cost`,
+        why: `Price is under unit cost. At current volume that's a loss of ~${cents(loss)} per month.`,
+        what_to_do: `Raise price to ${cents(suggested)} (breakeven + 20% margin).`,
+      },
+    };
+  },
+  margin_low_lift: (m) => {
+    const name = str(m, "product_name", "товар");
+    const lift = num(m, "lift_pct") * 100;
+    const extra = num(m, "expected_monthly_lift_cents");
+    const suggested = num(m, "suggested_price_cents");
+    return {
+      ua: {
+        headline: `${name}: можна підняти ціну на ${lift.toFixed(0)}%`,
+        why: `Високий volume + низька маржа. Невелике підняття ціни не вб'є попит, але дасть ~${cents(extra)} додаткової маржі на місяць.`,
+        what_to_do: `Підняти ціну до ${cents(suggested)} і моніторити конверсію 14 днів.`,
+      },
+      en: {
+        headline: `${name}: room to raise price by ${lift.toFixed(0)}%`,
+        why: `High volume + thin margin. A small bump won't kill demand and adds ~${cents(extra)} margin/month.`,
+        what_to_do: `Raise to ${cents(suggested)} and watch conversion for 14 days.`,
+      },
+    };
+  },
+
+  // ---------- LTV / Churn ----------
+  high_value_churn_risk: (m) => {
+    const name = str(m, "customer_name", "VIP");
+    const ltv = num(m, "predicted_ltv_cents");
+    const days = num(m, "days_since_last_order");
+    return {
+      ua: {
+        headline: `${name}: VIP-клієнт йде`,
+        why: `Predicted LTV ${cents(ltv)} на 12 міс, але не купував ${days} днів — ризик відтоку понад 70%.`,
+        what_to_do: `Персональний win-back: знижка 15% або безкоштовна доставка на наступне замовлення.`,
+      },
+      en: {
+        headline: `${name}: high-value customer at risk`,
+        why: `Predicted LTV ${cents(ltv)} over 12mo, but ${days} days silent — churn risk >70%.`,
+        what_to_do: `Personal win-back: 15% off or free shipping on next order.`,
+      },
+    };
+  },
+
+  // ---------- Cart Abandonment ----------
+  cart_abandoned: (m) => {
+    const name = str(m, "customer_name", "Клієнт");
+    const value = num(m, "cart_value_cents");
+    const items = num(m, "product_count");
+    return {
+      ua: {
+        headline: `${name} покинув кошик ${cents(value)}`,
+        why: `Додав ${items} товарів і пішов. Recovery email конвертить ~15-20%.`,
+        what_to_do: `Надіслати follow-up email з нагадуванням і опційною знижкою 10%.`,
+      },
+      en: {
+        headline: `${name} abandoned cart ${cents(value)}`,
+        why: `${items} items added then left. Recovery emails convert at ~15-20%.`,
+        what_to_do: `Send follow-up email with reminder + optional 10% off.`,
+      },
+    };
+  },
+
+  // ---------- Anomaly Detector ----------
+  revenue_drop: (m) => {
+    const delta = Math.abs(num(m, "delta_pct") * 100);
+    const today = num(m, "today_revenue_cents");
+    const base = num(m, "baseline_revenue_cents");
+    return {
+      ua: {
+        headline: `Виторг впав на ${delta.toFixed(0)}%`,
+        why: `Сьогодні ${cents(today)} проти середніх ${cents(base)}. Це не випадковість — потрібна перевірка.`,
+        what_to_do: `Перевір: трафік, checkout, останні зміни ціни/контенту.`,
+      },
+      en: {
+        headline: `Revenue down ${delta.toFixed(0)}%`,
+        why: `Today ${cents(today)} vs baseline ${cents(base)}. This is beyond normal variance.`,
+        what_to_do: `Check: traffic source, checkout flow, recent price/content changes.`,
+      },
+    };
+  },
+  revenue_spike: (m) => {
+    const delta = num(m, "delta_pct") * 100;
+    return {
+      ua: {
+        headline: `Виторг виріс на ${delta.toFixed(0)}%`,
+        why: "Знайшов щось що працює. Зрозумій причину і повтори.",
+        what_to_do: "Перевір атрибуцію останніх замовлень — який канал/кампанія дала ріст.",
+      },
+      en: {
+        headline: `Revenue up ${delta.toFixed(0)}%`,
+        why: "Something is working. Identify the cause and double down.",
+        what_to_do: "Check attribution on today's orders — which channel/campaign drove the lift.",
+      },
+    };
+  },
+  orders_drop: (m) => {
+    const delta = Math.abs(num(m, "delta_pct") * 100);
+    return {
+      ua: {
+        headline: `Замовлень на ${delta.toFixed(0)}% менше`,
+        why: "Кількість замовлень нижча за норму. Швидше за все: трафік або checkout-friction.",
+        what_to_do: "Перевір funnel — на якому кроці клієнти відвалюються.",
+      },
+      en: {
+        headline: `Orders down ${delta.toFixed(0)}%`,
+        why: "Order count is below normal. Likely cause: traffic drop or checkout friction.",
+        what_to_do: "Check funnel — which step is leaking.",
+      },
+    };
+  },
+  orders_spike: () => ({
+    ua: {
+      headline: "Замовлень помітно більше",
+      why: "Скейлиш — добре. Перевір що інвентар витримає.",
+      what_to_do: "Глянь stockout-прогноз для top-продуктів.",
+    },
+    en: {
+      headline: "Orders noticeably up",
+      why: "Scale moment — good. Check inventory can keep up.",
+      what_to_do: "Review stockout forecast for top sellers.",
+    },
+  }),
+  traffic_drop: (m) => {
+    const delta = Math.abs(num(m, "delta_pct") * 100);
+    return {
+      ua: {
+        headline: `Трафік впав на ${delta.toFixed(0)}%`,
+        why: "Менше відвідувачів = менше шансів на продаж.",
+        what_to_do: "Перевір SEO-позиції, ad-кампанії, email-розсилки за останні 3 дні.",
+      },
+      en: {
+        headline: `Traffic down ${delta.toFixed(0)}%`,
+        why: "Fewer visitors = fewer chances to convert.",
+        what_to_do: "Check SEO rankings, ad campaigns, email sends for last 3 days.",
+      },
+    };
+  },
+  traffic_spike: () => ({
+    ua: {
+      headline: "Сплеск трафіку",
+      why: "Добре. Перевір чи конвертує — інакше це just expensive eyeballs.",
+      what_to_do: "Глянь conversion rate — якщо нижчий за середній, посилюй CTA.",
+    },
+    en: {
+      headline: "Traffic spike",
+      why: "Good. Make sure it converts — otherwise it's just expensive eyeballs.",
+      what_to_do: "Check conversion rate — if below average, strengthen CTA.",
+    },
+  }),
 };
