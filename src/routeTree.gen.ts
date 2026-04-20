@@ -25,9 +25,11 @@ import { Route as HooksEnginesReorderRouteImport } from './routes/hooks/engines.
 import { Route as HooksEnginesDispatchRouteImport } from './routes/hooks/engines.dispatch'
 import { Route as HooksAgentsStockoutRouteImport } from './routes/hooks/agents.stockout'
 import { Route as HooksAgentsSearchGapRouteImport } from './routes/hooks/agents.search-gap'
+import { Route as HooksAgentsSalesBotAllRouteImport } from './routes/hooks/agents.sales-bot-all'
 import { Route as HooksAgentsSalesBotRouteImport } from './routes/hooks/agents.sales-bot'
 import { Route as HooksAgentsRunAllRouteImport } from './routes/hooks/agents.run-all'
 import { Route as HooksAgentsMemoryFeedbackRouteImport } from './routes/hooks/agents.memory-feedback'
+import { Route as HooksAgentsFeedbackLoopAllRouteImport } from './routes/hooks/agents.feedback-loop-all'
 import { Route as HooksAgentsFeedbackLoopRouteImport } from './routes/hooks/agents.feedback-loop'
 import { Route as HooksAgentsCronAllRouteImport } from './routes/hooks/agents.cron-all'
 import { Route as HooksAgentsChurnRiskRouteImport } from './routes/hooks/agents.churn-risk'
@@ -117,6 +119,11 @@ const HooksAgentsSearchGapRoute = HooksAgentsSearchGapRouteImport.update({
   path: '/hooks/agents/search-gap',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsSalesBotAllRoute = HooksAgentsSalesBotAllRouteImport.update({
+  id: '/hooks/agents/sales-bot-all',
+  path: '/hooks/agents/sales-bot-all',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsSalesBotRoute = HooksAgentsSalesBotRouteImport.update({
   id: '/hooks/agents/sales-bot',
   path: '/hooks/agents/sales-bot',
@@ -131,6 +138,12 @@ const HooksAgentsMemoryFeedbackRoute =
   HooksAgentsMemoryFeedbackRouteImport.update({
     id: '/hooks/agents/memory-feedback',
     path: '/hooks/agents/memory-feedback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsFeedbackLoopAllRoute =
+  HooksAgentsFeedbackLoopAllRouteImport.update({
+    id: '/hooks/agents/feedback-loop-all',
+    path: '/hooks/agents/feedback-loop-all',
     getParentRoute: () => rootRouteImport,
   } as any)
 const HooksAgentsFeedbackLoopRoute = HooksAgentsFeedbackLoopRouteImport.update({
@@ -199,9 +212,11 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
+  '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
   '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
+  '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
@@ -228,9 +243,11 @@ export interface FileRoutesByTo {
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
+  '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
   '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
+  '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
@@ -259,9 +276,11 @@ export interface FileRoutesById {
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
+  '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
   '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
+  '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
@@ -290,9 +309,11 @@ export interface FileRouteTypes {
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/feedback-loop'
+    | '/hooks/agents/feedback-loop-all'
     | '/hooks/agents/memory-feedback'
     | '/hooks/agents/run-all'
     | '/hooks/agents/sales-bot'
+    | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
     | '/hooks/engines/dispatch'
@@ -319,9 +340,11 @@ export interface FileRouteTypes {
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/feedback-loop'
+    | '/hooks/agents/feedback-loop-all'
     | '/hooks/agents/memory-feedback'
     | '/hooks/agents/run-all'
     | '/hooks/agents/sales-bot'
+    | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
     | '/hooks/engines/dispatch'
@@ -349,9 +372,11 @@ export interface FileRouteTypes {
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/feedback-loop'
+    | '/hooks/agents/feedback-loop-all'
     | '/hooks/agents/memory-feedback'
     | '/hooks/agents/run-all'
     | '/hooks/agents/sales-bot'
+    | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
     | '/hooks/engines/dispatch'
@@ -377,9 +402,11 @@ export interface RootRouteChildren {
   HooksAgentsChurnRiskRoute: typeof HooksAgentsChurnRiskRoute
   HooksAgentsCronAllRoute: typeof HooksAgentsCronAllRoute
   HooksAgentsFeedbackLoopRoute: typeof HooksAgentsFeedbackLoopRoute
+  HooksAgentsFeedbackLoopAllRoute: typeof HooksAgentsFeedbackLoopAllRoute
   HooksAgentsMemoryFeedbackRoute: typeof HooksAgentsMemoryFeedbackRoute
   HooksAgentsRunAllRoute: typeof HooksAgentsRunAllRoute
   HooksAgentsSalesBotRoute: typeof HooksAgentsSalesBotRoute
+  HooksAgentsSalesBotAllRoute: typeof HooksAgentsSalesBotAllRoute
   HooksAgentsSearchGapRoute: typeof HooksAgentsSearchGapRoute
   HooksAgentsStockoutRoute: typeof HooksAgentsStockoutRoute
   HooksEnginesDispatchRoute: typeof HooksEnginesDispatchRoute
@@ -502,6 +529,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsSearchGapRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/sales-bot-all': {
+      id: '/hooks/agents/sales-bot-all'
+      path: '/hooks/agents/sales-bot-all'
+      fullPath: '/hooks/agents/sales-bot-all'
+      preLoaderRoute: typeof HooksAgentsSalesBotAllRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/sales-bot': {
       id: '/hooks/agents/sales-bot'
       path: '/hooks/agents/sales-bot'
@@ -521,6 +555,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/memory-feedback'
       fullPath: '/hooks/agents/memory-feedback'
       preLoaderRoute: typeof HooksAgentsMemoryFeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/feedback-loop-all': {
+      id: '/hooks/agents/feedback-loop-all'
+      path: '/hooks/agents/feedback-loop-all'
+      fullPath: '/hooks/agents/feedback-loop-all'
+      preLoaderRoute: typeof HooksAgentsFeedbackLoopAllRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/feedback-loop': {
@@ -645,9 +686,11 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsChurnRiskRoute: HooksAgentsChurnRiskRoute,
   HooksAgentsCronAllRoute: HooksAgentsCronAllRoute,
   HooksAgentsFeedbackLoopRoute: HooksAgentsFeedbackLoopRoute,
+  HooksAgentsFeedbackLoopAllRoute: HooksAgentsFeedbackLoopAllRoute,
   HooksAgentsMemoryFeedbackRoute: HooksAgentsMemoryFeedbackRoute,
   HooksAgentsRunAllRoute: HooksAgentsRunAllRoute,
   HooksAgentsSalesBotRoute: HooksAgentsSalesBotRoute,
+  HooksAgentsSalesBotAllRoute: HooksAgentsSalesBotAllRoute,
   HooksAgentsSearchGapRoute: HooksAgentsSearchGapRoute,
   HooksAgentsStockoutRoute: HooksAgentsStockoutRoute,
   HooksEnginesDispatchRoute: HooksEnginesDispatchRoute,
@@ -658,3 +701,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
