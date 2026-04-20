@@ -1,56 +1,72 @@
 
-Goal: fix the “Invalid login credentials” loop without resetting data again.
 
-What I found:
-- Backend auth is working: the logs show signup succeeded and the app immediately logged in that same new user successfully.
-- So this is not a broken database/auth backend issue.
-- The weak spots are in the app UX/flow:
-  1. signup assumes instant login and has no confirm-password protection,
-  2. login gives only the raw error,
-  3. there is no password recovery path,
-  4. auth guarding is still client-side and can be cleaned up.
+## Step 7+: Generate Demo Data — enhanced version
 
-Plan
+### Що покращую vs базовий план
 
-1. Harden signup/login UX
-- Add `confirm password` on `/signup`
-- Normalize email before submit (`trim().toLowerCase()`)
-- Keep password exactly as typed
-- Add show/hide password toggle on signup + login
-- Improve error copy for invalid credentials so users get a clearer message
+Базовий план: 5 продуктів + 100 events.
+Покращений: realistic e-commerce симуляція з повноцінним funnel, ордерами, time-distribution за 30 днів і вибором масштабу.
 
-2. Add recovery flow
-- Add “Forgot password?” link on `/login`
-- Create `/reset-password-request` page to send reset email
-- Create `/reset-password` page to set a new password after recovery link
-- Wire it through the existing backend auth
+### Що генерується
 
-3. Make signup flow robust
-- Update `signUp` handling so it does not blindly assume auto-login
-- If signup returns a live session: continue to dashboard
-- If signup requires confirmation: show a success message with next steps instead of trying to log in again
-- This removes the fragile “auto-confirm is on” assumption in the current code
+**8 products** (різні категорії, ціни, stock):
+- Premium Hoodie $59 / Classic T-Shirt $24 / Sneakers Pro $129
+- Baseball Cap $19 / Canvas Tote $15 / Leather Wallet $45
+- Wireless Earbuds $89 / Water Bottle $12
 
-4. Tighten route auth behavior
-- Replace the current component-level redirect pattern in `_authenticated.tsx` with proper route guard logic
-- Prevent edge cases where the app sits in loading/redirect states awkwardly
+З SKU, description, image_url (Unsplash placeholder), is_active. Skip якщо tenant вже має >=8 продуктів.
 
-5. Verify end-to-end
-- Fresh signup with a new email
-- Sign out → sign back in with same password
-- Trigger forgot-password → reset password → log in with new password
-- Confirm super-admin bootstrap still works for the first fresh user
+**~50 sessions** розподілених за останні **30 днів** (не 7) з реалістичним funnel-decay:
+- 50 sessions → 50 page_view
+- ~35 → product_view (70% conversion)
+- ~18 → add_to_cart (50%)
+- ~9 → checkout_start (50%)
+- ~5 → purchase (55%)
 
-Files to update
-- `src/hooks/useAuth.tsx`
-- `src/routes/login.tsx`
-- `src/routes/signup.tsx`
-- `src/routes/_authenticated.tsx`
-- new public route for reset request
-- new public route for reset password
+Total: ~120 events (а не сухих 100), session_id consistent в межах сесії, product_id для product-related events.
 
-Expected result
-- No more dead-end when a user cannot sign in
-- Much clearer auth UX
-- Safe recovery path instead of wiping the database
-- More reliable protected-route behavior
+**5 orders** (по 1-3 line items кожен) — щоб purchase events мали реальні order_id, total_cents, customer_email, status='paid'.
+
+**Time distribution**: events розкидані за 30 днів через `payload.ts` (бо БД default `now()`), з реалістичним weighting — більше recent events (last 7 days = ~60%).
+
+### UI на Overview tab
+
+Нова Card "Demo data" з:
+- Опис що буде згенеровано
+- Select scale: **Small** (1×) / **Medium** (3×) / **Large** (10×) — multiplier на sessions/orders, products завжди 8
+- Switch "Skip if data exists" (default on)
+- Button `Generate demo data` (variant outline, з Sparkles icon)
+- AlertDialog confirm з summary що буде створено
+- Progress toast: "Creating products… (1/3)" → "Creating orders… (2/3)" → "Generating events… (3/3)"
+- Final toast з результатом + invalidation усіх queries
+
+Bonus: button **"Clear demo data"** (variant ghost, destructive text) — видаляє всі products/orders/events tenant'а з confirm dialog. Тільки super_admin.
+
+### Implementation
+
+Один файл:
+- EDIT: `src/routes/_authenticated/admin.tenants.$tenantId.tsx`
+
+Виносимо логіку в helper `src/lib/demoData.ts`:
+- `generateDemoProducts(tenantId, supabase)` → returns product ids
+- `generateDemoOrders(tenantId, productIds, count, supabase)` → returns order ids
+- `generateDemoEvents(tenantId, productIds, orderIds, sessionCount, supabase)` → batch insert
+- `clearDemoData(tenantId, supabase)` → delete events, order_items, orders, products
+
+NEW: `src/lib/demoData.ts`
+
+### Files
+- NEW: `src/lib/demoData.ts`
+- EDIT: `src/routes/_authenticated/admin.tenants.$tenantId.tsx`
+
+### Чому це краще
+- 30 днів time-spread → можна одразу будувати time-series charts
+- Реальні orders + order_items → revenue metrics працюють, не тільки event counts
+- Scale selector → можна стресити аналітику великим обʼємом
+- Clear button → re-test loop без SQL
+- Realistic funnel decay → dashboard виглядатиме як справжній e-commerce, не як random noise
+
+### Next loop
+- Step 8: Funnel + revenue chart на Overview (recharts)
+- Step 9: Public storefront `/s/$slug`
+
