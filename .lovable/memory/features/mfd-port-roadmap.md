@@ -4,8 +4,8 @@ description: Mapping 88 MFD acos-* edge functions to 45 generalized ACOS agents 
 type: feature
 ---
 **Strategy**: 40-50 generalized agents (not 1:1 port). Full MFD-stack tables (22) added in batch 0.
-**Done**: Batch 0 (22 tables + RLS), Batch 1 (margin-optimizer, ltv-predictor, cart-recovery, anomaly-detector, morning-brief), Batch 2 (bundle-recommender, promo-fatigue, promo-portfolio, discount-elasticity, predictive-pricing), Batch 3 (cohort-engine, attribution, funnel-healer, browse-abandonment, second-order-nurture), Batch 4 (bot-sequences, broadcast-composer, best-time-to-send, csat-dispatcher, nurture-roi).
-**Progress**: 20/45 ported.
+**Done**: Batch 0 (22 tables + RLS), Batch 1 (margin-optimizer, ltv-predictor, cart-recovery, anomaly-detector, morning-brief), Batch 2 (bundle-recommender, promo-fatigue, promo-portfolio, discount-elasticity, predictive-pricing), Batch 3 (cohort-engine, attribution, funnel-healer, browse-abandonment, second-order-nurture), Batch 4 (bot-sequences, broadcast-composer, best-time-to-send, csat-dispatcher, nurture-roi), Batch 5 (seo-rewriter, content-velocity, ugc-harvester, search-intent-miner, programmatic-seo), Batch 6 (customer-segments-auto, loyalty-tiers, product-affinity, customer-churn-predictor, first-order-funnel).
+**Progress**: 30/45 ported.
 **Remaining batches** (5 agents each):
 - B5: seo-rewriter, content-velocity, ugc-harvester, search-intent-miner, programmatic-seo
 - B6: customer-segments-auto, loyalty-tiers, product-affinity, customer-churn-predictor, first-order-funnel

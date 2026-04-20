@@ -1026,4 +1026,78 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       },
     };
   },
+
+  // ---------- Batch 6: Customer/Loyalty ----------
+  loyalty_tier_proposal: (m) => {
+    const silver = num(m, "silver_threshold_cents") / 100;
+    const gold = num(m, "gold_threshold_cents") / 100;
+    const platinum = num(m, "platinum_threshold_cents") / 100;
+    return {
+      ua: {
+        headline: `Loyalty-tiers готові: Silver $${silver.toFixed(0)} / Gold $${gold.toFixed(0)} / Platinum $${platinum.toFixed(0)}`,
+        why: "Природні breakpoints за розподілом LTV. Tier-програма дає 10-20% росту retention через статусний ефект.",
+        what_to_do: "Apply → створює 4 рівні з цими порогами і вмикає авто-присвоєння.",
+      },
+      en: {
+        headline: `Loyalty tiers ready: Silver $${silver.toFixed(0)} / Gold $${gold.toFixed(0)} / Platinum $${platinum.toFixed(0)}`,
+        why: "Natural breakpoints from your LTV distribution. Tiers usually lift retention 10-20% via status effect.",
+        what_to_do: "Apply → creates 4 tiers with these thresholds and enables auto-assignment.",
+      },
+    };
+  },
+
+  next_best_product: (m) => {
+    const from = str(m, "from_name", "товар А");
+    const to = str(m, "to_name", "товар Б");
+    const count = num(m, "transition_count");
+    return {
+      ua: {
+        headline: `Після "${from}" беруть "${to}" (${count}× за 90д)`,
+        why: "Стійкий sequential паттерн — клієнти самі вибирають це. Auto-recommend закриває цикл без зусиль.",
+        what_to_do: `Додати "${to}" у post-purchase / reorder-нагадування для покупців "${from}".`,
+      },
+      en: {
+        headline: `After "${from}" they buy "${to}" (${count}× in 90d)`,
+        why: "Stable sequential pattern — customers choose it themselves. Auto-recommend closes the loop effortlessly.",
+        what_to_do: `Add "${to}" to post-purchase / reorder reminders for "${from}" buyers.`,
+      },
+    };
+  },
+
+  high_value_churn_risk: (m) => {
+    const name = str(m, "customer_name", "клієнт");
+    const ltv = num(m, "ltv_cents") / 100;
+    const prob = num(m, "churn_probability") * 100;
+    return {
+      ua: {
+        headline: `${name}: ${prob.toFixed(0)}% churn (LTV $${ltv.toFixed(0)})`,
+        why: "Цінний клієнт виходить з циклу замовлень. Зараз — найкращий момент повернути; через 30 днів шанс падає вдвічі.",
+        what_to_do: "Apply → персональний win-back з 15-20% знижкою + посилання на улюблений товар.",
+      },
+      en: {
+        headline: `${name}: ${prob.toFixed(0)}% churn risk (LTV $${ltv.toFixed(0)})`,
+        why: "High-value customer drifting out of cycle. Now is the best moment; chances halve in 30 days.",
+        what_to_do: "Apply → personal win-back with 15-20% off + link to their favorite product.",
+      },
+    };
+  },
+
+  first_order_funnel_weak: (m) => {
+    const conv = num(m, "conversion") * 100;
+    const from = str(m, "weakest_from", "step");
+    const to = str(m, "weakest_to", "step");
+    const drop = num(m, "weakest_drop") * 100;
+    return {
+      ua: {
+        headline: `First-order конверсія: ${conv.toFixed(2)}% — слабка`,
+        why: `Найбільша втрата: ${from} → ${to} (-${drop.toFixed(0)}%). Це місце де нові відвідувачі найчастіше "відвалюються".`,
+        what_to_do: "Apply → ШІ перевірить цей крок (UX, ціна, довіра) і запропонує 2-3 fix.",
+      },
+      en: {
+        headline: `First-order conversion: ${conv.toFixed(2)}% — weak`,
+        why: `Biggest drop: ${from} → ${to} (-${drop.toFixed(0)}%). This is where first-time visitors bail most.`,
+        what_to_do: "Apply → AI audits this step (UX, price, trust) and suggests 2-3 fixes.",
+      },
+    };
+  },
 };
