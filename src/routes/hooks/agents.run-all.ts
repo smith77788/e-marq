@@ -28,6 +28,12 @@ const AGENTS = [
   "cart-recovery",
   "anomaly-detector",
   "morning-brief",
+  // Batch 2: promo + bundles
+  "bundle-recommender",
+  "promo-fatigue",
+  "promo-portfolio",
+  "discount-elasticity",
+  "predictive-pricing",
 ] as const;
 
 export const Route = createFileRoute("/hooks/agents/run-all")({

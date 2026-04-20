@@ -513,4 +513,146 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       what_to_do: "Check conversion rate — if below average, strengthen CTA.",
     },
   }),
+
+  // ---------- Batch 2: Bundles ----------
+  bundle_opportunity: (m) => {
+    const a = str(m, "product_a_name", "Товар А");
+    const b = str(m, "product_b_name", "Товар Б");
+    const lift = num(m, "lift_score");
+    const count = num(m, "co_purchase_count");
+    const price = num(m, "suggested_bundle_price_cents");
+    return {
+      ua: {
+        headline: `Бандл: ${a} + ${b}`,
+        why: `Куплені разом ${count} раз${count === 1 ? "" : "и"} — це у ${lift.toFixed(1)}× частіше за випадковість. Бандл збільшить AOV без зусиль.`,
+        what_to_do: `Створити bundle за ${cents(price)} (-10%) і показати на сторінці кожного з товарів.`,
+      },
+      en: {
+        headline: `Bundle: ${a} + ${b}`,
+        why: `Co-purchased ${count} time${count === 1 ? "" : "s"} — that's ${lift.toFixed(1)}× more often than random. Bundling lifts AOV with no effort.`,
+        what_to_do: `Create a bundle at ${cents(price)} (-10%) and show on each product page.`,
+      },
+    };
+  },
+
+  // ---------- Batch 2: Promo Fatigue / Portfolio ----------
+  promo_fatigued: (m) => {
+    const name = str(m, "promo_name", "промо");
+    const fatigue = num(m, "fatigue_score") * 100;
+    const roi = num(m, "roi");
+    return {
+      ua: {
+        headline: `Промо "${name}" втомила (${fatigue.toFixed(0)}% fatigue)`,
+        why: `Аудиторія перенасичена: utilization падає, ROI ${roi.toFixed(1)}×. Кожен наступний день з нею знижує ефект.`,
+        what_to_do: `Поставити на паузу і запустити нову кампанію з іншим angle.`,
+      },
+      en: {
+        headline: `Promo "${name}" fatigued (${fatigue.toFixed(0)}%)`,
+        why: `Audience is saturated: utilization down, ROI ${roi.toFixed(1)}×. Every additional day reduces impact.`,
+        what_to_do: `Pause it and launch a fresh campaign with a different angle.`,
+      },
+    };
+  },
+  promo_segment_gap: (m) => {
+    const missing = (m.missing_segments as string[] | undefined) ?? [];
+    return {
+      ua: {
+        headline: `Сегменти без промо: ${missing.join(", ")}`,
+        why: "Ці клієнти не отримують релевантної знижки → потенційний виторг лежить незачеплений.",
+        what_to_do: `Створити одну промо для сегменту "${missing[0]}" — типово +10-20% конверсії в когорті.`,
+      },
+      en: {
+        headline: `Uncovered segments: ${missing.join(", ")}`,
+        why: "These customers see no relevant offer → revenue is left on the table.",
+        what_to_do: `Create one promo targeting "${missing[0]}" — typically lifts cohort conversion 10-20%.`,
+      },
+    };
+  },
+  promo_overlap: (m) => {
+    const c = num(m, "overlapping_count");
+    return {
+      ua: {
+        headline: `${c} продуктів під 2+ промо одночасно`,
+        why: "Канібалізація: один товар отримує 2 знижки — клієнт користується найбільшою, ти втрачаєш маржу.",
+        what_to_do: "Залишити по одній найкращій промо на продукт.",
+      },
+      en: {
+        headline: `${c} products covered by 2+ promos`,
+        why: "Cannibalization: one product gets stacked discounts — customer takes the biggest, you lose margin.",
+        what_to_do: "Keep one best promo per product.",
+      },
+    };
+  },
+  promo_too_many: (m) => {
+    const n = num(m, "active_promos");
+    return {
+      ua: {
+        headline: `${n} активних промо — забагато`,
+        why: "Понад 4-6 одночасних знижок розмивають сприйняття. 'Знижка' перестає бути подією.",
+        what_to_do: "Залишити топ-4 за ROI, інші згорнути.",
+      },
+      en: {
+        headline: `${n} active promos — too many`,
+        why: "Over 4-6 concurrent discounts dilute perception. 'Sale' stops being an event.",
+        what_to_do: "Keep top-4 by ROI, retire the rest.",
+      },
+    };
+  },
+
+  // ---------- Batch 2: Discount Elasticity ----------
+  discount_sweet_spot: (m) => {
+    const depth = num(m, "best_depth_pct");
+    const roi = num(m, "best_roi");
+    return {
+      ua: {
+        headline: `Знижка ${depth}% — оптимум (ROI ${roi.toFixed(1)}×)`,
+        why: `Історично саме ця глибина знижки приносить найбільше повернення. Менше — мало мотивує, більше — з'їдає маржу.`,
+        what_to_do: `Стандартизувати наступні промо на ${depth}%.`,
+      },
+      en: {
+        headline: `${depth}% discount is the sweet spot (${roi.toFixed(1)}× ROI)`,
+        why: `Historically this depth yields highest return. Less is too weak, more eats margin.`,
+        what_to_do: `Standardize next promos at ${depth}%.`,
+      },
+    };
+  },
+  discount_negative_roi: (m) => {
+    const depth = num(m, "bad_depth_pct");
+    const roi = num(m, "bad_roi");
+    return {
+      ua: {
+        headline: `Знижки ${depth}% збиткові (ROI ${roi.toFixed(2)}×)`,
+        why: `На такій глибині повертається менше ніж витрачається — це чистий мінус по cash.`,
+        what_to_do: `Прибрати знижки ${depth}% з playbook.`,
+      },
+      en: {
+        headline: `${depth}% discounts are unprofitable (${roi.toFixed(2)}× ROI)`,
+        why: `At this depth you get back less than you spend — net cash loss.`,
+        what_to_do: `Remove ${depth}% discounts from the playbook.`,
+      },
+    };
+  },
+
+  // ---------- Batch 2: Predictive Pricing ----------
+  price_predicted_optimal: (m) => {
+    const name = str(m, "product_name", "товар");
+    const cur = num(m, "current_price_cents");
+    const sug = num(m, "suggested_price_cents");
+    const elast = num(m, "elasticity");
+    const uplift = num(m, "expected_monthly_uplift_cents");
+    const dir = sug > cur ? "підняти" : "знизити";
+    const dirEn = sug > cur ? "raise" : "lower";
+    return {
+      ua: {
+        headline: `${name}: ${dir} ціну ${cents(cur)} → ${cents(sug)}`,
+        why: `Еластичність попиту ${elast.toFixed(2)}. Ця ціна максимізує revenue на 60-денному вікні.`,
+        what_to_do: uplift > 0 ? `Застосувати — очікуваний uplift ${cents(uplift)}/міс.` : `Застосувати — стабілізує виторг при поточному попиті.`,
+      },
+      en: {
+        headline: `${name}: ${dirEn} price ${cents(cur)} → ${cents(sug)}`,
+        why: `Demand elasticity ${elast.toFixed(2)}. This price maximizes revenue over the 60-day window.`,
+        what_to_do: uplift > 0 ? `Apply — expected uplift ${cents(uplift)}/mo.` : `Apply — stabilizes revenue at current demand.`,
+      },
+    };
+  },
 };
