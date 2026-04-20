@@ -95,7 +95,7 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border">
         <Link
-          to={isSuperAdmin ? "/admin/tenants" : "/brand"}
+          to={isSuperAdmin ? "/admin" : "/brand"}
           className="flex items-center gap-2 px-2 py-1.5"
         >
           <span className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
