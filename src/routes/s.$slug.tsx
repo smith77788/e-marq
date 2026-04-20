@@ -502,6 +502,7 @@ function CheckoutDialog({
   cartLines,
   totalCents,
   currency,
+  payments,
   onSuccess,
 }: {
   open: boolean;
@@ -510,22 +511,35 @@ function CheckoutDialog({
   cartLines: { product: Product; quantity: number }[];
   totalCents: number;
   currency: string;
-  onSuccess: () => void;
+  payments: PaymentsConfig;
+  onSuccess: (orderId: string) => void;
 }) {
+  const manualEnabled = payments.manual_enabled !== false;
+  const stripeEnabled = payments.stripe_enabled === true;
+  const defaultMethod: "manual" | "stripe_card" = manualEnabled
+    ? "manual"
+    : stripeEnabled
+      ? "stripe_card"
+      : "manual";
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [method, setMethod] = useState<"manual" | "stripe_card">(defaultMethod);
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState<{ orderId: string } | null>(null);
 
   useEffect(() => {
     if (!open) {
-      setDone(null);
       setSubmitting(false);
+      setMethod(defaultMethod);
     }
-  }, [open]);
+  }, [open, defaultMethod]);
 
   async function placeOrder() {
     if (!email.trim() || cartLines.length === 0) return;
+    if (method === "stripe_card") {
+      toast.error("Card payments coming soon — please use bank transfer for now.");
+      return;
+    }
     setSubmitting(true);
     try {
       const { data: order, error: oErr } = await supabase
@@ -536,7 +550,8 @@ function CheckoutDialog({
           customer_name: name.trim() || null,
           currency,
           total_cents: totalCents,
-          status: "paid", // mock — Stripe integration буде наступним кроком
+          status: "pending",
+          payment_method: "manual",
           metadata: { source: "storefront", session_id: getSessionId() },
         })
         .select("id")
@@ -556,12 +571,17 @@ function CheckoutDialog({
 
       track(tenantId, "purchase_completed", {
         order_id: order.id,
-        payload: { total_cents: totalCents, items: items.length, currency },
+        payload: {
+          total_cents: totalCents,
+          items: items.length,
+          currency,
+          payment_method: "manual",
+          status: "pending",
+        },
       });
 
-      setDone({ orderId: order.id });
-      onSuccess();
-      toast.success("Order placed!");
+      toast.success("Order placed! Awaiting payment.");
+      onSuccess(order.id);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to place order";
       toast.error(msg);
@@ -570,92 +590,126 @@ function CheckoutDialog({
     }
   }
 
+  const noMethods = !manualEnabled && !stripeEnabled;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{done ? "Order confirmed" : "Checkout"}</DialogTitle>
+          <DialogTitle>Checkout</DialogTitle>
         </DialogHeader>
 
-        {done ? (
-          <div className="space-y-4 py-2 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <Check className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">Thank you for your order.</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Order #{done.orderId.slice(0, 8)}
-              </p>
-            </div>
-            <Button className="w-full" onClick={() => onOpenChange(false)}>
-              Continue shopping
-            </Button>
-          </div>
-        ) : (
-          <>
-            <div className="space-y-3 py-2">
-              <div className="rounded-md border p-3">
-                <ul className="space-y-1 text-xs">
-                  {cartLines.map((l) => (
-                    <li key={l.product.id} className="flex justify-between">
-                      <span className="line-clamp-1">
-                        {l.product.name} × {l.quantity}
-                      </span>
-                      <span>
-                        {((l.product.price_cents * l.quantity) / 100).toFixed(2)} {currency}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-2 flex justify-between border-t pt-2 text-sm font-medium">
-                  <span>Total</span>
-                  <span>
-                    {(totalCents / 100).toFixed(2)} {currency}
+        <div className="space-y-4 py-2">
+          <div className="rounded-md border p-3">
+            <ul className="space-y-1 text-xs">
+              {cartLines.map((l) => (
+                <li key={l.product.id} className="flex justify-between">
+                  <span className="line-clamp-1">
+                    {l.product.name} × {l.quantity}
                   </span>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="checkout-name">Name (optional)</Label>
-                <Input
-                  id="checkout-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Jane Doe"
-                  disabled={submitting}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="checkout-email">Email *</Label>
-                <Input
-                  id="checkout-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                  disabled={submitting}
-                />
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                Demo checkout — payment will be added in next step.
-              </p>
+                  <span>
+                    {((l.product.price_cents * l.quantity) / 100).toFixed(2)} {currency}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-2 flex justify-between border-t pt-2 text-sm font-medium">
+              <span>Total</span>
+              <span>
+                {(totalCents / 100).toFixed(2)} {currency}
+              </span>
             </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={submitting}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="checkout-name">Name (optional)</Label>
+            <Input
+              id="checkout-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Jane Doe"
+              disabled={submitting}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="checkout-email">Email *</Label>
+            <Input
+              id="checkout-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              required
+              disabled={submitting}
+            />
+          </div>
+
+          {noMethods ? (
+            <p className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
+              No payment methods configured. Please contact the merchant.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              <Label>Payment method</Label>
+              <RadioGroup
+                value={method}
+                onValueChange={(v) => setMethod(v as "manual" | "stripe_card")}
+                className="space-y-2"
               >
-                Cancel
-              </Button>
-              <Button onClick={placeOrder} disabled={submitting || !email.trim()}>
-                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Place order
-              </Button>
-            </DialogFooter>
-          </>
-        )}
+                {manualEnabled && (
+                  <label
+                    htmlFor="pm-manual"
+                    className="flex cursor-pointer items-start gap-3 rounded-md border p-3 hover:bg-accent/50"
+                  >
+                    <RadioGroupItem id="pm-manual" value="manual" className="mt-1" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Landmark className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">Bank transfer</span>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Manual confirmation by the merchant. Instructions shown after checkout.
+                      </p>
+                    </div>
+                  </label>
+                )}
+                {stripeEnabled && (
+                  <label
+                    htmlFor="pm-stripe"
+                    className="flex cursor-pointer items-start gap-3 rounded-md border p-3 opacity-60 hover:bg-accent/50"
+                  >
+                    <RadioGroupItem id="pm-stripe" value="stripe_card" className="mt-1" disabled />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">Card (Stripe)</span>
+                        <Badge variant="outline" className="text-[10px]">
+                          Coming soon
+                        </Badge>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Awaiting Stripe API key configuration.
+                      </p>
+                    </div>
+                  </label>
+                )}
+              </RadioGroup>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button
+            onClick={placeOrder}
+            disabled={submitting || !email.trim() || noMethods || method === "stripe_card"}
+          >
+            {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Place order
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
