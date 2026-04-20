@@ -13,6 +13,7 @@ import { InsightsPanel } from "@/components/owner/InsightsPanel";
 import { TrackingSnippet } from "@/components/owner/TrackingSnippet";
 import { KpiDashboard } from "@/components/owner/KpiDashboard";
 import { RevenueTrendChart } from "@/components/owner/RevenueTrendChart";
+import { TopCustomers } from "@/components/owner/TopCustomers";
 
 type Search = { tenant?: string };
 

@@ -51,9 +51,6 @@ export const Route = createFileRoute("/hooks/engines/winback-one")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const auth = authorizeAgentRequest(request);
-        if (!auth.ok) return jsonError(auth.error, auth.status);
-
         const body = (await request.json().catch(() => ({}))) as {
           tenant_id?: string;
           customer_id?: string;
@@ -61,6 +58,9 @@ export const Route = createFileRoute("/hooks/engines/winback-one")({
         if (!body.tenant_id || !body.customer_id) {
           return jsonError("tenant_id and customer_id required", 400);
         }
+        const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
+        const auth = await authorizeAgentRequest(token, body.tenant_id);
+        if ("error" in auth) return jsonError(auth.error, auth.status);
 
         const { data: customer, error: cErr } = await supabaseAdmin
           .from("customers")
