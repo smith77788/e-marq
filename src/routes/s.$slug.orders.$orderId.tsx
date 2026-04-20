@@ -115,7 +115,7 @@ function OrderStatusPage() {
   const { slug, orderId } = Route.useParams();
   const initial = Route.useLoaderData();
 
-  const { data } = useQuery({
+  const { data } = useQuery<Awaited<ReturnType<typeof loadOrder>>>({
     queryKey: ["order", slug, orderId],
     queryFn: () => loadOrder(slug, orderId),
     initialData: initial,
