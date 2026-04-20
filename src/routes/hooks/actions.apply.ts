@@ -61,24 +61,25 @@ export const Route = createFileRoute("/hooks/actions/apply")({
         const m = ins.metrics as { product_id?: string; email?: string; search_term?: string };
         const targetId = mapping.target_entity === "product" ? m.product_id ?? null : null;
 
+        const insertRow = {
+          tenant_id: ins.tenant_id,
+          agent_id: mapping.agent_id,
+          source_insight_id: ins.id,
+          action_type: mapping.action_type,
+          target_entity: mapping.target_entity ?? null,
+          target_id: targetId,
+          status: "applied",
+          applied_at: new Date().toISOString(),
+          expected_impact: ins.expected_impact ?? null,
+          parameters: {
+            source_metrics: ins.metrics,
+            triggered_by: ctx.kind,
+          } as never,
+          actual_result: { note: "Action recorded; side-effect simulated in this iteration." } as never,
+        };
         const { data: action, error: actErr } = await supabaseAdmin
           .from("ai_actions")
-          .insert({
-            tenant_id: ins.tenant_id,
-            agent_id: mapping.agent_id,
-            source_insight_id: ins.id,
-            action_type: mapping.action_type,
-            target_entity: mapping.target_entity ?? null,
-            target_id: targetId,
-            status: "applied",
-            applied_at: new Date().toISOString(),
-            expected_impact: ins.expected_impact ?? null,
-            parameters: {
-              source_metrics: ins.metrics,
-              triggered_by: ctx.kind,
-            },
-            actual_result: { note: "Action recorded; side-effect simulated in this iteration." },
-          })
+          .insert(insertRow)
           .select("id")
           .single();
         if (actErr || !action) return jsonError("Failed to log action", 500, { details: actErr?.message });
