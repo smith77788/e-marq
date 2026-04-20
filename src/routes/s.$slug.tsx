@@ -31,10 +31,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { loadCart, saveCart, clearCart, type Cart } from "@/lib/cart";
 
 type TenantRow = { id: string; name: string; slug: string; status: string };
+type PaymentsConfig = {
+  manual_enabled?: boolean;
+  stripe_enabled?: boolean;
+  manual_instructions?: string;
+  manual_contact?: string;
+  currency?: string;
+};
 type ConfigRow = {
   brand_name: string;
   ui: Record<string, unknown> | null;
   seo: Record<string, unknown> | null;
+  features: Record<string, unknown> | null;
 };
 type Product = {
   id: string;
@@ -85,7 +93,7 @@ async function loadStorefront(slug: string) {
   const [{ data: config, error: cErr }, { data: products, error: pErr }] = await Promise.all([
     supabase
       .from("tenant_configs")
-      .select("brand_name, ui, seo")
+      .select("brand_name, ui, seo, features")
       .eq("tenant_id", tenant.id)
       .maybeSingle(),
     supabase
