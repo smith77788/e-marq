@@ -2,10 +2,19 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Sparkles, Trash2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -40,6 +49,13 @@ import {
   normalizeConfig,
   type TenantConfigValues,
 } from "@/components/admin/TenantConfigForm";
+import {
+  generateDemoProducts,
+  generateDemoOrders,
+  generateDemoEvents,
+  clearDemoData,
+  DEMO_PRODUCT_COUNT,
+} from "@/lib/demoData";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants/$tenantId")({
   component: TenantDetailPage,
@@ -66,6 +82,10 @@ function TenantDetailPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<ProductRow | null>(null);
   const [deleting, setDeleting] = useState<ProductRow | null>(null);
+  const [demoScale, setDemoScale] = useState<"small" | "medium" | "large">("small");
+  const [demoSkipExisting, setDemoSkipExisting] = useState(true);
+  const [demoConfirmOpen, setDemoConfirmOpen] = useState(false);
+  const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
 
   const tenantQuery = useQuery({
     queryKey: ["tenant", tenantId],
@@ -231,6 +251,98 @@ function TenantDetailPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const scaleMultiplier = demoScale === "small" ? 1 : demoScale === "medium" ? 3 : 10;
+  const sessionsToCreate = 50 * scaleMultiplier;
+  const ordersToCreate = 5 * scaleMultiplier;
+
+  const generateDemoMutation = useMutation({
+    mutationFn: async () => {
+      const existingProducts = productsQuery.data ?? [];
+      const hasData = existingProducts.length > 0;
+
+      if (demoSkipExisting && hasData) {
+        throw new Error(
+          "Tenant already has data. Disable 'Skip if data exists' or clear demo data first.",
+        );
+      }
+
+      // 1) Products
+      toast.loading("Creating products… (1/3)", { id: "demo-gen" });
+      let productIds: string[];
+      const productMeta = new Map<string, { name: string; price_cents: number }>();
+
+      if (existingProducts.length >= DEMO_PRODUCT_COUNT) {
+        productIds = existingProducts.map((p) => p.id);
+        for (const p of existingProducts) {
+          productMeta.set(p.id, { name: p.name, price_cents: p.price_cents });
+        }
+      } else {
+        productIds = await generateDemoProducts(tenantId, supabase);
+        const { data: fresh, error } = await supabase
+          .from("products")
+          .select("id, name, price_cents")
+          .in("id", productIds);
+        if (error) throw error;
+        for (const p of fresh ?? []) {
+          productMeta.set(p.id, { name: p.name, price_cents: p.price_cents });
+        }
+      }
+
+      // 2) Orders
+      toast.loading("Creating orders… (2/3)", { id: "demo-gen" });
+      const orders = await generateDemoOrders(
+        tenantId,
+        productIds,
+        productMeta,
+        ordersToCreate,
+        supabase,
+      );
+
+      // 3) Events
+      toast.loading("Generating events… (3/3)", { id: "demo-gen" });
+      const eventCount = await generateDemoEvents(
+        tenantId,
+        productIds,
+        orders.map((o) => o.orderId),
+        sessionsToCreate,
+        supabase,
+      );
+
+      return {
+        products: productIds.length,
+        orders: orders.length,
+        events: eventCount,
+      };
+    },
+    onSuccess: (result) => {
+      toast.success(
+        `Created ${result.products} products, ${result.orders} orders, ${result.events} events`,
+        { id: "demo-gen" },
+      );
+      setDemoConfirmOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["tenant-products", tenantId] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-orders-count", tenantId] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-events-count", tenantId] });
+    },
+    onError: (e: Error) => {
+      toast.error(e.message, { id: "demo-gen" });
+    },
+  });
+
+  const clearDemoMutation = useMutation({
+    mutationFn: async () => {
+      await clearDemoData(tenantId, supabase);
+    },
+    onSuccess: () => {
+      toast.success("Demo data cleared");
+      setClearConfirmOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["tenant-products", tenantId] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-orders-count", tenantId] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-events-count", tenantId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   if (loading) {
     return <p className="text-sm text-muted-foreground">Loading…</p>;
   }
@@ -317,6 +429,72 @@ function TenantDetailPage() {
                 <dt className="text-muted-foreground">Created</dt>
                 <dd className="text-foreground">{new Date(tenant.created_at).toLocaleString()}</dd>
               </dl>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                Demo data
+              </CardTitle>
+              <CardDescription>
+                Populate this tenant with realistic demo products, orders, and funnel events
+                spread across the last 30 days.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="demo-scale">Scale</Label>
+                  <Select
+                    value={demoScale}
+                    onValueChange={(v) => setDemoScale(v as "small" | "medium" | "large")}
+                  >
+                    <SelectTrigger id="demo-scale">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="small">Small — 50 sessions, 5 orders</SelectItem>
+                      <SelectItem value="medium">Medium — 150 sessions, 15 orders</SelectItem>
+                      <SelectItem value="large">Large — 500 sessions, 50 orders</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-end gap-3">
+                  <div className="flex-1 space-y-1">
+                    <Label htmlFor="demo-skip">Skip if data exists</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Avoid duplicating data on existing tenants.
+                    </p>
+                  </div>
+                  <Switch
+                    id="demo-skip"
+                    checked={demoSkipExisting}
+                    onCheckedChange={setDemoSkipExisting}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setDemoConfirmOpen(true)}
+                  disabled={generateDemoMutation.isPending}
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  {generateDemoMutation.isPending ? "Generating…" : "Generate demo data"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => setClearConfirmOpen(true)}
+                  disabled={clearDemoMutation.isPending}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {clearDemoMutation.isPending ? "Clearing…" : "Clear demo data"}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -481,6 +659,72 @@ function TenantDetailPage() {
               }}
             >
               {deleteMutation.isPending ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Generate demo confirm */}
+      <AlertDialog open={demoConfirmOpen} onOpenChange={setDemoConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Generate demo data?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>This will create:</p>
+                <ul className="ml-4 list-disc space-y-1">
+                  <li>
+                    Up to <span className="font-medium">{DEMO_PRODUCT_COUNT} products</span>{" "}
+                    (skipped if tenant already has them)
+                  </li>
+                  <li>
+                    <span className="font-medium">{ordersToCreate} paid orders</span> with line
+                    items
+                  </li>
+                  <li>
+                    Funnel events from{" "}
+                    <span className="font-medium">{sessionsToCreate} sessions</span> spread across
+                    the last 30 days
+                  </li>
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={generateDemoMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={generateDemoMutation.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                generateDemoMutation.mutate();
+              }}
+            >
+              {generateDemoMutation.isPending ? "Generating…" : "Generate"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clear demo data confirm */}
+      <AlertDialog open={clearConfirmOpen} onOpenChange={setClearConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear all tenant data?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-medium">all products, orders,
+              order items, and events</span> for this tenant. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={clearDemoMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={clearDemoMutation.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                clearDemoMutation.mutate();
+              }}
+            >
+              {clearDemoMutation.isPending ? "Clearing…" : "Clear everything"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
