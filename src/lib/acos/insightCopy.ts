@@ -1063,25 +1063,6 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       },
     };
   },
-
-  high_value_churn_risk: (m) => {
-    const name = str(m, "customer_name", "клієнт");
-    const ltv = num(m, "ltv_cents") / 100;
-    const prob = num(m, "churn_probability") * 100;
-    return {
-      ua: {
-        headline: `${name}: ${prob.toFixed(0)}% churn (LTV $${ltv.toFixed(0)})`,
-        why: "Цінний клієнт виходить з циклу замовлень. Зараз — найкращий момент повернути; через 30 днів шанс падає вдвічі.",
-        what_to_do: "Apply → персональний win-back з 15-20% знижкою + посилання на улюблений товар.",
-      },
-      en: {
-        headline: `${name}: ${prob.toFixed(0)}% churn risk (LTV $${ltv.toFixed(0)})`,
-        why: "High-value customer drifting out of cycle. Now is the best moment; chances halve in 30 days.",
-        what_to_do: "Apply → personal win-back with 15-20% off + link to their favorite product.",
-      },
-    };
-  },
-
   first_order_funnel_weak: (m) => {
     const conv = num(m, "conversion") * 100;
     const from = str(m, "weakest_from", "step");
