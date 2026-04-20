@@ -1,11 +1,12 @@
 /**
  * Outbound channel dispatchers for autonomous messages.
  *
- * Each channel takes a queued `outbound_messages` row and actually delivers it.
- * The dispatcher only knows how to talk to the channel — the decision of *what*
- * to send is made by the engine that queued the row.
+ * Telegram is now sent through the **shared Lovable connector** (one bot for the
+ * whole platform). Tenants no longer need their own bot token. Customers bind
+ * their chat to a tenant by sending `/start <slug>` to the shared bot — see
+ * src/routes/hooks/telegram.poll.ts.
  *
- * Supported channels: telegram, email (Resend).
+ * Email still uses Resend if RESEND_API_KEY is configured.
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
@@ -18,8 +19,9 @@ export type OutboundRow = {
   metadata: Record<string, unknown>;
 };
 
+const TG_GATEWAY = "https://connector-gateway.lovable.dev/telegram";
+
 type TenantBotConfig = {
-  telegram?: { bot_token?: string };
   email?: { from?: string; reply_to?: string };
 };
 
@@ -35,11 +37,44 @@ async function getTenantBot(tenantId: string): Promise<{ bot: TenantBotConfig; b
   };
 }
 
-async function sendTelegram(row: OutboundRow): Promise<{ ok: true; channel_message_id: string } | { ok: false; error: string }> {
-  const { bot } = await getTenantBot(row.tenant_id);
-  const token = bot.telegram?.bot_token;
-  if (!token) return { ok: false, error: "Telegram bot token not configured for tenant" };
+/** Send a Telegram message via the Lovable shared connector gateway. */
+export async function sendTelegramText(
+  chatId: string,
+  text: string,
+): Promise<{ ok: true; message_id: string } | { ok: false; error: string }> {
+  const lovableKey = process.env.LOVABLE_API_KEY;
+  const tgKey = process.env.TELEGRAM_API_KEY;
+  if (!lovableKey) return { ok: false, error: "LOVABLE_API_KEY missing" };
+  if (!tgKey) return { ok: false, error: "TELEGRAM_API_KEY missing (connector not linked)" };
 
+  const res = await fetch(`${TG_GATEWAY}/sendMessage`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${lovableKey}`,
+      "X-Connection-Api-Key": tgKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text,
+      parse_mode: "HTML",
+      disable_web_page_preview: true,
+    }),
+  });
+  const json = (await res.json().catch(() => ({}))) as {
+    ok?: boolean;
+    result?: { message_id?: number };
+    description?: string;
+  };
+  if (!res.ok || !json.ok) {
+    return { ok: false, error: json.description ?? `HTTP ${res.status}` };
+  }
+  return { ok: true, message_id: String(json.result?.message_id ?? "") };
+}
+
+async function sendTelegramOutbound(
+  row: OutboundRow,
+): Promise<{ ok: true; channel_message_id: string } | { ok: false; error: string }> {
   const { data: customer } = await supabaseAdmin
     .from("customers")
     .select("telegram_chat_id")
@@ -48,22 +83,18 @@ async function sendTelegram(row: OutboundRow): Promise<{ ok: true; channel_messa
   const chatId = customer?.telegram_chat_id;
   if (!chatId) return { ok: false, error: "Customer has no telegram_chat_id" };
 
-  const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text: row.body, parse_mode: "HTML", disable_web_page_preview: true }),
-  });
-  const json = (await res.json().catch(() => ({}))) as { ok?: boolean; result?: { message_id?: number }; description?: string };
-  if (!res.ok || !json.ok) return { ok: false, error: json.description ?? `HTTP ${res.status}` };
-  return { ok: true, channel_message_id: String(json.result?.message_id ?? "") };
+  const result = await sendTelegramText(chatId, row.body);
+  if (!result.ok) return result;
+  return { ok: true, channel_message_id: result.message_id };
 }
 
 function bodyToHtml(body: string): string {
-  // body may already contain <b> etc. Convert newlines to <br>.
   return body.split("\n").map((l) => l).join("<br>");
 }
 
-async function sendEmail(row: OutboundRow): Promise<{ ok: true; channel_message_id: string } | { ok: false; error: string }> {
+async function sendEmail(
+  row: OutboundRow,
+): Promise<{ ok: true; channel_message_id: string } | { ok: false; error: string }> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return { ok: false, error: "RESEND_API_KEY not configured" };
 
@@ -72,11 +103,13 @@ async function sendEmail(row: OutboundRow): Promise<{ ok: true; channel_message_
   const replyTo = bot.email?.reply_to;
 
   const { data: customer } = await supabaseAdmin
-    .from("customers").select("email, name").eq("id", row.customer_id ?? "").maybeSingle();
+    .from("customers")
+    .select("email, name")
+    .eq("id", row.customer_id ?? "")
+    .maybeSingle();
   const to = customer?.email;
   if (!to) return { ok: false, error: "Customer has no email" };
 
-  // Subject: derive from first line, fallback to a sensible default.
   const firstLine = row.body.split("\n")[0]?.replace(/<[^>]+>/g, "").trim() ?? "";
   const subject = firstLine.length > 4 && firstLine.length < 80 ? firstLine : `A note from ${brandName}`;
 
@@ -96,8 +129,11 @@ async function sendEmail(row: OutboundRow): Promise<{ ok: true; channel_message_
   return { ok: true, channel_message_id: json.id };
 }
 
-/** Process all due outbound messages for a tenant. Returns count sent. */
-export async function dispatchTenantOutbound(tenantId: string, limit = 50): Promise<{ sent: number; failed: number; skipped: number }> {
+/** Process all due outbound messages for a tenant. */
+export async function dispatchTenantOutbound(
+  tenantId: string,
+  limit = 50,
+): Promise<{ sent: number; failed: number; skipped: number }> {
   const { data: rows, error } = await supabaseAdmin
     .from("outbound_messages")
     .select("id, tenant_id, customer_id, channel, body, metadata")
@@ -107,11 +143,13 @@ export async function dispatchTenantOutbound(tenantId: string, limit = 50): Prom
     .order("scheduled_for", { ascending: true })
     .limit(limit);
   if (error) throw error;
-  let sent = 0, failed = 0, skipped = 0;
+  let sent = 0,
+    failed = 0,
+    skipped = 0;
   for (const r of (rows ?? []) as OutboundRow[]) {
     let result: { ok: true; channel_message_id: string } | { ok: false; error: string };
     if (r.channel === "telegram") {
-      result = await sendTelegram(r);
+      result = await sendTelegramOutbound(r);
     } else if (r.channel === "email") {
       result = await sendEmail(r);
     } else {
@@ -130,10 +168,7 @@ export async function dispatchTenantOutbound(tenantId: string, limit = 50): Prom
         payload: { outbound_id: r.id, channel: r.channel } as never,
       });
       if (r.customer_id) {
-        await supabaseAdmin
-          .from("customers")
-          .update({ last_contacted_at: now })
-          .eq("id", r.customer_id);
+        await supabaseAdmin.from("customers").update({ last_contacted_at: now }).eq("id", r.customer_id);
       }
       sent++;
     } else {
