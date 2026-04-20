@@ -358,16 +358,19 @@ function TenantDetailPage() {
         <p className="text-sm text-muted-foreground">/{tenant.slug}</p>
       </div>
 
-      <Tabs defaultValue="acos" className="space-y-4">
+      <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="acos">ACOS</TabsTrigger>
           <TabsTrigger value="overview">Commerce</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
           <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="config">Config</TabsTrigger>
+          <TabsTrigger value="acos-debug">ACOS Debug</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="acos" className="space-y-4">
+        <TabsContent value="acos-debug" className="space-y-4">
+          <p className="text-xs text-muted-foreground">
+            Internal debug view for ACOS agents (manual queue / runs). Not part of the autonomous owner experience.
+          </p>
           <AcosOverviewTab tenantId={tenantId} />
           <AcosInsightsQueue tenantId={tenantId} />
           <AcosAgentRuns tenantId={tenantId} />

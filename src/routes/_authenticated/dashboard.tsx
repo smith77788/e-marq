@@ -55,10 +55,14 @@ function DashboardPage() {
             <ul className="divide-y divide-border">
               {tenants.map((t) => (
                 <li key={t.id} className="flex items-center justify-between py-3">
-                  <div>
+                  <Link
+                    to="/brand"
+                    search={{ tenant: t.id }}
+                    className="flex-1 hover:opacity-80"
+                  >
                     <p className="font-medium text-foreground">{t.name}</p>
                     <p className="text-xs text-muted-foreground">/{t.slug}</p>
-                  </div>
+                  </Link>
                   <Badge variant={t.status === "active" ? "default" : "outline"}>
                     {t.status}
                   </Badge>
