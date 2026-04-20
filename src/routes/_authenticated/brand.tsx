@@ -12,6 +12,7 @@ import { ChannelSetup } from "@/components/owner/ChannelSetup";
 import { InsightsPanel } from "@/components/owner/InsightsPanel";
 import { TrackingSnippet } from "@/components/owner/TrackingSnippet";
 import { KpiDashboard } from "@/components/owner/KpiDashboard";
+import { RevenueTrendChart } from "@/components/owner/RevenueTrendChart";
 
 type Search = { tenant?: string };
 
@@ -95,6 +96,8 @@ function BrandPage() {
       </div>
 
       <KpiDashboard tenantId={current.id} />
+
+      <RevenueTrendChart tenantId={current.id} />
 
       <RevenueFeed tenantId={current.id} />
 
