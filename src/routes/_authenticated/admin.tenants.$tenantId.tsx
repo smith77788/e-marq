@@ -238,7 +238,7 @@ function TenantDetailPage() {
         .update({
           brand_name: values.brand_name,
           ui: values.ui,
-          features: values.features,
+          features: { ...values.features, payments: values.payments },
           bot: values.bot,
           seo: values.seo,
         })
