@@ -663,6 +663,72 @@ function TenantDetailPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Generate demo confirm */}
+      <AlertDialog open={demoConfirmOpen} onOpenChange={setDemoConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Generate demo data?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>This will create:</p>
+                <ul className="ml-4 list-disc space-y-1">
+                  <li>
+                    Up to <span className="font-medium">{DEMO_PRODUCT_COUNT} products</span>{" "}
+                    (skipped if tenant already has them)
+                  </li>
+                  <li>
+                    <span className="font-medium">{ordersToCreate} paid orders</span> with line
+                    items
+                  </li>
+                  <li>
+                    Funnel events from{" "}
+                    <span className="font-medium">{sessionsToCreate} sessions</span> spread across
+                    the last 30 days
+                  </li>
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={generateDemoMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={generateDemoMutation.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                generateDemoMutation.mutate();
+              }}
+            >
+              {generateDemoMutation.isPending ? "Generating…" : "Generate"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clear demo data confirm */}
+      <AlertDialog open={clearConfirmOpen} onOpenChange={setClearConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear all tenant data?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-medium">all products, orders,
+              order items, and events</span> for this tenant. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={clearDemoMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={clearDemoMutation.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                clearDemoMutation.mutate();
+              }}
+            >
+              {clearDemoMutation.isPending ? "Clearing…" : "Clear everything"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
