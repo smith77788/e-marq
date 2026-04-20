@@ -15,6 +15,7 @@ import { KpiDashboard } from "@/components/owner/KpiDashboard";
 import { RevenueTrendChart } from "@/components/owner/RevenueTrendChart";
 import { TopCustomers } from "@/components/owner/TopCustomers";
 import { AgentTimeline } from "@/components/owner/AgentTimeline";
+import { AnalyticsWindowProvider, AnalyticsWindowToggle } from "@/components/owner/AnalyticsWindow";
 
 type Search = { tenant?: string };
 
@@ -97,9 +98,15 @@ function BrandPage() {
         )}
       </div>
 
-      <KpiDashboard tenantId={current.id} />
+      <AnalyticsWindowProvider initial={30}>
+        <div className="flex items-center justify-end">
+          <AnalyticsWindowToggle />
+        </div>
 
-      <RevenueTrendChart tenantId={current.id} />
+        <KpiDashboard tenantId={current.id} />
+
+        <RevenueTrendChart tenantId={current.id} />
+      </AnalyticsWindowProvider>
 
       <RevenueFeed tenantId={current.id} />
 

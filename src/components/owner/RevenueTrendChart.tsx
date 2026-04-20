@@ -13,6 +13,7 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YA
 import { TrendingUp } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { useAnalyticsWindow } from "./AnalyticsWindow";
 
 type Props = { tenantId: string };
 
@@ -33,24 +34,24 @@ function shortDate(key: string) {
 }
 
 export function RevenueTrendChart({ tenantId }: Props) {
+  const { days, sinceIso } = useAnalyticsWindow();
   const { data, isLoading } = useQuery({
-    queryKey: ["revenue-trend", tenantId],
+    queryKey: ["revenue-trend", tenantId, days],
     enabled: !!tenantId,
     refetchInterval: 60_000,
     queryFn: async () => {
-      const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
       const [ordersRes, outboundRes] = await Promise.all([
         supabase
           .from("orders")
           .select("total_cents, paid_at")
           .eq("tenant_id", tenantId)
           .eq("status", "paid")
-          .gte("paid_at", since),
+          .gte("paid_at", sinceIso),
         supabase
           .from("outbound_messages")
           .select("actual_revenue_cents, converted_at")
           .eq("tenant_id", tenantId)
-          .gte("converted_at", since),
+          .gte("converted_at", sinceIso),
       ]);
       return {
         orders: (ordersRes.data ?? []) as Order[],
@@ -61,8 +62,7 @@ export function RevenueTrendChart({ tenantId }: Props) {
 
   const series = useMemo(() => {
     const buckets = new Map<string, { day: string; total: number; ai: number }>();
-    // Seed last 30 days so chart is continuous
-    for (let i = 29; i >= 0; i--) {
+    for (let i = days - 1; i >= 0; i--) {
       const d = new Date(Date.now() - i * 24 * 3600 * 1000).toISOString();
       const k = dayKey(d);
       buckets.set(k, { day: k, total: 0, ai: 0 });
@@ -86,7 +86,7 @@ export function RevenueTrendChart({ tenantId }: Props) {
       ai: b.ai / 100,
       organic: Math.max(0, (b.total - b.ai) / 100),
     }));
-  }, [data]);
+  }, [data, days]);
 
   const totals = useMemo(() => {
     const total = series.reduce((s, p) => s + p.total, 0);
@@ -100,7 +100,7 @@ export function RevenueTrendChart({ tenantId }: Props) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
           <TrendingUp className="h-4 w-4 text-primary" />
-          Revenue trend (30 days)
+          Revenue trend ({days} days)
         </CardTitle>
         <CardDescription className="text-xs">
           Total <span className="font-semibold text-foreground">{fmtUsd(totals.total)}</span> · AI-attributed <span className="font-semibold text-primary">{fmtUsd(totals.ai)}</span> ({totals.share}%)
