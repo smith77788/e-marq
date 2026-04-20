@@ -20,12 +20,15 @@ import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBrandRouteImport } from './routes/_authenticated/brand'
+import { Route as HooksEnginesReorderAllRouteImport } from './routes/hooks/engines.reorder-all'
 import { Route as HooksEnginesReorderRouteImport } from './routes/hooks/engines.reorder'
 import { Route as HooksEnginesDispatchRouteImport } from './routes/hooks/engines.dispatch'
 import { Route as HooksAgentsStockoutRouteImport } from './routes/hooks/agents.stockout'
 import { Route as HooksAgentsSearchGapRouteImport } from './routes/hooks/agents.search-gap'
+import { Route as HooksAgentsSalesBotRouteImport } from './routes/hooks/agents.sales-bot'
 import { Route as HooksAgentsRunAllRouteImport } from './routes/hooks/agents.run-all'
 import { Route as HooksAgentsMemoryFeedbackRouteImport } from './routes/hooks/agents.memory-feedback'
+import { Route as HooksAgentsFeedbackLoopRouteImport } from './routes/hooks/agents.feedback-loop'
 import { Route as HooksAgentsCronAllRouteImport } from './routes/hooks/agents.cron-all'
 import { Route as HooksAgentsChurnRiskRouteImport } from './routes/hooks/agents.churn-risk'
 import { Route as HooksAgentsAovLeakRouteImport } from './routes/hooks/agents.aov-leak'
@@ -89,6 +92,11 @@ const AuthenticatedBrandRoute = AuthenticatedBrandRouteImport.update({
   path: '/brand',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const HooksEnginesReorderAllRoute = HooksEnginesReorderAllRouteImport.update({
+  id: '/hooks/engines/reorder-all',
+  path: '/hooks/engines/reorder-all',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksEnginesReorderRoute = HooksEnginesReorderRouteImport.update({
   id: '/hooks/engines/reorder',
   path: '/hooks/engines/reorder',
@@ -109,6 +117,11 @@ const HooksAgentsSearchGapRoute = HooksAgentsSearchGapRouteImport.update({
   path: '/hooks/agents/search-gap',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsSalesBotRoute = HooksAgentsSalesBotRouteImport.update({
+  id: '/hooks/agents/sales-bot',
+  path: '/hooks/agents/sales-bot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsRunAllRoute = HooksAgentsRunAllRouteImport.update({
   id: '/hooks/agents/run-all',
   path: '/hooks/agents/run-all',
@@ -120,6 +133,11 @@ const HooksAgentsMemoryFeedbackRoute =
     path: '/hooks/agents/memory-feedback',
     getParentRoute: () => rootRouteImport,
   } as any)
+const HooksAgentsFeedbackLoopRoute = HooksAgentsFeedbackLoopRouteImport.update({
+  id: '/hooks/agents/feedback-loop',
+  path: '/hooks/agents/feedback-loop',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsCronAllRoute = HooksAgentsCronAllRouteImport.update({
   id: '/hooks/agents/cron-all',
   path: '/hooks/agents/cron-all',
@@ -180,12 +198,15 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
+  '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
   '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
+  '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
   '/hooks/engines/reorder': typeof HooksEnginesReorderRoute
+  '/hooks/engines/reorder-all': typeof HooksEnginesReorderAllRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -206,12 +227,15 @@ export interface FileRoutesByTo {
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
+  '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
   '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
+  '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
   '/hooks/engines/reorder': typeof HooksEnginesReorderRoute
+  '/hooks/engines/reorder-all': typeof HooksEnginesReorderAllRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -234,12 +258,15 @@ export interface FileRoutesById {
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
+  '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
   '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
+  '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
   '/hooks/engines/reorder': typeof HooksEnginesReorderRoute
+  '/hooks/engines/reorder-all': typeof HooksEnginesReorderAllRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/hooks/telegram/webhook/$tenant': typeof HooksTelegramWebhookTenantRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -262,12 +289,15 @@ export interface FileRouteTypes {
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cron-all'
+    | '/hooks/agents/feedback-loop'
     | '/hooks/agents/memory-feedback'
     | '/hooks/agents/run-all'
+    | '/hooks/agents/sales-bot'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
     | '/hooks/engines/dispatch'
     | '/hooks/engines/reorder'
+    | '/hooks/engines/reorder-all'
     | '/admin/tenants/$tenantId'
     | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
@@ -288,12 +318,15 @@ export interface FileRouteTypes {
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cron-all'
+    | '/hooks/agents/feedback-loop'
     | '/hooks/agents/memory-feedback'
     | '/hooks/agents/run-all'
+    | '/hooks/agents/sales-bot'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
     | '/hooks/engines/dispatch'
     | '/hooks/engines/reorder'
+    | '/hooks/engines/reorder-all'
     | '/admin/tenants/$tenantId'
     | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
@@ -315,12 +348,15 @@ export interface FileRouteTypes {
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cron-all'
+    | '/hooks/agents/feedback-loop'
     | '/hooks/agents/memory-feedback'
     | '/hooks/agents/run-all'
+    | '/hooks/agents/sales-bot'
     | '/hooks/agents/search-gap'
     | '/hooks/agents/stockout'
     | '/hooks/engines/dispatch'
     | '/hooks/engines/reorder'
+    | '/hooks/engines/reorder-all'
     | '/_authenticated/admin/tenants/$tenantId'
     | '/hooks/telegram/webhook/$tenant'
     | '/s/$slug/orders/$orderId'
@@ -340,12 +376,15 @@ export interface RootRouteChildren {
   HooksAgentsAovLeakRoute: typeof HooksAgentsAovLeakRoute
   HooksAgentsChurnRiskRoute: typeof HooksAgentsChurnRiskRoute
   HooksAgentsCronAllRoute: typeof HooksAgentsCronAllRoute
+  HooksAgentsFeedbackLoopRoute: typeof HooksAgentsFeedbackLoopRoute
   HooksAgentsMemoryFeedbackRoute: typeof HooksAgentsMemoryFeedbackRoute
   HooksAgentsRunAllRoute: typeof HooksAgentsRunAllRoute
+  HooksAgentsSalesBotRoute: typeof HooksAgentsSalesBotRoute
   HooksAgentsSearchGapRoute: typeof HooksAgentsSearchGapRoute
   HooksAgentsStockoutRoute: typeof HooksAgentsStockoutRoute
   HooksEnginesDispatchRoute: typeof HooksEnginesDispatchRoute
   HooksEnginesReorderRoute: typeof HooksEnginesReorderRoute
+  HooksEnginesReorderAllRoute: typeof HooksEnginesReorderAllRoute
   HooksTelegramWebhookTenantRoute: typeof HooksTelegramWebhookTenantRoute
 }
 
@@ -428,6 +467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBrandRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/hooks/engines/reorder-all': {
+      id: '/hooks/engines/reorder-all'
+      path: '/hooks/engines/reorder-all'
+      fullPath: '/hooks/engines/reorder-all'
+      preLoaderRoute: typeof HooksEnginesReorderAllRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/engines/reorder': {
       id: '/hooks/engines/reorder'
       path: '/hooks/engines/reorder'
@@ -456,6 +502,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsSearchGapRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/sales-bot': {
+      id: '/hooks/agents/sales-bot'
+      path: '/hooks/agents/sales-bot'
+      fullPath: '/hooks/agents/sales-bot'
+      preLoaderRoute: typeof HooksAgentsSalesBotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/run-all': {
       id: '/hooks/agents/run-all'
       path: '/hooks/agents/run-all'
@@ -468,6 +521,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/memory-feedback'
       fullPath: '/hooks/agents/memory-feedback'
       preLoaderRoute: typeof HooksAgentsMemoryFeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/feedback-loop': {
+      id: '/hooks/agents/feedback-loop'
+      path: '/hooks/agents/feedback-loop'
+      fullPath: '/hooks/agents/feedback-loop'
+      preLoaderRoute: typeof HooksAgentsFeedbackLoopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/cron-all': {
@@ -584,12 +644,15 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsAovLeakRoute: HooksAgentsAovLeakRoute,
   HooksAgentsChurnRiskRoute: HooksAgentsChurnRiskRoute,
   HooksAgentsCronAllRoute: HooksAgentsCronAllRoute,
+  HooksAgentsFeedbackLoopRoute: HooksAgentsFeedbackLoopRoute,
   HooksAgentsMemoryFeedbackRoute: HooksAgentsMemoryFeedbackRoute,
   HooksAgentsRunAllRoute: HooksAgentsRunAllRoute,
+  HooksAgentsSalesBotRoute: HooksAgentsSalesBotRoute,
   HooksAgentsSearchGapRoute: HooksAgentsSearchGapRoute,
   HooksAgentsStockoutRoute: HooksAgentsStockoutRoute,
   HooksEnginesDispatchRoute: HooksEnginesDispatchRoute,
   HooksEnginesReorderRoute: HooksEnginesReorderRoute,
+  HooksEnginesReorderAllRoute: HooksEnginesReorderAllRoute,
   HooksTelegramWebhookTenantRoute: HooksTelegramWebhookTenantRoute,
 }
 export const routeTree = rootRouteImport
