@@ -220,6 +220,23 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       },
     };
   },
+  price_revert: (m) => {
+    const dropPct = Math.round((1 - num(m, "drop_ratio", 1)) * 100);
+    const oldP = num(m, "suggested_price_cents");
+    const newP = num(m, "current_price_cents");
+    return {
+      ua: {
+        headline: `Конверсія впала на ${dropPct}% — повертаю стару ціну`,
+        why: `Після зміни ціни на ${cents(newP)} конверсія просіла на ${dropPct}% за 14 днів. Це втрачені продажі — безпечніше відкотити до ${cents(oldP)}.`,
+        what_to_do: `Auto-revert вже виконано: ціна повернута на ${cents(oldP)}. Перевір лог дій якщо хочеш скасувати.`,
+      },
+      en: {
+        headline: `Conversion dropped ${dropPct}% — rolling price back`,
+        why: `After moving price to ${cents(newP)}, conversion fell ${dropPct}% over 14 days. This is lost revenue — safer to revert to ${cents(oldP)}.`,
+        what_to_do: `Auto-revert already applied: price restored to ${cents(oldP)}. Check actions log to undo.`,
+      },
+    };
+  },
 
   // ---------- Onboarding / Setup ----------
   setup_no_products: () => ({
