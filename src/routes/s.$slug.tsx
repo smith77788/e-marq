@@ -132,7 +132,7 @@ function StorefrontPage() {
   const initial = Route.useLoaderData();
 
   // Re-query on client so add-to-cart / refresh stays fresh, but seed from loader
-  const { data } = useQuery({
+  const { data } = useQuery<Awaited<ReturnType<typeof loadStorefront>>>({
     queryKey: ["storefront", slug],
     queryFn: () => loadStorefront(slug),
     initialData: initial,
