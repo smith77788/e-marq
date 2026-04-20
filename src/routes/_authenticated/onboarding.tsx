@@ -5,7 +5,7 @@
  * Кожен крок зберігає прогрес одразу (idempotent), тому користувач може
  * вийти і повернутися без втрат.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactElement } from "react";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Check, Copy, Loader2, Sparkles } from "lucide-react";
@@ -72,7 +72,7 @@ function OnboardingPage() {
     );
   }
 
-  const steps: Array<{ titleKey: TKey; descKey: TKey; render: () => JSX.Element }> = [
+  const steps: Array<{ titleKey: TKey; descKey: TKey; render: () => ReactElement }> = [
     { titleKey: "onb.s1.title", descKey: "onb.s1.desc", render: () => <Step1Brand tenantId={tenantId} qc={qc} /> },
     { titleKey: "onb.s2.title", descKey: "onb.s2.desc", render: () => <Step2Channel tenantId={tenantId} qc={qc} /> },
     { titleKey: "onb.s3.title", descKey: "onb.s3.desc", render: () => <Step3Product tenantId={tenantId} qc={qc} /> },
@@ -460,6 +460,3 @@ function Step7Team({ tenantId }: { tenantId: string }) {
   );
 }
 
-// Vite-friendly typing for JSX in non-tsx-default-export files
-type JSXEl = ReturnType<typeof Sparkles>;
-export type { JSXEl };

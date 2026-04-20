@@ -18,6 +18,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBrandRouteImport } from './routes/_authenticated/brand'
 import { Route as TrackSlugJsRouteImport } from './routes/track.$slug.js'
@@ -95,6 +96,11 @@ const HooksIngestRoute = HooksIngestRouteImport.update({
   id: '/hooks/ingest',
   path: '/hooks/ingest',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
@@ -279,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/brand': typeof AuthenticatedBrandRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
@@ -322,6 +329,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/brand': typeof AuthenticatedBrandRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
@@ -367,6 +375,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_authenticated/brand': typeof AuthenticatedBrandRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
@@ -412,6 +421,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/brand'
     | '/dashboard'
+    | '/onboarding'
     | '/hooks/ingest'
     | '/s/$slug'
     | '/admin/tenants'
@@ -455,6 +465,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/brand'
     | '/dashboard'
+    | '/onboarding'
     | '/hooks/ingest'
     | '/s/$slug'
     | '/admin/tenants'
@@ -499,6 +510,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_authenticated/brand'
     | '/_authenticated/dashboard'
+    | '/_authenticated/onboarding'
     | '/hooks/ingest'
     | '/s/$slug'
     | '/_authenticated/admin/tenants'
@@ -638,6 +650,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/hooks/ingest'
       preLoaderRoute: typeof HooksIngestRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
@@ -891,12 +910,14 @@ const AuthenticatedAdminTenantsRouteWithChildren =
 interface AuthenticatedRouteChildren {
   AuthenticatedBrandRoute: typeof AuthenticatedBrandRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedAdminTenantsRoute: typeof AuthenticatedAdminTenantsRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedBrandRoute: AuthenticatedBrandRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedAdminTenantsRoute: AuthenticatedAdminTenantsRouteWithChildren,
 }
 
