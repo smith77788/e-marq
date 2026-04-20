@@ -52,6 +52,12 @@ const AGENTS = [
   "ugc-harvester",
   "search-intent-miner",
   "programmatic-seo",
+  // Batch 6: customer/loyalty
+  "customer-segments-auto",
+  "loyalty-tiers",
+  "product-affinity",
+  "customer-churn-predictor",
+  "first-order-funnel",
 ] as const;
 
 export const Route = createFileRoute("/hooks/agents/run-all")({
