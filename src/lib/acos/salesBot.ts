@@ -103,18 +103,19 @@ export async function runSalesBotForTenant(tenantId: string, limit = 20): Promis
 
   if (!inbound || inbound.length === 0) return { replied: 0, skipped: 0 };
 
-  // Brand name for tone
-  const { data: cfg } = await supabaseAdmin
-    .from("tenant_configs")
-    .select("brand_name")
-    .eq("tenant_id", tenantId)
-    .maybeSingle();
+  // Brand name + slug for storefront link
+  const [{ data: cfg }, { data: tenantRow }] = await Promise.all([
+    supabaseAdmin.from("tenant_configs").select("brand_name").eq("tenant_id", tenantId).maybeSingle(),
+    supabaseAdmin.from("tenants").select("slug").eq("id", tenantId).maybeSingle(),
+  ]);
   const brandName = cfg?.brand_name ?? "this brand";
+  const publicBase = process.env.PUBLIC_APP_URL ?? process.env.SUPABASE_URL?.replace(/\.supabase\.co.*$/, ".lovable.app") ?? null;
+  const storefrontBase = tenantRow?.slug && publicBase ? `${publicBase.replace(/\/$/, "")}/s/${tenantRow.slug}` : null;
 
   // Catalogue
   const { data: products } = await supabaseAdmin
     .from("products")
-    .select("name, price_cents, currency, stock")
+    .select("id, name, price_cents, currency, stock")
     .eq("tenant_id", tenantId)
     .eq("is_active", true)
     .order("price_cents", { ascending: false })
@@ -170,6 +171,7 @@ export async function runSalesBotForTenant(tenantId: string, limit = 20): Promis
 
     const reply = await aiReply({
       brandName,
+      storefrontBase,
       customerName: customer?.name ?? null,
       history: (history ?? []) as { direction: string; body: string }[],
       catalogue,
