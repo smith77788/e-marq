@@ -66,7 +66,7 @@ const ADMIN_NAV: { label: string; items: NavItem[] }[] = [
   {
     label: "System",
     items: [
-      { label: "Mission Control", to: "/admin/tenants", icon: ShieldCheck, exact: true },
+      { label: "Mission Control", to: "/admin", icon: ShieldCheck, exact: true },
       { label: "All Tenants", to: "/admin/tenants", icon: Building2 },
     ],
   },
@@ -75,7 +75,7 @@ const ADMIN_NAV: { label: string; items: NavItem[] }[] = [
     items: [
       { label: "Live Runs", to: "/agents", icon: Activity },
       { label: "Agent Library", to: "/agents", icon: Cpu },
-      { label: "Insight Stream", to: "/admin/tenants", icon: Radio },
+      { label: "Insight Stream", to: "/admin", icon: Radio },
     ],
   },
 ];
