@@ -105,6 +105,8 @@ function BrandPage() {
 
       <InsightsPanel tenantId={current.id} />
 
+      <AgentTimeline tenantId={current.id} />
+
       <TopCustomers tenantId={current.id} />
 
       <div className="grid gap-6 lg:grid-cols-2">
