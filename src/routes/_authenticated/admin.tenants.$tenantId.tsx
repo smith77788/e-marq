@@ -324,8 +324,8 @@ function TenantDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["tenant-products", tenantId] });
       queryClient.invalidateQueries({ queryKey: ["tenant-orders-count", tenantId] });
       queryClient.invalidateQueries({ queryKey: ["tenant-events-count", tenantId] });
-    },
-    onError: (e: Error) => {
+      queryClient.invalidateQueries({ queryKey: ["tenant-funnel", tenantId] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-revenue", tenantId] });
       toast.error(e.message, { id: "demo-gen" });
     },
   });
