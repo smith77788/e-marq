@@ -667,42 +667,44 @@ function TenantDetailPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Generate demo confirm */}
-      <AlertDialog open={demoConfirmOpen} onOpenChange={setDemoConfirmOpen}>
+      {/* Generate ACOS dataset confirm */}
+      <AlertDialog open={acosConfirmOpen} onOpenChange={setAcosConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Generate demo data?</AlertDialogTitle>
+            <AlertDialogTitle>Generate ACOS dataset?</AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-2 text-sm">
-                <p>This will create:</p>
+                <p>This will create a 90-day synthetic dataset with:</p>
                 <ul className="ml-4 list-disc space-y-1">
                   <li>
-                    Up to <span className="font-medium">{DEMO_PRODUCT_COUNT} products</span>{" "}
-                    (skipped if tenant already has them)
+                    <span className="font-medium">{ACOS_CATALOG_SIZE} products</span> across
+                    apparel, footwear, accessories, audio (incl. 2 stockout-risk SKUs)
                   </li>
                   <li>
-                    <span className="font-medium">{ordersToCreate} paid orders</span> with line
-                    items
+                    {acosScale === "small" ? "120" : acosScale === "medium" ? "250" : "600"}{" "}
+                    <span className="font-medium">customers</span> across 5 cohorts
+                    (new / one-time / returning / VIP-active / VIP-churning)
                   </li>
-                  <li>
-                    Funnel events from{" "}
-                    <span className="font-medium">{sessionsToCreate} sessions</span> spread across
-                    the last 30 days
-                  </li>
+                  <li>Paid orders with realistic affinity bundles and weekly seasonality</li>
+                  <li>Funnel + search events (~18% search-no-results signal)</li>
                 </ul>
+                <p className="text-xs text-muted-foreground">
+                  Generation runs entirely client-side and may take 10-30 seconds for the larger
+                  scales.
+                </p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={generateDemoMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={generateAcosMutation.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              disabled={generateDemoMutation.isPending}
+              disabled={generateAcosMutation.isPending}
               onClick={(e) => {
                 e.preventDefault();
-                generateDemoMutation.mutate();
+                generateAcosMutation.mutate();
               }}
             >
-              {generateDemoMutation.isPending ? "Generating…" : "Generate"}
+              {generateAcosMutation.isPending ? "Generating…" : "Generate"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
