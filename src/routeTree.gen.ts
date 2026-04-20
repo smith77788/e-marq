@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as HooksAgentsChurnRiskRouteImport } from './routes/hooks/agents.churn-risk'
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin.tenants'
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
@@ -48,6 +49,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const HooksAgentsChurnRiskRoute = HooksAgentsChurnRiskRouteImport.update({
+  id: '/hooks/agents/churn-risk',
+  path: '/hooks/agents/churn-risk',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminTenantsRoute =
   AuthenticatedAdminTenantsRouteImport.update({
     id: '/admin/tenants',
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
+  '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
+  '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
+  '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/s/$slug'
     | '/admin/tenants'
+    | '/hooks/agents/churn-risk'
     | '/admin/tenants/$tenantId'
     | '/s/$slug/orders/$orderId'
   fileRoutesByTo: FileRoutesByTo
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/s/$slug'
     | '/admin/tenants'
+    | '/hooks/agents/churn-risk'
     | '/admin/tenants/$tenantId'
     | '/s/$slug/orders/$orderId'
   id:
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/s/$slug'
     | '/_authenticated/admin/tenants'
+    | '/hooks/agents/churn-risk'
     | '/_authenticated/admin/tenants/$tenantId'
     | '/s/$slug/orders/$orderId'
   fileRoutesById: FileRoutesById
@@ -138,6 +150,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   SSlugRoute: typeof SSlugRouteWithChildren
+  HooksAgentsChurnRiskRoute: typeof HooksAgentsChurnRiskRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -183,6 +196,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/hooks/agents/churn-risk': {
+      id: '/hooks/agents/churn-risk'
+      path: '/hooks/agents/churn-risk'
+      fullPath: '/hooks/agents/churn-risk'
+      preLoaderRoute: typeof HooksAgentsChurnRiskRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/tenants': {
       id: '/_authenticated/admin/tenants'
@@ -253,7 +273,17 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   SSlugRoute: SSlugRouteWithChildren,
+  HooksAgentsChurnRiskRoute: HooksAgentsChurnRiskRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
