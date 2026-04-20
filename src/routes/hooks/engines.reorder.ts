@@ -19,7 +19,7 @@ import {
   finishAgentRun,
   failAgentRun,
 } from "@/lib/acos/agentRuntime";
-import { dispatchTenantOutbound } from "@/lib/acos/channels";
+import { dispatchTenantOutbound, pickChannelForCustomer } from "@/lib/acos/channels";
 
 const AGENT_ID = "reorder_engine";
 
@@ -74,8 +74,8 @@ export const Route = createFileRoute("/hooks/engines/reorder")({
 
           let queued = 0;
           for (const c of (candidates ?? []) as CustomerRow[]) {
-            // Skip customers without telegram (channel-specific in this iteration)
-            if (!c.telegram_chat_id) continue;
+            const channel = await pickChannelForCustomer(c.id);
+            if (!channel) continue;
 
             // Find last bought product (best-effort)
             const { data: lastItems } = await supabaseAdmin
@@ -95,7 +95,7 @@ export const Route = createFileRoute("/hooks/engines/reorder")({
             const { error: insErr } = await supabaseAdmin.from("outbound_messages").insert({
               tenant_id: tenantId,
               customer_id: c.id,
-              channel: "telegram",
+              channel,
               trigger_kind: "reorder",
               template_key: "reorder.v1",
               body,
