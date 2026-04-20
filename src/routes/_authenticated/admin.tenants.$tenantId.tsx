@@ -82,6 +82,10 @@ function TenantDetailPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<ProductRow | null>(null);
   const [deleting, setDeleting] = useState<ProductRow | null>(null);
+  const [demoScale, setDemoScale] = useState<"small" | "medium" | "large">("small");
+  const [demoSkipExisting, setDemoSkipExisting] = useState(true);
+  const [demoConfirmOpen, setDemoConfirmOpen] = useState(false);
+  const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
 
   const tenantQuery = useQuery({
     queryKey: ["tenant", tenantId],
