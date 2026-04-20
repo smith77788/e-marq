@@ -76,7 +76,7 @@ export const Route = createFileRoute("/hooks/agents/social-proof-live")({
           // views per product
           const viewsByProduct = new Map<string, Set<string>>();
           for (const e of eventsRes.data ?? []) {
-            if (e.type !== "product_view" || !e.product_id) continue;
+            if (e.type !== "product_viewed" || !e.product_id) continue;
             const set = viewsByProduct.get(e.product_id) ?? new Set<string>();
             if (e.session_id) set.add(e.session_id);
             viewsByProduct.set(e.product_id, set);
