@@ -35,6 +35,7 @@ import { Route as HooksDemoSeedRouteImport } from './routes/hooks/demo.seed'
 import { Route as HooksAgentsTickRouteImport } from './routes/hooks/agents.tick'
 import { Route as HooksAgentsStockoutRouteImport } from './routes/hooks/agents.stockout'
 import { Route as HooksAgentsSegmentationRouteImport } from './routes/hooks/agents.segmentation'
+import { Route as HooksAgentsSecondOrderNurtureRouteImport } from './routes/hooks/agents.second-order-nurture'
 import { Route as HooksAgentsSearchGapRouteImport } from './routes/hooks/agents.search-gap'
 import { Route as HooksAgentsSalesBotAllRouteImport } from './routes/hooks/agents.sales-bot-all'
 import { Route as HooksAgentsSalesBotRouteImport } from './routes/hooks/agents.sales-bot'
@@ -49,14 +50,18 @@ import { Route as HooksAgentsMorningBriefRouteImport } from './routes/hooks/agen
 import { Route as HooksAgentsMemoryFeedbackRouteImport } from './routes/hooks/agents.memory-feedback'
 import { Route as HooksAgentsMarginOptimizerRouteImport } from './routes/hooks/agents.margin-optimizer'
 import { Route as HooksAgentsLtvPredictorRouteImport } from './routes/hooks/agents.ltv-predictor'
+import { Route as HooksAgentsFunnelHealerRouteImport } from './routes/hooks/agents.funnel-healer'
 import { Route as HooksAgentsFeedbackLoopAllRouteImport } from './routes/hooks/agents.feedback-loop-all'
 import { Route as HooksAgentsFeedbackLoopRouteImport } from './routes/hooks/agents.feedback-loop'
 import { Route as HooksAgentsDiscountElasticityRouteImport } from './routes/hooks/agents.discount-elasticity'
 import { Route as HooksAgentsCronAllRouteImport } from './routes/hooks/agents.cron-all'
+import { Route as HooksAgentsCohortEngineRouteImport } from './routes/hooks/agents.cohort-engine'
 import { Route as HooksAgentsChurnRiskRouteImport } from './routes/hooks/agents.churn-risk'
 import { Route as HooksAgentsCartRecoveryRouteImport } from './routes/hooks/agents.cart-recovery'
 import { Route as HooksAgentsBundleRecommenderRouteImport } from './routes/hooks/agents.bundle-recommender'
+import { Route as HooksAgentsBrowseAbandonmentRouteImport } from './routes/hooks/agents.browse-abandonment'
 import { Route as HooksAgentsBotQualityRouteImport } from './routes/hooks/agents.bot-quality'
+import { Route as HooksAgentsAttributionRouteImport } from './routes/hooks/agents.attribution'
 import { Route as HooksAgentsAovOptimizerRouteImport } from './routes/hooks/agents.aov-optimizer'
 import { Route as HooksAgentsAovLeakRouteImport } from './routes/hooks/agents.aov-leak'
 import { Route as HooksAgentsAnomalyDetectorRouteImport } from './routes/hooks/agents.anomaly-detector'
@@ -196,6 +201,12 @@ const HooksAgentsSegmentationRoute = HooksAgentsSegmentationRouteImport.update({
   path: '/hooks/agents/segmentation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsSecondOrderNurtureRoute =
+  HooksAgentsSecondOrderNurtureRouteImport.update({
+    id: '/hooks/agents/second-order-nurture',
+    path: '/hooks/agents/second-order-nurture',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsSearchGapRoute = HooksAgentsSearchGapRouteImport.update({
   id: '/hooks/agents/search-gap',
   path: '/hooks/agents/search-gap',
@@ -271,6 +282,11 @@ const HooksAgentsLtvPredictorRoute = HooksAgentsLtvPredictorRouteImport.update({
   path: '/hooks/agents/ltv-predictor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsFunnelHealerRoute = HooksAgentsFunnelHealerRouteImport.update({
+  id: '/hooks/agents/funnel-healer',
+  path: '/hooks/agents/funnel-healer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsFeedbackLoopAllRoute =
   HooksAgentsFeedbackLoopAllRouteImport.update({
     id: '/hooks/agents/feedback-loop-all',
@@ -293,6 +309,11 @@ const HooksAgentsCronAllRoute = HooksAgentsCronAllRouteImport.update({
   path: '/hooks/agents/cron-all',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsCohortEngineRoute = HooksAgentsCohortEngineRouteImport.update({
+  id: '/hooks/agents/cohort-engine',
+  path: '/hooks/agents/cohort-engine',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsChurnRiskRoute = HooksAgentsChurnRiskRouteImport.update({
   id: '/hooks/agents/churn-risk',
   path: '/hooks/agents/churn-risk',
@@ -309,9 +330,20 @@ const HooksAgentsBundleRecommenderRoute =
     path: '/hooks/agents/bundle-recommender',
     getParentRoute: () => rootRouteImport,
   } as any)
+const HooksAgentsBrowseAbandonmentRoute =
+  HooksAgentsBrowseAbandonmentRouteImport.update({
+    id: '/hooks/agents/browse-abandonment',
+    path: '/hooks/agents/browse-abandonment',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsBotQualityRoute = HooksAgentsBotQualityRouteImport.update({
   id: '/hooks/agents/bot-quality',
   path: '/hooks/agents/bot-quality',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HooksAgentsAttributionRoute = HooksAgentsAttributionRouteImport.update({
+  id: '/hooks/agents/attribution',
+  path: '/hooks/agents/attribution',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HooksAgentsAovOptimizerRoute = HooksAgentsAovOptimizerRouteImport.update({
@@ -370,14 +402,18 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/aov-optimizer': typeof HooksAgentsAovOptimizerRoute
+  '/hooks/agents/attribution': typeof HooksAgentsAttributionRoute
   '/hooks/agents/bot-quality': typeof HooksAgentsBotQualityRoute
+  '/hooks/agents/browse-abandonment': typeof HooksAgentsBrowseAbandonmentRoute
   '/hooks/agents/bundle-recommender': typeof HooksAgentsBundleRecommenderRoute
   '/hooks/agents/cart-recovery': typeof HooksAgentsCartRecoveryRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
+  '/hooks/agents/cohort-engine': typeof HooksAgentsCohortEngineRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/discount-elasticity': typeof HooksAgentsDiscountElasticityRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
   '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
+  '/hooks/agents/funnel-healer': typeof HooksAgentsFunnelHealerRoute
   '/hooks/agents/ltv-predictor': typeof HooksAgentsLtvPredictorRoute
   '/hooks/agents/margin-optimizer': typeof HooksAgentsMarginOptimizerRoute
   '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
@@ -392,6 +428,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
+  '/hooks/agents/second-order-nurture': typeof HooksAgentsSecondOrderNurtureRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/agents/tick': typeof HooksAgentsTickRoute
@@ -426,14 +463,18 @@ export interface FileRoutesByTo {
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/aov-optimizer': typeof HooksAgentsAovOptimizerRoute
+  '/hooks/agents/attribution': typeof HooksAgentsAttributionRoute
   '/hooks/agents/bot-quality': typeof HooksAgentsBotQualityRoute
+  '/hooks/agents/browse-abandonment': typeof HooksAgentsBrowseAbandonmentRoute
   '/hooks/agents/bundle-recommender': typeof HooksAgentsBundleRecommenderRoute
   '/hooks/agents/cart-recovery': typeof HooksAgentsCartRecoveryRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
+  '/hooks/agents/cohort-engine': typeof HooksAgentsCohortEngineRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/discount-elasticity': typeof HooksAgentsDiscountElasticityRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
   '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
+  '/hooks/agents/funnel-healer': typeof HooksAgentsFunnelHealerRoute
   '/hooks/agents/ltv-predictor': typeof HooksAgentsLtvPredictorRoute
   '/hooks/agents/margin-optimizer': typeof HooksAgentsMarginOptimizerRoute
   '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
@@ -448,6 +489,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
+  '/hooks/agents/second-order-nurture': typeof HooksAgentsSecondOrderNurtureRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/agents/tick': typeof HooksAgentsTickRoute
@@ -484,14 +526,18 @@ export interface FileRoutesById {
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
   '/hooks/agents/aov-leak': typeof HooksAgentsAovLeakRoute
   '/hooks/agents/aov-optimizer': typeof HooksAgentsAovOptimizerRoute
+  '/hooks/agents/attribution': typeof HooksAgentsAttributionRoute
   '/hooks/agents/bot-quality': typeof HooksAgentsBotQualityRoute
+  '/hooks/agents/browse-abandonment': typeof HooksAgentsBrowseAbandonmentRoute
   '/hooks/agents/bundle-recommender': typeof HooksAgentsBundleRecommenderRoute
   '/hooks/agents/cart-recovery': typeof HooksAgentsCartRecoveryRoute
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
+  '/hooks/agents/cohort-engine': typeof HooksAgentsCohortEngineRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/discount-elasticity': typeof HooksAgentsDiscountElasticityRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
   '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
+  '/hooks/agents/funnel-healer': typeof HooksAgentsFunnelHealerRoute
   '/hooks/agents/ltv-predictor': typeof HooksAgentsLtvPredictorRoute
   '/hooks/agents/margin-optimizer': typeof HooksAgentsMarginOptimizerRoute
   '/hooks/agents/memory-feedback': typeof HooksAgentsMemoryFeedbackRoute
@@ -506,6 +552,7 @@ export interface FileRoutesById {
   '/hooks/agents/sales-bot': typeof HooksAgentsSalesBotRoute
   '/hooks/agents/sales-bot-all': typeof HooksAgentsSalesBotAllRoute
   '/hooks/agents/search-gap': typeof HooksAgentsSearchGapRoute
+  '/hooks/agents/second-order-nurture': typeof HooksAgentsSecondOrderNurtureRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/agents/tick': typeof HooksAgentsTickRoute
@@ -542,14 +589,18 @@ export interface FileRouteTypes {
     | '/hooks/agents/anomaly-detector'
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/aov-optimizer'
+    | '/hooks/agents/attribution'
     | '/hooks/agents/bot-quality'
+    | '/hooks/agents/browse-abandonment'
     | '/hooks/agents/bundle-recommender'
     | '/hooks/agents/cart-recovery'
     | '/hooks/agents/churn-risk'
+    | '/hooks/agents/cohort-engine'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/discount-elasticity'
     | '/hooks/agents/feedback-loop'
     | '/hooks/agents/feedback-loop-all'
+    | '/hooks/agents/funnel-healer'
     | '/hooks/agents/ltv-predictor'
     | '/hooks/agents/margin-optimizer'
     | '/hooks/agents/memory-feedback'
@@ -564,6 +615,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/sales-bot'
     | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
+    | '/hooks/agents/second-order-nurture'
     | '/hooks/agents/segmentation'
     | '/hooks/agents/stockout'
     | '/hooks/agents/tick'
@@ -598,14 +650,18 @@ export interface FileRouteTypes {
     | '/hooks/agents/anomaly-detector'
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/aov-optimizer'
+    | '/hooks/agents/attribution'
     | '/hooks/agents/bot-quality'
+    | '/hooks/agents/browse-abandonment'
     | '/hooks/agents/bundle-recommender'
     | '/hooks/agents/cart-recovery'
     | '/hooks/agents/churn-risk'
+    | '/hooks/agents/cohort-engine'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/discount-elasticity'
     | '/hooks/agents/feedback-loop'
     | '/hooks/agents/feedback-loop-all'
+    | '/hooks/agents/funnel-healer'
     | '/hooks/agents/ltv-predictor'
     | '/hooks/agents/margin-optimizer'
     | '/hooks/agents/memory-feedback'
@@ -620,6 +676,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/sales-bot'
     | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
+    | '/hooks/agents/second-order-nurture'
     | '/hooks/agents/segmentation'
     | '/hooks/agents/stockout'
     | '/hooks/agents/tick'
@@ -655,14 +712,18 @@ export interface FileRouteTypes {
     | '/hooks/agents/anomaly-detector'
     | '/hooks/agents/aov-leak'
     | '/hooks/agents/aov-optimizer'
+    | '/hooks/agents/attribution'
     | '/hooks/agents/bot-quality'
+    | '/hooks/agents/browse-abandonment'
     | '/hooks/agents/bundle-recommender'
     | '/hooks/agents/cart-recovery'
     | '/hooks/agents/churn-risk'
+    | '/hooks/agents/cohort-engine'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/discount-elasticity'
     | '/hooks/agents/feedback-loop'
     | '/hooks/agents/feedback-loop-all'
+    | '/hooks/agents/funnel-healer'
     | '/hooks/agents/ltv-predictor'
     | '/hooks/agents/margin-optimizer'
     | '/hooks/agents/memory-feedback'
@@ -677,6 +738,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/sales-bot'
     | '/hooks/agents/sales-bot-all'
     | '/hooks/agents/search-gap'
+    | '/hooks/agents/second-order-nurture'
     | '/hooks/agents/segmentation'
     | '/hooks/agents/stockout'
     | '/hooks/agents/tick'
@@ -709,14 +771,18 @@ export interface RootRouteChildren {
   HooksAgentsAnomalyDetectorRoute: typeof HooksAgentsAnomalyDetectorRoute
   HooksAgentsAovLeakRoute: typeof HooksAgentsAovLeakRoute
   HooksAgentsAovOptimizerRoute: typeof HooksAgentsAovOptimizerRoute
+  HooksAgentsAttributionRoute: typeof HooksAgentsAttributionRoute
   HooksAgentsBotQualityRoute: typeof HooksAgentsBotQualityRoute
+  HooksAgentsBrowseAbandonmentRoute: typeof HooksAgentsBrowseAbandonmentRoute
   HooksAgentsBundleRecommenderRoute: typeof HooksAgentsBundleRecommenderRoute
   HooksAgentsCartRecoveryRoute: typeof HooksAgentsCartRecoveryRoute
   HooksAgentsChurnRiskRoute: typeof HooksAgentsChurnRiskRoute
+  HooksAgentsCohortEngineRoute: typeof HooksAgentsCohortEngineRoute
   HooksAgentsCronAllRoute: typeof HooksAgentsCronAllRoute
   HooksAgentsDiscountElasticityRoute: typeof HooksAgentsDiscountElasticityRoute
   HooksAgentsFeedbackLoopRoute: typeof HooksAgentsFeedbackLoopRoute
   HooksAgentsFeedbackLoopAllRoute: typeof HooksAgentsFeedbackLoopAllRoute
+  HooksAgentsFunnelHealerRoute: typeof HooksAgentsFunnelHealerRoute
   HooksAgentsLtvPredictorRoute: typeof HooksAgentsLtvPredictorRoute
   HooksAgentsMarginOptimizerRoute: typeof HooksAgentsMarginOptimizerRoute
   HooksAgentsMemoryFeedbackRoute: typeof HooksAgentsMemoryFeedbackRoute
@@ -731,6 +797,7 @@ export interface RootRouteChildren {
   HooksAgentsSalesBotRoute: typeof HooksAgentsSalesBotRoute
   HooksAgentsSalesBotAllRoute: typeof HooksAgentsSalesBotAllRoute
   HooksAgentsSearchGapRoute: typeof HooksAgentsSearchGapRoute
+  HooksAgentsSecondOrderNurtureRoute: typeof HooksAgentsSecondOrderNurtureRoute
   HooksAgentsSegmentationRoute: typeof HooksAgentsSegmentationRoute
   HooksAgentsStockoutRoute: typeof HooksAgentsStockoutRoute
   HooksAgentsTickRoute: typeof HooksAgentsTickRoute
@@ -931,6 +998,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsSegmentationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/second-order-nurture': {
+      id: '/hooks/agents/second-order-nurture'
+      path: '/hooks/agents/second-order-nurture'
+      fullPath: '/hooks/agents/second-order-nurture'
+      preLoaderRoute: typeof HooksAgentsSecondOrderNurtureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/search-gap': {
       id: '/hooks/agents/search-gap'
       path: '/hooks/agents/search-gap'
@@ -1029,6 +1103,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsLtvPredictorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/funnel-healer': {
+      id: '/hooks/agents/funnel-healer'
+      path: '/hooks/agents/funnel-healer'
+      fullPath: '/hooks/agents/funnel-healer'
+      preLoaderRoute: typeof HooksAgentsFunnelHealerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/feedback-loop-all': {
       id: '/hooks/agents/feedback-loop-all'
       path: '/hooks/agents/feedback-loop-all'
@@ -1057,6 +1138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsCronAllRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/cohort-engine': {
+      id: '/hooks/agents/cohort-engine'
+      path: '/hooks/agents/cohort-engine'
+      fullPath: '/hooks/agents/cohort-engine'
+      preLoaderRoute: typeof HooksAgentsCohortEngineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/churn-risk': {
       id: '/hooks/agents/churn-risk'
       path: '/hooks/agents/churn-risk'
@@ -1078,11 +1166,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsBundleRecommenderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/browse-abandonment': {
+      id: '/hooks/agents/browse-abandonment'
+      path: '/hooks/agents/browse-abandonment'
+      fullPath: '/hooks/agents/browse-abandonment'
+      preLoaderRoute: typeof HooksAgentsBrowseAbandonmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/bot-quality': {
       id: '/hooks/agents/bot-quality'
       path: '/hooks/agents/bot-quality'
       fullPath: '/hooks/agents/bot-quality'
       preLoaderRoute: typeof HooksAgentsBotQualityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/attribution': {
+      id: '/hooks/agents/attribution'
+      path: '/hooks/agents/attribution'
+      fullPath: '/hooks/agents/attribution'
+      preLoaderRoute: typeof HooksAgentsAttributionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/aov-optimizer': {
@@ -1194,14 +1296,18 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsAnomalyDetectorRoute: HooksAgentsAnomalyDetectorRoute,
   HooksAgentsAovLeakRoute: HooksAgentsAovLeakRoute,
   HooksAgentsAovOptimizerRoute: HooksAgentsAovOptimizerRoute,
+  HooksAgentsAttributionRoute: HooksAgentsAttributionRoute,
   HooksAgentsBotQualityRoute: HooksAgentsBotQualityRoute,
+  HooksAgentsBrowseAbandonmentRoute: HooksAgentsBrowseAbandonmentRoute,
   HooksAgentsBundleRecommenderRoute: HooksAgentsBundleRecommenderRoute,
   HooksAgentsCartRecoveryRoute: HooksAgentsCartRecoveryRoute,
   HooksAgentsChurnRiskRoute: HooksAgentsChurnRiskRoute,
+  HooksAgentsCohortEngineRoute: HooksAgentsCohortEngineRoute,
   HooksAgentsCronAllRoute: HooksAgentsCronAllRoute,
   HooksAgentsDiscountElasticityRoute: HooksAgentsDiscountElasticityRoute,
   HooksAgentsFeedbackLoopRoute: HooksAgentsFeedbackLoopRoute,
   HooksAgentsFeedbackLoopAllRoute: HooksAgentsFeedbackLoopAllRoute,
+  HooksAgentsFunnelHealerRoute: HooksAgentsFunnelHealerRoute,
   HooksAgentsLtvPredictorRoute: HooksAgentsLtvPredictorRoute,
   HooksAgentsMarginOptimizerRoute: HooksAgentsMarginOptimizerRoute,
   HooksAgentsMemoryFeedbackRoute: HooksAgentsMemoryFeedbackRoute,
@@ -1216,6 +1322,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsSalesBotRoute: HooksAgentsSalesBotRoute,
   HooksAgentsSalesBotAllRoute: HooksAgentsSalesBotAllRoute,
   HooksAgentsSearchGapRoute: HooksAgentsSearchGapRoute,
+  HooksAgentsSecondOrderNurtureRoute: HooksAgentsSecondOrderNurtureRoute,
   HooksAgentsSegmentationRoute: HooksAgentsSegmentationRoute,
   HooksAgentsStockoutRoute: HooksAgentsStockoutRoute,
   HooksAgentsTickRoute: HooksAgentsTickRoute,
