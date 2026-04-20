@@ -98,9 +98,15 @@ function BrandPage() {
         )}
       </div>
 
-      <KpiDashboard tenantId={current.id} />
+      <AnalyticsWindowProvider initial={30}>
+        <div className="flex items-center justify-end">
+          <AnalyticsWindowToggle />
+        </div>
 
-      <RevenueTrendChart tenantId={current.id} />
+        <KpiDashboard tenantId={current.id} />
+
+        <RevenueTrendChart tenantId={current.id} />
+      </AnalyticsWindowProvider>
 
       <RevenueFeed tenantId={current.id} />
 
