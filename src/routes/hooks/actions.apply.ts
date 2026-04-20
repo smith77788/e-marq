@@ -7,6 +7,36 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { authorizeAgentRequest, jsonError, jsonOk } from "@/lib/acos/agentRuntime";
+import { pickChannelForCustomer } from "@/lib/acos/channels";
+
+async function queueVipProductNudges(tenantId: string, productId: string, sourceInsightId: string): Promise<number> {
+  const { data: product } = await supabaseAdmin
+    .from("products").select("id, name, price_cents").eq("id", productId).maybeSingle();
+  if (!product) return 0;
+  const { data: vips } = await supabaseAdmin
+    .from("customers")
+    .select("id, name")
+    .eq("tenant_id", tenantId)
+    .eq("consent_marketing", true)
+    .in("lifecycle_stage", ["vip", "active"])
+    .gte("total_orders", 2)
+    .limit(20);
+  let queued = 0;
+  for (const c of vips ?? []) {
+    const channel = await pickChannelForCustomer(c.id);
+    if (!channel) continue;
+    const firstName = (c.name ?? "").split(" ")[0] || "there";
+    const body = `Hey ${firstName} — have you tried our <b>${product.name}</b>? It's been getting lots of attention lately. Want me to add one to your next order?`;
+    const { error } = await supabaseAdmin.from("outbound_messages").insert({
+      tenant_id: tenantId, customer_id: c.id, channel, trigger_kind: "promo",
+      template_key: "promo.feature_product.v1", body, status: "pending",
+      expected_impact_cents: product.price_cents, related_product_id: product.id,
+      metadata: { source_insight_id: sourceInsightId } as never,
+    });
+    if (!error) queued++;
+  }
+  return queued;
+}
 
 type InsightRow = {
   id: string;
@@ -24,6 +54,8 @@ const ACTION_BY_TYPE: Record<string, { action_type: string; agent_id: string; ta
   stockout_predicted: { action_type: "reorder_request", agent_id: "stockout_predictor", target_entity: "product" },
   aov_leak: { action_type: "abandoned_cart_email", agent_id: "aov_leak_detector", target_entity: "product" },
   search_gap: { action_type: "create_seo_page", agent_id: "search_gap_detector", target_entity: "search_term" },
+  low_engagement_product: { action_type: "vip_product_nudge", agent_id: "aov_optimizer", target_entity: "product" },
+  cart_abandon: { action_type: "vip_product_nudge", agent_id: "aov_optimizer", target_entity: "product" },
 };
 
 export const Route = createFileRoute("/hooks/actions/apply")({
@@ -61,6 +93,13 @@ export const Route = createFileRoute("/hooks/actions/apply")({
         const m = ins.metrics as { product_id?: string; email?: string; search_term?: string };
         const targetId = mapping.target_entity === "product" ? m.product_id ?? null : null;
 
+        // For vip_product_nudge: actually queue messages to VIP customers
+        let sideEffect: Record<string, unknown> = { note: "Action recorded." };
+        if (mapping.action_type === "vip_product_nudge" && targetId) {
+          const queued = await queueVipProductNudges(ins.tenant_id, targetId, ins.id);
+          sideEffect = { queued_messages: queued };
+        }
+
         const insertRow = {
           tenant_id: ins.tenant_id,
           agent_id: mapping.agent_id,
@@ -75,7 +114,7 @@ export const Route = createFileRoute("/hooks/actions/apply")({
             source_metrics: ins.metrics,
             triggered_by: ctx.kind,
           } as never,
-          actual_result: { note: "Action recorded; side-effect simulated in this iteration." } as never,
+          actual_result: sideEffect as never,
         };
         const { data: action, error: actErr } = await supabaseAdmin
           .from("ai_actions")
