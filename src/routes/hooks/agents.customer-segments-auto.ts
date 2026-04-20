@@ -132,16 +132,18 @@ export const Route = createFileRoute("/hooks/agents/customer-segments-auto")({
                   )
                 : 0;
             const { error } = await supabaseAdmin.from("customer_segments").upsert(
-              {
-                tenant_id: tenantId!,
-                segment_key: s.key,
-                name: s.name,
-                description: s.description,
-                rules: s.rules,
-                customer_count: matches.length,
-                avg_ltv_cents: avgLtv,
-                is_auto_generated: true,
-              },
+              [
+                {
+                  tenant_id: tenantId!,
+                  segment_key: s.key,
+                  name: s.name,
+                  description: s.description,
+                  rules: s.rules,
+                  customer_count: matches.length,
+                  avg_ltv_cents: avgLtv,
+                  is_auto_generated: true,
+                },
+              ],
               { onConflict: "tenant_id,segment_key", ignoreDuplicates: false },
             );
             if (!error) upserts++;
