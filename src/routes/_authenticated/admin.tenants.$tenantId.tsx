@@ -60,6 +60,7 @@ import { TenantAnalytics } from "@/components/admin/TenantAnalytics";
 import { TenantOrders } from "@/components/admin/TenantOrders";
 import { AcosOverviewTab } from "@/components/admin/AcosOverviewTab";
 import { AcosInsightsQueue } from "@/components/admin/AcosInsightsQueue";
+import { AcosAgentRuns } from "@/components/admin/AcosAgentRuns";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants/$tenantId")({
   component: TenantDetailPage,
@@ -369,6 +370,7 @@ function TenantDetailPage() {
         <TabsContent value="acos" className="space-y-4">
           <AcosOverviewTab tenantId={tenantId} />
           <AcosInsightsQueue tenantId={tenantId} />
+          <AcosAgentRuns tenantId={tenantId} />
         </TabsContent>
 
         <TabsContent value="overview" className="space-y-4">
