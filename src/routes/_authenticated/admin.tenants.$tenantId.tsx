@@ -60,6 +60,7 @@ import { TenantAnalytics } from "@/components/admin/TenantAnalytics";
 import { TenantOrders } from "@/components/admin/TenantOrders";
 import { AcosOverviewTab } from "@/components/admin/AcosOverviewTab";
 import { AcosInsightsQueue } from "@/components/admin/AcosInsightsQueue";
+import { AcosAgentRuns } from "@/components/admin/AcosAgentRuns";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants/$tenantId")({
   component: TenantDetailPage,
