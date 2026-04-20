@@ -86,7 +86,7 @@ export function RevenueTrendChart({ tenantId }: Props) {
       ai: b.ai / 100,
       organic: Math.max(0, (b.total - b.ai) / 100),
     }));
-  }, [data]);
+  }, [data, days]);
 
   const totals = useMemo(() => {
     const total = series.reduce((s, p) => s + p.total, 0);
@@ -100,7 +100,7 @@ export function RevenueTrendChart({ tenantId }: Props) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
           <TrendingUp className="h-4 w-4 text-primary" />
-          Revenue trend (30 days)
+          Revenue trend ({days} days)
         </CardTitle>
         <CardDescription className="text-xs">
           Total <span className="font-semibold text-foreground">{fmtUsd(totals.total)}</span> · AI-attributed <span className="font-semibold text-primary">{fmtUsd(totals.ai)}</span> ({totals.share}%)
