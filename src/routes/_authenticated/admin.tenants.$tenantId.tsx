@@ -49,13 +49,13 @@ import {
   normalizeConfig,
   type TenantConfigValues,
 } from "@/components/admin/TenantConfigForm";
+import { clearDemoData } from "@/lib/demoData";
 import {
-  generateDemoProducts,
-  generateDemoOrders,
-  generateDemoEvents,
-  clearDemoData,
-  DEMO_PRODUCT_COUNT,
-} from "@/lib/demoData";
+  generateAcosDataset,
+  ACOS_CATALOG_SIZE,
+  type AcosScale,
+  type AcosGenerationResult,
+} from "@/lib/acosDataset";
 import { TenantAnalytics } from "@/components/admin/TenantAnalytics";
 import { TenantOrders } from "@/components/admin/TenantOrders";
 import { AcosOverviewTab } from "@/components/admin/AcosOverviewTab";
