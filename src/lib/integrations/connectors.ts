@@ -15,6 +15,7 @@
  */
 import Papa from "papaparse";
 import type { EntityKind, ParsedRow } from "./parser";
+import { safeFetch } from "./safeFetch";
 
 export type ConnectorPullInput = {
   provider: string;
