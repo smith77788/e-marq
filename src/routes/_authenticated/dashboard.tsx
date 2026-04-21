@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { SetupReadinessCard } from "@/components/owner/SetupReadinessCard";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
@@ -38,6 +39,10 @@ function DashboardPage() {
           <Badge variant="secondary">супер-адмін</Badge>
         )}
       </div>
+
+      {tenants && tenants.length > 0 && (
+        <SetupReadinessCard tenantId={tenants[0].id} tenantSlug={tenants[0].slug} compact />
+      )}
 
       <Card>
         <CardHeader>

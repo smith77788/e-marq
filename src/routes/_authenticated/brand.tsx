@@ -18,6 +18,7 @@ import { TopCustomers } from "@/components/owner/TopCustomers";
 import { AgentTimeline } from "@/components/owner/AgentTimeline";
 import { MemoryInspector } from "@/components/owner/MemoryInspector";
 import { SetupChecklist } from "@/components/owner/SetupChecklist";
+import { SetupReadinessCard } from "@/components/owner/SetupReadinessCard";
 import { AnalyticsWindowProvider, AnalyticsWindowToggle } from "@/components/owner/AnalyticsWindow";
 import { CockpitHero } from "@/components/owner/CockpitHero";
 import { FunnelChart } from "@/components/owner/FunnelChart";
