@@ -147,6 +147,7 @@ import { Route as AuthenticatedAdminCommandsRouteImport } from './routes/_authen
 import { Route as SSlugProductsProductIdRouteImport } from './routes/s.$slug.products.$productId'
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
 import { Route as SSlugCollectionsHandleRouteImport } from './routes/s.$slug.collections.$handle'
+import { Route as ApiPublicShippingNpRouteImport } from './routes/api/public/shipping.np'
 import { Route as ApiIntegrationsSyncProviderRouteImport } from './routes/api/integrations.sync.$provider'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
 import { Route as AuthenticatedAdminDntradeHealthTenantIdRouteImport } from './routes/_authenticated/admin.dntrade-health.$tenantId'
@@ -908,6 +909,11 @@ const SSlugCollectionsHandleRoute = SSlugCollectionsHandleRouteImport.update({
   path: '/collections/$handle',
   getParentRoute: () => SSlugRoute,
 } as any)
+const ApiPublicShippingNpRoute = ApiPublicShippingNpRouteImport.update({
+  id: '/api/public/shipping/np',
+  path: '/api/public/shipping/np',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiIntegrationsSyncProviderRoute =
   ApiIntegrationsSyncProviderRouteImport.update({
     id: '/api/integrations/sync/$provider',
@@ -1071,6 +1077,7 @@ export interface FileRoutesByFullPath {
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
+  '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
   '/s/$slug/products/$productId': typeof SSlugProductsProductIdRoute
@@ -1213,6 +1220,7 @@ export interface FileRoutesByTo {
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
+  '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
   '/s/$slug/products/$productId': typeof SSlugProductsProductIdRoute
@@ -1358,6 +1366,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
+  '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
   '/s/$slug/products/$productId': typeof SSlugProductsProductIdRoute
@@ -1503,6 +1512,7 @@ export interface FileRouteTypes {
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
     | '/api/integrations/sync/$provider'
+    | '/api/public/shipping/np'
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
     | '/s/$slug/products/$productId'
@@ -1645,6 +1655,7 @@ export interface FileRouteTypes {
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
     | '/api/integrations/sync/$provider'
+    | '/api/public/shipping/np'
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
     | '/s/$slug/products/$productId'
@@ -1789,6 +1800,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/dntrade-health/$tenantId'
     | '/_authenticated/admin/tenants/$tenantId'
     | '/api/integrations/sync/$provider'
+    | '/api/public/shipping/np'
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
     | '/s/$slug/products/$productId'
@@ -1909,6 +1921,7 @@ export interface RootRouteChildren {
   HooksTelegramPollRoute: typeof HooksTelegramPollRoute
   TrackSlugJsRoute: typeof TrackSlugJsRoute
   ApiIntegrationsSyncProviderRoute: typeof ApiIntegrationsSyncProviderRoute
+  ApiPublicShippingNpRoute: typeof ApiPublicShippingNpRoute
   ApiPublicIntegrationsInboundProviderRoute: typeof ApiPublicIntegrationsInboundProviderRoute
 }
 
@@ -2880,6 +2893,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SSlugCollectionsHandleRouteImport
       parentRoute: typeof SSlugRoute
     }
+    '/api/public/shipping/np': {
+      id: '/api/public/shipping/np'
+      path: '/api/public/shipping/np'
+      fullPath: '/api/public/shipping/np'
+      preLoaderRoute: typeof ApiPublicShippingNpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/integrations/sync/$provider': {
       id: '/api/integrations/sync/$provider'
       path: '/api/integrations/sync/$provider'
@@ -3149,6 +3169,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksTelegramPollRoute: HooksTelegramPollRoute,
   TrackSlugJsRoute: TrackSlugJsRoute,
   ApiIntegrationsSyncProviderRoute: ApiIntegrationsSyncProviderRoute,
+  ApiPublicShippingNpRoute: ApiPublicShippingNpRoute,
   ApiPublicIntegrationsInboundProviderRoute:
     ApiPublicIntegrationsInboundProviderRoute,
 }
