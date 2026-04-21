@@ -87,6 +87,14 @@ const LIVE_AGENT_IDS = [
   "refund-risk",
   "lifecycle-trigger-tuner",
   "inventory-rebalance",
+  "brand-profile",
+  "catalog-enricher",
+  "margin-estimator",
+  "customer-voice",
+  "channel-discovery",
+  "seasonality-detector",
+  "integration-scout",
+  "data-gap-auditor",
 ] as const;
 
 function AgentsLivePage() {
