@@ -201,12 +201,12 @@ type HeroCardProps = {
 };
 
 const TONE: Record<HeroCardProps["tone"], { ring: string; glow: string; gradId: string; stroke: string; fill: string; iconCls: string }> = {
-  default:    { ring: "border-border",                 glow: "",                                    gradId: "spark-default",  stroke: "hsl(var(--muted-foreground))", fill: "hsl(var(--muted-foreground))", iconCls: "text-muted-foreground" },
-  primary:    { ring: "border-primary/40",             glow: "shadow-[0_0_30px_-12px_hsl(var(--primary)/0.4)]", gradId: "spark-primary",  stroke: "hsl(var(--primary))",          fill: "hsl(var(--primary))",          iconCls: "text-primary" },
-  accent:     { ring: "border-accent/40",              glow: "shadow-[0_0_30px_-12px_hsl(var(--accent)/0.4)]",  gradId: "spark-accent",   stroke: "hsl(var(--accent))",           fill: "hsl(var(--accent))",           iconCls: "text-accent" },
-  success:    { ring: "border-success/40",             glow: "shadow-[0_0_30px_-12px_hsl(var(--success)/0.4)]", gradId: "spark-success",  stroke: "hsl(var(--success))",          fill: "hsl(var(--success))",          iconCls: "text-success" },
-  warning:    { ring: "border-warning/40",             glow: "",                                    gradId: "spark-warning",  stroke: "hsl(var(--warning))",          fill: "hsl(var(--warning))",          iconCls: "text-warning-foreground" },
-  destructive:{ ring: "border-destructive/40",         glow: "shadow-[0_0_30px_-12px_hsl(var(--destructive)/0.4)]", gradId: "spark-destructive", stroke: "hsl(var(--destructive))",  fill: "hsl(var(--destructive))",      iconCls: "text-destructive" },
+  default:    { ring: "border-border",                 glow: "",                                                                              gradId: "spark-default",  stroke: "var(--muted-foreground)", fill: "var(--muted-foreground)", iconCls: "text-muted-foreground" },
+  primary:    { ring: "border-primary/40",             glow: "shadow-[0_0_30px_-12px_color-mix(in_oklab,var(--primary)_40%,transparent)]",   gradId: "spark-primary",  stroke: "var(--primary)",          fill: "var(--primary)",          iconCls: "text-primary" },
+  accent:     { ring: "border-accent/40",              glow: "shadow-[0_0_30px_-12px_color-mix(in_oklab,var(--accent)_40%,transparent)]",    gradId: "spark-accent",   stroke: "var(--accent)",           fill: "var(--accent)",           iconCls: "text-accent" },
+  success:    { ring: "border-success/40",             glow: "shadow-[0_0_30px_-12px_color-mix(in_oklab,var(--success,var(--primary))_40%,transparent)]", gradId: "spark-success",  stroke: "var(--success,var(--primary))", fill: "var(--success,var(--primary))", iconCls: "text-success" },
+  warning:    { ring: "border-warning/40",             glow: "",                                                                              gradId: "spark-warning",  stroke: "var(--warning,var(--primary))", fill: "var(--warning,var(--primary))", iconCls: "text-warning-foreground" },
+  destructive:{ ring: "border-destructive/40",         glow: "shadow-[0_0_30px_-12px_color-mix(in_oklab,var(--destructive)_40%,transparent)]", gradId: "spark-destructive", stroke: "var(--destructive)", fill: "var(--destructive)",      iconCls: "text-destructive" },
 };
 
 function HeroCard({ icon: Icon, label, value, sub, delta, series, seriesKey, tone, badge }: HeroCardProps) {
