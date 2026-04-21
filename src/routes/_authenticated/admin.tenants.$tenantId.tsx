@@ -267,14 +267,14 @@ function TenantDetailPage() {
           "Tenant already has data. Disable 'Skip if data exists' or clear it first.",
         );
       }
-      toast.loading("Generating ACOS dataset…", { id: "acos-gen" });
+      toast.loading("Готуємо демо-дані для ACOS…", { id: "acos-gen" });
       const result = await generateAcosDataset(tenantId, acosScale, supabase);
       return result;
     },
     onSuccess: (result) => {
       setLastAcosResult(result);
       toast.success(
-        `${result.products} products · ${result.customers} customers · ${result.orders} orders · ${result.events} events`,
+        `Готово · товарів: ${result.products} · клієнтів: ${result.customers} · замовлень: ${result.orders} · подій: ${result.events}`,
         { id: "acos-gen", duration: 6000 },
       );
       setAcosConfirmOpen(false);
@@ -294,7 +294,7 @@ function TenantDetailPage() {
       await clearDemoData(tenantId, supabase);
     },
     onSuccess: () => {
-      toast.success("Demo data cleared");
+      toast.success("Готово · демо-дані видалено");
       setClearConfirmOpen(false);
       queryClient.invalidateQueries({ queryKey: ["tenant-products", tenantId] });
       queryClient.invalidateQueries({ queryKey: ["tenant-orders-count", tenantId] });

@@ -220,7 +220,7 @@ function Step2Channel({ tenantId, qc: _qc }: { tenantId: string; qc: QC }) {
           }}
           disabled={!deepLink}
         >
-          Copy
+          Скопіювати
         </Button>
       </div>
       {deepLink && (
@@ -244,7 +244,7 @@ function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
     mutationFn: async () => {
       const priceCents = Math.round(Number(price) * 100);
       const stockNum = Math.max(0, parseInt(stock || "0", 10));
-      if (!name || !Number.isFinite(priceCents) || priceCents <= 0) throw new Error("Name and price required");
+      if (!name || !Number.isFinite(priceCents) || priceCents <= 0) throw new Error("Заповніть назву та ціну");
       const { error } = await supabase.from("products").insert({
         tenant_id: tenantId,
         name,
@@ -255,7 +255,7 @@ function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Product created ✓");
+      toast.success("Готово · товар створено");
       setName("");
       setPrice("");
       setStock("");
@@ -306,13 +306,13 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
           return email ? { tenant_id: tenantId, email, name: name || null } : null;
         })
         .filter(Boolean) as { tenant_id: string; email: string; name: string | null }[];
-      if (rows.length === 0) throw new Error("No valid rows");
+      if (rows.length === 0) throw new Error("Не знайдено жодного рядка з email");
       const { error } = await supabase.from("customers").insert(rows as never);
       if (error) throw error;
       return rows.length;
     },
     onSuccess: (n) => {
-      toast.success(`Imported ${n} customers ✓`);
+      toast.success(`Готово · додано клієнтів: ${n}`);
       setCsv("");
       qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
     },
