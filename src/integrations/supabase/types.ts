@@ -3831,6 +3831,21 @@ export type Database = {
           product_ids: string[]
         }[]
       }
+      get_storefront_collection_products: {
+        Args: { _handle: string; _slug: string }
+        Returns: Json
+      }
+      get_storefront_collections: {
+        Args: { _slug: string }
+        Returns: {
+          description: string
+          handle: string
+          id: string
+          image_url: string
+          name: string
+          product_count: number
+        }[]
+      }
       get_storefront_config: { Args: { _slug: string }; Returns: Json }
       get_storefront_page: {
         Args: { _page_slug: string; _slug: string }
@@ -3857,6 +3872,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_storefront_product_detail: {
+        Args: { _product_id: string; _slug: string }
+        Returns: Json
       }
       get_storefront_products: {
         Args: { _slug: string }
