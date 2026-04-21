@@ -131,6 +131,7 @@ import { Route as HooksAgentsAnomalyDetectorRouteImport } from './routes/hooks/a
 import { Route as HooksAgentsActionWatchdogRouteImport } from './routes/hooks/agents.action-watchdog'
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
+import { Route as AuthenticatedBrandPromotionsRouteImport } from './routes/_authenticated/brand.promotions'
 import { Route as AuthenticatedBrandProductsRouteImport } from './routes/_authenticated/brand.products'
 import { Route as AuthenticatedBrandOrdersRouteImport } from './routes/_authenticated/brand.orders'
 import { Route as AuthenticatedBrandIntegrationsRouteImport } from './routes/_authenticated/brand.integrations'
@@ -817,6 +818,12 @@ const AuthenticatedInviteTokenRoute =
     path: '/invite/$token',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedBrandPromotionsRoute =
+  AuthenticatedBrandPromotionsRouteImport.update({
+    id: '/promotions',
+    path: '/promotions',
+    getParentRoute: () => AuthenticatedBrandRoute,
+  } as any)
 const AuthenticatedBrandProductsRoute =
   AuthenticatedBrandProductsRouteImport.update({
     id: '/products',
@@ -953,6 +960,7 @@ export interface FileRoutesByFullPath {
   '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/brand/orders': typeof AuthenticatedBrandOrdersRoute
   '/brand/products': typeof AuthenticatedBrandProductsRoute
+  '/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
@@ -1094,6 +1102,7 @@ export interface FileRoutesByTo {
   '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/brand/orders': typeof AuthenticatedBrandOrdersRoute
   '/brand/products': typeof AuthenticatedBrandProductsRoute
+  '/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
@@ -1238,6 +1247,7 @@ export interface FileRoutesById {
   '/_authenticated/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/_authenticated/brand/orders': typeof AuthenticatedBrandOrdersRoute
   '/_authenticated/brand/products': typeof AuthenticatedBrandProductsRoute
+  '/_authenticated/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
@@ -1382,6 +1392,7 @@ export interface FileRouteTypes {
     | '/brand/integrations'
     | '/brand/orders'
     | '/brand/products'
+    | '/brand/promotions'
     | '/invite/$token'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
@@ -1523,6 +1534,7 @@ export interface FileRouteTypes {
     | '/brand/integrations'
     | '/brand/orders'
     | '/brand/products'
+    | '/brand/promotions'
     | '/invite/$token'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
@@ -1666,6 +1678,7 @@ export interface FileRouteTypes {
     | '/_authenticated/brand/integrations'
     | '/_authenticated/brand/orders'
     | '/_authenticated/brand/products'
+    | '/_authenticated/brand/promotions'
     | '/_authenticated/invite/$token'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
@@ -2755,6 +2768,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInviteTokenRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/brand/promotions': {
+      id: '/_authenticated/brand/promotions'
+      path: '/promotions'
+      fullPath: '/brand/promotions'
+      preLoaderRoute: typeof AuthenticatedBrandPromotionsRouteImport
+      parentRoute: typeof AuthenticatedBrandRoute
+    }
     '/_authenticated/brand/products': {
       id: '/_authenticated/brand/products'
       path: '/products'
@@ -2897,6 +2917,7 @@ interface AuthenticatedBrandRouteChildren {
   AuthenticatedBrandIntegrationsRoute: typeof AuthenticatedBrandIntegrationsRoute
   AuthenticatedBrandOrdersRoute: typeof AuthenticatedBrandOrdersRoute
   AuthenticatedBrandProductsRoute: typeof AuthenticatedBrandProductsRoute
+  AuthenticatedBrandPromotionsRoute: typeof AuthenticatedBrandPromotionsRoute
 }
 
 const AuthenticatedBrandRouteChildren: AuthenticatedBrandRouteChildren = {
@@ -2905,6 +2926,7 @@ const AuthenticatedBrandRouteChildren: AuthenticatedBrandRouteChildren = {
   AuthenticatedBrandIntegrationsRoute: AuthenticatedBrandIntegrationsRoute,
   AuthenticatedBrandOrdersRoute: AuthenticatedBrandOrdersRoute,
   AuthenticatedBrandProductsRoute: AuthenticatedBrandProductsRoute,
+  AuthenticatedBrandPromotionsRoute: AuthenticatedBrandPromotionsRoute,
 }
 
 const AuthenticatedBrandRouteWithChildren =
