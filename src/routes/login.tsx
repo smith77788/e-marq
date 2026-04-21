@@ -6,12 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useT, tStatic } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Sign in — ACOS" },
-      { name: "description", content: "Sign in to your ACOS workspace with Google." },
+      { title: `${tStatic("auth.signinTitle")} — ACOS` },
+      { name: "description", content: tStatic("auth.signinDesc") },
     ],
   }),
   component: LoginPage,
@@ -20,9 +22,9 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const { t } = useT();
   const [submitting, setSubmitting] = useState(false);
 
-  // If we already have a session (e.g. OAuth completed in background), redirect.
   useEffect(() => {
     if (!loading && user) {
       void navigate({ to: "/dashboard", replace: true });
@@ -37,48 +39,48 @@ function LoginPage() {
       });
       if (result.redirected) return;
 
-      // Even if lovable reports an error, the underlying supabase session may have
-      // been established (the OAuth broker delivered tokens). Re-check before failing.
       if (result.error) {
         const { data } = await supabase.auth.getSession();
         if (data.session) {
-          toast.success("Вітаємо!");
+          toast.success(t("auth.welcome"));
           navigate({ to: "/dashboard", replace: true });
           return;
         }
         const msg = result.error instanceof Error ? result.error.message : String(result.error);
-        // Suppress noisy "cancelled" message if user actually closed the popup.
         if (!/cancel/i.test(msg)) {
-          toast.error(msg || "Не вдалось увійти через Google");
+          toast.error(msg || t("auth.failGoogle"));
         }
         setSubmitting(false);
         return;
       }
 
-      toast.success("Вітаємо!");
+      toast.success(t("auth.welcome"));
       navigate({ to: "/dashboard", replace: true });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Sign in failed");
+      toast.error(err instanceof Error ? err.message : t("auth.fail"));
       setSubmitting(false);
     }
   }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="absolute right-4 top-4">
+        <LanguageSwitcher />
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Sign in</CardTitle>
-          <CardDescription>Увійдіть до ACOS через Google.</CardDescription>
+          <CardTitle>{t("auth.signinTitle")}</CardTitle>
+          <CardDescription>{t("auth.signinDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Button type="button" variant="outline" className="w-full" onClick={onGoogle} disabled={submitting}>
             <GoogleIcon />
-            {submitting ? "Перенаправлення…" : "Continue with Google"}
+            {submitting ? t("auth.redirecting") : t("auth.continueGoogle")}
           </Button>
           <p className="text-center text-sm text-muted-foreground">
-            Немає акаунту?{" "}
+            {t("auth.noAccount")}{" "}
             <Link to="/signup" className="font-medium text-primary hover:underline">
-              Створити
+              {t("auth.create")}
             </Link>
           </p>
         </CardContent>
