@@ -208,8 +208,7 @@ export function AcosOverviewTab({ tenantId }: Props) {
 
       <Card>
         <CardHeader>
-          <CardTitle class
-Name="text-base">Що система робить для цього бренду</CardTitle>
+          <CardTitle className="text-base">Що система робить для цього бренду</CardTitle>
           <CardDescription>
             Підключіть один раз — агенти працюють за розкладом, знаходять можливості для виторгу
             і ставлять їх у чергу на ваше одне натискання «Так».
