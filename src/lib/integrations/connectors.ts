@@ -77,7 +77,7 @@ async function pullShopify(input: ConnectorPullInput): Promise<ConnectorPullResu
   url.searchParams.set("limit", String(limit));
   if (resource === "orders") url.searchParams.set("status", "any");
 
-  const res = await fetch(url.toString(), {
+  const res = await safeFetch(url.toString(), {
     headers: {
       "X-Shopify-Access-Token": token,
       "Content-Type": "application/json",
@@ -146,7 +146,7 @@ async function pullWooCommerce(input: ConnectorPullInput): Promise<ConnectorPull
 
   const url = `${base}/wp-json/wc/v3/${resource}?per_page=${limit}`;
   const auth = "Basic " + btoa(`${ck}:${cs}`);
-  const res = await fetch(url, { headers: { Authorization: auth } });
+  const res = await safeFetch(url, { headers: { Authorization: auth } });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`WooCommerce API ${res.status}: ${body.slice(0, 300)}`);
@@ -201,7 +201,7 @@ async function pullStripe(input: ConnectorPullInput): Promise<ConnectorPullResul
 
   const resource = input.entityKind === "customers" ? "customers" : "charges";
   const url = `https://api.stripe.com/v1/${resource}?limit=${limit}`;
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${key}` } });
+  const res = await safeFetch(url, { headers: { Authorization: `Bearer ${key}` } });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`Stripe API ${res.status}: ${body.slice(0, 300)}`);
@@ -353,7 +353,7 @@ async function pullGoogleSheets(input: ConnectorPullInput): Promise<ConnectorPul
   const gid = gidMatch ? gidMatch[1] : "0";
   const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
 
-  const res = await fetch(csvUrl, { redirect: "follow" });
+  const res = await safeFetch(csvUrl);
   if (!res.ok) {
     throw new Error(`Не вдалось завантажити Google Sheet (${res.status}). Перевірте, що доступ "будь-хто з посиланням".`);
   }
@@ -371,7 +371,7 @@ async function pullRest(input: ConnectorPullInput): Promise<ConnectorPullResult>
   const headers: Record<string, string> = { Accept: "application/json" };
   if (input.credentials) headers.Authorization = input.credentials;
 
-  const res = await fetch(url, { headers });
+  const res = await safeFetch(url, { headers });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`REST ${res.status}: ${body.slice(0, 300)}`);
