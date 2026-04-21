@@ -8,6 +8,7 @@ import {
   Cpu,
   CreditCard,
   Gauge,
+  HeartPulse,
   IdCard,
   Layers,
   LayoutDashboard,
