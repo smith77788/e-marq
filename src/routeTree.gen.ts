@@ -19,6 +19,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
+import { Route as HandbookDntradeWebhookRouteImport } from './routes/handbook.dntrade-webhook'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -176,6 +177,11 @@ const HooksIngestRoute = HooksIngestRouteImport.update({
   id: '/hooks/ingest',
   path: '/hooks/ingest',
   getParentRoute: () => rootRouteImport,
+} as any)
+const HandbookDntradeWebhookRoute = HandbookDntradeWebhookRouteImport.update({
+  id: '/dntrade-webhook',
+  path: '/dntrade-webhook',
+  getParentRoute: () => HandbookRoute,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
@@ -775,7 +781,7 @@ const AuthenticatedAdminTenantsTenantIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
-  '/handbook': typeof HandbookRoute
+  '/handbook': typeof HandbookRouteWithChildren
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -784,6 +790,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
@@ -894,7 +901,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
-  '/handbook': typeof HandbookRoute
+  '/handbook': typeof HandbookRouteWithChildren
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -903,6 +910,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
@@ -1015,7 +1023,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/agents': typeof AgentsRoute
-  '/handbook': typeof HandbookRoute
+  '/handbook': typeof HandbookRouteWithChildren
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -1024,6 +1032,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/_authenticated/admin/commands': typeof AuthenticatedAdminCommandsRoute
@@ -1145,6 +1154,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/profile'
+    | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
     | '/s/$slug'
     | '/admin/commands'
@@ -1264,6 +1274,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/profile'
+    | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
     | '/s/$slug'
     | '/admin/commands'
@@ -1384,6 +1395,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
     | '/_authenticated/profile'
+    | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
     | '/s/$slug'
     | '/_authenticated/admin/commands'
@@ -1496,7 +1508,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AgentsRoute: typeof AgentsRoute
-  HandbookRoute: typeof HandbookRoute
+  HandbookRoute: typeof HandbookRouteWithChildren
   HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
@@ -1669,6 +1681,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/hooks/ingest'
       preLoaderRoute: typeof HooksIngestRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/handbook/dntrade-webhook': {
+      id: '/handbook/dntrade-webhook'
+      path: '/dntrade-webhook'
+      fullPath: '/handbook/dntrade-webhook'
+      preLoaderRoute: typeof HandbookDntradeWebhookRouteImport
+      parentRoute: typeof HandbookRoute
     }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
@@ -2489,6 +2508,18 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface HandbookRouteChildren {
+  HandbookDntradeWebhookRoute: typeof HandbookDntradeWebhookRoute
+}
+
+const HandbookRouteChildren: HandbookRouteChildren = {
+  HandbookDntradeWebhookRoute: HandbookDntradeWebhookRoute,
+}
+
+const HandbookRouteWithChildren = HandbookRoute._addFileChildren(
+  HandbookRouteChildren,
+)
+
 interface SSlugRouteChildren {
   SSlugOrdersOrderIdRoute: typeof SSlugOrdersOrderIdRoute
 }
@@ -2503,7 +2534,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AgentsRoute: AgentsRoute,
-  HandbookRoute: HandbookRoute,
+  HandbookRoute: HandbookRouteWithChildren,
   HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
