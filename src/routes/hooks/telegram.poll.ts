@@ -461,7 +461,7 @@ export const Route = createFileRoute("/hooks/telegram/poll")({
               "X-Connection-Api-Key": tgKey,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ offset, timeout, allowed_updates: ["message"] }),
+            body: JSON.stringify({ offset, timeout, allowed_updates: ["message", "callback_query"] }),
           });
           if (!res.ok) {
             const errText = await res.text().catch(() => "");
