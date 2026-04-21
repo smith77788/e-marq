@@ -91,7 +91,6 @@ function evaluateHealth(integ: IntegRow): HealthResult {
   };
 }
 
-/** Перевірити, чи вже є свіжа алерт-нотифікація. */
 async function hasRecentAlert(
   tenantId: string,
   kind: string,
@@ -106,6 +105,27 @@ async function hasRecentAlert(
     .limit(1);
   return (data?.length ?? 0) > 0;
 }
+
+// Типи для нових таблиць/функцій ще не у згенерованому Database type — тимчасово
+// працюємо через any-проксі, не втрачаючи рантайм-безпеки.
+const sb = supabaseAdmin as unknown as {
+  from: (t: string) => {
+    insert: (row: Record<string, unknown>) => Promise<{ error: unknown }>;
+    select: (cols: string) => {
+      eq: (c: string, v: unknown) => {
+        eq: (c: string, v: unknown) => {
+          gte: (c: string, v: unknown) => {
+            limit: (n: number) => Promise<{ data: unknown[] | null; error: unknown }>;
+          };
+        };
+      };
+    };
+  };
+  rpc: (
+    name: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: unknown }>;
+};
 
 export const Route = createFileRoute(
   "/hooks/integrations/dntrade-health-cron",
@@ -137,15 +157,15 @@ export const Route = createFileRoute(
         for (const integ of (integrations ?? []) as IntegRow[]) {
           const h = evaluateHealth(integ);
 
-          // 1. Snapshot у health_log.
-          await supabaseAdmin.from("dntrade_health_log").insert({
+          // 1. Snapshot у health_log (нова таблиця, поки не у Database types).
+          await sb.from("dntrade_health_log").insert({
             tenant_id: integ.tenant_id,
             integration_id: integ.id,
             status: h.status,
             http_status: h.http_status,
             ready: h.ready,
-            blockers: h.blockers as never,
-            warnings: h.warnings as never,
+            blockers: h.blockers,
+            warnings: h.warnings,
             last_sync_status: h.last_sync_status,
             last_sync_age_seconds: h.last_sync_age_seconds,
           });
@@ -171,12 +191,11 @@ export const Route = createFileRoute(
 
           // 3a. Тривалий unhealthy.
           if (h.status === "unhealthy" || h.status === "missing") {
-            const { data: streakRows } = await supabaseAdmin.rpc(
+            const { data: streakData } = await sb.rpc(
               "dntrade_unhealthy_streak_minutes",
               { _tenant_id: integ.tenant_id },
             );
-            const streak =
-              typeof streakRows === "number" ? streakRows : Number(streakRows ?? 0);
+            const streak = Number(streakData ?? 0);
             if (streak >= ALERT_UNHEALTHY_MIN) {
               const recent = await hasRecentAlert(
                 integ.tenant_id,
@@ -204,14 +223,14 @@ export const Route = createFileRoute(
 
           // 3b. Повторювані partial-синки.
           if (!alerted) {
-            const { data: partialRows } = await supabaseAdmin.rpc(
+            const { data: partialData } = await sb.rpc(
               "dntrade_partial_count_recent",
-              { _tenant_id: integ.tenant_id, _hours: ALERT_PARTIAL_WINDOW_HOURS },
+              {
+                _tenant_id: integ.tenant_id,
+                _hours: ALERT_PARTIAL_WINDOW_HOURS,
+              },
             );
-            const partialCount =
-              typeof partialRows === "number"
-                ? partialRows
-                : Number(partialRows ?? 0);
+            const partialCount = Number(partialData ?? 0);
             if (partialCount >= ALERT_PARTIAL_THRESHOLD) {
               const recent = await hasRecentAlert(
                 integ.tenant_id,
