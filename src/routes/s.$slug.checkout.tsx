@@ -336,6 +336,27 @@ function CheckoutPage() {
                   disabled={submitting}
                 />
               </div>
+              <div className="space-y-1">
+                <Label htmlFor="co-phone">Телефон</Label>
+                <Input
+                  id="co-phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+380 ..."
+                  disabled={submitting}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Shipping — Nova Poshta */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Доставка · Нова Пошта</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ShippingSelector value={shipping} onChange={setShipping} disabled={submitting} />
             </CardContent>
           </Card>
 
