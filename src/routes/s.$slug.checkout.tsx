@@ -76,6 +76,8 @@ function CheckoutPage() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [shipping, setShipping] = useState<NPSelection | null>(null);
   const [method, setMethod] = useState<"manual" | "stripe_card">(defaultMethod);
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState<DiscountResult | null>(null);
