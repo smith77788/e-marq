@@ -60,11 +60,14 @@ export const Route = createFileRoute("/_authenticated/brand/integrations")({
 
 function IntegrationsHubPage() {
   const { current, currentTenantId, loading } = useTenantContext();
+  const qc = useQueryClient();
   const [active, setActive] = useState<IntegrationDef | null>(null);
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<IntegrationCategory | "all">("all");
+  const [syncTarget, setSyncTarget] = useState<IntegrationDef | null>(null);
+  const [syncEntity, setSyncEntity] = useState<"products" | "customers" | "orders">("products");
+  const [syncing, setSyncing] = useState<string | null>(null);
 
-  // Підключені інтеграції бренду — щоб показати «✓ Підключено» на картках.
   const { data: connected } = useQuery({
     queryKey: ["tenant-integrations", currentTenantId],
     enabled: !!currentTenantId,
@@ -78,7 +81,6 @@ function IntegrationsHubPage() {
     },
   });
 
-  // Останні імпорти — журнал унизу.
   const { data: jobs } = useQuery({
     queryKey: ["import-jobs", currentTenantId],
     enabled: !!currentTenantId,
@@ -98,6 +100,35 @@ function IntegrationsHubPage() {
     () => new Set((connected ?? []).filter((c) => c.is_active).map((c) => c.provider)),
     [connected],
   );
+
+  async function runSync(provider: string, entity: "products" | "customers" | "orders") {
+    if (!currentTenantId) return;
+    setSyncing(provider);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) throw new Error("Сесія не знайдена");
+      const res = await fetch(`/api/integrations/sync/${provider}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ entityKind: entity, tenantId: currentTenantId }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Помилка синку");
+      toast.success(`Синхронізовано: ${json.imported} рядків`, {
+        description: json.failed > 0 ? `Помилок: ${json.failed}` : undefined,
+      });
+      qc.invalidateQueries({ queryKey: ["import-jobs", currentTenantId] });
+      qc.invalidateQueries({ queryKey: ["tenant-integrations", currentTenantId] });
+    } catch (e) {
+      toast.error("Не вдалось синхронізувати", {
+        description: e instanceof Error ? e.message : String(e),
+      });
+    } finally {
+      setSyncing(null);
+      setSyncTarget(null);
+    }
+  }
 
   const filtered = useMemo(() => {
     return INTEGRATIONS.filter((i) => {
