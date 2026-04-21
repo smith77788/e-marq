@@ -218,16 +218,16 @@ function CheckoutPage() {
     setRedeemApplied(null);
     setRedeemPoints("");
   }
+
+  // Auto-redirect to home if cart is empty (e.g., after submission or direct link)
+  useEffect(() => {
+    if (cart.cartLines.length === 0) {
       const t = setTimeout(() => {
         navigate({ to: "/s/$slug", params: { slug } });
       }, 100);
       return () => clearTimeout(t);
     }
   }, [cart.cartLines.length, navigate, slug]);
-
-  const subtotalCents = cart.totalCents;
-  const discountCents = discount && discount.valid ? discount.discount_cents : 0;
-  const finalTotalCents = Math.max(0, subtotalCents - discountCents);
 
   async function applyPromo() {
     const code = promoCode.trim();
