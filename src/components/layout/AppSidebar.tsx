@@ -8,6 +8,7 @@ import {
   Cpu,
   CreditCard,
   Gauge,
+  IdCard,
   Layers,
   LayoutDashboard,
   Lightbulb,
@@ -74,6 +75,13 @@ const OWNER_NAV: { labelKey: TKey; items: NavItem[] }[] = [
 ];
 
 const ADMIN_NAV: { labelKey: TKey; items: NavItem[] }[] = [
+  {
+    labelKey: "sb.brandLabel",
+    items: [
+      { labelKey: "sb.billing", to: "/brand/billing", icon: CreditCard },
+      { labelKey: "sb.profile" as TKey, to: "/profile", icon: IdCard, exact: true },
+    ],
+  },
   {
     labelKey: "sb.system",
     items: [

@@ -31,6 +31,7 @@ const dict = {
     "sb.settings": "Параметри",
     "sb.billing": "Тариф і баланс",
     "sb.planBilling": "Тариф і рахунок",
+    "sb.profile": "Мій профіль",
 
     // Sidebar — super-admin
     "sb.system": "Система",
@@ -532,6 +533,7 @@ const dict = {
     "sb.settings": "Settings",
     "sb.billing": "Plan & balance",
     "sb.planBilling": "Plan & billing",
+    "sb.profile": "My profile",
     "sb.system": "System",
     "sb.missionControl": "Mission Control",
     "sb.crossTenant": "Cross-tenant overview",
