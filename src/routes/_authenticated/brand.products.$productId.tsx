@@ -199,7 +199,12 @@ function ProductDetailEditor() {
             variant="ghost"
             size="sm"
             className="mb-2 -ml-2 h-7 text-xs text-muted-foreground"
-            onClick={() => navigate({ to: "/brand/products" })}
+            onClick={() =>
+              navigate({
+                to: "/brand/products",
+                search: { tenant: product.tenant_id },
+              })
+            }
           >
             <ArrowLeft className="mr-1 h-3 w-3" />
             До товарів
