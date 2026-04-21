@@ -475,7 +475,7 @@ function CheckoutPage() {
                 size="lg"
                 onClick={placeOrder}
                 disabled={
-                  submitting || !email.trim() || noMethods || method === "stripe_card"
+                  submitting || !email.trim() || !shipping || noMethods || method === "stripe_card"
                 }
               >
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
