@@ -43,19 +43,35 @@ async function aiReply(opts: {
   history: { direction: string; body: string }[];
   catalogue: ProductLite[];
   lastBought: string | null;
+  lastInbound: string;
 }): Promise<string | null> {
   const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) return null;
+
+  // Heuristic language detection from the latest customer message:
+  // default = Ukrainian; switch only when text is clearly English or Russian.
+  const lastLower = (opts.lastInbound || "").toLowerCase();
+  const hasCyrillic = /[\u0400-\u04ff]/.test(lastLower);
+  const hasUkrainianMarkers = /[іїєґ]/.test(lastLower);
+  const hasRussianOnlyMarkers = /[ыёэъ]/.test(lastLower);
+  const looksEnglish = !hasCyrillic && /[a-z]/.test(lastLower);
+  const lang =
+    looksEnglish ? "English"
+    : hasRussianOnlyMarkers && !hasUkrainianMarkers ? "Russian"
+    : "Ukrainian";
+
   const sys = [
-    `You are the autonomous sales assistant for D2C brand "${opts.brandName}".`,
-    `Goal: be warm, concise, close the sale. Reply in 1-3 short sentences max. Use customer's first name if known.`,
-    `If they ask "how much" / "price" / "available" / "what do you have" — name the product and price clearly from the catalogue.`,
+    `You are the autonomous sales assistant for the Ukrainian D2C brand "${opts.brandName}".`,
+    `Default language is Ukrainian. The customer's most recent message looks ${lang}, so reply in ${lang}. If unsure — use Ukrainian.`,
+    `Goal: be warm, concise, close the sale. Reply in 1–3 short sentences max. Use the customer's first name if known.`,
+    `Prices are in Ukrainian hryvnia (₴). Always show the price as "1 234 ₴" — never use "$" or USD.`,
+    `If they ask "скільки коштує" / "ціна" / "є в наявності" / "що у вас є" — name the product and price clearly from the catalogue.`,
     `If they pick a specific product, confirm it and tell them you'll send a checkout link.`,
     `If unsure what they want, ask one focused clarifying question.`,
     `Never say you are an AI. Never make up products or prices. Never invent links.`,
     opts.lastBought ? `Customer's last purchase: ${opts.lastBought}.` : "",
     `Catalogue (max 8 shown):`,
-    ...opts.catalogue.slice(0, 8).map((p) => `- ${p.name} — ${(p.price_cents / 100).toFixed(0)} ${p.currency}${p.stock > 0 ? "" : " (out of stock)"}`),
+    ...opts.catalogue.slice(0, 8).map((p) => `- ${p.name} — ${(p.price_cents / 100).toFixed(0)} ₴${p.stock > 0 ? "" : " (немає в наявності)"}`),
   ].filter(Boolean).join("\n");
 
   const messages: { role: string; content: string }[] = [
@@ -176,6 +192,7 @@ export async function runSalesBotForTenant(tenantId: string, limit = 20): Promis
       history: (history ?? []) as { direction: string; body: string }[],
       catalogue,
       lastBought: lastItem?.[0]?.product_name ?? null,
+      lastInbound: r.body,
     });
     if (!reply) { skipped++; continue; }
 
