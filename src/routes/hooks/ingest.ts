@@ -262,7 +262,7 @@ export const Route = createFileRoute("/hooks/ingest")({
             orderId = existing?.id ?? null;
           }
           if (!orderId) {
-            const { data: ord } = await supabaseAdmin
+            const { data: ord, error: ordErr } = await supabaseAdmin
               .from("orders")
               .insert({
                 tenant_id: tenantId,
@@ -279,6 +279,9 @@ export const Route = createFileRoute("/hooks/ingest")({
               })
               .select("id")
               .single();
+            if (ordErr) {
+              console.error("[ingest] order insert failed", ordErr);
+            }
             orderId = ord?.id ?? null;
 
             // Insert items if provided.
@@ -294,7 +297,8 @@ export const Route = createFileRoute("/hooks/ingest")({
                   unit_price_cents: it.unit_price_cents ?? 0,
                 }));
               if (itemsRows.length) {
-                await supabaseAdmin.from("order_items").insert(itemsRows);
+                const { error: itErr } = await supabaseAdmin.from("order_items").insert(itemsRows);
+                if (itErr) console.error("[ingest] order_items insert failed", itErr);
               }
             }
           }
