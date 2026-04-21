@@ -1,6 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   Activity,
+  BookOpen,
   Bot,
   Building2,
   Cpu,
