@@ -49,7 +49,7 @@ async function tgAnswerCallback(callbackId: string, text?: string): Promise<void
       "X-Connection-Api-Key": tgKey,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ callback_query_id: callbackId, text: text ?? "Done", show_alert: false }),
+    body: JSON.stringify({ callback_query_id: callbackId, text: text ?? "Готово", show_alert: false }),
   }).catch(() => undefined);
 }
 
