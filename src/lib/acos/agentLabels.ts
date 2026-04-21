@@ -105,7 +105,10 @@ export const AGENT_HUMAN_LABELS: Record<string, string> = {
   // Інше
   orchestrator: "Диригент агентів",
   telegram_reorder_bot: "Бот повторних замовлень",
+  "sales-bot": "Бот продажів",
   sales_bot: "Бот продажів",
+  "feedback-loop": "Навчання на досвіді",
+  abandoned_cart: "Повернення кинутих кошиків",
   reorder_engine: "Двигун повторних замовлень",
   winback_engine: "Двигун повернення клієнтів",
 };
