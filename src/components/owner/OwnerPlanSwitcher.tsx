@@ -58,7 +58,7 @@ export function OwnerPlanSwitcher({
       const { error } = await supabase.rpc("owner_change_plan", {
         _tenant_id: tenantId,
         _plan_key: planKey,
-        _reason: reason || null,
+        _reason: reason || undefined,
       });
       if (error) throw error;
     },

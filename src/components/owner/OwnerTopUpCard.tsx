@@ -27,7 +27,7 @@ export function OwnerTopUpCard({ tenantId }: { tenantId: string }) {
       const { error } = await supabase.rpc("owner_topup_ai_credits", {
         _tenant_id: tenantId,
         _amount: num,
-        _reason: reason || null,
+        _reason: reason || undefined,
       });
       if (error) throw error;
     },
