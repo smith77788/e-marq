@@ -1530,6 +1530,56 @@ export type Database = {
           },
         ]
       }
+      owner_telegram_outbox: {
+        Row: {
+          chat_id: string | null
+          created_at: string
+          error: string | null
+          id: string
+          payload: Json
+          sent_at: string | null
+          source_id: string
+          source_kind: string
+          status: string
+          tenant_id: string
+          tg_message_id: number | null
+        }
+        Insert: {
+          chat_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json
+          sent_at?: string | null
+          source_id: string
+          source_kind: string
+          status?: string
+          tenant_id: string
+          tg_message_id?: number | null
+        }
+        Update: {
+          chat_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json
+          sent_at?: string | null
+          source_id?: string
+          source_kind?: string
+          status?: string
+          tenant_id?: string
+          tg_message_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_telegram_outbox_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plan_change_log: {
         Row: {
           actor_user_id: string | null
@@ -2280,6 +2330,7 @@ export type Database = {
           brand_name: string
           created_at: string
           features: Json
+          owner_telegram_chat_id: string | null
           seo: Json
           tenant_id: string
           ui: Json
@@ -2290,6 +2341,7 @@ export type Database = {
           brand_name: string
           created_at?: string
           features?: Json
+          owner_telegram_chat_id?: string | null
           seo?: Json
           tenant_id: string
           ui?: Json
@@ -2300,6 +2352,7 @@ export type Database = {
           brand_name?: string
           created_at?: string
           features?: Json
+          owner_telegram_chat_id?: string | null
           seo?: Json
           tenant_id?: string
           ui?: Json
@@ -2772,6 +2825,14 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      notify_owner_telegram: {
+        Args: { _kind: string; _source_id: string; _tenant_id: string }
+        Returns: undefined
+      }
+      set_owner_telegram_chat: {
+        Args: { _chat_id: string; _tenant_id: string }
+        Returns: undefined
       }
     }
     Enums: {

@@ -30,7 +30,149 @@ type TgUpdate = {
     chat?: { id: number; first_name?: string; username?: string };
     date?: number;
   };
+  callback_query?: {
+    id: string;
+    from: { id: number; first_name?: string; username?: string };
+    message?: { message_id: number; chat: { id: number } };
+    data?: string;
+  };
 };
+
+async function tgAnswerCallback(callbackId: string, text?: string): Promise<void> {
+  const lovableKey = process.env.LOVABLE_API_KEY;
+  const tgKey = process.env.TELEGRAM_API_KEY;
+  if (!lovableKey || !tgKey) return;
+  await fetch(`${TG_GATEWAY}/answerCallbackQuery`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${lovableKey}`,
+      "X-Connection-Api-Key": tgKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ callback_query_id: callbackId, text: text ?? "Done", show_alert: false }),
+  }).catch(() => undefined);
+}
+
+async function tgEditMessage(chatId: string | number, messageId: number, html: string): Promise<void> {
+  const lovableKey = process.env.LOVABLE_API_KEY;
+  const tgKey = process.env.TELEGRAM_API_KEY;
+  if (!lovableKey || !tgKey) return;
+  await fetch(`${TG_GATEWAY}/editMessageText`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${lovableKey}`,
+      "X-Connection-Api-Key": tgKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      chat_id: chatId,
+      message_id: messageId,
+      text: html,
+      parse_mode: "HTML",
+      disable_web_page_preview: true,
+    }),
+  }).catch(() => undefined);
+}
+
+async function processCallback(cb: NonNullable<TgUpdate["callback_query"]>, appOrigin: string): Promise<void> {
+  const data = cb.data ?? "";
+  const chatId = cb.message?.chat.id ?? cb.from.id;
+  const msgId = cb.message?.message_id;
+  const parts = data.split(":");
+  if (parts.length !== 3) {
+    await tgAnswerCallback(cb.id, "Bad payload");
+    return;
+  }
+  const [scope, op, id] = parts as [string, string, string];
+
+  // Authorization: callback must come from a chat that is bound as owner of a tenant.
+  const { data: cfgRow } = await supabaseAdmin
+    .from("tenant_configs")
+    .select("tenant_id")
+    .eq("owner_telegram_chat_id", String(chatId))
+    .maybeSingle();
+  if (!cfgRow) {
+    await tgAnswerCallback(cb.id, "Not authorized");
+    return;
+  }
+  const tenantId = cfgRow.tenant_id;
+
+  if (scope === "i") {
+    const { data: ins } = await supabaseAdmin
+      .from("ai_insights")
+      .select("id, tenant_id, title, status")
+      .eq("id", id)
+      .maybeSingle();
+    if (!ins || ins.tenant_id !== tenantId) {
+      await tgAnswerCallback(cb.id, "Not found");
+      return;
+    }
+    if (op === "apply") {
+      const res = await fetch(`${appOrigin}/hooks/actions/apply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ insight_id: id }),
+      });
+      await tgAnswerCallback(cb.id, res.ok ? "✅ Applied" : "Failed to apply");
+      if (msgId && res.ok) await tgEditMessage(chatId, msgId, `✅ <b>Applied:</b> ${ins.title}`);
+    } else if (op === "dismiss") {
+      await supabaseAdmin.from("ai_insights").update({ status: "dismissed" }).eq("id", id);
+      await tgAnswerCallback(cb.id, "Dismissed");
+      if (msgId) await tgEditMessage(chatId, msgId, `❌ <b>Dismissed:</b> ${ins.title}`);
+    } else if (op === "view") {
+      const url = `${appOrigin}/brand?tenant=${tenantId}#insight-${id}`;
+      await tgAnswerCallback(cb.id, "Opening…");
+      await sendTelegramText(String(chatId), `🔗 ${ins.title}\n${url}`);
+    }
+  } else if (scope === "a") {
+    const { data: act } = await supabaseAdmin
+      .from("ai_actions")
+      .select("id, tenant_id, action_type, status")
+      .eq("id", id)
+      .maybeSingle();
+    if (!act || act.tenant_id !== tenantId) {
+      await tgAnswerCallback(cb.id, "Not found");
+      return;
+    }
+    if (op === "apply") {
+      await supabaseAdmin
+        .from("ai_actions")
+        .update({ status: "applied", applied_at: new Date().toISOString() })
+        .eq("id", id);
+      await tgAnswerCallback(cb.id, "✅ Applied");
+      if (msgId) await tgEditMessage(chatId, msgId, `✅ <b>Applied action:</b> ${act.action_type}`);
+    } else if (op === "dismiss") {
+      await supabaseAdmin.from("ai_actions").update({ status: "dismissed" }).eq("id", id);
+      await tgAnswerCallback(cb.id, "Dismissed");
+      if (msgId) await tgEditMessage(chatId, msgId, `❌ <b>Dismissed:</b> ${act.action_type}`);
+    } else if (op === "view") {
+      const url = `${appOrigin}/brand?tenant=${tenantId}#action-${id}`;
+      await tgAnswerCallback(cb.id, "Opening…");
+      await sendTelegramText(String(chatId), `🔗 ${act.action_type}\n${url}`);
+    }
+  } else if (scope === "n") {
+    const { data: n } = await supabaseAdmin
+      .from("owner_notifications")
+      .select("id, tenant_id, title, link")
+      .eq("id", id)
+      .maybeSingle();
+    if (!n || n.tenant_id !== tenantId) {
+      await tgAnswerCallback(cb.id, "Not found");
+      return;
+    }
+    if (op === "read") {
+      await supabaseAdmin.from("owner_notifications").update({ is_read: true }).eq("id", id);
+      await tgAnswerCallback(cb.id, "Marked as read");
+      if (msgId) await tgEditMessage(chatId, msgId, `✓ ${n.title}`);
+    } else if (op === "view") {
+      const url = n.link ?? `${appOrigin}/brand?tenant=${tenantId}`;
+      await tgAnswerCallback(cb.id, "Opening…");
+      await sendTelegramText(String(chatId), `🔗 ${n.title}\n${url}`);
+    }
+  } else {
+    await tgAnswerCallback(cb.id, "Unknown action");
+  }
+}
 
 async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
   const msg = u.message;
@@ -42,9 +184,37 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
   const username = msg.from?.username ?? msg.chat?.username ?? null;
   const firstName = msg.from?.first_name ?? msg.chat?.first_name ?? null;
 
-  // ---- /start <slug> binds chat → tenant ----
+  // ---- /start owner <slug> binds owner-chat to receive insights w/ buttons ----
+  const ownerStart = text.match(/^\/start\s+owner\s+([a-z0-9_-]+)/i);
+  if (ownerStart) {
+    const slug = ownerStart[1].toLowerCase();
+    const { data: tenant } = await supabaseAdmin
+      .from("tenants")
+      .select("id, name")
+      .eq("slug", slug)
+      .maybeSingle();
+    if (!tenant) {
+      await sendTelegramText(chatId, `Brand "${slug}" not found.`);
+      return;
+    }
+    const { error: rpcErr } = await supabaseAdmin
+      .from("tenant_configs")
+      .update({ owner_telegram_chat_id: chatId })
+      .eq("tenant_id", tenant.id);
+    if (rpcErr) {
+      await sendTelegramText(chatId, `Could not bind: ${rpcErr.message}`);
+      return;
+    }
+    await sendTelegramText(
+      chatId,
+      `🔔 You're now receiving owner notifications for <b>${tenant.name}</b>. Insights and pending agent actions will arrive here with Apply/Dismiss buttons.`,
+    );
+    return;
+  }
+
+  // ---- /start <slug> binds chat → tenant (customer flow) ----
   const startMatch = text.match(/^\/start\s+([a-z0-9_-]+)/i);
-  if (startMatch) {
+  if (startMatch && !ownerStart) {
     const slug = startMatch[1].toLowerCase();
     const { data: tenant } = await supabaseAdmin
       .from("tenants")
@@ -61,7 +231,6 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
         { chat_id: chatId, tenant_id: tenant.id, updated_at: new Date().toISOString() },
         { onConflict: "chat_id" },
       );
-    // Get brand name for greeting
     const { data: cfg } = await supabaseAdmin
       .from("tenant_configs")
       .select("brand_name")
@@ -72,14 +241,13 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
       chatId,
       `👋 Welcome to <b>${brand}</b>! Ask me anything — I can show products, help you order, or notify you about new arrivals.`,
     );
-    // Continue to upsert customer below
   }
 
   // ---- Plain /start (no slug) ----
   if (text === "/start") {
     await sendTelegramText(
       chatId,
-      `Hi! To connect to a brand, send <code>/start &lt;brand-slug&gt;</code> (the brand will give you the link).`,
+      `Hi! Customers: <code>/start &lt;brand-slug&gt;</code>. Owners: <code>/start owner &lt;brand-slug&gt;</code>.`,
     );
     return;
   }
@@ -293,7 +461,7 @@ export const Route = createFileRoute("/hooks/telegram/poll")({
               "X-Connection-Api-Key": tgKey,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ offset, timeout, allowed_updates: ["message"] }),
+            body: JSON.stringify({ offset, timeout, allowed_updates: ["message", "callback_query"] }),
           });
           if (!res.ok) {
             const errText = await res.text().catch(() => "");
@@ -308,9 +476,13 @@ export const Route = createFileRoute("/hooks/telegram/poll")({
 
           for (const u of updates) {
             try {
-              await processMessage(u, appOrigin);
+              if (u.callback_query) {
+                await processCallback(u.callback_query, appOrigin);
+              } else if (u.message) {
+                await processMessage(u, appOrigin);
+              }
             } catch (err) {
-              console.error("[telegram.poll] processMessage error", err);
+              console.error("[telegram.poll] update error", err);
             }
             processed++;
           }
