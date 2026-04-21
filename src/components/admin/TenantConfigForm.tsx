@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { MSG } from "@/lib/glossary";
 
 export type TenantConfigValues = {
   brand_name: string;
@@ -47,6 +48,9 @@ const bool = (v: unknown, fallback = false): boolean =>
 const obj = (v: unknown): AnyRecord =>
   v && typeof v === "object" && !Array.isArray(v) ? (v as AnyRecord) : {};
 
+const DEFAULT_MANUAL_INSTRUCTIONS =
+  "Оплата на картку: 0000 0000 0000 0000 (отримувач: ваш бренд). У призначенні платежу вкажіть номер замовлення.";
+
 export function normalizeConfig(input: {
   brand_name?: string | null;
   ui?: unknown;
@@ -86,10 +90,7 @@ export function normalizeConfig(input: {
     payments: {
       manual_enabled: bool(payments.manual_enabled, true),
       stripe_enabled: bool(payments.stripe_enabled, false),
-      manual_instructions: str(
-        payments.manual_instructions,
-        "Bank transfer: IBAN UA00 0000 0000 0000 0000 0000 000\nReference your order ID in the payment description.",
-      ),
+      manual_instructions: str(payments.manual_instructions, DEFAULT_MANUAL_INSTRUCTIONS),
       manual_contact: str(payments.manual_contact, ""),
       currency: str(payments.currency, "UAH"),
     },
@@ -102,11 +103,16 @@ type Props = {
   isPending?: boolean;
 };
 
+const MAX_WELCOME = 200;
+const MAX_PROMPT = 2000;
+
 export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) {
   const [values, setValues] = useState<TenantConfigValues>(initialValues);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setValues(initialValues);
+    setErrors({});
   }, [initialValues]);
 
   const update = <K extends keyof TenantConfigValues>(
@@ -122,64 +128,98 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
     });
   };
 
+  const validate = (v: TenantConfigValues): Record<string, string> => {
+    const errs: Record<string, string> = {};
+    if (!v.brand_name.trim()) errs.brand_name = "Вкажіть назву бренду";
+    if (v.payments.manual_enabled && !v.payments.manual_instructions.trim()) {
+      errs.manual_instructions =
+        "Опишіть, як саме клієнт має оплатити (картка, IBAN, телефон тощо)";
+    }
+    if (v.payments.currency.length !== 3) {
+      errs.currency = "Код валюти має бути з 3 літер (наприклад UAH)";
+    }
+    return errs;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!values.brand_name.trim()) return;
+    const errs = validate(values);
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
     onSubmit(values);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Brand */}
+      {/* Бренд */}
       <section className="space-y-3">
-        <SectionHeader title="Brand" description="Public name displayed across the storefront." />
+        <SectionHeader
+          title="Бренд"
+          description="Публічна назва, яку бачать ваші клієнти на вітрині магазину."
+        />
         <div className="grid gap-2">
-          <Label htmlFor="brand_name">Brand name *</Label>
+          <Label htmlFor="brand_name">Назва бренду *</Label>
           <Input
             id="brand_name"
             value={values.brand_name}
             onChange={(e) => setValues((p) => ({ ...p, brand_name: e.target.value }))}
+            placeholder="Наприклад: Сонячна Пекарня"
             required
           />
+          {errors.brand_name && (
+            <p className="text-xs text-destructive">{errors.brand_name}</p>
+          )}
         </div>
       </section>
 
       <Separator />
 
-      {/* UI */}
+      {/* Зовнішній вигляд */}
       <section className="space-y-3">
-        <SectionHeader title="UI" description="Visual theming for the storefront." />
+        <SectionHeader
+          title="Зовнішній вигляд"
+          description="Кольори і логотип, які побачить клієнт у вашому магазині."
+        />
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="grid gap-2">
-            <Label htmlFor="primary_color">Primary color</Label>
+            <Label htmlFor="primary_color">Основний колір</Label>
             <Input
               id="primary_color"
               value={values.ui.primary_color}
               onChange={(e) => update("ui", { primary_color: e.target.value })}
               placeholder="#6366f1"
             />
+            <p className="text-[11px] text-muted-foreground">
+              Колір кнопок та активних елементів. Скопіюйте з вашого фірмового стилю.
+            </p>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="accent_color">Accent color</Label>
+            <Label htmlFor="accent_color">Додатковий колір</Label>
             <Input
               id="accent_color"
               value={values.ui.accent_color}
               onChange={(e) => update("ui", { accent_color: e.target.value })}
               placeholder="#22d3ee"
             />
+            <p className="text-[11px] text-muted-foreground">
+              Використовується для виділень і підказок.
+            </p>
           </div>
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="logo_url">Logo URL</Label>
+          <Label htmlFor="logo_url">Посилання на логотип</Label>
           <Input
             id="logo_url"
             value={values.ui.logo_url}
             onChange={(e) => update("ui", { logo_url: e.target.value })}
-            placeholder="https://…"
+            placeholder="https://приклад.ua/logo.png"
           />
+          <p className="text-[11px] text-muted-foreground">
+            Завантажте логотип будь-куди в інтернеті і вставте посилання сюди.
+          </p>
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="theme">Theme</Label>
+          <Label htmlFor="theme">Оформлення</Label>
           <select
             id="theme"
             className="h-9 rounded-md border border-input bg-background px-3 text-sm"
@@ -188,33 +228,36 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
               update("ui", { theme: e.target.value as TenantConfigValues["ui"]["theme"] })
             }
           >
-            <option value="system">System</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
+            <option value="system">Як у пристрої клієнта</option>
+            <option value="light">Світле</option>
+            <option value="dark">Темне</option>
           </select>
         </div>
       </section>
 
       <Separator />
 
-      {/* Features */}
+      {/* Можливості */}
       <section className="space-y-3">
-        <SectionHeader title="Features" description="Enable or disable storefront capabilities." />
+        <SectionHeader
+          title="Можливості"
+          description="Увімкніть або вимкніть функції магазину."
+        />
         <FeatureToggle
-          label="AI bot"
-          description="Show the in-store AI assistant."
+          label="ШІ-помічник у магазині"
+          description="Маленький чат у вітрині, який відповідає клієнтам і радить товари."
           checked={values.features.bot_enabled}
           onChange={(v) => update("features", { bot_enabled: v })}
         />
         <FeatureToggle
-          label="One-click reorder"
-          description="Allow returning customers to reorder past purchases."
+          label="Замовлення в один клік"
+          description="Постійні клієнти зможуть повторити минуле замовлення однією кнопкою."
           checked={values.features.reorder_enabled}
           onChange={(v) => update("features", { reorder_enabled: v })}
         />
         <FeatureToggle
-          label="Analytics"
-          description="Track funnel events for this tenant."
+          label="Збір аналітики"
+          description="Записувати, які сторінки переглядають клієнти, що додають у кошик і купують."
           checked={values.features.analytics_enabled}
           onChange={(v) => update("features", { analytics_enabled: v })}
         />
@@ -222,91 +265,119 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
 
       <Separator />
 
-      {/* Bot */}
+      {/* ШІ-помічник */}
       <section className="space-y-3">
-        <SectionHeader title="Bot" description="Configure the AI assistant behavior." />
+        <SectionHeader
+          title="ШІ-помічник у магазині"
+          description="Налаштуйте, як саме помічник спілкується з клієнтами."
+        />
         <div className="grid gap-2">
-          <Label htmlFor="bot_model">Model</Label>
+          <Label htmlFor="bot_model">Який ШІ-двигун використовувати</Label>
           <select
             id="bot_model"
             className="h-9 rounded-md border border-input bg-background px-3 text-sm"
             value={values.bot.model}
             onChange={(e) => update("bot", { model: e.target.value })}
           >
-            <option value="google/gemini-2.5-flash">Gemini 2.5 Flash (fast, cheap)</option>
-            <option value="google/gemini-2.5-pro">Gemini 2.5 Pro (powerful)</option>
-            <option value="openai/gpt-5-mini">GPT-5 Mini (balanced)</option>
-            <option value="openai/gpt-5">GPT-5 (top reasoning)</option>
+            <option value="google/gemini-2.5-flash">Швидкий і дешевий (Gemini Flash)</option>
+            <option value="google/gemini-2.5-pro">Розумний (Gemini Pro)</option>
+            <option value="openai/gpt-5-mini">Збалансований (GPT-5 Mini)</option>
+            <option value="openai/gpt-5">Найрозумніший (GPT-5)</option>
           </select>
+          <p className="text-[11px] text-muted-foreground">
+            Швидкий — для коротких відповідей. Розумний — коли клієнти ставлять складні питання.
+          </p>
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="welcome_message">Welcome message</Label>
+          <Label htmlFor="welcome_message">Привітання</Label>
           <Input
             id="welcome_message"
             value={values.bot.welcome_message}
-            onChange={(e) => update("bot", { welcome_message: e.target.value })}
-            placeholder="Hi! How can I help?"
+            onChange={(e) =>
+              update("bot", { welcome_message: e.target.value.slice(0, MAX_WELCOME) })
+            }
+            placeholder="Вітаю! Я допоможу обрати товар. Що шукаєте?"
+            maxLength={MAX_WELCOME}
           />
+          <p className="text-[11px] text-muted-foreground">
+            Перше повідомлення, яке побачить клієнт у чаті. {values.bot.welcome_message.length}/{MAX_WELCOME}
+          </p>
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="system_prompt">System prompt</Label>
+          <Label htmlFor="system_prompt">Інструкція для помічника</Label>
           <Textarea
             id="system_prompt"
             value={values.bot.system_prompt}
-            onChange={(e) => update("bot", { system_prompt: e.target.value })}
-            placeholder="You are a helpful assistant for {brand}. Always recommend products from the catalog…"
+            onChange={(e) =>
+              update("bot", { system_prompt: e.target.value.slice(0, MAX_PROMPT) })
+            }
+            placeholder="Ти — приязний консультант магазину {brand}. Завжди радь товари з нашого каталогу. Відповідай українською, коротко і по суті."
             rows={5}
+            maxLength={MAX_PROMPT}
           />
+          <p className="text-[11px] text-muted-foreground">
+            Опишіть характер помічника простими словами: який тон, що пропонувати, чого уникати.
+            {" "}{values.bot.system_prompt.length}/{MAX_PROMPT}
+          </p>
         </div>
       </section>
 
       <Separator />
 
-      {/* SEO */}
+      {/* Як магазин виглядає в Google */}
       <section className="space-y-3">
-        <SectionHeader title="SEO" description="Metadata for search engines and social sharing." />
+        <SectionHeader
+          title="Як магазин виглядає в Google"
+          description="Текст і картинка, які побачать люди в результатах пошуку та коли діляться посиланням."
+        />
         <div className="grid gap-2">
-          <Label htmlFor="seo_title">Title</Label>
+          <Label htmlFor="seo_title">Заголовок у Google</Label>
           <Input
             id="seo_title"
             value={values.seo.title}
             onChange={(e) => update("seo", { title: e.target.value })}
             maxLength={60}
+            placeholder="Сонячна Пекарня — свіжа випічка щодня"
           />
           <p className="text-xs text-muted-foreground">{values.seo.title.length}/60</p>
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="seo_description">Description</Label>
+          <Label htmlFor="seo_description">Опис у Google</Label>
           <Textarea
             id="seo_description"
             value={values.seo.description}
             onChange={(e) => update("seo", { description: e.target.value })}
             maxLength={160}
             rows={3}
+            placeholder="Хліб, круасани і торти з натуральних інгредієнтів. Доставка по Львову за 2 години."
           />
           <p className="text-xs text-muted-foreground">{values.seo.description.length}/160</p>
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="og_image_url">OG image URL</Label>
+          <Label htmlFor="og_image_url">Картинка для соцмереж</Label>
           <Input
             id="og_image_url"
             value={values.seo.og_image_url}
             onChange={(e) => update("seo", { og_image_url: e.target.value })}
-            placeholder="https://…"
+            placeholder="https://приклад.ua/cover.jpg"
           />
+          <p className="text-[11px] text-muted-foreground">
+            Що покаже Facebook чи Telegram, коли хтось поділиться посиланням на ваш магазин.
+            Розмір 1200×630.
+          </p>
         </div>
       </section>
 
       <Separator />
 
-      {/* Payments */}
+      {/* Оплата */}
       <section className="space-y-3">
         <SectionHeader
-          title="Payments"
-          description="Configure how customers pay. Manual = bank transfer confirmed by you. Stripe = automatic card payment (requires API keys)."
+          title="Оплата"
+          description="Як саме клієнт буде платити за замовлення."
         />
         <div className="grid gap-2">
-          <Label htmlFor="payments_currency">Currency (ISO 4217)</Label>
+          <Label htmlFor="payments_currency">Валюта (3 літери)</Label>
           <Input
             id="payments_currency"
             value={values.payments.currency}
@@ -316,23 +387,29 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
             placeholder="UAH"
             maxLength={3}
           />
+          {errors.currency && (
+            <p className="text-xs text-destructive">{errors.currency}</p>
+          )}
+          <p className="text-[11px] text-muted-foreground">
+            UAH — гривня, USD — долар, EUR — євро.
+          </p>
         </div>
         <FeatureToggle
-          label="Manual payment (bank transfer)"
-          description="Customer places order, you confirm payment manually after receiving funds."
+          label="Оплата вручну (переказ на картку)"
+          description="Клієнт оформлює замовлення, переказує гроші, ви підтверджуєте оплату."
           checked={values.payments.manual_enabled}
           onChange={(v) => update("payments", { manual_enabled: v })}
         />
         <FeatureToggle
-          label="Stripe card payment"
-          description="Automatic card processing via Stripe. Requires STRIPE_SECRET_KEY (BYOK)."
+          label="Оплата карткою через Stripe"
+          description="Автоматична оплата картою. Потрібен ключ Stripe — додайте в налаштуваннях інтеграцій."
           checked={values.payments.stripe_enabled}
           onChange={(v) => update("payments", { stripe_enabled: v })}
         />
         {values.payments.manual_enabled && (
           <>
             <div className="grid gap-2">
-              <Label htmlFor="manual_instructions">Manual payment instructions</Label>
+              <Label htmlFor="manual_instructions">Інструкція з оплати *</Label>
               <Textarea
                 id="manual_instructions"
                 value={values.payments.manual_instructions}
@@ -340,20 +417,27 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
                   update("payments", { manual_instructions: e.target.value })
                 }
                 rows={5}
-                placeholder="Bank transfer: IBAN ..."
+                placeholder={DEFAULT_MANUAL_INSTRUCTIONS}
               />
+              {errors.manual_instructions && (
+                <p className="text-xs text-destructive">{errors.manual_instructions}</p>
+              )}
               <p className="text-xs text-muted-foreground">
-                Shown to customer after they place a manual order.
+                Цей текст побачить клієнт після оформлення замовлення. Напишіть номер картки,
+                IBAN або інший спосіб переказу.
               </p>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="manual_contact">Contact for payment questions</Label>
+              <Label htmlFor="manual_contact">Куди писати щодо оплати</Label>
               <Input
                 id="manual_contact"
                 value={values.payments.manual_contact}
                 onChange={(e) => update("payments", { manual_contact: e.target.value })}
-                placeholder="payments@yourbrand.com or +380…"
+                placeholder="oplata@приклад.ua або +380…"
               />
+              <p className="text-[11px] text-muted-foreground">
+                Email або телефон, куди клієнт може звернутись, якщо щось пішло не так.
+              </p>
             </div>
           </>
         )}
@@ -361,7 +445,7 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
 
       <div className="flex justify-end">
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving…" : "Save changes"}
+          {isPending ? MSG.saving : "Зберегти зміни"}
         </Button>
       </div>
     </form>

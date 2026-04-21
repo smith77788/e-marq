@@ -8,6 +8,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { CHART } from "@/lib/chartColors";
 
 type Point = { day: string; revenue: number; orders: number };
 
@@ -19,7 +20,7 @@ export function CrossTenantPulse({ points }: Props) {
   const data = useMemo(
     () =>
       points.map((p) => ({
-        day: new Date(p.day).toLocaleDateString(undefined, {
+        day: new Date(p.day).toLocaleDateString("uk-UA", {
           month: "short",
           day: "numeric",
         }),
@@ -32,7 +33,7 @@ export function CrossTenantPulse({ points }: Props) {
   if (data.length === 0) {
     return (
       <div className="flex h-48 items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
-        Поки що даних недостатньо — згенеруйте демо-набір для будь-якого бренду.
+        Поки що даних замало — згенеруйте демо-набір для будь-якого бренду.
       </div>
     );
   }
@@ -43,43 +44,41 @@ export function CrossTenantPulse({ points }: Props) {
         <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="cross-rev" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.5} />
-              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+              <stop offset="0%" stopColor={CHART.primary} stopOpacity={0.55} />
+              <stop offset="100%" stopColor={CHART.primary} stopOpacity={0.02} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" opacity={0.3} />
+          <CartesianGrid stroke={CHART.gridStroke} strokeDasharray={CHART.gridDash} opacity={0.4} />
           <XAxis
             dataKey="day"
-            stroke="hsl(var(--muted-foreground))"
-            fontSize={10}
+            stroke={CHART.muted}
+            fontSize={11}
             tickLine={false}
             axisLine={false}
           />
           <YAxis
-            stroke="hsl(var(--muted-foreground))"
-            fontSize={10}
+            stroke={CHART.muted}
+            fontSize={11}
             tickLine={false}
             axisLine={false}
-            width={40}
+            width={48}
           />
           <Tooltip
-            contentStyle={{
-              background: "hsl(var(--popover))",
-              border: "1px solid hsl(var(--border))",
-              borderRadius: 8,
-              fontSize: 12,
-            }}
-            labelStyle={{ color: "hsl(var(--foreground))" }}
+            contentStyle={CHART.tooltipStyle}
+            cursor={{ fill: CHART.cursorFill }}
             formatter={(v: number, name) =>
-              name === "revenue" ? [`${v.toLocaleString("uk-UA")} ₴`, "Виторг"] : [v, "Замовлення"]
+              name === "revenue"
+                ? [`${v.toLocaleString("uk-UA")} ₴`, "Виторг"]
+                : [v, "Замовлення"]
             }
           />
           <Area
             type="monotone"
             dataKey="revenue"
-            stroke="hsl(var(--primary))"
+            stroke={CHART.primary}
             strokeWidth={2}
             fill="url(#cross-rev)"
+            animationDuration={500}
           />
         </AreaChart>
       </ResponsiveContainer>
