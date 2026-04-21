@@ -17,7 +17,9 @@ import {
   ShieldCheck,
   ShoppingBag,
   Sparkles,
+  Terminal,
   Users,
+  UsersRound,
 } from "lucide-react";
 import {
   Sidebar,
@@ -81,11 +83,13 @@ const ADMIN_NAV: { labelKey: TKey; items: NavItem[] }[] = [
       { labelKey: "sb.crossTenant" as TKey, to: "/admin/overview", icon: Layers },
       { labelKey: "sb.allTenants", to: "/admin/tenants", icon: Building2 },
       { labelKey: "sb.plansCatalog" as TKey, to: "/admin/plans", icon: Coins },
+      { labelKey: "sb.adminUsers" as TKey, to: "/admin/users", icon: UsersRound },
     ],
   },
   {
     labelKey: "sb.agents",
     items: [
+      { labelKey: "sb.adminCommands" as TKey, to: "/admin/commands", icon: Terminal },
       { labelKey: "sb.liveRuns", to: "/agents/live", icon: Activity },
       { labelKey: "sb.agentLibrary", to: "/agents", icon: Cpu, exact: true },
       { labelKey: "sb.insightStream", to: "/admin", icon: Radio },
