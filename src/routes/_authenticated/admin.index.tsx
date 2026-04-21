@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useT } from "@/lib/i18n";
 import { MissionStatCard } from "@/components/admin/MissionStatCard";
 import {
   TenantLeaderboard,
@@ -54,6 +55,7 @@ function MissionControlPage() {
 }
 
 function MissionControlContent() {
+  const { t } = useT();
   const sinceIso = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const since24hIso = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
@@ -181,24 +183,24 @@ function MissionControlContent() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-            Mission Control
+            {t("mc.title")}
           </p>
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Cross-tenant cockpit
+            {t("mc.title")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Real-time pulse across all {data.tenants.length} tenant{data.tenants.length === 1 ? "" : "s"}.
+            {t("mc.subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="outline" size="sm">
             <Link to="/admin/tenants">
-              <Building2 className="mr-1.5 h-4 w-4" /> All tenants
+              <Building2 className="mr-1.5 h-4 w-4" /> {t("sb.allTenants")}
             </Link>
           </Button>
           <Button asChild size="sm">
             <Link to="/agents">
-              <Bot className="mr-1.5 h-4 w-4" /> Agents
+              <Bot className="mr-1.5 h-4 w-4" /> {t("sb.agents")}
             </Link>
           </Button>
         </div>
@@ -207,30 +209,30 @@ function MissionControlContent() {
       {/* KPI row */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <MissionStatCard
-          label="Tenants"
+          label={t("mc.activeTenants")}
           value={data.tenants.length}
-          hint={`${data.tenants.filter((t) => t.status === "active").length} active`}
+          hint={`${data.tenants.filter((t) => t.status === "active").length} ${t("hero.active").split(" ·")[0]}`}
           icon={Building2}
           tone="primary"
         />
         <MissionStatCard
-          label="GMV (30d)"
+          label={t("mc.gmv30")}
           value={`$${(totalRevenue / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
-          hint={`${paidOrders} paid orders`}
+          hint={`${paidOrders} ${t("sb.revenue").toLowerCase()}`}
           icon={DollarSign}
           tone="success"
         />
         <MissionStatCard
-          label="Pending insights"
+          label={t("mc.insights24h")}
           value={pendingInsights}
-          hint={`${highRiskInsights} high-risk`}
+          hint={`${highRiskInsights} ⚠`}
           icon={Lightbulb}
           tone={highRiskInsights > 5 ? "warning" : "info"}
         />
         <MissionStatCard
-          label="Agent runs (24h)"
+          label={t("mc.runs24h")}
           value={data.runs.length}
-          hint={`${successRuns} ok · ${failedRuns} failed`}
+          hint={`${successRuns} ✓ · ${failedRuns} ✗`}
           icon={Activity}
           tone={failedRuns > successRuns / 4 ? "destructive" : "primary"}
         />
@@ -239,20 +241,19 @@ function MissionControlContent() {
       {/* Secondary KPI row */}
       <div className="grid gap-3 sm:grid-cols-3">
         <MissionStatCard
-          label="Total customers"
+          label={t("mc.totalCustomers")}
           value={data.customers.length.toLocaleString()}
           icon={Users}
           tone="info"
         />
         <MissionStatCard
-          label="Pending actions"
+          label={t("mc.pendingActions")}
           value={pendingActions}
-          hint="Awaiting owner approval"
           icon={Zap}
           tone="warning"
         />
         <MissionStatCard
-          label="Insights (30d)"
+          label={t("mc.insights24h")}
           value={data.insights.length.toLocaleString()}
           icon={Sparkles}
           tone="primary"
@@ -263,8 +264,7 @@ function MissionControlContent() {
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2 border-border/60 bg-card/60 backdrop-blur">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Network revenue pulse</CardTitle>
-            <CardDescription>Daily paid revenue, all tenants combined.</CardDescription>
+            <CardTitle className="text-base">{t("mc.crossTenantPulse")}</CardTitle>
           </CardHeader>
           <CardContent>
             <CrossTenantPulse points={points} />
@@ -273,8 +273,7 @@ function MissionControlContent() {
 
         <Card className="border-border/60 bg-card/60 backdrop-blur">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Top tenants</CardTitle>
-            <CardDescription>By 30-day paid revenue.</CardDescription>
+            <CardTitle className="text-base">{t("mc.leaderboard")}</CardTitle>
           </CardHeader>
           <CardContent>
             <TenantLeaderboard rows={leaderRows} />
@@ -287,14 +286,11 @@ function MissionControlContent() {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-base">Agent fleet health · 24h</CardTitle>
-              <CardDescription>
-                Per-agent run status across the entire network.
-              </CardDescription>
+              <CardTitle className="text-base">{t("mc.systemHealth")} · 24h</CardTitle>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Cpu className="h-4 w-4 text-primary" />
-              <span>{healthRows.length} agents observed</span>
+              <span>{healthRows.length}</span>
             </div>
           </div>
         </CardHeader>

@@ -6,6 +6,7 @@ import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { LiveStatus } from "@/components/layout/LiveStatus";
+import { InsightToasts } from "@/components/layout/InsightToasts";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
 
@@ -29,7 +30,7 @@ function AuthenticatedLayout() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <span className="pulse-dot" /> Booting cockpit…
+          <span className="pulse-dot" /> {t("hdr.booting")}
         </div>
       </div>
     );
@@ -51,7 +52,7 @@ function AuthenticatedLayout() {
             <LiveStatus />
             {isSuperAdmin && (
               <span className="rounded-full border border-accent/40 bg-accent/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent">
-                Super-admin
+                {t("hdr.superAdmin")}
               </span>
             )}
           </div>
@@ -71,6 +72,7 @@ function AuthenticatedLayout() {
             <Outlet />
           </div>
         </main>
+        <InsightToasts />
       </SidebarInset>
     </SidebarProvider>
   );

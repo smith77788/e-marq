@@ -29,53 +29,54 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { useT, type TKey } from "@/lib/i18n";
 
 type NavItem = {
-  label: string;
+  labelKey: TKey;
   to: string;
   icon: typeof LayoutDashboard;
   exact?: boolean;
 };
 
-const OWNER_NAV: { label: string; items: NavItem[] }[] = [
+const OWNER_NAV: { labelKey: TKey; items: NavItem[] }[] = [
   {
-    label: "Cockpit",
+    labelKey: "sb.cockpit",
     items: [
-      { label: "Overview", to: "/brand", icon: LayoutDashboard },
-      { label: "Revenue", to: "/dashboard", icon: Gauge },
+      { labelKey: "sb.overview", to: "/brand", icon: LayoutDashboard },
+      { labelKey: "sb.revenue", to: "/dashboard", icon: Gauge },
     ],
   },
   {
-    label: "Growth",
+    labelKey: "sb.growth",
     items: [
-      { label: "Insights", to: "/brand", icon: Lightbulb },
-      { label: "Customers", to: "/brand", icon: Users },
-      { label: "Agents", to: "/agents", icon: Bot },
+      { labelKey: "sb.insights", to: "/brand", icon: Lightbulb },
+      { labelKey: "sb.customers", to: "/brand", icon: Users },
+      { labelKey: "sb.agents", to: "/agents", icon: Bot },
     ],
   },
   {
-    label: "Setup",
+    labelKey: "sb.setup",
     items: [
-      { label: "Channels", to: "/brand", icon: Plug },
-      { label: "Onboarding", to: "/onboarding", icon: Sparkles },
+      { labelKey: "sb.channels", to: "/brand", icon: Plug },
+      { labelKey: "sb.onboarding", to: "/onboarding", icon: Sparkles },
     ],
   },
 ];
 
-const ADMIN_NAV: { label: string; items: NavItem[] }[] = [
+const ADMIN_NAV: { labelKey: TKey; items: NavItem[] }[] = [
   {
-    label: "System",
+    labelKey: "sb.system",
     items: [
-      { label: "Mission Control", to: "/admin", icon: ShieldCheck, exact: true },
-      { label: "All Tenants", to: "/admin/tenants", icon: Building2 },
+      { labelKey: "sb.missionControl", to: "/admin", icon: ShieldCheck, exact: true },
+      { labelKey: "sb.allTenants", to: "/admin/tenants", icon: Building2 },
     ],
   },
   {
-    label: "Agents",
+    labelKey: "sb.agents",
     items: [
-      { label: "Live Runs", to: "/agents", icon: Activity },
-      { label: "Agent Library", to: "/agents", icon: Cpu },
-      { label: "Insight Stream", to: "/admin", icon: Radio },
+      { labelKey: "sb.liveRuns", to: "/agents", icon: Activity },
+      { labelKey: "sb.agentLibrary", to: "/agents", icon: Cpu },
+      { labelKey: "sb.insightStream", to: "/admin", icon: Radio },
     ],
   },
 ];
@@ -89,6 +90,7 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const { t } = useT();
   const groups = isSuperAdmin ? ADMIN_NAV : OWNER_NAV;
 
   return (
@@ -105,7 +107,7 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
             <div className="flex flex-col leading-tight">
               <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">ACOS</span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                {isSuperAdmin ? "Mission Control" : brandName ?? "Cockpit"}
+                {isSuperAdmin ? t("sb.missionControl") : brandName ?? t("sb.cockpit")}
               </span>
             </div>
           )}
@@ -114,9 +116,9 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
 
       <SidebarContent>
         {groups.map((group) => (
-          <SidebarGroup key={group.label}>
+          <SidebarGroup key={group.labelKey}>
             <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-              {group.label}
+              {t(group.labelKey)}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -124,9 +126,10 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
                   const isActive = item.exact
                     ? location.pathname === item.to
                     : location.pathname.startsWith(item.to);
+                  const label = t(item.labelKey);
                   return (
-                    <SidebarMenuItem key={`${group.label}-${item.label}`}>
-                      <SidebarMenuButton asChild tooltip={item.label}>
+                    <SidebarMenuItem key={`${group.labelKey}-${item.labelKey}`}>
+                      <SidebarMenuButton asChild tooltip={label}>
                         <Link
                           to={item.to}
                           className={cn(
@@ -142,7 +145,7 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
                               isActive ? "text-primary" : "text-muted-foreground group-hover/nav:text-foreground",
                             )}
                           />
-                          {!collapsed && <span className="truncate">{item.label}</span>}
+                          {!collapsed && <span className="truncate">{label}</span>}
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -157,24 +160,24 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Storefront">
+            <SidebarMenuButton asChild tooltip={t("sb.storefront")}>
               <Link
                 to="/dashboard"
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
               >
                 <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-                {!collapsed && <span>Storefront</span>}
+                {!collapsed && <span>{t("sb.storefront")}</span>}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Settings">
+            <SidebarMenuButton asChild tooltip={t("sb.settings")}>
               <Link
                 to="/onboarding"
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
               >
                 <Settings className="h-4 w-4 text-muted-foreground" />
-                {!collapsed && <span>Settings</span>}
+                {!collapsed && <span>{t("sb.settings")}</span>}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
