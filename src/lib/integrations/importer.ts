@@ -3,7 +3,12 @@
  * Створює запис в import_jobs з результатом.
  */
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { parsePriceToCents, type EntityKind, type ParsedRow } from "./parser";
+
+type ProductInsert = Database["public"]["Tables"]["products"]["Insert"];
+type CustomerInsert = Database["public"]["Tables"]["customers"]["Insert"];
+type OrderInsert = Database["public"]["Tables"]["orders"]["Insert"];
 
 export type ImportInput = {
   tenantId: string;
