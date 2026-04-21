@@ -9,6 +9,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
+import { uk } from "date-fns/locale";
 import {
   Activity,
   AlertCircle,
@@ -38,6 +40,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { MSG } from "@/lib/glossary";
 
 type Props = { tenantId: string };
 
@@ -150,14 +153,14 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
   const saveKey = useMutation({
     mutationFn: async (key: string) => {
       const trimmed = key.trim();
-      if (!trimmed) throw new Error("Введіть API key");
+      if (!trimmed) throw new Error("Введіть ключ доступу DN Trade");
       const verifyRes = await fetch("/hooks/integrations/dntrade-verify", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await authHeader()) },
         body: JSON.stringify({ tenant_id: tenantId, api_key: trimmed }),
       });
       const verifyJson = await verifyRes.json();
-      if (!verifyRes.ok) throw new Error(verifyJson.error ?? "Verify failed");
+      if (!verifyRes.ok) throw new Error(verifyJson.error ?? "Не вдалося перевірити ключ");
       if (!verifyJson.valid) {
         throw new Error(`DN Trade відхилив ключ: ${verifyJson.message ?? "невірний ключ"}`);
       }
@@ -173,10 +176,10 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("DN Trade підключено");
+      toast.success("Готово · DN Trade підключено");
       void qc.invalidateQueries({ queryKey: ["dntrade-integration", tenantId] });
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Не вдалося зберегти"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : MSG.errSave),
   });
 
   const sync = useMutation({
@@ -187,20 +190,20 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
         body: JSON.stringify({ tenant_id: tenantId, full }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Sync failed");
+      if (!res.ok) throw new Error(json.error ?? MSG.errSync);
       return json.summary as DryRunSummary;
     },
     onSuccess: (s) => {
       toast.success(
-        `Sync OK · товари: ${s.products.upserted}, клієнти: ${s.customers.upserted}, замовлення: ${s.orders.inserted}`,
+        `Готово · товари: ${s.products.upserted}, клієнти: ${s.customers.upserted}, замовлення: ${s.orders.inserted}`,
       );
       if (s.mapping_errors?.length) {
-        toast.warning(`${s.mapping_errors.length} помилок мапінгу — перегляньте нижче`);
+        toast.warning(`${s.mapping_errors.length} невідповідностей — перегляньте нижче`);
       }
       void qc.invalidateQueries({ queryKey: ["dntrade-integration", tenantId] });
       void qc.invalidateQueries({ queryKey: ["dntrade-mapping-errors", tenantId] });
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Sync failed"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : MSG.errSync),
   });
 
   const dryRun = useMutation({
@@ -211,16 +214,16 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
         body: JSON.stringify({ tenant_id: tenantId }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Dry-run failed");
+      if (!res.ok) throw new Error(json.error ?? "Пробний запуск не вдався");
       return json.summary as DryRunSummary;
     },
     onSuccess: (s) => {
       setDryRunResult(s);
       toast.success(
-        `Dry-run · товари ${s.products.fetched}, клієнти ${s.customers.fetched}, замовлення ${s.orders.fetched}`,
+        `Готово · знайшли товарів ${s.products.fetched}, клієнтів ${s.customers.fetched}, замовлень ${s.orders.fetched}`,
       );
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Dry-run failed"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : MSG.errGeneric),
   });
 
   const generateWebhookSecret = useMutation({
@@ -235,10 +238,10 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
       return secret;
     },
     onSuccess: () => {
-      toast.success("Webhook secret згенеровано");
+      toast.success("Готово · ключ для автоматичних сповіщень створено");
       void qc.invalidateQueries({ queryKey: ["dntrade-integration", tenantId] });
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Не вдалося згенерувати"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : MSG.errGeneric),
   });
 
   const data = integ.data;
@@ -257,19 +260,19 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
       ? {
           className: "border-success/40 text-success",
           icon: CheckCircle2,
-          label: "health: OK",
+          label: "стан: усе працює",
         }
       : healthData?.status === "degraded"
         ? {
             className: "border-warning/40 text-warning",
             icon: TriangleAlert,
-            label: "health: degraded",
+            label: "стан: є попередження",
           }
         : healthData
           ? {
               className: "border-destructive/40 text-destructive",
               icon: HeartPulse,
-              label: "health: down",
+              label: "стан: не працює",
             }
           : null;
   const healthTooltip = healthData
@@ -285,7 +288,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <Plug className="h-4 w-4 text-primary" />
-            <CardTitle className="text-base">DN Trade інтеграція</CardTitle>
+            <CardTitle className="text-base">Підключення до DN Trade</CardTitle>
             {isConfigured && (
               <Badge variant="outline" className="border-success/40 text-success text-[10px]">
                 <ShieldCheck className="mr-1 h-3 w-3" /> підключено
@@ -306,7 +309,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
               to="/admin/dntrade-health"
               className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
             >
-              <Activity className="h-3 w-3" /> Адмін-дашборд
+              <Activity className="h-3 w-3" /> Адмін-панель стану
             </Link>
           )}
         </div>
@@ -320,7 +323,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
           >
             dntrade.com.ua
           </a>
-          . Згенеруйте ApiKey у{" "}
+          . Створіть ключ доступу у{" "}
           <span className="font-mono text-foreground">Опції → Інтеграції → API DNTrade</span> і
           вставте сюди.
         </CardDescription>
@@ -328,7 +331,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="dntrade-key" className="text-xs">
-            DN Trade ApiKey
+            Ключ доступу DN Trade
           </Label>
           <div className="flex gap-2">
             <Input
@@ -336,7 +339,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
               type={showKey ? "text" : "password"}
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder="вставте токен"
+              placeholder="вставте ключ доступу"
               className="font-mono text-xs"
             />
             <Button
@@ -376,7 +379,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
                   ) : (
                     <RefreshCw className="mr-1 h-3 w-3" />
                   )}
-                  Синхронізувати зміни
+                  Підтягнути зміни
                 </Button>
                 <Button
                   type="button"
@@ -399,7 +402,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
                   ) : (
                     <TestTube className="mr-1 h-3 w-3" />
                   )}
-                  Тестовий Dry-Run
+                  Пробний запуск (нічого не зміниться)
                 </Button>
               </div>
 
@@ -410,9 +413,10 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
               </div>
 
               <div className="text-xs text-muted-foreground">
-                Останній sync:{" "}
-                {data?.last_sync_at ? new Date(data.last_sync_at).toLocaleString() : "—"} ·
-                статус:{" "}
+                Остання синхронізація:{" "}
+                {data?.last_sync_at
+                  ? formatDistanceToNow(new Date(data.last_sync_at), { addSuffix: true, locale: uk })
+                  : "ще не було"} · стан:{" "}
                 <span
                   className={
                     lastStatus === "success"
@@ -424,25 +428,31 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
                           : "text-foreground"
                   }
                 >
-                  {lastStatus ?? "—"}
+                  {lastStatus === "success"
+                    ? "успішно"
+                    : lastStatus === "failed"
+                      ? "не вдалося"
+                      : lastStatus === "partial"
+                        ? "частково"
+                        : (lastStatus ?? "—")}
                 </span>
                 {data?.last_sync_error && (
                   <div className="mt-1 text-destructive">{data.last_sync_error.slice(0, 200)}</div>
                 )}
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Автосинхронізація — щогодини. Кнопки вище — миттєвий запуск.
+                Автоматична синхронізація — щогодини. Кнопки вище — ручний запуск.
               </p>
             </div>
 
-            {/* Dry-run результат */}
+            {/* Результат пробного запуску */}
             {dryRunResult && (
               <>
                 <Separator />
                 <div className="space-y-2 rounded-md border border-primary/30 bg-primary/5 p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs font-semibold text-primary">
-                      <TestTube className="h-3 w-3" /> Результат Dry-Run (НЕ записано в БД)
+                      <TestTube className="h-3 w-3" /> Результат пробного запуску (нічого не записано)
                     </div>
                     <Button
                       type="button"
@@ -456,49 +466,56 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-xs">
                     <Stat
-                      label="Товари (отримано)"
+                      label="Товари (знайдено)"
                       value={dryRunResult.products.fetched}
                     />
                     <Stat
-                      label="Клієнти (отримано)"
+                      label="Клієнти (знайдено)"
                       value={dryRunResult.customers.fetched}
                     />
                     <Stat
-                      label="Замовлення (отримано)"
+                      label="Замовлення (знайдено)"
                       value={dryRunResult.orders.fetched}
                     />
                   </div>
                   {dryRunResult.mapping_errors.length > 0 && (
                     <div className="text-xs text-destructive">
-                      {dryRunResult.mapping_errors.length} помилок мапінгу — деталі нижче ↓
+                      {dryRunResult.mapping_errors.length} невідповідностей — деталі нижче ↓
                     </div>
                   )}
                   {showSamples && dryRunResult.samples && (
                     <div className="space-y-2">
-                      {(["products", "customers", "orders"] as const).map((k) => (
-                        <details key={k} className="rounded border border-border/60 bg-card/40 p-2">
-                          <summary className="cursor-pointer text-xs font-medium capitalize">
-                            {k} ({dryRunResult.samples?.[k].length ?? 0})
-                          </summary>
-                          <pre className="mt-2 max-h-64 overflow-auto rounded bg-background/60 p-2 text-[10px]">
-                            {JSON.stringify(dryRunResult.samples?.[k], null, 2)}
-                          </pre>
-                        </details>
-                      ))}
+                      {(["products", "customers", "orders"] as const).map((k) => {
+                        const labels: Record<typeof k, string> = {
+                          products: "Товари",
+                          customers: "Клієнти",
+                          orders: "Замовлення",
+                        };
+                        return (
+                          <details key={k} className="rounded border border-border/60 bg-card/40 p-2">
+                            <summary className="cursor-pointer text-xs font-medium">
+                              {labels[k]} ({dryRunResult.samples?.[k].length ?? 0})
+                            </summary>
+                            <pre className="mt-2 max-h-64 overflow-auto rounded bg-background/60 p-2 text-[10px]">
+                              {JSON.stringify(dryRunResult.samples?.[k], null, 2)}
+                            </pre>
+                          </details>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
               </>
             )}
 
-            {/* Mapping errors */}
+            {/* Невідповідності даних */}
             {mappingErrors.data && mappingErrors.data.length > 0 && (
               <>
                 <Separator />
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-xs font-semibold text-destructive">
                     <AlertCircle className="h-3 w-3" />
-                    Останні помилки мапінгу ({mappingErrors.data.length})
+                    Останні невідповідності даних ({mappingErrors.data.length})
                   </div>
                   <div className="max-h-64 space-y-1 overflow-auto rounded-md border border-border bg-card/40 p-2">
                     {mappingErrors.data.map((err) => (
@@ -511,7 +528,13 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
                             variant="outline"
                             className="border-destructive/40 text-[10px] text-destructive"
                           >
-                            {err.kind}
+                            {err.kind === "product"
+                              ? "товар"
+                              : err.kind === "customer"
+                                ? "клієнт"
+                                : err.kind === "order"
+                                  ? "замовлення"
+                                  : err.kind}
                           </Badge>
                           <span className="font-mono text-[10px] text-muted-foreground">
                             {err.external_id ?? "—"}
@@ -519,7 +542,10 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
                         </div>
                         <div className="mt-0.5 text-foreground">{err.message}</div>
                         <div className="text-[10px] text-muted-foreground">
-                          {new Date(err.occurred_at).toLocaleString()}
+                          {formatDistanceToNow(new Date(err.occurred_at), {
+                            addSuffix: true,
+                            locale: uk,
+                          })}
                         </div>
                       </div>
                     ))}
@@ -528,17 +554,17 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
               </>
             )}
 
-            {/* Webhook */}
+            {/* Автоматичні сповіщення від DN Trade */}
             <Separator />
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-semibold">
-                <Webhook className="h-3 w-3 text-primary" /> Push-вебхук від DN Trade
+                <Webhook className="h-3 w-3 text-primary" /> Автоматичні сповіщення від DN Trade
               </div>
               {data?.webhook_secret && webhookUrl ? (
                 <>
                   <p className="text-[11px] text-muted-foreground">
-                    Скопіюйте URL і вставте в DN Trade як endpoint для подій. Приймаємо POST,
-                    автоматично запускаємо інкрементальну синхронізацію.
+                    Скопіюйте посилання і вставте в DN Trade як адресу для подій. Коли DN Trade
+                    щось змінює — ми одразу підтягуємо ці зміни.
                   </p>
                   <div className="flex gap-2">
                     <Input
@@ -552,7 +578,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
                       variant="outline"
                       onClick={() => {
                         navigator.clipboard.writeText(webhookUrl);
-                        toast.success("URL скопійовано");
+                        toast.success(MSG.copied);
                       }}
                     >
                       <Copy className="h-3 w-3" />
@@ -568,13 +594,14 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
                     {generateWebhookSecret.isPending && (
                       <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                     )}
-                    Згенерувати новий secret
+                    Створити новий ключ
                   </Button>
                 </>
               ) : (
                 <>
                   <p className="text-[11px] text-muted-foreground">
-                    Ще не налаштовано. Згенеруйте secret і отримайте URL для вставки в DN Trade.
+                    Ще не налаштовано. Створіть ключ — і отримаєте посилання, яке треба вставити
+                    в DN Trade.
                   </p>
                   <Button
                     type="button"
@@ -586,7 +613,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
                     {generateWebhookSecret.isPending && (
                       <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                     )}
-                    Створити webhook URL
+                    Створити посилання для сповіщень
                   </Button>
                 </>
               )}
