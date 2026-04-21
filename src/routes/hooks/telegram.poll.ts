@@ -74,6 +74,18 @@ async function tgEditMessage(chatId: string | number, messageId: number, html: s
   }).catch(() => undefined);
 }
 
+function getInternalAgentAuthHeaders(): HeadersInit {
+  const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+  return publishableKey
+    ? {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${publishableKey}`,
+      }
+    : {
+        "Content-Type": "application/json",
+      };
+}
+
 async function processCallback(cb: NonNullable<TgUpdate["callback_query"]>, appOrigin: string): Promise<void> {
   const data = cb.data ?? "";
   const chatId = cb.message?.chat.id ?? cb.from.id;
@@ -110,10 +122,17 @@ async function processCallback(cb: NonNullable<TgUpdate["callback_query"]>, appO
     if (op === "apply") {
       const res = await fetch(`${appOrigin}/hooks/actions/apply`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getInternalAgentAuthHeaders(),
         body: JSON.stringify({ insight_id: id }),
       });
+      const errorText = res.ok ? null : await res.text().catch(() => "");
       await tgAnswerCallback(cb.id, res.ok ? "✅ Застосовано" : "Не вдалося застосувати");
+      if (!res.ok) {
+        await sendTelegramText(
+          String(chatId),
+          `⚠️ Не вдалося застосувати інсайт${errorText ? `: ${errorText.slice(0, 180)}` : "."}`,
+        );
+      }
       if (msgId && res.ok) await tgEditMessage(chatId, msgId, `✅ <b>Застосовано:</b> ${ins.title}`);
     } else if (op === "dismiss") {
       await supabaseAdmin.from("ai_insights").update({ status: "dismissed" }).eq("id", id);
