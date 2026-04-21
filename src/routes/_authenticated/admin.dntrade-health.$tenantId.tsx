@@ -288,32 +288,32 @@ function Drill({ tenantId }: { tenantId: string }) {
             <AreaChart data={dailyTrend}>
               <defs>
                 <linearGradient id="dHealthy" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.5} />
-                  <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                  <stop offset="5%" stopColor="var(--success, var(--primary))" stopOpacity={0.5} />
+                  <stop offset="95%" stopColor="var(--success, var(--primary))" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="dDegraded" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--warning))" stopOpacity={0.5} />
-                  <stop offset="95%" stopColor="hsl(var(--warning))" stopOpacity={0} />
+                  <stop offset="5%" stopColor="var(--warning, var(--primary))" stopOpacity={0.5} />
+                  <stop offset="95%" stopColor="var(--warning, var(--primary))" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="dUnhealthy" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.6} />
-                  <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0} />
+                  <stop offset="5%" stopColor="var(--destructive)" stopOpacity={0.6} />
+                  <stop offset="95%" stopColor="var(--destructive)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
-              <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} allowDecimals={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
+              <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={11} />
+              <YAxis stroke="var(--muted-foreground)" fontSize={11} allowDecimals={false} />
               <Tooltip
                 contentStyle={{
-                  background: "hsl(var(--popover))",
-                  border: "1px solid hsl(var(--border))",
+                  background: "var(--popover)",
+                  border: "1px solid var(--border)",
                   borderRadius: 8,
                   fontSize: 12,
                 }}
               />
-              <Area type="monotone" dataKey="healthy" stackId="1" stroke="hsl(var(--success))" fill="url(#dHealthy)" name="Працює" />
-              <Area type="monotone" dataKey="degraded" stackId="1" stroke="hsl(var(--warning))" fill="url(#dDegraded)" name="Попередження" />
-              <Area type="monotone" dataKey="unhealthy" stackId="1" stroke="hsl(var(--destructive))" fill="url(#dUnhealthy)" name="Не працює" />
+              <Area type="monotone" dataKey="healthy" stackId="1" stroke="var(--success, var(--primary))" fill="url(#dHealthy)" name="Працює" />
+              <Area type="monotone" dataKey="degraded" stackId="1" stroke="var(--warning, var(--primary))" fill="url(#dDegraded)" name="Попередження" />
+              <Area type="monotone" dataKey="unhealthy" stackId="1" stroke="var(--destructive)" fill="url(#dUnhealthy)" name="Не працює" />
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>

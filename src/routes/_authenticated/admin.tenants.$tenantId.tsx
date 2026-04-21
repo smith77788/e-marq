@@ -81,6 +81,14 @@ type ProductRow = {
   created_at: string;
 };
 
+const COHORT_LABEL: Record<string, string> = {
+  new: "нові",
+  one_time: "разові",
+  returning: "постійні",
+  vip_active: "найцінніші активні",
+  vip_churning: "найцінніші, можуть піти",
+};
+
 function TenantDetailPage() {
   const { tenantId } = Route.useParams();
   const { isSuperAdmin, loading } = useAuth();
@@ -267,14 +275,14 @@ function TenantDetailPage() {
           "Tenant already has data. Disable 'Skip if data exists' or clear it first.",
         );
       }
-      toast.loading("Generating ACOS dataset…", { id: "acos-gen" });
+      toast.loading("Готуємо демо-дані для ACOS…", { id: "acos-gen" });
       const result = await generateAcosDataset(tenantId, acosScale, supabase);
       return result;
     },
     onSuccess: (result) => {
       setLastAcosResult(result);
       toast.success(
-        `${result.products} products · ${result.customers} customers · ${result.orders} orders · ${result.events} events`,
+        `Готово · товарів: ${result.products} · клієнтів: ${result.customers} · замовлень: ${result.orders} · подій: ${result.events}`,
         { id: "acos-gen", duration: 6000 },
       );
       setAcosConfirmOpen(false);
@@ -294,7 +302,7 @@ function TenantDetailPage() {
       await clearDemoData(tenantId, supabase);
     },
     onSuccess: () => {
-      toast.success("Demo data cleared");
+      toast.success("Готово · демо-дані видалено");
       setClearConfirmOpen(false);
       queryClient.invalidateQueries({ queryKey: ["tenant-products", tenantId] });
       queryClient.invalidateQueries({ queryKey: ["tenant-orders-count", tenantId] });
@@ -369,7 +377,7 @@ function TenantDetailPage() {
           <TabsTrigger value="products">Товари</TabsTrigger>
           <TabsTrigger value="orders">Замовлення</TabsTrigger>
           <TabsTrigger value="config">Налаштування</TabsTrigger>
-          <TabsTrigger value="acos-debug">Агенти (debug)</TabsTrigger>
+          <TabsTrigger value="acos-debug">ШІ-помічники (тех)</TabsTrigger>
         </TabsList>
 
         <TabsContent value="plan" className="space-y-4">
@@ -423,19 +431,19 @@ function TenantDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
-                ACOS-rich synthetic dataset
+                Демо-дані для тестування ШІ-помічників
               </CardTitle>
               <CardDescription>
-                90 days of realistic D2C signals: cohorts (new / returning / VIP-active /
-                VIP-churning), weekly seasonality, product affinity, stockout-risk SKUs,
-                cart-abandonment, and search-no-results events. Designed so ACOS agents can find
-                real insights — not just placeholder data.
+                Реалістичний набір даних за 90 днів: групи клієнтів (нові, постійні, найцінніші
+                активні та такі, що можуть піти), сезонність по тижнях, набори товарів, що часто
+                купують разом, ризики закінчення на складі, покинуті кошики та пошук без
+                результатів. Створено для того, щоб ШІ-помічники могли знаходити справжні підказки.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="acos-scale">Scale</Label>
+                  <Label htmlFor="acos-scale">Розмір набору</Label>
                   <Select
                     value={acosScale}
                     onValueChange={(v) => setAcosScale(v as AcosScale)}
@@ -444,17 +452,17 @@ function TenantDetailPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="small">Small — 120 customers</SelectItem>
-                      <SelectItem value="medium">Medium — 250 customers</SelectItem>
-                      <SelectItem value="large">Large — 600 customers</SelectItem>
+                      <SelectItem value="small">Малий — 120 клієнтів</SelectItem>
+                      <SelectItem value="medium">Середній — 250 клієнтів</SelectItem>
+                      <SelectItem value="large">Великий — 600 клієнтів</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="flex items-end gap-3">
                   <div className="flex-1 space-y-1">
-                    <Label htmlFor="acos-skip">Skip if data exists</Label>
+                    <Label htmlFor="acos-skip">Пропустити, якщо дані вже є</Label>
                     <p className="text-xs text-muted-foreground">
-                      Avoid duplicating data on tenants that already have a catalog.
+                      Не створювати дублі для брендів, у яких уже є каталог.
                     </p>
                   </div>
                   <Switch
@@ -471,7 +479,7 @@ function TenantDetailPage() {
                   disabled={generateAcosMutation.isPending}
                 >
                   <Sparkles className="mr-2 h-4 w-4" />
-                  {generateAcosMutation.isPending ? "Generating…" : "Generate ACOS dataset"}
+                  {generateAcosMutation.isPending ? "Створюємо…" : "Створити демо-набір даних"}
                 </Button>
                 <Button
                   variant="ghost"
@@ -480,35 +488,35 @@ function TenantDetailPage() {
                   disabled={clearDemoMutation.isPending}
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  {clearDemoMutation.isPending ? "Clearing…" : "Clear all data"}
+                  {clearDemoMutation.isPending ? "Очищаємо…" : "Очистити всі дані"}
                 </Button>
               </div>
 
               {lastAcosResult && (
                 <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
-                  <p className="text-xs font-medium text-foreground">Last generation</p>
+                  <p className="text-xs font-medium text-foreground">Останнє створення</p>
                   <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-4">
                     <div>
-                      <span className="text-muted-foreground">Products: </span>
+                      <span className="text-muted-foreground">Товарів: </span>
                       <span className="font-medium text-foreground">{lastAcosResult.products}</span>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Customers: </span>
+                      <span className="text-muted-foreground">Клієнтів: </span>
                       <span className="font-medium text-foreground">{lastAcosResult.customers}</span>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Orders: </span>
+                      <span className="text-muted-foreground">Замовлень: </span>
                       <span className="font-medium text-foreground">{lastAcosResult.orders}</span>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Events: </span>
+                      <span className="text-muted-foreground">Подій: </span>
                       <span className="font-medium text-foreground">{lastAcosResult.events}</span>
                     </div>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1">
                     {Object.entries(lastAcosResult.cohorts).map(([cohort, count]) => (
                       <Badge key={cohort} variant="outline" className="text-[10px]">
-                        {cohort.replace("_", " ")}: {count}
+                        {COHORT_LABEL[cohort] ?? cohort.replace("_", " ")}: {count}
                       </Badge>
                     ))}
                   </div>
@@ -522,28 +530,28 @@ function TenantDetailPage() {
           <Card>
             <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
               <div>
-                <CardTitle>Products</CardTitle>
+                <CardTitle>Товари</CardTitle>
                 <CardDescription>
-                  {productsQuery.data?.length ?? 0} total. Manage catalog for this tenant.
+                  Усього: {productsQuery.data?.length ?? 0}. Керуйте каталогом цього бренду.
                 </CardDescription>
               </div>
               <Button size="sm" onClick={() => setCreateOpen(true)}>
-                + New product
+                + Новий товар
               </Button>
             </CardHeader>
             <CardContent>
               {productsQuery.isLoading ? (
-                <p className="text-sm text-muted-foreground">Loading…</p>
+                <p className="text-sm text-muted-foreground">Завантажуємо…</p>
               ) : productsQuery.data && productsQuery.data.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>SKU</TableHead>
-                      <TableHead className="text-right">Price</TableHead>
-                      <TableHead className="text-right">Stock</TableHead>
-                      <TableHead>Active</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>Назва</TableHead>
+                      <TableHead>Артикул</TableHead>
+                      <TableHead className="text-right">Ціна</TableHead>
+                      <TableHead className="text-right">Залишок</TableHead>
+                      <TableHead>Активний</TableHead>
+                      <TableHead className="text-right">Дії</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -567,14 +575,14 @@ function TenantDetailPage() {
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Button size="sm" variant="outline" onClick={() => setEditing(p)}>
-                              Edit
+                              Редагувати
                             </Button>
                             <Button
                               size="sm"
                               variant="destructive"
                               onClick={() => setDeleting(p)}
                             >
-                              Delete
+                              Видалити
                             </Button>
                           </div>
                         </TableCell>
@@ -583,7 +591,7 @@ function TenantDetailPage() {
                   </TableBody>
                 </Table>
               ) : (
-                <p className="text-sm text-muted-foreground">No products yet.</p>
+                <p className="text-sm text-muted-foreground">Поки що товарів немає.</p>
               )}
             </CardContent>
           </Card>
@@ -596,14 +604,14 @@ function TenantDetailPage() {
         <TabsContent value="config" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Tenant config</CardTitle>
+              <CardTitle>Налаштування бренду</CardTitle>
               <CardDescription>
-                Brand, UI theme, feature flags, AI bot, and SEO metadata.
+                Назва, оформлення, увімкнені можливості, ШІ-помічник та SEO.
               </CardDescription>
             </CardHeader>
             <CardContent>
               {configQuery.isLoading ? (
-                <p className="text-sm text-muted-foreground">Loading…</p>
+                <p className="text-sm text-muted-foreground">Завантажуємо…</p>
               ) : configQuery.data ? (
                 <TenantConfigForm
                   initialValues={normalizeConfig(configQuery.data)}
@@ -611,34 +619,34 @@ function TenantDetailPage() {
                   isPending={saveConfigMutation.isPending}
                 />
               ) : (
-                <p className="text-sm text-muted-foreground">No config found.</p>
+                <p className="text-sm text-muted-foreground">Налаштування не знайдено.</p>
               )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Create dialog */}
+      {/* Створення товару */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>New product</DialogTitle>
-            <DialogDescription>Add a product to this tenant catalog.</DialogDescription>
+            <DialogTitle>Новий товар</DialogTitle>
+            <DialogDescription>Додайте товар у каталог цього бренду.</DialogDescription>
           </DialogHeader>
           <ProductForm
             onSubmit={(values) => createMutation.mutate(values)}
             onCancel={() => setCreateOpen(false)}
             isPending={createMutation.isPending}
-            submitLabel="Create"
+            submitLabel="Створити"
           />
         </DialogContent>
       </Dialog>
 
-      {/* Edit dialog */}
+      {/* Редагування товару */}
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit product</DialogTitle>
+            <DialogTitle>Редагування товару</DialogTitle>
             <DialogDescription>{editing?.name}</DialogDescription>
           </DialogHeader>
           {editing && (
@@ -656,24 +664,24 @@ function TenantDetailPage() {
               onSubmit={(values) => updateMutation.mutate({ id: editing.id, values })}
               onCancel={() => setEditing(null)}
               isPending={updateMutation.isPending}
-              submitLabel="Save changes"
+              submitLabel="Зберегти зміни"
             />
           )}
         </DialogContent>
       </Dialog>
 
-      {/* Delete confirm */}
+      {/* Підтвердження видалення */}
       <AlertDialog open={!!deleting} onOpenChange={(open) => !open && setDeleting(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete product?</AlertDialogTitle>
+            <AlertDialogTitle>Видалити товар?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete <span className="font-medium">{deleting?.name}</span>.
-              This cannot be undone.
+              Товар <span className="font-medium">{deleting?.name}</span> буде видалено назавжди.
+              Цю дію не можна скасувати.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Скасувати</AlertDialogCancel>
             <AlertDialogAction
               disabled={deleteMutation.isPending}
               onClick={(e) => {
@@ -681,42 +689,44 @@ function TenantDetailPage() {
                 if (deleting) deleteMutation.mutate(deleting.id);
               }}
             >
-              {deleteMutation.isPending ? "Deleting…" : "Delete"}
+              {deleteMutation.isPending ? "Видаляємо…" : "Так, видалити"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Generate ACOS dataset confirm */}
+      {/* Підтвердження генерації демо ACOS */}
       <AlertDialog open={acosConfirmOpen} onOpenChange={setAcosConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Generate ACOS dataset?</AlertDialogTitle>
+            <AlertDialogTitle>Створити демо-набір даних для ACOS?</AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-2 text-sm">
-                <p>This will create a 90-day synthetic dataset with:</p>
+                <p>Буде створено реалістичний набір даних за останні 90 днів:</p>
                 <ul className="ml-4 list-disc space-y-1">
                   <li>
-                    <span className="font-medium">{ACOS_CATALOG_SIZE} products</span> across
-                    apparel, footwear, accessories, audio (incl. 2 stockout-risk SKUs)
+                    <span className="font-medium">{ACOS_CATALOG_SIZE} товарів</span> — одяг,
+                    взуття, аксесуари та аудіо (зокрема 2 з ризиком закінчитись на складі)
                   </li>
                   <li>
-                    {acosScale === "small" ? "120" : acosScale === "medium" ? "250" : "600"}{" "}
-                    <span className="font-medium">customers</span> across 5 cohorts
-                    (new / one-time / returning / VIP-active / VIP-churning)
+                    <span className="font-medium">
+                      {acosScale === "small" ? "120" : acosScale === "medium" ? "250" : "600"} клієнтів
+                    </span>{" "}
+                    із 5 типових груп (нові, разові, постійні, найцінніші активні та найцінніші, що
+                    можуть піти)
                   </li>
-                  <li>Paid orders with realistic affinity bundles and weekly seasonality</li>
-                  <li>Funnel + search events (~18% search-no-results signal)</li>
+                  <li>Оплачені замовлення з реалістичними наборами товарів та сезонністю</li>
+                  <li>Події шляху покупця та пошуку (приблизно 18% — пошук без результатів)</li>
                 </ul>
                 <p className="text-xs text-muted-foreground">
-                  Generation runs entirely client-side and may take 10-30 seconds for the larger
-                  scales.
+                  Дані створюються прямо у браузері — для більших обʼємів це може зайняти 10–30
+                  секунд.
                 </p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={generateAcosMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={generateAcosMutation.isPending}>Скасувати</AlertDialogCancel>
             <AlertDialogAction
               disabled={generateAcosMutation.isPending}
               onClick={(e) => {
@@ -724,24 +734,24 @@ function TenantDetailPage() {
                 generateAcosMutation.mutate();
               }}
             >
-              {generateAcosMutation.isPending ? "Generating…" : "Generate"}
+              {generateAcosMutation.isPending ? "Створюємо…" : "Створити дані"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Clear demo data confirm */}
+      {/* Підтвердження очищення демо-даних */}
       <AlertDialog open={clearConfirmOpen} onOpenChange={setClearConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Clear all tenant data?</AlertDialogTitle>
+            <AlertDialogTitle>Очистити всі дані бренду?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete <span className="font-medium">all products, orders,
-              order items, and events</span> for this tenant. This cannot be undone.
+              Буде назавжди видалено <span className="font-medium">всі товари, замовлення,
+              позиції замовлень та події</span> цього бренду. Цю дію не можна скасувати.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={clearDemoMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={clearDemoMutation.isPending}>Скасувати</AlertDialogCancel>
             <AlertDialogAction
               disabled={clearDemoMutation.isPending}
               onClick={(e) => {
@@ -749,7 +759,7 @@ function TenantDetailPage() {
                 clearDemoMutation.mutate();
               }}
             >
-              {clearDemoMutation.isPending ? "Clearing…" : "Clear everything"}
+              {clearDemoMutation.isPending ? "Очищаємо…" : "Так, очистити все"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

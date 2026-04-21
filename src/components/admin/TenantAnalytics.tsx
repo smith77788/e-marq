@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { CHART, CHART_SCALE } from "@/lib/chartColors";
 
 type Props = { tenantId: string };
 
@@ -116,32 +117,28 @@ export function TenantAnalytics({ tenantId }: Props) {
                     layout="vertical"
                     margin={{ left: 8, right: 24, top: 4, bottom: 4 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                    <CartesianGrid strokeDasharray={CHART.gridDash} stroke={CHART.gridStroke} />
+                    <XAxis type="number" stroke={CHART.muted} fontSize={11} />
                     <YAxis
                       type="category"
                       dataKey="step"
-                      stroke="hsl(var(--muted-foreground))"
-                      fontSize={12}
-                      width={90}
+                      stroke={CHART.muted}
+                      fontSize={11}
+                      width={100}
                     />
                     <Tooltip
-                      contentStyle={{
-                        background: "hsl(var(--popover))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: 8,
-                        fontSize: 12,
-                      }}
-                      formatter={(value: number, name: string, item) => {
+                      contentStyle={CHART.tooltipStyle}
+                      cursor={{ fill: CHART.cursorFill }}
+                      formatter={(value: number, _name: string, item) => {
                         const rate = (item.payload as { rate: number }).rate;
                         return [`${value.toLocaleString("uk-UA")} (${rate}%)`, "Подій"];
                       }}
                     />
-                    <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                    <Bar dataKey="count" radius={[0, 6, 6, 0]} animationDuration={600}>
                       {funnelQuery.data.map((_, i) => (
                         <Cell
                           key={i}
-                          fill={`hsl(var(--primary) / ${1 - i * 0.15})`}
+                          fill={CHART_SCALE[Math.min(i, CHART_SCALE.length - 1)]}
                         />
                       ))}
                     </Bar>
@@ -182,33 +179,30 @@ export function TenantAnalytics({ tenantId }: Props) {
                   data={revenueQuery.data}
                   margin={{ left: 8, right: 16, top: 4, bottom: 4 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <CartesianGrid strokeDasharray={CHART.gridDash} stroke={CHART.gridStroke} />
                   <XAxis
                     dataKey="date"
-                    stroke="hsl(var(--muted-foreground))"
+                    stroke={CHART.muted}
                     fontSize={11}
                     interval={4}
                   />
                   <YAxis
-                    stroke="hsl(var(--muted-foreground))"
+                    stroke={CHART.muted}
                     fontSize={11}
                     tickFormatter={(v: number) => `${v} ₴`}
                   />
                   <Tooltip
-                    contentStyle={{
-                      background: "hsl(var(--popover))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
+                    contentStyle={CHART.tooltipStyle}
+                    cursor={{ stroke: CHART.cursorFill, strokeWidth: 1 }}
                     formatter={(v: number) => [`${v.toFixed(2)} ₴`, "Виторг"]}
                   />
                   <Line
                     type="monotone"
                     dataKey="revenue"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
+                    stroke={CHART.primary}
+                    strokeWidth={2.5}
                     dot={false}
+                    animationDuration={600}
                   />
                 </LineChart>
               </ResponsiveContainer>

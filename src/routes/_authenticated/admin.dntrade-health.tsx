@@ -419,25 +419,25 @@ function DnTradeHealthContent() {
             <AreaChart data={trend}>
               <defs>
                 <linearGradient id="hHealthy" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.5} />
-                  <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                  <stop offset="5%" stopColor="var(--success, var(--primary))" stopOpacity={0.5} />
+                  <stop offset="95%" stopColor="var(--success, var(--primary))" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="hDegraded" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--warning))" stopOpacity={0.5} />
-                  <stop offset="95%" stopColor="hsl(var(--warning))" stopOpacity={0} />
+                  <stop offset="5%" stopColor="var(--warning, var(--primary))" stopOpacity={0.5} />
+                  <stop offset="95%" stopColor="var(--warning, var(--primary))" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="hUnhealthy" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.6} />
-                  <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0} />
+                  <stop offset="5%" stopColor="var(--destructive)" stopOpacity={0.6} />
+                  <stop offset="95%" stopColor="var(--destructive)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
-              <XAxis dataKey="hour" stroke="hsl(var(--muted-foreground))" fontSize={11} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} allowDecimals={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
+              <XAxis dataKey="hour" stroke="var(--muted-foreground)" fontSize={11} />
+              <YAxis stroke="var(--muted-foreground)" fontSize={11} allowDecimals={false} />
               <Tooltip
                 contentStyle={{
-                  background: "hsl(var(--popover))",
-                  border: "1px solid hsl(var(--border))",
+                  background: "var(--popover)",
+                  border: "1px solid var(--border)",
                   borderRadius: 8,
                   fontSize: 12,
                 }}
@@ -446,7 +446,7 @@ function DnTradeHealthContent() {
                 type="monotone"
                 dataKey="healthy"
                 stackId="1"
-                stroke="hsl(var(--success))"
+                stroke="var(--success, var(--primary))"
                 fill="url(#hHealthy)"
                 name="Працює"
               />
@@ -454,7 +454,7 @@ function DnTradeHealthContent() {
                 type="monotone"
                 dataKey="degraded"
                 stackId="1"
-                stroke="hsl(var(--warning))"
+                stroke="var(--warning, var(--primary))"
                 fill="url(#hDegraded)"
                 name="Попередження"
               />
@@ -462,7 +462,7 @@ function DnTradeHealthContent() {
                 type="monotone"
                 dataKey="unhealthy"
                 stackId="1"
-                stroke="hsl(var(--destructive))"
+                stroke="var(--destructive)"
                 fill="url(#hUnhealthy)"
                 name="Не працює"
               />
