@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useT } from "@/lib/i18n";
 import { RevenueFeed } from "@/components/owner/RevenueFeed";
 import { CustomerRoster } from "@/components/owner/CustomerRoster";
 import { ChannelSetup } from "@/components/owner/ChannelSetup";
@@ -36,6 +37,7 @@ export const Route = createFileRoute("/_authenticated/brand")({
 function BrandPage() {
   const { tenant: tenantId } = useSearch({ from: "/_authenticated/brand" });
   const { user, loading } = useAuth();
+  const { t } = useT();
   const navigate = useNavigate();
 
   const { data: tenants } = useQuery({
@@ -91,11 +93,11 @@ function BrandPage() {
             <Badge variant="outline" className="font-mono text-[10px]">/{current.slug}</Badge>
             <Badge variant="outline" className="border-success/40 text-success text-[10px]">
               <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-              LIVE
+              {t("brand.live")}
             </Badge>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Mission cockpit · what the autonomous fleet did, who it knows, what it earned.
+            {t("brand.missionSubtitle")}
           </p>
         </div>
         {tenants.length > 1 && (
@@ -117,7 +119,7 @@ function BrandPage() {
 
       <AnalyticsWindowProvider initial={30}>
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Revenue performance</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("brand.revenuePerf")}</h2>
           <AnalyticsWindowToggle />
         </div>
 
@@ -134,7 +136,7 @@ function BrandPage() {
         <CohortRetention tenantId={current.id} />
       </div>
 
-      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Autonomous fleet</h2>
+      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("brand.autonomousFleet")}</h2>
 
       <AgentHealthHeatmap tenantId={current.id} />
 
@@ -146,7 +148,7 @@ function BrandPage() {
 
       <MemoryInspector tenantId={current.id} />
 
-      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Customers & channels</h2>
+      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("brand.customersChannels")}</h2>
 
       <TopCustomers tenantId={current.id} />
 

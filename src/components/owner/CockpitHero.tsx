@@ -10,6 +10,7 @@ import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/lib/i18n";
 
 type Props = { tenantId: string };
 
@@ -26,6 +27,7 @@ function dayKey(iso: string) {
 }
 
 export function CockpitHero({ tenantId }: Props) {
+  const { t } = useT();
   const { data, isLoading } = useQuery({
     queryKey: ["cockpit-hero", tenantId],
     enabled: !!tenantId,
@@ -145,9 +147,9 @@ export function CockpitHero({ tenantId }: Props) {
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <HeroCard
         icon={BadgeDollarSign}
-        label="Revenue · 30d"
+        label={t("hero.revenue30")}
         value={fmtUsd(computed.rev30)}
-        sub={`${fmtUsd(computed.rev7)} this week`}
+        sub={`${fmtUsd(computed.rev7)} ${t("hero.thisWeek")}`}
         delta={computed.revDelta}
         series={computed.series}
         seriesKey="revenue"
@@ -155,28 +157,28 @@ export function CockpitHero({ tenantId }: Props) {
       />
       <HeroCard
         icon={Sparkles}
-        label="AI-attributed"
+        label={t("hero.aiAttributed")}
         value={fmtUsd(computed.ai30)}
-        sub={`${computed.aiShare}% of revenue · ${fmtUsd(computed.ai7)} 7d`}
+        sub={`${computed.aiShare}% ${t("hero.ofRevenue")} · ${fmtUsd(computed.ai7)} ${t("hero.7d")}`}
         series={computed.series}
         seriesKey="ai"
         tone="primary"
-        badge="AUTONOMOUS"
+        badge={t("hero.autonomous")}
       />
       <HeroCard
         icon={Bot}
-        label="Conversion · 7d"
+        label={t("hero.conversion7")}
         value={`${computed.convRate}%`}
-        sub={`${computed.conv7} of ${computed.sent7} messages converted`}
+        sub={`${computed.conv7} ${t("hero.converted")} ${computed.sent7}`}
         series={computed.series}
         seriesKey="ai"
         tone="accent"
       />
       <HeroCard
         icon={Users}
-        label="Customers"
+        label={t("hero.customers")}
         value={computed.totalCustomers.toLocaleString()}
-        sub={`${computed.activeCustomers} active · agent health ${computed.agentHealth}%`}
+        sub={`${computed.activeCustomers} ${t("hero.active")} ${computed.agentHealth}%`}
         series={computed.series}
         seriesKey="runs"
         tone={computed.agentHealth >= 90 ? "success" : computed.agentHealth >= 70 ? "warning" : "destructive"}
