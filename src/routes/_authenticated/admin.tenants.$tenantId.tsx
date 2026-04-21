@@ -62,7 +62,6 @@ import { AcosOverviewTab } from "@/components/admin/AcosOverviewTab";
 import { AcosInsightsQueue } from "@/components/admin/AcosInsightsQueue";
 import { AcosAgentRuns } from "@/components/admin/AcosAgentRuns";
 import { PlanBillingTab } from "@/components/admin/PlanBillingTab";
-import { BalancesTab } from "@/components/admin/BalancesTab";
 import { MembersTab } from "@/components/admin/MembersTab";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants/$tenantId")({
@@ -364,8 +363,7 @@ function TenantDetailPage() {
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="overview">Огляд</TabsTrigger>
-          <TabsTrigger value="plan">Тариф і оплата</TabsTrigger>
-          <TabsTrigger value="balances">Баланси</TabsTrigger>
+          <TabsTrigger value="plan">Тариф</TabsTrigger>
           <TabsTrigger value="members">Команда</TabsTrigger>
           <TabsTrigger value="products">Товари</TabsTrigger>
           <TabsTrigger value="orders">Замовлення</TabsTrigger>
@@ -375,10 +373,6 @@ function TenantDetailPage() {
 
         <TabsContent value="plan" className="space-y-4">
           <PlanBillingTab tenantId={tenantId} />
-        </TabsContent>
-
-        <TabsContent value="balances" className="space-y-4">
-          <BalancesTab tenantId={tenantId} />
         </TabsContent>
 
         <TabsContent value="members" className="space-y-4">

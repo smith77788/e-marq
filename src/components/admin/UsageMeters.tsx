@@ -29,8 +29,6 @@ const METRICS: Array<{ key: string; limitKey: string; label: string }> = [
   { key: "products_count", limitKey: "max_products", label: "Products" },
   { key: "orders_count", limitKey: "max_orders_per_month", label: "Orders / mo" },
   { key: "customers_count", limitKey: "max_customers", label: "Customers" },
-  { key: "ai_runs_count", limitKey: "max_ai_runs_per_month", label: "AI runs / mo" },
-  { key: "outbound_messages_count", limitKey: "max_outbound_messages_per_month", label: "Messages / mo" },
 ];
 
 export function UsageMeters({ summary, compact = false }: { summary: PlanSummary; compact?: boolean }) {
