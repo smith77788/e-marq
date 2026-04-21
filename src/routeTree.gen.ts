@@ -130,6 +130,7 @@ import { Route as AuthenticatedAdminOverviewRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminDntradeHealthRouteImport } from './routes/_authenticated/admin.dntrade-health'
 import { Route as AuthenticatedAdminCommandsRouteImport } from './routes/_authenticated/admin.commands'
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
+import { Route as ApiIntegrationsSyncProviderRouteImport } from './routes/api/integrations.sync.$provider'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
 import { Route as AuthenticatedAdminDntradeHealthTenantIdRouteImport } from './routes/_authenticated/admin.dntrade-health.$tenantId'
 import { Route as ApiPublicIntegrationsInboundProviderRouteImport } from './routes/api/public/integrations.inbound.$provider'
@@ -794,6 +795,12 @@ const SSlugOrdersOrderIdRoute = SSlugOrdersOrderIdRouteImport.update({
   path: '/orders/$orderId',
   getParentRoute: () => SSlugRoute,
 } as any)
+const ApiIntegrationsSyncProviderRoute =
+  ApiIntegrationsSyncProviderRouteImport.update({
+    id: '/api/integrations/sync/$provider',
+    path: '/api/integrations/sync/$provider',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAdminTenantsTenantIdRoute =
   AuthenticatedAdminTenantsTenantIdRouteImport.update({
     id: '/$tenantId',
@@ -935,6 +942,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
+  '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
   '/api/public/integrations/inbound/$provider': typeof ApiPublicIntegrationsInboundProviderRoute
 }
@@ -1060,6 +1068,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
+  '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
   '/api/public/integrations/inbound/$provider': typeof ApiPublicIntegrationsInboundProviderRoute
 }
@@ -1187,6 +1196,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
+  '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
   '/api/public/integrations/inbound/$provider': typeof ApiPublicIntegrationsInboundProviderRoute
 }
@@ -1314,6 +1324,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
+    | '/api/integrations/sync/$provider'
     | '/s/$slug/orders/$orderId'
     | '/api/public/integrations/inbound/$provider'
   fileRoutesByTo: FileRoutesByTo
@@ -1439,6 +1450,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
+    | '/api/integrations/sync/$provider'
     | '/s/$slug/orders/$orderId'
     | '/api/public/integrations/inbound/$provider'
   id:
@@ -1565,6 +1577,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/admin/dntrade-health/$tenantId'
     | '/_authenticated/admin/tenants/$tenantId'
+    | '/api/integrations/sync/$provider'
     | '/s/$slug/orders/$orderId'
     | '/api/public/integrations/inbound/$provider'
   fileRoutesById: FileRoutesById
@@ -1674,6 +1687,7 @@ export interface RootRouteChildren {
   HooksTelegramNotifyOwnerRoute: typeof HooksTelegramNotifyOwnerRoute
   HooksTelegramPollRoute: typeof HooksTelegramPollRoute
   TrackSlugJsRoute: typeof TrackSlugJsRoute
+  ApiIntegrationsSyncProviderRoute: typeof ApiIntegrationsSyncProviderRoute
   ApiPublicIntegrationsInboundProviderRoute: typeof ApiPublicIntegrationsInboundProviderRoute
 }
 
@@ -2526,6 +2540,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SSlugOrdersOrderIdRouteImport
       parentRoute: typeof SSlugRoute
     }
+    '/api/integrations/sync/$provider': {
+      id: '/api/integrations/sync/$provider'
+      path: '/api/integrations/sync/$provider'
+      fullPath: '/api/integrations/sync/$provider'
+      preLoaderRoute: typeof ApiIntegrationsSyncProviderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/tenants/$tenantId': {
       id: '/_authenticated/admin/tenants/$tenantId'
       path: '/$tenantId'
@@ -2761,6 +2782,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksTelegramNotifyOwnerRoute: HooksTelegramNotifyOwnerRoute,
   HooksTelegramPollRoute: HooksTelegramPollRoute,
   TrackSlugJsRoute: TrackSlugJsRoute,
+  ApiIntegrationsSyncProviderRoute: ApiIntegrationsSyncProviderRoute,
   ApiPublicIntegrationsInboundProviderRoute:
     ApiPublicIntegrationsInboundProviderRoute,
 }

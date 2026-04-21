@@ -6,7 +6,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   METHOD_LABELS,
@@ -17,7 +17,10 @@ import {
 type Props = {
   integration: IntegrationDef;
   isConnected?: boolean;
+  canSync?: boolean;
+  syncing?: boolean;
   onSelect: (integration: IntegrationDef) => void;
+  onSync?: (integration: IntegrationDef) => void;
 };
 
 const IMPORT_LABELS: Record<string, string> = {
