@@ -272,10 +272,10 @@ export const Route = createFileRoute("/hooks/ingest")({
                 currency: (body.currency ?? "UAH").toUpperCase(),
                 customer_email: body.customer?.email ?? null,
                 customer_name: body.customer?.name ?? null,
-                customer_user_id: body.customer?.user_id ?? null,
+                customer_user_id: null, // FK to auth.users — never write external IDs
                 payment_method: "manual",
                 payment_ref: `${body.session_id ?? "anon"}:${body.total_cents}`,
-                metadata: { ingest: true, source: "pixel" } as never,
+                metadata: { ingest: true, source: "pixel", external_user_id: body.customer?.user_id ?? null } as never,
               })
               .select("id")
               .single();
