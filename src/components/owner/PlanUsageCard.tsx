@@ -3,7 +3,7 @@
  * Read-only — owners cannot self-upgrade (super-admin controlled in this iteration).
  */
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { Crown, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { UsageMeters, type PlanSummary } from "@/components/admin/UsageMeters";
 import { PlanBadge } from "@/components/admin/PlanBadge";
 
 export function PlanUsageCard({ tenantId }: { tenantId: string }) {
+  const navigate = useNavigate();
   const { data, isLoading } = useQuery({
     queryKey: ["plan-summary", tenantId],
     queryFn: async () => {
@@ -49,10 +50,13 @@ export function PlanUsageCard({ tenantId }: { tenantId: string }) {
             <PlanBadge planKey={data.plan.key} planName={data.plan.name} />
             <Badge variant="outline">{data.subscription.status}</Badge>
           </CardTitle>
-          <Button asChild size="sm" variant="outline">
-            <Link to="/brand/billing" search={{ tenant: tenantId }}>
-              Billing & balance <ExternalLink className="ml-1 h-3 w-3" />
-            </Link>
+          <Button
+            size="sm"
+            variant="outline"
+            type="button"
+            onClick={() => void navigate({ to: "/brand/billing", search: { tenant: tenantId } })}
+          >
+            Billing & balance <ExternalLink className="ml-1 h-3 w-3" />
           </Button>
         </div>
         <CardDescription>
