@@ -14,6 +14,7 @@ type AuthContextValue = {
   signOut: () => Promise<void>;
   requestPasswordReset: (email: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
+  updateProfile: (input: { fullName?: string; bio?: string }) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -119,6 +120,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw new Error(humanizeAuthError(error.message));
   }
 
+  async function updateProfile(input: { fullName?: string; bio?: string }) {
+    const metadata: Record<string, string> = {};
+    if (typeof input.fullName === "string") metadata.full_name = input.fullName.trim();
+    if (typeof input.bio === "string") metadata.bio = input.bio.trim();
+
+    const { error } = await supabase.auth.updateUser({
+      data: metadata,
+    });
+    if (error) throw new Error(humanizeAuthError(error.message));
+
+    const { data } = await supabase.auth.getUser();
+    setUser(data.user ?? null);
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -131,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut,
         requestPasswordReset,
         updatePassword,
+        updateProfile,
       }}
     >
       {children}
