@@ -89,7 +89,7 @@ async function pullShopify(input: ConnectorPullInput): Promise<ConnectorPullResu
   const json = (await res.json()) as Record<string, unknown>;
   const items = (json[resource] as Array<Record<string, unknown>>) ?? [];
 
-  const rows: ParsedRow[] = items.map((it) => {
+  const rows: ParsedRow[] = items.map((it): ParsedRow => {
     if (resource === "products") {
       const variants = (it.variants as Array<Record<string, unknown>>) ?? [];
       const v = variants[0] ?? {};
@@ -152,7 +152,7 @@ async function pullWooCommerce(input: ConnectorPullInput): Promise<ConnectorPull
   }
   const items = (await res.json()) as Array<Record<string, unknown>>;
 
-  const rows: ParsedRow[] = items.map((it) => {
+  const rows: ParsedRow[] = items.map((it): ParsedRow => {
     if (resource === "products") {
       const images = (it.images as Array<Record<string, unknown>>) ?? [];
       return {
@@ -208,7 +208,7 @@ async function pullStripe(input: ConnectorPullInput): Promise<ConnectorPullResul
   const json = (await res.json()) as { data?: Array<Record<string, unknown>> };
   const items = json.data ?? [];
 
-  const rows: ParsedRow[] = items.map((it) => {
+  const rows: ParsedRow[] = items.map((it): ParsedRow => {
     if (resource === "customers") {
       return {
         name: asString(it.name) || asString(it.email),
@@ -256,7 +256,7 @@ async function pullBitrix24(input: ConnectorPullInput): Promise<ConnectorPullRes
   const json = (await res.json()) as { result?: Array<Record<string, unknown>> };
   const items = (json.result ?? []).slice(0, limit);
 
-  const rows: ParsedRow[] = items.map((it) => {
+  const rows: ParsedRow[] = items.map((it): ParsedRow => {
     if (input.entityKind === "customers") {
       const emails = (it.EMAIL as Array<{ VALUE?: string }>) ?? [];
       const phones = (it.PHONE as Array<{ VALUE?: string }>) ?? [];
@@ -303,7 +303,7 @@ async function pullPoster(input: ConnectorPullInput): Promise<ConnectorPullResul
   if (json.error) throw new Error(`Poster API error: ${JSON.stringify(json.error)}`);
   const items = (json.response ?? []).slice(0, limit);
 
-  const rows: ParsedRow[] = items.map((it) => {
+  const rows: ParsedRow[] = items.map((it): ParsedRow => {
     if (input.entityKind === "products") {
       return {
         name: asString(it.product_name),
@@ -382,7 +382,7 @@ async function pullRest(input: ConnectorPullInput): Promise<ConnectorPullResult>
   else if (Array.isArray((json as { data?: unknown }).data)) items = (json as { data: Array<Record<string, unknown>> }).data;
   else if (Array.isArray((json as { results?: unknown }).results)) items = (json as { results: Array<Record<string, unknown>> }).results;
   else throw new Error("Очікувано масив у відповіді або поле data/results.");
-  const rows: ParsedRow[] = items.map((it) => {
+  const rows: ParsedRow[] = items.map((it): ParsedRow => {
     const out: ParsedRow = {};
     for (const [k, v] of Object.entries(it)) out[k] = asString(v);
     return out;
