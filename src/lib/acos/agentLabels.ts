@@ -5,6 +5,7 @@
 export const AGENT_HUMAN_LABELS: Record<string, string> = {
   // Базові
   onboarding: "Привітання нових клієнтів",
+  onboarding_coach: "Привітання нових клієнтів",
   "churn-risk": "Ризик втрати клієнта",
   churn_risk_predictor: "Ризик втрати клієнта",
   "customer-churn-predictor": "Прогноз відтоку клієнтів",
@@ -25,6 +26,7 @@ export const AGENT_HUMAN_LABELS: Record<string, string> = {
   segmentation: "Розподіл клієнтів на групи",
   customer_segmentation: "Розподіл клієнтів на групи",
   "memory-feedback": "Навчання на досвіді",
+  feedback_loop: "Навчання на досвіді",
 
   // Маржа й прогнози
   "margin-optimizer": "Оптимізація прибутковості",
