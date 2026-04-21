@@ -31,14 +31,11 @@ type MemoryRow = {
 
 type Filter = "all" | "active" | "inactive";
 
+import { AGENT_HUMAN_LABELS } from "@/lib/acos/agentLabels";
 const AGENT_LABELS: Record<string, string> = {
-  reorder_engine: "Reorder",
-  winback_engine: "Winback",
-  abandoned_cart: "Cart Recovery",
-  sales_bot: "Sales Bot",
-  price_optimizer: "Price",
-  aov_optimizer: "AOV",
-  feedback_loop: "Feedback Loop",
+  ...AGENT_HUMAN_LABELS,
+  abandoned_cart: "Повернення кошиків",
+  feedback_loop: "Навчання на відгуках",
 };
 
 function formatRule(rule: string): string {
