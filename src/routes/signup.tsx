@@ -4,12 +4,14 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { lovable } from "@/integrations/lovable";
+import { useT, tStatic } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
-      { title: "Create account — ACOS" },
-      { name: "description", content: "Create your ACOS workspace with Google." },
+      { title: `${tStatic("auth.signupTitle")} — ACOS` },
+      { name: "description", content: tStatic("auth.signupDesc") },
     ],
   }),
   component: SignupPage,
@@ -17,6 +19,7 @@ export const Route = createFileRoute("/signup")({
 
 function SignupPage() {
   const navigate = useNavigate();
+  const { t } = useT();
   const [submitting, setSubmitting] = useState(false);
 
   async function onGoogle() {
@@ -26,35 +29,38 @@ function SignupPage() {
         redirect_uri: window.location.origin,
       });
       if (result.error) {
-        toast.error(result.error instanceof Error ? result.error.message : "Не вдалось зареєструватись через Google");
+        toast.error(result.error instanceof Error ? result.error.message : t("auth.failSignupGoogle"));
         setSubmitting(false);
         return;
       }
       if (result.redirected) return;
-      toast.success("Account created");
+      toast.success(t("auth.created"));
       navigate({ to: "/dashboard" });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Sign up failed");
+      toast.error(err instanceof Error ? err.message : t("auth.failSignup"));
       setSubmitting(false);
     }
   }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="absolute right-4 top-4">
+        <LanguageSwitcher />
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Create account</CardTitle>
-          <CardDescription>Зареєструйтесь у ACOS через Google за секунду.</CardDescription>
+          <CardTitle>{t("auth.signupTitle")}</CardTitle>
+          <CardDescription>{t("auth.signupDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Button type="button" variant="outline" className="w-full" onClick={onGoogle} disabled={submitting}>
             <GoogleIcon />
-            {submitting ? "Перенаправлення…" : "Sign up with Google"}
+            {submitting ? t("auth.redirecting") : t("auth.signupGoogle")}
           </Button>
           <p className="text-center text-sm text-muted-foreground">
-            Вже маєте акаунт?{" "}
+            {t("auth.hasAccount")}{" "}
             <Link to="/login" className="font-medium text-primary hover:underline">
-              Увійти
+              {t("auth.signin")}
             </Link>
           </p>
         </CardContent>

@@ -14,76 +14,24 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
+import { useT, tStatic } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ACOS — Autonomous Revenue OS for D2C brands" },
-      {
-        name: "description",
-        content:
-          "Connect your store once. AI agents monitor churn, stockouts, AOV leaks, pricing and SEO 24/7 — and queue revenue opportunities for one-click approval.",
-      },
-      { property: "og:title", content: "ACOS — Autonomous Revenue OS for D2C brands" },
-      {
-        property: "og:description",
-        content:
-          "AI agents that find revenue opportunities in your D2C brand and apply them after your one-click approval.",
-      },
+      { title: tStatic("home.title") },
+      { name: "description", content: tStatic("home.metaDesc") },
+      { property: "og:title", content: tStatic("home.title") },
+      { property: "og:description", content: tStatic("home.metaDesc") },
     ],
   }),
   component: Index,
 });
 
-const AGENT_LOOPS = [
-  {
-    icon: AlertOctagon,
-    title: "Churn Prevention",
-    description:
-      "Detects VIPs whose buying cadence has slipped. Suggests targeted winback touches before they go cold.",
-    impact: "+8–15% retained revenue",
-  },
-  {
-    icon: Boxes,
-    title: "Stockout Forecast",
-    description:
-      "Predicts when SKUs will run out. Triggers reorder alerts and surfaces which products to push down funnel.",
-    impact: "Eliminate lost sales from OOS",
-  },
-  {
-    icon: TrendingUp,
-    title: "AOV Optimization",
-    description:
-      "Spots categories where average order value is leaking. Recommends bundles, upsells, and shipping thresholds.",
-    impact: "+5–12% AOV per bundle",
-  },
-];
-
-const HOW_IT_WORKS = [
-  {
-    step: "01",
-    title: "Connect your data",
-    description: "Plug in your store, payments, and analytics. ACOS reads your orders, customers, and traffic.",
-  },
-  {
-    step: "02",
-    title: "Agents run 24/7",
-    description: "Specialized AI agents continuously analyze every layer — CRM, inventory, pricing, SEO.",
-  },
-  {
-    step: "03",
-    title: "Approve in one click",
-    description: "Insights land in your queue with expected impact and confidence score. You stay in control.",
-  },
-  {
-    step: "04",
-    title: "Memory loop learns",
-    description: "Actions that grow revenue get amplified. Patterns that fail get blocked. Smarter every week.",
-  },
-];
-
 function Index() {
   const { user, loading } = useAuth();
+  const { t } = useT();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -91,6 +39,26 @@ function Index() {
       navigate({ to: "/dashboard" });
     }
   }, [loading, user, navigate]);
+
+  const loops = [
+    { icon: AlertOctagon, title: t("home.loops.churnTitle"), desc: t("home.loops.churnDesc"), impact: t("home.loops.churnImpact") },
+    { icon: Boxes, title: t("home.loops.stockTitle"), desc: t("home.loops.stockDesc"), impact: t("home.loops.stockImpact") },
+    { icon: TrendingUp, title: t("home.loops.aovTitle"), desc: t("home.loops.aovDesc"), impact: t("home.loops.aovImpact") },
+  ];
+
+  const how = [
+    { step: "01", title: t("home.how.s1Title"), desc: t("home.how.s1Desc") },
+    { step: "02", title: t("home.how.s2Title"), desc: t("home.how.s2Desc") },
+    { step: "03", title: t("home.how.s3Title"), desc: t("home.how.s3Desc") },
+    { step: "04", title: t("home.how.s4Title"), desc: t("home.how.s4Desc") },
+  ];
+
+  const why = [
+    { icon: Crown, title: t("home.why.multiTitle"), desc: t("home.why.multiDesc") },
+    { icon: Database, title: t("home.why.memTitle"), desc: t("home.why.memDesc") },
+    { icon: Users, title: t("home.why.queueTitle"), desc: t("home.why.queueDesc") },
+    { icon: CheckCircle2, title: t("home.why.shopTitle"), desc: t("home.why.shopDesc") },
+  ];
 
   return (
     <main className="min-h-screen bg-background">
@@ -102,13 +70,14 @@ function Index() {
             ACOS
           </Link>
           <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">
-            <Link to="/how-it-works" className="hover:text-foreground transition-colors">How it works</Link>
-            <Link to="/agents" className="hover:text-foreground transition-colors">Agents</Link>
-            <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+            <Link to="/how-it-works" className="hover:text-foreground transition-colors">{t("site.nav.how")}</Link>
+            <Link to="/agents" className="hover:text-foreground transition-colors">{t("site.nav.agents")}</Link>
+            <Link to="/pricing" className="hover:text-foreground transition-colors">{t("site.nav.pricing")}</Link>
           </nav>
           <div className="flex items-center gap-2">
-            <Button asChild size="sm" variant="ghost"><Link to="/login">Sign in</Link></Button>
-            <Button asChild size="sm"><Link to="/signup">Start free</Link></Button>
+            <LanguageSwitcher />
+            <Button asChild size="sm" variant="ghost"><Link to="/login">{t("site.nav.signin")}</Link></Button>
+            <Button asChild size="sm"><Link to="/signup">{t("site.nav.signup")}</Link></Button>
           </div>
         </div>
       </header>
@@ -119,28 +88,28 @@ function Index() {
         <div className="relative mx-auto max-w-5xl px-4 py-20 text-center sm:py-28">
           <Badge variant="outline" className="border-primary/30 bg-primary/5 text-primary">
             <Sparkles className="mr-1 h-3 w-3" />
-            Autonomous Revenue OS
+            {t("home.badge")}
           </Badge>
           <h1 className="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
-            Your D2C brand's{" "}
+            {t("home.heroPre")}{" "}
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              autonomous growth team
-            </span>
+              {t("home.heroAccent")}
+            </span>{" "}
+            {t("home.heroPost")}
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Connect your store once. AI agents monitor churn, stockouts, AOV leaks, pricing and SEO
-            around the clock — and queue revenue opportunities for your one-click approval.
+            {t("home.heroSub")}
           </p>
           <div className="mt-10 flex items-center justify-center gap-3">
             <Button asChild size="lg">
-              <Link to="/signup">Start free</Link>
+              <Link to="/signup">{t("home.heroCtaPrimary")}</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/login">Sign in</Link>
+              <Link to="/login">{t("home.heroCtaSecondary")}</Link>
             </Button>
           </div>
           <p className="mt-6 text-xs text-muted-foreground">
-            No credit card required · Connect your existing store
+            {t("home.heroNote")}
           </p>
         </div>
       </section>
@@ -149,19 +118,18 @@ function Index() {
       <section className="mx-auto max-w-6xl px-4 py-20">
         <div className="text-center">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-            Always-on agent loops
+            {t("home.loops.eyebrow")}
           </p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Specialized AI agents for every revenue lever
+            {t("home.loops.title")}
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground">
-            Not a chatbot. Not a dashboard. A team of focused agents that continuously hunt for
-            growth in your data.
+            {t("home.loops.subtitle")}
           </p>
         </div>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {AGENT_LOOPS.map((loop) => {
+          {loops.map((loop) => {
             const Icon = loop.icon;
             return (
               <Card key={loop.title} className="border-border bg-card/50">
@@ -170,7 +138,7 @@ function Index() {
                     <Icon className="h-5 w-5 text-primary" />
                   </div>
                   <CardTitle className="mt-4 text-lg">{loop.title}</CardTitle>
-                  <CardDescription>{loop.description}</CardDescription>
+                  <CardDescription>{loop.desc}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Badge variant="secondary" className="text-xs">
@@ -188,19 +156,19 @@ function Index() {
         <div className="mx-auto max-w-6xl px-4 py-20">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-              How it works
+              {t("home.how.eyebrow")}
             </p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              Connect once. Approve. Grow.
+              {t("home.how.title")}
             </h2>
           </div>
 
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {HOW_IT_WORKS.map((item) => (
+            {how.map((item) => (
               <div key={item.step} className="relative">
                 <div className="text-3xl font-bold text-primary/30">{item.step}</div>
                 <h3 className="mt-2 text-base font-semibold text-foreground">{item.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -212,42 +180,17 @@ function Index() {
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-              Why ACOS
+              {t("home.why.eyebrow")}
             </p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              You stay in control. The system does the work.
+              {t("home.why.title")}
             </h2>
             <p className="mt-4 text-base text-muted-foreground">
-              Every action is queued for your approval with expected impact and confidence score.
-              ACOS never moves money or messages your customers without you saying yes.
+              {t("home.why.body")}
             </p>
           </div>
           <div className="space-y-4">
-            {[
-              {
-                icon: Crown,
-                title: "Multi-tenant from day one",
-                description: "Run multiple brands. Each gets isolated data, agents, and approval queue.",
-              },
-              {
-                icon: Database,
-                title: "Memory that learns",
-                description:
-                  "Patterns that work get boosted. Patterns that fail get blocked. Auto-tuned per brand.",
-              },
-              {
-                icon: Users,
-                title: "Approval queue, not autopilot",
-                description:
-                  "One-click approve, reject, or batch. Full revert log. You always know what changed.",
-              },
-              {
-                icon: CheckCircle2,
-                title: "Optional commerce shell",
-                description:
-                  "Don't have a store yet? Spin up a hosted storefront in minutes. Or connect Shopify.",
-              },
-            ].map((item) => {
+            {why.map((item) => {
               const Icon = item.icon;
               return (
                 <div key={item.title} className="flex gap-4">
@@ -256,7 +199,7 @@ function Index() {
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-foreground">{item.title}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{item.desc}</p>
                   </div>
                 </div>
               );
@@ -269,17 +212,17 @@ function Index() {
       <section className="border-t border-border bg-gradient-to-br from-primary/10 via-background to-background">
         <div className="mx-auto max-w-3xl px-4 py-20 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Stop watching dashboards. Start approving growth.
+            {t("home.cta.title")}
           </h2>
           <p className="mt-4 text-base text-muted-foreground">
-            Set up your first brand in under five minutes.
+            {t("home.cta.body")}
           </p>
           <div className="mt-8 flex items-center justify-center gap-3">
             <Button asChild size="lg">
-              <Link to="/signup">Get started</Link>
+              <Link to="/signup">{t("home.cta.primary")}</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/how-it-works">See how it works</Link>
+              <Link to="/how-it-works">{t("home.cta.secondary")}</Link>
             </Button>
           </div>
         </div>
@@ -290,13 +233,13 @@ function Index() {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 text-xs text-muted-foreground sm:flex-row">
           <div className="flex items-center gap-2">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
-            <span>ACOS — Autonomous Revenue OS</span>
+            <span>{t("home.footer.tag")}</span>
           </div>
           <nav className="flex flex-wrap items-center gap-4">
-            <Link to="/how-it-works" className="hover:text-foreground">How it works</Link>
-            <Link to="/agents" className="hover:text-foreground">Agents</Link>
-            <Link to="/pricing" className="hover:text-foreground">Pricing</Link>
-            <Link to="/login" className="hover:text-foreground">Sign in</Link>
+            <Link to="/how-it-works" className="hover:text-foreground">{t("site.nav.how")}</Link>
+            <Link to="/agents" className="hover:text-foreground">{t("site.nav.agents")}</Link>
+            <Link to="/pricing" className="hover:text-foreground">{t("site.nav.pricing")}</Link>
+            <Link to="/login" className="hover:text-foreground">{t("site.nav.signin")}</Link>
           </nav>
         </div>
       </footer>
