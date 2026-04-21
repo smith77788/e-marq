@@ -407,6 +407,59 @@ export type Database = {
           },
         ]
       }
+      balance_ledger: {
+        Row: {
+          actor_user_id: string | null
+          amount: number
+          balance_after: number
+          created_at: string
+          direction: string
+          id: string
+          kind: string
+          metadata: Json
+          reason: string
+          reference_id: string | null
+          reference_kind: string | null
+          tenant_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          amount: number
+          balance_after: number
+          created_at?: string
+          direction: string
+          id?: string
+          kind: string
+          metadata?: Json
+          reason: string
+          reference_id?: string | null
+          reference_kind?: string | null
+          tenant_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          direction?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          reason?: string
+          reference_id?: string | null
+          reference_kind?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "balance_ledger_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cart_recovery_attempts: {
         Row: {
           abandoned_at: string
@@ -1477,6 +1530,136 @@ export type Database = {
           },
         ]
       }
+      plan_change_log: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          from_plan_id: string | null
+          id: string
+          reason: string | null
+          tenant_id: string
+          to_plan_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          from_plan_id?: string | null
+          id?: string
+          reason?: string | null
+          tenant_id: string
+          to_plan_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          from_plan_id?: string | null
+          id?: string
+          reason?: string | null
+          tenant_id?: string
+          to_plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_change_log_from_plan_id_fkey"
+            columns: ["from_plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_change_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_change_log_to_plan_id_fkey"
+            columns: ["to_plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          agents_allowed: string[]
+          created_at: string
+          currency: string
+          description: string | null
+          features_enabled: string[]
+          id: string
+          is_active: boolean
+          is_public: boolean
+          key: string
+          max_ai_credits_monthly_grant: number
+          max_ai_runs_per_month: number | null
+          max_customers: number | null
+          max_orders_per_month: number | null
+          max_outbound_messages_per_month: number | null
+          max_products: number | null
+          max_storage_mb: number | null
+          max_team_members: number | null
+          metadata: Json
+          name: string
+          price_cents_monthly: number
+          price_cents_yearly: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          agents_allowed?: string[]
+          created_at?: string
+          currency?: string
+          description?: string | null
+          features_enabled?: string[]
+          id?: string
+          is_active?: boolean
+          is_public?: boolean
+          key: string
+          max_ai_credits_monthly_grant?: number
+          max_ai_runs_per_month?: number | null
+          max_customers?: number | null
+          max_orders_per_month?: number | null
+          max_outbound_messages_per_month?: number | null
+          max_products?: number | null
+          max_storage_mb?: number | null
+          max_team_members?: number | null
+          metadata?: Json
+          name: string
+          price_cents_monthly?: number
+          price_cents_yearly?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          agents_allowed?: string[]
+          created_at?: string
+          currency?: string
+          description?: string | null
+          features_enabled?: string[]
+          id?: string
+          is_active?: boolean
+          is_public?: boolean
+          key?: string
+          max_ai_credits_monthly_grant?: number
+          max_ai_runs_per_month?: number | null
+          max_customers?: number | null
+          max_orders_per_month?: number | null
+          max_outbound_messages_per_month?: number | null
+          max_products?: number | null
+          max_storage_mb?: number | null
+          max_team_members?: number | null
+          metadata?: Json
+          name?: string
+          price_cents_monthly?: number
+          price_cents_yearly?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       price_elasticity: {
         Row: {
           computed_at: string
@@ -2050,6 +2233,47 @@ export type Database = {
           },
         ]
       }
+      tenant_balances: {
+        Row: {
+          ai_credits_balance: number
+          ai_credits_consumed_this_period: number
+          ai_credits_granted_this_period: number
+          currency: string
+          last_grant_at: string | null
+          money_balance_cents: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          ai_credits_balance?: number
+          ai_credits_consumed_this_period?: number
+          ai_credits_granted_this_period?: number
+          currency?: string
+          last_grant_at?: string | null
+          money_balance_cents?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          ai_credits_balance?: number
+          ai_credits_consumed_this_period?: number
+          ai_credits_granted_this_period?: number
+          currency?: string
+          last_grant_at?: string | null
+          money_balance_cents?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_balances_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_configs: {
         Row: {
           bot: Json
@@ -2116,6 +2340,101 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tenant_memberships_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_end: string
+          current_period_start: string
+          id: string
+          notes: string | null
+          overrides: Json
+          plan_id: string
+          status: string
+          tenant_id: string
+          trial_ends_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          id?: string
+          notes?: string | null
+          overrides?: Json
+          plan_id: string
+          status?: string
+          tenant_id: string
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          id?: string
+          notes?: string | null
+          overrides?: Json
+          plan_id?: string
+          status?: string
+          tenant_id?: string
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_subscriptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_usage_counters: {
+        Row: {
+          id: string
+          metric: string
+          period_start: string
+          tenant_id: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          id?: string
+          metric: string
+          period_start: string
+          tenant_id: string
+          updated_at?: string
+          value?: number
+        }
+        Update: {
+          id?: string
+          metric?: string
+          period_start?: string
+          tenant_id?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_usage_counters_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -2243,6 +2562,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_balance: {
+        Args: {
+          _amount: number
+          _kind: string
+          _reason: string
+          _reference_kind?: string
+          _tenant_id: string
+        }
+        Returns: number
+      }
       cancel_order: {
         Args: { _order_id: string }
         Returns: {
@@ -2268,13 +2597,67 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      change_tenant_plan: {
+        Args: { _plan_key: string; _reason?: string; _tenant_id: string }
+        Returns: {
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_end: string
+          current_period_start: string
+          id: string
+          notes: string | null
+          overrides: Json
+          plan_id: string
+          status: string
+          tenant_id: string
+          trial_ends_at: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tenant_subscriptions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      check_feature_enabled: {
+        Args: { _feature: string; _tenant_id: string }
+        Returns: boolean
+      }
+      check_plan_limit: {
+        Args: { _limit_key: string; _metric: string; _tenant_id: string }
+        Returns: boolean
+      }
+      consume_ai_credits: {
+        Args: {
+          _amount: number
+          _reason: string
+          _reference_id?: string
+          _reference_kind?: string
+          _tenant_id: string
+        }
+        Returns: boolean
+      }
+      get_current_usage: {
+        Args: { _metric: string; _tenant_id: string }
+        Returns: number
+      }
+      get_effective_limit: {
+        Args: { _limit_key: string; _tenant_id: string }
+        Returns: number
+      }
       get_public_order: { Args: { _order_id: string }; Returns: Json }
+      get_tenant_plan_summary: { Args: { _tenant_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_usage: {
+        Args: { _delta?: number; _metric: string; _tenant_id: string }
+        Returns: undefined
       }
       is_super_admin: { Args: never; Returns: boolean }
       is_tenant_admin: { Args: { _tenant_id: string }; Returns: boolean }
