@@ -65,15 +65,15 @@ function BrandPage() {
 
   const current = tenants?.find((t) => t.id === tenantId);
 
-  if (loading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (loading) return <p className="text-sm text-muted-foreground">Завантаження…</p>;
 
   if (!tenants || tenants.length === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>No brand yet</CardTitle>
+          <CardTitle>У вас ще немає бренду</CardTitle>
           <CardDescription>
-            You don't own a brand yet. Ask a super-admin to create one and assign you as owner.
+            Попросіть супер-адміністратора створити бренд і призначити вас власником.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -81,7 +81,7 @@ function BrandPage() {
   }
 
   if (!current) {
-    return <p className="text-sm text-muted-foreground">Loading brand…</p>;
+    return <p className="text-sm text-muted-foreground">Завантажую бренд…</p>;
   }
 
   return (
@@ -172,10 +172,10 @@ function BrandPage() {
         <CardHeader>
           <CardTitle className="text-sm flex items-center gap-2">
             <Settings className="h-4 w-4 text-muted-foreground" />
-            Storefront & catalogue
+            Магазин і каталог
           </CardTitle>
           <CardDescription className="text-xs">
-            Public storefront lives at <Link to="/s/$slug" params={{ slug: current.slug }} className="text-primary hover:underline">/s/{current.slug}</Link>. Manage products and orders in the brand admin.
+            Ваш публічний магазин: <Link to="/s/$slug" params={{ slug: current.slug }} className="text-primary hover:underline">/s/{current.slug}</Link>. Товарами та замовленнями керуйте у розділі бренду.
           </CardDescription>
         </CardHeader>
       </Card>

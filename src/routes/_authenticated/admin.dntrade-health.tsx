@@ -86,21 +86,21 @@ type NotificationRow = {
 };
 
 const STATUS_TONE: Record<string, { label: string; className: string }> = {
-  healthy: { label: "Healthy", className: "bg-success/15 text-success border-success/30" },
+  healthy: { label: "Працює", className: "bg-success/15 text-success border-success/30" },
   degraded: {
-    label: "Degraded",
+    label: "З попередженнями",
     className: "bg-warning/15 text-warning border-warning/30",
   },
   unhealthy: {
-    label: "Unhealthy",
+    label: "Не працює",
     className: "bg-destructive/15 text-destructive border-destructive/30",
   },
   missing: {
-    label: "Missing",
+    label: "Не підключено",
     className: "bg-muted text-muted-foreground border-border",
   },
   error: {
-    label: "Error",
+    label: "Помилка",
     className: "bg-destructive/15 text-destructive border-destructive/30",
   },
 };
@@ -357,7 +357,7 @@ function DnTradeHealthContent() {
         <Card className="border-border/60 bg-card/60 backdrop-blur">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1.5 text-xs">
-              <HeartPulse className="h-3.5 w-3.5" /> Tenants з інтеграцією
+              <HeartPulse className="h-3.5 w-3.5" /> Бренди з інтеграцією
             </CardDescription>
             <CardTitle className="text-3xl font-bold">{kpi.tenants}</CardTitle>
           </CardHeader>
@@ -368,40 +368,40 @@ function DnTradeHealthContent() {
         <Card className="border-success/30 bg-success/5 backdrop-blur">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1.5 text-xs text-success">
-              <CheckCircle2 className="h-3.5 w-3.5" /> Healthy
+              <CheckCircle2 className="h-3.5 w-3.5" /> Працює
             </CardDescription>
             <CardTitle className="text-3xl font-bold text-success">
               {kpi.healthyPct}%
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
-            {kpi.healthy} зі {kpi.total} перевірок
+            {kpi.healthy} з {kpi.total} перевірок
           </CardContent>
         </Card>
         <Card className="border-warning/30 bg-warning/5 backdrop-blur">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1.5 text-xs text-warning">
-              <TriangleAlert className="h-3.5 w-3.5" /> Degraded
+              <TriangleAlert className="h-3.5 w-3.5" /> З попередженнями
             </CardDescription>
             <CardTitle className="text-3xl font-bold text-warning">
               {kpi.degradedPct}%
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
-            {kpi.degraded} з попередженнями
+            {kpi.degraded} перевірок з попередженнями
           </CardContent>
         </Card>
         <Card className="border-destructive/30 bg-destructive/5 backdrop-blur">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1.5 text-xs text-destructive">
-              <ShieldAlert className="h-3.5 w-3.5" /> Unhealthy
+              <ShieldAlert className="h-3.5 w-3.5" /> Не працює
             </CardDescription>
             <CardTitle className="text-3xl font-bold text-destructive">
               {kpi.unhealthyPct}%
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
-            {kpi.unhealthy} з блокерами
+            {kpi.unhealthy} перевірок із серйозними проблемами
           </CardContent>
         </Card>
       </div>
@@ -448,7 +448,7 @@ function DnTradeHealthContent() {
                 stackId="1"
                 stroke="hsl(var(--success))"
                 fill="url(#hHealthy)"
-                name="Healthy"
+                name="Працює"
               />
               <Area
                 type="monotone"
@@ -456,7 +456,7 @@ function DnTradeHealthContent() {
                 stackId="1"
                 stroke="hsl(var(--warning))"
                 fill="url(#hDegraded)"
-                name="Degraded"
+                name="Попередження"
               />
               <Area
                 type="monotone"
@@ -464,7 +464,7 @@ function DnTradeHealthContent() {
                 stackId="1"
                 stroke="hsl(var(--destructive))"
                 fill="url(#hUnhealthy)"
-                name="Unhealthy"
+                name="Не працює"
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -476,10 +476,10 @@ function DnTradeHealthContent() {
         <Card className="border-destructive/30 bg-card/60 backdrop-blur">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <ShieldAlert className="h-4 w-4 text-destructive" /> Top блокерів · 24г
+              <ShieldAlert className="h-4 w-4 text-destructive" /> Найчастіші проблеми · 24 год
             </CardTitle>
             <CardDescription className="text-xs">
-              Що частіше за все блокує інтеграції
+              Що найчастіше ламає інтеграцію
             </CardDescription>
           </CardHeader>
           <CardContent>

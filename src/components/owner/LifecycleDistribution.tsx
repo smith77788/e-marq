@@ -14,11 +14,11 @@ type Props = { tenantId: string };
 type Customer = { lifecycle_stage: string; total_spent_cents: number; total_orders: number };
 
 const STAGES = [
-  { key: "vip",      label: "VIP",       color: "hsl(var(--primary))" },
-  { key: "active",   label: "Active",    color: "hsl(var(--accent))" },
-  { key: "new",      label: "New",       color: "hsl(var(--success))" },
-  { key: "at_risk",  label: "At risk",   color: "hsl(var(--warning))" },
-  { key: "churned",  label: "Churned",   color: "hsl(var(--destructive))" },
+  { key: "vip",      label: "VIP",                    color: "hsl(var(--primary))" },
+  { key: "active",   label: "Активні",                color: "hsl(var(--accent))" },
+  { key: "new",      label: "Нові",                   color: "hsl(var(--success))" },
+  { key: "at_risk",  label: "Можуть піти",            color: "hsl(var(--warning))" },
+  { key: "churned",  label: "Втрачені",               color: "hsl(var(--destructive))" },
 ] as const;
 
 function fmtUsd(cents: number) {
@@ -69,7 +69,7 @@ export function LifecycleDistribution({ tenantId }: Props) {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-sm">
             <UsersRound className="h-4 w-4 text-primary" />
-            Lifecycle mix
+            Розподіл клієнтів за стадіями
           </CardTitle>
         </CardHeader>
         <CardContent><div className="h-48 animate-pulse rounded-md bg-muted/30" /></CardContent>
@@ -82,16 +82,16 @@ export function LifecycleDistribution({ tenantId }: Props) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
           <UsersRound className="h-4 w-4 text-primary" />
-          Lifecycle mix
+          Розподіл клієнтів за стадіями
         </CardTitle>
         <CardDescription className="text-xs">
-          {total.toLocaleString()} customers · {fmtUsd(totalRev)} lifetime revenue
+          {total.toLocaleString("uk-UA")} клієнтів · усього витратили {fmtUsd(totalRev)}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {total === 0 ? (
           <div className="rounded-md border border-dashed border-border bg-muted/20 p-4 text-center text-xs text-muted-foreground">
-            No customers yet.
+            Поки що клієнтів немає.
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3 sm:flex-row">
@@ -131,7 +131,7 @@ export function LifecycleDistribution({ tenantId }: Props) {
               </ResponsiveContainer>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-2xl font-bold text-foreground">{total}</span>
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">customers</span>
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">клієнтів</span>
               </div>
             </div>
             <ul className="flex-1 space-y-1.5 text-xs w-full">

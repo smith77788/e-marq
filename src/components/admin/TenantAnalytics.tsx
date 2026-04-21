@@ -17,11 +17,11 @@ import { supabase } from "@/integrations/supabase/client";
 type Props = { tenantId: string };
 
 const FUNNEL_STEPS = [
-  { type: "content_viewed", label: "Page view" },
-  { type: "product_viewed", label: "Product view" },
-  { type: "add_to_cart", label: "Add to cart" },
-  { type: "checkout_started", label: "Checkout" },
-  { type: "purchase_completed", label: "Purchase" },
+  { type: "content_viewed", label: "Перегляд сторінки" },
+  { type: "product_viewed", label: "Перегляд товару" },
+  { type: "add_to_cart", label: "У кошик" },
+  { type: "checkout_started", label: "Оформлення" },
+  { type: "purchase_completed", label: "Покупка" },
 ] as const;
 
 function startOfDayISO(d: Date) {
@@ -101,12 +101,12 @@ export function TenantAnalytics({ tenantId }: Props) {
     <div className="grid gap-4 lg:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle>Conversion funnel</CardTitle>
-          <CardDescription>Last 30 days. % relative to first step.</CardDescription>
+          <CardTitle>Воронка конверсії</CardTitle>
+          <CardDescription>Останні 30 днів. % від першого кроку.</CardDescription>
         </CardHeader>
         <CardContent>
           {funnelQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+            <p className="text-sm text-muted-foreground">Завантаження…</p>
           ) : funnelQuery.data && funnelQuery.data.some((d) => d.count > 0) ? (
             <div className="space-y-3">
               <div className="h-56 w-full">
@@ -134,7 +134,7 @@ export function TenantAnalytics({ tenantId }: Props) {
                       }}
                       formatter={(value: number, name: string, item) => {
                         const rate = (item.payload as { rate: number }).rate;
-                        return [`${value.toLocaleString()} (${rate}%)`, "Events"];
+                        return [`${value.toLocaleString("uk-UA")} (${rate}%)`, "Подій"];
                       }}
                     />
                     <Bar dataKey="count" radius={[0, 4, 4, 0]}>
@@ -159,7 +159,7 @@ export function TenantAnalytics({ tenantId }: Props) {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              No events yet. Generate demo data to see the funnel.
+              Подій ще немає. Згенеруйте демо-дані, щоб побачити воронку.
             </p>
           )}
         </CardContent>
@@ -174,7 +174,7 @@ export function TenantAnalytics({ tenantId }: Props) {
         </CardHeader>
         <CardContent>
           {revenueQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+            <p className="text-sm text-muted-foreground">Завантаження…</p>
           ) : revenueQuery.data && revenueQuery.data.length > 0 ? (
             <div className="h-56 w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -214,7 +214,7 @@ export function TenantAnalytics({ tenantId }: Props) {
               </ResponsiveContainer>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No paid orders in the last 30 days.</p>
+            <p className="text-sm text-muted-foreground">За останні 30 днів оплачених замовлень немає.</p>
           )}
         </CardContent>
       </Card>

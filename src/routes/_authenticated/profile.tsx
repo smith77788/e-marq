@@ -19,6 +19,14 @@ export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
 });
 
+const SUB_STATUS_LABEL: Record<string, string> = {
+  trial: "пробний період",
+  active: "активний",
+  past_due: "прострочено",
+  suspended: "призупинено",
+  cancelled: "скасовано",
+};
+
 function ProfilePage() {
   const { user, updateProfile } = useAuth();
   const { current, currentTenantId } = useTenantContext();
@@ -102,7 +110,7 @@ function ProfilePage() {
                   <PlanBadge planKey={summaryQuery.data.plan.key} planName={summaryQuery.data.plan.name} />
                 </CardTitle>
                 <CardDescription>
-                  Статус: {summaryQuery.data.subscription.status} · Період {new Date(summaryQuery.data.subscription.current_period_start).toLocaleDateString("uk-UA")} → {new Date(summaryQuery.data.subscription.current_period_end).toLocaleDateString("uk-UA")}
+                  Статус: {SUB_STATUS_LABEL[summaryQuery.data.subscription.status] ?? summaryQuery.data.subscription.status} · Період {new Date(summaryQuery.data.subscription.current_period_start).toLocaleDateString("uk-UA")} → {new Date(summaryQuery.data.subscription.current_period_end).toLocaleDateString("uk-UA")}
                 </CardDescription>
               </CardHeader>
               <CardContent>

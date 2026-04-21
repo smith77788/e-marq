@@ -26,9 +26,9 @@ export type PlanSummary = {
 };
 
 const METRICS: Array<{ key: string; limitKey: string; label: string }> = [
-  { key: "products_count", limitKey: "max_products", label: "Products" },
-  { key: "orders_count", limitKey: "max_orders_per_month", label: "Orders / mo" },
-  { key: "customers_count", limitKey: "max_customers", label: "Customers" },
+  { key: "products_count", limitKey: "max_products", label: "Товари" },
+  { key: "orders_count", limitKey: "max_orders_per_month", label: "Замовлення / міс" },
+  { key: "customers_count", limitKey: "max_customers", label: "Клієнти" },
 ];
 
 export function UsageMeters({ summary, compact = false }: { summary: PlanSummary; compact?: boolean }) {

@@ -40,7 +40,7 @@ export function ProductForm({
   onSubmit,
   onCancel,
   isPending,
-  submitLabel = "Save",
+  submitLabel = "Зберегти",
 }: ProductFormProps) {
   const [name, setName] = useState(initialValues?.name ?? defaults.name);
   const [sku, setSku] = useState(initialValues?.sku ?? defaults.sku);
@@ -62,17 +62,17 @@ export function ProductForm({
 
     const trimmedName = name.trim();
     if (!trimmedName) {
-      setError("Name is required");
+      setError("Назва обовʼязкова");
       return;
     }
     const priceNum = Number(priceDollars);
     if (!Number.isFinite(priceNum) || priceNum < 0) {
-      setError("Price must be a non-negative number");
+      setError("Ціна має бути числом не меншим за 0");
       return;
     }
     const stockNum = Number(stock);
     if (!Number.isInteger(stockNum) || stockNum < 0) {
-      setError("Stock must be a non-negative integer");
+      setError("Залишок має бути цілим числом не меншим за 0");
       return;
     }
 
@@ -91,7 +91,7 @@ export function ProductForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="product-name">Name *</Label>
+        <Label htmlFor="product-name">Назва *</Label>
         <Input
           id="product-name"
           value={name}
@@ -103,7 +103,7 @@ export function ProductForm({
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="product-sku">SKU</Label>
+          <Label htmlFor="product-sku">Артикул (SKU)</Label>
           <Input
             id="product-sku"
             value={sku}
@@ -112,7 +112,7 @@ export function ProductForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="product-currency">Currency</Label>
+          <Label htmlFor="product-currency">Валюта</Label>
           <Input
             id="product-currency"
             value={currency}
@@ -124,7 +124,7 @@ export function ProductForm({
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="product-price">Price</Label>
+          <Label htmlFor="product-price">Ціна</Label>
           <Input
             id="product-price"
             type="number"
@@ -135,7 +135,7 @@ export function ProductForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="product-stock">Stock</Label>
+          <Label htmlFor="product-stock">Залишок на складі</Label>
           <Input
             id="product-stock"
             type="number"
@@ -148,7 +148,7 @@ export function ProductForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="product-image">Image URL</Label>
+        <Label htmlFor="product-image">Посилання на фото</Label>
         <Input
           id="product-image"
           type="url"
@@ -160,7 +160,7 @@ export function ProductForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="product-description">Description</Label>
+        <Label htmlFor="product-description">Опис</Label>
         <Textarea
           id="product-description"
           value={description}
@@ -173,9 +173,9 @@ export function ProductForm({
       <div className="flex items-center justify-between rounded-md border border-border p-3">
         <div>
           <Label htmlFor="product-active" className="cursor-pointer">
-            Active
+            У продажу
           </Label>
-          <p className="text-xs text-muted-foreground">Visible in storefront</p>
+          <p className="text-xs text-muted-foreground">Видно покупцям у магазині</p>
         </div>
         <Switch id="product-active" checked={isActive} onCheckedChange={setIsActive} />
       </div>
@@ -184,10 +184,10 @@ export function ProductForm({
 
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
-          Cancel
+          Скасувати
         </Button>
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving…" : submitLabel}
+          {isPending ? "Зберігаю…" : submitLabel}
         </Button>
       </div>
     </form>

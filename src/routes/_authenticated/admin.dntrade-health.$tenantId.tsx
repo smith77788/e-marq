@@ -52,15 +52,15 @@ export const Route = createFileRoute(
 });
 
 const STATUS_TONE: Record<string, { label: string; className: string }> = {
-  healthy: { label: "Healthy", className: "bg-success/15 text-success border-success/30" },
-  degraded: { label: "Degraded", className: "bg-warning/15 text-warning border-warning/30" },
+  healthy: { label: "Працює", className: "bg-success/15 text-success border-success/30" },
+  degraded: { label: "З попередженнями", className: "bg-warning/15 text-warning border-warning/30" },
   unhealthy: {
-    label: "Unhealthy",
+    label: "Не працює",
     className: "bg-destructive/15 text-destructive border-destructive/30",
   },
-  missing: { label: "Missing", className: "bg-muted text-muted-foreground border-border" },
+  missing: { label: "Не підключено", className: "bg-muted text-muted-foreground border-border" },
   error: {
-    label: "Error",
+    label: "Помилка",
     className: "bg-destructive/15 text-destructive border-destructive/30",
   },
 };
@@ -205,13 +205,13 @@ function Drill({ tenantId }: { tenantId: string }) {
             to="/admin/dntrade-health"
             className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="h-3 w-3" /> Назад до загального дашборду
+            <ArrowLeft className="h-3 w-3" /> Назад до загального огляду
           </Link>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             DN Trade · {tenantLabel}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Історія health за 30 днів · {logs.length} перевірок
+            Історія перевірок за 30 днів · {logs.length} перевірок
           </p>
         </div>
         <Button
@@ -222,7 +222,7 @@ function Drill({ tenantId }: { tenantId: string }) {
           }
           disabled={logs.length === 0}
         >
-          <Download className="mr-1 h-3.5 w-3.5" /> Експорт CSV
+          <Download className="mr-1 h-3.5 w-3.5" /> Завантажити CSV
         </Button>
       </div>
 
@@ -244,20 +244,20 @@ function Drill({ tenantId }: { tenantId: string }) {
         <Card className="border-success/30 bg-success/5">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1.5 text-xs text-success">
-              <CheckCircle2 className="h-3.5 w-3.5" /> Uptime · 30д
+              <CheckCircle2 className="h-3.5 w-3.5" /> Час безперебійної роботи · 30 днів
             </CardDescription>
             <CardTitle className="text-3xl font-bold text-success">
               {stats.uptimePct}%
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
-            {stats.healthy}/{stats.total} healthy
+            {stats.healthy} з {stats.total} перевірок успішні
           </CardContent>
         </Card>
         <Card className="border-warning/30 bg-warning/5">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1.5 text-xs text-warning">
-              <TriangleAlert className="h-3.5 w-3.5" /> Degraded
+              <TriangleAlert className="h-3.5 w-3.5" /> З попередженнями
             </CardDescription>
             <CardTitle className="text-3xl font-bold text-warning">
               {stats.degraded}
@@ -268,7 +268,7 @@ function Drill({ tenantId }: { tenantId: string }) {
         <Card className="border-destructive/30 bg-destructive/5">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1.5 text-xs text-destructive">
-              <ShieldAlert className="h-3.5 w-3.5" /> Unhealthy
+              <ShieldAlert className="h-3.5 w-3.5" /> Не працює
             </CardDescription>
             <CardTitle className="text-3xl font-bold text-destructive">
               {stats.unhealthy}
@@ -280,8 +280,8 @@ function Drill({ tenantId }: { tenantId: string }) {
 
       <Card className="border-border/60 bg-card/60 backdrop-blur">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">Тренд за 30 днів</CardTitle>
-          <CardDescription className="text-xs">Перевірки по днях</CardDescription>
+          <CardTitle className="text-base">Як змінювався стан за 30 днів</CardTitle>
+          <CardDescription className="text-xs">Кількість перевірок щодня</CardDescription>
         </CardHeader>
         <CardContent className="h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -311,9 +311,9 @@ function Drill({ tenantId }: { tenantId: string }) {
                   fontSize: 12,
                 }}
               />
-              <Area type="monotone" dataKey="healthy" stackId="1" stroke="hsl(var(--success))" fill="url(#dHealthy)" name="Healthy" />
-              <Area type="monotone" dataKey="degraded" stackId="1" stroke="hsl(var(--warning))" fill="url(#dDegraded)" name="Degraded" />
-              <Area type="monotone" dataKey="unhealthy" stackId="1" stroke="hsl(var(--destructive))" fill="url(#dUnhealthy)" name="Unhealthy" />
+              <Area type="monotone" dataKey="healthy" stackId="1" stroke="hsl(var(--success))" fill="url(#dHealthy)" name="Працює" />
+              <Area type="monotone" dataKey="degraded" stackId="1" stroke="hsl(var(--warning))" fill="url(#dDegraded)" name="Попередження" />
+              <Area type="monotone" dataKey="unhealthy" stackId="1" stroke="hsl(var(--destructive))" fill="url(#dUnhealthy)" name="Не працює" />
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>
@@ -332,11 +332,11 @@ function Drill({ tenantId }: { tenantId: string }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Час (UA)</TableHead>
+                  <TableHead>Коли перевіряли</TableHead>
                   <TableHead>Стан</TableHead>
-                  <TableHead>HTTP</TableHead>
-                  <TableHead>Last sync</TableHead>
-                  <TableHead>Блокери / попередження</TableHead>
+                  <TableHead>Код</TableHead>
+                  <TableHead>Остання синхронізація</TableHead>
+                  <TableHead>Помилки / попередження</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -385,9 +385,9 @@ function Drill({ tenantId }: { tenantId: string }) {
 
       <Card className="border-border/60 bg-card/60 backdrop-blur">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">Sync-помилки за 30 днів</CardTitle>
+          <CardTitle className="text-base">Помилки синхронізації за 30 днів</CardTitle>
           <CardDescription className="text-xs">
-            З dntrade_sync_errors · до 50 останніх
+            До 50 останніх записів
           </CardDescription>
         </CardHeader>
         <CardContent>

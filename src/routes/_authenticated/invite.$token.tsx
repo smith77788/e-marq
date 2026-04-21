@@ -48,25 +48,25 @@ function AcceptInvitePage() {
             {state === "pending" && <Loader2 className="h-5 w-5 animate-spin" />}
             {state === "success" && <CheckCircle2 className="h-5 w-5 text-success" />}
             {state === "error" && <XCircle className="h-5 w-5 text-destructive" />}
-            {state === "pending" && "Accepting invitation…"}
-            {state === "success" && "Welcome aboard!"}
-            {state === "error" && "Invitation problem"}
+            {state === "pending" && "Приймаємо запрошення…"}
+            {state === "success" && "Ласкаво просимо!"}
+            {state === "error" && "Проблема із запрошенням"}
           </CardTitle>
           <CardDescription>
-            {state === "pending" && "Linking your account to the brand."}
-            {state === "success" && "You now have access to this brand."}
+            {state === "pending" && "Прив'язуємо ваш акаунт до бренду."}
+            {state === "success" && "Тепер у вас є доступ до цього бренду."}
             {state === "error" && error}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex gap-2">
           {state === "success" && tenantId && (
             <Button onClick={() => navigate({ to: "/brand", search: { tenant: tenantId } })}>
-              Open dashboard
+              Відкрити панель бренду
             </Button>
           )}
           {state === "error" && (
             <Button asChild variant="outline">
-              <Link to="/brand">Go to dashboard</Link>
+              <Link to="/brand">На головну</Link>
             </Button>
           )}
         </CardContent>

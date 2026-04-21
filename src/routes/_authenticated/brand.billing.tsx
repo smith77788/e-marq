@@ -15,6 +15,14 @@ import { OwnerPlanSwitcher } from "@/components/owner/OwnerPlanSwitcher";
 
 type Search = { tenant?: string };
 
+const SUB_STATUS_LABEL: Record<string, string> = {
+  trial: "пробний період",
+  active: "активний",
+  past_due: "прострочено",
+  suspended: "призупинено",
+  cancelled: "скасовано",
+};
+
 export const Route = createFileRoute("/_authenticated/brand/billing")({
   validateSearch: (s: Record<string, unknown>): Search => ({
     tenant: typeof s.tenant === "string" ? s.tenant : undefined,
@@ -46,9 +54,9 @@ function BrandBillingPage() {
   if (!tenantId) {
     return (
       <Card>
-        <CardHeader><CardTitle>No brand selected</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Бренд не обрано</CardTitle></CardHeader>
         <CardContent>
-          <Link to="/brand" className="text-primary hover:underline">← Back to dashboard</Link>
+          <Link to="/brand" className="text-primary hover:underline">← Назад на головну</Link>
         </CardContent>
       </Card>
     );
@@ -78,7 +86,7 @@ function BrandBillingPage() {
               <PlanBadge planKey={summary.plan.key} planName={summary.plan.name} />
             </CardTitle>
             <CardDescription>
-              Статус: {summary.subscription.status} · Період {new Date(summary.subscription.current_period_start).toLocaleDateString("uk-UA")} → {new Date(summary.subscription.current_period_end).toLocaleDateString("uk-UA")}
+              Статус: {SUB_STATUS_LABEL[summary.subscription.status] ?? summary.subscription.status} · Період {new Date(summary.subscription.current_period_start).toLocaleDateString("uk-UA")} → {new Date(summary.subscription.current_period_end).toLocaleDateString("uk-UA")}
             </CardDescription>
           </CardHeader>
           <CardContent>

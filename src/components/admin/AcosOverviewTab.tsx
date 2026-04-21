@@ -37,59 +37,59 @@ const LAYERS: {
 }[] = [
   {
     key: "inventory",
-    label: "Inventory",
+    label: "Склад",
     icon: Boxes,
     types: ["stockout_predicted", "restock_alert"],
-    description: "Stockout forecasts & reorder triggers",
+    description: "Прогноз зникнення товару та поповнення",
   },
   {
     key: "crm",
-    label: "CRM / Cohorts",
+    label: "Клієнти / Когорти",
     icon: Users,
     types: ["churn_risk", "cohort_segmentation", "winback_triggered"],
-    description: "Churn risk VIPs & winback touches",
+    description: "VIP, що можуть піти, та повернення клієнтів",
   },
   {
     key: "ltv",
-    label: "LTV Tiers",
+    label: "Цінність клієнтів",
     icon: Gem,
     types: ["ltv_score", "loyalty_tier"],
-    description: "Lifetime value scoring & loyalty",
+    description: "Оцінка цінності та програма лояльності",
   },
   {
     key: "promotions",
-    label: "Auto-Promotions",
+    label: "Авто-промо",
     icon: Package,
     types: ["auto_promotion", "bundle_recommendation"],
-    description: "Smart bundles & promo suggestions",
+    description: "Розумні набори та промо-пропозиції",
   },
   {
     key: "pricing",
-    label: "Pricing",
+    label: "Ціни",
     icon: TrendingUp,
     types: ["pricing_recommendation", "elasticity_signal"],
-    description: "Elasticity-driven price tuning",
+    description: "Підбір цін за чутливістю покупців",
   },
   {
     key: "search",
-    label: "Search & SEO",
+    label: "Пошук та SEO",
     icon: Search,
     types: ["search_gap", "seo_opportunity"],
-    description: "SEO opportunities & content gaps",
+    description: "Можливості SEO та прогалини в контенті",
   },
   {
     key: "recovery",
-    label: "Cart Recovery",
+    label: "Кошики",
     icon: ShoppingCart,
     types: ["aov_leak", "cart_recovery", "checkout_friction"],
-    description: "AOV leaks & abandoned carts",
+    description: "Втрати чека та покинуті кошики",
   },
   {
     key: "monitoring",
-    label: "Anomalies",
+    label: "Аномалії",
     icon: AlertTriangle,
     types: ["anomaly_revenue_dip", "anomaly_conversion_drop"],
-    description: "Revenue & funnel anomalies",
+    description: "Різкі падіння виторгу та конверсії",
   },
 ];
 
@@ -134,14 +134,14 @@ export function AcosOverviewTab({ tenantId }: Props) {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Crown className="h-5 w-5 text-primary" />
-                ACOS Command Center
+                Командний центр агентів
                 <Badge variant="outline" className="text-[10px]">
-                  7d
+                  7 днів
                 </Badge>
               </CardTitle>
               <CardDescription>
-                {insights.length} insights · {newCount} new · {inReviewCount} pending approval
-                {highRiskCount > 0 && ` · ${highRiskCount} high-risk`}
+                {insights.length} підказок · {newCount} нових · {inReviewCount} на схваленні
+                {highRiskCount > 0 && ` · ${highRiskCount} високого ризику`}
               </CardDescription>
             </div>
             {insights.length > 0 && (
@@ -150,23 +150,23 @@ export function AcosOverviewTab({ tenantId }: Props) {
                 params={{ tenantId }}
                 className="shrink-0 text-xs font-medium text-primary hover:underline"
               >
-                View all →
+                Дивитись усі →
               </Link>
             )}
           </div>
         </CardHeader>
         <CardContent>
           {insightsQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading insights…</p>
+            <p className="text-sm text-muted-foreground">Завантажую підказки…</p>
           ) : insights.length === 0 ? (
             <div className="rounded-md border border-dashed border-border bg-muted/20 p-6 text-center">
               <Sparkles className="mx-auto h-8 w-8 text-muted-foreground/60" />
               <p className="mt-3 text-sm font-medium text-foreground">
-                No insights yet
+                Поки що підказок немає
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                ACOS agents haven't run for this tenant. Generate synthetic data or connect a real
-                data source — agents will start writing insights into the approval queue.
+                Агенти ще не запускались для цього бренду. Згенеруйте демо-дані або підключіть реальне джерело —
+                і агенти почнуть формувати підказки на схвалення.
               </p>
             </div>
           ) : null}
@@ -208,10 +208,11 @@ export function AcosOverviewTab({ tenantId }: Props) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">What ACOS does for this brand</CardTitle>
+          <CardTitle class
+Name="text-base">Що система робить для цього бренду</CardTitle>
           <CardDescription>
-            Connect once. AI agents run on a schedule, surface revenue opportunities, and queue
-            them for one-click approval.
+            Підключіть один раз — агенти працюють за розкладом, знаходять можливості для виторгу
+            і ставлять їх у чергу на ваше одне натискання «Так».
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">
@@ -220,9 +221,9 @@ export function AcosOverviewTab({ tenantId }: Props) {
               1
             </div>
             <p>
-              <span className="font-medium text-foreground">Agents analyze</span> — daily cron
-              jobs scan orders, customers, products, and events for churn risk, stockouts, AOV
-              leaks, pricing elasticity, SEO gaps.
+              <span className="font-medium text-foreground">Агенти аналізують</span> — щоденно
+              переглядають замовлення, клієнтів, товари та події, шукаючи ризик відтоку,
+              зникнення товару, втрати в чеку, можливості ціни та SEO.
             </p>
           </div>
           <div className="flex gap-3">
@@ -230,8 +231,8 @@ export function AcosOverviewTab({ tenantId }: Props) {
               2
             </div>
             <p>
-              <span className="font-medium text-foreground">Insights queue up</span> — each finding
-              lands here with an expected impact, confidence score, and suggested action.
+              <span className="font-medium text-foreground">Підказки вишиковуються в чергу</span> —
+              кожна знахідка має очікуваний ефект, рівень впевненості та готову дію.
             </p>
           </div>
           <div className="flex gap-3">
@@ -239,9 +240,9 @@ export function AcosOverviewTab({ tenantId }: Props) {
               3
             </div>
             <p>
-              <span className="font-medium text-foreground">You approve in one click</span> — ACOS
-              applies the action (winback touch, restock, promo, price tune) and tracks the
-              actual revenue impact.
+              <span className="font-medium text-foreground">Ви схвалюєте одним натисканням</span> —
+              система виконує дію (повернення клієнта, поповнення, промо, зміна ціни)
+              і відстежує реальний ефект у виторгу.
             </p>
           </div>
           <div className="flex gap-3">
@@ -249,9 +250,9 @@ export function AcosOverviewTab({ tenantId }: Props) {
               4
             </div>
             <p>
-              <span className="font-medium text-foreground">Memory loop learns</span> — patterns
-              that worked get boosted, ones that failed get blocked. The system gets smarter every
-              week.
+              <span className="font-medium text-foreground">Памʼять навчається</span> — те, що
+              спрацювало, повторюється; що ні — більше не пропонується. З кожним тижнем система
+              стає точнішою саме під ваш бренд.
             </p>
           </div>
         </CardContent>

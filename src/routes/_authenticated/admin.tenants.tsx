@@ -68,7 +68,7 @@ function AdminTenantsPage() {
       return data;
     },
     onSuccess: () => {
-      toast.success("Tenant created");
+      toast.success("Бренд створено");
       setName("");
       setSlug("");
       setSlugTouched(false);
@@ -76,24 +76,24 @@ function AdminTenantsPage() {
       void qc.invalidateQueries({ queryKey: ["my-tenants"] });
     },
     onError: (err) => {
-      toast.error(err instanceof Error ? err.message : "Failed to create tenant");
+      toast.error(err instanceof Error ? err.message : "Не вдалося створити бренд");
     },
   });
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Loading…</p>;
+    return <p className="text-sm text-muted-foreground">Завантаження…</p>;
   }
 
   if (!isSuperAdmin) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Access denied</CardTitle>
-          <CardDescription>This page is restricted to super admins.</CardDescription>
+          <CardTitle>Доступ заборонено</CardTitle>
+          <CardDescription>Ця сторінка лише для супер-адміністраторів.</CardDescription>
         </CardHeader>
         <CardContent>
           <Link to="/dashboard" className="text-sm font-medium text-primary hover:underline">
-            ← Back to dashboard
+            ← На головну
           </Link>
         </CardContent>
       </Card>
@@ -104,32 +104,38 @@ function AdminTenantsPage() {
     e.preventDefault();
     const finalSlug = (slug || slugify(name)).trim();
     if (!name.trim() || !finalSlug) {
-      toast.error("Name and slug are required");
+      toast.error("Назва та коротке імʼя обовʼязкові");
       return;
     }
     createTenant.mutate({ name: name.trim(), slug: finalSlug });
   }
 
+  const STATUS_LABEL: Record<string, string> = {
+    active: "активний",
+    suspended: "призупинено",
+    inactive: "вимкнено",
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Tenants</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Бренди</h1>
         <p className="text-sm text-muted-foreground">
-          Provision and manage all D2C brand workspaces.
+          Створення та керування всіма робочими просторами брендів.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Create tenant</CardTitle>
+          <CardTitle>Створити бренд</CardTitle>
           <CardDescription>
-            Owner is set to you. A default config is created automatically.
+            Власником стаєте ви. Базові налаштування створюються автоматично.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
             <div className="space-y-2">
-              <Label htmlFor="name">Brand name</Label>
+              <Label htmlFor="name">Назва бренду</Label>
               <Input
                 id="name"
                 required
@@ -142,7 +148,7 @@ function AdminTenantsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="slug">Slug</Label>
+              <Label htmlFor="slug">Коротке імʼя в адресі</Label>
               <Input
                 id="slug"
                 required
@@ -155,7 +161,7 @@ function AdminTenantsPage() {
               />
             </div>
             <Button type="submit" disabled={createTenant.isPending}>
-              {createTenant.isPending ? "Creating…" : "Create"}
+              {createTenant.isPending ? "Створюю…" : "Створити"}
             </Button>
           </form>
         </CardContent>
@@ -163,22 +169,22 @@ function AdminTenantsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All tenants</CardTitle>
+          <CardTitle>Усі бренди</CardTitle>
           <CardDescription>
-            {tenantsQuery.data?.length ?? 0} total
+            Усього: {tenantsQuery.data?.length ?? 0}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {tenantsQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+            <p className="text-sm text-muted-foreground">Завантаження…</p>
           ) : tenantsQuery.data && tenantsQuery.data.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Slug</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
+                  <TableHead>Назва</TableHead>
+                  <TableHead>Адреса</TableHead>
+                  <TableHead>Статус</TableHead>
+                  <TableHead>Створено</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -196,18 +202,18 @@ function AdminTenantsPage() {
                     <TableCell className="text-muted-foreground">/{t.slug}</TableCell>
                     <TableCell>
                       <Badge variant={t.status === "active" ? "default" : "outline"}>
-                        {t.status}
+                        {STATUS_LABEL[t.status] ?? t.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {new Date(t.created_at).toLocaleDateString()}
+                      {new Date(t.created_at).toLocaleDateString("uk-UA")}
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           ) : (
-            <p className="text-sm text-muted-foreground">No tenants yet. Create the first one above.</p>
+            <p className="text-sm text-muted-foreground">Поки що брендів немає. Створіть перший вище.</p>
           )}
         </CardContent>
       </Card>
