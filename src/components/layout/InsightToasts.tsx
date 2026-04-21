@@ -38,7 +38,7 @@ export function InsightToasts() {
     let cancelled = false;
     (async () => {
       const since = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      const [{ data: insights }, { data: runs }] = await Promise.all([
+      const [{ data: insights }, { data: runs }, { data: notifs }] = await Promise.all([
         supabase
           .from("ai_insights")
           .select("id")
@@ -49,10 +49,17 @@ export function InsightToasts() {
           .select("id")
           .in("tenant_id", tenantIds)
           .gte("started_at", since),
+        supabase
+          .from("owner_notifications")
+          .select("id")
+          .in("tenant_id", tenantIds)
+          .in("kind", ["dntrade_unhealthy", "dntrade_partial_repeat"])
+          .gte("created_at", since),
       ]);
       if (cancelled) return;
       for (const r of insights ?? []) seenInsightsRef.current.add(r.id);
       for (const r of runs ?? []) seenRunsRef.current.add(r.id);
+      for (const r of notifs ?? []) seenNotifsRef.current.add(r.id);
       initializedRef.current = true;
     })();
 
