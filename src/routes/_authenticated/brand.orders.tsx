@@ -175,6 +175,9 @@ function BrandOrdersPage() {
       }
       const { error } = await supabase.from("orders").update(patch).eq("id", id);
       if (error) throw error;
+      if (status === "paid" || status === "fulfilled" || status === "cancelled" || status === "refunded") {
+        void sendOrderStatusEmail(id, status);
+      }
     },
     onSuccess: (_, vars) => {
       toast.success(t("bo.changed"));
