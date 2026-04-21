@@ -87,12 +87,13 @@ async function verifySvixSignature(
 
   const key = await crypto.subtle.importKey(
     "raw",
-    keyBytes,
+    keyBytes.buffer.slice(keyBytes.byteOffset, keyBytes.byteOffset + keyBytes.byteLength) as ArrayBuffer,
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"],
   );
-  const toSign = new TextEncoder().encode(`${svixId}.${svixTs}.${rawBody}`);
+  const toSignBytes = new TextEncoder().encode(`${svixId}.${svixTs}.${rawBody}`);
+  const toSign = toSignBytes.buffer.slice(toSignBytes.byteOffset, toSignBytes.byteOffset + toSignBytes.byteLength) as ArrayBuffer;
   const sigBuf = await crypto.subtle.sign("HMAC", key, toSign);
   const expected = new Uint8Array(sigBuf);
 
