@@ -27,6 +27,9 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as TrackSlugJsRouteImport } from './routes/track.$slug.js'
 import { Route as HooksTelegramPollRouteImport } from './routes/hooks/telegram.poll'
 import { Route as HooksTelegramNotifyOwnerRouteImport } from './routes/hooks/telegram.notify-owner'
+import { Route as HooksIntegrationsDntradeVerifyRouteImport } from './routes/hooks/integrations.dntrade-verify'
+import { Route as HooksIntegrationsDntradeSyncRouteImport } from './routes/hooks/integrations.dntrade-sync'
+import { Route as HooksIntegrationsDntradeCronRouteImport } from './routes/hooks/integrations.dntrade-cron'
 import { Route as HooksEnginesWinbackOneRouteImport } from './routes/hooks/engines.winback-one'
 import { Route as HooksEnginesWinbackAllRouteImport } from './routes/hooks/engines.winback-all'
 import { Route as HooksEnginesWinbackRouteImport } from './routes/hooks/engines.winback'
@@ -209,6 +212,24 @@ const HooksTelegramNotifyOwnerRoute =
   HooksTelegramNotifyOwnerRouteImport.update({
     id: '/hooks/telegram/notify-owner',
     path: '/hooks/telegram/notify-owner',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksIntegrationsDntradeVerifyRoute =
+  HooksIntegrationsDntradeVerifyRouteImport.update({
+    id: '/hooks/integrations/dntrade-verify',
+    path: '/hooks/integrations/dntrade-verify',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksIntegrationsDntradeSyncRoute =
+  HooksIntegrationsDntradeSyncRouteImport.update({
+    id: '/hooks/integrations/dntrade-sync',
+    path: '/hooks/integrations/dntrade-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksIntegrationsDntradeCronRoute =
+  HooksIntegrationsDntradeCronRouteImport.update({
+    id: '/hooks/integrations/dntrade-cron',
+    path: '/hooks/integrations/dntrade-cron',
     getParentRoute: () => rootRouteImport,
   } as any)
 const HooksEnginesWinbackOneRoute = HooksEnginesWinbackOneRouteImport.update({
@@ -828,6 +849,9 @@ export interface FileRoutesByFullPath {
   '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
   '/hooks/engines/winback-all': typeof HooksEnginesWinbackAllRoute
   '/hooks/engines/winback-one': typeof HooksEnginesWinbackOneRoute
+  '/hooks/integrations/dntrade-cron': typeof HooksIntegrationsDntradeCronRoute
+  '/hooks/integrations/dntrade-sync': typeof HooksIntegrationsDntradeSyncRoute
+  '/hooks/integrations/dntrade-verify': typeof HooksIntegrationsDntradeVerifyRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
@@ -940,6 +964,9 @@ export interface FileRoutesByTo {
   '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
   '/hooks/engines/winback-all': typeof HooksEnginesWinbackAllRoute
   '/hooks/engines/winback-one': typeof HooksEnginesWinbackOneRoute
+  '/hooks/integrations/dntrade-cron': typeof HooksIntegrationsDntradeCronRoute
+  '/hooks/integrations/dntrade-sync': typeof HooksIntegrationsDntradeSyncRoute
+  '/hooks/integrations/dntrade-verify': typeof HooksIntegrationsDntradeVerifyRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
@@ -1054,6 +1081,9 @@ export interface FileRoutesById {
   '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
   '/hooks/engines/winback-all': typeof HooksEnginesWinbackAllRoute
   '/hooks/engines/winback-one': typeof HooksEnginesWinbackOneRoute
+  '/hooks/integrations/dntrade-cron': typeof HooksIntegrationsDntradeCronRoute
+  '/hooks/integrations/dntrade-sync': typeof HooksIntegrationsDntradeSyncRoute
+  '/hooks/integrations/dntrade-verify': typeof HooksIntegrationsDntradeVerifyRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
@@ -1168,6 +1198,9 @@ export interface FileRouteTypes {
     | '/hooks/engines/winback'
     | '/hooks/engines/winback-all'
     | '/hooks/engines/winback-one'
+    | '/hooks/integrations/dntrade-cron'
+    | '/hooks/integrations/dntrade-sync'
+    | '/hooks/integrations/dntrade-verify'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
@@ -1280,6 +1313,9 @@ export interface FileRouteTypes {
     | '/hooks/engines/winback'
     | '/hooks/engines/winback-all'
     | '/hooks/engines/winback-one'
+    | '/hooks/integrations/dntrade-cron'
+    | '/hooks/integrations/dntrade-sync'
+    | '/hooks/integrations/dntrade-verify'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
@@ -1393,6 +1429,9 @@ export interface FileRouteTypes {
     | '/hooks/engines/winback'
     | '/hooks/engines/winback-all'
     | '/hooks/engines/winback-one'
+    | '/hooks/integrations/dntrade-cron'
+    | '/hooks/integrations/dntrade-sync'
+    | '/hooks/integrations/dntrade-verify'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
@@ -1495,6 +1534,9 @@ export interface RootRouteChildren {
   HooksEnginesWinbackRoute: typeof HooksEnginesWinbackRoute
   HooksEnginesWinbackAllRoute: typeof HooksEnginesWinbackAllRoute
   HooksEnginesWinbackOneRoute: typeof HooksEnginesWinbackOneRoute
+  HooksIntegrationsDntradeCronRoute: typeof HooksIntegrationsDntradeCronRoute
+  HooksIntegrationsDntradeSyncRoute: typeof HooksIntegrationsDntradeSyncRoute
+  HooksIntegrationsDntradeVerifyRoute: typeof HooksIntegrationsDntradeVerifyRoute
   HooksTelegramNotifyOwnerRoute: typeof HooksTelegramNotifyOwnerRoute
   HooksTelegramPollRoute: typeof HooksTelegramPollRoute
   TrackSlugJsRoute: typeof TrackSlugJsRoute
@@ -1626,6 +1668,27 @@ declare module '@tanstack/react-router' {
       path: '/hooks/telegram/notify-owner'
       fullPath: '/hooks/telegram/notify-owner'
       preLoaderRoute: typeof HooksTelegramNotifyOwnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/integrations/dntrade-verify': {
+      id: '/hooks/integrations/dntrade-verify'
+      path: '/hooks/integrations/dntrade-verify'
+      fullPath: '/hooks/integrations/dntrade-verify'
+      preLoaderRoute: typeof HooksIntegrationsDntradeVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/integrations/dntrade-sync': {
+      id: '/hooks/integrations/dntrade-sync'
+      path: '/hooks/integrations/dntrade-sync'
+      fullPath: '/hooks/integrations/dntrade-sync'
+      preLoaderRoute: typeof HooksIntegrationsDntradeSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/integrations/dntrade-cron': {
+      id: '/hooks/integrations/dntrade-cron'
+      path: '/hooks/integrations/dntrade-cron'
+      fullPath: '/hooks/integrations/dntrade-cron'
+      preLoaderRoute: typeof HooksIntegrationsDntradeCronRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/engines/winback-one': {
@@ -2447,6 +2510,9 @@ const rootRouteChildren: RootRouteChildren = {
   HooksEnginesWinbackRoute: HooksEnginesWinbackRoute,
   HooksEnginesWinbackAllRoute: HooksEnginesWinbackAllRoute,
   HooksEnginesWinbackOneRoute: HooksEnginesWinbackOneRoute,
+  HooksIntegrationsDntradeCronRoute: HooksIntegrationsDntradeCronRoute,
+  HooksIntegrationsDntradeSyncRoute: HooksIntegrationsDntradeSyncRoute,
+  HooksIntegrationsDntradeVerifyRoute: HooksIntegrationsDntradeVerifyRoute,
   HooksTelegramNotifyOwnerRoute: HooksTelegramNotifyOwnerRoute,
   HooksTelegramPollRoute: HooksTelegramPollRoute,
   TrackSlugJsRoute: TrackSlugJsRoute,

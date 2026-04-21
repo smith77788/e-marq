@@ -26,6 +26,7 @@ import { AgentHealthHeatmap } from "@/components/owner/AgentHealthHeatmap";
 import { LifecycleDistribution } from "@/components/owner/LifecycleDistribution";
 import { PlanUsageCard } from "@/components/owner/PlanUsageCard";
 import { OwnerTelegramBindCard } from "@/components/owner/OwnerTelegramBindCard";
+import { DnTradeIntegrationCard } from "@/components/owner/DnTradeIntegrationCard";
 
 type Search = { tenant?: string };
 
@@ -120,6 +121,8 @@ function BrandPage() {
       <PlanUsageCard tenantId={current.id} />
 
       <OwnerTelegramBindCard tenantId={current.id} tenantSlug={current.slug} />
+
+      <DnTradeIntegrationCard tenantId={current.id} />
 
       <CockpitHero tenantId={current.id} />
 
