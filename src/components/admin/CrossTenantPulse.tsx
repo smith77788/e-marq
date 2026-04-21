@@ -32,7 +32,7 @@ export function CrossTenantPulse({ points }: Props) {
   if (data.length === 0) {
     return (
       <div className="flex h-48 items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
-        Not enough data yet — generate a demo dataset on any tenant.
+        Поки що даних недостатньо — згенеруйте демо-набір для будь-якого бренду.
       </div>
     );
   }

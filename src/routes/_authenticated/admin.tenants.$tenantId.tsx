@@ -184,7 +184,7 @@ function TenantDetailPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Product created");
+      toast.success("Товар створено");
       setCreateOpen(false);
       invalidateProducts();
     },
@@ -209,7 +209,7 @@ function TenantDetailPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Product updated");
+      toast.success("Товар оновлено");
       setEditing(null);
       invalidateProducts();
     },
@@ -231,7 +231,7 @@ function TenantDetailPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Product deleted");
+      toast.success("Товар видалено");
       setDeleting(null);
       invalidateProducts();
     },
@@ -253,7 +253,7 @@ function TenantDetailPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Config saved");
+      toast.success("Налаштування збережено");
       queryClient.invalidateQueries({ queryKey: ["tenant-config", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -306,34 +306,34 @@ function TenantDetailPage() {
   });
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Loading…</p>;
+    return <p className="text-sm text-muted-foreground">Завантаження…</p>;
   }
 
   if (!isSuperAdmin) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Access denied</CardTitle>
-          <CardDescription>This page is restricted to super admins.</CardDescription>
+          <CardTitle>Доступ заборонено</CardTitle>
+          <CardDescription>Ця сторінка лише для супер-адміністраторів.</CardDescription>
         </CardHeader>
       </Card>
     );
   }
 
   if (tenantQuery.isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading tenant…</p>;
+    return <p className="text-sm text-muted-foreground">Завантажую бренд…</p>;
   }
 
   if (tenantQuery.error || !tenantQuery.data) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Tenant not found</CardTitle>
-          <CardDescription>This tenant does not exist or you cannot access it.</CardDescription>
+          <CardTitle>Бренд не знайдено</CardTitle>
+          <CardDescription>Цей бренд не існує або у вас немає доступу.</CardDescription>
         </CardHeader>
         <CardContent>
           <Link to="/admin/tenants" className="text-sm font-medium text-primary hover:underline">
-            ← Back to tenants
+            ← Назад до брендів
           </Link>
         </CardContent>
       </Card>
@@ -341,6 +341,7 @@ function TenantDetailPage() {
   }
 
   const tenant = tenantQuery.data;
+  const T_STATUS: Record<string, string> = { active: "активний", suspended: "призупинено", inactive: "вимкнено" };
 
   return (
     <div className="space-y-6">
@@ -349,12 +350,12 @@ function TenantDetailPage() {
           to="/admin/tenants"
           className="text-xs font-medium text-muted-foreground hover:text-foreground"
         >
-          ← Tenants
+          ← Бренди
         </Link>
         <div className="mt-2 flex items-center gap-3">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">{tenant.name}</h1>
           <Badge variant={tenant.status === "active" ? "default" : "outline"}>
-            {tenant.status}
+            {T_STATUS[tenant.status] ?? tenant.status}
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">/{tenant.slug}</p>
@@ -381,7 +382,7 @@ function TenantDetailPage() {
 
         <TabsContent value="acos-debug" className="space-y-4">
           <p className="text-xs text-muted-foreground">
-            Internal debug view for ACOS agents (manual queue / runs). Not part of the autonomous owner experience.
+            Технічна панель для відлагодження роботи агентів. Не використовується власниками брендів у звичайному режимі.
           </p>
           <AcosOverviewTab tenantId={tenantId} />
           <AcosInsightsQueue tenantId={tenantId} />
@@ -391,12 +392,12 @@ function TenantDetailPage() {
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-3">
             <StatCard
-              label="Products"
+              label="Товарів"
               value={productsQuery.data?.length ?? 0}
               loading={productsQuery.isLoading}
             />
-            <StatCard label="Orders" value={ordersQuery.data ?? 0} loading={ordersQuery.isLoading} />
-            <StatCard label="Events" value={eventsQuery.data ?? 0} loading={eventsQuery.isLoading} />
+            <StatCard label="Замовлень" value={ordersQuery.data ?? 0} loading={ordersQuery.isLoading} />
+            <StatCard label="Подій" value={eventsQuery.data ?? 0} loading={eventsQuery.isLoading} />
           </div>
 
           <TenantAnalytics tenantId={tenantId} />
@@ -404,16 +405,16 @@ function TenantDetailPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Tenant info</CardTitle>
+              <CardTitle>Технічна інформація</CardTitle>
             </CardHeader>
             <CardContent>
-              <dl className="grid grid-cols-[140px_1fr] gap-y-2 text-sm">
-                <dt className="text-muted-foreground">Tenant ID</dt>
+              <dl className="grid grid-cols-[160px_1fr] gap-y-2 text-sm">
+                <dt className="text-muted-foreground">ID бренду</dt>
                 <dd className="font-mono text-xs text-foreground">{tenant.id}</dd>
-                <dt className="text-muted-foreground">Owner user ID</dt>
+                <dt className="text-muted-foreground">ID власника</dt>
                 <dd className="font-mono text-xs text-foreground">{tenant.owner_user_id}</dd>
-                <dt className="text-muted-foreground">Created</dt>
-                <dd className="text-foreground">{new Date(tenant.created_at).toLocaleString()}</dd>
+                <dt className="text-muted-foreground">Створено</dt>
+                <dd className="text-foreground">{new Date(tenant.created_at).toLocaleString("uk-UA")}</dd>
               </dl>
             </CardContent>
           </Card>

@@ -121,7 +121,7 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Order marked as paid");
+      toast.success("Замовлення позначено оплаченим");
       setConfirmingOrder(null);
       setPaymentRef("");
       invalidate();
@@ -135,7 +135,7 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Order cancelled");
+      toast.success("Замовлення скасовано");
       setCancelingOrder(null);
       invalidate();
     },
@@ -146,42 +146,42 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
     <Card>
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:space-y-0">
         <div>
-          <CardTitle>Orders</CardTitle>
+          <CardTitle>Замовлення</CardTitle>
           <CardDescription>
-            Confirm manual payments, cancel orders, and review history.
+            Підтверджуйте оплати банком, скасовуйте замовлення та переглядайте історію.
           </CardDescription>
         </div>
-        <div className="w-full sm:w-48">
+        <div className="w-full sm:w-56">
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="paid">Paid</SelectItem>
-              <SelectItem value="fulfilled">Fulfilled</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-              <SelectItem value="refunded">Refunded</SelectItem>
+              <SelectItem value="all">Усі статуси</SelectItem>
+              <SelectItem value="pending">Очікує оплату</SelectItem>
+              <SelectItem value="paid">Оплачено</SelectItem>
+              <SelectItem value="fulfilled">Відправлено</SelectItem>
+              <SelectItem value="cancelled">Скасовано</SelectItem>
+              <SelectItem value="refunded">Повернуто</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </CardHeader>
       <CardContent>
         {ordersQuery.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <p className="text-sm text-muted-foreground">Завантаження…</p>
         ) : ordersQuery.data && ordersQuery.data.length > 0 ? (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-8"></TableHead>
-                  <TableHead>Order</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Замовлення</TableHead>
+                  <TableHead>Покупець</TableHead>
+                  <TableHead>Спосіб оплати</TableHead>
+                  <TableHead>Статус</TableHead>
+                  <TableHead className="text-right">Сума</TableHead>
+                  <TableHead className="text-right">Дії</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -218,7 +218,7 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-[10px]">
-                            {o.payment_method === "manual" ? "Bank" : "Card"}
+                            {o.payment_method === "manual" ? "Банк" : "Картка"}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -240,7 +240,7 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
                                   }}
                                 >
                                   <Check className="mr-1 h-3 w-3" />
-                                  Confirm
+                                  Підтвердити оплату
                                 </Button>
                                 <Button
                                   size="sm"
@@ -257,7 +257,7 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
                                 variant="outline"
                                 onClick={() => setCancelingOrder(o)}
                               >
-                                Refund / cancel
+                                Повернути / скасувати
                               </Button>
                             )}
                           </div>
@@ -268,10 +268,10 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
                           <TableCell colSpan={7} className="py-3">
                             <div className="space-y-2">
                               <p className="text-xs font-semibold text-muted-foreground">
-                                Items
+                                Товари у замовленні
                               </p>
                               {itemsQuery.isLoading ? (
-                                <p className="text-xs text-muted-foreground">Loading…</p>
+                                <p className="text-xs text-muted-foreground">Завантаження…</p>
                               ) : itemsQuery.data && itemsQuery.data.length > 0 ? (
                                 <ul className="space-y-1 text-sm">
                                   {itemsQuery.data.map((it) => (
@@ -287,17 +287,17 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
                                   ))}
                                 </ul>
                               ) : (
-                                <p className="text-xs text-muted-foreground">No items.</p>
+                                <p className="text-xs text-muted-foreground">Товарів немає.</p>
                               )}
                               {o.payment_ref && (
                                 <p className="text-xs text-muted-foreground">
-                                  Payment ref:{" "}
+                                  Номер платежу:{" "}
                                   <span className="font-mono text-foreground">{o.payment_ref}</span>
                                 </p>
                               )}
                               {o.paid_at && (
                                 <p className="text-xs text-muted-foreground">
-                                  Paid at: {new Date(o.paid_at).toLocaleString()}
+                                  Оплачено: {new Date(o.paid_at).toLocaleString("uk-UA")}
                                 </p>
                               )}
                             </div>
@@ -311,7 +311,7 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
             </Table>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">No orders.</p>
+          <p className="text-sm text-muted-foreground">Поки що замовлень немає.</p>
         )}
       </CardContent>
 
@@ -327,25 +327,25 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Mark order as paid?</DialogTitle>
+            <DialogTitle>Підтвердити оплату цього замовлення?</DialogTitle>
             <DialogDescription>
-              Order #{confirmingOrder?.id.slice(0, 8)} — {confirmingOrder?.customer_email}
+              Замовлення №{confirmingOrder?.id.slice(0, 8)} — {confirmingOrder?.customer_email}
               <br />
-              Total: {confirmingOrder && (confirmingOrder.total_cents / 100).toFixed(2)}{" "}
+              Сума: {confirmingOrder && (confirmingOrder.total_cents / 100).toFixed(2)}{" "}
               {confirmingOrder?.currency}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2 py-2">
-            <Label htmlFor="payment-ref">Payment reference (optional)</Label>
+            <Label htmlFor="payment-ref">Номер платежу (необовʼязково)</Label>
             <Input
               id="payment-ref"
               value={paymentRef}
               onChange={(e) => setPaymentRef(e.target.value)}
-              placeholder="Bank txn ID, receipt #, …"
+              placeholder="Номер банк. транзакції, чек тощо"
               disabled={markPaidMutation.isPending}
             />
             <p className="text-xs text-muted-foreground">
-              This will decrement product stock and trigger fulfillment.
+              Залишок товару зменшиться, замовлення піде у виконання.
             </p>
           </div>
           <DialogFooter>
@@ -354,7 +354,7 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
               onClick={() => setConfirmingOrder(null)}
               disabled={markPaidMutation.isPending}
             >
-              Cancel
+              Скасувати
             </Button>
             <Button
               onClick={() =>
@@ -366,7 +366,7 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
               {markPaidMutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Confirm payment
+              Так, оплачено
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -379,14 +379,14 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Cancel this order?</AlertDialogTitle>
+            <AlertDialogTitle>Скасувати це замовлення?</AlertDialogTitle>
             <AlertDialogDescription>
-              Order #{cancelingOrder?.id.slice(0, 8)}. If it was paid, stock will be restored.
-              This cannot be undone via the UI.
+              Замовлення №{cancelingOrder?.id.slice(0, 8)}. Якщо воно було оплачене — залишок товару повернеться.
+              Скасувати дію через інтерфейс пізніше не вийде.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={cancelMutation.isPending}>Keep order</AlertDialogCancel>
+            <AlertDialogCancel disabled={cancelMutation.isPending}>Залишити</AlertDialogCancel>
             <AlertDialogAction
               disabled={cancelMutation.isPending}
               onClick={(e) => {
@@ -394,7 +394,7 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
                 if (cancelingOrder) cancelMutation.mutate(cancelingOrder.id);
               }}
             >
-              {cancelMutation.isPending ? "Cancelling…" : "Cancel order"}
+              {cancelMutation.isPending ? "Скасовую…" : "Так, скасувати"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -408,11 +408,11 @@ function StatusBadge({ status }: { status: OrderRow["status"] }) {
     OrderRow["status"],
     { label: string; variant: "default" | "outline" | "secondary" | "destructive" }
   > = {
-    pending: { label: "Pending", variant: "secondary" },
-    paid: { label: "Paid", variant: "default" },
-    fulfilled: { label: "Fulfilled", variant: "default" },
-    cancelled: { label: "Cancelled", variant: "destructive" },
-    refunded: { label: "Refunded", variant: "destructive" },
+    pending: { label: "Очікує", variant: "secondary" },
+    paid: { label: "Оплачено", variant: "default" },
+    fulfilled: { label: "Відправлено", variant: "default" },
+    cancelled: { label: "Скасовано", variant: "destructive" },
+    refunded: { label: "Повернуто", variant: "destructive" },
   };
   const { label, variant } = map[status];
   return (

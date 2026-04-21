@@ -33,7 +33,7 @@ export function TenantSwitcher() {
           onClick={() => navigate({ to: "/admin/tenants" })}
         >
           <Building2 className="mr-1.5 h-3.5 w-3.5" />
-          Manage tenants
+          Керувати брендами
         </Button>
       );
     }
@@ -55,14 +55,14 @@ export function TenantSwitcher() {
         >
           <span className="flex items-center gap-1.5 truncate">
             <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="truncate">{current?.tenant_name ?? "Select brand"}</span>
+            <span className="truncate">{current?.tenant_name ?? "Оберіть бренд"}</span>
           </span>
           <ChevronsUpDown className="h-3 w-3 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-72">
         <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-          Your brands
+          Ваші бренди
         </DropdownMenuLabel>
         {tenants.map((t) => (
           <DropdownMenuItem
@@ -91,7 +91,7 @@ export function TenantSwitcher() {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate({ to: "/admin/tenants" })}>
               <Building2 className="mr-2 h-3.5 w-3.5" />
-              All tenants (admin)
+              Усі бренди (адмін)
             </DropdownMenuItem>
           </>
         )}

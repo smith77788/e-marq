@@ -78,41 +78,49 @@ function AdminOverviewPage() {
     };
   }, [overviewQuery.data]);
 
-  if (loading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (loading) return <p className="text-sm text-muted-foreground">Завантаження…</p>;
   if (!isSuperAdmin) {
     return (
       <Card>
-        <CardHeader><CardTitle>Access denied</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Доступ заборонено</CardTitle></CardHeader>
       </Card>
     );
   }
 
+  const SUB_LABEL: Record<string, string> = {
+    trial: "пробний",
+    active: "активний",
+    past_due: "прострочено",
+    suspended: "призупинено",
+    cancelled: "скасовано",
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Cross-tenant overview</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Огляд по всіх брендах</h1>
         <p className="text-sm text-muted-foreground">
-          Plans, balances, usage and health across all tenants. Auto-refreshes every 30s.
+          Тарифи, баланси, навантаження і стан усіх брендів. Оновлюється автоматично кожні 30 секунд.
         </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-4">
-        <StatBlock label="Tenants" value={totals.tenants} />
-        <StatBlock label="Suspended/cancelled" value={totals.suspended} accent={totals.suspended > 0 ? "danger" : undefined} />
-        <StatBlock label="Orders this period" value={totals.orders.toLocaleString()} />
-        <StatBlock label="AI runs this period" value={totals.runs.toLocaleString()} />
+        <StatBlock label="Брендів" value={totals.tenants} />
+        <StatBlock label="Призупинено / скасовано" value={totals.suspended} accent={totals.suspended > 0 ? "danger" : undefined} />
+        <StatBlock label="Замовлень за період" value={totals.orders.toLocaleString("uk-UA")} />
+        <StatBlock label="Запусків ШІ за період" value={totals.runs.toLocaleString("uk-UA")} />
       </div>
 
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <CardTitle>All tenants</CardTitle>
-              <CardDescription>{filtered.length} of {overviewQuery.data?.length ?? 0}</CardDescription>
+              <CardTitle>Усі бренди</CardTitle>
+              <CardDescription>{filtered.length} з {overviewQuery.data?.length ?? 0}</CardDescription>
             </div>
             <div className="relative max-w-xs flex-1">
               <Search className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search…" className="h-8 pl-7 text-xs" />
+              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Пошук…" className="h-8 pl-7 text-xs" />
             </div>
           </div>
         </CardHeader>
@@ -120,13 +128,13 @@ function AdminOverviewPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Brand</TableHead>
-                <TableHead>Plan</TableHead>
-                <TableHead>Sub</TableHead>
-                <TableHead className="text-right">Runs</TableHead>
-                <TableHead className="text-right">Orders</TableHead>
-                <TableHead className="text-right">Products</TableHead>
-                <TableHead className="text-right">Customers</TableHead>
+                <TableHead>Бренд</TableHead>
+                <TableHead>Тариф</TableHead>
+                <TableHead>Підписка</TableHead>
+                <TableHead className="text-right">Запусків ШІ</TableHead>
+                <TableHead className="text-right">Замовлень</TableHead>
+                <TableHead className="text-right">Товарів</TableHead>
+                <TableHead className="text-right">Клієнтів</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -144,7 +152,7 @@ function AdminOverviewPage() {
                   </TableCell>
                   <TableCell><PlanBadge planKey={r.plan_key} planName={r.plan_name} /></TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="text-[10px]">{r.subscription_status}</Badge>
+                    <Badge variant="outline" className="text-[10px]">{SUB_LABEL[r.subscription_status] ?? r.subscription_status}</Badge>
                   </TableCell>
                   <TableCell className="text-right font-mono text-xs">{Number(r.ai_runs_this_period).toLocaleString()}</TableCell>
                   <TableCell className="text-right font-mono text-xs">{Number(r.orders_this_period).toLocaleString()}</TableCell>

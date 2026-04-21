@@ -55,7 +55,7 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
 
   const invite = useMutation({
     mutationFn: async () => {
-      if (!/\S+@\S+\.\S+/.test(email)) throw new Error("Invalid email");
+      if (!/\S+@\S+\.\S+/.test(email)) throw new Error("Невірний email");
       const { error } = await supabase.from("tenant_invitations").insert({
         tenant_id: tenantId,
         email: email.trim().toLowerCase(),
@@ -64,7 +64,7 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Invitation created");
+      toast.success("Запрошення створено");
       setEmail("");
       qc.invalidateQueries({ queryKey: ["tenant-invites", tenantId] });
     },
@@ -95,7 +95,7 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Member removed");
+      toast.success("Учасника видалено");
       qc.invalidateQueries({ queryKey: ["tenant-members", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -111,7 +111,7 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Role updated");
+      toast.success("Роль оновлено");
       qc.invalidateQueries({ queryKey: ["tenant-members", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -119,15 +119,21 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
 
   const copyInviteLink = (token: string) => {
     const url = `${window.location.origin}/invite/${token}`;
-    navigator.clipboard.writeText(url).then(() => toast.success("Invite link copied"));
+    navigator.clipboard.writeText(url).then(() => toast.success("Посилання-запрошення скопійовано"));
+  };
+
+  const ROLE_LABEL: Record<Role, string> = {
+    owner: "Власник",
+    admin: "Адміністратор",
+    member: "Учасник",
   };
 
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Invite team member</CardTitle>
-          <CardDescription>They'll get a unique link to join this brand.</CardDescription>
+          <CardTitle>Запросити людину в команду</CardTitle>
+          <CardDescription>Вона отримає особисте посилання, щоб приєднатися до бренду.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap items-end gap-2">
@@ -136,19 +142,19 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
               <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="colleague@example.com" type="email" />
             </div>
             <div className="space-y-2">
-              <Label>Role</Label>
+              <Label>Роль</Label>
               <Select value={role} onValueChange={(v) => setRole(v as Role)}>
-                <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="member">Member</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="owner">Owner</SelectItem>
+                  <SelectItem value="member">Учасник</SelectItem>
+                  <SelectItem value="admin">Адміністратор</SelectItem>
+                  <SelectItem value="owner">Власник</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <Button onClick={() => invite.mutate()} disabled={invite.isPending || !email}>
               <Mail className="mr-1.5 h-4 w-4" />
-              Invite
+              Запросити
             </Button>
           </div>
         </CardContent>
@@ -157,7 +163,7 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
       {invitesQuery.data && invitesQuery.data.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Pending invitations</CardTitle>
+            <CardTitle>Запрошення, що очікують</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
@@ -166,11 +172,11 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
                   <div className="flex flex-col text-sm">
                     <span className="font-medium">{inv.email}</span>
                     <span className="text-[10px] text-muted-foreground">
-                      role: {inv.role} · expires {new Date(inv.expires_at).toLocaleDateString()}
+                      роль: {ROLE_LABEL[inv.role as Role] ?? inv.role} · діє до {new Date(inv.expires_at).toLocaleDateString("uk-UA")}
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button size="sm" variant="ghost" onClick={() => copyInviteLink(inv.token)}>Copy link</Button>
+                    <Button size="sm" variant="ghost" onClick={() => copyInviteLink(inv.token)}>Копіювати посилання</Button>
                     <Button size="sm" variant="ghost" onClick={() => cancelInvite.mutate(inv.id)}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
@@ -184,7 +190,7 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Members</CardTitle>
+          <CardTitle>Учасники</CardTitle>
         </CardHeader>
         <CardContent>
           {membersQuery.data && membersQuery.data.length > 0 ? (
@@ -194,15 +200,15 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
                   <div className="flex items-center gap-2">
                     {m.role === "owner" ? <Crown className="h-4 w-4 text-warning" /> : <User className="h-4 w-4 text-muted-foreground" />}
                     <span className="font-mono text-xs">{m.user_id}</span>
-                    <Badge variant="outline">{m.role}</Badge>
+                    <Badge variant="outline">{ROLE_LABEL[m.role as Role] ?? m.role}</Badge>
                   </div>
                   <div className="flex items-center gap-1">
                     <Select value={m.role} onValueChange={(v) => updateRole.mutate({ userId: m.user_id, newRole: v as Role })}>
-                      <SelectTrigger className="h-7 w-28 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="h-7 w-36 text-xs"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="member">Member</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="owner">Owner</SelectItem>
+                        <SelectItem value="member">Учасник</SelectItem>
+                        <SelectItem value="admin">Адміністратор</SelectItem>
+                        <SelectItem value="owner">Власник</SelectItem>
                       </SelectContent>
                     </Select>
                     <Button size="sm" variant="ghost" onClick={() => removeMember.mutate(m.user_id)}>
@@ -213,7 +219,7 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
               ))}
             </ul>
           ) : (
-            <p className="text-xs text-muted-foreground">No members.</p>
+            <p className="text-xs text-muted-foreground">Поки що немає учасників.</p>
           )}
         </CardContent>
       </Card>
