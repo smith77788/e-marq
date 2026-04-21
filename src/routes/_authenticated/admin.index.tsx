@@ -19,10 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
 import { MissionStatCard } from "@/components/admin/MissionStatCard";
-import {
-  TenantLeaderboard,
-  type TenantLeaderRow,
-} from "@/components/admin/TenantLeaderboard";
+import { TenantLeaderboard, type TenantLeaderRow } from "@/components/admin/TenantLeaderboard";
 import { SystemHealthGrid } from "@/components/admin/SystemHealthGrid";
 import { CrossTenantPulse } from "@/components/admin/CrossTenantPulse";
 
@@ -126,9 +123,7 @@ function MissionControlContent() {
   const tenantMap = new Map(data.tenants.map((t) => [t.id, t]));
   const leaderRows: TenantLeaderRow[] = data.tenants
     .map((t) => {
-      const tenantOrders = data.orders.filter(
-        (o) => o.tenant_id === t.id && o.status === "paid",
-      );
+      const tenantOrders = data.orders.filter((o) => o.tenant_id === t.id && o.status === "paid");
       const tenantInsights = data.insights.filter((i) => i.tenant_id === t.id);
       const tenantRuns = data.runs.filter((r) => r.tenant_id === t.id);
       return {
@@ -188,9 +183,7 @@ function MissionControlContent() {
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {t("mc.title")}
           </h1>
-          <p className="text-sm text-muted-foreground">
-            {t("mc.subtitle")}
-          </p>
+          <p className="text-sm text-muted-foreground">{t("mc.subtitle")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button asChild variant="outline" size="sm">

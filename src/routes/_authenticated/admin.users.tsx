@@ -114,7 +114,11 @@ function AdminUsersPage() {
       <div className="grid gap-3 sm:grid-cols-3">
         <StatCard label="Усього користувачів" value={users.length} icon={Users} />
         <StatCard label="Супер-адмінів" value={adminCount} icon={ShieldCheck} accent="primary" />
-        <StatCard label="З брендами" value={users.filter((u) => u.tenant_count > 0).length} icon={Users} />
+        <StatCard
+          label="З брендами"
+          value={users.filter((u) => u.tenant_count > 0).length}
+          icon={Users}
+        />
       </div>
 
       <Card>
@@ -122,7 +126,9 @@ function AdminUsersPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <CardTitle>Список користувачів</CardTitle>
-              <CardDescription>{filtered.length} з {users.length}</CardDescription>
+              <CardDescription>
+                {filtered.length} з {users.length}
+              </CardDescription>
             </div>
             <div className="relative max-w-xs flex-1">
               <Search className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -157,16 +163,24 @@ function AdminUsersPage() {
                     <TableRow key={u.user_id}>
                       <TableCell className="font-medium">
                         {u.email ?? <span className="text-muted-foreground">(без email)</span>}
-                        {isMe && <Badge variant="outline" className="ml-2 text-[10px]">це ви</Badge>}
+                        {isMe && (
+                          <Badge variant="outline" className="ml-2 text-[10px]">
+                            це ви
+                          </Badge>
+                        )}
                       </TableCell>
                       <TableCell>
                         {u.is_super_admin ? (
                           <Badge className="text-[10px]">super_admin</Badge>
                         ) : (
-                          <Badge variant="outline" className="text-[10px]">користувач</Badge>
+                          <Badge variant="outline" className="text-[10px]">
+                            користувач
+                          </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-right font-mono text-xs">{u.tenant_count}</TableCell>
+                      <TableCell className="text-right font-mono text-xs">
+                        {u.tenant_count}
+                      </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {new Date(u.created_at).toLocaleDateString("uk-UA")}
                       </TableCell>
@@ -211,7 +225,8 @@ function AdminUsersPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Зняти super_admin?</AlertDialogTitle>
             <AlertDialogDescription>
-              Користувач <strong>{confirmTarget?.email}</strong> втратить доступ до командного центру та керування брендами. Дію можна скасувати, повернувши роль.
+              Користувач <strong>{confirmTarget?.email}</strong> втратить доступ до командного
+              центру та керування брендами. Дію можна скасувати, повернувши роль.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -242,7 +257,9 @@ function StatCard({
   return (
     <Card>
       <CardContent className="flex items-center gap-3 pt-4">
-        <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${accent === "primary" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+        <div
+          className={`flex h-10 w-10 items-center justify-center rounded-lg ${accent === "primary" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
+        >
           <Icon className="h-5 w-5" />
         </div>
         <div>

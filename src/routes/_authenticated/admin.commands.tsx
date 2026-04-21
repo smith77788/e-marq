@@ -33,11 +33,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  COMMAND_GROUPS,
-  getIndividualAgents,
-  type AdminCommand,
-} from "@/lib/acos/adminCommands";
+import { COMMAND_GROUPS, getIndividualAgents, type AdminCommand } from "@/lib/acos/adminCommands";
 import { humanizeAgentId } from "@/lib/acos/agentLabels";
 
 export const Route = createFileRoute("/_authenticated/admin/commands")({
@@ -74,6 +70,18 @@ function AdminCommandsPage() {
       return data ?? [];
     },
   });
+
+  const tenants = tenantsQuery.data ?? [];
+  const selectedTenant = tenants.find((t) => t.id === tenantId);
+  const individualAgents = useMemo(() => {
+    const list = getIndividualAgents().map((a) => ({
+      ...a,
+      title: humanizeAgentId(a.id),
+    }));
+    if (!search) return list;
+    const q = search.toLowerCase();
+    return list.filter((a) => a.title.toLowerCase().includes(q) || a.id.toLowerCase().includes(q));
+  }, [search]);
 
   if (loading) return <Skeleton className="h-32 w-full" />;
   if (!isSuperAdmin) return <Navigate to="/brand" />;
@@ -130,32 +138,24 @@ function AdminCommandsPage() {
       else toast.error(`✗ ${cmd.title} · HTTP ${res.status}`);
     } catch (err) {
       const ms = Math.round(performance.now() - t0);
-      setResults((prev) => [{
-        commandId: cmd.id,
-        ok: false,
-        status: 0,
-        ms,
-        body: { error: err instanceof Error ? err.message : String(err) },
-        startedAt,
-      }, ...prev].slice(0, 30));
+      setResults((prev) =>
+        [
+          {
+            commandId: cmd.id,
+            ok: false,
+            status: 0,
+            ms,
+            body: { error: err instanceof Error ? err.message : String(err) },
+            startedAt,
+          },
+          ...prev,
+        ].slice(0, 30),
+      );
       toast.error(err instanceof Error ? err.message : "Помилка запуску");
     } finally {
       setRunning(null);
     }
   }
-
-  const tenants = tenantsQuery.data ?? [];
-  const selectedTenant = tenants.find((t) => t.id === tenantId);
-  const individualAgents = useMemo(() => {
-    const list = getIndividualAgents().map((a) => ({
-      ...a,
-      title: humanizeAgentId(a.id),
-    }));
-    if (!search) return list;
-    const q = search.toLowerCase();
-    return list.filter((a) => a.title.toLowerCase().includes(q) || a.id.toLowerCase().includes(q));
-  }, [search]);
-
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -175,7 +175,8 @@ function AdminCommandsPage() {
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Контекст</CardTitle>
           <CardDescription>
-            Більшість команд працюють у межах одного бренду. Оберіть бренд нижче — він підставиться у виклики автоматично.
+            Більшість команд працюють у межах одного бренду. Оберіть бренд нижче — він підставиться
+            у виклики автоматично.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
@@ -195,7 +196,11 @@ function AdminCommandsPage() {
           {selectedTenant && (
             <p className="text-xs text-muted-foreground">
               Активний: <strong>{selectedTenant.name}</strong> · /{selectedTenant.slug} ·{" "}
-              <Link to="/admin/tenants/$tenantId" params={{ tenantId: selectedTenant.id }} className="text-primary hover:underline">
+              <Link
+                to="/admin/tenants/$tenantId"
+                params={{ tenantId: selectedTenant.id }}
+                className="text-primary hover:underline"
+              >
                 відкрити сторінку бренду →
               </Link>
             </p>
@@ -206,7 +211,9 @@ function AdminCommandsPage() {
       <Tabs defaultValue="orchestrators" className="space-y-4">
         <TabsList className="flex flex-wrap h-auto">
           {COMMAND_GROUPS.map((g) => (
-            <TabsTrigger key={g.key} value={g.key}>{g.title}</TabsTrigger>
+            <TabsTrigger key={g.key} value={g.key}>
+              {g.title}
+            </TabsTrigger>
           ))}
           <TabsTrigger value="agents">Окремі агенти ({individualAgents.length})</TabsTrigger>
           <TabsTrigger value="log">Журнал ({results.length})</TabsTrigger>
@@ -276,7 +283,9 @@ function AdminCommandsPage() {
             })}
           </div>
           {!tenantId && (
-            <p className="text-xs text-warning">Оберіть бренд вгорі, щоб увімкнути запуск окремих агентів.</p>
+            <p className="text-xs text-warning">
+              Оберіть бренд вгорі, щоб увімкнути запуск окремих агентів.
+            </p>
           )}
         </TabsContent>
 
@@ -285,7 +294,12 @@ function AdminCommandsPage() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">Журнал запусків</CardTitle>
-                <Button variant="ghost" size="sm" onClick={() => setResults([])} disabled={results.length === 0}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setResults([])}
+                  disabled={results.length === 0}
+                >
                   Очистити
                 </Button>
               </div>
@@ -293,12 +307,17 @@ function AdminCommandsPage() {
             </CardHeader>
             <CardContent>
               {results.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Поки порожньо — запустіть будь-яку команду.</p>
+                <p className="text-sm text-muted-foreground">
+                  Поки порожньо — запустіть будь-яку команду.
+                </p>
               ) : (
                 <ScrollArea className="h-[480px]">
                   <div className="space-y-2">
                     {results.map((r, i) => (
-                      <div key={i} className="rounded-lg border border-border/60 bg-card/40 p-3 text-xs">
+                      <div
+                        key={i}
+                        className="rounded-lg border border-border/60 bg-card/40 p-3 text-xs"
+                      >
                         <div className="mb-1 flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
                             {r.ok ? (
@@ -307,11 +326,16 @@ function AdminCommandsPage() {
                               <AlertCircle className="h-3.5 w-3.5 text-destructive" />
                             )}
                             <span className="font-mono font-semibold">{r.commandId}</span>
-                            <Badge variant={r.ok ? "default" : "destructive"} className="text-[10px]">
+                            <Badge
+                              variant={r.ok ? "default" : "destructive"}
+                              className="text-[10px]"
+                            >
                               HTTP {r.status}
                             </Badge>
                           </div>
-                          <span className="text-muted-foreground">{r.ms}ms · {new Date(r.startedAt).toLocaleTimeString()}</span>
+                          <span className="text-muted-foreground">
+                            {r.ms}ms · {new Date(r.startedAt).toLocaleTimeString()}
+                          </span>
                         </div>
                         <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded bg-muted/40 p-2 font-mono text-[10px] text-foreground">
                           {JSON.stringify(r.body, null, 2)}
@@ -355,7 +379,10 @@ function CommandCard({
             <CardTitle className="text-sm">{cmd.title}</CardTitle>
             <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">{cmd.path}</p>
           </div>
-          <Badge variant={cmd.scope === "global" ? "default" : "outline"} className="shrink-0 text-[10px]">
+          <Badge
+            variant={cmd.scope === "global" ? "default" : "outline"}
+            className="shrink-0 text-[10px]"
+          >
             {cmd.scope === "global" ? "глобально" : "по бренду"}
           </Badge>
         </div>
@@ -364,7 +391,9 @@ function CommandCard({
         <p className="text-xs text-muted-foreground">{cmd.description}</p>
         {cmd.extraBody && (
           <div className="space-y-1">
-            <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">Параметри (JSON)</Label>
+            <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">
+              Параметри (JSON)
+            </Label>
             <Textarea
               value={extraBody ?? placeholder}
               onChange={(e) => onExtraBodyChange(e.target.value)}
@@ -375,9 +404,13 @@ function CommandCard({
         )}
         <Button onClick={onRun} disabled={disabled} size="sm" className="w-full">
           {running ? (
-            <><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> Виконується…</>
+            <>
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> Виконується…
+            </>
           ) : (
-            <><Play className="mr-1.5 h-3.5 w-3.5" /> Запустити</>
+            <>
+              <Play className="mr-1.5 h-3.5 w-3.5" /> Запустити
+            </>
           )}
         </Button>
         {cmd.scope === "tenant" && !hasTenant && (

@@ -69,9 +69,7 @@ const OWNER_NAV: { labelKey: TKey; items: NavItem[] }[] = [
   },
   {
     labelKey: "sb.billing" as TKey,
-    items: [
-      { labelKey: "sb.planBilling" as TKey, to: "/brand/billing", icon: CreditCard },
-    ],
+    items: [{ labelKey: "sb.planBilling" as TKey, to: "/brand/billing", icon: CreditCard }],
   },
 ];
 
@@ -121,9 +119,11 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
           </span>
           {!collapsed && (
             <div className="flex flex-col leading-tight">
-              <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">MARQ</span>
+              <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">
+                MARQ
+              </span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                {isSuperAdmin ? t("sb.missionControl") : brandName ?? t("sb.cockpit")}
+                {isSuperAdmin ? t("sb.missionControl") : (brandName ?? t("sb.cockpit"))}
               </span>
             </div>
           )}
@@ -158,7 +158,9 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
                           <item.icon
                             className={cn(
                               "h-4 w-4 shrink-0 transition-colors",
-                              isActive ? "text-primary" : "text-muted-foreground group-hover/nav:text-foreground",
+                              isActive
+                                ? "text-primary"
+                                : "text-muted-foreground group-hover/nav:text-foreground",
                             )}
                           />
                           {!collapsed && <span className="truncate">{label}</span>}
