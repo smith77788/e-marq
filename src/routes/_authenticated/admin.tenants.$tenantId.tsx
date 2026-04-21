@@ -363,14 +363,14 @@ function TenantDetailPage() {
 
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="flex-wrap h-auto">
-          <TabsTrigger value="overview">Commerce</TabsTrigger>
-          <TabsTrigger value="plan">Plan & Billing</TabsTrigger>
-          <TabsTrigger value="balances">Balances</TabsTrigger>
-          <TabsTrigger value="members">Members</TabsTrigger>
-          <TabsTrigger value="products">Products</TabsTrigger>
-          <TabsTrigger value="orders">Orders</TabsTrigger>
-          <TabsTrigger value="config">Config</TabsTrigger>
-          <TabsTrigger value="acos-debug">ACOS Debug</TabsTrigger>
+          <TabsTrigger value="overview">Огляд</TabsTrigger>
+          <TabsTrigger value="plan">Тариф і оплата</TabsTrigger>
+          <TabsTrigger value="balances">Баланси</TabsTrigger>
+          <TabsTrigger value="members">Команда</TabsTrigger>
+          <TabsTrigger value="products">Товари</TabsTrigger>
+          <TabsTrigger value="orders">Замовлення</TabsTrigger>
+          <TabsTrigger value="config">Налаштування</TabsTrigger>
+          <TabsTrigger value="acos-debug">Агенти (debug)</TabsTrigger>
         </TabsList>
 
         <TabsContent value="plan" className="space-y-4">
