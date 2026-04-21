@@ -26,6 +26,7 @@ const dict = {
     "sb.agents": "Агенти",
     "sb.setup": "Налаштування",
     "sb.channels": "Канали",
+    "sb.integrations": "Імпорт даних",
     "sb.onboarding": "Онбординг",
     "sb.storefront": "Вітрина",
     "sb.settings": "Параметри",

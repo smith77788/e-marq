@@ -66,6 +66,7 @@ const OWNER_NAV: { labelKey: TKey; items: NavItem[] }[] = [
     labelKey: "sb.setup",
     items: [
       { labelKey: "sb.channels", to: "/brand", icon: Plug },
+      { labelKey: "sb.integrations" as TKey, to: "/brand/integrations", icon: Plug },
       { labelKey: "sb.onboarding", to: "/onboarding", icon: Sparkles },
       { labelKey: "sb.profile" as TKey, to: "/profile", icon: IdCard, exact: true },
     ],

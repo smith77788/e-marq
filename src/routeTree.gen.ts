@@ -120,6 +120,7 @@ import { Route as HooksAgentsAnomalyDetectorRouteImport } from './routes/hooks/a
 import { Route as HooksAgentsActionWatchdogRouteImport } from './routes/hooks/agents.action-watchdog'
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
+import { Route as AuthenticatedBrandIntegrationsRouteImport } from './routes/_authenticated/brand.integrations'
 import { Route as AuthenticatedBrandBillingRouteImport } from './routes/_authenticated/brand.billing'
 import { Route as AuthenticatedAgentsLiveRouteImport } from './routes/_authenticated/agents.live'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
@@ -131,6 +132,7 @@ import { Route as AuthenticatedAdminCommandsRouteImport } from './routes/_authen
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
 import { Route as AuthenticatedAdminDntradeHealthTenantIdRouteImport } from './routes/_authenticated/admin.dntrade-health.$tenantId'
+import { Route as ApiPublicIntegrationsInboundProviderRouteImport } from './routes/api/public/integrations.inbound.$provider'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -736,6 +738,12 @@ const AuthenticatedInviteTokenRoute =
     path: '/invite/$token',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedBrandIntegrationsRoute =
+  AuthenticatedBrandIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AuthenticatedBrandRoute,
+  } as any)
 const AuthenticatedBrandBillingRoute =
   AuthenticatedBrandBillingRouteImport.update({
     id: '/billing',
@@ -798,6 +806,12 @@ const AuthenticatedAdminDntradeHealthTenantIdRoute =
     path: '/$tenantId',
     getParentRoute: () => AuthenticatedAdminDntradeHealthRoute,
   } as any)
+const ApiPublicIntegrationsInboundProviderRoute =
+  ApiPublicIntegrationsInboundProviderRouteImport.update({
+    id: '/api/public/integrations/inbound/$provider',
+    path: '/api/public/integrations/inbound/$provider',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -822,6 +836,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
+  '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
@@ -921,6 +936,7 @@ export interface FileRoutesByFullPath {
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
+  '/api/public/integrations/inbound/$provider': typeof ApiPublicIntegrationsInboundProviderRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -945,6 +961,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
+  '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
@@ -1044,6 +1061,7 @@ export interface FileRoutesByTo {
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
+  '/api/public/integrations/inbound/$provider': typeof ApiPublicIntegrationsInboundProviderRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1070,6 +1088,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/_authenticated/brand/billing': typeof AuthenticatedBrandBillingRoute
+  '/_authenticated/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
@@ -1169,6 +1188,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
+  '/api/public/integrations/inbound/$provider': typeof ApiPublicIntegrationsInboundProviderRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1195,6 +1215,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/agents/live'
     | '/brand/billing'
+    | '/brand/integrations'
     | '/invite/$token'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
@@ -1294,6 +1315,7 @@ export interface FileRouteTypes {
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
     | '/s/$slug/orders/$orderId'
+    | '/api/public/integrations/inbound/$provider'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1318,6 +1340,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/agents/live'
     | '/brand/billing'
+    | '/brand/integrations'
     | '/invite/$token'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
@@ -1417,6 +1440,7 @@ export interface FileRouteTypes {
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
     | '/s/$slug/orders/$orderId'
+    | '/api/public/integrations/inbound/$provider'
   id:
     | '__root__'
     | '/'
@@ -1442,6 +1466,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/users'
     | '/_authenticated/agents/live'
     | '/_authenticated/brand/billing'
+    | '/_authenticated/brand/integrations'
     | '/_authenticated/invite/$token'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
@@ -1541,6 +1566,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/dntrade-health/$tenantId'
     | '/_authenticated/admin/tenants/$tenantId'
     | '/s/$slug/orders/$orderId'
+    | '/api/public/integrations/inbound/$provider'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1648,6 +1674,7 @@ export interface RootRouteChildren {
   HooksTelegramNotifyOwnerRoute: typeof HooksTelegramNotifyOwnerRoute
   HooksTelegramPollRoute: typeof HooksTelegramPollRoute
   TrackSlugJsRoute: typeof TrackSlugJsRoute
+  ApiPublicIntegrationsInboundProviderRoute: typeof ApiPublicIntegrationsInboundProviderRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -2429,6 +2456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInviteTokenRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/brand/integrations': {
+      id: '/_authenticated/brand/integrations'
+      path: '/integrations'
+      fullPath: '/brand/integrations'
+      preLoaderRoute: typeof AuthenticatedBrandIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedBrandRoute
+    }
     '/_authenticated/brand/billing': {
       id: '/_authenticated/brand/billing'
       path: '/billing'
@@ -2506,15 +2540,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDntradeHealthTenantIdRouteImport
       parentRoute: typeof AuthenticatedAdminDntradeHealthRoute
     }
+    '/api/public/integrations/inbound/$provider': {
+      id: '/api/public/integrations/inbound/$provider'
+      path: '/api/public/integrations/inbound/$provider'
+      fullPath: '/api/public/integrations/inbound/$provider'
+      preLoaderRoute: typeof ApiPublicIntegrationsInboundProviderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AuthenticatedBrandRouteChildren {
   AuthenticatedBrandBillingRoute: typeof AuthenticatedBrandBillingRoute
+  AuthenticatedBrandIntegrationsRoute: typeof AuthenticatedBrandIntegrationsRoute
 }
 
 const AuthenticatedBrandRouteChildren: AuthenticatedBrandRouteChildren = {
   AuthenticatedBrandBillingRoute: AuthenticatedBrandBillingRoute,
+  AuthenticatedBrandIntegrationsRoute: AuthenticatedBrandIntegrationsRoute,
 }
 
 const AuthenticatedBrandRouteWithChildren =
@@ -2718,6 +2761,8 @@ const rootRouteChildren: RootRouteChildren = {
   HooksTelegramNotifyOwnerRoute: HooksTelegramNotifyOwnerRoute,
   HooksTelegramPollRoute: HooksTelegramPollRoute,
   TrackSlugJsRoute: TrackSlugJsRoute,
+  ApiPublicIntegrationsInboundProviderRoute:
+    ApiPublicIntegrationsInboundProviderRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
