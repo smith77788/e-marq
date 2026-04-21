@@ -119,6 +119,8 @@ function BrandPage() {
 
       <SetupChecklist tenantId={current.id} tenantSlug={current.slug} />
 
+      <SetupReadinessCard tenantId={current.id} tenantSlug={current.slug} />
+
       <PlanUsageCard tenantId={current.id} />
 
       <OwnerTelegramBindCard tenantId={current.id} tenantSlug={current.slug} />
