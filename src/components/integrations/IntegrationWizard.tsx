@@ -152,12 +152,6 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
       setStep(3);
     },
     onError: (e: Error) => toast.error(MSG.errSave, { description: e.message }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["tenant-integrations", tenantId] });
-      toast.success(MSG.saved);
-      setStep(3);
-    },
-    onError: (e: Error) => toast.error(MSG.errSave, { description: e.message }),
   });
 
   async function runImportNow() {
