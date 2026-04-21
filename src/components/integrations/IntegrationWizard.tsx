@@ -155,12 +155,13 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
   });
 
   async function runImportNow() {
-    if (!parsedFile) return;
+    if (!parsedFile || !integration) return;
+    const providerId = integration.id;
     setImporting(true);
     try {
       const res = await runImport({
         tenantId,
-        sourceProvider: integration.id,
+        sourceProvider: providerId,
         sourceKind: "manual",
         entityKind,
         rows: parsedFile.rows,
