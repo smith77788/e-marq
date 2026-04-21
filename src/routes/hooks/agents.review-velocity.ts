@@ -52,8 +52,8 @@ export const Route = createFileRoute("/hooks/agents/review-velocity")({
           const previous = new Map<string, number>();
           for (const it of items ?? []) {
             if (!it.product_id) continue;
-            // @ts-expect-error nested join
-            const orderDate = it.orders?.created_at as string;
+            const ord = (it as unknown as { orders?: { created_at?: string } }).orders;
+            const orderDate = ord?.created_at ?? "";
             if (orderDate >= last7) {
               const e = recent.get(it.product_id) ?? { name: it.product_name, qty: 0 };
               e.qty += it.quantity;

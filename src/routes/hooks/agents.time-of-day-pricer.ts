@@ -43,7 +43,7 @@ export const Route = createFileRoute("/hooks/agents/time-of-day-pricer")({
               .from("events")
               .select("created_at")
               .eq("tenant_id", tenantId)
-              .eq("type", "page_view")
+              .eq("type", "product_viewed")
               .gte("created_at", since)
               .limit(5000),
             supabaseAdmin
