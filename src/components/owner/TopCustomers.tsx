@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { DetailableElement } from "@/components/detail";
+import { fetchCustomerDetail } from "@/components/detail/builders";
 
 type Props = { tenantId: string };
 
@@ -120,35 +122,45 @@ export function TopCustomers({ tenantId }: Props) {
               const reachable = !!c.email || !!c.telegram_chat_id;
               const canMessage = c.consent_marketing && reachable;
               return (
-                <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-2">
-                  <div className="flex min-w-0 flex-1 items-center gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-foreground">{c.name ?? c.email ?? "Анонім"}</p>
-                      <p className="truncate text-[11px] text-muted-foreground">
-                        {c.total_orders} замовлень · {fmtUsd(c.total_spent_cents)}
-                        {since !== null && (
-                          <span className={overdue ? "ml-1 text-amber-600 dark:text-amber-400" : "ml-1"}>
-                            · {since} дн. тому{overdue ? " (час нагадати)" : ""}
-                          </span>
-                        )}
-                      </p>
+                <DetailableElement
+                  key={c.id}
+                  elementId={c.id}
+                  resourceType="customer"
+                  drawerTitle={c.name ?? c.email ?? "Анонім"}
+                  fetchDetail={() => fetchCustomerDetail(tenantId, c.id)}
+                  staleTime={60_000}
+                  ariaLabel={`Профіль клієнта ${c.name ?? c.email ?? "анонім"}`}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-2">
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-foreground">{c.name ?? c.email ?? "Анонім"}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">
+                          {c.total_orders} замовлень · {fmtUsd(c.total_spent_cents)}
+                          {since !== null && (
+                            <span className={overdue ? "ml-1 text-amber-600 dark:text-amber-400" : "ml-1"}>
+                              · {since} дн. тому{overdue ? " (час нагадати)" : ""}
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className={`text-[10px] ${stage.cls}`}>{stage.label}</Badge>
+                      <Button
+                        size="sm"
+                        variant={overdue ? "default" : "outline"}
+                        disabled={!canMessage || busy === c.id}
+                        onClick={() => sendWinback(c)}
+                        className="h-7 gap-1 text-xs"
+                        title={!canMessage ? (c.consent_marketing ? "Немає каналу для звʼязку" : "Клієнт відмовився від розсилок") : "Надіслати персональне нагадування від ШІ"}
+                      >
+                        {busy === c.id ? <Loader2 className="h-3 w-3 animate-spin" /> : !canMessage ? <AlertCircle className="h-3 w-3" /> : <Send className="h-3 w-3" />}
+                        Повернути
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={`text-[10px] ${stage.cls}`}>{stage.label}</Badge>
-                    <Button
-                      size="sm"
-                      variant={overdue ? "default" : "outline"}
-                      disabled={!canMessage || busy === c.id}
-                      onClick={() => sendWinback(c)}
-                      className="h-7 gap-1 text-xs"
-                      title={!canMessage ? (c.consent_marketing ? "Немає каналу для звʼязку" : "Клієнт відмовився від розсилок") : "Надіслати персональне нагадування від ШІ"}
-                    >
-                      {busy === c.id ? <Loader2 className="h-3 w-3 animate-spin" /> : !canMessage ? <AlertCircle className="h-3 w-3" /> : <Send className="h-3 w-3" />}
-                      Повернути
-                    </Button>
-                  </div>
-                </div>
+                </DetailableElement>
               );
             })}
           </div>

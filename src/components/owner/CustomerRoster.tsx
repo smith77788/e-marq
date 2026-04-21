@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
+import { DetailableElement } from "@/components/detail";
+import { fetchCustomerDetail } from "@/components/detail/builders";
 
 type Props = { tenantId: string };
 
@@ -94,41 +96,51 @@ export function CustomerRoster({ tenantId }: Props) {
                   : c.lifecycle_stage === "dormant" ? "сплячий"
                   : c.lifecycle_stage;
                 return (
-                  <div key={c.id} className="rounded-lg border border-border bg-card p-3">
-                    <div className="flex items-center gap-2">
-                      {c.lifecycle_stage === "vip" && <Crown className="h-3.5 w-3.5 text-warning-foreground" />}
-                      <p className="text-sm font-medium text-foreground">
-                        {c.name ?? c.email ?? (c.telegram_username ? `@${c.telegram_username}` : "анонім")}
-                      </p>
-                      <Badge variant="outline" className={`ml-auto text-[10px] ${stage}`}>
-                        {stageLabel}
-                      </Badge>
-                    </div>
-                    <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-                      {c.email && <span className="truncate">{c.email}</span>}
-                      {c.telegram_chat_id && (
-                        <span className="inline-flex items-center gap-1 text-primary">
-                          <MessageCircle className="h-3 w-3" /> Telegram
-                        </span>
-                      )}
-                    </div>
-                    <div className="mt-2 grid grid-cols-3 gap-2 text-[11px]">
-                      <div>
-                        <span className="text-muted-foreground">Замовлень</span>
-                        <p className="font-medium text-foreground">{c.total_orders}</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Витратив усього</span>
-                        <p className="font-medium text-foreground">{Math.round(c.total_spent_cents / 100).toLocaleString("uk-UA")} ₴</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Наступна покупка</span>
-                        <p className={`font-medium ${overdue ? "text-destructive" : "text-foreground"}`}>
-                          {c.predicted_next_order_at ? new Date(c.predicted_next_order_at).toLocaleDateString("uk-UA") : "—"}
+                  <DetailableElement
+                    key={c.id}
+                    elementId={c.id}
+                    resourceType="customer"
+                    drawerTitle={c.name ?? c.email ?? (c.telegram_username ? `@${c.telegram_username}` : "Анонім")}
+                    fetchDetail={() => fetchCustomerDetail(tenantId, c.id)}
+                    staleTime={60_000}
+                    ariaLabel={`Профіль клієнта ${c.name ?? c.email ?? "анонім"}`}
+                  >
+                    <div className="rounded-lg border border-border bg-card p-3">
+                      <div className="flex items-center gap-2">
+                        {c.lifecycle_stage === "vip" && <Crown className="h-3.5 w-3.5 text-warning-foreground" />}
+                        <p className="text-sm font-medium text-foreground">
+                          {c.name ?? c.email ?? (c.telegram_username ? `@${c.telegram_username}` : "анонім")}
                         </p>
+                        <Badge variant="outline" className={`ml-auto text-[10px] ${stage}`}>
+                          {stageLabel}
+                        </Badge>
+                      </div>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                        {c.email && <span className="truncate">{c.email}</span>}
+                        {c.telegram_chat_id && (
+                          <span className="inline-flex items-center gap-1 text-primary">
+                            <MessageCircle className="h-3 w-3" /> Telegram
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-2 grid grid-cols-3 gap-2 text-[11px]">
+                        <div>
+                          <span className="text-muted-foreground">Замовлень</span>
+                          <p className="font-medium text-foreground">{c.total_orders}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Витратив усього</span>
+                          <p className="font-medium text-foreground">{Math.round(c.total_spent_cents / 100).toLocaleString("uk-UA")} ₴</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Наступна покупка</span>
+                          <p className={`font-medium ${overdue ? "text-destructive" : "text-foreground"}`}>
+                            {c.predicted_next_order_at ? new Date(c.predicted_next_order_at).toLocaleDateString("uk-UA") : "—"}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </DetailableElement>
                 );
               })}
             </div>

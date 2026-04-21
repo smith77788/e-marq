@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/lib/i18n";
 import { MSG } from "@/lib/glossary";
 import type { InsightCopy, LocalizedCopy } from "@/lib/acos/insightCopy";
+import { DetailableElement } from "@/components/detail";
+import { buildInsightPayload } from "@/components/detail/builders";
 
 const INSIGHT_TYPE_LABEL: Record<string, string> = {
   low_engagement_product: "слабкий інтерес до товару",
@@ -161,60 +163,70 @@ export function InsightsPanel({ tenantId }: Props) {
               const what = copy?.what_to_do;
               const techOpen = openTech[i.id];
               return (
-                <div key={i.id} className="rounded-lg border border-border bg-card p-3">
-                  <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
-                    <Badge variant="outline" className={`text-[10px] ${style.cls}`}>
-                      <Icon className="mr-1 h-3 w-3" />
-                      {humanType(i.insight_type)}
-                    </Badge>
-                    <Badge variant="outline" className="text-[10px]">
-                      {Math.round(i.confidence * 100)}% {t("insights.confidence")}
-                    </Badge>
-                    <span className="ml-auto text-[10px] text-muted-foreground">
-                      {formatDistanceToNow(new Date(i.created_at), { addSuffix: true, locale: uk })}
-                    </span>
-                  </div>
-                  <p className="text-sm font-semibold text-foreground">{headline}</p>
-                  <div className="mt-2 space-y-1.5 text-xs">
-                    <div>
-                      <span className="font-medium text-muted-foreground">{t("insights.why")}: </span>
-                      <span className="text-foreground/90">{why}</span>
+                <DetailableElement
+                  key={i.id}
+                  elementId={i.id}
+                  resourceType="insight"
+                  drawerTitle={headline}
+                  payload={buildInsightPayload(i)}
+                  ariaLabel={`Відкрити деталі інсайту ${headline}`}
+                >
+                  <div className="rounded-lg border border-border bg-card p-3">
+                    <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+                      <Badge variant="outline" className={`text-[10px] ${style.cls}`}>
+                        <Icon className="mr-1 h-3 w-3" />
+                        {humanType(i.insight_type)}
+                      </Badge>
+                      <Badge variant="outline" className="text-[10px]">
+                        {Math.round(i.confidence * 100)}% {t("insights.confidence")}
+                      </Badge>
+                      <span className="ml-auto text-[10px] text-muted-foreground">
+                        {formatDistanceToNow(new Date(i.created_at), { addSuffix: true, locale: uk })}
+                      </span>
                     </div>
-                    {what && (
+                    <p className="text-sm font-semibold text-foreground">{headline}</p>
+                    <div className="mt-2 space-y-1.5 text-xs">
                       <div>
-                        <span className="font-medium text-muted-foreground">{t("insights.what")}: </span>
-                        <span className="text-foreground/90">{what}</span>
+                        <span className="font-medium text-muted-foreground">{t("insights.why")}: </span>
+                        <span className="text-foreground/90">{why}</span>
                       </div>
+                      {what && (
+                        <div>
+                          <span className="font-medium text-muted-foreground">{t("insights.what")}: </span>
+                          <span className="text-foreground/90">{what}</span>
+                        </div>
+                      )}
+                    </div>
+                    {i.expected_impact && (
+                      <p className="mt-2 text-[11px] font-medium text-primary">💰 {i.expected_impact}</p>
                     )}
-                  </div>
-                  {i.expected_impact && (
-                    <p className="mt-2 text-[11px] font-medium text-primary">💰 {i.expected_impact}</p>
-                  )}
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <Button size="sm" onClick={() => apply.mutate(i.id)} disabled={pending}>
-                      {pending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
-                      {t("insights.apply")}
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => dismiss.mutate(i.id)} disabled={dismiss.isPending}>
-                      <X className="mr-1 h-3.5 w-3.5" /> {t("insights.dismiss")}
-                    </Button>
-                    {copy && (
-                      <button
-                        type="button"
-                        className="ml-auto inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
-                        onClick={() => setOpenTech((o) => ({ ...o, [i.id]: !o[i.id] }))}
-                      >
-                        <ChevronDown className={`h-3 w-3 transition-transform ${techOpen ? "rotate-180" : ""}`} />
-                        {t("insights.tech")}
-                      </button>
-                    )}
-                  </div>
-                  {techOpen && (
-                    <pre className="mt-2 overflow-x-auto rounded bg-muted/40 p-2 text-[10px] text-muted-foreground">
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <Button size="sm" onClick={() => apply.mutate(i.id)} disabled={pending}>
+                        {pending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
+                        {t("insights.apply")}
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => dismiss.mutate(i.id)} disabled={dismiss.isPending}>
+                        <X className="mr-1 h-3.5 w-3.5" /> {t("insights.dismiss")}
+                      </Button>
+                      {copy && (
+                        <button
+                          type="button"
+                          data-stop-detail
+                          className="ml-auto inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+                          onClick={() => setOpenTech((o) => ({ ...o, [i.id]: !o[i.id] }))}
+                        >
+                          <ChevronDown className={`h-3 w-3 transition-transform ${techOpen ? "rotate-180" : ""}`} />
+                          {t("insights.tech")}
+                        </button>
+                      )}
+                    </div>
+                    {techOpen && (
+                      <pre className="mt-2 overflow-x-auto rounded bg-muted/40 p-2 text-[10px] text-muted-foreground">
 {JSON.stringify({ title: i.title, description: i.description, metrics: i.metrics }, null, 2)}
-                    </pre>
-                  )}
-                </div>
+                      </pre>
+                    )}
+                  </div>
+                </DetailableElement>
               );
             })}
           </div>

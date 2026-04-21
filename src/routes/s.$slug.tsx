@@ -29,6 +29,8 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
 import { loadCart, saveCart, clearCart, type Cart } from "@/lib/cart";
+import { DetailableElement } from "@/components/detail";
+import { buildStorefrontProductPayload } from "@/components/detail/builders";
 
 type TenantRow = { id: string; name: string; slug: string; status: string };
 type PaymentsConfig = {
@@ -466,53 +468,62 @@ function ProductCard({
   const maxedOut = inCart >= product.stock;
 
   return (
-    <Card className="overflow-hidden">
-      {product.image_url ? (
-        <div className="aspect-square w-full overflow-hidden bg-muted">
-          <img
-            src={product.image_url}
-            alt={product.name}
-            loading="lazy"
-            className="h-full w-full object-cover"
-          />
-        </div>
-      ) : (
-        <div className="flex aspect-square w-full items-center justify-center bg-muted">
-          <span className="text-xs text-muted-foreground">No image</span>
-        </div>
-      )}
-      <CardContent className="space-y-3 p-4">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="line-clamp-1 font-medium text-foreground">{product.name}</h3>
-          <Badge variant="outline" className="shrink-0">
-            {price} {product.currency}
-          </Badge>
-        </div>
-        {product.description && (
-          <p className="line-clamp-2 text-xs text-muted-foreground">{product.description}</p>
+    <DetailableElement
+      elementId={product.id}
+      resourceType="product"
+      drawerTitle={product.name}
+      drawerSize="lg"
+      payload={buildStorefrontProductPayload(product)}
+      ariaLabel={`Деталі товару ${product.name}`}
+    >
+      <Card className="overflow-hidden">
+        {product.image_url ? (
+          <div className="aspect-square w-full overflow-hidden bg-muted">
+            <img
+              src={product.image_url}
+              alt={product.name}
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
+          </div>
+        ) : (
+          <div className="flex aspect-square w-full items-center justify-center bg-muted">
+            <span className="text-xs text-muted-foreground">No image</span>
+          </div>
         )}
-        <Button
-          size="sm"
-          className="w-full"
-          disabled={outOfStock || maxedOut}
-          onClick={onAdd}
-        >
-          {outOfStock ? (
-            "Out of stock"
-          ) : inCart > 0 ? (
-            <>
-              <Check className="mr-2 h-4 w-4" />
-              In cart ({inCart})
-            </>
-          ) : (
-            <>
-              <ShoppingCart className="mr-2 h-4 w-4" />
-              Add to cart
-            </>
+        <CardContent className="space-y-3 p-4">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="line-clamp-1 font-medium text-foreground">{product.name}</h3>
+            <Badge variant="outline" className="shrink-0">
+              {price} {product.currency}
+            </Badge>
+          </div>
+          {product.description && (
+            <p className="line-clamp-2 text-xs text-muted-foreground">{product.description}</p>
           )}
-        </Button>
-      </CardContent>
-    </Card>
+          <Button
+            size="sm"
+            className="w-full"
+            disabled={outOfStock || maxedOut}
+            onClick={onAdd}
+          >
+            {outOfStock ? (
+              "Out of stock"
+            ) : inCart > 0 ? (
+              <>
+                <Check className="mr-2 h-4 w-4" />
+                In cart ({inCart})
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                Add to cart
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+    </DetailableElement>
   );
 }
 

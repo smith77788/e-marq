@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
+import { DetailableElement } from "@/components/detail";
+import { buildTimelinePayload } from "@/components/detail/builders";
 
 type Props = { tenantId: string };
 
@@ -170,18 +172,29 @@ export function AgentTimeline({ tenantId }: Props) {
                     <span className="absolute -left-[27px] flex h-5 w-5 items-center justify-center rounded-full border border-border bg-background">
                       <Icon className="h-3 w-3 text-primary" />
                     </span>
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <p className="text-sm font-medium text-foreground leading-snug">{item.title}</p>
-                      {item.badge && (
-                        <Badge variant={item.badgeVariant ?? "secondary"} className="text-[10px]">
-                          {item.badge}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{item.detail}</p>
-                    <p className="mt-0.5 text-[10px] text-muted-foreground/70">
-                      {formatDistanceToNow(item.ts, { addSuffix: true, locale: uk })}
-                    </p>
+                    <DetailableElement
+                      elementId={item.id}
+                      resourceType={item.kind === "outbound" ? "outbound" : item.kind === "insight" ? "insight" : item.kind === "action" ? "agent" : "agent"}
+                      drawerTitle={item.title}
+                      drawerSize="sm"
+                      payload={buildTimelinePayload({ kind: item.kind, title: item.title, detail: item.detail, ts: item.ts, badge: item.badge })}
+                      ariaLabel={`Деталі події ${item.title}`}
+                    >
+                      <div>
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <p className="text-sm font-medium text-foreground leading-snug">{item.title}</p>
+                          {item.badge && (
+                            <Badge variant={item.badgeVariant ?? "secondary"} className="text-[10px]">
+                              {item.badge}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{item.detail}</p>
+                        <p className="mt-0.5 text-[10px] text-muted-foreground/70">
+                          {formatDistanceToNow(item.ts, { addSuffix: true, locale: uk })}
+                        </p>
+                      </div>
+                    </DetailableElement>
                   </li>
                 );
               })}

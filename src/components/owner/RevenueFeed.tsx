@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { formatMoney } from "@/lib/money";
+import { DetailableElement } from "@/components/detail";
+import { buildOutboundPayload } from "@/components/detail/builders";
 
 type Props = { tenantId: string };
 
@@ -199,28 +201,37 @@ export function RevenueFeed({ tenantId }: Props) {
                   r.customers?.name ?? r.customers?.email ?? (r.customers?.telegram_username ? `@${r.customers.telegram_username}` : "анонім");
                 const ts = r.sent_at ?? r.scheduled_for;
                 return (
-                  <div key={r.id} className="rounded-lg border border-border bg-card p-3">
-                    <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
-                      <Badge variant="outline" className={`text-[10px] ${s.cls}`}>
-                        <StatusIcon className="mr-1 h-3 w-3" />
-                        {s.label}
-                      </Badge>
-                      <Badge variant="outline" className="text-[10px]">{TRIGGER_LABEL[r.trigger_kind] ?? r.trigger_kind}</Badge>
-                      <Badge variant="secondary" className="text-[10px]">{r.channel}</Badge>
-                      <span className="ml-auto text-[10px] text-muted-foreground">
-                        {formatDistanceToNow(new Date(ts), { addSuffix: true })}
-                      </span>
-                    </div>
-                    <p className="text-xs font-medium text-foreground">→ {customerLabel}</p>
-                    <p className="mt-1 whitespace-pre-line text-xs text-muted-foreground line-clamp-3">
-                      {r.body.replace(/<[^>]+>/g, "")}
-                    </p>
-                    {r.expected_impact_cents != null && (
-                      <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-primary">
-                        <TrendingUp className="h-3 w-3" /> потенціал {formatMoney(r.expected_impact_cents)}
+                  <DetailableElement
+                    key={r.id}
+                    elementId={r.id}
+                    resourceType="outbound"
+                    drawerTitle={TRIGGER_LABEL[r.trigger_kind] ?? r.trigger_kind}
+                    payload={buildOutboundPayload(r)}
+                    ariaLabel={`Відкрити деталі повідомлення ${customerLabel}`}
+                  >
+                    <div className="rounded-lg border border-border bg-card p-3">
+                      <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+                        <Badge variant="outline" className={`text-[10px] ${s.cls}`}>
+                          <StatusIcon className="mr-1 h-3 w-3" />
+                          {s.label}
+                        </Badge>
+                        <Badge variant="outline" className="text-[10px]">{TRIGGER_LABEL[r.trigger_kind] ?? r.trigger_kind}</Badge>
+                        <Badge variant="secondary" className="text-[10px]">{r.channel}</Badge>
+                        <span className="ml-auto text-[10px] text-muted-foreground">
+                          {formatDistanceToNow(new Date(ts), { addSuffix: true })}
+                        </span>
+                      </div>
+                      <p className="text-xs font-medium text-foreground">→ {customerLabel}</p>
+                      <p className="mt-1 whitespace-pre-line text-xs text-muted-foreground line-clamp-3">
+                        {r.body.replace(/<[^>]+>/g, "")}
                       </p>
-                    )}
-                  </div>
+                      {r.expected_impact_cents != null && (
+                        <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-primary">
+                          <TrendingUp className="h-3 w-3" /> потенціал {formatMoney(r.expected_impact_cents)}
+                        </p>
+                      )}
+                    </div>
+                  </DetailableElement>
                 );
               })}
             </div>
