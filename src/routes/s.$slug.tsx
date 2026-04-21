@@ -550,42 +550,50 @@ function CheckoutDialog({
   }, [open, defaultMethod]);
 
   async function placeOrder() {
-    if (!email.trim() || cartLines.length === 0) return;
+    const trimmedEmail = email.trim();
+    const trimmedName = name.trim();
+    if (!trimmedEmail || cartLines.length === 0) return;
+
+    // Client-side validation (defense-in-depth — server RPC валідує знов)
+    if (trimmedEmail.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      toast.error("Please enter a valid email");
+      return;
+    }
+    if (trimmedName.length > 200) {
+      toast.error("Name is too long");
+      return;
+    }
+    if (cartLines.length > 50) {
+      toast.error("Too many items in cart");
+      return;
+    }
     if (method === "stripe_card") {
       toast.error("Card payments coming soon — please use bank transfer for now.");
       return;
     }
+
     setSubmitting(true);
     try {
-      const { data: order, error: oErr } = await supabase
-        .from("orders")
-        .insert({
-          tenant_id: tenantId,
-          customer_email: email.trim(),
-          customer_name: name.trim() || null,
-          currency,
-          total_cents: totalCents,
-          status: "pending",
-          payment_method: "manual",
-          metadata: { source: "storefront", session_id: getSessionId() },
-        })
-        .select("id")
-        .single();
-      if (oErr) throw oErr;
-
+      // Безпечне оформлення через SECURITY DEFINER RPC.
+      // Сервер сам перевіряє: tenant active, products belong to tenant, stock,
+      // перераховує total_cents (клієнт НЕ може підмінити ціну).
       const items = cartLines.map((l) => ({
-        order_id: order.id,
-        tenant_id: tenantId,
         product_id: l.product.id,
-        product_name: l.product.name,
         quantity: l.quantity,
-        unit_price_cents: l.product.price_cents,
       }));
-      const { error: iErr } = await supabase.from("order_items").insert(items);
-      if (iErr) throw iErr;
+
+      const { data: orderId, error: rpcErr } = await supabase.rpc("place_storefront_order", {
+        _tenant_id: tenantId,
+        _customer_name: trimmedName,
+        _customer_email: trimmedEmail,
+        _items: items,
+        _payment_method: "manual",
+      });
+      if (rpcErr) throw rpcErr;
+      if (!orderId) throw new Error("Failed to place order");
 
       track(tenantId, "purchase_completed", {
-        order_id: order.id,
+        order_id: orderId,
         payload: {
           total_cents: totalCents,
           items: items.length,
@@ -596,10 +604,20 @@ function CheckoutDialog({
       });
 
       toast.success("Order placed! Awaiting payment.");
-      onSuccess(order.id);
+      onSuccess(orderId);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Failed to place order";
-      toast.error(msg);
+      const raw = e instanceof Error ? e.message : "Failed to place order";
+      // Маскуємо технічні помилки RPC у дружній текст
+      const friendly = raw.includes("invalid_email")
+        ? "Invalid email address"
+        : raw.includes("insufficient_stock")
+          ? "Some items are out of stock — please refresh."
+          : raw.includes("invalid_product")
+            ? "Some items are no longer available."
+            : raw.includes("tenant_inactive") || raw.includes("invalid_tenant")
+              ? "This store is not available right now."
+              : "Could not place order. Please try again.";
+      toast.error(friendly);
     } finally {
       setSubmitting(false);
     }
