@@ -4,7 +4,7 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Crown, ExternalLink, Sparkles } from "lucide-react";
+import { Crown, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -55,15 +55,9 @@ export function PlanUsageCard({ tenantId }: { tenantId: string }) {
             </Link>
           </Button>
         </div>
-        <CardDescription className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1">
-            <Sparkles className="h-3 w-3 text-primary" />
-            {data.balances.ai_credits_balance.toLocaleString()} AI credits left
-          </span>
-          <span className="text-muted-foreground">·</span>
-          <span>
-            Period ends {new Date(data.subscription.current_period_end).toLocaleDateString()}
-          </span>
+        <CardDescription>
+          Безлімітне користування агентами в межах тарифу · Період до{" "}
+          {new Date(data.subscription.current_period_end).toLocaleDateString()}
         </CardDescription>
       </CardHeader>
       <CardContent>

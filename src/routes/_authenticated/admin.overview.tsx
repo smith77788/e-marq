@@ -5,7 +5,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
-import { AlertCircle, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -72,9 +72,9 @@ function AdminOverviewPage() {
     const rows = overviewQuery.data ?? [];
     return {
       tenants: rows.length,
-      lowCredits: rows.filter((r) => r.ai_credits_balance < 50).length,
       suspended: rows.filter((r) => r.subscription_status === "suspended" || r.subscription_status === "cancelled").length,
       orders: rows.reduce((sum, r) => sum + Number(r.orders_this_period ?? 0), 0),
+      runs: rows.reduce((sum, r) => sum + Number(r.ai_runs_this_period ?? 0), 0),
     };
   }, [overviewQuery.data]);
 
@@ -98,9 +98,9 @@ function AdminOverviewPage() {
 
       <div className="grid gap-3 sm:grid-cols-4">
         <StatBlock label="Tenants" value={totals.tenants} />
-        <StatBlock label="Low credits (&lt;50)" value={totals.lowCredits} accent={totals.lowCredits > 0 ? "warning" : undefined} />
         <StatBlock label="Suspended/cancelled" value={totals.suspended} accent={totals.suspended > 0 ? "danger" : undefined} />
         <StatBlock label="Orders this period" value={totals.orders.toLocaleString()} />
+        <StatBlock label="AI runs this period" value={totals.runs.toLocaleString()} />
       </div>
 
       <Card>
@@ -123,8 +123,6 @@ function AdminOverviewPage() {
                 <TableHead>Brand</TableHead>
                 <TableHead>Plan</TableHead>
                 <TableHead>Sub</TableHead>
-                <TableHead className="text-right">AI credits</TableHead>
-                <TableHead className="text-right">Money</TableHead>
                 <TableHead className="text-right">Runs</TableHead>
                 <TableHead className="text-right">Orders</TableHead>
                 <TableHead className="text-right">Products</TableHead>
@@ -132,38 +130,28 @@ function AdminOverviewPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((r) => {
-                const lowCredits = r.ai_credits_balance < 50;
-                return (
-                  <TableRow key={r.tenant_id}>
-                    <TableCell>
-                      <Link
-                        to="/admin/tenants/$tenantId"
-                        params={{ tenantId: r.tenant_id }}
-                        className="font-medium hover:underline"
-                      >
-                        {r.tenant_name}
-                      </Link>
-                      <div className="font-mono text-[10px] text-muted-foreground">/{r.tenant_slug}</div>
-                    </TableCell>
-                    <TableCell><PlanBadge planKey={r.plan_key} planName={r.plan_name} /></TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-[10px]">{r.subscription_status}</Badge>
-                    </TableCell>
-                    <TableCell className={`text-right font-mono text-xs ${lowCredits ? "text-warning font-semibold" : ""}`}>
-                      {lowCredits && <AlertCircle className="mr-1 inline h-3 w-3" />}
-                      {r.ai_credits_balance.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-xs">
-                      ${(r.money_balance_cents / 100).toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-xs">{Number(r.ai_runs_this_period).toLocaleString()}</TableCell>
-                    <TableCell className="text-right font-mono text-xs">{Number(r.orders_this_period).toLocaleString()}</TableCell>
-                    <TableCell className="text-right font-mono text-xs">{Number(r.products_count).toLocaleString()}</TableCell>
-                    <TableCell className="text-right font-mono text-xs">{Number(r.customers_count).toLocaleString()}</TableCell>
-                  </TableRow>
-                );
-              })}
+              {filtered.map((r) => (
+                <TableRow key={r.tenant_id}>
+                  <TableCell>
+                    <Link
+                      to="/admin/tenants/$tenantId"
+                      params={{ tenantId: r.tenant_id }}
+                      className="font-medium hover:underline"
+                    >
+                      {r.tenant_name}
+                    </Link>
+                    <div className="font-mono text-[10px] text-muted-foreground">/{r.tenant_slug}</div>
+                  </TableCell>
+                  <TableCell><PlanBadge planKey={r.plan_key} planName={r.plan_name} /></TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="text-[10px]">{r.subscription_status}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-xs">{Number(r.ai_runs_this_period).toLocaleString()}</TableCell>
+                  <TableCell className="text-right font-mono text-xs">{Number(r.orders_this_period).toLocaleString()}</TableCell>
+                  <TableCell className="text-right font-mono text-xs">{Number(r.products_count).toLocaleString()}</TableCell>
+                  <TableCell className="text-right font-mono text-xs">{Number(r.customers_count).toLocaleString()}</TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </CardContent>
