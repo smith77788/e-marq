@@ -167,10 +167,9 @@ export function TenantAnalytics({ tenantId }: Props) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Revenue (30 days)</CardTitle>
+          <CardTitle>Виторг (30 днів)</CardTitle>
           <CardDescription>
-            ${totalRevenue.toLocaleString(undefined, { maximumFractionDigits: 2 })} total from paid
-            orders.
+            {totalRevenue.toLocaleString("uk-UA", { maximumFractionDigits: 2 })} ₴ загалом з оплачених замовлень.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -193,7 +192,7 @@ export function TenantAnalytics({ tenantId }: Props) {
                   <YAxis
                     stroke="hsl(var(--muted-foreground))"
                     fontSize={11}
-                    tickFormatter={(v: number) => `$${v}`}
+                    tickFormatter={(v: number) => `${v} ₴`}
                   />
                   <Tooltip
                     contentStyle={{
@@ -202,7 +201,7 @@ export function TenantAnalytics({ tenantId }: Props) {
                       borderRadius: 8,
                       fontSize: 12,
                     }}
-                    formatter={(v: number) => [`$${v.toFixed(2)}`, "Revenue"]}
+                    formatter={(v: number) => [`${v.toFixed(2)} ₴`, "Виторг"]}
                   />
                   <Line
                     type="monotone"

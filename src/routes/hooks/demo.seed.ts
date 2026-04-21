@@ -36,14 +36,14 @@ async function isAuthorized(token: string): Promise<{ ok: boolean; userId?: stri
 }
 
 const SAMPLE_PRODUCTS = [
-  { name: "Cold-Brew Coffee Concentrate 1L", price_cents: 1800, stock: 80, sku: "CB-1L" },
-  { name: "Single Origin Beans 250g", price_cents: 1400, stock: 120, sku: "SO-250" },
-  { name: "Espresso Blend 500g", price_cents: 2200, stock: 60, sku: "ES-500" },
-  { name: "Decaf Beans 250g", price_cents: 1500, stock: 40, sku: "DC-250" },
-  { name: "Drip Bag Box (10 pcs)", price_cents: 1200, stock: 200, sku: "DB-10" },
-  { name: "Reusable Filter", price_cents: 900, stock: 30, sku: "FT-01" },
-  { name: "Branded Mug", price_cents: 1700, stock: 25, sku: "MG-01" },
-  { name: "Subscription Bag — Monthly", price_cents: 2500, stock: 999, sku: "SUB-M" },
+  { name: "Cold-Brew Coffee Concentrate 1L", price_cents: 75000, stock: 80, sku: "CB-1L" },
+  { name: "Single Origin Beans 250g", price_cents: 58000, stock: 120, sku: "SO-250" },
+  { name: "Espresso Blend 500g", price_cents: 92000, stock: 60, sku: "ES-500" },
+  { name: "Decaf Beans 250g", price_cents: 62000, stock: 40, sku: "DC-250" },
+  { name: "Drip Bag Box (10 pcs)", price_cents: 50000, stock: 200, sku: "DB-10" },
+  { name: "Reusable Filter", price_cents: 38000, stock: 30, sku: "FT-01" },
+  { name: "Branded Mug", price_cents: 70000, stock: 25, sku: "MG-01" },
+  { name: "Subscription Bag — Monthly", price_cents: 105000, stock: 999, sku: "SUB-M" },
 ];
 
 const FIRST_NAMES = ["Anna", "Maria", "Olena", "Petro", "Ivan", "Yuri", "Sofia", "Kateryna", "Andriy", "Oksana", "Vitalii", "Nataliya", "Roman", "Yulia", "Bohdan", "Lesia", "Mykhailo", "Tetiana", "Serhii", "Daria"];
@@ -80,7 +80,7 @@ export const Route = createFileRoute("/hooks/demo/seed")({
             log.push(`Skipping product re-seed (force=true ignored — would orphan orders).`);
             productIds = existing.map((e) => ({ id: e.id, name: e.name, price_cents: 1500 }));
           } else {
-            const rows = SAMPLE_PRODUCTS.map((p) => ({ tenant_id: tenantId!, ...p, currency: "USD", is_active: true }));
+            const rows = SAMPLE_PRODUCTS.map((p) => ({ tenant_id: tenantId!, ...p, currency: "UAH", is_active: true }));
             const { data: inserted, error } = await supabaseAdmin.from("products").insert(rows).select("id, name, price_cents");
             if (error) return jsonError("Failed to seed products", 500, { details: error.message });
             productIds = inserted ?? [];
@@ -128,7 +128,7 @@ export const Route = createFileRoute("/hooks/demo/seed")({
               customer_name: c.name,
               status: "paid",
               total_cents: total,
-              currency: "USD",
+              currency: "UAH",
               payment_method: "manual",
               created_at: orderTs.toISOString(),
               paid_at: orderTs.toISOString(),

@@ -91,7 +91,7 @@ export function normalizeConfig(input: {
         "Bank transfer: IBAN UA00 0000 0000 0000 0000 0000 000\nReference your order ID in the payment description.",
       ),
       manual_contact: str(payments.manual_contact, ""),
-      currency: str(payments.currency, "USD"),
+      currency: str(payments.currency, "UAH"),
     },
   };
 }
@@ -313,7 +313,7 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
             onChange={(e) =>
               update("payments", { currency: e.target.value.toUpperCase().slice(0, 3) })
             }
-            placeholder="USD"
+            placeholder="UAH"
             maxLength={3}
           />
         </div>
