@@ -85,6 +85,7 @@ function randomSecret() {
 
 export function DnTradeIntegrationCard({ tenantId }: Props) {
   const qc = useQueryClient();
+  const { isSuperAdmin } = useAuth();
   const [apiKey, setApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [dryRunResult, setDryRunResult] = useState<DryRunSummary | null>(null);
