@@ -11,15 +11,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/lib/i18n";
+import { formatMoney, formatMoneyCompact } from "@/lib/money";
 
 type Props = { tenantId: string };
 
 type Order = { total_cents: number; paid_at: string | null; created_at: string };
 type Outbound = { actual_revenue_cents: number | null; converted_at: string | null; sent_at: string | null };
 
-function fmtUsd(cents: number) {
-  if (cents >= 1_000_000) return `$${(cents / 100_000).toFixed(1)}k`;
-  return `$${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+function fmtUah(cents: number) {
+  if (cents >= 1_000_000) return formatMoneyCompact(cents);
+  return formatMoney(cents);
 }
 
 function dayKey(iso: string) {
@@ -148,8 +149,8 @@ export function CockpitHero({ tenantId }: Props) {
       <HeroCard
         icon={BadgeDollarSign}
         label={t("hero.revenue30")}
-        value={fmtUsd(computed.rev30)}
-        sub={`${fmtUsd(computed.rev7)} ${t("hero.thisWeek")}`}
+        value={fmtUah(computed.rev30)}
+        sub={`${fmtUah(computed.rev7)} ${t("hero.thisWeek")}`}
         delta={computed.revDelta}
         series={computed.series}
         seriesKey="revenue"
@@ -158,8 +159,8 @@ export function CockpitHero({ tenantId }: Props) {
       <HeroCard
         icon={Sparkles}
         label={t("hero.aiAttributed")}
-        value={fmtUsd(computed.ai30)}
-        sub={`${computed.aiShare}% ${t("hero.ofRevenue")} · ${fmtUsd(computed.ai7)} ${t("hero.7d")}`}
+        value={fmtUah(computed.ai30)}
+        sub={`${computed.aiShare}% ${t("hero.ofRevenue")} · ${fmtUah(computed.ai7)} ${t("hero.7d")}`}
         series={computed.series}
         seriesKey="ai"
         tone="primary"

@@ -26,6 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { formatMoneyExact } from "@/lib/money";
 
 export function BalancesTab({ tenantId }: { tenantId: string }) {
   const qc = useQueryClient();
@@ -112,10 +113,9 @@ export function BalancesTab({ tenantId }: { tenantId: string }) {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold tabular-nums">
-              {((b?.money_balance_cents ?? 0) / 100).toFixed(2)}{" "}
-              <span className="text-sm font-normal text-muted-foreground">{b?.currency ?? "USD"}</span>
+              {formatMoneyExact(b?.money_balance_cents ?? 0)}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">For platform fees, gateway charges.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Для платіжного шлюзу та комісій платформи.</p>
           </CardContent>
         </Card>
       </div>

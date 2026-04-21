@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAnalyticsWindow } from "./AnalyticsWindow";
+import { formatMoney } from "@/lib/money";
 
 type Props = { tenantId: string };
 
@@ -24,16 +25,12 @@ type Order = { total_cents: number; paid_at: string | null };
 type Customer = { lifecycle_stage: string; last_order_at: string | null; predicted_next_order_at: string | null };
 
 const TRIGGER_LABEL: Record<string, string> = {
-  reorder: "Reorder",
-  winback: "Winback",
-  abandoned_cart: "Cart recovery",
-  promo: "Promo nudge",
-  sales_reply: "Sales reply",
+  reorder: "Повторне замовлення",
+  winback: "Повернення клієнта",
+  abandoned_cart: "Покинутий кошик",
+  promo: "Промо-нагадування",
+  sales_reply: "Відповідь продавця",
 };
-
-function fmtUsd(cents: number) {
-  return `$${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
-}
 
 function within(dateIso: string | null, sinceMs: number) {
   if (!dateIso) return false;
@@ -126,36 +123,36 @@ export function KpiDashboard({ tenantId }: Props) {
   const convWin = data.outbound.filter((m) => m.converted_at && within(m.converted_at, sinceMs)).length;
   const convRate = sentWin > 0 ? ((convWin / sentWin) * 100).toFixed(1) : "0.0";
 
-  const winLabel = `${days}d`;
-  const cmpLabel = `${compareDays}d`;
+  const winLabel = `${days}д`;
+  const cmpLabel = `${compareDays}д`;
 
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           icon={BadgeDollarSign}
-          label={`Revenue (${winLabel})`}
-          value={fmtUsd(revenueWin)}
-          sub={`${fmtUsd(revenueCmp)} last ${cmpLabel} · ${ordersWin} orders`}
+          label={`Виторг (${winLabel})`}
+          value={formatMoney(revenueWin)}
+          sub={`${formatMoney(revenueCmp)} попередні ${cmpLabel} · ${ordersWin} замовл.`}
         />
         <KpiCard
           icon={Sparkles}
-          label={`AI-attributed (${winLabel})`}
-          value={fmtUsd(aiRevWin)}
-          sub={`${fmtUsd(aiRevCmp)} last ${cmpLabel} · ${aiShareWin}% of total`}
+          label={`Від ШІ (${winLabel})`}
+          value={formatMoney(aiRevWin)}
+          sub={`${formatMoney(aiRevCmp)} попередні ${cmpLabel} · ${aiShareWin}% усього`}
           accent="primary"
         />
         <KpiCard
           icon={ShoppingBag}
-          label={`AOV (${winLabel})`}
-          value={fmtUsd(aovWin)}
-          sub={`${ordersCmp} orders last ${cmpLabel}`}
+          label={`Середній чек (${winLabel})`}
+          value={formatMoney(aovWin)}
+          sub={`${ordersCmp} замовлень за ${cmpLabel}`}
         />
         <KpiCard
           icon={Users}
-          label="Customers"
-          value={totalCustomers.toLocaleString()}
-          sub={`${activeCustomers} active · ${overdue} overdue`}
+          label="Клієнти"
+          value={totalCustomers.toLocaleString("uk-UA")}
+          sub={`${activeCustomers} активні · ${overdue} прострочені`}
         />
       </div>
 
@@ -163,17 +160,17 @@ export function KpiDashboard({ tenantId }: Props) {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-sm">
             <Bot className="h-4 w-4 text-primary" />
-            What the agents earned (last {winLabel})
+            Що заробили агенти (останні {winLabel})
           </CardTitle>
           <CardDescription className="text-xs">
-            Attribution per trigger. Conversion rate overall: <span className="font-semibold text-foreground">{convRate}%</span> ({convWin} of {sentWin} sent).
+            Атрибуція по тригеру. Загальна конверсія: <span className="font-semibold text-foreground">{convRate}%</span> ({convWin} з {sentWin} надісланих).
           </CardDescription>
         </CardHeader>
         <CardContent>
           {triggerRows.length === 0 ? (
             <div className="rounded-md border border-dashed border-border bg-muted/20 p-4 text-center text-xs text-muted-foreground">
               <Activity className="mx-auto mb-2 h-5 w-5" />
-              No outbound activity yet. Trigger an engine below or wait for the next cron tick.
+              Поки що відправок немає. Запустіть рушій нижче або зачекайте на наступний цикл cron.
             </div>
           ) : (
             <div className="space-y-2">
@@ -183,11 +180,11 @@ export function KpiDashboard({ tenantId }: Props) {
                   <div key={kind} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-2">
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="text-[10px]">{TRIGGER_LABEL[kind] ?? kind}</Badge>
-                      <span className="text-xs text-muted-foreground">{v.sent} sent · {v.converted} converted · {rate}%</span>
+                      <span className="text-xs text-muted-foreground">{v.sent} надіслано · {v.converted} куплено · {rate}%</span>
                     </div>
                     <div className="flex items-center gap-1 text-sm font-semibold text-primary">
                       <ArrowUpRight className="h-3.5 w-3.5" />
-                      {fmtUsd(v.revenue)}
+                      {formatMoney(v.revenue)}
                     </div>
                   </div>
                 );
