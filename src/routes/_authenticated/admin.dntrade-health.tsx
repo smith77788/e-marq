@@ -16,11 +16,14 @@ import {
   AlertTriangle,
   Bell,
   CheckCircle2,
+  Download,
   ExternalLink,
   HeartPulse,
   ShieldAlert,
   TriangleAlert,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { downloadHealthCsv } from "@/lib/dntrade/healthCsv";
 import {
   Card,
   CardContent,

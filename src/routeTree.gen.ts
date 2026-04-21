@@ -28,6 +28,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as TrackSlugJsRouteImport } from './routes/track.$slug.js'
 import { Route as HooksTelegramPollRouteImport } from './routes/hooks/telegram.poll'
 import { Route as HooksTelegramNotifyOwnerRouteImport } from './routes/hooks/telegram.notify-owner'
+import { Route as HooksIntegrationsDntradeWeeklyDigestRouteImport } from './routes/hooks/integrations.dntrade-weekly-digest'
 import { Route as HooksIntegrationsDntradeWebhookHealthRouteImport } from './routes/hooks/integrations.dntrade-webhook-health'
 import { Route as HooksIntegrationsDntradeWebhookRouteImport } from './routes/hooks/integrations.dntrade-webhook'
 import { Route as HooksIntegrationsDntradeVerifyRouteImport } from './routes/hooks/integrations.dntrade-verify'
@@ -129,6 +130,7 @@ import { Route as AuthenticatedAdminDntradeHealthRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminCommandsRouteImport } from './routes/_authenticated/admin.commands'
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
+import { Route as AuthenticatedAdminDntradeHealthTenantIdRouteImport } from './routes/_authenticated/admin.dntrade-health.$tenantId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -223,6 +225,12 @@ const HooksTelegramNotifyOwnerRoute =
   HooksTelegramNotifyOwnerRouteImport.update({
     id: '/hooks/telegram/notify-owner',
     path: '/hooks/telegram/notify-owner',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksIntegrationsDntradeWeeklyDigestRoute =
+  HooksIntegrationsDntradeWeeklyDigestRouteImport.update({
+    id: '/hooks/integrations/dntrade-weekly-digest',
+    path: '/hooks/integrations/dntrade-weekly-digest',
     getParentRoute: () => rootRouteImport,
   } as any)
 const HooksIntegrationsDntradeWebhookHealthRoute =
@@ -784,6 +792,12 @@ const AuthenticatedAdminTenantsTenantIdRoute =
     path: '/$tenantId',
     getParentRoute: () => AuthenticatedAdminTenantsRoute,
   } as any)
+const AuthenticatedAdminDntradeHealthTenantIdRoute =
+  AuthenticatedAdminDntradeHealthTenantIdRouteImport.update({
+    id: '/$tenantId',
+    path: '/$tenantId',
+    getParentRoute: () => AuthenticatedAdminDntradeHealthRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -801,7 +815,7 @@ export interface FileRoutesByFullPath {
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
-  '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRoute
+  '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
@@ -899,10 +913,12 @@ export interface FileRoutesByFullPath {
   '/hooks/integrations/dntrade-verify': typeof HooksIntegrationsDntradeVerifyRoute
   '/hooks/integrations/dntrade-webhook': typeof HooksIntegrationsDntradeWebhookRoute
   '/hooks/integrations/dntrade-webhook-health': typeof HooksIntegrationsDntradeWebhookHealthRoute
+  '/hooks/integrations/dntrade-weekly-digest': typeof HooksIntegrationsDntradeWeeklyDigestRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
@@ -922,7 +938,7 @@ export interface FileRoutesByTo {
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
-  '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRoute
+  '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
@@ -1020,10 +1036,12 @@ export interface FileRoutesByTo {
   '/hooks/integrations/dntrade-verify': typeof HooksIntegrationsDntradeVerifyRoute
   '/hooks/integrations/dntrade-webhook': typeof HooksIntegrationsDntradeWebhookRoute
   '/hooks/integrations/dntrade-webhook-health': typeof HooksIntegrationsDntradeWebhookHealthRoute
+  '/hooks/integrations/dntrade-weekly-digest': typeof HooksIntegrationsDntradeWeeklyDigestRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
@@ -1045,7 +1063,7 @@ export interface FileRoutesById {
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/_authenticated/admin/commands': typeof AuthenticatedAdminCommandsRoute
-  '/_authenticated/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRoute
+  '/_authenticated/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   '/_authenticated/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/_authenticated/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
@@ -1143,10 +1161,12 @@ export interface FileRoutesById {
   '/hooks/integrations/dntrade-verify': typeof HooksIntegrationsDntradeVerifyRoute
   '/hooks/integrations/dntrade-webhook': typeof HooksIntegrationsDntradeWebhookRoute
   '/hooks/integrations/dntrade-webhook-health': typeof HooksIntegrationsDntradeWebhookHealthRoute
+  '/hooks/integrations/dntrade-weekly-digest': typeof HooksIntegrationsDntradeWeeklyDigestRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
 }
@@ -1266,10 +1286,12 @@ export interface FileRouteTypes {
     | '/hooks/integrations/dntrade-verify'
     | '/hooks/integrations/dntrade-webhook'
     | '/hooks/integrations/dntrade-webhook-health'
+    | '/hooks/integrations/dntrade-weekly-digest'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
     | '/admin/'
+    | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
     | '/s/$slug/orders/$orderId'
   fileRoutesByTo: FileRoutesByTo
@@ -1387,10 +1409,12 @@ export interface FileRouteTypes {
     | '/hooks/integrations/dntrade-verify'
     | '/hooks/integrations/dntrade-webhook'
     | '/hooks/integrations/dntrade-webhook-health'
+    | '/hooks/integrations/dntrade-weekly-digest'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
     | '/admin'
+    | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
     | '/s/$slug/orders/$orderId'
   id:
@@ -1509,10 +1533,12 @@ export interface FileRouteTypes {
     | '/hooks/integrations/dntrade-verify'
     | '/hooks/integrations/dntrade-webhook'
     | '/hooks/integrations/dntrade-webhook-health'
+    | '/hooks/integrations/dntrade-weekly-digest'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
     | '/_authenticated/admin/'
+    | '/_authenticated/admin/dntrade-health/$tenantId'
     | '/_authenticated/admin/tenants/$tenantId'
     | '/s/$slug/orders/$orderId'
   fileRoutesById: FileRoutesById
@@ -1618,6 +1644,7 @@ export interface RootRouteChildren {
   HooksIntegrationsDntradeVerifyRoute: typeof HooksIntegrationsDntradeVerifyRoute
   HooksIntegrationsDntradeWebhookRoute: typeof HooksIntegrationsDntradeWebhookRoute
   HooksIntegrationsDntradeWebhookHealthRoute: typeof HooksIntegrationsDntradeWebhookHealthRoute
+  HooksIntegrationsDntradeWeeklyDigestRoute: typeof HooksIntegrationsDntradeWeeklyDigestRoute
   HooksTelegramNotifyOwnerRoute: typeof HooksTelegramNotifyOwnerRoute
   HooksTelegramPollRoute: typeof HooksTelegramPollRoute
   TrackSlugJsRoute: typeof TrackSlugJsRoute
@@ -1756,6 +1783,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/telegram/notify-owner'
       fullPath: '/hooks/telegram/notify-owner'
       preLoaderRoute: typeof HooksTelegramNotifyOwnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/integrations/dntrade-weekly-digest': {
+      id: '/hooks/integrations/dntrade-weekly-digest'
+      path: '/hooks/integrations/dntrade-weekly-digest'
+      fullPath: '/hooks/integrations/dntrade-weekly-digest'
+      preLoaderRoute: typeof HooksIntegrationsDntradeWeeklyDigestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/integrations/dntrade-webhook-health': {
@@ -2465,6 +2499,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTenantsTenantIdRouteImport
       parentRoute: typeof AuthenticatedAdminTenantsRoute
     }
+    '/_authenticated/admin/dntrade-health/$tenantId': {
+      id: '/_authenticated/admin/dntrade-health/$tenantId'
+      path: '/$tenantId'
+      fullPath: '/admin/dntrade-health/$tenantId'
+      preLoaderRoute: typeof AuthenticatedAdminDntradeHealthTenantIdRouteImport
+      parentRoute: typeof AuthenticatedAdminDntradeHealthRoute
+    }
   }
 }
 
@@ -2478,6 +2519,21 @@ const AuthenticatedBrandRouteChildren: AuthenticatedBrandRouteChildren = {
 
 const AuthenticatedBrandRouteWithChildren =
   AuthenticatedBrandRoute._addFileChildren(AuthenticatedBrandRouteChildren)
+
+interface AuthenticatedAdminDntradeHealthRouteChildren {
+  AuthenticatedAdminDntradeHealthTenantIdRoute: typeof AuthenticatedAdminDntradeHealthTenantIdRoute
+}
+
+const AuthenticatedAdminDntradeHealthRouteChildren: AuthenticatedAdminDntradeHealthRouteChildren =
+  {
+    AuthenticatedAdminDntradeHealthTenantIdRoute:
+      AuthenticatedAdminDntradeHealthTenantIdRoute,
+  }
+
+const AuthenticatedAdminDntradeHealthRouteWithChildren =
+  AuthenticatedAdminDntradeHealthRoute._addFileChildren(
+    AuthenticatedAdminDntradeHealthRouteChildren,
+  )
 
 interface AuthenticatedAdminTenantsRouteChildren {
   AuthenticatedAdminTenantsTenantIdRoute: typeof AuthenticatedAdminTenantsTenantIdRoute
@@ -2500,7 +2556,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedAdminCommandsRoute: typeof AuthenticatedAdminCommandsRoute
-  AuthenticatedAdminDntradeHealthRoute: typeof AuthenticatedAdminDntradeHealthRoute
+  AuthenticatedAdminDntradeHealthRoute: typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   AuthenticatedAdminOverviewRoute: typeof AuthenticatedAdminOverviewRoute
   AuthenticatedAdminPlansRoute: typeof AuthenticatedAdminPlansRoute
   AuthenticatedAdminTenantsRoute: typeof AuthenticatedAdminTenantsRouteWithChildren
@@ -2516,7 +2572,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedAdminCommandsRoute: AuthenticatedAdminCommandsRoute,
-  AuthenticatedAdminDntradeHealthRoute: AuthenticatedAdminDntradeHealthRoute,
+  AuthenticatedAdminDntradeHealthRoute:
+    AuthenticatedAdminDntradeHealthRouteWithChildren,
   AuthenticatedAdminOverviewRoute: AuthenticatedAdminOverviewRoute,
   AuthenticatedAdminPlansRoute: AuthenticatedAdminPlansRoute,
   AuthenticatedAdminTenantsRoute: AuthenticatedAdminTenantsRouteWithChildren,
@@ -2656,6 +2713,8 @@ const rootRouteChildren: RootRouteChildren = {
   HooksIntegrationsDntradeWebhookRoute: HooksIntegrationsDntradeWebhookRoute,
   HooksIntegrationsDntradeWebhookHealthRoute:
     HooksIntegrationsDntradeWebhookHealthRoute,
+  HooksIntegrationsDntradeWeeklyDigestRoute:
+    HooksIntegrationsDntradeWeeklyDigestRoute,
   HooksTelegramNotifyOwnerRoute: HooksTelegramNotifyOwnerRoute,
   HooksTelegramPollRoute: HooksTelegramPollRoute,
   TrackSlugJsRoute: TrackSlugJsRoute,
