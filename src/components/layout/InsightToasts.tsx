@@ -7,7 +7,7 @@
 import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Lightbulb, Bot } from "lucide-react";
+import { Lightbulb, Bot, HeartPulse, TriangleAlert } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
