@@ -664,6 +664,108 @@ export type Database = {
           },
         ]
       }
+      collection_products: {
+        Row: {
+          collection_id: string
+          position: number
+          product_id: string
+          tenant_id: string
+        }
+        Insert: {
+          collection_id: string
+          position?: number
+          product_id: string
+          tenant_id: string
+        }
+        Update: {
+          collection_id?: string
+          position?: number
+          product_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_products_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_products_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          created_at: string
+          description: string | null
+          handle: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          is_smart: boolean
+          name: string
+          rules: Json | null
+          seo_description: string | null
+          seo_title: string | null
+          sort_order: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          handle: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_smart?: boolean
+          name: string
+          rules?: Json | null
+          seo_description?: string | null
+          seo_title?: string | null
+          sort_order?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          handle?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_smart?: boolean
+          name?: string
+          rules?: Json | null
+          seo_description?: string | null
+          seo_title?: string | null
+          sort_order?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collections_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_pages: {
         Row: {
           agent: string | null
@@ -1279,6 +1381,172 @@ export type Database = {
           },
         ]
       }
+      email_campaigns: {
+        Row: {
+          clicks_count: number
+          created_at: string
+          id: string
+          metadata: Json
+          name: string
+          opens_count: number
+          recipients_count: number
+          scheduled_at: string | null
+          segment: string | null
+          sent_at: string | null
+          status: string
+          subject: string
+          template: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          clicks_count?: number
+          created_at?: string
+          id?: string
+          metadata?: Json
+          name: string
+          opens_count?: number
+          recipients_count?: number
+          scheduled_at?: string | null
+          segment?: string | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+          template: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          clicks_count?: number
+          created_at?: string
+          id?: string
+          metadata?: Json
+          name?: string
+          opens_count?: number
+          recipients_count?: number
+          scheduled_at?: string | null
+          segment?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          template?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_campaigns_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+          resend_message_id: string
+          tenant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+          resend_message_id: string
+          tenant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          resend_message_id?: string
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_sends: {
+        Row: {
+          bounced_at: string | null
+          campaign_id: string | null
+          clicked_at: string | null
+          created_at: string
+          error: string | null
+          id: string
+          metadata: Json
+          opened_at: string | null
+          order_id: string | null
+          resend_message_id: string | null
+          status: string
+          subject: string | null
+          template: string
+          tenant_id: string
+          to_email: string
+        }
+        Insert: {
+          bounced_at?: string | null
+          campaign_id?: string | null
+          clicked_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          metadata?: Json
+          opened_at?: string | null
+          order_id?: string | null
+          resend_message_id?: string | null
+          status?: string
+          subject?: string | null
+          template: string
+          tenant_id: string
+          to_email: string
+        }
+        Update: {
+          bounced_at?: string | null
+          campaign_id?: string | null
+          clicked_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          metadata?: Json
+          opened_at?: string | null
+          order_id?: string | null
+          resend_message_id?: string | null
+          status?: string
+          subject?: string | null
+          template?: string
+          tenant_id?: string
+          to_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_sends_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_sends_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           created_at: string
@@ -1552,6 +1820,149 @@ export type Database = {
           },
         ]
       }
+      loyalty_accounts: {
+        Row: {
+          balance_points: number
+          created_at: string
+          customer_email: string
+          id: string
+          lifetime_points: number
+          tenant_id: string
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          balance_points?: number
+          created_at?: string
+          customer_email: string
+          id?: string
+          lifetime_points?: number
+          tenant_id: string
+          tier?: string
+          updated_at?: string
+        }
+        Update: {
+          balance_points?: number
+          created_at?: string
+          customer_email?: string
+          id?: string
+          lifetime_points?: number
+          tenant_id?: string
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loyalty_programs: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          min_redeem_points: number
+          name: string
+          points_per_100_uah: number
+          tenant_id: string
+          tiers: Json
+          uah_per_point: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          min_redeem_points?: number
+          name?: string
+          points_per_100_uah?: number
+          tenant_id: string
+          tiers?: Json
+          uah_per_point?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          min_redeem_points?: number
+          name?: string
+          points_per_100_uah?: number
+          tenant_id?: string
+          tiers?: Json
+          uah_per_point?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_programs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loyalty_transactions: {
+        Row: {
+          account_id: string
+          created_at: string
+          description: string | null
+          id: string
+          order_id: string | null
+          points: number
+          tenant_id: string
+          type: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          points: number
+          tenant_id: string
+          type: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          points?: number
+          tenant_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "loyalty_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loyalty_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loyalty_transactions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_fraud_signals: {
         Row: {
           created_at: string
@@ -1616,6 +2027,7 @@ export type Database = {
           quantity: number
           tenant_id: string
           unit_price_cents: number
+          variant_id: string | null
         }
         Insert: {
           created_at?: string
@@ -1626,6 +2038,7 @@ export type Database = {
           quantity: number
           tenant_id: string
           unit_price_cents: number
+          variant_id?: string | null
         }
         Update: {
           created_at?: string
@@ -1636,6 +2049,7 @@ export type Database = {
           quantity?: number
           tenant_id?: string
           unit_price_cents?: number
+          variant_id?: string | null
         }
         Relationships: [
           {
@@ -1659,6 +2073,13 @@ export type Database = {
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "order_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       orders: {
@@ -1668,14 +2089,21 @@ export type Database = {
           customer_email: string | null
           customer_name: string | null
           customer_user_id: string | null
+          fulfilled_at: string | null
           id: string
           metadata: Json
+          notes: string | null
           paid_at: string | null
           payment_method: string
           payment_ref: string | null
+          shipping_address: Json | null
+          shipping_cost_cents: number
+          shipping_method: string | null
           status: Database["public"]["Enums"]["order_status"]
           tenant_id: string
           total_cents: number
+          tracking_number: string | null
+          tracking_url: string | null
           updated_at: string
         }
         Insert: {
@@ -1684,14 +2112,21 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_user_id?: string | null
+          fulfilled_at?: string | null
           id?: string
           metadata?: Json
+          notes?: string | null
           paid_at?: string | null
           payment_method?: string
           payment_ref?: string | null
+          shipping_address?: Json | null
+          shipping_cost_cents?: number
+          shipping_method?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           tenant_id: string
           total_cents?: number
+          tracking_number?: string | null
+          tracking_url?: string | null
           updated_at?: string
         }
         Update: {
@@ -1700,14 +2135,21 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_user_id?: string | null
+          fulfilled_at?: string | null
           id?: string
           metadata?: Json
+          notes?: string | null
           paid_at?: string | null
           payment_method?: string
           payment_ref?: string | null
+          shipping_address?: Json | null
+          shipping_cost_cents?: number
+          shipping_method?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           tenant_id?: string
           total_cents?: number
+          tracking_number?: string | null
+          tracking_url?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -2341,51 +2783,198 @@ export type Database = {
           },
         ]
       }
-      products: {
+      product_images: {
         Row: {
+          alt: string | null
           created_at: string
-          currency: string
-          description: string | null
+          id: string
+          is_primary: boolean
+          position: number
+          product_id: string
+          tenant_id: string
+          url: string
+        }
+        Insert: {
+          alt?: string | null
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          position?: number
+          product_id: string
+          tenant_id: string
+          url: string
+        }
+        Update: {
+          alt?: string | null
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          position?: number
+          product_id?: string
+          tenant_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_images_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variants: {
+        Row: {
+          compare_at_price_cents: number | null
+          created_at: string
           id: string
           image_url: string | null
           is_active: boolean
           metadata: Json
-          name: string
+          option_1_name: string | null
+          option_1_value: string | null
+          option_2_name: string | null
+          option_2_value: string | null
+          option_3_name: string | null
+          option_3_value: string | null
           price_cents: number
+          product_id: string
           sku: string | null
           stock: number
           tenant_id: string
           updated_at: string
         }
         Insert: {
+          compare_at_price_cents?: number | null
           created_at?: string
-          currency?: string
-          description?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           metadata?: Json
-          name: string
+          option_1_name?: string | null
+          option_1_value?: string | null
+          option_2_name?: string | null
+          option_2_value?: string | null
+          option_3_name?: string | null
+          option_3_value?: string | null
           price_cents?: number
+          product_id: string
           sku?: string | null
           stock?: number
           tenant_id: string
           updated_at?: string
         }
         Update: {
+          compare_at_price_cents?: number | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          metadata?: Json
+          option_1_name?: string | null
+          option_1_value?: string | null
+          option_2_name?: string | null
+          option_2_value?: string | null
+          option_3_name?: string | null
+          option_3_value?: string | null
+          price_cents?: number
+          product_id?: string
+          sku?: string | null
+          stock?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          compare_at_price_cents: number | null
+          created_at: string
+          currency: string
+          description: string | null
+          has_variants: boolean
+          id: string
+          image_url: string | null
+          is_active: boolean
+          metadata: Json
+          name: string
+          price_cents: number
+          seo_description: string | null
+          seo_title: string | null
+          sku: string | null
+          stock: number
+          tags: string[]
+          tenant_id: string
+          updated_at: string
+          url_handle: string | null
+          weight_grams: number | null
+        }
+        Insert: {
+          compare_at_price_cents?: number | null
           created_at?: string
           currency?: string
           description?: string | null
+          has_variants?: boolean
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          metadata?: Json
+          name: string
+          price_cents?: number
+          seo_description?: string | null
+          seo_title?: string | null
+          sku?: string | null
+          stock?: number
+          tags?: string[]
+          tenant_id: string
+          updated_at?: string
+          url_handle?: string | null
+          weight_grams?: number | null
+        }
+        Update: {
+          compare_at_price_cents?: number | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          has_variants?: boolean
           id?: string
           image_url?: string | null
           is_active?: boolean
           metadata?: Json
           name?: string
           price_cents?: number
+          seo_description?: string | null
+          seo_title?: string | null
           sku?: string | null
           stock?: number
+          tags?: string[]
           tenant_id?: string
           updated_at?: string
+          url_handle?: string | null
+          weight_grams?: number | null
         }
         Relationships: [
           {
@@ -2409,6 +2998,7 @@ export type Database = {
           fatigue_score: number
           id: string
           is_active: boolean
+          min_order_cents: number
           name: string
           promo_type: string
           revenue_cents: number
@@ -2417,6 +3007,7 @@ export type Database = {
           times_used: number
           updated_at: string
           usage_limit: number | null
+          usage_per_customer: number
           value: number
         }
         Insert: {
@@ -2430,6 +3021,7 @@ export type Database = {
           fatigue_score?: number
           id?: string
           is_active?: boolean
+          min_order_cents?: number
           name: string
           promo_type?: string
           revenue_cents?: number
@@ -2438,6 +3030,7 @@ export type Database = {
           times_used?: number
           updated_at?: string
           usage_limit?: number | null
+          usage_per_customer?: number
           value?: number
         }
         Update: {
@@ -2451,6 +3044,7 @@ export type Database = {
           fatigue_score?: number
           id?: string
           is_active?: boolean
+          min_order_cents?: number
           name?: string
           promo_type?: string
           revenue_cents?: number
@@ -2459,6 +3053,7 @@ export type Database = {
           times_used?: number
           updated_at?: string
           usage_limit?: number | null
+          usage_per_customer?: number
           value?: number
         }
         Relationships: [
@@ -3105,14 +3700,21 @@ export type Database = {
           customer_email: string | null
           customer_name: string | null
           customer_user_id: string | null
+          fulfilled_at: string | null
           id: string
           metadata: Json
+          notes: string | null
           paid_at: string | null
           payment_method: string
           payment_ref: string | null
+          shipping_address: Json | null
+          shipping_cost_cents: number
+          shipping_method: string | null
           status: Database["public"]["Enums"]["order_status"]
           tenant_id: string
           total_cents: number
+          tracking_number: string | null
+          tracking_url: string | null
           updated_at: string
         }
         SetofOptions: {
@@ -3268,6 +3870,22 @@ export type Database = {
           stock_available: boolean
         }[]
       }
+      get_storefront_products_v2: {
+        Args: { _slug: string }
+        Returns: {
+          compare_at_price_cents: number
+          currency: string
+          description: string
+          has_variants: boolean
+          id: string
+          image_url: string
+          name: string
+          price_cents: number
+          stock: number
+          tags: string[]
+          url_handle: string
+        }[]
+      }
       get_storefront_social_proof: {
         Args: { _limit?: number; _slug: string }
         Returns: {
@@ -3319,14 +3937,21 @@ export type Database = {
           customer_email: string | null
           customer_name: string | null
           customer_user_id: string | null
+          fulfilled_at: string | null
           id: string
           metadata: Json
+          notes: string | null
           paid_at: string | null
           payment_method: string
           payment_ref: string | null
+          shipping_address: Json | null
+          shipping_cost_cents: number
+          shipping_method: string | null
           status: Database["public"]["Enums"]["order_status"]
           tenant_id: string
           total_cents: number
+          tracking_number: string | null
+          tracking_url: string | null
           updated_at: string
         }
         SetofOptions: {
@@ -3380,6 +4005,15 @@ export type Database = {
       set_owner_telegram_chat: {
         Args: { _chat_id: string; _tenant_id: string }
         Returns: undefined
+      }
+      validate_discount_code: {
+        Args: {
+          _code: string
+          _customer_email: string
+          _order_total_cents: number
+          _slug: string
+        }
+        Returns: Json
       }
       validate_promo_code: {
         Args: { _code: string; _tenant_id: string }
