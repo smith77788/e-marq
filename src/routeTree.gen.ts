@@ -134,6 +134,7 @@ import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenti
 import { Route as AuthenticatedBrandProductsRouteImport } from './routes/_authenticated/brand.products'
 import { Route as AuthenticatedBrandOrdersRouteImport } from './routes/_authenticated/brand.orders'
 import { Route as AuthenticatedBrandIntegrationsRouteImport } from './routes/_authenticated/brand.integrations'
+import { Route as AuthenticatedBrandCatalogRouteImport } from './routes/_authenticated/brand.catalog'
 import { Route as AuthenticatedBrandBillingRouteImport } from './routes/_authenticated/brand.billing'
 import { Route as AuthenticatedAgentsLiveRouteImport } from './routes/_authenticated/agents.live'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
@@ -834,6 +835,12 @@ const AuthenticatedBrandIntegrationsRoute =
     path: '/integrations',
     getParentRoute: () => AuthenticatedBrandRoute,
   } as any)
+const AuthenticatedBrandCatalogRoute =
+  AuthenticatedBrandCatalogRouteImport.update({
+    id: '/catalog',
+    path: '/catalog',
+    getParentRoute: () => AuthenticatedBrandRoute,
+  } as any)
 const AuthenticatedBrandBillingRoute =
   AuthenticatedBrandBillingRouteImport.update({
     id: '/billing',
@@ -942,6 +949,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
+  '/brand/catalog': typeof AuthenticatedBrandCatalogRoute
   '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/brand/orders': typeof AuthenticatedBrandOrdersRoute
   '/brand/products': typeof AuthenticatedBrandProductsRoute
@@ -1082,6 +1090,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
+  '/brand/catalog': typeof AuthenticatedBrandCatalogRoute
   '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/brand/orders': typeof AuthenticatedBrandOrdersRoute
   '/brand/products': typeof AuthenticatedBrandProductsRoute
@@ -1225,6 +1234,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/_authenticated/brand/billing': typeof AuthenticatedBrandBillingRoute
+  '/_authenticated/brand/catalog': typeof AuthenticatedBrandCatalogRoute
   '/_authenticated/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/_authenticated/brand/orders': typeof AuthenticatedBrandOrdersRoute
   '/_authenticated/brand/products': typeof AuthenticatedBrandProductsRoute
@@ -1368,6 +1378,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/agents/live'
     | '/brand/billing'
+    | '/brand/catalog'
     | '/brand/integrations'
     | '/brand/orders'
     | '/brand/products'
@@ -1508,6 +1519,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/agents/live'
     | '/brand/billing'
+    | '/brand/catalog'
     | '/brand/integrations'
     | '/brand/orders'
     | '/brand/products'
@@ -1650,6 +1662,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/users'
     | '/_authenticated/agents/live'
     | '/_authenticated/brand/billing'
+    | '/_authenticated/brand/catalog'
     | '/_authenticated/brand/integrations'
     | '/_authenticated/brand/orders'
     | '/_authenticated/brand/products'
@@ -2763,6 +2776,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBrandIntegrationsRouteImport
       parentRoute: typeof AuthenticatedBrandRoute
     }
+    '/_authenticated/brand/catalog': {
+      id: '/_authenticated/brand/catalog'
+      path: '/catalog'
+      fullPath: '/brand/catalog'
+      preLoaderRoute: typeof AuthenticatedBrandCatalogRouteImport
+      parentRoute: typeof AuthenticatedBrandRoute
+    }
     '/_authenticated/brand/billing': {
       id: '/_authenticated/brand/billing'
       path: '/billing'
@@ -2873,6 +2893,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedBrandRouteChildren {
   AuthenticatedBrandBillingRoute: typeof AuthenticatedBrandBillingRoute
+  AuthenticatedBrandCatalogRoute: typeof AuthenticatedBrandCatalogRoute
   AuthenticatedBrandIntegrationsRoute: typeof AuthenticatedBrandIntegrationsRoute
   AuthenticatedBrandOrdersRoute: typeof AuthenticatedBrandOrdersRoute
   AuthenticatedBrandProductsRoute: typeof AuthenticatedBrandProductsRoute
@@ -2880,6 +2901,7 @@ interface AuthenticatedBrandRouteChildren {
 
 const AuthenticatedBrandRouteChildren: AuthenticatedBrandRouteChildren = {
   AuthenticatedBrandBillingRoute: AuthenticatedBrandBillingRoute,
+  AuthenticatedBrandCatalogRoute: AuthenticatedBrandCatalogRoute,
   AuthenticatedBrandIntegrationsRoute: AuthenticatedBrandIntegrationsRoute,
   AuthenticatedBrandOrdersRoute: AuthenticatedBrandOrdersRoute,
   AuthenticatedBrandProductsRoute: AuthenticatedBrandProductsRoute,
