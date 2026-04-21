@@ -10,11 +10,14 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ArrowLeft,
+  Award,
   CreditCard,
   Landmark,
   Loader2,
+  Sparkles,
   Tag,
   Trash2,
+  X,
   Plus,
   Minus,
 } from "lucide-react";
@@ -36,6 +39,29 @@ import { sendOrderConfirmationEmail } from "@/lib/email/client";
 type DiscountResult =
   | { valid: true; promo_id: string; name: string; type: string; discount_cents: number }
   | { valid: false; error: string; min_cents?: number };
+
+type LoyaltyValidation =
+  | {
+      valid: true;
+      discount_cents: number;
+      points_used: number;
+      balance_after: number;
+    }
+  | {
+      valid: false;
+      error: string;
+      min_points?: number;
+      balance_points?: number;
+    };
+
+type LoyaltyState = {
+  programActive: boolean;
+  pointsPer100: number;
+  uahPerPoint: number;
+  minRedeem: number;
+  balance: number;
+  tier: string;
+};
 
 export const Route = createFileRoute("/s/$slug/checkout")({
   loader: ({ params }) => loadStorefrontShell(params.slug),
@@ -85,6 +111,117 @@ function CheckoutPage() {
   const [validatingPromo, setValidatingPromo] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Loyalty
+  const [loyalty, setLoyalty] = useState<LoyaltyState | null>(null);
+  const [loyaltyChecking, setLoyaltyChecking] = useState(false);
+  const [redeemPoints, setRedeemPoints] = useState("");
+  const [redeemApplied, setRedeemApplied] = useState<{
+    points: number;
+    discountCents: number;
+  } | null>(null);
+
+  const subtotalCents = cart.totalCents;
+  const promoDiscountCents = discount && discount.valid ? discount.discount_cents : 0;
+  const loyaltyDiscountCents = redeemApplied?.discountCents ?? 0;
+  const discountCents = promoDiscountCents + loyaltyDiscountCents;
+  const finalTotalCents = Math.max(0, subtotalCents - discountCents);
+
+  // Bали які буде нараховано (передбачення)
+  const projectedEarnPoints = loyalty?.programActive
+    ? Math.floor(loyalty.pointsPer100 * (finalTotalCents / 10000))
+    : 0;
+
+  // Завантаження loyalty стану коли email стабільний
+  useEffect(() => {
+    const trimmed = email.trim().toLowerCase();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setLoyalty(null);
+      setRedeemApplied(null);
+      return;
+    }
+    let cancelled = false;
+    const tid = setTimeout(async () => {
+      setLoyaltyChecking(true);
+      try {
+        const { data: program } = await supabase
+          .from("loyalty_programs")
+          .select("points_per_100_uah, uah_per_point, min_redeem_points, is_active")
+          .eq("tenant_id", cart.tenantId)
+          .maybeSingle();
+        if (cancelled) return;
+        if (!program?.is_active) {
+          setLoyalty(null);
+          return;
+        }
+        const { data: account } = await supabase
+          .from("loyalty_accounts")
+          .select("balance_points, tier")
+          .eq("tenant_id", cart.tenantId)
+          .eq("customer_email", trimmed)
+          .maybeSingle();
+        if (cancelled) return;
+        setLoyalty({
+          programActive: true,
+          pointsPer100: program.points_per_100_uah,
+          uahPerPoint: Number(program.uah_per_point),
+          minRedeem: program.min_redeem_points,
+          balance: account?.balance_points ?? 0,
+          tier: account?.tier ?? "bronze",
+        });
+      } finally {
+        if (!cancelled) setLoyaltyChecking(false);
+      }
+    }, 500);
+    return () => {
+      cancelled = true;
+      clearTimeout(tid);
+    };
+  }, [email, cart.tenantId]);
+
+  async function applyLoyalty() {
+    if (!loyalty) return;
+    const pts = parseInt(redeemPoints);
+    if (!Number.isFinite(pts) || pts <= 0) {
+      toast.error("Введіть кількість балів");
+      return;
+    }
+    setLoyaltyChecking(true);
+    try {
+      const { data, error } = await supabase.rpc("validate_loyalty_redeem", {
+        _tenant_id: cart.tenantId,
+        _customer_email: email.trim().toLowerCase(),
+        _redeem_points: pts,
+        _order_total_cents: subtotalCents - promoDiscountCents,
+      });
+      if (error) throw error;
+      const result = data as unknown as LoyaltyValidation;
+      if (result.valid) {
+        setRedeemApplied({ points: result.points_used, discountCents: result.discount_cents });
+        toast.success(
+          `Списано ${result.points_used} балів → −${formatMoneyExact(result.discount_cents)}`,
+        );
+      } else {
+        const messages: Record<string, string> = {
+          program_inactive: "Програма лояльності неактивна",
+          insufficient_balance: `Недостатньо балів (баланс: ${result.balance_points ?? 0})`,
+          below_min_redeem: `Мінімум для списання: ${result.min_points ?? 100} балів`,
+          invalid_email: "Введіть email щоб скористатись балами",
+          invalid_points: "Введіть коректну кількість",
+        };
+        toast.error(messages[result.error] ?? "Не вдалося списати бали");
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Помилка");
+    } finally {
+      setLoyaltyChecking(false);
+    }
+  }
+
+  function clearLoyalty() {
+    setRedeemApplied(null);
+    setRedeemPoints("");
+  }
+
   // Auto-redirect to home if cart is empty (e.g., after submission or direct link)
   useEffect(() => {
     if (cart.cartLines.length === 0) {
@@ -94,10 +231,6 @@ function CheckoutPage() {
       return () => clearTimeout(t);
     }
   }, [cart.cartLines.length, navigate, slug]);
-
-  const subtotalCents = cart.totalCents;
-  const discountCents = discount && discount.valid ? discount.discount_cents : 0;
-  const finalTotalCents = Math.max(0, subtotalCents - discountCents);
 
   async function applyPromo() {
     const code = promoCode.trim();
@@ -187,6 +320,8 @@ function CheckoutPage() {
         _items: items,
         _payment_method: "manual",
         _shipping: shippingPayload,
+        _promo_code: discount?.valid ? promoCode.trim().toUpperCase() : null,
+        _loyalty_redeem_points: redeemApplied?.points ?? null,
       });
       if (rpcErr) throw rpcErr;
       if (!orderId) throw new Error("Не вдалося створити замовлення");
@@ -432,8 +567,14 @@ function CheckoutPage() {
                 </div>
                 {discount?.valid && (
                   <div className="flex justify-between text-primary">
-                    <span>Знижка</span>
+                    <span>Промокод</span>
                     <span className="tabular-nums">−{formatMoneyExact(discount.discount_cents)}</span>
+                  </div>
+                )}
+                {redeemApplied && (
+                  <div className="flex justify-between text-primary">
+                    <span>Бали лояльності ({redeemApplied.points})</span>
+                    <span className="tabular-nums">−{formatMoneyExact(redeemApplied.discountCents)}</span>
                   </div>
                 )}
               </div>
@@ -462,6 +603,76 @@ function CheckoutPage() {
                   </Button>
                 </div>
               </div>
+
+              {/* Loyalty block — visible only if program is active for this email */}
+              {loyalty?.programActive && (
+                <>
+                  <Separator />
+                  <div className="space-y-2 rounded-md border border-primary/20 bg-primary/5 p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs font-medium">
+                        <Award className="h-3.5 w-3.5 text-primary" />
+                        Бали лояльності
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        Баланс: <span className="font-semibold text-foreground tabular-nums">{loyalty.balance}</span>
+                      </span>
+                    </div>
+
+                    {loyalty.balance >= loyalty.minRedeem ? (
+                      redeemApplied ? (
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">
+                            Списано {redeemApplied.points} балів
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 px-2 text-xs"
+                            onClick={clearLoyalty}
+                          >
+                            <X className="mr-0.5 h-3 w-3" />
+                            Скасувати
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                          <Input
+                            type="number"
+                            min={loyalty.minRedeem}
+                            max={loyalty.balance}
+                            value={redeemPoints}
+                            onChange={(e) => setRedeemPoints(e.target.value)}
+                            placeholder={`від ${loyalty.minRedeem}`}
+                            className="h-8 text-xs tabular-nums"
+                            disabled={loyaltyChecking || submitting}
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8"
+                            onClick={applyLoyalty}
+                            disabled={!redeemPoints || loyaltyChecking || submitting}
+                          >
+                            {loyaltyChecking ? <Loader2 className="h-3 w-3 animate-spin" /> : "Списати"}
+                          </Button>
+                        </div>
+                      )
+                    ) : (
+                      <p className="text-[11px] text-muted-foreground">
+                        Накопичіть {loyalty.minRedeem} балів щоб обміняти на знижку.
+                      </p>
+                    )}
+
+                    {projectedEarnPoints > 0 && (
+                      <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                        <Sparkles className="h-3 w-3 text-primary" />
+                        Ви отримаєте <strong className="text-foreground">{projectedEarnPoints}</strong> балів за це замовлення
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
 
               <Separator />
 

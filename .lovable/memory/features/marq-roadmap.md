@@ -49,10 +49,13 @@ type: feature
 - ⏳ Платежі: LiqPay, WayForPay, Monobank — НЕ зроблено
 - TenantConfigForm: розширити поля payments/shipping/email
 
-### Sprint 5 — Promotions + Loyalty ⏳
-- brand.promotions (ця сторінка існує — перевірити повноту)
-- validate_discount_code інтеграція в checkout
-- LoyaltyCard.tsx + earn/redeem в checkout
+### Sprint 5 — Promotions + Loyalty ✅ (готово)
+- brand.promotions: повний CRUD промокодів (percent_off / fixed_off / free_shipping)
+- validate_discount_code інтегровано в checkout
+- LoyaltyCard.tsx (admin: pts/100uah, uah/pt, min_redeem, on/off, stats)
+- validate_loyalty_redeem RPC + award_loyalty_points_on_paid trigger
+- place_storefront_order розширено _loyalty_redeem_points + _promo_code
+- Checkout: блок «Бали лояльності» (баланс, списання, projection earn)
 
 ### Sprint 6 — New Agents ⏳
 - agents.email-abandoned-cart
