@@ -50,7 +50,7 @@ export function PlanUsageCard({ tenantId }: { tenantId: string }) {
             <Badge variant="outline">{data.subscription.status}</Badge>
           </CardTitle>
           <Button asChild size="sm" variant="outline">
-            <Link to="/brand/billing">
+            <Link to="/brand/billing" search={{ tenant: tenantId }}>
               Billing & balance <ExternalLink className="ml-1 h-3 w-3" />
             </Link>
           </Button>
