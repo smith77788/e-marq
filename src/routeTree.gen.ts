@@ -31,6 +31,7 @@ import { Route as HooksIntegrationsDntradeWebhookHealthRouteImport } from './rou
 import { Route as HooksIntegrationsDntradeWebhookRouteImport } from './routes/hooks/integrations.dntrade-webhook'
 import { Route as HooksIntegrationsDntradeVerifyRouteImport } from './routes/hooks/integrations.dntrade-verify'
 import { Route as HooksIntegrationsDntradeSyncRouteImport } from './routes/hooks/integrations.dntrade-sync'
+import { Route as HooksIntegrationsDntradeHealthCronRouteImport } from './routes/hooks/integrations.dntrade-health-cron'
 import { Route as HooksIntegrationsDntradeDryRunRouteImport } from './routes/hooks/integrations.dntrade-dry-run'
 import { Route as HooksIntegrationsDntradeCronRouteImport } from './routes/hooks/integrations.dntrade-cron'
 import { Route as HooksEnginesWinbackOneRouteImport } from './routes/hooks/engines.winback-one'
@@ -239,6 +240,12 @@ const HooksIntegrationsDntradeSyncRoute =
   HooksIntegrationsDntradeSyncRouteImport.update({
     id: '/hooks/integrations/dntrade-sync',
     path: '/hooks/integrations/dntrade-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksIntegrationsDntradeHealthCronRoute =
+  HooksIntegrationsDntradeHealthCronRouteImport.update({
+    id: '/hooks/integrations/dntrade-health-cron',
+    path: '/hooks/integrations/dntrade-health-cron',
     getParentRoute: () => rootRouteImport,
   } as any)
 const HooksIntegrationsDntradeDryRunRoute =
@@ -872,6 +879,7 @@ export interface FileRoutesByFullPath {
   '/hooks/engines/winback-one': typeof HooksEnginesWinbackOneRoute
   '/hooks/integrations/dntrade-cron': typeof HooksIntegrationsDntradeCronRoute
   '/hooks/integrations/dntrade-dry-run': typeof HooksIntegrationsDntradeDryRunRoute
+  '/hooks/integrations/dntrade-health-cron': typeof HooksIntegrationsDntradeHealthCronRoute
   '/hooks/integrations/dntrade-sync': typeof HooksIntegrationsDntradeSyncRoute
   '/hooks/integrations/dntrade-verify': typeof HooksIntegrationsDntradeVerifyRoute
   '/hooks/integrations/dntrade-webhook': typeof HooksIntegrationsDntradeWebhookRoute
@@ -990,6 +998,7 @@ export interface FileRoutesByTo {
   '/hooks/engines/winback-one': typeof HooksEnginesWinbackOneRoute
   '/hooks/integrations/dntrade-cron': typeof HooksIntegrationsDntradeCronRoute
   '/hooks/integrations/dntrade-dry-run': typeof HooksIntegrationsDntradeDryRunRoute
+  '/hooks/integrations/dntrade-health-cron': typeof HooksIntegrationsDntradeHealthCronRoute
   '/hooks/integrations/dntrade-sync': typeof HooksIntegrationsDntradeSyncRoute
   '/hooks/integrations/dntrade-verify': typeof HooksIntegrationsDntradeVerifyRoute
   '/hooks/integrations/dntrade-webhook': typeof HooksIntegrationsDntradeWebhookRoute
@@ -1110,6 +1119,7 @@ export interface FileRoutesById {
   '/hooks/engines/winback-one': typeof HooksEnginesWinbackOneRoute
   '/hooks/integrations/dntrade-cron': typeof HooksIntegrationsDntradeCronRoute
   '/hooks/integrations/dntrade-dry-run': typeof HooksIntegrationsDntradeDryRunRoute
+  '/hooks/integrations/dntrade-health-cron': typeof HooksIntegrationsDntradeHealthCronRoute
   '/hooks/integrations/dntrade-sync': typeof HooksIntegrationsDntradeSyncRoute
   '/hooks/integrations/dntrade-verify': typeof HooksIntegrationsDntradeVerifyRoute
   '/hooks/integrations/dntrade-webhook': typeof HooksIntegrationsDntradeWebhookRoute
@@ -1230,6 +1240,7 @@ export interface FileRouteTypes {
     | '/hooks/engines/winback-one'
     | '/hooks/integrations/dntrade-cron'
     | '/hooks/integrations/dntrade-dry-run'
+    | '/hooks/integrations/dntrade-health-cron'
     | '/hooks/integrations/dntrade-sync'
     | '/hooks/integrations/dntrade-verify'
     | '/hooks/integrations/dntrade-webhook'
@@ -1348,6 +1359,7 @@ export interface FileRouteTypes {
     | '/hooks/engines/winback-one'
     | '/hooks/integrations/dntrade-cron'
     | '/hooks/integrations/dntrade-dry-run'
+    | '/hooks/integrations/dntrade-health-cron'
     | '/hooks/integrations/dntrade-sync'
     | '/hooks/integrations/dntrade-verify'
     | '/hooks/integrations/dntrade-webhook'
@@ -1467,6 +1479,7 @@ export interface FileRouteTypes {
     | '/hooks/engines/winback-one'
     | '/hooks/integrations/dntrade-cron'
     | '/hooks/integrations/dntrade-dry-run'
+    | '/hooks/integrations/dntrade-health-cron'
     | '/hooks/integrations/dntrade-sync'
     | '/hooks/integrations/dntrade-verify'
     | '/hooks/integrations/dntrade-webhook'
@@ -1575,6 +1588,7 @@ export interface RootRouteChildren {
   HooksEnginesWinbackOneRoute: typeof HooksEnginesWinbackOneRoute
   HooksIntegrationsDntradeCronRoute: typeof HooksIntegrationsDntradeCronRoute
   HooksIntegrationsDntradeDryRunRoute: typeof HooksIntegrationsDntradeDryRunRoute
+  HooksIntegrationsDntradeHealthCronRoute: typeof HooksIntegrationsDntradeHealthCronRoute
   HooksIntegrationsDntradeSyncRoute: typeof HooksIntegrationsDntradeSyncRoute
   HooksIntegrationsDntradeVerifyRoute: typeof HooksIntegrationsDntradeVerifyRoute
   HooksIntegrationsDntradeWebhookRoute: typeof HooksIntegrationsDntradeWebhookRoute
@@ -1738,6 +1752,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/integrations/dntrade-sync'
       fullPath: '/hooks/integrations/dntrade-sync'
       preLoaderRoute: typeof HooksIntegrationsDntradeSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/integrations/dntrade-health-cron': {
+      id: '/hooks/integrations/dntrade-health-cron'
+      path: '/hooks/integrations/dntrade-health-cron'
+      fullPath: '/hooks/integrations/dntrade-health-cron'
+      preLoaderRoute: typeof HooksIntegrationsDntradeHealthCronRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/integrations/dntrade-dry-run': {
@@ -2575,6 +2596,8 @@ const rootRouteChildren: RootRouteChildren = {
   HooksEnginesWinbackOneRoute: HooksEnginesWinbackOneRoute,
   HooksIntegrationsDntradeCronRoute: HooksIntegrationsDntradeCronRoute,
   HooksIntegrationsDntradeDryRunRoute: HooksIntegrationsDntradeDryRunRoute,
+  HooksIntegrationsDntradeHealthCronRoute:
+    HooksIntegrationsDntradeHealthCronRoute,
   HooksIntegrationsDntradeSyncRoute: HooksIntegrationsDntradeSyncRoute,
   HooksIntegrationsDntradeVerifyRoute: HooksIntegrationsDntradeVerifyRoute,
   HooksIntegrationsDntradeWebhookRoute: HooksIntegrationsDntradeWebhookRoute,
