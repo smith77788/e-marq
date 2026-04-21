@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AcosAgentRuns } from "@/components/admin/AcosAgentRuns";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { useT, tStatic } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/agents/live")({
   head: () => ({
@@ -30,15 +31,22 @@ function AgentsLivePage() {
     if (!tenantId) return;
     setRunning(true);
     try {
+      const { data: sess } = await supabase.auth.getSession();
+      const token = sess.session?.access_token;
+      if (!token) throw new Error("not signed in");
       const res = await fetch("/hooks/agents/run-all", {
         method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ tenantId }),
+        headers: {
+          "content-type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ tenant_id: tenantId }),
       });
-      if (!res.ok) throw new Error(await res.text());
-      toast.success(t("ag.liveTriggered"));
+      const json = (await res.json().catch(() => ({}))) as { error?: string; insights_created?: number };
+      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+      toast.success(`${t("ag.liveTriggered")} (+${json.insights_created ?? 0})`);
     } catch (e) {
-      toast.error(t("ag.liveFailed"));
+      toast.error(`${t("ag.liveFailed")} ${e instanceof Error ? e.message : ""}`);
       console.error(e);
     } finally {
       setRunning(false);
