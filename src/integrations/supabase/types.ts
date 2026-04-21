@@ -1100,6 +1100,54 @@ export type Database = {
           },
         ]
       }
+      dntrade_sync_errors: {
+        Row: {
+          external_id: string | null
+          id: string
+          integration_id: string | null
+          kind: string
+          message: string
+          occurred_at: string
+          raw: Json
+          tenant_id: string
+        }
+        Insert: {
+          external_id?: string | null
+          id?: string
+          integration_id?: string | null
+          kind: string
+          message: string
+          occurred_at?: string
+          raw?: Json
+          tenant_id: string
+        }
+        Update: {
+          external_id?: string | null
+          id?: string
+          integration_id?: string | null
+          kind?: string
+          message?: string
+          occurred_at?: string
+          raw?: Json
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dntrade_sync_errors_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dntrade_sync_errors_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           created_at: string
@@ -2384,6 +2432,7 @@ export type Database = {
           synced_products_count: number
           tenant_id: string
           updated_at: string
+          webhook_secret: string | null
         }
         Insert: {
           config?: Json
@@ -2400,6 +2449,7 @@ export type Database = {
           synced_products_count?: number
           tenant_id: string
           updated_at?: string
+          webhook_secret?: string | null
         }
         Update: {
           config?: Json
@@ -2416,6 +2466,7 @@ export type Database = {
           synced_products_count?: number
           tenant_id?: string
           updated_at?: string
+          webhook_secret?: string | null
         }
         Relationships: [
           {

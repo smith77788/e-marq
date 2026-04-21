@@ -1,19 +1,36 @@
 /**
  * DN Trade integration card.
- * - Owner enters ApiKey (paste from DN Trade → Опції → Інтеграції → API DNTrade).
- * - "Verify & save" — server-side check + upsert у tenant_integrations.
- * - "Sync now" — запускає повний sync (full=true перший раз, далі інкрементально).
- * - Показує статус останньої синхронізації та лічильники.
+ * - Owner enters ApiKey і зберігає (з валідацією через DN Trade /products/stores).
+ * - Кнопки: повний sync, інкрементальний sync, dry-run (без запису).
+ * - Перегляд останніх mapping errors.
+ * - Генерація webhook URL + secret для push-подій з DN Trade.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, Plug, RefreshCw, ShieldCheck } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertCircle,
+  Copy,
+  Eye,
+  Loader2,
+  Plug,
+  RefreshCw,
+  ShieldCheck,
+  TestTube,
+  Webhook,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 
 type Props = { tenantId: string };
@@ -22,6 +39,7 @@ type IntegRow = {
   id: string;
   is_active: boolean;
   credentials_encrypted: string | null;
+  webhook_secret: string | null;
   last_sync_at: string | null;
   last_sync_status: string | null;
   last_sync_error: string | null;
@@ -30,16 +48,41 @@ type IntegRow = {
   synced_orders_count: number;
 };
 
+type MappingError = {
+  id: string;
+  kind: string;
+  external_id: string | null;
+  message: string;
+  occurred_at: string;
+};
+
+type DryRunSummary = {
+  products: { fetched: number; upserted: number };
+  customers: { fetched: number; upserted: number };
+  orders: { fetched: number; inserted: number; skipped: number };
+  errors: string[];
+  mapping_errors: Array<{ kind: string; external_id: string | null; message: string }>;
+  samples?: { products: unknown[]; customers: unknown[]; orders: unknown[] };
+};
+
 async function authHeader(): Promise<Record<string, string>> {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+function randomSecret() {
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 export function DnTradeIntegrationCard({ tenantId }: Props) {
   const qc = useQueryClient();
   const [apiKey, setApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
+  const [dryRunResult, setDryRunResult] = useState<DryRunSummary | null>(null);
+  const [showSamples, setShowSamples] = useState(false);
 
   const integ = useQuery({
     queryKey: ["dntrade-integration", tenantId],
@@ -47,7 +90,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
       const { data, error } = await supabase
         .from("tenant_integrations")
         .select(
-          "id, is_active, credentials_encrypted, last_sync_at, last_sync_status, last_sync_error, synced_products_count, synced_customers_count, synced_orders_count",
+          "id, is_active, credentials_encrypted, webhook_secret, last_sync_at, last_sync_status, last_sync_error, synced_products_count, synced_customers_count, synced_orders_count",
         )
         .eq("tenant_id", tenantId)
         .eq("provider", "dntrade")
@@ -55,6 +98,21 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
       if (error) throw error;
       return data as IntegRow | null;
     },
+  });
+
+  const mappingErrors = useQuery({
+    queryKey: ["dntrade-mapping-errors", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("dntrade_sync_errors")
+        .select("id, kind, external_id, message, occurred_at")
+        .eq("tenant_id", tenantId)
+        .order("occurred_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return (data ?? []) as MappingError[];
+    },
+    enabled: !!integ.data?.credentials_encrypted,
   });
 
   useEffect(() => {
@@ -67,7 +125,6 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
     mutationFn: async (key: string) => {
       const trimmed = key.trim();
       if (!trimmed) throw new Error("Введіть API key");
-      // Verify first
       const verifyRes = await fetch("/hooks/integrations/dntrade-verify", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await authHeader()) },
@@ -78,18 +135,15 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
       if (!verifyJson.valid) {
         throw new Error(`DN Trade відхилив ключ: ${verifyJson.message ?? "невірний ключ"}`);
       }
-      // Upsert
-      const { error } = await supabase
-        .from("tenant_integrations")
-        .upsert(
-          {
-            tenant_id: tenantId,
-            provider: "dntrade",
-            credentials_encrypted: trimmed,
-            is_active: true,
-          },
-          { onConflict: "tenant_id,provider" },
-        );
+      const { error } = await supabase.from("tenant_integrations").upsert(
+        {
+          tenant_id: tenantId,
+          provider: "dntrade",
+          credentials_encrypted: trimmed,
+          is_active: true,
+        },
+        { onConflict: "tenant_id,provider" },
+      );
       if (error) throw error;
     },
     onSuccess: () => {
@@ -108,25 +162,68 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Sync failed");
-      return json.summary as {
-        products: { fetched: number; upserted: number };
-        customers: { fetched: number; upserted: number };
-        orders: { fetched: number; inserted: number; skipped: number };
-        errors: string[];
-      };
+      return json.summary as DryRunSummary;
     },
     onSuccess: (s) => {
       toast.success(
         `Sync OK · товари: ${s.products.upserted}, клієнти: ${s.customers.upserted}, замовлення: ${s.orders.inserted}`,
       );
+      if (s.mapping_errors?.length) {
+        toast.warning(`${s.mapping_errors.length} помилок мапінгу — перегляньте нижче`);
+      }
       void qc.invalidateQueries({ queryKey: ["dntrade-integration", tenantId] });
+      void qc.invalidateQueries({ queryKey: ["dntrade-mapping-errors", tenantId] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Sync failed"),
+  });
+
+  const dryRun = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/hooks/integrations/dntrade-dry-run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(await authHeader()) },
+        body: JSON.stringify({ tenant_id: tenantId }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Dry-run failed");
+      return json.summary as DryRunSummary;
+    },
+    onSuccess: (s) => {
+      setDryRunResult(s);
+      toast.success(
+        `Dry-run · товари ${s.products.fetched}, клієнти ${s.customers.fetched}, замовлення ${s.orders.fetched}`,
+      );
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Dry-run failed"),
+  });
+
+  const generateWebhookSecret = useMutation({
+    mutationFn: async () => {
+      const secret = randomSecret();
+      const { error } = await supabase
+        .from("tenant_integrations")
+        .update({ webhook_secret: secret })
+        .eq("tenant_id", tenantId)
+        .eq("provider", "dntrade");
+      if (error) throw error;
+      return secret;
+    },
+    onSuccess: () => {
+      toast.success("Webhook secret згенеровано");
+      void qc.invalidateQueries({ queryKey: ["dntrade-integration", tenantId] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Не вдалося згенерувати"),
   });
 
   const data = integ.data;
   const isConfigured = !!data?.credentials_encrypted;
   const lastStatus = data?.last_sync_status ?? null;
+
+  const webhookUrl = useMemo(() => {
+    if (!data?.webhook_secret) return null;
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    return `${origin}/hooks/integrations/dntrade-webhook?tenant=${tenantId}&secret=${data.webhook_secret}`;
+  }, [data?.webhook_secret, tenantId]);
 
   return (
     <Card>
@@ -192,66 +289,238 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
         </div>
 
         {isConfigured && (
-          <div className="space-y-3 border-t border-border pt-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                type="button"
-                size="sm"
-                variant="default"
-                onClick={() => sync.mutate(false)}
-                disabled={sync.isPending}
-              >
-                {sync.isPending ? (
-                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                ) : (
-                  <RefreshCw className="mr-1 h-3 w-3" />
+          <>
+            <Separator />
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="default"
+                  onClick={() => sync.mutate(false)}
+                  disabled={sync.isPending || dryRun.isPending}
+                >
+                  {sync.isPending ? (
+                    <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                  ) : (
+                    <RefreshCw className="mr-1 h-3 w-3" />
+                  )}
+                  Синхронізувати зміни
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => sync.mutate(true)}
+                  disabled={sync.isPending || dryRun.isPending}
+                >
+                  Повна синхронізація
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => dryRun.mutate()}
+                  disabled={sync.isPending || dryRun.isPending}
+                >
+                  {dryRun.isPending ? (
+                    <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                  ) : (
+                    <TestTube className="mr-1 h-3 w-3" />
+                  )}
+                  Тестовий Dry-Run
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <Stat label="Товари" value={data?.synced_products_count ?? 0} />
+                <Stat label="Клієнти" value={data?.synced_customers_count ?? 0} />
+                <Stat label="Замовлення" value={data?.synced_orders_count ?? 0} />
+              </div>
+
+              <div className="text-xs text-muted-foreground">
+                Останній sync:{" "}
+                {data?.last_sync_at ? new Date(data.last_sync_at).toLocaleString() : "—"} ·
+                статус:{" "}
+                <span
+                  className={
+                    lastStatus === "success"
+                      ? "text-success"
+                      : lastStatus === "failed"
+                        ? "text-destructive"
+                        : lastStatus === "partial"
+                          ? "text-warning"
+                          : "text-foreground"
+                  }
+                >
+                  {lastStatus ?? "—"}
+                </span>
+                {data?.last_sync_error && (
+                  <div className="mt-1 text-destructive">{data.last_sync_error.slice(0, 200)}</div>
                 )}
-                Синхронізувати зміни
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => sync.mutate(true)}
-                disabled={sync.isPending}
-              >
-                Повна синхронізація
-              </Button>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Автосинхронізація — щогодини. Кнопки вище — миттєвий запуск.
+              </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 text-xs">
-              <Stat label="Товари" value={data?.synced_products_count ?? 0} />
-              <Stat label="Клієнти" value={data?.synced_customers_count ?? 0} />
-              <Stat label="Замовлення" value={data?.synced_orders_count ?? 0} />
-            </div>
-
-            <div className="text-xs text-muted-foreground">
-              Останній sync:{" "}
-              {data?.last_sync_at
-                ? new Date(data.last_sync_at).toLocaleString()
-                : "—"}{" "}
-              · статус:{" "}
-              <span
-                className={
-                  lastStatus === "success"
-                    ? "text-success"
-                    : lastStatus === "failed"
-                      ? "text-destructive"
-                      : "text-foreground"
-                }
-              >
-                {lastStatus ?? "—"}
-              </span>
-              {data?.last_sync_error && (
-                <div className="mt-1 text-destructive">
-                  {data.last_sync_error.slice(0, 200)}
+            {/* Dry-run результат */}
+            {dryRunResult && (
+              <>
+                <Separator />
+                <div className="space-y-2 rounded-md border border-primary/30 bg-primary/5 p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+                      <TestTube className="h-3 w-3" /> Результат Dry-Run (НЕ записано в БД)
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setShowSamples((s) => !s)}
+                    >
+                      <Eye className="mr-1 h-3 w-3" />
+                      {showSamples ? "Сховати приклади" : "Показати приклади"}
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <Stat
+                      label="Товари (отримано)"
+                      value={dryRunResult.products.fetched}
+                    />
+                    <Stat
+                      label="Клієнти (отримано)"
+                      value={dryRunResult.customers.fetched}
+                    />
+                    <Stat
+                      label="Замовлення (отримано)"
+                      value={dryRunResult.orders.fetched}
+                    />
+                  </div>
+                  {dryRunResult.mapping_errors.length > 0 && (
+                    <div className="text-xs text-destructive">
+                      {dryRunResult.mapping_errors.length} помилок мапінгу — деталі нижче ↓
+                    </div>
+                  )}
+                  {showSamples && dryRunResult.samples && (
+                    <div className="space-y-2">
+                      {(["products", "customers", "orders"] as const).map((k) => (
+                        <details key={k} className="rounded border border-border/60 bg-card/40 p-2">
+                          <summary className="cursor-pointer text-xs font-medium capitalize">
+                            {k} ({dryRunResult.samples?.[k].length ?? 0})
+                          </summary>
+                          <pre className="mt-2 max-h-64 overflow-auto rounded bg-background/60 p-2 text-[10px]">
+                            {JSON.stringify(dryRunResult.samples?.[k], null, 2)}
+                          </pre>
+                        </details>
+                      ))}
+                    </div>
+                  )}
                 </div>
+              </>
+            )}
+
+            {/* Mapping errors */}
+            {mappingErrors.data && mappingErrors.data.length > 0 && (
+              <>
+                <Separator />
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-destructive">
+                    <AlertCircle className="h-3 w-3" />
+                    Останні помилки мапінгу ({mappingErrors.data.length})
+                  </div>
+                  <div className="max-h-64 space-y-1 overflow-auto rounded-md border border-border bg-card/40 p-2">
+                    {mappingErrors.data.map((err) => (
+                      <div
+                        key={err.id}
+                        className="border-b border-border/50 pb-1 text-[11px] last:border-0"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <Badge
+                            variant="outline"
+                            className="border-destructive/40 text-[10px] text-destructive"
+                          >
+                            {err.kind}
+                          </Badge>
+                          <span className="font-mono text-[10px] text-muted-foreground">
+                            {err.external_id ?? "—"}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 text-foreground">{err.message}</div>
+                        <div className="text-[10px] text-muted-foreground">
+                          {new Date(err.occurred_at).toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Webhook */}
+            <Separator />
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <Webhook className="h-3 w-3 text-primary" /> Push-вебхук від DN Trade
+              </div>
+              {data?.webhook_secret && webhookUrl ? (
+                <>
+                  <p className="text-[11px] text-muted-foreground">
+                    Скопіюйте URL і вставте в DN Trade як endpoint для подій. Приймаємо POST,
+                    автоматично запускаємо інкрементальну синхронізацію.
+                  </p>
+                  <div className="flex gap-2">
+                    <Input
+                      value={webhookUrl}
+                      readOnly
+                      className="font-mono text-[10px]"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        navigator.clipboard.writeText(webhookUrl);
+                        toast.success("URL скопійовано");
+                      }}
+                    >
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => generateWebhookSecret.mutate()}
+                    disabled={generateWebhookSecret.isPending}
+                  >
+                    {generateWebhookSecret.isPending && (
+                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                    )}
+                    Згенерувати новий secret
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <p className="text-[11px] text-muted-foreground">
+                    Ще не налаштовано. Згенеруйте secret і отримайте URL для вставки в DN Trade.
+                  </p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => generateWebhookSecret.mutate()}
+                    disabled={generateWebhookSecret.isPending}
+                  >
+                    {generateWebhookSecret.isPending && (
+                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                    )}
+                    Створити webhook URL
+                  </Button>
+                </>
               )}
             </div>
-            <p className="text-[11px] text-muted-foreground">
-              Автосинхронізація — щогодини. Кнопка вище — миттєвий запуск.
-            </p>
-          </div>
+          </>
         )}
       </CardContent>
     </Card>

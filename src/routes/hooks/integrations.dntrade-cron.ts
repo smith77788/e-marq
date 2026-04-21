@@ -49,15 +49,20 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-cron")({
               supabaseAdmin,
               integ.tenant_id,
               integ.credentials_encrypted,
-              { modifiedFromIso: integ.last_sync_at ?? undefined },
+              { modifiedFromIso: integ.last_sync_at ?? undefined, integrationId: integ.id },
             );
-            const hasErrors = summary.errors.length > 0;
+            const hasErrors = summary.errors.length > 0 || summary.mapping_errors.length > 0;
             await supabaseAdmin
               .from("tenant_integrations")
               .update({
                 last_sync_at: new Date().toISOString(),
                 last_sync_status: hasErrors ? "partial" : "success",
-                last_sync_error: hasErrors ? summary.errors.join(" | ") : null,
+                last_sync_error: hasErrors
+                  ? [
+                      ...summary.errors,
+                      ...summary.mapping_errors.slice(0, 3).map((e) => `${e.kind}:${e.message}`),
+                    ].join(" | ")
+                  : null,
                 synced_products_count: summary.products.upserted,
                 synced_customers_count: summary.customers.upserted,
                 synced_orders_count: summary.orders.inserted,
