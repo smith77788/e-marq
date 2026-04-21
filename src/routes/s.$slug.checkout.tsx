@@ -108,9 +108,116 @@ function CheckoutPage() {
   const [validatingPromo, setValidatingPromo] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Auto-redirect to home if cart is empty (e.g., after submission or direct link)
+  // Loyalty
+  const [loyalty, setLoyalty] = useState<LoyaltyState | null>(null);
+  const [loyaltyChecking, setLoyaltyChecking] = useState(false);
+  const [redeemPoints, setRedeemPoints] = useState("");
+  const [redeemApplied, setRedeemApplied] = useState<{
+    points: number;
+    discountCents: number;
+  } | null>(null);
+
+  const subtotalCents = cart.totalCents;
+  const promoDiscountCents = discount && discount.valid ? discount.discount_cents : 0;
+  const loyaltyDiscountCents = redeemApplied?.discountCents ?? 0;
+  const discountCents = promoDiscountCents + loyaltyDiscountCents;
+  const finalTotalCents = Math.max(0, subtotalCents - discountCents);
+
+  // Bали які буде нараховано (передбачення)
+  const projectedEarnPoints = loyalty?.programActive
+    ? Math.floor(loyalty.pointsPer100 * (finalTotalCents / 10000))
+    : 0;
+
+  // Завантаження loyalty стану коли email стабільний
   useEffect(() => {
-    if (cart.cartLines.length === 0) {
+    const trimmed = email.trim().toLowerCase();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setLoyalty(null);
+      setRedeemApplied(null);
+      return;
+    }
+    let cancelled = false;
+    const tid = setTimeout(async () => {
+      setLoyaltyChecking(true);
+      try {
+        const { data: program } = await supabase
+          .from("loyalty_programs")
+          .select("points_per_100_uah, uah_per_point, min_redeem_points, is_active")
+          .eq("tenant_id", cart.tenantId)
+          .maybeSingle();
+        if (cancelled) return;
+        if (!program?.is_active) {
+          setLoyalty(null);
+          return;
+        }
+        const { data: account } = await supabase
+          .from("loyalty_accounts")
+          .select("balance_points, tier")
+          .eq("tenant_id", cart.tenantId)
+          .eq("customer_email", trimmed)
+          .maybeSingle();
+        if (cancelled) return;
+        setLoyalty({
+          programActive: true,
+          pointsPer100: program.points_per_100_uah,
+          uahPerPoint: Number(program.uah_per_point),
+          minRedeem: program.min_redeem_points,
+          balance: account?.balance_points ?? 0,
+          tier: account?.tier ?? "bronze",
+        });
+      } finally {
+        if (!cancelled) setLoyaltyChecking(false);
+      }
+    }, 500);
+    return () => {
+      cancelled = true;
+      clearTimeout(tid);
+    };
+  }, [email, cart.tenantId]);
+
+  async function applyLoyalty() {
+    if (!loyalty) return;
+    const pts = parseInt(redeemPoints);
+    if (!Number.isFinite(pts) || pts <= 0) {
+      toast.error("Введіть кількість балів");
+      return;
+    }
+    setLoyaltyChecking(true);
+    try {
+      const { data, error } = await supabase.rpc("validate_loyalty_redeem", {
+        _tenant_id: cart.tenantId,
+        _customer_email: email.trim().toLowerCase(),
+        _redeem_points: pts,
+        _order_total_cents: subtotalCents - promoDiscountCents,
+      });
+      if (error) throw error;
+      const result = data as unknown as LoyaltyValidation;
+      if (result.valid) {
+        setRedeemApplied({ points: result.points_used, discountCents: result.discount_cents });
+        toast.success(
+          `Списано ${result.points_used} балів → −${formatMoneyExact(result.discount_cents)}`,
+        );
+      } else {
+        const messages: Record<string, string> = {
+          program_inactive: "Програма лояльності неактивна",
+          insufficient_balance: `Недостатньо балів (баланс: ${result.balance_points ?? 0})`,
+          below_min_redeem: `Мінімум для списання: ${result.min_points ?? 100} балів`,
+          invalid_email: "Введіть email щоб скористатись балами",
+          invalid_points: "Введіть коректну кількість",
+        };
+        toast.error(messages[result.error] ?? "Не вдалося списати бали");
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Помилка");
+    } finally {
+      setLoyaltyChecking(false);
+    }
+  }
+
+  function clearLoyalty() {
+    setRedeemApplied(null);
+    setRedeemPoints("");
+  }
       const t = setTimeout(() => {
         navigate({ to: "/s/$slug", params: { slug } });
       }, 100);
