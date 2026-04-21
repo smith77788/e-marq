@@ -60,18 +60,38 @@ function OnboardingPage() {
 
   const [step, setStep] = useState(0);
 
-  if (!tenantId || !tenantSlug) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("onb.title")}</CardTitle>
-          <CardDescription>
-            {lang === "ua" ? "Спочатку створи бренд або попроси super-admin." : "Create a brand first or ask a super-admin."}
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
+  // Статуси завершення кожного кроку — рахуємо за реальними даними з бази
+  const { data: status } = useQuery({
+    queryKey: ["onboarding-status", tenantId],
+    enabled: !!tenantId,
+    refetchInterval: 8000,
+    queryFn: async () => {
+      if (!tenantId) return null;
+      const [tn, prod, cust, cfg, tg, inv] = await Promise.all([
+        supabase.from("tenants").select("name").eq("id", tenantId).maybeSingle(),
+        supabase.from("products").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("is_active", true),
+        supabase.from("customers").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
+        supabase.from("tenant_configs").select("features").eq("tenant_id", tenantId).maybeSingle(),
+        supabase.from("telegram_chat_routing").select("chat_id", { count: "exact", head: true }).eq("tenant_id", tenantId),
+        supabase.from("tenant_invitations").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
+      ]);
+      const features = (cfg.data?.features ?? {}) as Record<string, unknown>;
+      return {
+        s1: !!(tn.data?.name && tn.data.name.trim().length > 1),
+        s2: (tg.count ?? 0) > 0,
+        s3: (prod.count ?? 0) > 0,
+        s4: (cust.count ?? 0) > 0,
+        s5: !!features.tracking_installed,
+        s6: !!features.payment_method,
+        s7: (inv.count ?? 0) > 0,
+      };
+    },
+  });
+
+  const stepDone = (i: number): boolean => {
+    if (!status) return false;
+    return [status.s1, status.s2, status.s3, status.s4, status.s5, status.s6, status.s7][i] ?? false;
+  };
 
   const steps: Array<{ titleKey: TKey; descKey: TKey; render: () => ReactElement }> = [
     { titleKey: "onb.s1.title", descKey: "onb.s1.desc", render: () => <Step1Brand tenantId={tenantId} qc={qc} /> },
@@ -80,7 +100,7 @@ function OnboardingPage() {
     { titleKey: "onb.s4.title", descKey: "onb.s4.desc", render: () => <Step4Customers tenantId={tenantId} qc={qc} /> },
     { titleKey: "onb.s5.title", descKey: "onb.s5.desc", render: () => <Step5Tracking tenantSlug={tenantSlug} /> },
     { titleKey: "onb.s6.title", descKey: "onb.s6.desc", render: () => <Step6Payment tenantId={tenantId} qc={qc} /> },
-    { titleKey: "onb.s7.title", descKey: "onb.s7.desc", render: () => <Step7Team tenantId={tenantId} /> },
+    { titleKey: "onb.s7.title", descKey: "onb.s7.desc", render: () => <Step7Team tenantId={tenantId} tenantSlug={tenantSlug} /> },
   ];
 
   const pct = Math.round(((step + 1) / steps.length) * 100);
