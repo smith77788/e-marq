@@ -81,6 +81,14 @@ type ProductRow = {
   created_at: string;
 };
 
+const COHORT_LABEL: Record<string, string> = {
+  new: "нові",
+  one_time: "разові",
+  returning: "постійні",
+  vip_active: "найцінніші активні",
+  vip_churning: "найцінніші, можуть піти",
+};
+
 function TenantDetailPage() {
   const { tenantId } = Route.useParams();
   const { isSuperAdmin, loading } = useAuth();
