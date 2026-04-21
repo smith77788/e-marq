@@ -61,6 +61,9 @@ import { TenantOrders } from "@/components/admin/TenantOrders";
 import { AcosOverviewTab } from "@/components/admin/AcosOverviewTab";
 import { AcosInsightsQueue } from "@/components/admin/AcosInsightsQueue";
 import { AcosAgentRuns } from "@/components/admin/AcosAgentRuns";
+import { PlanBillingTab } from "@/components/admin/PlanBillingTab";
+import { BalancesTab } from "@/components/admin/BalancesTab";
+import { MembersTab } from "@/components/admin/MembersTab";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants/$tenantId")({
   component: TenantDetailPage,
@@ -359,13 +362,28 @@ function TenantDetailPage() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="overview">Commerce</TabsTrigger>
+          <TabsTrigger value="plan">Plan & Billing</TabsTrigger>
+          <TabsTrigger value="balances">Balances</TabsTrigger>
+          <TabsTrigger value="members">Members</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
           <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="config">Config</TabsTrigger>
           <TabsTrigger value="acos-debug">ACOS Debug</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="plan" className="space-y-4">
+          <PlanBillingTab tenantId={tenantId} />
+        </TabsContent>
+
+        <TabsContent value="balances" className="space-y-4">
+          <BalancesTab tenantId={tenantId} />
+        </TabsContent>
+
+        <TabsContent value="members" className="space-y-4">
+          <MembersTab tenantId={tenantId} />
+        </TabsContent>
 
         <TabsContent value="acos-debug" className="space-y-4">
           <p className="text-xs text-muted-foreground">

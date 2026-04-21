@@ -24,6 +24,7 @@ import { FunnelChart } from "@/components/owner/FunnelChart";
 import { CohortRetention } from "@/components/owner/CohortRetention";
 import { AgentHealthHeatmap } from "@/components/owner/AgentHealthHeatmap";
 import { LifecycleDistribution } from "@/components/owner/LifecycleDistribution";
+import { PlanUsageCard } from "@/components/owner/PlanUsageCard";
 
 type Search = { tenant?: string };
 
@@ -114,6 +115,8 @@ function BrandPage() {
       </div>
 
       <SetupChecklist tenantId={current.id} tenantSlug={current.slug} />
+
+      <PlanUsageCard tenantId={current.id} />
 
       <CockpitHero tenantId={current.id} />
 
