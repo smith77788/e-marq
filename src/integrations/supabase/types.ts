@@ -3167,6 +3167,18 @@ export type Database = {
         }[]
       }
       get_public_order: { Args: { _order_id: string }; Returns: Json }
+      get_storefront_bundles: {
+        Args: { _slug: string }
+        Returns: {
+          bundle_price_cents: number
+          description: string
+          discount_pct: number
+          id: string
+          individual_price_cents: number
+          name: string
+          product_ids: string[]
+        }[]
+      }
       get_storefront_config: { Args: { _slug: string }; Returns: Json }
       get_storefront_page: {
         Args: { _page_slug: string; _slug: string }

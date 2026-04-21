@@ -105,14 +105,20 @@ async function loadStorefront(slug: string) {
   if (tErr) throw tErr;
   if (!tenant) throw notFound();
 
-  // Products — RLS дозволяє anon читати лише is_active=true.
-  const { data: products, error: pErr } = await supabase
-    .from("products")
-    .select("id, name, description, price_cents, currency, image_url, stock")
-    .eq("tenant_id", tenant.id)
-    .eq("is_active", true)
-    .order("created_at", { ascending: false });
+  // Products — через безпечну RPC, що ховає точний залишок (повертає лише stock_available).
+  // Реальна валідація запасів — на сервері в `place_storefront_order`.
+  const { data: rawProducts, error: pErr } = await supabase.rpc("get_storefront_products", { _slug: slug });
   if (pErr) throw pErr;
+  const products = (rawProducts ?? []).map((p) => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    price_cents: p.price_cents,
+    currency: p.currency,
+    image_url: p.image_url,
+    // Не розкриваємо клієнту точний залишок — використовуємо великий ліміт, серверна RPC валідує реальний.
+    stock: p.stock_available ? 9999 : 0,
+  }));
 
   const config: ConfigRow = {
     brand_name: cfgPayload.brand_name,
