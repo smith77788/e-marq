@@ -135,6 +135,7 @@ function CheckoutPage() {
   async function placeOrder() {
     const trimmedEmail = email.trim();
     const trimmedName = name.trim();
+    const trimmedPhone = phone.trim();
     if (!trimmedEmail || cart.cartLines.length === 0) return;
 
     if (trimmedEmail.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
@@ -143,6 +144,14 @@ function CheckoutPage() {
     }
     if (trimmedName.length > 200) {
       toast.error("Ім'я задовге");
+      return;
+    }
+    if (trimmedPhone && (trimmedPhone.length > 32 || !/^[+\d\s()-]{6,32}$/.test(trimmedPhone))) {
+      toast.error("Введіть коректний телефон");
+      return;
+    }
+    if (!shipping) {
+      toast.error("Оберіть місто та відділення Нової Пошти");
       return;
     }
     if (cart.cartLines.length > 50) {
@@ -160,12 +169,23 @@ function CheckoutPage() {
         product_id: l.product_id,
         quantity: l.quantity,
       }));
+      const shippingPayload = {
+        method: "nova_poshta",
+        phone: trimmedPhone,
+        carrier: "nova_poshta",
+        city_ref: shipping.cityRef,
+        city_name: shipping.cityName,
+        warehouse_ref: shipping.warehouseRef,
+        warehouse_number: shipping.warehouseNumber,
+        warehouse_description: shipping.warehouseDescription,
+      };
       const { data: orderId, error: rpcErr } = await supabase.rpc("place_storefront_order", {
         _tenant_id: cart.tenantId,
         _customer_name: trimmedName,
         _customer_email: trimmedEmail,
         _items: items,
         _payment_method: "manual",
+        _shipping: shippingPayload,
       });
       if (rpcErr) throw rpcErr;
       if (!orderId) throw new Error("Не вдалося створити замовлення");
