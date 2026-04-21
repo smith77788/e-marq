@@ -318,6 +318,8 @@ function BrandPromotionsPage() {
         </Button>
       </div>
 
+      <EmailCampaignsCard tenantId={tenantId!} />
+
       <Card>
         <CardContent className="p-0">
           {isEmpty ? (
