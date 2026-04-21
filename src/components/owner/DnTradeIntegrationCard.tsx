@@ -7,16 +7,21 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
+  Activity,
   AlertCircle,
+  CheckCircle2,
   Copy,
   Eye,
+  HeartPulse,
   Loader2,
   Plug,
   RefreshCw,
   ShieldCheck,
   TestTube,
+  TriangleAlert,
   Webhook,
 } from "lucide-react";
 import {
@@ -32,6 +37,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 type Props = { tenantId: string };
 
