@@ -191,7 +191,7 @@ function PlanCard({
               {!plan.is_public && <Badge variant="outline">private</Badge>}
             </CardTitle>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">${(plan.price_cents_monthly / 100).toFixed(0)}/mo</span>
+              <span className="text-sm font-medium">{Math.round(plan.price_cents_monthly / 100).toLocaleString("uk-UA")} ₴/міс</span>
               <Button size="sm" variant="outline" onClick={onEdit}>Edit</Button>
               <Button size="sm" variant="ghost" onClick={onDelete}>
                 <Trash2 className="h-3.5 w-3.5" />
