@@ -5,10 +5,10 @@
  * Кожен крок зберігає прогрес одразу (idempotent), тому користувач може
  * вийти і повернутися без втрат.
  */
-import { useEffect, useMemo, useState, type ReactElement } from "react";
+import { useEffect, useState, type ReactElement } from "react";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Copy, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Copy, Loader2, Mail, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
