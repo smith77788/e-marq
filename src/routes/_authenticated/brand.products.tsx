@@ -314,7 +314,16 @@ function BrandProductsPage() {
                         <div className="h-10 w-10 rounded bg-muted" />
                       )}
                     </TableCell>
-                    <TableCell className="font-medium">{p.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link
+                        to="/brand/products/$productId"
+                        params={{ productId: p.id }}
+                        search={{ tenant: tenantId }}
+                        className="hover:underline hover:text-primary"
+                      >
+                        {p.name}
+                      </Link>
+                    </TableCell>
                     <TableCell className="hidden font-mono text-xs text-muted-foreground md:table-cell">
                       {p.sku ?? "—"}
                     </TableCell>
