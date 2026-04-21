@@ -76,6 +76,17 @@ const AGENTS = [
   "owner-playbook",
   "meta-prior-injector",
   "autonomous-seo-loop",
+  // Batch 10: ops, retention, capital efficiency
+  "shipping-optimizer",
+  "return-predictor",
+  "vip-concierge",
+  "review-velocity",
+  "payment-retry",
+  "geo-demand",
+  "time-of-day-pricer",
+  "refund-risk",
+  "lifecycle-trigger-tuner",
+  "inventory-rebalance",
 ] as const;
 
 export const Route = createFileRoute("/hooks/agents/run-all")({
