@@ -25,6 +25,14 @@ import { Badge } from "@/components/ui/badge";
 import { UsageMeters, type PlanSummary } from "@/components/admin/UsageMeters";
 import { PlanBadge } from "@/components/admin/PlanBadge";
 
+const STATUS_LABELS: Record<string, string> = {
+  trial: "Пробний період",
+  active: "Активний",
+  past_due: "Прострочено",
+  suspended: "Призупинено",
+  cancelled: "Скасовано",
+};
+
 export function PlanBillingTab({ tenantId }: { tenantId: string }) {
   const qc = useQueryClient();
   const [reason, setReason] = useState("");
@@ -88,7 +96,7 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Plan changed");
+      toast.success("Тариф змінено");
       setReason("");
       qc.invalidateQueries({ queryKey: ["plan-summary", tenantId] });
       qc.invalidateQueries({ queryKey: ["tenant-sub", tenantId] });
@@ -109,7 +117,7 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Saved");
+      toast.success("Збережено");
       qc.invalidateQueries({ queryKey: ["plan-summary", tenantId] });
       qc.invalidateQueries({ queryKey: ["tenant-sub", tenantId] });
     },
@@ -117,7 +125,7 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
   });
 
   if (summaryQuery.isLoading || subQuery.isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading…</p>;
+    return <p className="text-sm text-muted-foreground">Завантажую…</p>;
   }
   const summary = summaryQuery.data;
   const sub = subQuery.data;
@@ -127,12 +135,12 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            Current plan
+            Поточний тариф
             {summary && <PlanBadge planKey={summary.plan.key} planName={summary.plan.name} />}
-            {sub && <Badge variant="outline">{sub.status}</Badge>}
+            {sub && <Badge variant="outline">{STATUS_LABELS[sub.status] ?? sub.status}</Badge>}
           </CardTitle>
           <CardDescription>
-            Period: {sub ? new Date(sub.current_period_start).toLocaleDateString() : "—"} → {sub ? new Date(sub.current_period_end).toLocaleDateString() : "—"}
+            Період: {sub ? new Date(sub.current_period_start).toLocaleDateString("uk-UA") : "—"} → {sub ? new Date(sub.current_period_end).toLocaleDateString("uk-UA") : "—"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -142,13 +150,13 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Change plan</CardTitle>
-          <CardDescription>Switching grants new monthly AI credits and resets to active.</CardDescription>
+          <CardTitle>Змінити тариф</CardTitle>
+          <CardDescription>При переході нараховуються нові щомісячні AI-кредити, статус — «активний».</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid gap-2">
-            <Label htmlFor="reason">Reason (optional)</Label>
-            <Input id="reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Why is this changing?" />
+            <Label htmlFor="reason">Причина (необов'язково)</Label>
+            <Input id="reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Чому змінюємо тариф?" />
           </div>
           <div className="flex flex-wrap gap-2">
             {plansQuery.data?.map((p) => (
@@ -161,7 +169,7 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
               >
                 {p.name}
                 <span className="ml-2 text-[10px] text-muted-foreground">
-                  {p.price_cents_monthly === 0 ? "—" : `${Math.round(p.price_cents_monthly / 100).toLocaleString("uk-UA")} ₴/міс`}
+                  {p.price_cents_monthly === 0 ? "безкоштовно" : `${Math.round(p.price_cents_monthly / 100).toLocaleString("uk-UA")} ₴/міс`}
                 </span>
               </Button>
             ))}
@@ -172,29 +180,29 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
       {sub && (
         <Card>
           <CardHeader>
-            <CardTitle>Subscription controls</CardTitle>
-            <CardDescription>Status, trial, custom limit overrides.</CardDescription>
+            <CardTitle>Налаштування підписки</CardTitle>
+            <CardDescription>Статус, пробний період, особисті ліміти.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>Status</Label>
+                <Label>Статус</Label>
                 <Select
                   value={sub.status}
                   onValueChange={(v) => updateSub.mutate({ status: v })}
                 >
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="trial">Trial</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="past_due">Past due</SelectItem>
-                    <SelectItem value="suspended">Suspended</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                    <SelectItem value="trial">Пробний період</SelectItem>
+                    <SelectItem value="active">Активний</SelectItem>
+                    <SelectItem value="past_due">Прострочено</SelectItem>
+                    <SelectItem value="suspended">Призупинено</SelectItem>
+                    <SelectItem value="cancelled">Скасовано</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Trial ends at</Label>
+                <Label>Пробний період закінчується</Label>
                 <Input
                   type="date"
                   defaultValue={sub.trial_ends_at ? new Date(sub.trial_ends_at).toISOString().slice(0, 10) : ""}
@@ -203,10 +211,12 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Limit overrides (JSON)</Label>
+              <Label>Особисті ліміти (JSON)</Label>
               <p className="text-xs text-muted-foreground">
-                Keys: max_products, max_orders_per_month, max_customers, max_ai_runs_per_month,
-                max_outbound_messages_per_month, max_storage_mb, max_team_members. Use null for unlimited.
+                Ключі: max_products (товари), max_orders_per_month (замовлення/міс),
+                max_customers (клієнти), max_ai_runs_per_month (запуски AI/міс),
+                max_outbound_messages_per_month (повідомлення/міс), max_storage_mb (сховище),
+                max_team_members (учасники команди). Вкажи null — щоб без ліміту.
               </p>
               <Textarea
                 rows={6}
@@ -217,18 +227,18 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
                     const parsed = JSON.parse(e.target.value || "{}");
                     updateSub.mutate({ overrides: parsed });
                   } catch {
-                    toast.error("Invalid JSON");
+                    toast.error("Невірний JSON");
                   }
                 }}
               />
             </div>
             <div className="space-y-2">
-              <Label>Internal notes</Label>
+              <Label>Внутрішні нотатки</Label>
               <Textarea
                 rows={2}
                 defaultValue={sub.notes ?? ""}
                 onBlur={(e) => updateSub.mutate({ notes: e.target.value || null })}
-                placeholder="Visible only to super-admins."
+                placeholder="Видно тільки супер-адмінам."
               />
             </div>
           </CardContent>
@@ -237,7 +247,7 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Plan change history</CardTitle>
+          <CardTitle>Історія зміни тарифів</CardTitle>
         </CardHeader>
         <CardContent>
           {historyQuery.data && historyQuery.data.length > 0 ? (
@@ -245,16 +255,16 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
               {historyQuery.data.map((h) => (
                 <li key={h.id} className="rounded border border-border bg-muted/20 p-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-muted-foreground">{new Date(h.created_at).toLocaleString()}</span>
+                    <span className="font-mono text-muted-foreground">{new Date(h.created_at).toLocaleString("uk-UA")}</span>
                   </div>
                   <div className="mt-1 text-foreground">
-                    {h.reason || <span className="italic text-muted-foreground">No reason</span>}
+                    {h.reason || <span className="italic text-muted-foreground">Без причини</span>}
                   </div>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-xs text-muted-foreground">No changes yet.</p>
+            <p className="text-xs text-muted-foreground">Поки що змін не було.</p>
           )}
         </CardContent>
       </Card>
