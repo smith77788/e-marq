@@ -161,7 +161,7 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
               >
                 {p.name}
                 <span className="ml-2 text-[10px] text-muted-foreground">
-                  ${(p.price_cents_monthly / 100).toFixed(0)}/mo
+                  {p.price_cents_monthly === 0 ? "—" : `${Math.round(p.price_cents_monthly / 100).toLocaleString("uk-UA")} ₴/міс`}
                 </span>
               </Button>
             ))}

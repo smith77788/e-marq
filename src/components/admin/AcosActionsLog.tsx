@@ -79,7 +79,7 @@ export function AcosActionsLog({ tenantId }: Props) {
               {totals.succeeded} succeeded
             </Badge>
             <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary">
-              ${(totals.revenue / 100).toFixed(0)} attributed
+              {Math.round(totals.revenue / 100).toLocaleString("uk-UA")} ₴ attributed
             </Badge>
           </div>
         </div>
@@ -127,7 +127,7 @@ export function AcosActionsLog({ tenantId }: Props) {
                     )}
                     {a.measured_at && (
                       <p className="mt-0.5 text-[11px] font-medium text-foreground">
-                        actual: ${(impactCents / 100).toFixed(2)}
+                        actual: {(impactCents / 100).toFixed(2)} ₴
                         {typeof r?.recovered_orders === "number" && ` · ${r.recovered_orders} orders`}
                       </p>
                     )}

@@ -195,5 +195,5 @@ export const Route = createFileRoute("/hooks/agents/cart-recovery")({
 });
 
 function formatCents(c: number): string {
-  return `$${(c / 100).toFixed(c >= 1000 ? 0 : 2)}`;
+  return `${(c / 100).toFixed(c >= 1000 ? 0 : 2)} ₴`;
 }

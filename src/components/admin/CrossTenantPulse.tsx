@@ -71,7 +71,7 @@ export function CrossTenantPulse({ points }: Props) {
             }}
             labelStyle={{ color: "hsl(var(--foreground))" }}
             formatter={(v: number, name) =>
-              name === "revenue" ? [`$${v.toLocaleString()}`, "Revenue"] : [v, "Orders"]
+              name === "revenue" ? [`${v.toLocaleString("uk-UA")} ₴`, "Виторг"] : [v, "Замовлення"]
             }
           />
           <Area

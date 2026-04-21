@@ -112,7 +112,7 @@ export function CustomerRoster({ tenantId }: Props) {
                       </div>
                       <div>
                         <span className="text-muted-foreground">LTV</span>
-                        <p className="font-medium text-foreground">${(c.total_spent_cents / 100).toFixed(0)}</p>
+                        <p className="font-medium text-foreground">{Math.round(c.total_spent_cents / 100).toLocaleString("uk-UA")} ₴</p>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Next order</span>

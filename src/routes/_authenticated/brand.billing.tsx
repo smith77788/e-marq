@@ -112,7 +112,7 @@ function BrandBillingPage() {
               <BalanceTile
                 icon={<Wallet className="h-5 w-5 text-success" />}
                 label="Money balance"
-                value={`$${(summary.balances.money_balance_cents / 100).toFixed(2)}`}
+                value={`${(summary.balances.money_balance_cents / 100).toFixed(2)} ₴`}
                 hint={`Currency: ${summary.balances.currency}`}
               />
             </div>

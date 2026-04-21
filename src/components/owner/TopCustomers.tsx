@@ -37,7 +37,7 @@ const STAGE_VARIANT: Record<string, { label: string; cls: string }> = {
 };
 
 function fmtUsd(cents: number) {
-  return `$${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+  return `${(cents / 100).toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`;
 }
 function daysSince(iso: string | null) {
   if (!iso) return null;

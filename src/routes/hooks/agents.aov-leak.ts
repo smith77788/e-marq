@@ -128,7 +128,7 @@ export const Route = createFileRoute("/hooks/agents/aov-leak")({
               affected_layer: "recovery",
               title: `${p.name}: ${a.sessions.size} carts abandoned in ${WINDOW_DAYS}d`,
               description: `Of ${a.sessions.size} sessions that added "${p.name}" to cart, none completed checkout. ${a.checkouts} reached the checkout step but didn't pay. Trigger an abandoned-cart email with a soft 10% reminder — typical recovery rate ~25%.`,
-              expected_impact: `Recover ~$${(recoverableRevCents / 100).toFixed(2)} (~${recoverableSessions} orders)`,
+              expected_impact: `Recover ~${(recoverableRevCents / 100).toFixed(2)} ₴ (~${recoverableSessions} orders)`,
               confidence,
               risk_level: risk,
               metrics: {

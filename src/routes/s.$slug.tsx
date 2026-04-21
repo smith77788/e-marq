@@ -220,7 +220,7 @@ function StorefrontPage() {
   }, [cart, productById]);
 
   const totalCents = cartLines.reduce((s, l) => s + l.product.price_cents * l.quantity, 0);
-  const currency = cartLines[0]?.product.currency ?? "USD";
+  const currency = cartLines[0]?.product.currency ?? "UAH";
 
   useEffect(() => {
     track(tenant.id, "content_viewed", { payload: { path: `/s/${slug}` } });

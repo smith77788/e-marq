@@ -99,7 +99,7 @@ async function analyzePriceAction(
     insight_type: "price_revert",
     affected_layer: "product",
     title: `Revert price on ${productName} — conversion dropped ${dropPct}%`,
-    description: `After the price ${direction} from $${oldPriceFmt} to $${newPriceFmt}, conversion fell from ${(convPre * 100).toFixed(1)}% to ${(convPost * 100).toFixed(1)}% over ${WINDOW_DAYS} days. Recommend rollback to previous price.`,
+    description: `After the price ${direction} from ${oldPriceFmt} ₴ to ${newPriceFmt} ₴, conversion fell from ${(convPre * 100).toFixed(1)}% to ${(convPost * 100).toFixed(1)}% over ${WINDOW_DAYS} days. Recommend rollback to previous price.`,
     expected_impact: `Recover ~${dropPct}% conversion on ${productName}`,
     confidence: Math.min(0.95, 0.6 + (vPre + vPost) / 500),
     risk_level: "high",

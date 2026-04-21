@@ -76,9 +76,9 @@ export const Route = createFileRoute("/hooks/agents/inventory-rebalance")({
               tenant_id: tenantId,
               insight_type: "dead_stock",
               affected_layer: "inventory",
-              title: `🪦 Мертвий запас: ${p.name} ($${(tied / 100).toFixed(0)} заморожено)`,
+              title: `🪦 Мертвий запас: ${p.name} (${(tied / 100).toFixed(0)} ₴ заморожено)`,
               description: `${p.stock} шт. на складі, 0 продажів за 60 днів.`,
-              expected_impact: `Знижка 25% + bundle може реалізувати запас → ~$${((tied * 0.6) / 100).toFixed(0)}`,
+              expected_impact: `Знижка 25% + bundle може реалізувати запас → ~${((tied * 0.6) / 100).toFixed(0)} ₴`,
               confidence: 0.7,
               risk_level: tied > 50000 ? "high" : "medium",
               metrics: {

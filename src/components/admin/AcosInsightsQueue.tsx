@@ -347,7 +347,7 @@ function MetricsLine({ type, m }: { type: string; m: Record<string, unknown> }) 
     return (
       <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground sm:grid-cols-4">
         <div><span className="text-foreground">{num("order_count")}</span> orders</div>
-        <div>${(((num("total_spent_cents") ?? 0) as number) / 100).toFixed(0)} LTV</div>
+        <div>{Math.round(((num("total_spent_cents") ?? 0) as number) / 100).toLocaleString("uk-UA")} ₴ LTV</div>
         <div>{num("recency_days")?.toFixed(0)}d silent</div>
         <div>{num("drift_ratio")?.toFixed(2)}× drift</div>
       </div>
@@ -369,7 +369,7 @@ function MetricsLine({ type, m }: { type: string; m: Record<string, unknown> }) 
         <div><span className="text-foreground">{num("abandoned_sessions")}</span> abandoned</div>
         <div>{num("abandoned_checkouts")} stuck at checkout</div>
         <div>recover ~{num("recoverable_sessions")}</div>
-        <div>${(((num("recoverable_revenue_cents") ?? 0) as number) / 100).toFixed(0)} ↺</div>
+        <div>{Math.round(((num("recoverable_revenue_cents") ?? 0) as number) / 100).toLocaleString("uk-UA")} ₴ ↺</div>
       </div>
     );
   }

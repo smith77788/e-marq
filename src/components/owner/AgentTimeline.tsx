@@ -92,7 +92,7 @@ export function AgentTimeline({ tenantId }: Props) {
         if (typeof result.queued_messages === "number") {
           detail = `Queued ${result.queued_messages} VIP nudges`;
         } else if (typeof result.old_price_cents === "number" && typeof result.new_price_cents === "number") {
-          detail = `Price $${(result.old_price_cents / 100).toFixed(2)} → $${(result.new_price_cents / 100).toFixed(2)}`;
+          detail = `Price ${(result.old_price_cents / 100).toFixed(2)} ₴ → ${(result.new_price_cents / 100).toFixed(2)} ₴`;
         }
         out.push({
           id: `a-${r.id}`,

@@ -80,7 +80,7 @@ export const Route = createFileRoute("/hooks/agents/refund-risk")({
               tenant_id: tenantId,
               insight_type: "refund_risk_high",
               affected_layer: "fulfillment",
-              title: `⚠️ Підвищений refund-ризик: $${(o.total_cents / 100).toFixed(2)} (${o.customer_name ?? "guest"})`,
+              title: `⚠️ Підвищений refund-ризик: ${(o.total_cents / 100).toFixed(2)} ₴ (${o.customer_name ?? "guest"})`,
               description: `Risk score ${score.toFixed(2)}. Сигнали: ${reasons.join(", ")}.`,
               expected_impact: `Превентивне follow-up знижує refund на ~40% для таких замовлень`,
               confidence: 0.6,

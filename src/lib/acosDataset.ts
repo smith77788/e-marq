@@ -185,7 +185,7 @@ export async function generateAcosProducts(
     name: p.name,
     sku: p.sku,
     price_cents: p.price_cents,
-    currency: "USD",
+    currency: "UAH",
     stock: p.stock,
     description: p.description,
     image_url: p.image_url,
@@ -301,7 +301,7 @@ export async function insertAcosOrders(
     const total = plan.items.reduce((s, it) => s + it.product.price_cents * it.qty, 0);
     return {
       tenant_id: tenantId,
-      currency: "USD",
+      currency: "UAH",
       status: "paid" as const,
       total_cents: total,
       customer_email: plan.customer.email,

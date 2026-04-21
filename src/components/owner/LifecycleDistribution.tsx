@@ -22,8 +22,8 @@ const STAGES = [
 ] as const;
 
 function fmtUsd(cents: number) {
-  if (cents >= 1_000_000) return `$${(cents / 100_000).toFixed(1)}k`;
-  return `$${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+  if (cents >= 1_000_000) return `${(cents / 100_000).toFixed(1)} тис. ₴`;
+  return `${(cents / 100).toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`;
 }
 
 export function LifecycleDistribution({ tenantId }: Props) {
