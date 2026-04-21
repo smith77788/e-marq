@@ -142,28 +142,27 @@ mirrorToMarq({
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="universal" className="text-xs">
               <Globe className="mr-1.5 h-3.5 w-3.5" />
-              HTML / 1-line
+              Сайт або лендінг
             </TabsTrigger>
             <TabsTrigger value="mirror" className="text-xs">
               <Code2 className="mr-1.5 h-3.5 w-3.5" />
-              React / Vite (mirror)
+              Свій застосунок
             </TabsTrigger>
             <TabsTrigger value="platforms" className="text-xs">
               <ShoppingBag className="mr-1.5 h-3.5 w-3.5" />
-              Shopify / WP
+              Shopify · WordPress
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="universal" className="space-y-3 pt-4">
             <p className="text-xs text-muted-foreground">
-              Найпростіший варіант. Підходить для Tilda, Webflow, Wix, кастомного HTML, лендінгів.
-              Авто-трекає <code className="rounded bg-muted px-1">page_view</code> та продуктові
-              сторінки. Для cart/checkout використовуй{" "}
-              <code className="rounded bg-muted px-1">window.MARQ.track(type, payload)</code>.
+              Найпростіший варіант. Підходить для Tilda, Webflow, Wix, лендінгів та звичайних сайтів.
+              Сам відстежує перегляди сторінок і продуктові картки. Для кошика й оплати додай
+              ручні події через <code className="rounded bg-muted px-1">window.MARQ.track(тип, дані)</code>.
             </p>
             <Snippet code={universalSnippet} />
             <details className="rounded-md border border-dashed border-border bg-muted/20 p-3 text-xs">
-              <summary className="cursor-pointer font-medium">Manual events API</summary>
+              <summary className="cursor-pointer font-medium">Як надсилати події вручну</summary>
               <Snippet
                 small
                 code={`MARQ.track('add_to_cart',     { product_id: 'P1', name: 'Tee', price_cents: 2400 });
@@ -179,11 +178,11 @@ MARQ.track('purchase_completed', {
           <TabsContent value="mirror" className="space-y-3 pt-4">
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="text-[10px]">
-                Recommended
+                Рекомендовано
               </Badge>
               <p className="text-xs text-muted-foreground">
-                Для Lovable / Vite / Next / будь-якого React-проекту, що вже пише events у власну
-                БД. Дублюємо ті самі payload-и в MARQ через <code>sendBeacon</code> — нуль затримки UI.
+                Для React, Vite або Next-застосунку, який уже зберігає події у власну базу.
+                Дублюємо ті самі дані в MARQ через <code>sendBeacon</code> — без затримок інтерфейсу.
               </p>
             </div>
             <div className="space-y-2">
@@ -191,12 +190,12 @@ MARQ.track('purchase_completed', {
               <Snippet code={mirrorHelper} small maxH="max-h-72" />
             </div>
             <div className="space-y-2">
-              <p className="text-xs font-medium">2. Додай 1 рядок у свій існуючий tracker:</p>
+              <p className="text-xs font-medium">2. Додай 1 рядок у свій трекер подій:</p>
               <Snippet code={acosPatch} small />
             </div>
             <div className="rounded-md border border-success/30 bg-success/10 p-3 text-xs text-success">
-              ✅ Готово. Твоя власна аналітика залишається. MARQ-агенти отримають той самий потік
-              і почнуть генерувати insights через ~5 хвилин.
+              ✅ Готово. Твоя власна аналітика працює як раніше. ШІ-помічники MARQ почнуть давати
+              підказки приблизно через 5 хвилин.
             </div>
           </TabsContent>
 
@@ -204,21 +203,21 @@ MARQ.track('purchase_completed', {
             <div className="space-y-2">
               <p className="text-xs font-medium">Shopify</p>
               <p className="text-xs text-muted-foreground">
-                Online Store → Themes → Edit code → <code>theme.liquid</code> → встав перед{" "}
-                <code>&lt;/body&gt;</code>:
+                Online Store → Themes → Edit code → файл <code>theme.liquid</code> → встав цей рядок
+                перед <code>&lt;/body&gt;</code>:
               </p>
               <Snippet code={universalSnippet} small />
             </div>
             <div className="space-y-2">
               <p className="text-xs font-medium">WordPress / WooCommerce</p>
               <p className="text-xs text-muted-foreground">
-                Plugin <em>Insert Headers and Footers</em> → Footer Scripts → встав:
+                Встанови плагін <em>Insert Headers and Footers</em> → у поле «Footer Scripts» встав:
               </p>
               <Snippet code={universalSnippet} small />
             </div>
             <p className="text-xs text-muted-foreground">
-              Для покупок Shopify/Woo окремо потрібен webhook (ми додамо в наступному релізі).
-              Поки що purchase_completed автоматично логується скриптом на thank-you page.
+              Для покупок Shopify і WooCommerce окремо потрібен webhook (додамо в наступному оновленні).
+              Поки що оплата фіксується скриптом на сторінці подяки після замовлення.
             </p>
           </TabsContent>
         </Tabs>
