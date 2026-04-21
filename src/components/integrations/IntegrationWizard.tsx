@@ -46,6 +46,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { CANONICAL_FIELDS, autoMap, parseFile, type EntityKind, type ParseResult } from "@/lib/integrations/parser";
 import { runImport, type ImportResult } from "@/lib/integrations/importer";
 import {
@@ -53,6 +54,8 @@ import {
   type IntegrationDef,
 } from "@/lib/integrations/catalog";
 import { MSG } from "@/lib/glossary";
+
+type IntegrationInsert = Database["public"]["Tables"]["tenant_integrations"]["Insert"];
 
 type Props = {
   integration: IntegrationDef | null;
