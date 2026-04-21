@@ -243,14 +243,24 @@ function IntegrationsHubPage() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((integration) => (
-                <IntegrationCard
-                  key={integration.id}
-                  integration={integration}
-                  isConnected={connectedSet.has(integration.id)}
-                  onSelect={setActive}
-                />
-              ))}
+              {filtered.map((integration) => {
+                const connected = connectedSet.has(integration.id);
+                const canSync = connected && isConnectorSupported(integration.id);
+                return (
+                  <IntegrationCard
+                    key={integration.id}
+                    integration={integration}
+                    isConnected={connected}
+                    canSync={canSync}
+                    syncing={syncing === integration.id}
+                    onSelect={setActive}
+                    onSync={(i) => {
+                      setSyncTarget(i);
+                      setSyncEntity(i.imports.includes("orders") ? "orders" : (i.imports[0] as "products" | "customers" | "orders") ?? "products");
+                    }}
+                  />
+                );
+              })}
             </div>
           )}
         </TabsContent>
