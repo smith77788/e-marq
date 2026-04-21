@@ -31,7 +31,7 @@ const IMPORT_LABELS: Record<string, string> = {
   events: "події",
 };
 
-export function IntegrationCard({ integration, isConnected, onSelect }: Props) {
+export function IntegrationCard({ integration, isConnected, canSync, syncing, onSelect, onSync }: Props) {
   const Icon = integration.icon;
   const status = STATUS_LABELS[integration.status];
   const isComingSoon = integration.status === "comingSoon";
