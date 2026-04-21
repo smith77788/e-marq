@@ -67,6 +67,7 @@ import { Route as HooksAgentsSalesBotRouteImport } from './routes/hooks/agents.s
 import { Route as HooksAgentsRunAllRouteImport } from './routes/hooks/agents.run-all'
 import { Route as HooksAgentsReviewVelocityRouteImport } from './routes/hooks/agents.review-velocity'
 import { Route as HooksAgentsReturnPredictorRouteImport } from './routes/hooks/agents.return-predictor'
+import { Route as HooksAgentsRestockNotifierRouteImport } from './routes/hooks/agents.restock-notifier'
 import { Route as HooksAgentsRestockAlertRouteImport } from './routes/hooks/agents.restock-alert'
 import { Route as HooksAgentsRefundRiskRouteImport } from './routes/hooks/agents.refund-risk'
 import { Route as HooksAgentsPromoPortfolioRouteImport } from './routes/hooks/agents.promo-portfolio'
@@ -78,6 +79,7 @@ import { Route as HooksAgentsPriceOptimizerRouteImport } from './routes/hooks/ag
 import { Route as HooksAgentsPredictivePricingRouteImport } from './routes/hooks/agents.predictive-pricing'
 import { Route as HooksAgentsPaymentRetryRouteImport } from './routes/hooks/agents.payment-retry'
 import { Route as HooksAgentsOwnerPlaybookRouteImport } from './routes/hooks/agents.owner-playbook'
+import { Route as HooksAgentsOrderStatusNotifierRouteImport } from './routes/hooks/agents.order-status-notifier'
 import { Route as HooksAgentsOnboardingRouteImport } from './routes/hooks/agents.onboarding'
 import { Route as HooksAgentsNurtureRoiRouteImport } from './routes/hooks/agents.nurture-roi'
 import { Route as HooksAgentsNotificationRouterRouteImport } from './routes/hooks/agents.notification-router'
@@ -98,6 +100,9 @@ import { Route as HooksAgentsFunnelHealerRouteImport } from './routes/hooks/agen
 import { Route as HooksAgentsFirstOrderFunnelRouteImport } from './routes/hooks/agents.first-order-funnel'
 import { Route as HooksAgentsFeedbackLoopAllRouteImport } from './routes/hooks/agents.feedback-loop-all'
 import { Route as HooksAgentsFeedbackLoopRouteImport } from './routes/hooks/agents.feedback-loop'
+import { Route as HooksAgentsEmailWinbackRouteImport } from './routes/hooks/agents.email-winback'
+import { Route as HooksAgentsEmailPostPurchaseRouteImport } from './routes/hooks/agents.email-post-purchase'
+import { Route as HooksAgentsEmailAbandonedCartRouteImport } from './routes/hooks/agents.email-abandoned-cart'
 import { Route as HooksAgentsElasticityMetaLoopRouteImport } from './routes/hooks/agents.elasticity-meta-loop'
 import { Route as HooksAgentsDiscountElasticityRouteImport } from './routes/hooks/agents.discount-elasticity'
 import { Route as HooksAgentsDataGapAuditorRouteImport } from './routes/hooks/agents.data-gap-auditor'
@@ -470,6 +475,12 @@ const HooksAgentsReturnPredictorRoute =
     path: '/hooks/agents/return-predictor',
     getParentRoute: () => rootRouteImport,
   } as any)
+const HooksAgentsRestockNotifierRoute =
+  HooksAgentsRestockNotifierRouteImport.update({
+    id: '/hooks/agents/restock-notifier',
+    path: '/hooks/agents/restock-notifier',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsRestockAlertRoute = HooksAgentsRestockAlertRouteImport.update({
   id: '/hooks/agents/restock-alert',
   path: '/hooks/agents/restock-alert',
@@ -529,6 +540,12 @@ const HooksAgentsOwnerPlaybookRoute =
   HooksAgentsOwnerPlaybookRouteImport.update({
     id: '/hooks/agents/owner-playbook',
     path: '/hooks/agents/owner-playbook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsOrderStatusNotifierRoute =
+  HooksAgentsOrderStatusNotifierRouteImport.update({
+    id: '/hooks/agents/order-status-notifier',
+    path: '/hooks/agents/order-status-notifier',
     getParentRoute: () => rootRouteImport,
   } as any)
 const HooksAgentsOnboardingRoute = HooksAgentsOnboardingRouteImport.update({
@@ -643,6 +660,23 @@ const HooksAgentsFeedbackLoopRoute = HooksAgentsFeedbackLoopRouteImport.update({
   path: '/hooks/agents/feedback-loop',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsEmailWinbackRoute = HooksAgentsEmailWinbackRouteImport.update({
+  id: '/hooks/agents/email-winback',
+  path: '/hooks/agents/email-winback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HooksAgentsEmailPostPurchaseRoute =
+  HooksAgentsEmailPostPurchaseRouteImport.update({
+    id: '/hooks/agents/email-post-purchase',
+    path: '/hooks/agents/email-post-purchase',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsEmailAbandonedCartRoute =
+  HooksAgentsEmailAbandonedCartRouteImport.update({
+    id: '/hooks/agents/email-abandoned-cart',
+    path: '/hooks/agents/email-abandoned-cart',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsElasticityMetaLoopRoute =
   HooksAgentsElasticityMetaLoopRouteImport.update({
     id: '/hooks/agents/elasticity-meta-loop',
@@ -1064,6 +1098,9 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/data-gap-auditor': typeof HooksAgentsDataGapAuditorRoute
   '/hooks/agents/discount-elasticity': typeof HooksAgentsDiscountElasticityRoute
   '/hooks/agents/elasticity-meta-loop': typeof HooksAgentsElasticityMetaLoopRoute
+  '/hooks/agents/email-abandoned-cart': typeof HooksAgentsEmailAbandonedCartRoute
+  '/hooks/agents/email-post-purchase': typeof HooksAgentsEmailPostPurchaseRoute
+  '/hooks/agents/email-winback': typeof HooksAgentsEmailWinbackRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
   '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
   '/hooks/agents/first-order-funnel': typeof HooksAgentsFirstOrderFunnelRoute
@@ -1084,6 +1121,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/notification-router': typeof HooksAgentsNotificationRouterRoute
   '/hooks/agents/nurture-roi': typeof HooksAgentsNurtureRoiRoute
   '/hooks/agents/onboarding': typeof HooksAgentsOnboardingRoute
+  '/hooks/agents/order-status-notifier': typeof HooksAgentsOrderStatusNotifierRoute
   '/hooks/agents/owner-playbook': typeof HooksAgentsOwnerPlaybookRoute
   '/hooks/agents/payment-retry': typeof HooksAgentsPaymentRetryRoute
   '/hooks/agents/predictive-pricing': typeof HooksAgentsPredictivePricingRoute
@@ -1095,6 +1133,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/promo-portfolio': typeof HooksAgentsPromoPortfolioRoute
   '/hooks/agents/refund-risk': typeof HooksAgentsRefundRiskRoute
   '/hooks/agents/restock-alert': typeof HooksAgentsRestockAlertRoute
+  '/hooks/agents/restock-notifier': typeof HooksAgentsRestockNotifierRoute
   '/hooks/agents/return-predictor': typeof HooksAgentsReturnPredictorRoute
   '/hooks/agents/review-velocity': typeof HooksAgentsReviewVelocityRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
@@ -1216,6 +1255,9 @@ export interface FileRoutesByTo {
   '/hooks/agents/data-gap-auditor': typeof HooksAgentsDataGapAuditorRoute
   '/hooks/agents/discount-elasticity': typeof HooksAgentsDiscountElasticityRoute
   '/hooks/agents/elasticity-meta-loop': typeof HooksAgentsElasticityMetaLoopRoute
+  '/hooks/agents/email-abandoned-cart': typeof HooksAgentsEmailAbandonedCartRoute
+  '/hooks/agents/email-post-purchase': typeof HooksAgentsEmailPostPurchaseRoute
+  '/hooks/agents/email-winback': typeof HooksAgentsEmailWinbackRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
   '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
   '/hooks/agents/first-order-funnel': typeof HooksAgentsFirstOrderFunnelRoute
@@ -1236,6 +1278,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/notification-router': typeof HooksAgentsNotificationRouterRoute
   '/hooks/agents/nurture-roi': typeof HooksAgentsNurtureRoiRoute
   '/hooks/agents/onboarding': typeof HooksAgentsOnboardingRoute
+  '/hooks/agents/order-status-notifier': typeof HooksAgentsOrderStatusNotifierRoute
   '/hooks/agents/owner-playbook': typeof HooksAgentsOwnerPlaybookRoute
   '/hooks/agents/payment-retry': typeof HooksAgentsPaymentRetryRoute
   '/hooks/agents/predictive-pricing': typeof HooksAgentsPredictivePricingRoute
@@ -1247,6 +1290,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/promo-portfolio': typeof HooksAgentsPromoPortfolioRoute
   '/hooks/agents/refund-risk': typeof HooksAgentsRefundRiskRoute
   '/hooks/agents/restock-alert': typeof HooksAgentsRestockAlertRoute
+  '/hooks/agents/restock-notifier': typeof HooksAgentsRestockNotifierRoute
   '/hooks/agents/return-predictor': typeof HooksAgentsReturnPredictorRoute
   '/hooks/agents/review-velocity': typeof HooksAgentsReviewVelocityRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
@@ -1371,6 +1415,9 @@ export interface FileRoutesById {
   '/hooks/agents/data-gap-auditor': typeof HooksAgentsDataGapAuditorRoute
   '/hooks/agents/discount-elasticity': typeof HooksAgentsDiscountElasticityRoute
   '/hooks/agents/elasticity-meta-loop': typeof HooksAgentsElasticityMetaLoopRoute
+  '/hooks/agents/email-abandoned-cart': typeof HooksAgentsEmailAbandonedCartRoute
+  '/hooks/agents/email-post-purchase': typeof HooksAgentsEmailPostPurchaseRoute
+  '/hooks/agents/email-winback': typeof HooksAgentsEmailWinbackRoute
   '/hooks/agents/feedback-loop': typeof HooksAgentsFeedbackLoopRoute
   '/hooks/agents/feedback-loop-all': typeof HooksAgentsFeedbackLoopAllRoute
   '/hooks/agents/first-order-funnel': typeof HooksAgentsFirstOrderFunnelRoute
@@ -1391,6 +1438,7 @@ export interface FileRoutesById {
   '/hooks/agents/notification-router': typeof HooksAgentsNotificationRouterRoute
   '/hooks/agents/nurture-roi': typeof HooksAgentsNurtureRoiRoute
   '/hooks/agents/onboarding': typeof HooksAgentsOnboardingRoute
+  '/hooks/agents/order-status-notifier': typeof HooksAgentsOrderStatusNotifierRoute
   '/hooks/agents/owner-playbook': typeof HooksAgentsOwnerPlaybookRoute
   '/hooks/agents/payment-retry': typeof HooksAgentsPaymentRetryRoute
   '/hooks/agents/predictive-pricing': typeof HooksAgentsPredictivePricingRoute
@@ -1402,6 +1450,7 @@ export interface FileRoutesById {
   '/hooks/agents/promo-portfolio': typeof HooksAgentsPromoPortfolioRoute
   '/hooks/agents/refund-risk': typeof HooksAgentsRefundRiskRoute
   '/hooks/agents/restock-alert': typeof HooksAgentsRestockAlertRoute
+  '/hooks/agents/restock-notifier': typeof HooksAgentsRestockNotifierRoute
   '/hooks/agents/return-predictor': typeof HooksAgentsReturnPredictorRoute
   '/hooks/agents/review-velocity': typeof HooksAgentsReviewVelocityRoute
   '/hooks/agents/run-all': typeof HooksAgentsRunAllRoute
@@ -1526,6 +1575,9 @@ export interface FileRouteTypes {
     | '/hooks/agents/data-gap-auditor'
     | '/hooks/agents/discount-elasticity'
     | '/hooks/agents/elasticity-meta-loop'
+    | '/hooks/agents/email-abandoned-cart'
+    | '/hooks/agents/email-post-purchase'
+    | '/hooks/agents/email-winback'
     | '/hooks/agents/feedback-loop'
     | '/hooks/agents/feedback-loop-all'
     | '/hooks/agents/first-order-funnel'
@@ -1546,6 +1598,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/notification-router'
     | '/hooks/agents/nurture-roi'
     | '/hooks/agents/onboarding'
+    | '/hooks/agents/order-status-notifier'
     | '/hooks/agents/owner-playbook'
     | '/hooks/agents/payment-retry'
     | '/hooks/agents/predictive-pricing'
@@ -1557,6 +1610,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/promo-portfolio'
     | '/hooks/agents/refund-risk'
     | '/hooks/agents/restock-alert'
+    | '/hooks/agents/restock-notifier'
     | '/hooks/agents/return-predictor'
     | '/hooks/agents/review-velocity'
     | '/hooks/agents/run-all'
@@ -1678,6 +1732,9 @@ export interface FileRouteTypes {
     | '/hooks/agents/data-gap-auditor'
     | '/hooks/agents/discount-elasticity'
     | '/hooks/agents/elasticity-meta-loop'
+    | '/hooks/agents/email-abandoned-cart'
+    | '/hooks/agents/email-post-purchase'
+    | '/hooks/agents/email-winback'
     | '/hooks/agents/feedback-loop'
     | '/hooks/agents/feedback-loop-all'
     | '/hooks/agents/first-order-funnel'
@@ -1698,6 +1755,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/notification-router'
     | '/hooks/agents/nurture-roi'
     | '/hooks/agents/onboarding'
+    | '/hooks/agents/order-status-notifier'
     | '/hooks/agents/owner-playbook'
     | '/hooks/agents/payment-retry'
     | '/hooks/agents/predictive-pricing'
@@ -1709,6 +1767,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/promo-portfolio'
     | '/hooks/agents/refund-risk'
     | '/hooks/agents/restock-alert'
+    | '/hooks/agents/restock-notifier'
     | '/hooks/agents/return-predictor'
     | '/hooks/agents/review-velocity'
     | '/hooks/agents/run-all'
@@ -1832,6 +1891,9 @@ export interface FileRouteTypes {
     | '/hooks/agents/data-gap-auditor'
     | '/hooks/agents/discount-elasticity'
     | '/hooks/agents/elasticity-meta-loop'
+    | '/hooks/agents/email-abandoned-cart'
+    | '/hooks/agents/email-post-purchase'
+    | '/hooks/agents/email-winback'
     | '/hooks/agents/feedback-loop'
     | '/hooks/agents/feedback-loop-all'
     | '/hooks/agents/first-order-funnel'
@@ -1852,6 +1914,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/notification-router'
     | '/hooks/agents/nurture-roi'
     | '/hooks/agents/onboarding'
+    | '/hooks/agents/order-status-notifier'
     | '/hooks/agents/owner-playbook'
     | '/hooks/agents/payment-retry'
     | '/hooks/agents/predictive-pricing'
@@ -1863,6 +1926,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/promo-portfolio'
     | '/hooks/agents/refund-risk'
     | '/hooks/agents/restock-alert'
+    | '/hooks/agents/restock-notifier'
     | '/hooks/agents/return-predictor'
     | '/hooks/agents/review-velocity'
     | '/hooks/agents/run-all'
@@ -1968,6 +2032,9 @@ export interface RootRouteChildren {
   HooksAgentsDataGapAuditorRoute: typeof HooksAgentsDataGapAuditorRoute
   HooksAgentsDiscountElasticityRoute: typeof HooksAgentsDiscountElasticityRoute
   HooksAgentsElasticityMetaLoopRoute: typeof HooksAgentsElasticityMetaLoopRoute
+  HooksAgentsEmailAbandonedCartRoute: typeof HooksAgentsEmailAbandonedCartRoute
+  HooksAgentsEmailPostPurchaseRoute: typeof HooksAgentsEmailPostPurchaseRoute
+  HooksAgentsEmailWinbackRoute: typeof HooksAgentsEmailWinbackRoute
   HooksAgentsFeedbackLoopRoute: typeof HooksAgentsFeedbackLoopRoute
   HooksAgentsFeedbackLoopAllRoute: typeof HooksAgentsFeedbackLoopAllRoute
   HooksAgentsFirstOrderFunnelRoute: typeof HooksAgentsFirstOrderFunnelRoute
@@ -1988,6 +2055,7 @@ export interface RootRouteChildren {
   HooksAgentsNotificationRouterRoute: typeof HooksAgentsNotificationRouterRoute
   HooksAgentsNurtureRoiRoute: typeof HooksAgentsNurtureRoiRoute
   HooksAgentsOnboardingRoute: typeof HooksAgentsOnboardingRoute
+  HooksAgentsOrderStatusNotifierRoute: typeof HooksAgentsOrderStatusNotifierRoute
   HooksAgentsOwnerPlaybookRoute: typeof HooksAgentsOwnerPlaybookRoute
   HooksAgentsPaymentRetryRoute: typeof HooksAgentsPaymentRetryRoute
   HooksAgentsPredictivePricingRoute: typeof HooksAgentsPredictivePricingRoute
@@ -1999,6 +2067,7 @@ export interface RootRouteChildren {
   HooksAgentsPromoPortfolioRoute: typeof HooksAgentsPromoPortfolioRoute
   HooksAgentsRefundRiskRoute: typeof HooksAgentsRefundRiskRoute
   HooksAgentsRestockAlertRoute: typeof HooksAgentsRestockAlertRoute
+  HooksAgentsRestockNotifierRoute: typeof HooksAgentsRestockNotifierRoute
   HooksAgentsReturnPredictorRoute: typeof HooksAgentsReturnPredictorRoute
   HooksAgentsReviewVelocityRoute: typeof HooksAgentsReviewVelocityRoute
   HooksAgentsRunAllRoute: typeof HooksAgentsRunAllRoute
@@ -2453,6 +2522,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsReturnPredictorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/restock-notifier': {
+      id: '/hooks/agents/restock-notifier'
+      path: '/hooks/agents/restock-notifier'
+      fullPath: '/hooks/agents/restock-notifier'
+      preLoaderRoute: typeof HooksAgentsRestockNotifierRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/restock-alert': {
       id: '/hooks/agents/restock-alert'
       path: '/hooks/agents/restock-alert'
@@ -2528,6 +2604,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/owner-playbook'
       fullPath: '/hooks/agents/owner-playbook'
       preLoaderRoute: typeof HooksAgentsOwnerPlaybookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/order-status-notifier': {
+      id: '/hooks/agents/order-status-notifier'
+      path: '/hooks/agents/order-status-notifier'
+      fullPath: '/hooks/agents/order-status-notifier'
+      preLoaderRoute: typeof HooksAgentsOrderStatusNotifierRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/onboarding': {
@@ -2668,6 +2751,27 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/feedback-loop'
       fullPath: '/hooks/agents/feedback-loop'
       preLoaderRoute: typeof HooksAgentsFeedbackLoopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/email-winback': {
+      id: '/hooks/agents/email-winback'
+      path: '/hooks/agents/email-winback'
+      fullPath: '/hooks/agents/email-winback'
+      preLoaderRoute: typeof HooksAgentsEmailWinbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/email-post-purchase': {
+      id: '/hooks/agents/email-post-purchase'
+      path: '/hooks/agents/email-post-purchase'
+      fullPath: '/hooks/agents/email-post-purchase'
+      preLoaderRoute: typeof HooksAgentsEmailPostPurchaseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/email-abandoned-cart': {
+      id: '/hooks/agents/email-abandoned-cart'
+      path: '/hooks/agents/email-abandoned-cart'
+      fullPath: '/hooks/agents/email-abandoned-cart'
+      preLoaderRoute: typeof HooksAgentsEmailAbandonedCartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/elasticity-meta-loop': {
@@ -3299,6 +3403,9 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsDataGapAuditorRoute: HooksAgentsDataGapAuditorRoute,
   HooksAgentsDiscountElasticityRoute: HooksAgentsDiscountElasticityRoute,
   HooksAgentsElasticityMetaLoopRoute: HooksAgentsElasticityMetaLoopRoute,
+  HooksAgentsEmailAbandonedCartRoute: HooksAgentsEmailAbandonedCartRoute,
+  HooksAgentsEmailPostPurchaseRoute: HooksAgentsEmailPostPurchaseRoute,
+  HooksAgentsEmailWinbackRoute: HooksAgentsEmailWinbackRoute,
   HooksAgentsFeedbackLoopRoute: HooksAgentsFeedbackLoopRoute,
   HooksAgentsFeedbackLoopAllRoute: HooksAgentsFeedbackLoopAllRoute,
   HooksAgentsFirstOrderFunnelRoute: HooksAgentsFirstOrderFunnelRoute,
@@ -3319,6 +3426,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsNotificationRouterRoute: HooksAgentsNotificationRouterRoute,
   HooksAgentsNurtureRoiRoute: HooksAgentsNurtureRoiRoute,
   HooksAgentsOnboardingRoute: HooksAgentsOnboardingRoute,
+  HooksAgentsOrderStatusNotifierRoute: HooksAgentsOrderStatusNotifierRoute,
   HooksAgentsOwnerPlaybookRoute: HooksAgentsOwnerPlaybookRoute,
   HooksAgentsPaymentRetryRoute: HooksAgentsPaymentRetryRoute,
   HooksAgentsPredictivePricingRoute: HooksAgentsPredictivePricingRoute,
@@ -3330,6 +3438,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsPromoPortfolioRoute: HooksAgentsPromoPortfolioRoute,
   HooksAgentsRefundRiskRoute: HooksAgentsRefundRiskRoute,
   HooksAgentsRestockAlertRoute: HooksAgentsRestockAlertRoute,
+  HooksAgentsRestockNotifierRoute: HooksAgentsRestockNotifierRoute,
   HooksAgentsReturnPredictorRoute: HooksAgentsReturnPredictorRoute,
   HooksAgentsReviewVelocityRoute: HooksAgentsReviewVelocityRoute,
   HooksAgentsRunAllRoute: HooksAgentsRunAllRoute,
