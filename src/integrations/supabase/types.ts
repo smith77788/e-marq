@@ -1100,6 +1100,63 @@ export type Database = {
           },
         ]
       }
+      dntrade_health_log: {
+        Row: {
+          blockers: Json
+          checked_at: string
+          http_status: number
+          id: string
+          integration_id: string | null
+          last_sync_age_seconds: number | null
+          last_sync_status: string | null
+          ready: boolean
+          status: string
+          tenant_id: string
+          warnings: Json
+        }
+        Insert: {
+          blockers?: Json
+          checked_at?: string
+          http_status: number
+          id?: string
+          integration_id?: string | null
+          last_sync_age_seconds?: number | null
+          last_sync_status?: string | null
+          ready?: boolean
+          status: string
+          tenant_id: string
+          warnings?: Json
+        }
+        Update: {
+          blockers?: Json
+          checked_at?: string
+          http_status?: number
+          id?: string
+          integration_id?: string | null
+          last_sync_age_seconds?: number | null
+          last_sync_status?: string | null
+          ready?: boolean
+          status?: string
+          tenant_id?: string
+          warnings?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dntrade_health_log_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dntrade_health_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dntrade_sync_errors: {
         Row: {
           external_id: string | null
@@ -2874,6 +2931,14 @@ export type Database = {
       create_tenant_invitation: {
         Args: { _email: string; _role?: string; _tenant_id: string }
         Returns: Json
+      }
+      dntrade_partial_count_recent: {
+        Args: { _hours?: number; _tenant_id: string }
+        Returns: number
+      }
+      dntrade_unhealthy_streak_minutes: {
+        Args: { _tenant_id: string }
+        Returns: number
       }
       get_all_tenants_overview: {
         Args: never
