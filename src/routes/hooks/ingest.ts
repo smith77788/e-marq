@@ -248,14 +248,51 @@ export const Route = createFileRoute("/hooks/ingest")({
           }
         }
 
-        // Auto-upsert order on purchase_completed so LTV / retention agents
-        // work without a separate webhook. order_id is optional — when
-        // omitted, we synthesize one from session + total.
+        // Auto-upsert order on purchase_completed.
+        // ADAPTIVE: total_cents may live at top level OR inside payload (some
+        // storefronts send everything in a flat payload object). We probe a
+        // few common keys before giving up. If none found, we still create a
+        // placeholder order with total=0 so LTV/retention agents can count
+        // the purchase and we can enrich later from a separate webhook.
         let orderId: string | null = body.order_id ?? null;
-        if (eventType === "purchase_completed" && body.total_cents) {
+        if (eventType === "purchase_completed") {
+          const p = (body.payload ?? {}) as Record<string, unknown>;
+          const num = (v: unknown): number | null => {
+            if (typeof v === "number" && Number.isFinite(v)) return Math.round(v);
+            if (typeof v === "string" && v.trim() !== "" && !isNaN(Number(v))) return Math.round(Number(v));
+            return null;
+          };
+          // Probe top-level then common payload keys (cents preferred, fallback to currency-units * 100)
+          const totalCents =
+            num(body.total_cents) ??
+            num(p.total_cents) ??
+            num(p.totalCents) ??
+            num(p.amount_cents) ??
+            (num(p.total) != null ? Math.round(num(p.total)! * 100) : null) ??
+            (num(p.amount) != null ? Math.round(num(p.amount)! * 100) : null) ??
+            (num(p.value) != null ? Math.round(num(p.value)! * 100) : null) ??
+            (num(p.revenue) != null ? Math.round(num(p.revenue)! * 100) : null) ??
+            0;
+          const currency = ((body.currency ?? (p.currency as string) ?? "UAH") + "").toUpperCase();
+          // Items may also live in payload.items / payload.line_items / payload.products
+          const rawItems =
+            (Array.isArray(body.items) && body.items) ||
+            (Array.isArray(p.items) && (p.items as unknown[])) ||
+            (Array.isArray(p.line_items) && (p.line_items as unknown[])) ||
+            (Array.isArray(p.products) && (p.products as unknown[])) ||
+            [];
+          const externalOrderId =
+            (typeof p.order_id === "string" && p.order_id) ||
+            (typeof p.orderId === "string" && p.orderId) ||
+            (typeof p.transaction_id === "string" && p.transaction_id) ||
+            null;
+
+          // Fingerprint for idempotency: prefer external order id, fall back
+          // to session+total. Prevents duplicate orders on beacon retries.
+          const fingerprint =
+            externalOrderId ?? `${body.session_id ?? "anon"}:${totalCents}:${body.created_at ?? "now"}`;
+
           if (!orderId) {
-            // Fingerprint: prevents double-insert on retried beacons.
-            const fingerprint = `${body.session_id ?? "anon"}:${body.total_cents}`;
             const { data: existing } = await supabaseAdmin
               .from("orders")
               .select("id")
@@ -271,14 +308,20 @@ export const Route = createFileRoute("/hooks/ingest")({
                 tenant_id: tenantId,
                 status: "paid",
                 paid_at: body.created_at ?? new Date().toISOString(),
-                total_cents: body.total_cents,
-                currency: (body.currency ?? "UAH").toUpperCase(),
-                customer_email: body.customer?.email ?? null,
-                customer_name: body.customer?.name ?? null,
+                total_cents: totalCents,
+                currency,
+                customer_email: body.customer?.email ?? (p.customer_email as string) ?? null,
+                customer_name: body.customer?.name ?? (p.customer_name as string) ?? null,
                 customer_user_id: null, // FK to auth.users — never write external IDs
                 payment_method: "manual",
-                payment_ref: `${body.session_id ?? "anon"}:${body.total_cents}`,
-                metadata: { ingest: true, source: "pixel", external_user_id: body.customer?.user_id ?? null } as never,
+                payment_ref: fingerprint,
+                metadata: {
+                  ingest: true,
+                  source: (p.source as string) ?? "pixel",
+                  external_user_id: body.customer?.user_id ?? null,
+                  external_order_id: externalOrderId,
+                  enriched: totalCents > 0,
+                } as never,
               })
               .select("id")
               .single();
@@ -287,18 +330,33 @@ export const Route = createFileRoute("/hooks/ingest")({
             }
             orderId = ord?.id ?? null;
 
-            // Insert items if provided.
-            if (orderId && Array.isArray(body.items)) {
-              const itemsRows = body.items
-                .filter((it) => it.product_name && (it.quantity ?? 0) > 0)
-                .map((it) => ({
-                  tenant_id: tenantId!,
-                  order_id: orderId!,
-                  product_id: it.product_id ?? null,
-                  product_name: it.product_name!,
-                  quantity: it.quantity ?? 1,
-                  unit_price_cents: it.unit_price_cents ?? 0,
-                }));
+            // Insert items if any provided (normalize loose shapes).
+            if (orderId && rawItems.length) {
+              const itemsRows = rawItems
+                .map((raw) => {
+                  const it = (raw ?? {}) as Record<string, unknown>;
+                  const name =
+                    (it.product_name as string) ??
+                    (it.name as string) ??
+                    (it.title as string) ??
+                    null;
+                  const qty = num(it.quantity) ?? num(it.qty) ?? 1;
+                  const priceCents =
+                    num(it.unit_price_cents) ??
+                    num(it.price_cents) ??
+                    (num(it.price) != null ? Math.round(num(it.price)! * 100) : 0);
+                  if (!name || qty <= 0) return null;
+                  return {
+                    tenant_id: tenantId!,
+                    order_id: orderId!,
+                    product_id:
+                      (typeof it.product_id === "string" && isUuid(it.product_id) && it.product_id) || null,
+                    product_name: name,
+                    quantity: qty,
+                    unit_price_cents: priceCents ?? 0,
+                  };
+                })
+                .filter((x): x is NonNullable<typeof x> => x !== null);
               if (itemsRows.length) {
                 const { error: itErr } = await supabaseAdmin.from("order_items").insert(itemsRows);
                 if (itErr) console.error("[ingest] order_items insert failed", itErr);
