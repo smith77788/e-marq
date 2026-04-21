@@ -3041,6 +3041,7 @@ export type Database = {
           tenant_id: string
           updated_at: string
           url_handle: string | null
+          was_out_of_stock: boolean
           weight_grams: number | null
         }
         Insert: {
@@ -3063,6 +3064,7 @@ export type Database = {
           tenant_id: string
           updated_at?: string
           url_handle?: string | null
+          was_out_of_stock?: boolean
           weight_grams?: number | null
         }
         Update: {
@@ -3085,6 +3087,7 @@ export type Database = {
           tenant_id?: string
           updated_at?: string
           url_handle?: string | null
+          was_out_of_stock?: boolean
           weight_grams?: number | null
         }
         Relationships: [
@@ -3173,6 +3176,71 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restock_notifications: {
+        Row: {
+          created_at: string
+          customer_email: string
+          customer_id: string | null
+          id: string
+          notified_at: string | null
+          product_id: string
+          status: string
+          tenant_id: string
+          variant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_email: string
+          customer_id?: string | null
+          id?: string
+          notified_at?: string | null
+          product_id: string
+          status?: string
+          tenant_id: string
+          variant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string
+          customer_id?: string | null
+          id?: string
+          notified_at?: string | null
+          product_id?: string
+          status?: string
+          tenant_id?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restock_notifications_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restock_notifications_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restock_notifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restock_notifications_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
             referencedColumns: ["id"]
           },
         ]
