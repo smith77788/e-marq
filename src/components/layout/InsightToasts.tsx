@@ -7,7 +7,7 @@
 import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Lightbulb, Bot } from "lucide-react";
+import { Lightbulb, Bot, HeartPulse, TriangleAlert } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
@@ -17,6 +17,7 @@ export function InsightToasts() {
   const { t } = useT();
   const seenInsightsRef = useRef<Set<string>>(new Set());
   const seenRunsRef = useRef<Set<string>>(new Set());
+  const seenNotifsRef = useRef<Set<string>>(new Set());
   const initializedRef = useRef(false);
 
   const { data: tenants } = useQuery({
@@ -37,7 +38,7 @@ export function InsightToasts() {
     let cancelled = false;
     (async () => {
       const since = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      const [{ data: insights }, { data: runs }] = await Promise.all([
+      const [{ data: insights }, { data: runs }, { data: notifs }] = await Promise.all([
         supabase
           .from("ai_insights")
           .select("id")
@@ -48,10 +49,17 @@ export function InsightToasts() {
           .select("id")
           .in("tenant_id", tenantIds)
           .gte("started_at", since),
+        supabase
+          .from("owner_notifications")
+          .select("id")
+          .in("tenant_id", tenantIds)
+          .in("kind", ["dntrade_unhealthy", "dntrade_partial_repeat"])
+          .gte("created_at", since),
       ]);
       if (cancelled) return;
       for (const r of insights ?? []) seenInsightsRef.current.add(r.id);
       for (const r of runs ?? []) seenRunsRef.current.add(r.id);
+      for (const r of notifs ?? []) seenNotifsRef.current.add(r.id);
       initializedRef.current = true;
     })();
 
@@ -105,10 +113,52 @@ export function InsightToasts() {
       )
       .subscribe();
 
+    const notifsChannel = supabase
+      .channel("pulse-dntrade-notifs")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "owner_notifications" },
+        (payload) => {
+          if (!initializedRef.current) return;
+          const row = payload.new as {
+            id: string;
+            tenant_id: string;
+            kind: string;
+            title: string;
+            body: string | null;
+            severity: string;
+          };
+          if (!tenantIds.includes(row.tenant_id)) return;
+          if (row.kind !== "dntrade_unhealthy" && row.kind !== "dntrade_partial_repeat") return;
+          if (seenNotifsRef.current.has(row.id)) return;
+          seenNotifsRef.current.add(row.id);
+          const brand = tenantNameById.get(row.tenant_id) ?? "";
+          const desc = `${brand ? brand + " · " : ""}${row.body ?? ""}`.slice(0, 220);
+          const isHigh = row.severity === "high" || row.kind === "dntrade_unhealthy";
+          (isHigh ? toast.error : toast.warning)(row.title, {
+            description: desc,
+            icon: isHigh ? (
+              <HeartPulse className="h-4 w-4 text-destructive" />
+            ) : (
+              <TriangleAlert className="h-4 w-4 text-warning" />
+            ),
+            duration: 9000,
+            action: {
+              label: "Деталі",
+              onClick: () => {
+                window.location.href = "/brand";
+              },
+            },
+          });
+        },
+      )
+      .subscribe();
+
     return () => {
       cancelled = true;
       void supabase.removeChannel(insightsChannel);
       void supabase.removeChannel(runsChannel);
+      void supabase.removeChannel(notifsChannel);
     };
   }, [tenants, t]);
 
