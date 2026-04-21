@@ -134,7 +134,7 @@ export async function runImport(input: ImportInput): Promise<ImportResult> {
         // payment_method обмежений тригером БД до 'stripe_card' | 'manual'
         const rawPm = get(row, "payment_method").toLowerCase();
         const paymentMethod = rawPm === "stripe_card" || rawPm === "stripe" ? "stripe_card" : "manual";
-        const { error } = await supabase.from("orders").insert({
+        const orderPayload: OrderInsert = {
           tenant_id: tenantId,
           customer_name: customerName,
           customer_email: get(row, "customer_email").toLowerCase() || null,
@@ -148,7 +148,8 @@ export async function runImport(input: ImportInput): Promise<ImportResult> {
             import_source: sourceProvider,
             import_job_id: job.id,
           },
-        });
+        };
+        const { error } = await supabase.from("orders").insert(orderPayload);
         if (error) {
           failed++;
           errors.push({ row: i + 2, message: error.message });
