@@ -192,15 +192,20 @@ function MissionControlContent() {
             {t("mc.subtitle")}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin/users">
+              <Users className="mr-1.5 h-4 w-4" /> Користувачі
+            </Link>
+          </Button>
           <Button asChild variant="outline" size="sm">
             <Link to="/admin/tenants">
               <Building2 className="mr-1.5 h-4 w-4" /> {t("sb.allTenants")}
             </Link>
           </Button>
           <Button asChild size="sm">
-            <Link to="/agents">
-              <Bot className="mr-1.5 h-4 w-4" /> {t("sb.agents")}
+            <Link to="/admin/commands">
+              <Zap className="mr-1.5 h-4 w-4" /> Команди
             </Link>
           </Button>
         </div>

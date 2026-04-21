@@ -112,9 +112,11 @@ import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.ap
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedBrandBillingRouteImport } from './routes/_authenticated/brand.billing'
 import { Route as AuthenticatedAgentsLiveRouteImport } from './routes/_authenticated/agents.live'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin.tenants'
 import { Route as AuthenticatedAdminPlansRouteImport } from './routes/_authenticated/admin.plans'
 import { Route as AuthenticatedAdminOverviewRouteImport } from './routes/_authenticated/admin.overview'
+import { Route as AuthenticatedAdminCommandsRouteImport } from './routes/_authenticated/admin.commands'
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
 
@@ -675,6 +677,11 @@ const AuthenticatedAgentsLiveRoute = AuthenticatedAgentsLiveRouteImport.update({
   path: '/agents/live',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAdminTenantsRoute =
   AuthenticatedAdminTenantsRouteImport.update({
     id: '/admin/tenants',
@@ -690,6 +697,12 @@ const AuthenticatedAdminOverviewRoute =
   AuthenticatedAdminOverviewRouteImport.update({
     id: '/admin/overview',
     path: '/admin/overview',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAdminCommandsRoute =
+  AuthenticatedAdminCommandsRouteImport.update({
+    id: '/admin/commands',
+    path: '/admin/commands',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const SSlugOrdersOrderIdRoute = SSlugOrdersOrderIdRouteImport.update({
@@ -717,9 +730,11 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
+  '/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
@@ -826,9 +841,11 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
+  '/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
@@ -937,9 +954,11 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
+  '/_authenticated/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/_authenticated/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/_authenticated/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/_authenticated/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
@@ -1048,9 +1067,11 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/hooks/ingest'
     | '/s/$slug'
+    | '/admin/commands'
     | '/admin/overview'
     | '/admin/plans'
     | '/admin/tenants'
+    | '/admin/users'
     | '/agents/live'
     | '/brand/billing'
     | '/invite/$token'
@@ -1157,9 +1178,11 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/hooks/ingest'
     | '/s/$slug'
+    | '/admin/commands'
     | '/admin/overview'
     | '/admin/plans'
     | '/admin/tenants'
+    | '/admin/users'
     | '/agents/live'
     | '/brand/billing'
     | '/invite/$token'
@@ -1267,9 +1290,11 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/hooks/ingest'
     | '/s/$slug'
+    | '/_authenticated/admin/commands'
     | '/_authenticated/admin/overview'
     | '/_authenticated/admin/plans'
     | '/_authenticated/admin/tenants'
+    | '/_authenticated/admin/users'
     | '/_authenticated/agents/live'
     | '/_authenticated/brand/billing'
     | '/_authenticated/invite/$token'
@@ -2186,6 +2211,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgentsLiveRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/tenants': {
       id: '/_authenticated/admin/tenants'
       path: '/admin/tenants'
@@ -2205,6 +2237,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/overview'
       fullPath: '/admin/overview'
       preLoaderRoute: typeof AuthenticatedAdminOverviewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin/commands': {
+      id: '/_authenticated/admin/commands'
+      path: '/admin/commands'
+      fullPath: '/admin/commands'
+      preLoaderRoute: typeof AuthenticatedAdminCommandsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/s/$slug/orders/$orderId': {
@@ -2254,9 +2293,11 @@ interface AuthenticatedRouteChildren {
   AuthenticatedBrandRoute: typeof AuthenticatedBrandRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedAdminCommandsRoute: typeof AuthenticatedAdminCommandsRoute
   AuthenticatedAdminOverviewRoute: typeof AuthenticatedAdminOverviewRoute
   AuthenticatedAdminPlansRoute: typeof AuthenticatedAdminPlansRoute
   AuthenticatedAdminTenantsRoute: typeof AuthenticatedAdminTenantsRouteWithChildren
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAgentsLiveRoute: typeof AuthenticatedAgentsLiveRoute
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -2266,9 +2307,11 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedBrandRoute: AuthenticatedBrandRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedAdminCommandsRoute: AuthenticatedAdminCommandsRoute,
   AuthenticatedAdminOverviewRoute: AuthenticatedAdminOverviewRoute,
   AuthenticatedAdminPlansRoute: AuthenticatedAdminPlansRoute,
   AuthenticatedAdminTenantsRoute: AuthenticatedAdminTenantsRouteWithChildren,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAgentsLiveRoute: AuthenticatedAgentsLiveRoute,
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
