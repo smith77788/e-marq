@@ -169,7 +169,7 @@ const dict = {
     // Home page
     "home.title": "ACOS — автономна команда зростання для вашого магазину",
     "home.metaDesc": "65+ ШІ-агентів цілодобово знаходять, де ваш магазин може заробити більше, і пропонують готові дії — за один ваш клік. Без карти. Запуск за 5 хвилин.",
-    "home.badge": "Автономна Revenue OS · 65+ агентів",
+    "home.badge": "ACOS · 65+ AI-агентів",
     "home.heroPre": "Кожен магазин втрачає продажі.",
     "home.heroAccent": "Ми допомагаємо їх повернути",
     "home.heroPost": "— поки ви займаєтеся бізнесом",
@@ -641,7 +641,7 @@ const dict = {
 
     "home.title": "ACOS — autonomous growth team for your store",
     "home.metaDesc": "65+ AI agents work 24/7 to find where your store can earn more — and queue ready-to-ship actions for one-click approval. No credit card. Live in 5 minutes.",
-    "home.badge": "Autonomous Revenue OS · 65+ agents",
+    "home.badge": "ACOS · 65+ AI agents",
     "home.heroPre": "Every store leaves money on the table.",
     "home.heroAccent": "We help you recover it",
     "home.heroPost": "— while you run the business",
