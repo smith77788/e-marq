@@ -162,17 +162,18 @@ function BrandOrdersPage() {
 
   const statusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: OrderStatus }) => {
-      const patch: Partial<OrderRow> & { status: OrderStatus } = { status };
+      const patch: {
+        status: OrderStatus;
+        paid_at?: string;
+        fulfilled_at?: string;
+      } = { status };
       if (status === "paid" && !opened?.paid_at) {
-        (patch as { paid_at?: string }).paid_at = new Date().toISOString();
+        patch.paid_at = new Date().toISOString();
       }
       if (status === "fulfilled") {
-        (patch as { fulfilled_at?: string }).fulfilled_at = new Date().toISOString();
+        patch.fulfilled_at = new Date().toISOString();
       }
-      const { error } = await supabase
-        .from("orders")
-        .update(patch)
-        .eq("id", id);
+      const { error } = await supabase.from("orders").update(patch).eq("id", id);
       if (error) throw error;
     },
     onSuccess: (_, vars) => {
