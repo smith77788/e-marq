@@ -484,6 +484,56 @@ export type Database = {
           },
         ]
       }
+      bootstrap_facts: {
+        Row: {
+          confidence: number
+          created_at: string
+          evidence: Json
+          expires_at: string | null
+          fact_key: string
+          fact_kind: string
+          id: string
+          source: string
+          tenant_id: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          evidence?: Json
+          expires_at?: string | null
+          fact_key?: string
+          fact_kind: string
+          id?: string
+          source?: string
+          tenant_id: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          evidence?: Json
+          expires_at?: string | null
+          fact_key?: string
+          fact_kind?: string
+          id?: string
+          source?: string
+          tenant_id?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bootstrap_facts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cart_recovery_attempts: {
         Row: {
           abandoned_at: string
