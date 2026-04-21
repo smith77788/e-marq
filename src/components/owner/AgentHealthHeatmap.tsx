@@ -134,10 +134,14 @@ export function AgentHealthHeatmap({ tenantId }: Props) {
                         const runs = d?.runs ?? 0;
                         const failed = d?.failed ?? 0;
                         const intensity = runs > 0 ? Math.min(1, runs / grid.maxRunsPerDay) : 0;
-                        const bg = runs === 0
-                          ? "hsl(var(--muted) / 0.15)"
-                          : `hsl(var(--primary) / ${0.15 + intensity * 0.65})`;
-                        const ring = failed > 0 ? "0 0 0 1.5px hsl(var(--destructive) / 0.7) inset" : "none";
+                        const bg =
+                          runs === 0
+                            ? "color-mix(in oklab, var(--muted) 25%, transparent)"
+                            : `color-mix(in oklab, var(--primary) ${Math.round(18 + intensity * 70)}%, transparent)`;
+                        const ring =
+                          failed > 0
+                            ? "0 0 0 1.5px color-mix(in oklab, var(--destructive) 70%, transparent) inset"
+                            : "none";
                         return (
                           <td key={dk} className="p-0.5">
                             <div
@@ -155,15 +159,25 @@ export function AgentHealthHeatmap({ tenantId }: Props) {
                 })}
               </tbody>
             </table>
-            <div className="mt-3 flex items-center gap-3 text-[10px] text-muted-foreground">
-              <span>Менше</span>
-              {[0.15, 0.3, 0.5, 0.7, 0.85].map((i) => (
-                <span key={i} className="inline-block h-3 w-3 rounded-sm" style={{ background: `hsl(var(--primary) / ${i})` }} />
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
+              <span>Рідше працює</span>
+              {[18, 35, 55, 72, 88].map((p) => (
+                <span
+                  key={p}
+                  className="inline-block h-3 w-3 rounded-sm"
+                  style={{ background: `color-mix(in oklab, var(--primary) ${p}%, transparent)` }}
+                />
               ))}
-              <span>Більше</span>
-              <span className="ml-3 inline-flex items-center gap-1">
-                <span className="inline-block h-3 w-3 rounded-sm" style={{ boxShadow: "0 0 0 1.5px hsl(var(--destructive) / 0.7) inset" }} />
-                Помилка
+              <span>Частіше працює</span>
+              <span className="ml-2 inline-flex items-center gap-1">
+                <span
+                  className="inline-block h-3 w-3 rounded-sm"
+                  style={{
+                    boxShadow:
+                      "0 0 0 1.5px color-mix(in oklab, var(--destructive) 70%, transparent) inset",
+                  }}
+                />
+                Була помилка
               </span>
             </div>
           </div>

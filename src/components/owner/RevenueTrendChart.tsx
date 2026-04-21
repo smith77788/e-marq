@@ -15,6 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/integrations/supabase/client";
 import { useAnalyticsWindow } from "./AnalyticsWindow";
 import { formatMoney, formatNumber, HRYVNIA, PLATFORM_LOCALE } from "@/lib/money";
+import { CHART } from "@/lib/chartColors";
 
 type Props = { tenantId: string };
 
@@ -112,37 +113,33 @@ export function RevenueTrendChart({ tenantId }: Props) {
               <AreaChart data={series} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
                 <defs>
                   <linearGradient id="organicGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--muted-foreground))" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="hsl(var(--muted-foreground))" stopOpacity={0.05} />
+                    <stop offset="0%" stopColor={CHART.muted} stopOpacity={0.45} />
+                    <stop offset="100%" stopColor={CHART.muted} stopOpacity={0.05} />
                   </linearGradient>
                   <linearGradient id="aiGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.7} />
-                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
+                    <stop offset="0%" stopColor={CHART.primary} stopOpacity={0.75} />
+                    <stop offset="100%" stopColor={CHART.primary} stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <CartesianGrid strokeDasharray={CHART.gridDash} stroke={CHART.gridStroke} vertical={false} />
                 <XAxis
                   dataKey="label"
-                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                  tick={CHART.tickStyle}
                   tickLine={false}
                   axisLine={false}
                   interval="preserveStartEnd"
                   minTickGap={24}
                 />
                 <YAxis
-                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                  tick={CHART.tickStyle}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(v) => `${formatNumber(Number(v))} ${HRYVNIA}`}
                   width={64}
                 />
                 <Tooltip
-                  contentStyle={{
-                    background: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: 8,
-                    fontSize: 12,
-                  }}
+                  contentStyle={CHART.tooltipStyle}
+                  cursor={{ fill: CHART.cursorFill }}
                   formatter={(value: number, name) => [
                     `${formatNumber(value)} ${HRYVNIA}`,
                     name === "ai" ? "Від ШІ" : name === "organic" ? "Органіка" : name,
@@ -153,17 +150,19 @@ export function RevenueTrendChart({ tenantId }: Props) {
                   type="monotone"
                   dataKey="organic"
                   stackId="1"
-                  stroke="hsl(var(--muted-foreground))"
+                  stroke={CHART.muted}
                   strokeWidth={1.5}
                   fill="url(#organicGrad)"
+                  animationDuration={500}
                 />
                 <Area
                   type="monotone"
                   dataKey="ai"
                   stackId="1"
-                  stroke="hsl(var(--primary))"
+                  stroke={CHART.primary}
                   strokeWidth={2}
                   fill="url(#aiGrad)"
+                  animationDuration={500}
                 />
               </AreaChart>
             </ResponsiveContainer>

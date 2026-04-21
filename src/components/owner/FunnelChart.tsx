@@ -20,11 +20,11 @@ const STEPS: Array<{ key: string; label: string; types: string[] }> = [
 ];
 
 const STEP_COLORS = [
-  "hsl(var(--muted-foreground) / 0.4)",
-  "hsl(var(--accent) / 0.55)",
-  "hsl(var(--primary) / 0.6)",
-  "hsl(var(--primary) / 0.75)",
-  "hsl(var(--success) / 0.85)",
+  "color-mix(in oklab, var(--muted-foreground) 45%, transparent)",
+  "color-mix(in oklab, var(--accent) 60%, transparent)",
+  "color-mix(in oklab, var(--primary) 60%, transparent)",
+  "color-mix(in oklab, var(--primary) 80%, transparent)",
+  "color-mix(in oklab, var(--success, var(--primary)) 88%, transparent)",
 ];
 
 export function FunnelChart({ tenantId }: Props) {
@@ -109,8 +109,11 @@ export function FunnelChart({ tenantId }: Props) {
                   className="absolute inset-y-0 left-0 rounded-md transition-all duration-700 ease-out"
                   style={{
                     width: `${width}%`,
-                    background: `linear-gradient(90deg, ${STEP_COLORS[i]}, ${STEP_COLORS[i]} 60%, hsl(var(--primary) / 0.1))`,
-                    boxShadow: i === STEPS.length - 1 ? "0 0 14px hsl(var(--success) / 0.4)" : "none",
+                    background: `linear-gradient(90deg, ${STEP_COLORS[i]}, ${STEP_COLORS[i]} 60%, color-mix(in oklab, var(--primary) 12%, transparent))`,
+                    boxShadow:
+                      i === STEPS.length - 1
+                        ? "0 0 16px color-mix(in oklab, var(--success, var(--primary)) 45%, transparent)"
+                        : "none",
                   }}
                 />
                 <div className="absolute inset-0 flex items-center px-2">

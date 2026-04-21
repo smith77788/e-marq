@@ -124,16 +124,20 @@ export function CohortRetention({ tenantId }: Props) {
                         const count = ret.get(m) ?? 0;
                         const pct = size > 0 ? (count / size) * 100 : 0;
                         const intensity = Math.min(1, pct / 100);
-                        const bg = `hsl(var(--primary) / ${0.05 + intensity * 0.6})`;
+                        const bgPct = Math.round(8 + intensity * 70);
+                        const bg = `color-mix(in oklab, var(--primary) ${bgPct}%, transparent)`;
                         return (
                           <td key={m} className="px-0.5 py-0.5">
                             <div
-                              className="flex h-7 items-center justify-center rounded text-[10px] font-medium"
+                              className="flex h-7 items-center justify-center rounded text-[10px] font-medium transition-colors"
                               style={{
                                 background: bg,
-                                color: intensity > 0.4 ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground))",
-                                boxShadow: intensity > 0.5 ? "0 0 8px hsl(var(--primary) / 0.3)" : "none",
+                                color:
+                                  intensity > 0.45
+                                    ? "var(--primary-foreground)"
+                                    : "var(--foreground)",
                               }}
+                              title={`${pct.toFixed(0)}% повернулися через ${m} міс. (${count} з ${size})`}
                             >
                               {pct > 0 ? `${pct.toFixed(0)}%` : "—"}
                             </div>
@@ -145,6 +149,17 @@ export function CohortRetention({ tenantId }: Props) {
                 })}
               </tbody>
             </table>
+            <div className="mt-3 flex items-center gap-2 text-[10px] text-muted-foreground">
+              <span>Менше повернень</span>
+              {[8, 25, 45, 65, 80].map((p) => (
+                <span
+                  key={p}
+                  className="inline-block h-3 w-3 rounded-sm"
+                  style={{ background: `color-mix(in oklab, var(--primary) ${p}%, transparent)` }}
+                />
+              ))}
+              <span>Більше повернень</span>
+            </div>
           </div>
         )}
       </CardContent>
