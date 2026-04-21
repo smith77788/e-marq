@@ -25,6 +25,7 @@ import { CohortRetention } from "@/components/owner/CohortRetention";
 import { AgentHealthHeatmap } from "@/components/owner/AgentHealthHeatmap";
 import { LifecycleDistribution } from "@/components/owner/LifecycleDistribution";
 import { PlanUsageCard } from "@/components/owner/PlanUsageCard";
+import { OwnerTelegramBindCard } from "@/components/owner/OwnerTelegramBindCard";
 
 type Search = { tenant?: string };
 

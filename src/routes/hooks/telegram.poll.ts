@@ -476,9 +476,13 @@ export const Route = createFileRoute("/hooks/telegram/poll")({
 
           for (const u of updates) {
             try {
-              await processMessage(u, appOrigin);
+              if (u.callback_query) {
+                await processCallback(u.callback_query, appOrigin);
+              } else if (u.message) {
+                await processMessage(u, appOrigin);
+              }
             } catch (err) {
-              console.error("[telegram.poll] processMessage error", err);
+              console.error("[telegram.poll] update error", err);
             }
             processed++;
           }
