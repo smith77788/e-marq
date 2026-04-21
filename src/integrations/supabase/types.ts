@@ -2676,6 +2676,25 @@ export type Database = {
         }
         Returns: number
       }
+      admin_grant_super_admin: {
+        Args: { _target_user_id: string }
+        Returns: undefined
+      }
+      admin_list_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          is_super_admin: boolean
+          last_sign_in_at: string
+          tenant_count: number
+          user_id: string
+        }[]
+      }
+      admin_revoke_super_admin: {
+        Args: { _target_user_id: string }
+        Returns: undefined
+      }
       cancel_order: {
         Args: { _order_id: string }
         Returns: {
