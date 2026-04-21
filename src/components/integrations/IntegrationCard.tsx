@@ -79,15 +79,34 @@ export function IntegrationCard({ integration, isConnected, canSync, syncing, on
           <Badge variant="outline" className={cn("text-[10px]", status.tone)}>
             {status.label}
           </Badge>
-          <Button
-            size="sm"
-            variant={isComingSoon ? "outline" : "default"}
-            onClick={() => onSelect(integration)}
-            className="gap-1"
-          >
-            {isComingSoon ? "Інструкція" : isConnected ? "Налаштувати" : "Підключити"}
-            <ArrowRight className="h-3 w-3" />
-          </Button>
+          <div className="flex gap-1">
+            {isConnected && canSync && onSync && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onSync(integration)}
+                disabled={syncing}
+                className="gap-1"
+                title="Запустити імпорт зараз"
+              >
+                {syncing ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-3 w-3" />
+                )}
+                Синк
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant={isComingSoon ? "outline" : "default"}
+              onClick={() => onSelect(integration)}
+              className="gap-1"
+            >
+              {isComingSoon ? "Інструкція" : isConnected ? "Налаштувати" : "Підключити"}
+              <ArrowRight className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
