@@ -297,7 +297,11 @@ function DnTradeHealthContent() {
         bad: v.bad,
         pctBad: v.total ? Math.round((v.bad / v.total) * 100) : 0,
       }))
-      .sort((a, b) => b.pctBad - a.pctBad || a.tenant?.name?.localeCompare(b.tenant?.name ?? "") ?? 0);
+      .sort(
+        (a, b) =>
+          b.pctBad - a.pctBad ||
+          (a.tenant?.name ?? "").localeCompare(b.tenant?.name ?? ""),
+      );
   }, [last24, tenantMap]);
 
   if (data.isLoading) {

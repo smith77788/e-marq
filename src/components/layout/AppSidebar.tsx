@@ -92,6 +92,11 @@ const ADMIN_NAV: { labelKey: TKey; items: NavItem[] }[] = [
       { labelKey: "sb.allTenants", to: "/admin/tenants", icon: Building2 },
       { labelKey: "sb.plansCatalog" as TKey, to: "/admin/plans", icon: Coins },
       { labelKey: "sb.adminUsers" as TKey, to: "/admin/users", icon: UsersRound },
+      {
+        labelKey: "sb.dntradeHealth" as TKey,
+        to: "/admin/dntrade-health",
+        icon: HeartPulse,
+      },
     ],
   },
   {
