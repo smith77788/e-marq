@@ -4148,6 +4148,19 @@ export type Database = {
             }
             Returns: string
           }
+        | {
+            Args: {
+              _customer_email: string
+              _customer_name: string
+              _items: Json
+              _loyalty_redeem_points?: number
+              _payment_method?: string
+              _promo_code?: string
+              _shipping?: Json
+              _tenant_id: string
+            }
+            Returns: string
+          }
       set_owner_telegram_chat: {
         Args: { _chat_id: string; _tenant_id: string }
         Returns: undefined
@@ -4158,6 +4171,15 @@ export type Database = {
           _customer_email: string
           _order_total_cents: number
           _slug: string
+        }
+        Returns: Json
+      }
+      validate_loyalty_redeem: {
+        Args: {
+          _customer_email: string
+          _order_total_cents: number
+          _redeem_points: number
+          _tenant_id: string
         }
         Returns: Json
       }
