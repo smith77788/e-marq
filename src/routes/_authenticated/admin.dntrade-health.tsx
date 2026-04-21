@@ -603,11 +603,11 @@ function DnTradeHealthContent() {
                     </TableCell>
                     <TableCell className="text-right">
                       <Link
-                        to="/admin/tenants/$tenantId"
+                        to="/admin/dntrade-health/$tenantId"
                         params={{ tenantId: row.tenantId }}
                         className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                       >
-                        Деталі <ExternalLink className="h-3 w-3" />
+                        30д <ExternalLink className="h-3 w-3" />
                       </Link>
                     </TableCell>
                   </TableRow>
