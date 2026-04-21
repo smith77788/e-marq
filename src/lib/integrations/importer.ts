@@ -100,7 +100,7 @@ export async function runImport(input: ImportInput): Promise<ImportResult> {
           skipped++;
           continue;
         }
-        const payload = {
+        const payload: CustomerInsert = {
           tenant_id: tenantId,
           name,
           email: get(row, "email").toLowerCase() || null,
