@@ -31,6 +31,7 @@ import { useStorefrontCart, track } from "@/lib/storefront/cartContext";
 import { formatMoneyExact } from "@/lib/money";
 import { ShippingSelector } from "@/components/storefront/ShippingSelector";
 import type { NPSelection } from "@/lib/shipping/novaPoshta";
+import { sendOrderConfirmationEmail } from "@/lib/email/client";
 
 type DiscountResult =
   | { valid: true; promo_id: string; name: string; type: string; discount_cents: number }
@@ -204,6 +205,7 @@ function CheckoutPage() {
       });
 
       toast.success("Замовлення створено!");
+      void sendOrderConfirmationEmail(orderId);
       cart.clear();
       navigate({ to: "/s/$slug/orders/$orderId", params: { slug, orderId } });
     } catch (e) {

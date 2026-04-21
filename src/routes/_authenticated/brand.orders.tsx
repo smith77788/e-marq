@@ -44,6 +44,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
 import { formatMoneyExact } from "@/lib/money";
+import { sendOrderStatusEmail } from "@/lib/email/client";
 
 type OrderStatus = "pending" | "paid" | "fulfilled" | "cancelled" | "refunded";
 
