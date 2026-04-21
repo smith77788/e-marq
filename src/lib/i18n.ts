@@ -530,6 +530,7 @@ const dict = {
     "sb.agents": "Agents",
     "sb.setup": "Setup",
     "sb.channels": "Channels",
+    "sb.integrations": "Data import",
     "sb.onboarding": "Onboarding",
     "sb.storefront": "Storefront",
     "sb.settings": "Settings",
