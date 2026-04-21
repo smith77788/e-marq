@@ -1263,6 +1263,132 @@ export type Database = {
           },
         ]
       }
+      import_field_mappings: {
+        Row: {
+          created_at: string
+          entity_kind: string
+          id: string
+          integration_id: string | null
+          is_default: boolean
+          mapping: Json
+          source_provider: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_kind: string
+          id?: string
+          integration_id?: string | null
+          is_default?: boolean
+          mapping?: Json
+          source_provider: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_kind?: string
+          id?: string
+          integration_id?: string | null
+          is_default?: boolean
+          mapping?: Json
+          source_provider?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_field_mappings_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_field_mappings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_jobs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          entity_kind: string
+          error_summary: Json
+          finished_at: string | null
+          id: string
+          integration_id: string | null
+          metadata: Json
+          rows_failed: number
+          rows_imported: number
+          rows_skipped: number
+          rows_total: number
+          source_kind: string
+          source_provider: string
+          started_at: string | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          entity_kind: string
+          error_summary?: Json
+          finished_at?: string | null
+          id?: string
+          integration_id?: string | null
+          metadata?: Json
+          rows_failed?: number
+          rows_imported?: number
+          rows_skipped?: number
+          rows_total?: number
+          source_kind?: string
+          source_provider: string
+          started_at?: string | null
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          entity_kind?: string
+          error_summary?: Json
+          finished_at?: string | null
+          id?: string
+          integration_id?: string | null
+          metadata?: Json
+          rows_failed?: number
+          rows_imported?: number
+          rows_skipped?: number
+          rows_total?: number
+          source_kind?: string
+          source_provider?: string
+          started_at?: string | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_jobs_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_jobs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_forecasts: {
         Row: {
           computed_at: string
