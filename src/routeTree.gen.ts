@@ -108,7 +108,11 @@ import { Route as HooksAgentsAntiFraudRouteImport } from './routes/hooks/agents.
 import { Route as HooksAgentsAnomalyDetectorRouteImport } from './routes/hooks/agents.anomaly-detector'
 import { Route as HooksAgentsActionWatchdogRouteImport } from './routes/hooks/agents.action-watchdog'
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
+import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
+import { Route as AuthenticatedBrandBillingRouteImport } from './routes/_authenticated/brand.billing'
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin.tenants'
+import { Route as AuthenticatedAdminPlansRouteImport } from './routes/_authenticated/admin.plans'
+import { Route as AuthenticatedAdminOverviewRouteImport } from './routes/_authenticated/admin.overview'
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
 
@@ -646,10 +650,33 @@ const HooksActionsApplyRoute = HooksActionsApplyRouteImport.update({
   path: '/hooks/actions/apply',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedInviteTokenRoute =
+  AuthenticatedInviteTokenRouteImport.update({
+    id: '/invite/$token',
+    path: '/invite/$token',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedBrandBillingRoute =
+  AuthenticatedBrandBillingRouteImport.update({
+    id: '/billing',
+    path: '/billing',
+    getParentRoute: () => AuthenticatedBrandRoute,
+  } as any)
 const AuthenticatedAdminTenantsRoute =
   AuthenticatedAdminTenantsRouteImport.update({
     id: '/admin/tenants',
     path: '/admin/tenants',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAdminPlansRoute = AuthenticatedAdminPlansRouteImport.update({
+  id: '/admin/plans',
+  path: '/admin/plans',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAdminOverviewRoute =
+  AuthenticatedAdminOverviewRouteImport.update({
+    id: '/admin/overview',
+    path: '/admin/overview',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const SSlugOrdersOrderIdRoute = SSlugOrdersOrderIdRouteImport.update({
@@ -672,12 +699,16 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/signup': typeof SignupRoute
-  '/brand': typeof AuthenticatedBrandRoute
+  '/brand': typeof AuthenticatedBrandRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
+  '/admin/overview': typeof AuthenticatedAdminOverviewRoute
+  '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
+  '/brand/billing': typeof AuthenticatedBrandBillingRoute
+  '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
@@ -775,12 +806,16 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/signup': typeof SignupRoute
-  '/brand': typeof AuthenticatedBrandRoute
+  '/brand': typeof AuthenticatedBrandRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
+  '/admin/overview': typeof AuthenticatedAdminOverviewRoute
+  '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
+  '/brand/billing': typeof AuthenticatedBrandBillingRoute
+  '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
@@ -880,12 +915,16 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/signup': typeof SignupRoute
-  '/_authenticated/brand': typeof AuthenticatedBrandRoute
+  '/_authenticated/brand': typeof AuthenticatedBrandRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
+  '/_authenticated/admin/overview': typeof AuthenticatedAdminOverviewRoute
+  '/_authenticated/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
+  '/_authenticated/brand/billing': typeof AuthenticatedBrandBillingRoute
+  '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
@@ -990,7 +1029,11 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/hooks/ingest'
     | '/s/$slug'
+    | '/admin/overview'
+    | '/admin/plans'
     | '/admin/tenants'
+    | '/brand/billing'
+    | '/invite/$token'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
     | '/hooks/agents/anomaly-detector'
@@ -1093,7 +1136,11 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/hooks/ingest'
     | '/s/$slug'
+    | '/admin/overview'
+    | '/admin/plans'
     | '/admin/tenants'
+    | '/brand/billing'
+    | '/invite/$token'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
     | '/hooks/agents/anomaly-detector'
@@ -1197,7 +1244,11 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/hooks/ingest'
     | '/s/$slug'
+    | '/_authenticated/admin/overview'
+    | '/_authenticated/admin/plans'
     | '/_authenticated/admin/tenants'
+    | '/_authenticated/brand/billing'
+    | '/_authenticated/invite/$token'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
     | '/hooks/agents/anomaly-detector'
@@ -2081,11 +2132,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksActionsApplyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/invite/$token': {
+      id: '/_authenticated/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof AuthenticatedInviteTokenRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/brand/billing': {
+      id: '/_authenticated/brand/billing'
+      path: '/billing'
+      fullPath: '/brand/billing'
+      preLoaderRoute: typeof AuthenticatedBrandBillingRouteImport
+      parentRoute: typeof AuthenticatedBrandRoute
+    }
     '/_authenticated/admin/tenants': {
       id: '/_authenticated/admin/tenants'
       path: '/admin/tenants'
       fullPath: '/admin/tenants'
       preLoaderRoute: typeof AuthenticatedAdminTenantsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin/plans': {
+      id: '/_authenticated/admin/plans'
+      path: '/admin/plans'
+      fullPath: '/admin/plans'
+      preLoaderRoute: typeof AuthenticatedAdminPlansRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin/overview': {
+      id: '/_authenticated/admin/overview'
+      path: '/admin/overview'
+      fullPath: '/admin/overview'
+      preLoaderRoute: typeof AuthenticatedAdminOverviewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/s/$slug/orders/$orderId': {
@@ -2105,6 +2184,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedBrandRouteChildren {
+  AuthenticatedBrandBillingRoute: typeof AuthenticatedBrandBillingRoute
+}
+
+const AuthenticatedBrandRouteChildren: AuthenticatedBrandRouteChildren = {
+  AuthenticatedBrandBillingRoute: AuthenticatedBrandBillingRoute,
+}
+
+const AuthenticatedBrandRouteWithChildren =
+  AuthenticatedBrandRoute._addFileChildren(AuthenticatedBrandRouteChildren)
+
 interface AuthenticatedAdminTenantsRouteChildren {
   AuthenticatedAdminTenantsTenantIdRoute: typeof AuthenticatedAdminTenantsTenantIdRoute
 }
@@ -2121,18 +2211,24 @@ const AuthenticatedAdminTenantsRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedBrandRoute: typeof AuthenticatedBrandRoute
+  AuthenticatedBrandRoute: typeof AuthenticatedBrandRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedAdminOverviewRoute: typeof AuthenticatedAdminOverviewRoute
+  AuthenticatedAdminPlansRoute: typeof AuthenticatedAdminPlansRoute
   AuthenticatedAdminTenantsRoute: typeof AuthenticatedAdminTenantsRouteWithChildren
+  AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedBrandRoute: AuthenticatedBrandRoute,
+  AuthenticatedBrandRoute: AuthenticatedBrandRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedAdminOverviewRoute: AuthenticatedAdminOverviewRoute,
+  AuthenticatedAdminPlansRoute: AuthenticatedAdminPlansRoute,
   AuthenticatedAdminTenantsRoute: AuthenticatedAdminTenantsRouteWithChildren,
+  AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
