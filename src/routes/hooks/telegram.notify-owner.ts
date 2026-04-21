@@ -52,6 +52,61 @@ async function getBrandName(tenantId: string): Promise<string> {
   return data?.brand_name ?? "Brand";
 }
 
+/**
+ * Гуманізація технічних кодів дій/агентів/сутностей у людську мову.
+ * Все, що не знайдено — просто прибираємо підкреслення, щоб виглядало читко.
+ */
+function prettify(s: string): string {
+  return s.replace(/_/g, " ");
+}
+const ACTION_LABELS: Record<string, string> = {
+  winback_touch: "написати клієнтові, який давно не повертався",
+  reorder_request: "замовити товар у постачальника",
+  abandoned_cart_email: "нагадати про незавершений кошик",
+  create_seo_page: "створити сторінку під пошуковий запит",
+  vip_product_nudge: "запропонувати товар найвірнішим клієнтам",
+  update_price: "оновити ціну на товар",
+  revert_price: "повернути попередню ціну",
+  auto_create_pending_order: "підготувати чернетку замовлення",
+};
+const AGENT_LABELS: Record<string, string> = {
+  churn_risk_predictor: "помічник з утримання клієнтів",
+  stockout_predictor: "помічник зі складу",
+  aov_leak_detector: "помічник із середнього чека",
+  search_gap_detector: "помічник із пошуку",
+  aov_optimizer: "помічник із середнього чека",
+  price_optimizer: "помічник із цін",
+  price_revert_safety: "запобіжник цін",
+  orchestrator: "диригент агентів",
+  telegram_reorder_bot: "бот повторних замовлень",
+};
+const ENTITY_LABELS: Record<string, string> = {
+  product: "товар",
+  customer: "клієнт",
+  search_term: "пошуковий запит",
+  orders: "замовлення",
+};
+const KIND_LABELS: Record<string, string> = {
+  test_ping: "тестове повідомлення",
+  insight: "підказка",
+  action: "дія",
+  notification: "сповіщення",
+  alert: "увага",
+  daily_digest: "щоденне зведення",
+};
+function humanizeAction(code: string): string {
+  return ACTION_LABELS[code] ?? prettify(code);
+}
+function humanizeAgent(code: string): string {
+  return AGENT_LABELS[code] ?? prettify(code);
+}
+function humanizeEntity(code: string): string {
+  return ENTITY_LABELS[code] ?? prettify(code);
+}
+function humanizeKind(code: string): string {
+  return KIND_LABELS[code] ?? prettify(code);
+}
+
 async function renderInsight(tenantId: string, insightId: string): Promise<RenderResult> {
   const { data } = await supabaseAdmin
     .from("ai_insights")
@@ -61,13 +116,12 @@ async function renderInsight(tenantId: string, insightId: string): Promise<Rende
   if (!data || data.status === "applied" || data.status === "dismissed") return null;
   const brand = await getBrandName(tenantId);
   // Перевага — людський «копірайт» з metrics._copy.ua, якщо він є.
-  const copyUa =
-    (data.metrics as Record<string, unknown> | null)?._copy &&
-    ((data.metrics as { _copy?: { ua?: { headline?: string; why?: string; what_to_do?: string } } })
-      ._copy?.ua);
-  const headline = copyUa?.headline || data.title;
-  const why = copyUa?.why || data.description || "";
-  const whatToDo = copyUa?.what_to_do || "";
+  type CopyUa = { headline?: string; why?: string; what_to_do?: string };
+  const metricsObj = (data.metrics ?? null) as { _copy?: { ua?: CopyUa } } | null;
+  const copyUa: CopyUa = metricsObj?._copy?.ua ?? {};
+  const headline = copyUa.headline || data.title;
+  const why = copyUa.why || data.description || "";
+  const whatToDo = copyUa.what_to_do || "";
   const text = [
     `${severityEmoji(data.risk_level)} <b>${escapeHtml(brand)}</b> · <i>підказка</i>`,
     "",
