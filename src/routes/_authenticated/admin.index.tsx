@@ -217,7 +217,7 @@ function MissionControlContent() {
         />
         <MissionStatCard
           label={t("mc.gmv30")}
-          value={`$${(totalRevenue / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+          value={`${(totalRevenue / 100).toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`}
           hint={`${paidOrders} ${t("sb.revenue").toLowerCase()}`}
           icon={DollarSign}
           tone="success"
