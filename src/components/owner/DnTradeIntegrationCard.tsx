@@ -122,6 +122,25 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
     enabled: !!integ.data?.credentials_encrypted,
   });
 
+  // Live health-check (polling 60s) — викликає той самий ендпойнт, що адмін cron.
+  const health = useQuery({
+    queryKey: ["dntrade-health", tenantId],
+    enabled: !!integ.data,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const res = await fetch(
+        `/hooks/integrations/dntrade-webhook-health?tenant=${tenantId}`,
+      );
+      const json = (await res.json()) as {
+        status: "healthy" | "degraded" | "unhealthy" | "missing" | "error";
+        ready: boolean;
+        blockers?: string[];
+        warnings?: string[];
+      };
+      return { ...json, http: res.status };
+    },
+  });
+
   useEffect(() => {
     if (integ.data?.credentials_encrypted) {
       setApiKey(integ.data.credentials_encrypted);
