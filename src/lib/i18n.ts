@@ -978,9 +978,9 @@ let current: Lang = "ua";
 const listeners = new Set<() => void>();
 
 function readInitial(): Lang {
-  if (typeof window === "undefined") return "ua";
-  const saved = window.localStorage.getItem(STORAGE_KEY);
-  return saved === "en" || saved === "ua" ? saved : "ua";
+  // Українська — єдина мова інтерфейсу. Старий збережений вибір (наприклад "en")
+  // ігноруємо, щоб одразу прибрати англомовні тексти.
+  return "ua";
 }
 
 if (typeof window !== "undefined") {
@@ -992,9 +992,12 @@ export function getLang(): Lang {
 }
 
 export function setLang(lang: Lang) {
-  current = lang;
+  // Перемикання мови вимкнено: інтерфейс лишається українською.
+  // Підпис лишаємо для зворотної сумісності з кодом, що його викликає.
+  void lang;
+  current = "ua";
   if (typeof window !== "undefined") {
-    window.localStorage.setItem(STORAGE_KEY, lang);
+    window.localStorage.setItem(STORAGE_KEY, "ua");
   }
   for (const fn of listeners) fn();
 }
