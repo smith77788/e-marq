@@ -39,7 +39,7 @@ const dict = {
     "sb.allTenants": "Усі бренди",
     "sb.plansCatalog": "Каталог тарифів",
     "sb.adminUsers": "Користувачі",
-    "sb.adminCommands": "Команди",
+    "sb.adminCommands": "⚡ Команди системи",
     "sb.liveRuns": "Запуски в ефірі",
     "sb.agentLibrary": "Бібліотека агентів",
     "sb.insightStream": "Потік інсайтів",
