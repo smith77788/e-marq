@@ -17,6 +17,7 @@ export function InsightToasts() {
   const { t } = useT();
   const seenInsightsRef = useRef<Set<string>>(new Set());
   const seenRunsRef = useRef<Set<string>>(new Set());
+  const seenNotifsRef = useRef<Set<string>>(new Set());
   const initializedRef = useRef(false);
 
   const { data: tenants } = useQuery({
