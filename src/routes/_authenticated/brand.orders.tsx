@@ -44,6 +44,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
 import { formatMoneyExact } from "@/lib/money";
+import { sendOrderStatusEmail } from "@/lib/email/client";
 
 type OrderStatus = "pending" | "paid" | "fulfilled" | "cancelled" | "refunded";
 
@@ -175,6 +176,9 @@ function BrandOrdersPage() {
       }
       const { error } = await supabase.from("orders").update(patch).eq("id", id);
       if (error) throw error;
+      if (status === "paid" || status === "fulfilled" || status === "cancelled" || status === "refunded") {
+        void sendOrderStatusEmail(id, status);
+      }
     },
     onSuccess: (_, vars) => {
       toast.success(t("bo.changed"));

@@ -130,6 +130,8 @@ import { Route as HooksAgentsAntiFraudRouteImport } from './routes/hooks/agents.
 import { Route as HooksAgentsAnomalyDetectorRouteImport } from './routes/hooks/agents.anomaly-detector'
 import { Route as HooksAgentsActionWatchdogRouteImport } from './routes/hooks/agents.action-watchdog'
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
+import { Route as ApiEmailOrderStatusRouteImport } from './routes/api/email.order-status'
+import { Route as ApiEmailOrderConfirmationRouteImport } from './routes/api/email.order-confirmation'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedBrandPromotionsRouteImport } from './routes/_authenticated/brand.promotions'
 import { Route as AuthenticatedBrandProductsRouteImport } from './routes/_authenticated/brand.products'
@@ -813,6 +815,17 @@ const HooksActionsApplyRoute = HooksActionsApplyRouteImport.update({
   path: '/hooks/actions/apply',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiEmailOrderStatusRoute = ApiEmailOrderStatusRouteImport.update({
+  id: '/api/email/order-status',
+  path: '/api/email/order-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEmailOrderConfirmationRoute =
+  ApiEmailOrderConfirmationRouteImport.update({
+    id: '/api/email/order-confirmation',
+    path: '/api/email/order-confirmation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedInviteTokenRoute =
   AuthenticatedInviteTokenRouteImport.update({
     id: '/invite/$token',
@@ -968,6 +981,8 @@ export interface FileRoutesByFullPath {
   '/brand/products': typeof AuthenticatedBrandProductsRoute
   '/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
+  '/api/email/order-status': typeof ApiEmailOrderStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
@@ -1111,6 +1126,8 @@ export interface FileRoutesByTo {
   '/brand/products': typeof AuthenticatedBrandProductsRoute
   '/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
+  '/api/email/order-status': typeof ApiEmailOrderStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
@@ -1257,6 +1274,8 @@ export interface FileRoutesById {
   '/_authenticated/brand/products': typeof AuthenticatedBrandProductsRoute
   '/_authenticated/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
+  '/api/email/order-status': typeof ApiEmailOrderStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
@@ -1403,6 +1422,8 @@ export interface FileRouteTypes {
     | '/brand/products'
     | '/brand/promotions'
     | '/invite/$token'
+    | '/api/email/order-confirmation'
+    | '/api/email/order-status'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
     | '/hooks/agents/anomaly-detector'
@@ -1546,6 +1567,8 @@ export interface FileRouteTypes {
     | '/brand/products'
     | '/brand/promotions'
     | '/invite/$token'
+    | '/api/email/order-confirmation'
+    | '/api/email/order-status'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
     | '/hooks/agents/anomaly-detector'
@@ -1691,6 +1714,8 @@ export interface FileRouteTypes {
     | '/_authenticated/brand/products'
     | '/_authenticated/brand/promotions'
     | '/_authenticated/invite/$token'
+    | '/api/email/order-confirmation'
+    | '/api/email/order-status'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
     | '/hooks/agents/anomaly-detector'
@@ -1818,6 +1843,8 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   HooksIngestRoute: typeof HooksIngestRoute
   SSlugRoute: typeof SSlugRouteWithChildren
+  ApiEmailOrderConfirmationRoute: typeof ApiEmailOrderConfirmationRoute
+  ApiEmailOrderStatusRoute: typeof ApiEmailOrderStatusRoute
   HooksActionsApplyRoute: typeof HooksActionsApplyRoute
   HooksAgentsActionWatchdogRoute: typeof HooksAgentsActionWatchdogRoute
   HooksAgentsAnomalyDetectorRoute: typeof HooksAgentsAnomalyDetectorRoute
@@ -2774,6 +2801,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksActionsApplyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/email/order-status': {
+      id: '/api/email/order-status'
+      path: '/api/email/order-status'
+      fullPath: '/api/email/order-status'
+      preLoaderRoute: typeof ApiEmailOrderStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/email/order-confirmation': {
+      id: '/api/email/order-confirmation'
+      path: '/api/email/order-confirmation'
+      fullPath: '/api/email/order-confirmation'
+      preLoaderRoute: typeof ApiEmailOrderConfirmationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/invite/$token': {
       id: '/_authenticated/invite/$token'
       path: '/invite/$token'
@@ -3062,6 +3103,8 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   HooksIngestRoute: HooksIngestRoute,
   SSlugRoute: SSlugRouteWithChildren,
+  ApiEmailOrderConfirmationRoute: ApiEmailOrderConfirmationRoute,
+  ApiEmailOrderStatusRoute: ApiEmailOrderStatusRoute,
   HooksActionsApplyRoute: HooksActionsApplyRoute,
   HooksAgentsActionWatchdogRoute: HooksAgentsActionWatchdogRoute,
   HooksAgentsAnomalyDetectorRoute: HooksAgentsAnomalyDetectorRoute,
