@@ -645,7 +645,7 @@ const dict = {
     "home.heroPre": "Your store leaks money every single day.",
     "home.heroAccent": "MARQ plugs the leak",
     "home.heroPost": "— while competitors still hunt for a marketer",
-    "home.heroSub": "Abandoned carts. Customers who ghosted you. Stock that ran out at the worst time. Prices you should have raised months ago. 65+ MARQ AI agents find every hole in your revenue — and drop a ready action on your desk. One click — money comes back.",
+    "home.heroSub": "MARQ — Merchant Autonomous Revenue Quorum: an autonomous quorum of 65+ AI agents that decide together for your store. Abandoned carts, ghost customers, stock that ran out at the wrong time, underpriced products — every hole found, every action ready on your desk. One click and money comes back.",
     "home.heroCtaPrimary": "Stop the money leak →",
     "home.heroCtaSecondary": "I already have an account",
     "home.heroNote": "No card · 5 minutes to first insight · Shopify · WooCommerce · CSV",
