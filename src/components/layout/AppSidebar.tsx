@@ -13,13 +13,16 @@ import {
   Layers,
   LayoutDashboard,
   Lightbulb,
+  Package,
   Plug,
   Puzzle,
   Radio,
   Settings,
   ShieldCheck,
   ShoppingBag,
+  ShoppingCart,
   Sparkles,
+  Tag,
   Users,
   UsersRound,
   Zap,
@@ -53,6 +56,15 @@ const OWNER_NAV: { labelKey: TKey; items: NavItem[] }[] = [
     items: [
       { labelKey: "sb.overview", to: "/brand", icon: LayoutDashboard },
       { labelKey: "sb.revenue", to: "/dashboard", icon: Gauge },
+    ],
+  },
+  {
+    labelKey: "sb.shop",
+    items: [
+      { labelKey: "sb.products", to: "/brand/products", icon: Package },
+      { labelKey: "sb.orders", to: "/brand/orders", icon: ShoppingCart },
+      { labelKey: "sb.collections", to: "/brand/catalog", icon: Layers },
+      { labelKey: "sb.promotions", to: "/brand/promotions", icon: Tag },
     ],
   },
   {
