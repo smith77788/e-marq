@@ -172,7 +172,7 @@ async function applyEventToSend(
   }
 
   if (Object.keys(patch).length > 0) {
-    await supabaseAdmin.from("email_sends").update(patch).eq("id", send.id);
+    await supabaseAdmin.from("email_sends").update(patch as never).eq("id", send.id);
   }
 
   // For campaign sends, propagate to email_campaign_recipients too.
@@ -185,7 +185,7 @@ async function applyEventToSend(
     if (Object.keys(recipientPatch).length > 0) {
       await supabaseAdmin
         .from("email_campaign_recipients")
-        .update(recipientPatch)
+        .update(recipientPatch as never)
         .eq("resend_message_id", resendId);
     }
   }
@@ -217,8 +217,8 @@ async function maybeSuppress(
       email: email.toLowerCase(),
       reason,
       source_event_id: resendId,
-      metadata: (metadata as Record<string, unknown>) ?? {},
-    })
+      metadata: (metadata ?? {}) as never,
+    } as never)
     .then(
       () => undefined,
       // Ignore unique_violation (23505) — already suppressed.
