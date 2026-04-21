@@ -185,12 +185,48 @@ function OnboardingPage() {
 
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>
-            {lang === "ua" ? "Виконано" : "Completed"}: {doneCount} / {steps.length}
+          <span className="flex items-center gap-1.5">
+            {lang === "ua" ? "Виконано" : "Completed"}:{" "}
+            {statusLoading ? (
+              <Skeleton className="inline-block h-3 w-10 align-middle" />
+            ) : statusError ? (
+              <span className="text-destructive">— / {steps.length}</span>
+            ) : (
+              <>
+                {doneCount} / {steps.length}
+              </>
+            )}
+            {statusQuery.isFetching && !statusLoading && (
+              <Loader2 className="h-3 w-3 animate-spin text-muted-foreground/60" />
+            )}
           </span>
-          <span>{pct}%</span>
+          <span>
+            {statusLoading ? <Skeleton className="inline-block h-3 w-8 align-middle" /> : `${pct}%`}
+          </span>
         </div>
-        <Progress value={pct} className="h-2" />
+        <Progress value={statusLoading ? 0 : pct} className="h-2" />
+
+        {statusError && (
+          <div className="flex items-center justify-between gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+            <span className="flex items-center gap-1.5">
+              <AlertCircle className="h-3.5 w-3.5" />
+              {lang === "ua"
+                ? "Не вдалося оновити статуси кроків. Дані можуть бути застарілі."
+                : "Couldn't refresh step statuses. Data may be outdated."}
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-6 px-2 text-xs"
+              onClick={() => statusQuery.refetch()}
+              disabled={statusQuery.isFetching}
+            >
+              <RefreshCw className={`mr-1 h-3 w-3 ${statusQuery.isFetching ? "animate-spin" : ""}`} />
+              {lang === "ua" ? "Спробувати ще" : "Retry"}
+            </Button>
+          </div>
+        )}
+
         {/* Step dots: дозволяють перейти на будь-який крок одним кліком */}
         <div className="flex flex-wrap gap-1.5 pt-1">
           {steps.map((s, i) => {
@@ -202,7 +238,8 @@ function OnboardingPage() {
                 type="button"
                 onClick={() => setStep(i)}
                 title={t(s.titleKey)}
-                className={`flex h-7 min-w-[28px] items-center justify-center rounded-md border px-2 text-xs font-medium transition-colors ${
+                disabled={statusLoading}
+                className={`flex h-7 min-w-[28px] items-center justify-center rounded-md border px-2 text-xs font-medium transition-colors disabled:opacity-60 ${
                   active
                     ? "border-primary bg-primary text-primary-foreground"
                     : done
@@ -210,7 +247,13 @@ function OnboardingPage() {
                       : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/50"
                 }`}
               >
-                {done ? <Check className="h-3.5 w-3.5" /> : i + 1}
+                {statusLoading ? (
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-current opacity-40" />
+                ) : done ? (
+                  <Check className="h-3.5 w-3.5" />
+                ) : (
+                  i + 1
+                )}
               </button>
             );
           })}
