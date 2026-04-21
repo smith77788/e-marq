@@ -4,8 +4,11 @@ import {
   BookOpen,
   Bot,
   Building2,
+  Coins,
   Cpu,
+  CreditCard,
   Gauge,
+  Layers,
   LayoutDashboard,
   Lightbulb,
   Plug,
@@ -62,6 +65,12 @@ const OWNER_NAV: { labelKey: TKey; items: NavItem[] }[] = [
       { labelKey: "sb.onboarding", to: "/onboarding", icon: Sparkles },
     ],
   },
+  {
+    labelKey: "sb.billing" as TKey,
+    items: [
+      { labelKey: "sb.planBilling" as TKey, to: "/brand/billing", icon: CreditCard },
+    ],
+  },
 ];
 
 const ADMIN_NAV: { labelKey: TKey; items: NavItem[] }[] = [
@@ -69,7 +78,9 @@ const ADMIN_NAV: { labelKey: TKey; items: NavItem[] }[] = [
     labelKey: "sb.system",
     items: [
       { labelKey: "sb.missionControl", to: "/admin", icon: ShieldCheck, exact: true },
+      { labelKey: "sb.crossTenant" as TKey, to: "/admin/overview", icon: Layers },
       { labelKey: "sb.allTenants", to: "/admin/tenants", icon: Building2 },
+      { labelKey: "sb.plansCatalog" as TKey, to: "/admin/plans", icon: Coins },
     ],
   },
   {

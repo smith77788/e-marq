@@ -7,6 +7,8 @@ import { AppSidebar } from "@/components/layout/AppSidebar";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { LiveStatus } from "@/components/layout/LiveStatus";
 import { InsightToasts } from "@/components/layout/InsightToasts";
+import { TenantSwitcher } from "@/components/layout/TenantSwitcher";
+import { TenantContextProvider, useTenantContext } from "@/hooks/useTenantContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
 
@@ -43,8 +45,31 @@ function AuthenticatedLayout() {
   }
 
   return (
+    <TenantContextProvider>
+      <AuthenticatedShell
+        userEmail={user.email ?? ""}
+        isSuperAdmin={isSuperAdmin}
+        onSignOut={handleSignOut}
+      />
+    </TenantContextProvider>
+  );
+}
+
+function AuthenticatedShell({
+  userEmail,
+  isSuperAdmin,
+  onSignOut,
+}: {
+  userEmail: string;
+  isSuperAdmin: boolean;
+  onSignOut: () => void;
+}) {
+  const { t } = useT();
+  const { current } = useTenantContext();
+
+  return (
     <SidebarProvider defaultOpen>
-      <AppSidebar isSuperAdmin={isSuperAdmin} />
+      <AppSidebar isSuperAdmin={isSuperAdmin} brandName={current?.tenant_name} />
       <SidebarInset className="bg-background">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
@@ -57,12 +82,13 @@ function AuthenticatedLayout() {
             )}
           </div>
           <div className="ml-auto flex items-center gap-2">
+            <TenantSwitcher />
             <LanguageSwitcher />
             <ThemeToggle />
             <span className="hidden max-w-[180px] truncate text-xs text-muted-foreground md:inline">
-              {user.email}
+              {userEmail}
             </span>
-            <Button size="sm" variant="outline" onClick={handleSignOut}>
+            <Button size="sm" variant="outline" onClick={onSignOut}>
               {t("nav.signout")}
             </Button>
           </div>
