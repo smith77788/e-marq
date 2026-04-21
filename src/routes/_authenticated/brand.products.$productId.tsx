@@ -56,7 +56,12 @@ type ProductRecord = {
   seo_description: string | null;
 };
 
+type Search = { tenant?: string };
+
 export const Route = createFileRoute("/_authenticated/brand/products/$productId")({
+  validateSearch: (s: Record<string, unknown>): Search => ({
+    tenant: typeof s.tenant === "string" ? s.tenant : undefined,
+  }),
   component: ProductDetailEditor,
 });
 
