@@ -218,7 +218,7 @@ function Index() {
           <p className="mt-4 text-base text-muted-foreground">
             {t("home.cta.body")}
           </p>
-          <div className="mt-8 flex items-center justify-center gap-3">
+          <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
             <Button asChild size="lg">
               <Link to="/signup">{t("home.cta.primary")}</Link>
             </Button>
