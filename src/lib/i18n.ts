@@ -537,6 +537,8 @@ const dict = {
     "sb.crossTenant": "Cross-tenant overview",
     "sb.allTenants": "All tenants",
     "sb.plansCatalog": "Plans catalog",
+    "sb.adminUsers": "Users",
+    "sb.adminCommands": "Commands",
     "sb.liveRuns": "Live runs",
     "sb.agentLibrary": "Agent library",
     "sb.insightStream": "Insight stream",
