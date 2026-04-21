@@ -29,6 +29,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { loadStorefrontShell } from "@/lib/storefront/loaders";
 import { useStorefrontCart, track } from "@/lib/storefront/cartContext";
 import { formatMoneyExact } from "@/lib/money";
+import { ShippingSelector } from "@/components/storefront/ShippingSelector";
+import type { NPSelection } from "@/lib/shipping/novaPoshta";
 
 type DiscountResult =
   | { valid: true; promo_id: string; name: string; type: string; discount_cents: number }
@@ -74,6 +76,8 @@ function CheckoutPage() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [shipping, setShipping] = useState<NPSelection | null>(null);
   const [method, setMethod] = useState<"manual" | "stripe_card">(defaultMethod);
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState<DiscountResult | null>(null);
@@ -131,6 +135,7 @@ function CheckoutPage() {
   async function placeOrder() {
     const trimmedEmail = email.trim();
     const trimmedName = name.trim();
+    const trimmedPhone = phone.trim();
     if (!trimmedEmail || cart.cartLines.length === 0) return;
 
     if (trimmedEmail.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
@@ -139,6 +144,14 @@ function CheckoutPage() {
     }
     if (trimmedName.length > 200) {
       toast.error("Ім'я задовге");
+      return;
+    }
+    if (trimmedPhone && (trimmedPhone.length > 32 || !/^[+\d\s()-]{6,32}$/.test(trimmedPhone))) {
+      toast.error("Введіть коректний телефон");
+      return;
+    }
+    if (!shipping) {
+      toast.error("Оберіть місто та відділення Нової Пошти");
       return;
     }
     if (cart.cartLines.length > 50) {
@@ -156,12 +169,23 @@ function CheckoutPage() {
         product_id: l.product_id,
         quantity: l.quantity,
       }));
+      const shippingPayload = {
+        method: "nova_poshta",
+        phone: trimmedPhone,
+        carrier: "nova_poshta",
+        city_ref: shipping.cityRef,
+        city_name: shipping.cityName,
+        warehouse_ref: shipping.warehouseRef,
+        warehouse_number: shipping.warehouseNumber,
+        warehouse_description: shipping.warehouseDescription,
+      };
       const { data: orderId, error: rpcErr } = await supabase.rpc("place_storefront_order", {
         _tenant_id: cart.tenantId,
         _customer_name: trimmedName,
         _customer_email: trimmedEmail,
         _items: items,
         _payment_method: "manual",
+        _shipping: shippingPayload,
       });
       if (rpcErr) throw rpcErr;
       if (!orderId) throw new Error("Не вдалося створити замовлення");
@@ -312,6 +336,27 @@ function CheckoutPage() {
                   disabled={submitting}
                 />
               </div>
+              <div className="space-y-1">
+                <Label htmlFor="co-phone">Телефон</Label>
+                <Input
+                  id="co-phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+380 ..."
+                  disabled={submitting}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Shipping — Nova Poshta */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Доставка · Нова Пошта</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ShippingSelector value={shipping} onChange={setShipping} disabled={submitting} />
             </CardContent>
           </Card>
 
@@ -430,7 +475,7 @@ function CheckoutPage() {
                 size="lg"
                 onClick={placeOrder}
                 disabled={
-                  submitting || !email.trim() || noMethods || method === "stripe_card"
+                  submitting || !email.trim() || !shipping || noMethods || method === "stripe_card"
                 }
               >
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

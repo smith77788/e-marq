@@ -4011,16 +4011,28 @@ export type Database = {
         Args: { _amount: number; _reason?: string; _tenant_id: string }
         Returns: number
       }
-      place_storefront_order: {
-        Args: {
-          _customer_email: string
-          _customer_name: string
-          _items: Json
-          _payment_method?: string
-          _tenant_id: string
-        }
-        Returns: string
-      }
+      place_storefront_order:
+        | {
+            Args: {
+              _customer_email: string
+              _customer_name: string
+              _items: Json
+              _payment_method?: string
+              _tenant_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _customer_email: string
+              _customer_name: string
+              _items: Json
+              _payment_method?: string
+              _shipping?: Json
+              _tenant_id: string
+            }
+            Returns: string
+          }
       set_owner_telegram_chat: {
         Args: { _chat_id: string; _tenant_id: string }
         Returns: undefined
