@@ -81,7 +81,7 @@ export function AgentHealthHeatmap({ tenantId }: Props) {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-sm">
             <Cpu className="h-4 w-4 text-primary" />
-            Agent fleet · 14d
+            Робота агентів · 14 днів
           </CardTitle>
         </CardHeader>
         <CardContent><div className="h-48 animate-pulse rounded-md bg-muted/30" /></CardContent>
@@ -94,31 +94,31 @@ export function AgentHealthHeatmap({ tenantId }: Props) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
           <Cpu className="h-4 w-4 text-primary" />
-          Agent fleet · 14d
-          <Badge variant="outline" className="ml-auto text-[10px]">{grid.rows.length} agents</Badge>
+          Робота агентів · 14 днів
+          <Badge variant="outline" className="ml-auto text-[10px]">{grid.rows.length} агентів</Badge>
         </CardTitle>
         <CardDescription className="text-xs">
-          Runs per agent per day. Red ring = at least one failed run that day.
+          Скільки разів кожен агент запускався щодня. Червона рамка = була хоча б одна помилка в той день.
         </CardDescription>
       </CardHeader>
       <CardContent>
         {grid.rows.length === 0 ? (
           <div className="rounded-md border border-dashed border-border bg-muted/20 p-4 text-center text-xs text-muted-foreground">
-            No agent runs in the last {DAYS} days. Trigger the cron or wait for the next tick.
+            За останні {DAYS} днів агенти ще не працювали. Запустіть вручну або зачекайте на наступний автоматичний цикл.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="text-[10px]">
               <thead>
                 <tr className="text-muted-foreground">
-                  <th className="text-left pr-2 py-1 font-medium sticky left-0 bg-card">Agent</th>
+                  <th className="text-left pr-2 py-1 font-medium sticky left-0 bg-card">Агент</th>
                   {grid.dayKeys.map((dk) => (
                     <th key={dk} className="px-0.5 py-1 font-medium text-center w-6">
                       {Number(dk.slice(8))}
                     </th>
                   ))}
-                  <th className="pl-2 text-right font-medium">Total</th>
-                  <th className="pl-2 text-right font-medium text-primary">Insights</th>
+                  <th className="pl-2 text-right font-medium">Усього</th>
+                  <th className="pl-2 text-right font-medium text-primary">Підказки</th>
                 </tr>
               </thead>
               <tbody>
@@ -142,7 +142,7 @@ export function AgentHealthHeatmap({ tenantId }: Props) {
                           <td key={dk} className="p-0.5">
                             <div
                               className="h-5 w-5 rounded-sm transition-all"
-                              title={`${dk}: ${runs} runs · ${failed} failed · ${d?.insights ?? 0} insights`}
+                              title={`${dk}: запусків ${runs} · помилок ${failed} · підказок ${d?.insights ?? 0}`}
                               style={{ background: bg, boxShadow: ring }}
                             />
                           </td>
@@ -156,14 +156,14 @@ export function AgentHealthHeatmap({ tenantId }: Props) {
               </tbody>
             </table>
             <div className="mt-3 flex items-center gap-3 text-[10px] text-muted-foreground">
-              <span>Less</span>
+              <span>Менше</span>
               {[0.15, 0.3, 0.5, 0.7, 0.85].map((i) => (
                 <span key={i} className="inline-block h-3 w-3 rounded-sm" style={{ background: `hsl(var(--primary) / ${i})` }} />
               ))}
-              <span>More</span>
+              <span>Більше</span>
               <span className="ml-3 inline-flex items-center gap-1">
                 <span className="inline-block h-3 w-3 rounded-sm" style={{ boxShadow: "0 0 0 1.5px hsl(var(--destructive) / 0.7) inset" }} />
-                Failure
+                Помилка
               </span>
             </div>
           </div>

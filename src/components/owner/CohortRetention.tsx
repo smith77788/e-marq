@@ -74,7 +74,7 @@ export function CohortRetention({ tenantId }: Props) {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-sm">
             <Layers className="h-4 w-4 text-primary" />
-            Cohort retention
+            Утримання покупців по місяцях
           </CardTitle>
         </CardHeader>
         <CardContent><div className="h-48 animate-pulse rounded-md bg-muted/30" /></CardContent>
@@ -89,26 +89,26 @@ export function CohortRetention({ tenantId }: Props) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
           <Layers className="h-4 w-4 text-primary" />
-          Cohort retention · 6mo
+          Утримання покупців · 6 місяців
         </CardTitle>
         <CardDescription className="text-xs">
-          % of each monthly cohort still active months later. Brighter = stickier.
+          Скільки % покупців із кожного місяця продовжують купувати в наступні. Яскравіше — більше повертаються.
         </CardDescription>
       </CardHeader>
       <CardContent>
         {totalCustomers === 0 ? (
           <div className="rounded-md border border-dashed border-border bg-muted/20 p-4 text-center text-xs text-muted-foreground">
-            No cohort data yet. Need at least one customer with a first order.
+            Поки немає даних. Потрібен хоча б один покупець із першим замовленням.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-[10px]">
               <thead>
                 <tr className="text-muted-foreground">
-                  <th className="text-left px-2 py-1 font-medium">Cohort</th>
-                  <th className="text-right px-2 py-1 font-medium">Size</th>
+                  <th className="text-left px-2 py-1 font-medium">Місяць</th>
+                  <th className="text-right px-2 py-1 font-medium">Покупців</th>
                   {[0, 1, 2, 3, 4, 5].map((m) => (
-                    <th key={m} className="text-center px-1 py-1 font-medium">M+{m}</th>
+                    <th key={m} className="text-center px-1 py-1 font-medium">+{m} міс</th>
                   ))}
                 </tr>
               </thead>

@@ -29,52 +29,59 @@ function DashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Dashboard</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Головна</h1>
           <p className="text-sm text-muted-foreground">
-            {isSuperAdmin ? "Super-admin view — all tenants visible." : "Your workspaces."}
+            {isSuperAdmin ? "Режим супер-адміна — видно всі магазини." : "Ваші магазини."}
           </p>
         </div>
         {isSuperAdmin && (
-          <Badge variant="secondary">super_admin</Badge>
+          <Badge variant="secondary">супер-адмін</Badge>
         )}
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Your tenants</CardTitle>
+          <CardTitle>Ваші магазини</CardTitle>
           <CardDescription>
             {isSuperAdmin
-              ? "All tenants in the system."
-              : "Workspaces you own or are a member of."}
+              ? "Усі магазини у системі."
+              : "Магазини, якими ви володієте або де ви учасник."}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+            <p className="text-sm text-muted-foreground">Завантаження…</p>
           ) : tenants && tenants.length > 0 ? (
             <ul className="divide-y divide-border">
-              {tenants.map((t) => (
-                <li key={t.id} className="flex items-center justify-between py-3">
-                  <Link
-                    to="/brand"
-                    search={{ tenant: t.id }}
-                    className="flex-1 hover:opacity-80"
-                  >
-                    <p className="font-medium text-foreground">{t.name}</p>
-                    <p className="text-xs text-muted-foreground">/{t.slug}</p>
-                  </Link>
-                  <Badge variant={t.status === "active" ? "default" : "outline"}>
-                    {t.status}
-                  </Badge>
-                </li>
-              ))}
+              {tenants.map((t) => {
+                const statusLabel =
+                  t.status === "active" ? "активний"
+                  : t.status === "paused" ? "призупинено"
+                  : t.status === "suspended" ? "заблоковано"
+                  : t.status;
+                return (
+                  <li key={t.id} className="flex items-center justify-between py-3">
+                    <Link
+                      to="/brand"
+                      search={{ tenant: t.id }}
+                      className="flex-1 hover:opacity-80"
+                    >
+                      <p className="font-medium text-foreground">{t.name}</p>
+                      <p className="text-xs text-muted-foreground">/{t.slug}</p>
+                    </Link>
+                    <Badge variant={t.status === "active" ? "default" : "outline"}>
+                      {statusLabel}
+                    </Badge>
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <div className="space-y-3 text-sm text-muted-foreground">
-              <p>No tenants yet.</p>
+              <p>Поки немає жодного магазину.</p>
               {isSuperAdmin && (
                 <Link to="/admin/tenants" className="font-medium text-primary hover:underline">
-                  Create the first tenant →
+                  Створити перший магазин →
                 </Link>
               )}
             </div>
