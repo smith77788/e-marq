@@ -16,11 +16,14 @@ import {
   AlertTriangle,
   Bell,
   CheckCircle2,
+  Download,
   ExternalLink,
   HeartPulse,
   ShieldAlert,
   TriangleAlert,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { downloadHealthCsv } from "@/lib/dntrade/healthCsv";
 import {
   Card,
   CardContent,
@@ -333,6 +336,20 @@ function DnTradeHealthContent() {
             Оновлюється кожну хвилину.
           </p>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            downloadHealthCsv(
+              (data.data?.logs ?? []).filter((l) => l.checked_at >= since24h),
+              `dntrade-health-24h.csv`,
+            )
+          }
+          disabled={(data.data?.logs ?? []).length === 0}
+          title="Експорт усіх перевірок за 24 год для технічної підтримки"
+        >
+          <Download className="mr-1 h-3.5 w-3.5" /> Експорт CSV · 24г
+        </Button>
       </div>
 
       {/* KPI */}
@@ -586,11 +603,11 @@ function DnTradeHealthContent() {
                     </TableCell>
                     <TableCell className="text-right">
                       <Link
-                        to="/admin/tenants/$tenantId"
+                        to="/admin/dntrade-health/$tenantId"
                         params={{ tenantId: row.tenantId }}
                         className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                       >
-                        Деталі <ExternalLink className="h-3 w-3" />
+                        30д <ExternalLink className="h-3 w-3" />
                       </Link>
                     </TableCell>
                   </TableRow>
