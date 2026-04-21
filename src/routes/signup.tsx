@@ -10,7 +10,7 @@ import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
-      { title: `${tStatic("auth.signupTitle")} — ACOS` },
+      { title: `${tStatic("auth.signupTitle")} — MARQ` },
       { name: "description", content: tStatic("auth.signupDesc") },
     ],
   }),
