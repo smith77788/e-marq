@@ -386,7 +386,7 @@ function HandbookPage() {
             <div className="text-right">
               <Button asChild variant="outline" size="sm">
                 <Link to="/pricing">
-                  {t("home.pricingCta") /* fallback to existing key */ ?? "Pricing"}
+                  {t("site.nav.pricing")}
                   <ArrowRight className="ml-1 h-3.5 w-3.5" />
                 </Link>
               </Button>
