@@ -177,15 +177,20 @@ export async function fetchCustomerDetail(tenantId: string, customerId: string):
   if (error) throw error;
   if (!c) throw new Error("Клієнт не знайдений");
 
-  const { data: orders } = await supabase
-    .from("orders")
-    .select("id, created_at, total_cents, status, payment_method")
-    .eq("tenant_id", tenantId)
-    .eq("customer_user_id", customerId)
-    .order("created_at", { ascending: false })
-    .limit(10);
+  // Recent orders attached by customer email match (orders.customer_user_id is auth.users.id, not customers.id).
+  let orders: { id: string; created_at: string; total_cents: number; status: string; payment_method: string }[] = [];
+  if (c.email) {
+    const { data } = await supabase
+      .from("orders")
+      .select("id, created_at, total_cents, status, payment_method")
+      .eq("tenant_id", tenantId)
+      .eq("customer_email", c.email)
+      .order("created_at", { ascending: false })
+      .limit(10);
+    orders = data ?? [];
+  }
 
-  return buildCustomerPayload(c as CustomerDetailRow, orders ?? []);
+  return buildCustomerPayload(c as CustomerDetailRow, orders);
 }
 
 export function buildCustomerPayload(
