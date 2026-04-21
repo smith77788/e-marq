@@ -157,6 +157,7 @@ import { Route as ApiPublicShippingNpRouteImport } from './routes/api/public/shi
 import { Route as ApiPublicEmailUnsubscribeRouteImport } from './routes/api/public/email.unsubscribe'
 import { Route as ApiPublicEmailResendWebhookRouteImport } from './routes/api/public/email.resend-webhook'
 import { Route as ApiIntegrationsSyncProviderRouteImport } from './routes/api/integrations.sync.$provider'
+import { Route as AuthenticatedBrandProductsProductIdRouteImport } from './routes/_authenticated/brand.products.$productId'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
 import { Route as AuthenticatedAdminDntradeHealthTenantIdRouteImport } from './routes/_authenticated/admin.dntrade-health.$tenantId'
 import { Route as ApiPublicIntegrationsInboundProviderRouteImport } from './routes/api/public/integrations.inbound.$provider'
@@ -971,6 +972,12 @@ const ApiIntegrationsSyncProviderRoute =
     path: '/api/integrations/sync/$provider',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedBrandProductsProductIdRoute =
+  AuthenticatedBrandProductsProductIdRouteImport.update({
+    id: '/$productId',
+    path: '/$productId',
+    getParentRoute: () => AuthenticatedBrandProductsRoute,
+  } as any)
 const AuthenticatedAdminTenantsTenantIdRoute =
   AuthenticatedAdminTenantsTenantIdRouteImport.update({
     id: '/$tenantId',
@@ -1016,7 +1023,7 @@ export interface FileRoutesByFullPath {
   '/brand/catalog': typeof AuthenticatedBrandCatalogRoute
   '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/brand/orders': typeof AuthenticatedBrandOrdersRoute
-  '/brand/products': typeof AuthenticatedBrandProductsRoute
+  '/brand/products': typeof AuthenticatedBrandProductsRouteWithChildren
   '/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
@@ -1133,6 +1140,7 @@ export interface FileRoutesByFullPath {
   '/s/$slug/': typeof SSlugIndexRoute
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
+  '/brand/products/$productId': typeof AuthenticatedBrandProductsProductIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
   '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
   '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
@@ -1167,7 +1175,7 @@ export interface FileRoutesByTo {
   '/brand/catalog': typeof AuthenticatedBrandCatalogRoute
   '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/brand/orders': typeof AuthenticatedBrandOrdersRoute
-  '/brand/products': typeof AuthenticatedBrandProductsRoute
+  '/brand/products': typeof AuthenticatedBrandProductsRouteWithChildren
   '/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
@@ -1284,6 +1292,7 @@ export interface FileRoutesByTo {
   '/s/$slug': typeof SSlugIndexRoute
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
+  '/brand/products/$productId': typeof AuthenticatedBrandProductsProductIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
   '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
   '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
@@ -1321,7 +1330,7 @@ export interface FileRoutesById {
   '/_authenticated/brand/catalog': typeof AuthenticatedBrandCatalogRoute
   '/_authenticated/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/_authenticated/brand/orders': typeof AuthenticatedBrandOrdersRoute
-  '/_authenticated/brand/products': typeof AuthenticatedBrandProductsRoute
+  '/_authenticated/brand/products': typeof AuthenticatedBrandProductsRouteWithChildren
   '/_authenticated/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
@@ -1438,6 +1447,7 @@ export interface FileRoutesById {
   '/s/$slug/': typeof SSlugIndexRoute
   '/_authenticated/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
+  '/_authenticated/brand/products/$productId': typeof AuthenticatedBrandProductsProductIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
   '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
   '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
@@ -1592,6 +1602,7 @@ export interface FileRouteTypes {
     | '/s/$slug/'
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
+    | '/brand/products/$productId'
     | '/api/integrations/sync/$provider'
     | '/api/public/email/resend-webhook'
     | '/api/public/email/unsubscribe'
@@ -1743,6 +1754,7 @@ export interface FileRouteTypes {
     | '/s/$slug'
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
+    | '/brand/products/$productId'
     | '/api/integrations/sync/$provider'
     | '/api/public/email/resend-webhook'
     | '/api/public/email/unsubscribe'
@@ -1896,6 +1908,7 @@ export interface FileRouteTypes {
     | '/s/$slug/'
     | '/_authenticated/admin/dntrade-health/$tenantId'
     | '/_authenticated/admin/tenants/$tenantId'
+    | '/_authenticated/brand/products/$productId'
     | '/api/integrations/sync/$provider'
     | '/api/public/email/resend-webhook'
     | '/api/public/email/unsubscribe'
@@ -3070,6 +3083,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiIntegrationsSyncProviderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/brand/products/$productId': {
+      id: '/_authenticated/brand/products/$productId'
+      path: '/$productId'
+      fullPath: '/brand/products/$productId'
+      preLoaderRoute: typeof AuthenticatedBrandProductsProductIdRouteImport
+      parentRoute: typeof AuthenticatedBrandProductsRoute
+    }
     '/_authenticated/admin/tenants/$tenantId': {
       id: '/_authenticated/admin/tenants/$tenantId'
       path: '/$tenantId'
@@ -3094,12 +3114,27 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedBrandProductsRouteChildren {
+  AuthenticatedBrandProductsProductIdRoute: typeof AuthenticatedBrandProductsProductIdRoute
+}
+
+const AuthenticatedBrandProductsRouteChildren: AuthenticatedBrandProductsRouteChildren =
+  {
+    AuthenticatedBrandProductsProductIdRoute:
+      AuthenticatedBrandProductsProductIdRoute,
+  }
+
+const AuthenticatedBrandProductsRouteWithChildren =
+  AuthenticatedBrandProductsRoute._addFileChildren(
+    AuthenticatedBrandProductsRouteChildren,
+  )
+
 interface AuthenticatedBrandRouteChildren {
   AuthenticatedBrandBillingRoute: typeof AuthenticatedBrandBillingRoute
   AuthenticatedBrandCatalogRoute: typeof AuthenticatedBrandCatalogRoute
   AuthenticatedBrandIntegrationsRoute: typeof AuthenticatedBrandIntegrationsRoute
   AuthenticatedBrandOrdersRoute: typeof AuthenticatedBrandOrdersRoute
-  AuthenticatedBrandProductsRoute: typeof AuthenticatedBrandProductsRoute
+  AuthenticatedBrandProductsRoute: typeof AuthenticatedBrandProductsRouteWithChildren
   AuthenticatedBrandPromotionsRoute: typeof AuthenticatedBrandPromotionsRoute
 }
 
@@ -3108,7 +3143,7 @@ const AuthenticatedBrandRouteChildren: AuthenticatedBrandRouteChildren = {
   AuthenticatedBrandCatalogRoute: AuthenticatedBrandCatalogRoute,
   AuthenticatedBrandIntegrationsRoute: AuthenticatedBrandIntegrationsRoute,
   AuthenticatedBrandOrdersRoute: AuthenticatedBrandOrdersRoute,
-  AuthenticatedBrandProductsRoute: AuthenticatedBrandProductsRoute,
+  AuthenticatedBrandProductsRoute: AuthenticatedBrandProductsRouteWithChildren,
   AuthenticatedBrandPromotionsRoute: AuthenticatedBrandPromotionsRoute,
 }
 
