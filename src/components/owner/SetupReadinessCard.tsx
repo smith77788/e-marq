@@ -152,7 +152,7 @@ export function SetupReadinessCard({ tenantId, tenantSlug, compact = false }: Pr
                 <ul className="space-y-1.5">
                   {topGaps.map((g) => (
                     <li key={g.key} className="flex items-start gap-2 text-sm">
-                      <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
+                      <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />
                       <div className="min-w-0">
                         <p className="font-medium">{g.label}</p>
                         <p className="text-xs text-muted-foreground">{g.how}</p>
