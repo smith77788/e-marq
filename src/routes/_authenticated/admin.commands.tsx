@@ -71,6 +71,20 @@ function AdminCommandsPage() {
     },
   });
 
+  const tenants = tenantsQuery.data ?? [];
+  const selectedTenant = tenants.find((t) => t.id === tenantId);
+  const individualAgents = useMemo(() => {
+    const list = getIndividualAgents().map((a) => ({
+      ...a,
+      title: humanizeAgentId(a.id),
+    }));
+    if (!search) return list;
+    const q = search.toLowerCase();
+    return list.filter(
+      (a) => a.title.toLowerCase().includes(q) || a.id.toLowerCase().includes(q),
+    );
+  }, [search]);
+
   if (loading) return <Skeleton className="h-32 w-full" />;
   if (!isSuperAdmin) return <Navigate to="/brand" />;
 
