@@ -119,6 +119,8 @@ function BrandPage() {
 
       <PlanUsageCard tenantId={current.id} />
 
+      <OwnerTelegramBindCard tenantId={current.id} tenantSlug={current.slug} />
+
       <CockpitHero tenantId={current.id} />
 
       <AnalyticsWindowProvider initial={30}>
