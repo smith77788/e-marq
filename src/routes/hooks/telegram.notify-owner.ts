@@ -248,17 +248,22 @@ async function handleSingle(tenantId: string, kind: OutboxRow["source_kind"], so
 
 async function pushAndUpdate(row: OutboxRow) {
   const result = await processRow(row);
-  const update: Record<string, unknown> = { status: result.status };
   if (result.status === "sent") {
-    update.sent_at = new Date().toISOString();
-    update.tg_message_id = Number(result.error);
-    update.error = null;
-  } else if (result.status === "failed") {
-    update.error = result.error ?? null;
+    await supabaseAdmin
+      .from("owner_telegram_outbox")
+      .update({
+        status: "sent",
+        sent_at: new Date().toISOString(),
+        tg_message_id: Number(result.error),
+        error: null,
+      })
+      .eq("id", row.id);
   } else {
-    update.error = result.error ?? null;
+    await supabaseAdmin
+      .from("owner_telegram_outbox")
+      .update({ status: result.status, error: result.error ?? null })
+      .eq("id", row.id);
   }
-  await supabaseAdmin.from("owner_telegram_outbox").update(update).eq("id", row.id);
   return result;
 }
 

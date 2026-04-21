@@ -25,6 +25,7 @@ import { Route as AuthenticatedBrandRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as TrackSlugJsRouteImport } from './routes/track.$slug.js'
 import { Route as HooksTelegramPollRouteImport } from './routes/hooks/telegram.poll'
+import { Route as HooksTelegramNotifyOwnerRouteImport } from './routes/hooks/telegram.notify-owner'
 import { Route as HooksEnginesWinbackOneRouteImport } from './routes/hooks/engines.winback-one'
 import { Route as HooksEnginesWinbackAllRouteImport } from './routes/hooks/engines.winback-all'
 import { Route as HooksEnginesWinbackRouteImport } from './routes/hooks/engines.winback'
@@ -195,6 +196,12 @@ const HooksTelegramPollRoute = HooksTelegramPollRouteImport.update({
   path: '/hooks/telegram/poll',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksTelegramNotifyOwnerRoute =
+  HooksTelegramNotifyOwnerRouteImport.update({
+    id: '/hooks/telegram/notify-owner',
+    path: '/hooks/telegram/notify-owner',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksEnginesWinbackOneRoute = HooksEnginesWinbackOneRouteImport.update({
   id: '/hooks/engines/winback-one',
   path: '/hooks/engines/winback-one',
@@ -792,6 +799,7 @@ export interface FileRoutesByFullPath {
   '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
   '/hooks/engines/winback-all': typeof HooksEnginesWinbackAllRoute
   '/hooks/engines/winback-one': typeof HooksEnginesWinbackOneRoute
+  '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -899,6 +907,7 @@ export interface FileRoutesByTo {
   '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
   '/hooks/engines/winback-all': typeof HooksEnginesWinbackAllRoute
   '/hooks/engines/winback-one': typeof HooksEnginesWinbackOneRoute
+  '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -1008,6 +1017,7 @@ export interface FileRoutesById {
   '/hooks/engines/winback': typeof HooksEnginesWinbackRoute
   '/hooks/engines/winback-all': typeof HooksEnginesWinbackAllRoute
   '/hooks/engines/winback-one': typeof HooksEnginesWinbackOneRoute
+  '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -1117,6 +1127,7 @@ export interface FileRouteTypes {
     | '/hooks/engines/winback'
     | '/hooks/engines/winback-all'
     | '/hooks/engines/winback-one'
+    | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
     | '/admin/'
@@ -1224,6 +1235,7 @@ export interface FileRouteTypes {
     | '/hooks/engines/winback'
     | '/hooks/engines/winback-all'
     | '/hooks/engines/winback-one'
+    | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
     | '/admin'
@@ -1332,6 +1344,7 @@ export interface FileRouteTypes {
     | '/hooks/engines/winback'
     | '/hooks/engines/winback-all'
     | '/hooks/engines/winback-one'
+    | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
     | '/_authenticated/admin/'
@@ -1433,6 +1446,7 @@ export interface RootRouteChildren {
   HooksEnginesWinbackRoute: typeof HooksEnginesWinbackRoute
   HooksEnginesWinbackAllRoute: typeof HooksEnginesWinbackAllRoute
   HooksEnginesWinbackOneRoute: typeof HooksEnginesWinbackOneRoute
+  HooksTelegramNotifyOwnerRoute: typeof HooksTelegramNotifyOwnerRoute
   HooksTelegramPollRoute: typeof HooksTelegramPollRoute
   TrackSlugJsRoute: typeof TrackSlugJsRoute
 }
@@ -1549,6 +1563,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/telegram/poll'
       fullPath: '/hooks/telegram/poll'
       preLoaderRoute: typeof HooksTelegramPollRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/telegram/notify-owner': {
+      id: '/hooks/telegram/notify-owner'
+      path: '/hooks/telegram/notify-owner'
+      fullPath: '/hooks/telegram/notify-owner'
+      preLoaderRoute: typeof HooksTelegramNotifyOwnerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/engines/winback-one': {
@@ -2341,6 +2362,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksEnginesWinbackRoute: HooksEnginesWinbackRoute,
   HooksEnginesWinbackAllRoute: HooksEnginesWinbackAllRoute,
   HooksEnginesWinbackOneRoute: HooksEnginesWinbackOneRoute,
+  HooksTelegramNotifyOwnerRoute: HooksTelegramNotifyOwnerRoute,
   HooksTelegramPollRoute: HooksTelegramPollRoute,
   TrackSlugJsRoute: TrackSlugJsRoute,
 }
