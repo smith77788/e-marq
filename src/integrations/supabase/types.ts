@@ -2849,6 +2849,33 @@ export type Database = {
         Args: { _kind: string; _source_id: string; _tenant_id: string }
         Returns: undefined
       }
+      owner_change_plan: {
+        Args: { _plan_key: string; _reason?: string; _tenant_id: string }
+        Returns: {
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_end: string
+          current_period_start: string
+          id: string
+          notes: string | null
+          overrides: Json
+          plan_id: string
+          status: string
+          tenant_id: string
+          trial_ends_at: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tenant_subscriptions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      owner_topup_ai_credits: {
+        Args: { _amount: number; _reason?: string; _tenant_id: string }
+        Returns: number
+      }
       set_owner_telegram_chat: {
         Args: { _chat_id: string; _tenant_id: string }
         Returns: undefined
