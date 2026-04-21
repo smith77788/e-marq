@@ -37,6 +37,29 @@ type DiscountResult =
   | { valid: true; promo_id: string; name: string; type: string; discount_cents: number }
   | { valid: false; error: string; min_cents?: number };
 
+type LoyaltyValidation =
+  | {
+      valid: true;
+      discount_cents: number;
+      points_used: number;
+      balance_after: number;
+    }
+  | {
+      valid: false;
+      error: string;
+      min_points?: number;
+      balance_points?: number;
+    };
+
+type LoyaltyState = {
+  programActive: boolean;
+  pointsPer100: number;
+  uahPerPoint: number;
+  minRedeem: number;
+  balance: number;
+  tier: string;
+};
+
 export const Route = createFileRoute("/s/$slug/checkout")({
   loader: ({ params }) => loadStorefrontShell(params.slug),
   head: () => ({
