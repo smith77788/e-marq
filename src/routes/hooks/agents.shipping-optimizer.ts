@@ -77,9 +77,9 @@ export const Route = createFileRoute("/hooks/agents/shipping-optimizer")({
                 insight_type: "shipping_inefficiency",
                 affected_layer: "fulfillment",
                 title: `📦 Дорога/повільна доставка: ${key}`,
-                description: `За 30 днів — ${b.count} замовлень. Середня вартість $${(avgCost / 100).toFixed(2)}, доставка ${avgDays.toFixed(1)} дн.`,
+                description: `За 30 днів — ${b.count} замовлень. Середня вартість ${(avgCost / 100).toFixed(2)} ₴, доставка ${avgDays.toFixed(1)} дн.`,
                 expected_impact: avgCost > 1500
-                  ? `Зниження ціни на 15% → економія ~$${((avgCost * 0.15 * b.count) / 100).toFixed(0)}/міс`
+                  ? `Зниження ціни на 15% → економія ~${((avgCost * 0.15 * b.count) / 100).toFixed(0)} ₴/міс`
                   : `Скорочення часу доставки підвищить repeat rate`,
                 confidence: 0.7,
                 risk_level: "medium",

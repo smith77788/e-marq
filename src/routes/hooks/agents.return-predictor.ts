@@ -76,8 +76,8 @@ export const Route = createFileRoute("/hooks/agents/return-predictor")({
               insight_type: "high_return_rate",
               affected_layer: "product",
               title: `↩️ ${data.name}: висока ставка повернень (${(rate * 100).toFixed(0)}%)`,
-              description: `${data.qty} з ${total} проданих повернуто за 60 днів. Втрачено $${(data.cents / 100).toFixed(0)}.`,
-              expected_impact: `Виправлення опису/якості може повернути ~$${((data.cents * 0.6) / 100).toFixed(0)}/2міс`,
+              description: `${data.qty} з ${total} проданих повернуто за 60 днів. Втрачено ${(data.cents / 100).toFixed(0)} ₴.`,
+              expected_impact: `Виправлення опису/якості може повернути ~${((data.cents * 0.6) / 100).toFixed(0)} ₴/2міс`,
               confidence: 0.75,
               risk_level: rate > 0.2 ? "high" : "medium",
               metrics: {

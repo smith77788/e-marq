@@ -123,7 +123,7 @@ export const Route = createFileRoute("/hooks/agents/segmentation")({
               affected_layer: "crm",
               title: `${atRisk.count} customers entering "at_risk" cohort`,
               description: `Segmentation refresh found ${atRisk.count} customers (${((atRisk.revenue / Math.max(totalRev, 1)) * 100).toFixed(0)}% of historical revenue) that haven't ordered in 60-120 days. Schedule a winback sequence with a 15% nudge before they go dormant.`,
-              expected_impact: `Recover ~${Math.round(atRisk.count * 0.2)} customers (~$${((atRisk.revenue * 0.2) / 100 / Math.max(atRisk.count, 1)).toFixed(0)}/each)`,
+              expected_impact: `Recover ~${Math.round(atRisk.count * 0.2)} customers (~${((atRisk.revenue * 0.2) / 100 / Math.max(atRisk.count, 1)).toFixed(0)} ₴/each)`,
               confidence: 0.75,
               risk_level: "medium",
               metrics: {

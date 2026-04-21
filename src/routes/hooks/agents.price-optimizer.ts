@@ -46,7 +46,7 @@ const WINDOW_DAYS = 60;
 type ProductRow = { id: string; name: string; price_cents: number; is_active: boolean; stock: number };
 
 function fmtUsd(cents: number) {
-  return `$${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+  return `${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })} ₴`;
 }
 
 export const Route = createFileRoute("/hooks/agents/price-optimizer")({

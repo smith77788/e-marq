@@ -57,9 +57,9 @@ export const Route = createFileRoute("/hooks/agents/payment-retry")({
               tenant_id: tenantId,
               insight_type: "payment_retry_opportunity",
               affected_layer: "checkout",
-              title: `💳 Платіж застряг: $${(o.total_cents / 100).toFixed(2)} (${o.customer_name ?? o.customer_email ?? "guest"})`,
+              title: `💳 Платіж застряг: ${(o.total_cents / 100).toFixed(2)} ₴ (${o.customer_name ?? o.customer_email ?? "guest"})`,
               description: `Замовлення pending ${ageHours.toFixed(0)}h. Метод: ${o.payment_method}.`,
-              expected_impact: `Retry або alt. метод відновлює ~30% таких замовлень → ~$${((o.total_cents * 0.3) / 100).toFixed(2)}`,
+              expected_impact: `Retry або alt. метод відновлює ~30% таких замовлень → ~${((o.total_cents * 0.3) / 100).toFixed(2)} ₴`,
               confidence: 0.65,
               risk_level: o.total_cents > 5000 ? "high" : "medium",
               metrics: {

@@ -76,9 +76,9 @@ export const Route = createFileRoute("/hooks/agents/geo-demand")({
                 tenant_id: tenantId,
                 insight_type: "geo_demand_hotspot",
                 affected_layer: "marketing",
-                title: `🌍 Гарячий регіон: ${region} ($${(b.cents / 100).toFixed(0)})`,
+                title: `🌍 Гарячий регіон: ${region} (${(b.cents / 100).toFixed(0)} ₴)`,
                 description: `${b.count} замовлень за 30 днів (${(share * 100).toFixed(0)}% обсягу, ${(revShare * 100).toFixed(0)}% виторгу).`,
-                expected_impact: `Локальна реклама/промо може дати +20% до цього regіону → ~$${((b.cents * 0.2) / 100).toFixed(0)}`,
+                expected_impact: `Локальна реклама/промо може дати +20% до цього regіону → ~${((b.cents * 0.2) / 100).toFixed(0)} ₴`,
                 confidence: 0.75,
                 risk_level: "low",
                 metrics: {

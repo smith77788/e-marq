@@ -93,8 +93,8 @@ export const Route = createFileRoute("/hooks/agents/churn-risk")({
                 insight_type: "churn_risk",
                 affected_layer: "crm",
                 title: `${name ?? email} likely to churn — ${recency.toFixed(0)}d silent vs ${avg.toFixed(0)}d avg`,
-                description: `VIP customer with ${list.length} orders (lifetime $${(totalSpent / 100).toFixed(2)}) hasn't ordered in ${recency.toFixed(0)} days. Typical interval ${avg.toFixed(0)}d — drift ${drift.toFixed(2)}×. Recommend a 15% winback touch.`,
-                expected_impact: `Recover ~$${(expectedRevenueCents / 100).toFixed(2)} of next order revenue`,
+                description: `VIP customer with ${list.length} orders (lifetime ${(totalSpent / 100).toFixed(2)} ₴) hasn't ordered in ${recency.toFixed(0)} days. Typical interval ${avg.toFixed(0)}d — drift ${drift.toFixed(2)}×. Recommend a 15% winback touch.`,
+                expected_impact: `Recover ~${(expectedRevenueCents / 100).toFixed(2)} ₴ of next order revenue`,
                 confidence,
                 risk_level: risk,
                 metrics: {

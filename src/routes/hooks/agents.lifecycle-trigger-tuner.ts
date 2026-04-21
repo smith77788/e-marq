@@ -80,8 +80,8 @@ export const Route = createFileRoute("/hooks/agents/lifecycle-trigger-tuner")({
               insight_type: "lifecycle_trigger_imbalance",
               affected_layer: "messaging",
               title: `📊 ${best.trigger} приносить у ${(best.rps / Math.max(worst.rps, 1)).toFixed(1)}× більше за ${worst.trigger}`,
-              description: `${best.trigger}: $${(best.rps / 100).toFixed(2)}/повідомлення (${best.sent} надіслано). ${worst.trigger}: $${(worst.rps / 100).toFixed(2)}.`,
-              expected_impact: `Перерозподіл +30% бюджету на ${best.trigger} → ~$${((best.rps * worst.sent * 0.3) / 100).toFixed(0)}/міс`,
+              description: `${best.trigger}: ${(best.rps / 100).toFixed(2)} ₴/повідомлення (${best.sent} надіслано). ${worst.trigger}: ${(worst.rps / 100).toFixed(2)} ₴.`,
+              expected_impact: `Перерозподіл +30% бюджету на ${best.trigger} → ~${((best.rps * worst.sent * 0.3) / 100).toFixed(0)} ₴/міс`,
               confidence: 0.75,
               risk_level: "low",
               metrics: {

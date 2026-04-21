@@ -59,8 +59,8 @@ export const Route = createFileRoute("/hooks/agents/vip-concierge")({
               insight_type: "vip_silent",
               affected_layer: "customer",
               title: `💎 VIP мовчить: ${v.name ?? v.email ?? "клієнт"} (${daysSince.toFixed(0)} дн.)`,
-              description: `LTV $${(v.total_spent_cents / 100).toFixed(0)}, ${v.total_orders} замовлень. Звичайний цикл ${expected.toFixed(0)} дн.`,
-              expected_impact: `Персональне повідомлення з ексклюзивом може повернути ~$${((v.total_spent_cents / v.total_orders) / 100).toFixed(0)}`,
+              description: `LTV ${(v.total_spent_cents / 100).toFixed(0)} ₴, ${v.total_orders} замовлень. Звичайний цикл ${expected.toFixed(0)} дн.`,
+              expected_impact: `Персональне повідомлення з ексклюзивом може повернути ~${((v.total_spent_cents / v.total_orders) / 100).toFixed(0)} ₴`,
               confidence: 0.8,
               risk_level: daysSince > expected * 3 ? "high" : "medium",
               metrics: {

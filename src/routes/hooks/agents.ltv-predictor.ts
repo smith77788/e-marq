@@ -102,8 +102,8 @@ export const Route = createFileRoute("/hooks/agents/ltv-predictor")({
                 insight_type: "high_value_churn_risk",
                 affected_layer: "retention",
                 title: `${c.name || c.email || "VIP"}: ризик втрати високоцінного клієнта`,
-                description: `Predicted LTV $${(predictedLtv / 100).toFixed(0)}, не купував ${Math.round(daysSinceLast)} днів (зазвичай раз на ${Math.round(cycle)} днів).`,
-                expected_impact: `Win-back може зберегти ~$${(predictedLtv / 100).toFixed(0)} протягом 12 міс.`,
+                description: `Predicted LTV ${(predictedLtv / 100).toFixed(0)} ₴, не купував ${Math.round(daysSinceLast)} днів (зазвичай раз на ${Math.round(cycle)} днів).`,
+                expected_impact: `Win-back може зберегти ~${(predictedLtv / 100).toFixed(0)} ₴ протягом 12 міс.`,
                 confidence: 0.8,
                 risk_level: "high" as const,
                 metrics: {
