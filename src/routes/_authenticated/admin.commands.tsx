@@ -80,9 +80,7 @@ function AdminCommandsPage() {
     }));
     if (!search) return list;
     const q = search.toLowerCase();
-    return list.filter(
-      (a) => a.title.toLowerCase().includes(q) || a.id.toLowerCase().includes(q),
-    );
+    return list.filter((a) => a.title.toLowerCase().includes(q) || a.id.toLowerCase().includes(q));
   }, [search]);
 
   if (loading) return <Skeleton className="h-32 w-full" />;
