@@ -110,7 +110,7 @@ function HandbookPage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
             <Sparkles className="h-4 w-4 text-primary" />
-            ACOS
+            MARQ
           </Link>
           <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">
             <Link to="/how-it-works" className="hover:text-foreground transition-colors">
