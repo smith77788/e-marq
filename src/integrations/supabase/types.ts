@@ -2315,6 +2315,56 @@ export type Database = {
           },
         ]
       }
+      tenant_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          role: string
+          status: string
+          tenant_id: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          role?: string
+          status?: string
+          tenant_id: string
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          role?: string
+          status?: string
+          tenant_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_invitations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_memberships: {
         Row: {
           created_at: string
@@ -2562,6 +2612,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_tenant_invitation: { Args: { _token: string }; Returns: Json }
       add_balance: {
         Args: {
           _amount: number
@@ -2638,6 +2689,25 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_all_tenants_overview: {
+        Args: never
+        Returns: {
+          ai_credits_balance: number
+          ai_runs_this_period: number
+          created_at: string
+          customers_count: number
+          money_balance_cents: number
+          orders_this_period: number
+          plan_key: string
+          plan_name: string
+          products_count: number
+          status: string
+          subscription_status: string
+          tenant_id: string
+          tenant_name: string
+          tenant_slug: string
+        }[]
+      }
       get_current_usage: {
         Args: { _metric: string; _tenant_id: string }
         Returns: number
@@ -2645,6 +2715,18 @@ export type Database = {
       get_effective_limit: {
         Args: { _limit_key: string; _tenant_id: string }
         Returns: number
+      }
+      get_my_tenants: {
+        Args: never
+        Returns: {
+          membership_role: string
+          plan_key: string
+          plan_name: string
+          status: string
+          tenant_id: string
+          tenant_name: string
+          tenant_slug: string
+        }[]
       }
       get_public_order: { Args: { _order_id: string }; Returns: Json }
       get_tenant_plan_summary: { Args: { _tenant_id: string }; Returns: Json }
