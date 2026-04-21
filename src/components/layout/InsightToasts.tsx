@@ -113,10 +113,52 @@ export function InsightToasts() {
       )
       .subscribe();
 
+    const notifsChannel = supabase
+      .channel("pulse-dntrade-notifs")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "owner_notifications" },
+        (payload) => {
+          if (!initializedRef.current) return;
+          const row = payload.new as {
+            id: string;
+            tenant_id: string;
+            kind: string;
+            title: string;
+            body: string | null;
+            severity: string;
+          };
+          if (!tenantIds.includes(row.tenant_id)) return;
+          if (row.kind !== "dntrade_unhealthy" && row.kind !== "dntrade_partial_repeat") return;
+          if (seenNotifsRef.current.has(row.id)) return;
+          seenNotifsRef.current.add(row.id);
+          const brand = tenantNameById.get(row.tenant_id) ?? "";
+          const desc = `${brand ? brand + " · " : ""}${row.body ?? ""}`.slice(0, 220);
+          const isHigh = row.severity === "high" || row.kind === "dntrade_unhealthy";
+          (isHigh ? toast.error : toast.warning)(row.title, {
+            description: desc,
+            icon: isHigh ? (
+              <HeartPulse className="h-4 w-4 text-destructive" />
+            ) : (
+              <TriangleAlert className="h-4 w-4 text-warning" />
+            ),
+            duration: 9000,
+            action: {
+              label: "Деталі",
+              onClick: () => {
+                window.location.href = "/brand";
+              },
+            },
+          });
+        },
+      )
+      .subscribe();
+
     return () => {
       cancelled = true;
       void supabase.removeChannel(insightsChannel);
       void supabase.removeChannel(runsChannel);
+      void supabase.removeChannel(notifsChannel);
     };
   }, [tenants, t]);
 
