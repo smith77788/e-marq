@@ -88,7 +88,7 @@ export const Route = createFileRoute("/hooks/agents/customer-segments-auto")({
             {
               key: "vip",
               name: "VIP",
-              description: "5+ orders OR $500+ lifetime",
+              description: "5+ замовлень АБО 5 000 ₴+ за весь час",
               rules: { min_orders: 5, min_spent_cents: 50000, op: "OR" },
               match: (c) => c.total_orders >= 5 || c.total_spent_cents >= 50000,
             },
