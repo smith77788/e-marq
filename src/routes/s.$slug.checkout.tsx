@@ -317,6 +317,8 @@ function CheckoutPage() {
         _items: items,
         _payment_method: "manual",
         _shipping: shippingPayload,
+        _promo_code: discount?.valid ? promoCode.trim().toUpperCase() : null,
+        _loyalty_redeem_points: redeemApplied?.points ?? null,
       });
       if (rpcErr) throw rpcErr;
       if (!orderId) throw new Error("Не вдалося створити замовлення");
