@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   Lightbulb,
   Plug,
+  Puzzle,
   Radio,
   Settings,
   ShieldCheck,
