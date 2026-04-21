@@ -6,7 +6,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   METHOD_LABELS,
@@ -17,7 +17,10 @@ import {
 type Props = {
   integration: IntegrationDef;
   isConnected?: boolean;
+  canSync?: boolean;
+  syncing?: boolean;
   onSelect: (integration: IntegrationDef) => void;
+  onSync?: (integration: IntegrationDef) => void;
 };
 
 const IMPORT_LABELS: Record<string, string> = {
@@ -28,7 +31,7 @@ const IMPORT_LABELS: Record<string, string> = {
   events: "події",
 };
 
-export function IntegrationCard({ integration, isConnected, onSelect }: Props) {
+export function IntegrationCard({ integration, isConnected, canSync, syncing, onSelect, onSync }: Props) {
   const Icon = integration.icon;
   const status = STATUS_LABELS[integration.status];
   const isComingSoon = integration.status === "comingSoon";
@@ -76,15 +79,34 @@ export function IntegrationCard({ integration, isConnected, onSelect }: Props) {
           <Badge variant="outline" className={cn("text-[10px]", status.tone)}>
             {status.label}
           </Badge>
-          <Button
-            size="sm"
-            variant={isComingSoon ? "outline" : "default"}
-            onClick={() => onSelect(integration)}
-            className="gap-1"
-          >
-            {isComingSoon ? "Інструкція" : isConnected ? "Налаштувати" : "Підключити"}
-            <ArrowRight className="h-3 w-3" />
-          </Button>
+          <div className="flex gap-1">
+            {isConnected && canSync && onSync && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onSync(integration)}
+                disabled={syncing}
+                className="gap-1"
+                title="Запустити імпорт зараз"
+              >
+                {syncing ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-3 w-3" />
+                )}
+                Синк
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant={isComingSoon ? "outline" : "default"}
+              onClick={() => onSelect(integration)}
+              className="gap-1"
+            >
+              {isComingSoon ? "Інструкція" : isConnected ? "Налаштувати" : "Підключити"}
+              <ArrowRight className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -9,7 +9,8 @@
  */
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   AlertCircle,
   ArrowLeft,
@@ -24,6 +25,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { IntegrationCard } from "@/components/integrations/IntegrationCard";
@@ -35,6 +52,7 @@ import {
   type IntegrationCategory,
   type IntegrationDef,
 } from "@/lib/integrations/catalog";
+import { isConnectorSupported } from "@/lib/integrations/connectors";
 
 export const Route = createFileRoute("/_authenticated/brand/integrations")({
   component: IntegrationsHubPage,
@@ -42,11 +60,14 @@ export const Route = createFileRoute("/_authenticated/brand/integrations")({
 
 function IntegrationsHubPage() {
   const { current, currentTenantId, loading } = useTenantContext();
+  const qc = useQueryClient();
   const [active, setActive] = useState<IntegrationDef | null>(null);
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<IntegrationCategory | "all">("all");
+  const [syncTarget, setSyncTarget] = useState<IntegrationDef | null>(null);
+  const [syncEntity, setSyncEntity] = useState<"products" | "customers" | "orders">("products");
+  const [syncing, setSyncing] = useState<string | null>(null);
 
-  // Підключені інтеграції бренду — щоб показати «✓ Підключено» на картках.
   const { data: connected } = useQuery({
     queryKey: ["tenant-integrations", currentTenantId],
     enabled: !!currentTenantId,
@@ -60,7 +81,6 @@ function IntegrationsHubPage() {
     },
   });
 
-  // Останні імпорти — журнал унизу.
   const { data: jobs } = useQuery({
     queryKey: ["import-jobs", currentTenantId],
     enabled: !!currentTenantId,
@@ -80,6 +100,35 @@ function IntegrationsHubPage() {
     () => new Set((connected ?? []).filter((c) => c.is_active).map((c) => c.provider)),
     [connected],
   );
+
+  async function runSync(provider: string, entity: "products" | "customers" | "orders") {
+    if (!currentTenantId) return;
+    setSyncing(provider);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) throw new Error("Сесія не знайдена");
+      const res = await fetch(`/api/integrations/sync/${provider}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ entityKind: entity, tenantId: currentTenantId }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Помилка синку");
+      toast.success(`Синхронізовано: ${json.imported} рядків`, {
+        description: json.failed > 0 ? `Помилок: ${json.failed}` : undefined,
+      });
+      qc.invalidateQueries({ queryKey: ["import-jobs", currentTenantId] });
+      qc.invalidateQueries({ queryKey: ["tenant-integrations", currentTenantId] });
+    } catch (e) {
+      toast.error("Не вдалось синхронізувати", {
+        description: e instanceof Error ? e.message : String(e),
+      });
+    } finally {
+      setSyncing(null);
+      setSyncTarget(null);
+    }
+  }
 
   const filtered = useMemo(() => {
     return INTEGRATIONS.filter((i) => {
