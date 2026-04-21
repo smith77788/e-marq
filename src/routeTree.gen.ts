@@ -24,8 +24,11 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBrandRouteImport } from './routes/_authenticated/brand'
+import { Route as SSlugIndexRouteImport } from './routes/s.$slug.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as TrackSlugJsRouteImport } from './routes/track.$slug.js'
+import { Route as SSlugSearchRouteImport } from './routes/s.$slug.search'
+import { Route as SSlugCheckoutRouteImport } from './routes/s.$slug.checkout'
 import { Route as HooksTelegramPollRouteImport } from './routes/hooks/telegram.poll'
 import { Route as HooksTelegramNotifyOwnerRouteImport } from './routes/hooks/telegram.notify-owner'
 import { Route as HooksIntegrationsDntradeWeeklyDigestRouteImport } from './routes/hooks/integrations.dntrade-weekly-digest'
@@ -137,7 +140,9 @@ import { Route as AuthenticatedAdminPlansRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminOverviewRouteImport } from './routes/_authenticated/admin.overview'
 import { Route as AuthenticatedAdminDntradeHealthRouteImport } from './routes/_authenticated/admin.dntrade-health'
 import { Route as AuthenticatedAdminCommandsRouteImport } from './routes/_authenticated/admin.commands'
+import { Route as SSlugProductsProductIdRouteImport } from './routes/s.$slug.products.$productId'
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
+import { Route as SSlugCollectionsHandleRouteImport } from './routes/s.$slug.collections.$handle'
 import { Route as ApiIntegrationsSyncProviderRouteImport } from './routes/api/integrations.sync.$provider'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
 import { Route as AuthenticatedAdminDntradeHealthTenantIdRouteImport } from './routes/_authenticated/admin.dntrade-health.$tenantId'
@@ -217,6 +222,11 @@ const AuthenticatedBrandRoute = AuthenticatedBrandRouteImport.update({
   path: '/brand',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const SSlugIndexRoute = SSlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SSlugRoute,
+} as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -226,6 +236,16 @@ const TrackSlugJsRoute = TrackSlugJsRouteImport.update({
   id: '/track/$slug/js',
   path: '/track/$slug/js',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SSlugSearchRoute = SSlugSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => SSlugRoute,
+} as any)
+const SSlugCheckoutRoute = SSlugCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => SSlugRoute,
 } as any)
 const HooksTelegramPollRoute = HooksTelegramPollRouteImport.update({
   id: '/hooks/telegram/poll',
@@ -845,9 +865,19 @@ const AuthenticatedAdminCommandsRoute =
     path: '/admin/commands',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const SSlugProductsProductIdRoute = SSlugProductsProductIdRouteImport.update({
+  id: '/products/$productId',
+  path: '/products/$productId',
+  getParentRoute: () => SSlugRoute,
+} as any)
 const SSlugOrdersOrderIdRoute = SSlugOrdersOrderIdRouteImport.update({
   id: '/orders/$orderId',
   path: '/orders/$orderId',
+  getParentRoute: () => SSlugRoute,
+} as any)
+const SSlugCollectionsHandleRoute = SSlugCollectionsHandleRouteImport.update({
+  id: '/collections/$handle',
+  path: '/collections/$handle',
   getParentRoute: () => SSlugRoute,
 } as any)
 const ApiIntegrationsSyncProviderRoute =
@@ -1001,12 +1031,17 @@ export interface FileRoutesByFullPath {
   '/hooks/integrations/dntrade-weekly-digest': typeof HooksIntegrationsDntradeWeeklyDigestRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
+  '/s/$slug/checkout': typeof SSlugCheckoutRoute
+  '/s/$slug/search': typeof SSlugSearchRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/s/$slug/': typeof SSlugIndexRoute
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
+  '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
+  '/s/$slug/products/$productId': typeof SSlugProductsProductIdRoute
   '/api/public/integrations/inbound/$provider': typeof ApiPublicIntegrationsInboundProviderRoute
 }
 export interface FileRoutesByTo {
@@ -1023,7 +1058,6 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
-  '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
@@ -1135,12 +1169,17 @@ export interface FileRoutesByTo {
   '/hooks/integrations/dntrade-weekly-digest': typeof HooksIntegrationsDntradeWeeklyDigestRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
+  '/s/$slug/checkout': typeof SSlugCheckoutRoute
+  '/s/$slug/search': typeof SSlugSearchRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/s/$slug': typeof SSlugIndexRoute
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
+  '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
+  '/s/$slug/products/$productId': typeof SSlugProductsProductIdRoute
   '/api/public/integrations/inbound/$provider': typeof ApiPublicIntegrationsInboundProviderRoute
 }
 export interface FileRoutesById {
@@ -1271,12 +1310,17 @@ export interface FileRoutesById {
   '/hooks/integrations/dntrade-weekly-digest': typeof HooksIntegrationsDntradeWeeklyDigestRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
+  '/s/$slug/checkout': typeof SSlugCheckoutRoute
+  '/s/$slug/search': typeof SSlugSearchRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/s/$slug/': typeof SSlugIndexRoute
   '/_authenticated/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
+  '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
+  '/s/$slug/products/$productId': typeof SSlugProductsProductIdRoute
   '/api/public/integrations/inbound/$provider': typeof ApiPublicIntegrationsInboundProviderRoute
 }
 export interface FileRouteTypes {
@@ -1407,12 +1451,17 @@ export interface FileRouteTypes {
     | '/hooks/integrations/dntrade-weekly-digest'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
+    | '/s/$slug/checkout'
+    | '/s/$slug/search'
     | '/track/$slug/js'
     | '/admin/'
+    | '/s/$slug/'
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
     | '/api/integrations/sync/$provider'
+    | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
+    | '/s/$slug/products/$productId'
     | '/api/public/integrations/inbound/$provider'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -1429,7 +1478,6 @@ export interface FileRouteTypes {
     | '/profile'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
-    | '/s/$slug'
     | '/admin/commands'
     | '/admin/dntrade-health'
     | '/admin/overview'
@@ -1541,12 +1589,17 @@ export interface FileRouteTypes {
     | '/hooks/integrations/dntrade-weekly-digest'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
+    | '/s/$slug/checkout'
+    | '/s/$slug/search'
     | '/track/$slug/js'
     | '/admin'
+    | '/s/$slug'
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
     | '/api/integrations/sync/$provider'
+    | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
+    | '/s/$slug/products/$productId'
     | '/api/public/integrations/inbound/$provider'
   id:
     | '__root__'
@@ -1676,12 +1729,17 @@ export interface FileRouteTypes {
     | '/hooks/integrations/dntrade-weekly-digest'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
+    | '/s/$slug/checkout'
+    | '/s/$slug/search'
     | '/track/$slug/js'
     | '/_authenticated/admin/'
+    | '/s/$slug/'
     | '/_authenticated/admin/dntrade-health/$tenantId'
     | '/_authenticated/admin/tenants/$tenantId'
     | '/api/integrations/sync/$provider'
+    | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
+    | '/s/$slug/products/$productId'
     | '/api/public/integrations/inbound/$provider'
   fileRoutesById: FileRoutesById
 }
@@ -1909,6 +1967,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBrandRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/s/$slug/': {
+      id: '/s/$slug/'
+      path: '/'
+      fullPath: '/s/$slug/'
+      preLoaderRoute: typeof SSlugIndexRouteImport
+      parentRoute: typeof SSlugRoute
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/admin'
@@ -1922,6 +1987,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/track/$slug/js'
       preLoaderRoute: typeof TrackSlugJsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/s/$slug/search': {
+      id: '/s/$slug/search'
+      path: '/search'
+      fullPath: '/s/$slug/search'
+      preLoaderRoute: typeof SSlugSearchRouteImport
+      parentRoute: typeof SSlugRoute
+    }
+    '/s/$slug/checkout': {
+      id: '/s/$slug/checkout'
+      path: '/checkout'
+      fullPath: '/s/$slug/checkout'
+      preLoaderRoute: typeof SSlugCheckoutRouteImport
+      parentRoute: typeof SSlugRoute
     }
     '/hooks/telegram/poll': {
       id: '/hooks/telegram/poll'
@@ -2700,11 +2779,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCommandsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/s/$slug/products/$productId': {
+      id: '/s/$slug/products/$productId'
+      path: '/products/$productId'
+      fullPath: '/s/$slug/products/$productId'
+      preLoaderRoute: typeof SSlugProductsProductIdRouteImport
+      parentRoute: typeof SSlugRoute
+    }
     '/s/$slug/orders/$orderId': {
       id: '/s/$slug/orders/$orderId'
       path: '/orders/$orderId'
       fullPath: '/s/$slug/orders/$orderId'
       preLoaderRoute: typeof SSlugOrdersOrderIdRouteImport
+      parentRoute: typeof SSlugRoute
+    }
+    '/s/$slug/collections/$handle': {
+      id: '/s/$slug/collections/$handle'
+      path: '/collections/$handle'
+      fullPath: '/s/$slug/collections/$handle'
+      preLoaderRoute: typeof SSlugCollectionsHandleRouteImport
       parentRoute: typeof SSlugRoute
     }
     '/api/integrations/sync/$provider': {
@@ -2831,11 +2924,21 @@ const HandbookRouteWithChildren = HandbookRoute._addFileChildren(
 )
 
 interface SSlugRouteChildren {
+  SSlugCheckoutRoute: typeof SSlugCheckoutRoute
+  SSlugSearchRoute: typeof SSlugSearchRoute
+  SSlugIndexRoute: typeof SSlugIndexRoute
+  SSlugCollectionsHandleRoute: typeof SSlugCollectionsHandleRoute
   SSlugOrdersOrderIdRoute: typeof SSlugOrdersOrderIdRoute
+  SSlugProductsProductIdRoute: typeof SSlugProductsProductIdRoute
 }
 
 const SSlugRouteChildren: SSlugRouteChildren = {
+  SSlugCheckoutRoute: SSlugCheckoutRoute,
+  SSlugSearchRoute: SSlugSearchRoute,
+  SSlugIndexRoute: SSlugIndexRoute,
+  SSlugCollectionsHandleRoute: SSlugCollectionsHandleRoute,
   SSlugOrdersOrderIdRoute: SSlugOrdersOrderIdRoute,
+  SSlugProductsProductIdRoute: SSlugProductsProductIdRoute,
 }
 
 const SSlugRouteWithChildren = SSlugRoute._addFileChildren(SSlugRouteChildren)
