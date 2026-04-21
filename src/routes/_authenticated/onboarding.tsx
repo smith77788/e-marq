@@ -8,7 +8,8 @@
 import { useEffect, useState, type ReactElement } from "react";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Copy, Loader2, Mail, Sparkles } from "lucide-react";
+import { AlertCircle, ArrowLeft, ArrowRight, Check, Copy, Loader2, Mail, RefreshCw, Sparkles } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,19 +35,26 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
 function OnboardingPage() {
   const search = useSearch({ from: "/_authenticated/onboarding" });
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { t, lang } = useT();
   const qc = useQueryClient();
 
-  const { data: tenants } = useQuery({
+  // Чекаємо доки відновиться сесія, щоб RLS-запити не падали через auth.uid()=null
+  const authReady = !authLoading && !!user;
+
+  const tenantsQuery = useQuery({
     queryKey: ["my-tenants", user?.id],
-    enabled: !!user,
+    enabled: authReady,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+    staleTime: 30_000,
     queryFn: async () => {
       const { data, error } = await supabase.from("tenants").select("id, name, slug").order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
   });
+  const tenants = tenantsQuery.data;
 
   // Auto-select tenant from URL or first one
   const tenantId = search.tenant ?? tenants?.[0]?.id;
@@ -60,11 +68,18 @@ function OnboardingPage() {
 
   const [step, setStep] = useState(0);
 
-  // Статуси завершення кожного кроку — рахуємо за реальними даними з бази
-  const { data: status } = useQuery({
+  // Статуси завершення кожного кроку — рахуємо за реальними даними з бази.
+  // Запит виконується тільки коли auth повністю готова, з retry і явним
+  // станом помилки, щоб тимчасові збої мережі не показували "0/7".
+  const statusQuery = useQuery({
     queryKey: ["onboarding-status", tenantId],
-    enabled: !!tenantId,
+    enabled: authReady && !!tenantId,
     refetchInterval: 8000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+    staleTime: 5_000,
     queryFn: async () => {
       if (!tenantId) return null;
       const [tn, prod, cust, cfg, tg, inv] = await Promise.all([
@@ -75,6 +90,10 @@ function OnboardingPage() {
         supabase.from("telegram_chat_routing").select("chat_id", { count: "exact", head: true }).eq("tenant_id", tenantId),
         supabase.from("tenant_invitations").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
       ]);
+      // Якщо хоч один із запитів повернув помилку — кидаємо, щоб React Query
+      // зробив retry, а UI показав чесний "Помилка" замість фейкового "0/7".
+      const firstErr = [tn.error, prod.error, cust.error, cfg.error, tg.error, inv.error].find(Boolean);
+      if (firstErr) throw firstErr;
       const features = (cfg.data?.features ?? {}) as Record<string, unknown>;
       return {
         s1: !!(tn.data?.name && tn.data.name.trim().length > 1),
@@ -87,6 +106,32 @@ function OnboardingPage() {
       };
     },
   });
+  const status = statusQuery.data;
+
+  // 1. Поки auth відновлюється — show skeleton, не редіректимо і не показуємо "пусто"
+  if (!authReady) {
+    return <OnboardingSkeleton label={lang === "ua" ? "Відновлюємо ваш сеанс…" : "Restoring your session…"} />;
+  }
+
+  // 2. Поки tenants ще вантажаться — show skeleton
+  if (tenantsQuery.isLoading) {
+    return <OnboardingSkeleton label={lang === "ua" ? "Завантажуємо ваші бренди…" : "Loading your brands…"} />;
+  }
+
+  // 3. Помилка завантаження tenants — даємо Retry
+  if (tenantsQuery.isError) {
+    return (
+      <OnboardingError
+        message={
+          lang === "ua"
+            ? "Не вдалося завантажити список ваших брендів. Перевірте інтернет і спробуйте ще раз."
+            : "Couldn't load your brands. Check your connection and try again."
+        }
+        onRetry={() => tenantsQuery.refetch()}
+        retrying={tenantsQuery.isFetching}
+      />
+    );
+  }
 
   if (!tenantId || !tenantSlug) {
     return (
@@ -102,6 +147,11 @@ function OnboardingPage() {
       </Card>
     );
   }
+
+  // 4. Перше завантаження статусів — показуємо скелетон над майстром,
+  // щоб не блимало "0/7" перед справжніми даними.
+  const statusLoading = statusQuery.isLoading || (statusQuery.isFetching && !status);
+  const statusError = statusQuery.isError && !status;
 
   const stepDone = (i: number): boolean => {
     if (!status) return false;
