@@ -27,6 +27,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as TrackSlugJsRouteImport } from './routes/track.$slug.js'
 import { Route as HooksTelegramPollRouteImport } from './routes/hooks/telegram.poll'
 import { Route as HooksTelegramNotifyOwnerRouteImport } from './routes/hooks/telegram.notify-owner'
+import { Route as HooksIntegrationsDntradeWebhookHealthRouteImport } from './routes/hooks/integrations.dntrade-webhook-health'
 import { Route as HooksIntegrationsDntradeWebhookRouteImport } from './routes/hooks/integrations.dntrade-webhook'
 import { Route as HooksIntegrationsDntradeVerifyRouteImport } from './routes/hooks/integrations.dntrade-verify'
 import { Route as HooksIntegrationsDntradeSyncRouteImport } from './routes/hooks/integrations.dntrade-sync'
@@ -214,6 +215,12 @@ const HooksTelegramNotifyOwnerRoute =
   HooksTelegramNotifyOwnerRouteImport.update({
     id: '/hooks/telegram/notify-owner',
     path: '/hooks/telegram/notify-owner',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksIntegrationsDntradeWebhookHealthRoute =
+  HooksIntegrationsDntradeWebhookHealthRouteImport.update({
+    id: '/hooks/integrations/dntrade-webhook-health',
+    path: '/hooks/integrations/dntrade-webhook-health',
     getParentRoute: () => rootRouteImport,
   } as any)
 const HooksIntegrationsDntradeWebhookRoute =
@@ -868,6 +875,7 @@ export interface FileRoutesByFullPath {
   '/hooks/integrations/dntrade-sync': typeof HooksIntegrationsDntradeSyncRoute
   '/hooks/integrations/dntrade-verify': typeof HooksIntegrationsDntradeVerifyRoute
   '/hooks/integrations/dntrade-webhook': typeof HooksIntegrationsDntradeWebhookRoute
+  '/hooks/integrations/dntrade-webhook-health': typeof HooksIntegrationsDntradeWebhookHealthRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
@@ -985,6 +993,7 @@ export interface FileRoutesByTo {
   '/hooks/integrations/dntrade-sync': typeof HooksIntegrationsDntradeSyncRoute
   '/hooks/integrations/dntrade-verify': typeof HooksIntegrationsDntradeVerifyRoute
   '/hooks/integrations/dntrade-webhook': typeof HooksIntegrationsDntradeWebhookRoute
+  '/hooks/integrations/dntrade-webhook-health': typeof HooksIntegrationsDntradeWebhookHealthRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
@@ -1104,6 +1113,7 @@ export interface FileRoutesById {
   '/hooks/integrations/dntrade-sync': typeof HooksIntegrationsDntradeSyncRoute
   '/hooks/integrations/dntrade-verify': typeof HooksIntegrationsDntradeVerifyRoute
   '/hooks/integrations/dntrade-webhook': typeof HooksIntegrationsDntradeWebhookRoute
+  '/hooks/integrations/dntrade-webhook-health': typeof HooksIntegrationsDntradeWebhookHealthRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
@@ -1223,6 +1233,7 @@ export interface FileRouteTypes {
     | '/hooks/integrations/dntrade-sync'
     | '/hooks/integrations/dntrade-verify'
     | '/hooks/integrations/dntrade-webhook'
+    | '/hooks/integrations/dntrade-webhook-health'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
@@ -1340,6 +1351,7 @@ export interface FileRouteTypes {
     | '/hooks/integrations/dntrade-sync'
     | '/hooks/integrations/dntrade-verify'
     | '/hooks/integrations/dntrade-webhook'
+    | '/hooks/integrations/dntrade-webhook-health'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
@@ -1458,6 +1470,7 @@ export interface FileRouteTypes {
     | '/hooks/integrations/dntrade-sync'
     | '/hooks/integrations/dntrade-verify'
     | '/hooks/integrations/dntrade-webhook'
+    | '/hooks/integrations/dntrade-webhook-health'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
     | '/track/$slug/js'
@@ -1565,6 +1578,7 @@ export interface RootRouteChildren {
   HooksIntegrationsDntradeSyncRoute: typeof HooksIntegrationsDntradeSyncRoute
   HooksIntegrationsDntradeVerifyRoute: typeof HooksIntegrationsDntradeVerifyRoute
   HooksIntegrationsDntradeWebhookRoute: typeof HooksIntegrationsDntradeWebhookRoute
+  HooksIntegrationsDntradeWebhookHealthRoute: typeof HooksIntegrationsDntradeWebhookHealthRoute
   HooksTelegramNotifyOwnerRoute: typeof HooksTelegramNotifyOwnerRoute
   HooksTelegramPollRoute: typeof HooksTelegramPollRoute
   TrackSlugJsRoute: typeof TrackSlugJsRoute
@@ -1696,6 +1710,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/telegram/notify-owner'
       fullPath: '/hooks/telegram/notify-owner'
       preLoaderRoute: typeof HooksTelegramNotifyOwnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/integrations/dntrade-webhook-health': {
+      id: '/hooks/integrations/dntrade-webhook-health'
+      path: '/hooks/integrations/dntrade-webhook-health'
+      fullPath: '/hooks/integrations/dntrade-webhook-health'
+      preLoaderRoute: typeof HooksIntegrationsDntradeWebhookHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/integrations/dntrade-webhook': {
@@ -2557,6 +2578,8 @@ const rootRouteChildren: RootRouteChildren = {
   HooksIntegrationsDntradeSyncRoute: HooksIntegrationsDntradeSyncRoute,
   HooksIntegrationsDntradeVerifyRoute: HooksIntegrationsDntradeVerifyRoute,
   HooksIntegrationsDntradeWebhookRoute: HooksIntegrationsDntradeWebhookRoute,
+  HooksIntegrationsDntradeWebhookHealthRoute:
+    HooksIntegrationsDntradeWebhookHealthRoute,
   HooksTelegramNotifyOwnerRoute: HooksTelegramNotifyOwnerRoute,
   HooksTelegramPollRoute: HooksTelegramPollRoute,
   TrackSlugJsRoute: TrackSlugJsRoute,
