@@ -184,37 +184,32 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
   const username = msg.from?.username ?? msg.chat?.username ?? null;
   const firstName = msg.from?.first_name ?? msg.chat?.first_name ?? null;
 
-  // ---- /start <slug> binds chat → tenant ----
-  const startMatch = text.match(/^\/start\s+([a-z0-9_-]+)/i);
-  if (startMatch) {
-    const slug = startMatch[1].toLowerCase();
+  // ---- /start owner <slug> binds owner-chat to receive insights w/ buttons ----
+  const ownerStart = text.match(/^\/start\s+owner\s+([a-z0-9_-]+)/i);
+  if (ownerStart) {
+    const slug = ownerStart[1].toLowerCase();
     const { data: tenant } = await supabaseAdmin
       .from("tenants")
-      .select("id, slug, name")
+      .select("id, name")
       .eq("slug", slug)
       .maybeSingle();
     if (!tenant) {
-      await sendTelegramText(chatId, `Brand "${slug}" not found. Ask the brand for the correct link.`);
+      await sendTelegramText(chatId, `Brand "${slug}" not found.`);
       return;
     }
-    await supabaseAdmin
-      .from("telegram_chat_routing")
-      .upsert(
-        { chat_id: chatId, tenant_id: tenant.id, updated_at: new Date().toISOString() },
-        { onConflict: "chat_id" },
-      );
-    // Get brand name for greeting
-    const { data: cfg } = await supabaseAdmin
+    const { error: rpcErr } = await supabaseAdmin
       .from("tenant_configs")
-      .select("brand_name")
-      .eq("tenant_id", tenant.id)
-      .maybeSingle();
-    const brand = cfg?.brand_name ?? tenant.name;
+      .update({ owner_telegram_chat_id: chatId })
+      .eq("tenant_id", tenant.id);
+    if (rpcErr) {
+      await sendTelegramText(chatId, `Could not bind: ${rpcErr.message}`);
+      return;
+    }
     await sendTelegramText(
       chatId,
-      `👋 Welcome to <b>${brand}</b>! Ask me anything — I can show products, help you order, or notify you about new arrivals.`,
+      `🔔 You're now receiving owner notifications for <b>${tenant.name}</b>. Insights and pending agent actions will arrive here with Apply/Dismiss buttons.`,
     );
-    // Continue to upsert customer below
+    return;
   }
 
   // ---- Plain /start (no slug) ----
