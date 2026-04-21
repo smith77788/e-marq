@@ -56,8 +56,8 @@ function DashboardPage() {
               {tenants.map((t) => {
                 const statusLabel =
                   t.status === "active" ? "активний"
-                  : t.status === "paused" ? "призупинено"
                   : t.status === "suspended" ? "заблоковано"
+                  : t.status === "archived" ? "в архіві"
                   : t.status;
                 return (
                   <li key={t.id} className="flex items-center justify-between py-3">
