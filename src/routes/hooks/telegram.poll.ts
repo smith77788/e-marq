@@ -212,11 +212,42 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
     return;
   }
 
+  // ---- /start <slug> binds chat → tenant (customer flow) ----
+  const startMatch = text.match(/^\/start\s+([a-z0-9_-]+)/i);
+  if (startMatch && !ownerStart) {
+    const slug = startMatch[1].toLowerCase();
+    const { data: tenant } = await supabaseAdmin
+      .from("tenants")
+      .select("id, slug, name")
+      .eq("slug", slug)
+      .maybeSingle();
+    if (!tenant) {
+      await sendTelegramText(chatId, `Brand "${slug}" not found. Ask the brand for the correct link.`);
+      return;
+    }
+    await supabaseAdmin
+      .from("telegram_chat_routing")
+      .upsert(
+        { chat_id: chatId, tenant_id: tenant.id, updated_at: new Date().toISOString() },
+        { onConflict: "chat_id" },
+      );
+    const { data: cfg } = await supabaseAdmin
+      .from("tenant_configs")
+      .select("brand_name")
+      .eq("tenant_id", tenant.id)
+      .maybeSingle();
+    const brand = cfg?.brand_name ?? tenant.name;
+    await sendTelegramText(
+      chatId,
+      `👋 Welcome to <b>${brand}</b>! Ask me anything — I can show products, help you order, or notify you about new arrivals.`,
+    );
+  }
+
   // ---- Plain /start (no slug) ----
   if (text === "/start") {
     await sendTelegramText(
       chatId,
-      `Hi! To connect to a brand, send <code>/start &lt;brand-slug&gt;</code> (the brand will give you the link).`,
+      `Hi! Customers: <code>/start &lt;brand-slug&gt;</code>. Owners: <code>/start owner &lt;brand-slug&gt;</code>.`,
     );
     return;
   }
