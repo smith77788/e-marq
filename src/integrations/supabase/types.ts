@@ -1389,6 +1389,41 @@ export type Database = {
           },
         ]
       }
+      integration_rate_limits: {
+        Row: {
+          bucket_minute: string
+          created_at: string
+          id: string
+          provider: string
+          request_count: number
+          tenant_id: string
+        }
+        Insert: {
+          bucket_minute: string
+          created_at?: string
+          id?: string
+          provider: string
+          request_count?: number
+          tenant_id: string
+        }
+        Update: {
+          bucket_minute?: string
+          created_at?: string
+          id?: string
+          provider?: string
+          request_count?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_rate_limits_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_forecasts: {
         Row: {
           computed_at: string
@@ -3106,6 +3141,7 @@ export type Database = {
         }[]
       }
       get_public_order: { Args: { _order_id: string }; Returns: Json }
+      get_storefront_config: { Args: { _slug: string }; Returns: Json }
       get_tenant_plan_summary: { Args: { _tenant_id: string }; Returns: Json }
       has_role: {
         Args: {
@@ -3113,6 +3149,14 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_integration_rate_limit: {
+        Args: {
+          _max_per_minute?: number
+          _provider: string
+          _tenant_id: string
+        }
+        Returns: number
       }
       increment_usage: {
         Args: { _delta?: number; _metric: string; _tenant_id: string }
@@ -3176,6 +3220,16 @@ export type Database = {
       owner_topup_ai_credits: {
         Args: { _amount: number; _reason?: string; _tenant_id: string }
         Returns: number
+      }
+      place_storefront_order: {
+        Args: {
+          _customer_email: string
+          _customer_name: string
+          _items: Json
+          _payment_method?: string
+          _tenant_id: string
+        }
+        Returns: string
       }
       set_owner_telegram_chat: {
         Args: { _chat_id: string; _tenant_id: string }
