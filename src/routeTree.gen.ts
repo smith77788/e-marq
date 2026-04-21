@@ -13,6 +13,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as HandbookRouteImport } from './routes/handbook'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
@@ -129,6 +130,11 @@ const LoginRoute = LoginRouteImport.update({
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HandbookRoute = HandbookRouteImport.update({
+  id: '/handbook',
+  path: '/handbook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AgentsRoute = AgentsRouteImport.update({
@@ -661,6 +667,7 @@ const AuthenticatedAdminTenantsTenantIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
+  '/handbook': typeof HandbookRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -763,6 +770,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
+  '/handbook': typeof HandbookRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -867,6 +875,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/agents': typeof AgentsRoute
+  '/handbook': typeof HandbookRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -971,6 +980,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/agents'
+    | '/handbook'
     | '/how-it-works'
     | '/login'
     | '/pricing'
@@ -1073,6 +1083,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/agents'
+    | '/handbook'
     | '/how-it-works'
     | '/login'
     | '/pricing'
@@ -1176,6 +1187,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/agents'
+    | '/handbook'
     | '/how-it-works'
     | '/login'
     | '/pricing'
@@ -1280,6 +1292,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AgentsRoute: typeof AgentsRoute
+  HandbookRoute: typeof HandbookRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
@@ -1401,6 +1414,13 @@ declare module '@tanstack/react-router' {
       path: '/how-it-works'
       fullPath: '/how-it-works'
       preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/handbook': {
+      id: '/handbook'
+      path: '/handbook'
+      fullPath: '/handbook'
+      preLoaderRoute: typeof HandbookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/agents': {
@@ -2134,6 +2154,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AgentsRoute: AgentsRoute,
+  HandbookRoute: HandbookRoute,
   HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,

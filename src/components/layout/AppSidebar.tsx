@@ -1,6 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   Activity,
+  BookOpen,
   Bot,
   Building2,
   Cpu,
@@ -159,6 +160,17 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
 
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip={t("sb.handbook")}>
+              <Link
+                to="/handbook"
+                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
+              >
+                <BookOpen className="h-4 w-4 text-muted-foreground" />
+                {!collapsed && <span>{t("sb.handbook")}</span>}
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sb.storefront")}>
               <Link
