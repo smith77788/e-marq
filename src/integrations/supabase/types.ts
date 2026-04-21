@@ -407,6 +407,30 @@ export type Database = {
           },
         ]
       }
+      anon_event_rate_limit: {
+        Row: {
+          bucket_minute: string
+          count: number
+          id: number
+          session_id: string
+          tenant_id: string
+        }
+        Insert: {
+          bucket_minute: string
+          count?: number
+          id?: number
+          session_id: string
+          tenant_id: string
+        }
+        Update: {
+          bucket_minute?: string
+          count?: number
+          id?: number
+          session_id?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       balance_ledger: {
         Row: {
           actor_user_id: string | null
@@ -3079,6 +3103,7 @@ export type Database = {
         Args: { _limit_key: string; _metric: string; _tenant_id: string }
         Returns: boolean
       }
+      cleanup_anon_rate_limit: { Args: never; Returns: undefined }
       consume_ai_credits: {
         Args: {
           _amount: number
@@ -3128,6 +3153,7 @@ export type Database = {
         Args: { _limit_key: string; _tenant_id: string }
         Returns: number
       }
+      get_invitation_by_token: { Args: { _token: string }; Returns: Json }
       get_my_tenants: {
         Args: never
         Returns: {
@@ -3142,6 +3168,64 @@ export type Database = {
       }
       get_public_order: { Args: { _order_id: string }; Returns: Json }
       get_storefront_config: { Args: { _slug: string }; Returns: Json }
+      get_storefront_page: {
+        Args: { _page_slug: string; _slug: string }
+        Returns: {
+          agent: string | null
+          agent_generated: boolean
+          body_md: string | null
+          content_type: string
+          created_at: string
+          id: string
+          is_published: boolean
+          metadata: Json
+          published_at: string | null
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "content_pages"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_storefront_products: {
+        Args: { _slug: string }
+        Returns: {
+          currency: string
+          description: string
+          id: string
+          image_url: string
+          name: string
+          price_cents: number
+          stock_available: boolean
+        }[]
+      }
+      get_storefront_social_proof: {
+        Args: { _limit?: number; _slug: string }
+        Returns: {
+          created_at: string
+          display_text: string
+          event_type: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          metadata: Json
+          product_id: string | null
+          tenant_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "social_proof_events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_tenant_plan_summary: { Args: { _tenant_id: string }; Returns: Json }
       has_role: {
         Args: {
@@ -3234,6 +3318,10 @@ export type Database = {
       set_owner_telegram_chat: {
         Args: { _chat_id: string; _tenant_id: string }
         Returns: undefined
+      }
+      validate_promo_code: {
+        Args: { _code: string; _tenant_id: string }
+        Returns: Json
       }
     }
     Enums: {
