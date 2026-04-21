@@ -326,7 +326,7 @@ export const Route = createFileRoute("/hooks/ingest")({
                 tenant_id: tenantId,
                 status: "paid",
                 paid_at: body.created_at ?? new Date().toISOString(),
-                total_cents: totalCents,
+                total_cents: totalCentsFinal,
                 currency,
                 customer_email: body.customer?.email ?? (p.customer_email as string) ?? null,
                 customer_name: body.customer?.name ?? (p.customer_name as string) ?? null,
@@ -338,7 +338,7 @@ export const Route = createFileRoute("/hooks/ingest")({
                   source: (p.source as string) ?? "pixel",
                   external_user_id: body.customer?.user_id ?? null,
                   external_order_id: externalOrderId,
-                  enriched: totalCents > 0,
+                  enriched: totalCentsFinal > 0,
                 } as never,
               })
               .select("id")
