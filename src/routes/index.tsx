@@ -101,7 +101,7 @@ function Index() {
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
             {t("home.heroSub")}
           </p>
-          <div className="mt-10 flex items-center justify-center gap-3">
+          <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
             <Button asChild size="lg">
               <Link to="/signup">{t("home.heroCtaPrimary")}</Link>
             </Button>
@@ -218,7 +218,7 @@ function Index() {
           <p className="mt-4 text-base text-muted-foreground">
             {t("home.cta.body")}
           </p>
-          <div className="mt-8 flex items-center justify-center gap-3">
+          <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
             <Button asChild size="lg">
               <Link to="/signup">{t("home.cta.primary")}</Link>
             </Button>
