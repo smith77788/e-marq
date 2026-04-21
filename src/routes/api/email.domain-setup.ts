@@ -170,9 +170,25 @@ export const Route = createFileRoute("/api/email/domain-setup")({
           updated_at: new Date().toISOString(),
         };
 
-        const { error: upErr } = await supabaseAdmin
+        // Update existing or insert new tenant_configs row
+        const { data: existing } = await supabaseAdmin
           .from("tenant_configs")
-          .upsert({ tenant_id: tenantId, features }, { onConflict: "tenant_id" });
+          .select("tenant_id")
+          .eq("tenant_id", tenantId)
+          .maybeSingle();
+
+        const upErr = existing
+          ? (await supabaseAdmin
+              .from("tenant_configs")
+              .update({ features: features as never })
+              .eq("tenant_id", tenantId)).error
+          : (await supabaseAdmin
+              .from("tenant_configs")
+              .insert({
+                tenant_id: tenantId,
+                brand_name: domain,
+                features: features as never,
+              })).error;
         if (upErr) return jsonResponse({ error: upErr.message }, 500);
 
         return jsonResponse({

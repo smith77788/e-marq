@@ -289,8 +289,8 @@ export const Route = createFileRoute("/api/public/email/resend-webhook")({
           resend_message_id: resendId,
           event_type: eventType,
           tenant_id: tenantId,
-          payload: payload as unknown as Record<string, unknown>,
-        });
+          payload: payload as never,
+        } as never);
 
         // 3) Suppress on bounce/complaint.
         if (toEmail) {

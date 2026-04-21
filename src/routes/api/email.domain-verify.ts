@@ -101,7 +101,8 @@ export const Route = createFileRoute("/api/email/domain-verify")({
           features.email_settings = email;
           await supabaseAdmin
             .from("tenant_configs")
-            .upsert({ tenant_id: tenantId, features }, { onConflict: "tenant_id" });
+            .update({ features: features as never })
+            .eq("tenant_id", tenantId);
 
           return jsonResponse({ ok: true, status: j.status ?? null, records: j.records ?? null });
         } catch (e) {
