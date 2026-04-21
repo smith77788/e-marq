@@ -3,7 +3,12 @@
  * Створює запис в import_jobs з результатом.
  */
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { parsePriceToCents, type EntityKind, type ParsedRow } from "./parser";
+
+type ProductInsert = Database["public"]["Tables"]["products"]["Insert"];
+type CustomerInsert = Database["public"]["Tables"]["customers"]["Insert"];
+type OrderInsert = Database["public"]["Tables"]["orders"]["Insert"];
 
 export type ImportInput = {
   tenantId: string;
@@ -70,7 +75,7 @@ export async function runImport(input: ImportInput): Promise<ImportResult> {
           skipped++;
           continue;
         }
-        const payload = {
+        const payload: ProductInsert = {
           tenant_id: tenantId,
           name,
           sku: get(row, "sku") || null,
@@ -95,7 +100,7 @@ export async function runImport(input: ImportInput): Promise<ImportResult> {
           skipped++;
           continue;
         }
-        const payload = {
+        const payload: CustomerInsert = {
           tenant_id: tenantId,
           name,
           email: get(row, "email").toLowerCase() || null,
@@ -120,17 +125,29 @@ export async function runImport(input: ImportInput): Promise<ImportResult> {
           skipped++;
           continue;
         }
-        const status = (get(row, "status") || "pending").toLowerCase();
-        const validStatuses = ["pending", "paid", "shipped", "completed", "cancelled", "refunded"];
-        const finalStatus = validStatuses.includes(status) ? status : "pending";
-        const payload = {
+        // Маппінг популярних статусів з різних систем у наш enum
+        // (pending | paid | fulfilled | cancelled | refunded)
+        const rawStatus = (get(row, "status") || "pending").toLowerCase().trim();
+        type OrderStatus = "pending" | "paid" | "fulfilled" | "cancelled" | "refunded";
+        const statusMap: Record<string, OrderStatus> = {
+          pending: "pending", new: "pending", processing: "pending", "оплата очікується": "pending",
+          paid: "paid", оплачено: "paid", complete: "paid",
+          shipped: "fulfilled", completed: "fulfilled", fulfilled: "fulfilled", delivered: "fulfilled", доставлено: "fulfilled",
+          cancelled: "cancelled", canceled: "cancelled", скасовано: "cancelled",
+          refunded: "refunded", повернено: "refunded",
+        };
+        const finalStatus: OrderStatus = statusMap[rawStatus] ?? "pending";
+        // payment_method обмежений тригером БД до 'stripe_card' | 'manual'
+        const rawPm = get(row, "payment_method").toLowerCase();
+        const paymentMethod = rawPm === "stripe_card" || rawPm === "stripe" ? "stripe_card" : "manual";
+        const orderPayload: OrderInsert = {
           tenant_id: tenantId,
           customer_name: customerName,
           customer_email: get(row, "customer_email").toLowerCase() || null,
           total_cents: totalCents,
           currency: (get(row, "currency") || "UAH").toUpperCase().slice(0, 3),
-          status: finalStatus as "pending" | "paid" | "shipped" | "completed" | "cancelled" | "refunded",
-          payment_method: get(row, "payment_method") || "manual",
+          status: finalStatus,
+          payment_method: paymentMethod,
           paid_at: finalStatus === "paid" ? new Date().toISOString() : null,
           metadata: {
             external_id: get(row, "external_id") || null,
@@ -138,7 +155,7 @@ export async function runImport(input: ImportInput): Promise<ImportResult> {
             import_job_id: job.id,
           },
         };
-        const { error } = await supabase.from("orders").insert(payload);
+        const { error } = await supabase.from("orders").insert(orderPayload);
         if (error) {
           failed++;
           errors.push({ row: i + 2, message: error.message });
