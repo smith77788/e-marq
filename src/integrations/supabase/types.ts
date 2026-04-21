@@ -2320,6 +2320,51 @@ export type Database = {
         | "message_received"
         | "session_start"
         | "reorder_triggered"
+        | "page_viewed"
+        | "product_clicked"
+        | "remove_from_cart"
+        | "cart_viewed"
+        | "begin_checkout"
+        | "checkout_clicked"
+        | "checkout_viewed"
+        | "checkout_abandoned"
+        | "checkout_failed"
+        | "offer_shown"
+        | "offer_skipped"
+        | "upsell_accepted"
+        | "upsell_dismissed"
+        | "exit_intent_shown"
+        | "exit_intent_dismissed"
+        | "exit_intent_converted"
+        | "bot_started"
+        | "search_performed"
+        | "wishlist_added"
+        | "wishlist_removed"
+        | "review_submitted"
+        | "promo_applied"
+        | "promo_failed"
+        | "share_clicked"
+        | "phone_call_clicked"
+        | "telegram_link_clicked"
+        | "chat_opened"
+        | "chat_message_sent"
+        | "newsletter_signup"
+        | "ai_chat_product_click"
+        | "ai_chat_product_recommended"
+        | "reorder_completed"
+        | "app_opened"
+        | "deep_link_opened"
+        | "push_received"
+        | "push_opened"
+        | "oauth_callback_success"
+        | "apk_install_prompt_shown"
+        | "apk_install_prompt_clicked"
+        | "apk_install_prompt_dismissed"
+        | "bot_reorder_reminder_sent"
+        | "referral_link_copied"
+        | "referral_link_shared"
+        | "referral_clicked"
+        | "referral_rewarded"
       order_status: "pending" | "paid" | "fulfilled" | "cancelled" | "refunded"
       tenant_role: "owner" | "admin" | "member"
       tenant_status: "active" | "suspended" | "archived"
@@ -2464,6 +2509,51 @@ export const Constants = {
         "message_received",
         "session_start",
         "reorder_triggered",
+        "page_viewed",
+        "product_clicked",
+        "remove_from_cart",
+        "cart_viewed",
+        "begin_checkout",
+        "checkout_clicked",
+        "checkout_viewed",
+        "checkout_abandoned",
+        "checkout_failed",
+        "offer_shown",
+        "offer_skipped",
+        "upsell_accepted",
+        "upsell_dismissed",
+        "exit_intent_shown",
+        "exit_intent_dismissed",
+        "exit_intent_converted",
+        "bot_started",
+        "search_performed",
+        "wishlist_added",
+        "wishlist_removed",
+        "review_submitted",
+        "promo_applied",
+        "promo_failed",
+        "share_clicked",
+        "phone_call_clicked",
+        "telegram_link_clicked",
+        "chat_opened",
+        "chat_message_sent",
+        "newsletter_signup",
+        "ai_chat_product_click",
+        "ai_chat_product_recommended",
+        "reorder_completed",
+        "app_opened",
+        "deep_link_opened",
+        "push_received",
+        "push_opened",
+        "oauth_callback_success",
+        "apk_install_prompt_shown",
+        "apk_install_prompt_clicked",
+        "apk_install_prompt_dismissed",
+        "bot_reorder_reminder_sent",
+        "referral_link_copied",
+        "referral_link_shared",
+        "referral_clicked",
+        "referral_rewarded",
       ],
       order_status: ["pending", "paid", "fulfilled", "cancelled", "refunded"],
       tenant_role: ["owner", "admin", "member"],
