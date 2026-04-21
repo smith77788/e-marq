@@ -369,7 +369,7 @@ function TenantDetailPage() {
           <TabsTrigger value="products">Товари</TabsTrigger>
           <TabsTrigger value="orders">Замовлення</TabsTrigger>
           <TabsTrigger value="config">Налаштування</TabsTrigger>
-          <TabsTrigger value="acos-debug">Агенти (debug)</TabsTrigger>
+          <TabsTrigger value="acos-debug">ШІ-помічники (тех)</TabsTrigger>
         </TabsList>
 
         <TabsContent value="plan" className="space-y-4">
@@ -423,19 +423,19 @@ function TenantDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
-                ACOS-rich synthetic dataset
+                Демо-дані для тестування ШІ-помічників
               </CardTitle>
               <CardDescription>
-                90 days of realistic D2C signals: cohorts (new / returning / VIP-active /
-                VIP-churning), weekly seasonality, product affinity, stockout-risk SKUs,
-                cart-abandonment, and search-no-results events. Designed so ACOS agents can find
-                real insights — not just placeholder data.
+                Реалістичний набір даних за 90 днів: групи клієнтів (нові, постійні, найцінніші
+                активні та такі, що можуть піти), сезонність по тижнях, набори товарів, що часто
+                купують разом, ризики закінчення на складі, покинуті кошики та пошук без
+                результатів. Створено для того, щоб ШІ-помічники могли знаходити справжні підказки.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="acos-scale">Scale</Label>
+                  <Label htmlFor="acos-scale">Розмір набору</Label>
                   <Select
                     value={acosScale}
                     onValueChange={(v) => setAcosScale(v as AcosScale)}
@@ -444,17 +444,17 @@ function TenantDetailPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="small">Small — 120 customers</SelectItem>
-                      <SelectItem value="medium">Medium — 250 customers</SelectItem>
-                      <SelectItem value="large">Large — 600 customers</SelectItem>
+                      <SelectItem value="small">Малий — 120 клієнтів</SelectItem>
+                      <SelectItem value="medium">Середній — 250 клієнтів</SelectItem>
+                      <SelectItem value="large">Великий — 600 клієнтів</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="flex items-end gap-3">
                   <div className="flex-1 space-y-1">
-                    <Label htmlFor="acos-skip">Skip if data exists</Label>
+                    <Label htmlFor="acos-skip">Пропустити, якщо дані вже є</Label>
                     <p className="text-xs text-muted-foreground">
-                      Avoid duplicating data on tenants that already have a catalog.
+                      Не створювати дублі для брендів, у яких уже є каталог.
                     </p>
                   </div>
                   <Switch
@@ -471,7 +471,7 @@ function TenantDetailPage() {
                   disabled={generateAcosMutation.isPending}
                 >
                   <Sparkles className="mr-2 h-4 w-4" />
-                  {generateAcosMutation.isPending ? "Generating…" : "Generate ACOS dataset"}
+                  {generateAcosMutation.isPending ? "Створюємо…" : "Створити демо-набір даних"}
                 </Button>
                 <Button
                   variant="ghost"
@@ -480,35 +480,35 @@ function TenantDetailPage() {
                   disabled={clearDemoMutation.isPending}
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  {clearDemoMutation.isPending ? "Clearing…" : "Clear all data"}
+                  {clearDemoMutation.isPending ? "Очищаємо…" : "Очистити всі дані"}
                 </Button>
               </div>
 
               {lastAcosResult && (
                 <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
-                  <p className="text-xs font-medium text-foreground">Last generation</p>
+                  <p className="text-xs font-medium text-foreground">Останнє створення</p>
                   <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-4">
                     <div>
-                      <span className="text-muted-foreground">Products: </span>
+                      <span className="text-muted-foreground">Товарів: </span>
                       <span className="font-medium text-foreground">{lastAcosResult.products}</span>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Customers: </span>
+                      <span className="text-muted-foreground">Клієнтів: </span>
                       <span className="font-medium text-foreground">{lastAcosResult.customers}</span>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Orders: </span>
+                      <span className="text-muted-foreground">Замовлень: </span>
                       <span className="font-medium text-foreground">{lastAcosResult.orders}</span>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Events: </span>
+                      <span className="text-muted-foreground">Подій: </span>
                       <span className="font-medium text-foreground">{lastAcosResult.events}</span>
                     </div>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1">
                     {Object.entries(lastAcosResult.cohorts).map(([cohort, count]) => (
                       <Badge key={cohort} variant="outline" className="text-[10px]">
-                        {cohort.replace("_", " ")}: {count}
+                        {COHORT_LABEL[cohort] ?? cohort.replace("_", " ")}: {count}
                       </Badge>
                     ))}
                   </div>
@@ -522,9 +522,9 @@ function TenantDetailPage() {
           <Card>
             <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
               <div>
-                <CardTitle>Products</CardTitle>
+                <CardTitle>Товари</CardTitle>
                 <CardDescription>
-                  {productsQuery.data?.length ?? 0} total. Manage catalog for this tenant.
+                  Усього: {productsQuery.data?.length ?? 0}. Керуйте каталогом цього бренду.
                 </CardDescription>
               </div>
               <Button size="sm" onClick={() => setCreateOpen(true)}>
