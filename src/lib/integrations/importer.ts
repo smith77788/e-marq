@@ -125,12 +125,18 @@ export async function runImport(input: ImportInput): Promise<ImportResult> {
           skipped++;
           continue;
         }
-        const status = (get(row, "status") || "pending").toLowerCase();
-        const validStatuses = ["pending", "paid", "shipped", "completed", "cancelled", "refunded"] as const;
-        type OrderStatus = (typeof validStatuses)[number];
-        const finalStatus: OrderStatus = (validStatuses as readonly string[]).includes(status)
-          ? (status as OrderStatus)
-          : "pending";
+        // Маппінг популярних статусів з різних систем у наш enum
+        // (pending | paid | fulfilled | cancelled | refunded)
+        const rawStatus = (get(row, "status") || "pending").toLowerCase().trim();
+        type OrderStatus = "pending" | "paid" | "fulfilled" | "cancelled" | "refunded";
+        const statusMap: Record<string, OrderStatus> = {
+          pending: "pending", new: "pending", processing: "pending", "оплата очікується": "pending",
+          paid: "paid", оплачено: "paid", complete: "paid",
+          shipped: "fulfilled", completed: "fulfilled", fulfilled: "fulfilled", delivered: "fulfilled", доставлено: "fulfilled",
+          cancelled: "cancelled", canceled: "cancelled", скасовано: "cancelled",
+          refunded: "refunded", повернено: "refunded",
+        };
+        const finalStatus: OrderStatus = statusMap[rawStatus] ?? "pending";
         // payment_method обмежений тригером БД до 'stripe_card' | 'manual'
         const rawPm = get(row, "payment_method").toLowerCase();
         const paymentMethod = rawPm === "stripe_card" || rawPm === "stripe" ? "stripe_card" : "manual";
