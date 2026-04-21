@@ -97,7 +97,7 @@ export function MemoryInspector({ tenantId }: Props) {
       if (error) throw error;
     },
     onSuccess: (_, vars) => {
-      toast.success(vars.next ? "Pattern reactivated" : "Pattern deactivated");
+      toast.success(vars.next ? "Правило знову працює" : "Правило вимкнено");
       qc.invalidateQueries({ queryKey: ["ai-memory", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -126,17 +126,17 @@ export function MemoryInspector({ tenantId }: Props) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Brain className="h-5 w-5 text-primary" />
-              Memory Inspector
+              Памʼять системи
             </CardTitle>
             <CardDescription>
-              Patterns the agents have learned. Deactivate ones that hurt revenue.
+              Правила, яких агенти навчилися самі. Вимкніть ті, що зменшують виторг.
             </CardDescription>
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span><strong className="text-foreground">{stats.active}</strong>/{stats.total} active</span>
+            <span><strong className="text-foreground">{stats.active}</strong>/{stats.total} увімкнено</span>
             <span className="flex items-center gap-1">
               <CheckCircle2 className="h-3 w-3 text-success" />
-              <strong className="text-foreground">{(stats.winRate * 100).toFixed(0)}%</strong> win rate
+              <strong className="text-foreground">{(stats.winRate * 100).toFixed(0)}%</strong> успішних
             </span>
           </div>
         </div>
@@ -144,17 +144,17 @@ export function MemoryInspector({ tenantId }: Props) {
       <CardContent className="space-y-4">
         <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
           <TabsList>
-            <TabsTrigger value="active">Active</TabsTrigger>
-            <TabsTrigger value="inactive">Inactive</TabsTrigger>
-            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="active">Увімкнені</TabsTrigger>
+            <TabsTrigger value="inactive">Вимкнені</TabsTrigger>
+            <TabsTrigger value="all">Усі</TabsTrigger>
           </TabsList>
         </Tabs>
 
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading memory…</p>
+          <p className="text-sm text-muted-foreground">Завантаження памʼяті…</p>
         ) : filtered.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No patterns yet. Agents need a few cycles of feedback to learn.
+            Поки немає правил. Агенти мають попрацювати кілька циклів, щоб навчитися.
           </p>
         ) : (
           <ul className="space-y-2">
@@ -179,7 +179,7 @@ export function MemoryInspector({ tenantId }: Props) {
                       </div>
                       <p className="text-sm font-medium text-foreground">{formatRule(m.learned_rule || m.pattern_key)}</p>
                       <p className="mt-0.5 text-[11px] text-muted-foreground">
-                        {m.success_count}✓ / {m.failure_count}✗ · last seen {new Date(m.last_observed_at).toLocaleDateString()}
+                        {m.success_count}✓ / {m.failure_count}✗ · востаннє {new Date(m.last_observed_at).toLocaleDateString("uk-UA")}
                       </p>
                     </div>
                     <Button
@@ -191,16 +191,16 @@ export function MemoryInspector({ tenantId }: Props) {
                       {toggle.isPending && toggle.variables?.id === m.id ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : m.is_active ? (
-                        <><PowerOff className="mr-1 h-3.5 w-3.5" /> Disable</>
+                        <><PowerOff className="mr-1 h-3.5 w-3.5" /> Вимкнути</>
                       ) : (
-                        <><Power className="mr-1 h-3.5 w-3.5" /> Enable</>
+                        <><Power className="mr-1 h-3.5 w-3.5" /> Увімкнути</>
                       )}
                     </Button>
                   </div>
                   <div className="mt-2 flex items-center gap-2">
                     <Progress value={Math.round(winRate * 100)} className="h-1.5 flex-1" />
                     <span className="w-20 text-right text-[11px] tabular-nums text-muted-foreground">
-                      {(m.confidence * 100).toFixed(0)}% conf
+                      {(m.confidence * 100).toFixed(0)}% впевн.
                     </span>
                   </div>
                 </li>

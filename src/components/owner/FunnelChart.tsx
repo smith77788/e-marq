@@ -12,11 +12,11 @@ import { supabase } from "@/integrations/supabase/client";
 type Props = { tenantId: string };
 
 const STEPS: Array<{ key: string; label: string; types: string[] }> = [
-  { key: "session", label: "Sessions",       types: ["session_start"] },
-  { key: "view",    label: "Product viewed", types: ["product_viewed"] },
-  { key: "cart",    label: "Add to cart",    types: ["add_to_cart"] },
-  { key: "checkout",label: "Checkout",       types: ["checkout_started"] },
-  { key: "purchase",label: "Purchase",       types: ["purchase_completed"] },
+  { key: "session", label: "Зайшли на сайт",       types: ["session_start"] },
+  { key: "view",    label: "Переглянули товар",    types: ["product_viewed"] },
+  { key: "cart",    label: "Додали в кошик",       types: ["add_to_cart"] },
+  { key: "checkout",label: "Почали оформлення",    types: ["checkout_started"] },
+  { key: "purchase",label: "Оплатили",             types: ["purchase_completed"] },
 ];
 
 const STEP_COLORS = [
@@ -63,7 +63,7 @@ export function FunnelChart({ tenantId }: Props) {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-sm">
             <Filter className="h-4 w-4 text-primary" />
-            Conversion funnel
+            Лійка продажів
           </CardTitle>
         </CardHeader>
         <CardContent><div className="h-48 animate-pulse rounded-md bg-muted/30" /></CardContent>
@@ -78,10 +78,10 @@ export function FunnelChart({ tenantId }: Props) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
           <Filter className="h-4 w-4 text-primary" />
-          Conversion funnel · 30d
+          Лійка продажів · 30 днів
         </CardTitle>
         <CardDescription className="text-xs">
-          Session-level drop-off across the buyer journey.
+          Скільки людей доходить до оплати на кожному кроці.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2.5">
@@ -115,7 +115,7 @@ export function FunnelChart({ tenantId }: Props) {
                 />
                 <div className="absolute inset-0 flex items-center px-2">
                   <span className="text-[10px] font-medium text-foreground/80">
-                    {((count / max) * 100).toFixed(1)}% of top
+                    {((count / max) * 100).toFixed(1)}% від першого кроку
                   </span>
                 </div>
               </div>
@@ -124,7 +124,7 @@ export function FunnelChart({ tenantId }: Props) {
         })}
         {counts.session === 0 && counts.view === 0 && (
           <div className="rounded-md border border-dashed border-border bg-muted/20 p-3 text-center text-[11px] text-muted-foreground">
-            No tracked events yet. Install the tracking snippet to see your live funnel.
+            Поки що подій немає. Встановіть на сайт код відстеження — і тут зʼявиться жива лійка.
           </div>
         )}
       </CardContent>

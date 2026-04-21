@@ -97,7 +97,7 @@ export function ChannelSetup({ tenantId, tenantSlug }: Props) {
 
         {origin && (
           <div className="text-[10px] text-muted-foreground/70 font-mono break-all">
-            Tracking endpoint: {origin}/track/{tenantSlug}.js
+            Адреса для відстеження: {origin}/track/{tenantSlug}.js
           </div>
         )}
       </CardContent>

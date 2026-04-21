@@ -31,9 +31,9 @@ type Customer = {
 
 const STAGE_VARIANT: Record<string, { label: string; cls: string }> = {
   vip: { label: "VIP", cls: "bg-primary/15 text-primary border-primary/30" },
-  active: { label: "Active", cls: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
-  at_risk: { label: "At risk", cls: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" },
-  new: { label: "New", cls: "bg-muted text-muted-foreground border-border" },
+  active: { label: "активний", cls: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  at_risk: { label: "ризик піти", cls: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" },
+  new: { label: "новий", cls: "bg-muted text-muted-foreground border-border" },
 };
 
 function fmtUsd(cents: number) {
@@ -75,13 +75,13 @@ export function TopCustomers({ tenantId }: Props) {
         body: JSON.stringify({ tenant_id: tenantId, customer_id: customer.id }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Failed");
-      toast.success(`Winback queued via ${json.channel}`, {
-        description: `${json.dispatched ?? 0} delivered immediately`,
+      if (!res.ok) throw new Error(json.error ?? "Не вдалося надіслати");
+      toast.success(`Повернення клієнта надіслано через ${json.channel}`, {
+        description: `Доставлено одразу: ${json.dispatched ?? 0}`,
       });
       refetch();
     } catch (e) {
-      toast.error("Winback failed", { description: (e as Error).message });
+      toast.error("Не вдалося надіслати", { description: (e as Error).message });
     } finally {
       setBusy(null);
     }
@@ -92,10 +92,10 @@ export function TopCustomers({ tenantId }: Props) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
           <Crown className="h-4 w-4 text-primary" />
-          Top customers (lifetime value)
+          Найкращі клієнти (за сумою покупок)
         </CardTitle>
         <CardDescription className="text-xs">
-          One-click manual winback for your highest-value buyers.
+          Поверніть найцінніших покупців одним натисканням.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -107,7 +107,7 @@ export function TopCustomers({ tenantId }: Props) {
           </div>
         ) : !customers || customers.length === 0 ? (
           <div className="rounded-md border border-dashed border-border bg-muted/20 p-4 text-center text-xs text-muted-foreground">
-            No customers yet. Seed demo data or wait for first orders.
+            Поки немає клієнтів. Завантажте демо-дані або зачекайте на перші замовлення.
           </div>
         ) : (
           <div className="space-y-1.5">
@@ -123,12 +123,12 @@ export function TopCustomers({ tenantId }: Props) {
                 <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-2">
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-foreground">{c.name ?? c.email ?? "Anonymous"}</p>
+                      <p className="truncate text-sm font-medium text-foreground">{c.name ?? c.email ?? "Анонім"}</p>
                       <p className="truncate text-[11px] text-muted-foreground">
-                        {c.total_orders} orders · {fmtUsd(c.total_spent_cents)}
+                        {c.total_orders} замовлень · {fmtUsd(c.total_spent_cents)}
                         {since !== null && (
                           <span className={overdue ? "ml-1 text-amber-600 dark:text-amber-400" : "ml-1"}>
-                            · {since}d ago{overdue ? " (overdue)" : ""}
+                            · {since} дн. тому{overdue ? " (час нагадати)" : ""}
                           </span>
                         )}
                       </p>
@@ -142,10 +142,10 @@ export function TopCustomers({ tenantId }: Props) {
                       disabled={!canMessage || busy === c.id}
                       onClick={() => sendWinback(c)}
                       className="h-7 gap-1 text-xs"
-                      title={!canMessage ? (c.consent_marketing ? "No reachable channel" : "Customer opted out") : "Send personal AI winback"}
+                      title={!canMessage ? (c.consent_marketing ? "Немає каналу для звʼязку" : "Клієнт відмовився від розсилок") : "Надіслати персональне нагадування від ШІ"}
                     >
                       {busy === c.id ? <Loader2 className="h-3 w-3 animate-spin" /> : !canMessage ? <AlertCircle className="h-3 w-3" /> : <Send className="h-3 w-3" />}
-                      Winback
+                      Повернути
                     </Button>
                   </div>
                 </div>

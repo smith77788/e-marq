@@ -58,26 +58,26 @@ export function CustomerRoster({ tenantId }: Props) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5 text-primary" />
-          Customer roster
+          Список покупців
         </CardTitle>
         <CardDescription>
-          Who the system knows about and what it predicts for them.
+          Кого система знає та що для них прогнозує.
         </CardDescription>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Mini label="Customers" value={totals.count} />
-          <Mini label="VIPs" value={totals.vip} />
-          <Mini label="Reachable on TG" value={totals.withTg} />
-          <Mini label="Overdue to reorder" value={totals.overdue} highlight />
+          <Mini label="Усього покупців" value={totals.count} />
+          <Mini label="VIP" value={totals.vip} />
+          <Mini label="Є у Telegram" value={totals.withTg} />
+          <Mini label="Час повторити покупку" value={totals.overdue} highlight />
         </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <p className="text-sm text-muted-foreground">Завантаження…</p>
         ) : customers.length === 0 ? (
           <div className="rounded-md border border-dashed border-border bg-muted/20 p-6 text-center">
             <Users className="mx-auto h-8 w-8 text-muted-foreground/60" />
-            <p className="mt-3 text-sm font-medium">No customers yet</p>
-            <p className="mt-1 text-xs text-muted-foreground">Customers appear here automatically when orders are paid.</p>
+            <p className="mt-3 text-sm font-medium">Поки немає покупців</p>
+            <p className="mt-1 text-xs text-muted-foreground">Покупці зʼявляться тут автоматично, коли надійде перша оплата.</p>
           </div>
         ) : (
           <ScrollArea className="max-h-[480px] pr-3">
@@ -86,15 +86,22 @@ export function CustomerRoster({ tenantId }: Props) {
                 const stage = STAGE_STYLE[c.lifecycle_stage] ?? STAGE_STYLE.new;
                 const overdue =
                   c.predicted_next_order_at && new Date(c.predicted_next_order_at) < new Date();
+                const stageLabel =
+                  c.lifecycle_stage === "vip" ? "VIP"
+                  : c.lifecycle_stage === "active" ? "активний"
+                  : c.lifecycle_stage === "new" ? "новий"
+                  : c.lifecycle_stage === "at_risk" ? "ризик піти"
+                  : c.lifecycle_stage === "dormant" ? "сплячий"
+                  : c.lifecycle_stage;
                 return (
                   <div key={c.id} className="rounded-lg border border-border bg-card p-3">
                     <div className="flex items-center gap-2">
                       {c.lifecycle_stage === "vip" && <Crown className="h-3.5 w-3.5 text-warning-foreground" />}
                       <p className="text-sm font-medium text-foreground">
-                        {c.name ?? c.email ?? (c.telegram_username ? `@${c.telegram_username}` : "anonymous")}
+                        {c.name ?? c.email ?? (c.telegram_username ? `@${c.telegram_username}` : "анонім")}
                       </p>
                       <Badge variant="outline" className={`ml-auto text-[10px] ${stage}`}>
-                        {c.lifecycle_stage}
+                        {stageLabel}
                       </Badge>
                     </div>
                     <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
@@ -107,17 +114,17 @@ export function CustomerRoster({ tenantId }: Props) {
                     </div>
                     <div className="mt-2 grid grid-cols-3 gap-2 text-[11px]">
                       <div>
-                        <span className="text-muted-foreground">Orders</span>
+                        <span className="text-muted-foreground">Замовлень</span>
                         <p className="font-medium text-foreground">{c.total_orders}</p>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">LTV</span>
+                        <span className="text-muted-foreground">Витратив усього</span>
                         <p className="font-medium text-foreground">{Math.round(c.total_spent_cents / 100).toLocaleString("uk-UA")} ₴</p>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Next order</span>
+                        <span className="text-muted-foreground">Наступна покупка</span>
                         <p className={`font-medium ${overdue ? "text-destructive" : "text-foreground"}`}>
-                          {c.predicted_next_order_at ? new Date(c.predicted_next_order_at).toLocaleDateString() : "—"}
+                          {c.predicted_next_order_at ? new Date(c.predicted_next_order_at).toLocaleDateString("uk-UA") : "—"}
                         </p>
                       </div>
                     </div>

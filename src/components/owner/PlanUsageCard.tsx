@@ -23,7 +23,7 @@ export function PlanUsageCard({ tenantId }: { tenantId: string }) {
     },
   });
 
-  if (isLoading) return <p className="text-xs text-muted-foreground">Loading plan…</p>;
+  if (isLoading) return <p className="text-xs text-muted-foreground">Завантаження тарифу…</p>;
   if (!data) return null;
 
   // Anti-cheat banner: any metric >= 90%?
@@ -46,9 +46,15 @@ export function PlanUsageCard({ tenantId }: { tenantId: string }) {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <Crown className="h-4 w-4 text-warning" />
-            Your plan
+            Ваш тариф
             <PlanBadge planKey={data.plan.key} planName={data.plan.name} />
-            <Badge variant="outline">{data.subscription.status}</Badge>
+            <Badge variant="outline">{
+              data.subscription.status === "active" ? "активна"
+              : data.subscription.status === "trial" ? "пробний період"
+              : data.subscription.status === "past_due" ? "не оплачено"
+              : data.subscription.status === "canceled" ? "скасовано"
+              : data.subscription.status
+            }</Badge>
           </CardTitle>
           <Button
             size="sm"
@@ -56,19 +62,19 @@ export function PlanUsageCard({ tenantId }: { tenantId: string }) {
             type="button"
             onClick={() => void navigate({ to: "/brand/billing", search: { tenant: tenantId } })}
           >
-            Billing & balance <ExternalLink className="ml-1 h-3 w-3" />
+            Оплата та баланс <ExternalLink className="ml-1 h-3 w-3" />
           </Button>
         </div>
         <CardDescription>
           Безлімітне користування агентами в межах тарифу · Період до{" "}
-          {new Date(data.subscription.current_period_end).toLocaleDateString()}
+          {new Date(data.subscription.current_period_end).toLocaleDateString("uk-UA")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <UsageMeters summary={data} compact />
         {overLimit && (
           <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-2 text-xs text-destructive">
-            ⚠ You've hit a plan limit. New records of that type will be blocked. Contact support to upgrade.
+            ⚠ Ви досягли ліміту тарифу. Нові записи цього типу будуть заблоковані. Звʼяжіться з підтримкою, щоб підвищити тариф.
           </div>
         )}
       </CardContent>

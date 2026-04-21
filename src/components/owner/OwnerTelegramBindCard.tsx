@@ -46,11 +46,11 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(startCommand);
-    toast.success("Copied — paste it in @your_bot");
+    toast.success("Скопійовано — вставте в чат із ботом");
   };
 
   const handleUnbind = async () => {
-    if (!confirm("Stop receiving Telegram notifications for this brand?")) return;
+    if (!confirm("Перестати отримувати сповіщення в Telegram для цього магазину?")) return;
     setBusy(true);
     const { error } = await supabase.rpc("set_owner_telegram_chat", {
       _tenant_id: tenantId,
@@ -61,7 +61,7 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
       toast.error(error.message);
       return;
     }
-    toast.success("Telegram unbound");
+    toast.success("Telegram відʼєднано");
     qc.invalidateQueries({ queryKey: ["owner-tg-binding", tenantId] });
   };
 
@@ -70,8 +70,8 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
     const { error } = await supabase.from("owner_notifications").insert({
       tenant_id: tenantId,
       kind: "test_ping",
-      title: "Test ping from dashboard",
-      body: "If you see this in Telegram with buttons, integration works ✅",
+      title: "Тестове сповіщення з кабінету",
+      body: "Якщо ви бачите це в Telegram із кнопками — інтеграція працює ✅",
       severity: "high",
     });
     setBusy(false);
@@ -79,8 +79,18 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
       toast.error(error.message);
       return;
     }
-    toast.success("Sent — check Telegram in a few seconds");
+    toast.success("Надіслано — перевірте Telegram за кілька секунд");
     setTimeout(() => refetch(), 4000);
+  };
+
+  const STATUS_LABEL: Record<string, string> = { sent: "надіслано", failed: "помилка", queued: "у черзі", pending: "очікує" };
+  const KIND_LABEL: Record<string, string> = {
+    insight: "підказка",
+    test_ping: "тестове",
+    pending_action: "дія агента",
+    dntrade_unhealthy: "DN Trade недоступний",
+    dntrade_partial_repeat: "DN Trade збої",
+    dntrade_weekly_digest: "тижневий звіт DN Trade",
   };
 
   return (
@@ -92,46 +102,46 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
           ) : (
             <BellOff className="h-4 w-4 text-muted-foreground" />
           )}
-          Telegram notifications for owner
+          Сповіщення в Telegram для власника
           {isBound ? (
-            <Badge variant="outline" className="border-success/40 text-success">connected</Badge>
+            <Badge variant="outline" className="border-success/40 text-success">підключено</Badge>
           ) : (
-            <Badge variant="outline">not connected</Badge>
+            <Badge variant="outline">не підключено</Badge>
           )}
         </CardTitle>
         <CardDescription className="text-xs">
-          Get insights and pending agent actions pushed straight to your personal Telegram with
-          inline <b>Apply</b> / <b>Dismiss</b> / <b>View</b> buttons.
+          Отримуйте підказки та дії агентів прямо в особистий Telegram із кнопками{" "}
+          <b>Застосувати</b> / <b>Відхилити</b> / <b>Переглянути</b>.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
         {isLoading ? (
-          <p className="text-xs text-muted-foreground">Loading…</p>
+          <p className="text-xs text-muted-foreground">Завантаження…</p>
         ) : isBound ? (
           <>
             <div className="rounded-md border border-border bg-muted/20 p-3 text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Chat ID</span>
+                <span className="text-muted-foreground">ID вашого чату</span>
                 <code className="font-mono text-foreground">{data!.chatId}</code>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" variant="default" onClick={handleTest} disabled={busy}>
                 <Send className="mr-1.5 h-3.5 w-3.5" />
-                Send test ping
+                Надіслати тест
               </Button>
               <Button size="sm" variant="outline" onClick={() => refetch()} disabled={busy}>
                 <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
-                Refresh
+                Оновити
               </Button>
               <Button size="sm" variant="ghost" onClick={handleUnbind} disabled={busy}>
-                Unbind
+                Відʼєднати
               </Button>
             </div>
             {data!.recent.length > 0 && (
               <div>
                 <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Recent pushes
+                  Останні сповіщення
                 </p>
                 <div className="space-y-1">
                   {data!.recent.map((r, i) => (
@@ -139,7 +149,7 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
                       key={i}
                       className="flex items-center justify-between rounded border border-border/50 px-2 py-1 text-xs"
                     >
-                      <span className="font-mono text-muted-foreground">{r.source_kind}</span>
+                      <span className="text-muted-foreground">{KIND_LABEL[r.source_kind] ?? r.source_kind}</span>
                       <Badge
                         variant="outline"
                         className={
@@ -150,7 +160,7 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
                               : ""
                         }
                       >
-                        {r.status}
+                        {STATUS_LABEL[r.status] ?? r.status}
                       </Badge>
                     </div>
                   ))}
@@ -161,9 +171,9 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
         ) : (
           <>
             <ol className="list-decimal space-y-1 pl-5 text-xs text-muted-foreground">
-              <li>Open the same Telegram bot your customers use.</li>
+              <li>Відкрийте того ж Telegram-бота, яким користуються ваші клієнти.</li>
               <li>
-                Send this command:{" "}
+                Надішліть цю команду:{" "}
                 <button
                   type="button"
                   onClick={handleCopy}
@@ -171,13 +181,13 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
                 >
                   {startCommand}
                 </button>{" "}
-                (tap to copy).
+                (натисніть, щоб скопіювати).
               </li>
-              <li>The bot will reply, and your chat will be linked here automatically.</li>
+              <li>Бот відповість, і ваш чат автоматично прив'яжеться тут.</li>
             </ol>
             <Button size="sm" variant="outline" onClick={() => refetch()}>
               <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
-              I've sent the command — check now
+              Я надіслав команду — перевірте зараз
             </Button>
           </>
         )}

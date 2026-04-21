@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
+import { uk } from "date-fns/locale";
 import { Activity, Brain, CheckCircle2, MessageCircle, Sparkles, AlertTriangle, RotateCcw } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -73,14 +74,19 @@ export function AgentTimeline({ tenantId }: Props) {
 
       const out: TimelineItem[] = [];
 
+      const RISK_LABEL: Record<string, string> = { high: "високий", medium: "середній", low: "низький" };
+      const STATUS_LABEL: Record<string, string> = { new: "нова", applied: "застосовано", dismissed: "відхилена", sent: "надіслано", failed: "помилка", queued: "у черзі", success: "успіх", running: "виконується", error: "помилка" };
+      const TRIGGER_LABEL: Record<string, string> = { reorder: "повторне замовлення", winback: "повернення клієнта", abandoned_cart: "покинутий кошик", promo: "промо", sales_reply: "відповідь продавця" };
+      const CHANNEL_LABEL: Record<string, string> = { telegram: "Telegram", email: "email", sms: "SMS" };
+
       for (const r of insightsRes.data ?? []) {
         out.push({
           id: `i-${r.id}`,
           ts: new Date(r.created_at).getTime(),
           kind: "insight",
           title: r.title,
-          detail: `${r.insight_type.replace(/_/g, " ")} · ${r.status}`,
-          badge: r.risk_level,
+          detail: `${r.insight_type.replace(/_/g, " ")} · ${STATUS_LABEL[r.status] ?? r.status}`,
+          badge: RISK_LABEL[r.risk_level] ?? r.risk_level,
           badgeVariant: r.risk_level === "high" ? "destructive" : r.risk_level === "medium" ? "default" : "secondary",
         });
       }
@@ -90,15 +96,15 @@ export function AgentTimeline({ tenantId }: Props) {
         const result = (r.actual_result ?? {}) as Record<string, unknown>;
         let detail = r.expected_impact ?? r.action_type.replace(/_/g, " ");
         if (typeof result.queued_messages === "number") {
-          detail = `Queued ${result.queued_messages} VIP nudges`;
+          detail = `Поставлено в чергу ${result.queued_messages} нагадувань для VIP`;
         } else if (typeof result.old_price_cents === "number" && typeof result.new_price_cents === "number") {
-          detail = `Price ${(result.old_price_cents / 100).toFixed(2)} ₴ → ${(result.new_price_cents / 100).toFixed(2)} ₴`;
+          detail = `Ціна ${(result.old_price_cents / 100).toFixed(2)} ₴ → ${(result.new_price_cents / 100).toFixed(2)} ₴`;
         }
         out.push({
           id: `a-${r.id}`,
           ts: new Date(r.applied_at).getTime(),
           kind: "action",
-          title: `Applied: ${r.action_type.replace(/_/g, " ")}`,
+          title: `Виконано: ${r.action_type.replace(/_/g, " ")}`,
           detail,
           badge: r.agent_id,
           badgeVariant: "outline",
@@ -111,9 +117,9 @@ export function AgentTimeline({ tenantId }: Props) {
           id: `o-${r.id}`,
           ts: new Date(ts).getTime(),
           kind: "outbound",
-          title: `${r.trigger_kind.replace(/_/g, " ")} → ${r.channel}`,
+          title: `${TRIGGER_LABEL[r.trigger_kind] ?? r.trigger_kind.replace(/_/g, " ")} → ${CHANNEL_LABEL[r.channel] ?? r.channel}`,
           detail: r.body.slice(0, 110) + (r.body.length > 110 ? "…" : ""),
-          badge: r.status,
+          badge: STATUS_LABEL[r.status] ?? r.status,
           badgeVariant: r.status === "sent" ? "default" : r.status === "failed" ? "destructive" : "secondary",
         });
       }
@@ -123,9 +129,9 @@ export function AgentTimeline({ tenantId }: Props) {
           id: `r-${r.id}`,
           ts: new Date(r.started_at).getTime(),
           kind: "run",
-          title: `${r.agent_id} produced ${r.insights_created} insight${r.insights_created === 1 ? "" : "s"}`,
-          detail: `agent run · ${r.status}`,
-          badge: r.status,
+          title: `${r.agent_id} створив ${r.insights_created} ${r.insights_created === 1 ? "підказку" : "підказок"}`,
+          detail: `запуск агента · ${STATUS_LABEL[r.status] ?? r.status}`,
+          badge: STATUS_LABEL[r.status] ?? r.status,
           badgeVariant: r.status === "success" ? "secondary" : "destructive",
         });
       }
@@ -139,18 +145,18 @@ export function AgentTimeline({ tenantId }: Props) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-primary" />
-          Activity timeline
+          Стрічка подій
         </CardTitle>
         <CardDescription>
-          Everything the autonomous system did in the last 7 days. Refreshes every 30s.
+          Усе, що зробила автономна система за останні 7 днів. Оновлюється кожні 30 с.
         </CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <p className="text-sm text-muted-foreground">Завантаження…</p>
         ) : items.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No activity yet. Once agents run and discover patterns, you'll see a live feed here.
+            Поки немає подій. Коли агенти запрацюють і знайдуть закономірності — тут зʼявиться стрічка наживо.
           </p>
         ) : (
           <ScrollArea className="h-[420px] pr-3">
@@ -174,7 +180,7 @@ export function AgentTimeline({ tenantId }: Props) {
                     </div>
                     <p className="mt-0.5 text-xs text-muted-foreground">{item.detail}</p>
                     <p className="mt-0.5 text-[10px] text-muted-foreground/70">
-                      {formatDistanceToNow(item.ts, { addSuffix: true })}
+                      {formatDistanceToNow(item.ts, { addSuffix: true, locale: uk })}
                     </p>
                   </li>
                 );

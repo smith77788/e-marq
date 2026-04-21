@@ -305,8 +305,8 @@ function MissionControlContent() {
         >
           <Building2 className="h-5 w-5 text-primary" />
           <div className="flex-1">
-            <p className="text-sm font-semibold text-foreground">All tenants</p>
-            <p className="text-xs text-muted-foreground">Provision · configure · drill-down</p>
+            <p className="text-sm font-semibold text-foreground">Усі магазини</p>
+            <p className="text-xs text-muted-foreground">Створити, налаштувати, переглянути деталі</p>
           </div>
         </Link>
         <Link
@@ -315,8 +315,8 @@ function MissionControlContent() {
         >
           <Bot className="h-5 w-5 text-accent" />
           <div className="flex-1">
-            <p className="text-sm font-semibold text-foreground">Agent library</p>
-            <p className="text-xs text-muted-foreground">Live runs · per-agent diagnostics</p>
+            <p className="text-sm font-semibold text-foreground">Бібліотека агентів</p>
+            <p className="text-xs text-muted-foreground">Запуски наживо · діагностика по кожному</p>
           </div>
         </Link>
         <Link
@@ -325,8 +325,8 @@ function MissionControlContent() {
         >
           <ShoppingBag className="h-5 w-5 text-success" />
           <div className="flex-1">
-            <p className="text-sm font-semibold text-foreground">Owner cockpit</p>
-            <p className="text-xs text-muted-foreground">Preview the brand-side experience</p>
+            <p className="text-sm font-semibold text-foreground">Кабінет власника</p>
+            <p className="text-xs text-muted-foreground">Подивитись, як це бачить власник магазину</p>
           </div>
         </Link>
       </div>
