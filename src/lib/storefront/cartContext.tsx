@@ -171,18 +171,18 @@ export function CartProvider({
   }, [tenantId]);
 
   const cartLines = useMemo<CartLine[]>(() => {
-    return Object.entries(cart)
-      .map(([productId, item]) => {
-        const product = productCache[productId];
-        if (!product) return null;
-        return {
-          product_id: productId,
-          variant_id: null,
-          quantity: item.quantity,
-          product,
-        };
-      })
-      .filter((x): x is CartLine => x !== null);
+    const lines: CartLine[] = [];
+    for (const [productId, item] of Object.entries(cart)) {
+      const product = productCache[productId];
+      if (!product) continue;
+      lines.push({
+        product_id: productId,
+        variant_id: null,
+        quantity: item.quantity,
+        product,
+      });
+    }
+    return lines;
   }, [cart, productCache]);
 
   const cartCount = cartLines.reduce((s, l) => s + l.quantity, 0);
