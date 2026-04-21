@@ -73,6 +73,7 @@ function Index() {
             <Link to="/how-it-works" className="hover:text-foreground transition-colors">{t("site.nav.how")}</Link>
             <Link to="/agents" className="hover:text-foreground transition-colors">{t("site.nav.agents")}</Link>
             <Link to="/pricing" className="hover:text-foreground transition-colors">{t("site.nav.pricing")}</Link>
+            <Link to="/handbook" className="hover:text-foreground transition-colors">{t("site.nav.handbook")}</Link>
           </nav>
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
