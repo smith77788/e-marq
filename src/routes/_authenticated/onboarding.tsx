@@ -88,6 +88,21 @@ function OnboardingPage() {
     },
   });
 
+  if (!tenantId || !tenantSlug) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("onb.title")}</CardTitle>
+          <CardDescription>
+            {lang === "ua"
+              ? "Спочатку створіть бренд або попросіть головного адміністратора додати вас."
+              : "Create a brand first or ask a super-admin to add you."}
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
   const stepDone = (i: number): boolean => {
     if (!status) return false;
     return [status.s1, status.s2, status.s3, status.s4, status.s5, status.s6, status.s7][i] ?? false;
@@ -103,8 +118,10 @@ function OnboardingPage() {
     { titleKey: "onb.s7.title", descKey: "onb.s7.desc", render: () => <Step7Team tenantId={tenantId} tenantSlug={tenantSlug} /> },
   ];
 
-  const pct = Math.round(((step + 1) / steps.length) * 100);
+  const doneCount = steps.filter((_, i) => stepDone(i)).length;
+  const pct = Math.round((doneCount / steps.length) * 100);
   const isLast = step === steps.length - 1;
+  const currentDone = stepDone(step);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -119,18 +136,53 @@ function OnboardingPage() {
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>
-            {t("onb.step")} {step + 1} {t("onb.of")} {steps.length}
+            {lang === "ua" ? "Виконано" : "Completed"}: {doneCount} / {steps.length}
           </span>
           <span>{pct}%</span>
         </div>
         <Progress value={pct} className="h-2" />
+        {/* Step dots: дозволяють перейти на будь-який крок одним кліком */}
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {steps.map((s, i) => {
+            const done = stepDone(i);
+            const active = i === step;
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setStep(i)}
+                title={t(s.titleKey)}
+                className={`flex h-7 min-w-[28px] items-center justify-center rounded-md border px-2 text-xs font-medium transition-colors ${
+                  active
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : done
+                      ? "border-success/50 bg-success/10 text-success hover:bg-success/20"
+                      : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/50"
+                }`}
+              >
+                {done ? <Check className="h-3.5 w-3.5" /> : i + 1}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
+            {currentDone ? (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-success/15 text-success">
+                <Check className="h-3.5 w-3.5" />
+              </span>
+            ) : (
+              <Sparkles className="h-5 w-5 text-primary" />
+            )}
             {t(steps[step].titleKey)}
+            {currentDone && (
+              <span className="ml-auto rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-success">
+                {lang === "ua" ? "Готово" : "Done"}
+              </span>
+            )}
           </CardTitle>
           <CardDescription>{t(steps[step].descKey)}</CardDescription>
         </CardHeader>
