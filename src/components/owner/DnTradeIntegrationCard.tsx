@@ -251,11 +251,39 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
     return `${origin}/hooks/integrations/dntrade-webhook?tenant=${tenantId}&secret=${data.webhook_secret}`;
   }, [data?.webhook_secret, tenantId]);
 
+  const healthData = health.data;
+  const healthTone =
+    healthData?.status === "healthy"
+      ? {
+          className: "border-success/40 text-success",
+          icon: CheckCircle2,
+          label: "health: OK",
+        }
+      : healthData?.status === "degraded"
+        ? {
+            className: "border-warning/40 text-warning",
+            icon: TriangleAlert,
+            label: "health: degraded",
+          }
+        : healthData
+          ? {
+              className: "border-destructive/40 text-destructive",
+              icon: HeartPulse,
+              label: "health: down",
+            }
+          : null;
+  const healthTooltip = healthData
+    ? [
+        ...(healthData.blockers ?? []).map((b) => `⛔ ${b}`),
+        ...(healthData.warnings ?? []).map((w) => `⚠ ${w}`),
+      ].join("\n") || "Перевірок без зауважень."
+    : "Перевіряємо стан…";
+
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Plug className="h-4 w-4 text-primary" />
             <CardTitle className="text-base">DN Trade інтеграція</CardTitle>
             {isConfigured && (
@@ -263,7 +291,24 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
                 <ShieldCheck className="mr-1 h-3 w-3" /> підключено
               </Badge>
             )}
+            {healthTone && (
+              <Badge
+                variant="outline"
+                className={`text-[10px] ${healthTone.className}`}
+                title={healthTooltip}
+              >
+                <healthTone.icon className="mr-1 h-3 w-3" /> {healthTone.label}
+              </Badge>
+            )}
           </div>
+          {isSuperAdmin && (
+            <Link
+              to="/admin/dntrade-health"
+              className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+            >
+              <Activity className="h-3 w-3" /> Адмін-дашборд
+            </Link>
+          )}
         </div>
         <CardDescription className="text-xs">
           Підтягуємо товари, залишки, клієнтів і замовлення з{" "}
