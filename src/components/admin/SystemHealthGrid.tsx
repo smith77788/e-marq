@@ -1,5 +1,6 @@
 import { CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { humanizeAgentId } from "@/lib/acos/agentLabels";
 
 export type AgentHealthRow = {
   agent_id: string;
@@ -32,7 +33,7 @@ const STATUS_META: Record<
 export function SystemHealthGrid({ rows }: Props) {
   if (rows.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">No agent runs in the last 24h.</p>
+      <p className="text-sm text-muted-foreground">За останні 24 години агенти ще не запускались.</p>
     );
   }
   // Aggregate by agent_id
@@ -63,15 +64,15 @@ export function SystemHealthGrid({ rows }: Props) {
               "group flex items-center gap-2 rounded-lg border border-border/60 bg-card/50 p-2 ring-1 transition-all hover:scale-[1.02]",
               meta.bg,
             )}
-            title={`${row.runs_total} runs · ${row.runs_failed} failed · ${row.insights_created} insights`}
+            title={`${humanizeAgentId(row.agent_id)} — ${row.runs_total} запусків · ${row.runs_failed} з помилкою · ${row.insights_created} підказок`}
           >
             <Icon className={cn("h-4 w-4 shrink-0", meta.color)} />
             <div className="min-w-0">
               <p className="truncate text-[11px] font-medium text-foreground">
-                {row.agent_id}
+                {humanizeAgentId(row.agent_id)}
               </p>
               <p className="text-[10px] text-muted-foreground tabular-nums">
-                {row.runs_total} runs · {row.insights_created} ins
+                {row.runs_total} запусків · {row.insights_created} підказок
               </p>
             </div>
           </div>

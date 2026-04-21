@@ -125,8 +125,8 @@ export function AgentHealthHeatmap({ tenantId }: Props) {
                   const failureRate = r.total > 0 ? r.failed / r.total : 0;
                   return (
                     <tr key={r.agent_id} className="border-t border-border/40">
-                      <td className="pr-2 py-1 font-mono text-[10px] text-foreground sticky left-0 bg-card max-w-[120px] truncate">
-                        {r.agent_id}
+                      <td className="pr-2 py-1 text-[10px] text-foreground sticky left-0 bg-card max-w-[140px] truncate" title={humanizeAgentId(r.agent_id)}>
+                        {humanizeAgentId(r.agent_id)}
                       </td>
                       {grid.dayKeys.map((dk) => {
                         const d = r.perDay.get(dk);

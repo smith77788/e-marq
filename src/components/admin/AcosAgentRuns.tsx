@@ -4,6 +4,7 @@ import { Activity, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { humanizeAgentId, AGENT_HUMAN_LABELS } from "@/lib/acos/agentLabels";
 
 type Props = { tenantId: string };
 
@@ -18,18 +19,7 @@ type RunRow = {
   metadata: Record<string, unknown>;
 };
 
-const AGENT_LABEL: Record<string, string> = {
-  churn_risk_predictor: "Churn Risk",
-  stockout_predictor: "Stockout",
-  aov_leak_detector: "AOV Leak",
-  search_gap_detector: "Search Gap",
-  aov_optimizer: "AOV Optimizer",
-  price_optimizer: "Price Optimizer",
-  price_revert_safety: "Price Revert",
-  bot_quality_audit: "Bot Quality",
-  customer_segmentation: "Segmentation",
-  sales_bot: "Sales Bot",
-};
+const AGENT_LABEL = AGENT_HUMAN_LABELS;
 
 export function AcosAgentRuns({ tenantId }: Props) {
   const { data: runs = [], isLoading } = useQuery({
@@ -106,7 +96,7 @@ export function AcosAgentRuns({ tenantId }: Props) {
               <div className="text-xs font-medium text-muted-foreground">Recent runs</div>
               {runs.slice(0, 12).map((r) => (
                 <div key={r.id} className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/20 px-2.5 py-1.5 text-xs">
-                  <Badge variant="outline" className="text-[10px]">{AGENT_LABEL[r.agent_id] ?? r.agent_id}</Badge>
+                  <Badge variant="outline" className="text-[10px]">{humanizeAgentId(r.agent_id)}</Badge>
                   <span className={`text-[10px] font-medium ${r.status === "success" ? "text-success" : r.status === "running" ? "text-primary" : "text-destructive"}`}>
                     {r.status}
                   </span>
