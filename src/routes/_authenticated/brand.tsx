@@ -18,6 +18,7 @@ import { TopCustomers } from "@/components/owner/TopCustomers";
 import { AgentTimeline } from "@/components/owner/AgentTimeline";
 import { MemoryInspector } from "@/components/owner/MemoryInspector";
 import { SetupChecklist } from "@/components/owner/SetupChecklist";
+import { SetupReadinessCard } from "@/components/owner/SetupReadinessCard";
 import { AnalyticsWindowProvider, AnalyticsWindowToggle } from "@/components/owner/AnalyticsWindow";
 import { CockpitHero } from "@/components/owner/CockpitHero";
 import { FunnelChart } from "@/components/owner/FunnelChart";
@@ -117,6 +118,8 @@ function BrandPage() {
       </div>
 
       <SetupChecklist tenantId={current.id} tenantSlug={current.slug} />
+
+      <SetupReadinessCard tenantId={current.id} tenantSlug={current.slug} />
 
       <PlanUsageCard tenantId={current.id} />
 

@@ -1412,4 +1412,130 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       },
     };
   },
+
+  // ---------- Bootstrap scouts ----------
+  bootstrap_missing_brand_desc: () => ({
+    ua: {
+      headline: "Опис бренду відсутній",
+      why: "Без короткого опису й tagline broadcast/SEO-агенти використовують шаблонні фрази замість вашого голосу.",
+      what_to_do: "Brand Settings → SEO → додайте 1 tagline + 2-3 речення опису.",
+    },
+    en: {
+      headline: "Brand description missing",
+      why: "Without a tagline + short description, broadcast/SEO agents fall back to generic templates instead of your voice.",
+      what_to_do: "Brand Settings → SEO → add a tagline and a 2-3 sentence description.",
+    },
+  }),
+  bootstrap_missing_categories: (m) => {
+    const n = num(m, "products");
+    return {
+      ua: {
+        headline: `${n} товарів без категорій`,
+        why: "Bundle/cross-sell агенти не можуть запропонувати комбінації, поки SKU не згруповані.",
+        what_to_do: "Каталог → Edit product → додайте Category в metadata.",
+      },
+      en: {
+        headline: `${n} products without category tags`,
+        why: "Bundle/cross-sell agents can't propose combos until SKUs are grouped.",
+        what_to_do: "Catalog → Edit product → add Category in metadata.",
+      },
+    };
+  },
+  bootstrap_missing_costs: (m) => {
+    const n = num(m, "missing_count");
+    return {
+      ua: {
+        headline: `Собівартість не задана у ${n} SKU`,
+        why: "Margin/price-optimizer працюють по бенчмарках індустрії замість реальної маржі — ризик ціни в збиток.",
+        what_to_do: "Каталог → Edit product → metadata.cost_cents для кожного SKU.",
+      },
+      en: {
+        headline: `Cost price missing on ${n} SKUs`,
+        why: "Margin / price-optimizer use industry benchmarks instead of real margin — risk of pricing below cost.",
+        what_to_do: "Catalog → Edit product → metadata.cost_cents for each SKU.",
+      },
+    };
+  },
+  bootstrap_no_voice: () => ({
+    ua: {
+      headline: "Голос клієнта майже не зібрано",
+      why: "CSAT, review-velocity, broadcast-composer мовчать без діалогів і відгуків.",
+      what_to_do: "Активуйте Telegram-бот і збирайте перші 10+ відгуків.",
+    },
+    en: {
+      headline: "Customer voice barely collected",
+      why: "CSAT, review-velocity, broadcast-composer go silent without conversations or reviews.",
+      what_to_do: "Activate the Telegram bot and gather the first 10+ pieces of feedback.",
+    },
+  }),
+  bootstrap_no_channel: (m) => {
+    const ch = str(m, "channel", "channel");
+    return {
+      ua: {
+        headline: `Канал «${ch}» не активний`,
+        why: "Win-back / abandoned-cart / reorder-агенти не мають як достукатися до клієнта.",
+        what_to_do: "Brand Settings → Channels → підключити цей канал.",
+      },
+      en: {
+        headline: `Channel "${ch}" is not active`,
+        why: "Win-back / abandoned-cart / reorder agents have no way to reach the customer.",
+        what_to_do: "Brand Settings → Channels → connect this channel.",
+      },
+    };
+  },
+  bootstrap_seasonality_unknown: () => ({
+    ua: {
+      headline: "Сезонність ще не визначена",
+      why: "Best-time-to-send і forecast-агенти працюють всліпу, поки немає 30+ днів історії.",
+      what_to_do: "Дочекайтеся 30 днів подій або імпортуйте історичні замовлення.",
+    },
+    en: {
+      headline: "Seasonality not yet detected",
+      why: "Best-time-to-send and forecast agents work blind until 30+ days of history exist.",
+      what_to_do: "Wait 30 days of events or import historical orders.",
+    },
+  }),
+  bootstrap_integration_suggested: (m) => {
+    const provider = str(m, "provider", "інтеграція");
+    return {
+      ua: {
+        headline: `Підключіть ${provider}`,
+        why: "Об'єм замовлень виріс — ручний ввід даних з'їдає час, точність агентів падає.",
+        what_to_do: `Brand Settings → Integrations → ${provider} (інструкція пропонується покроково).`,
+      },
+      en: {
+        headline: `Connect ${provider}`,
+        why: "Order volume has grown — manual entry eats time and degrades agent precision.",
+        what_to_do: `Brand Settings → Integrations → ${provider} (step-by-step guide provided).`,
+      },
+    };
+  },
+  bootstrap_data_gaps_summary: (m) => {
+    const n = num(m, "gap_count");
+    const score = num(m, "readiness_score") * 100;
+    return {
+      ua: {
+        headline: `${n} прогалин у даних — готовність ${score.toFixed(0)}%`,
+        why: "Поки прогалини відкриті, 75+ робочих агентів використовують припущення замість фактів.",
+        what_to_do: "Відкрийте Setup Readiness та закривайте по черзі — починаючи з топ-3.",
+      },
+      en: {
+        headline: `${n} data gaps — ${score.toFixed(0)}% ready`,
+        why: "While gaps remain, 75+ working agents rely on assumptions instead of facts.",
+        what_to_do: "Open Setup Readiness and close them one by one — start with the top 3.",
+      },
+    };
+  },
+  bootstrap_all_ready: () => ({
+    ua: {
+      headline: "🎯 Усі дані зібрано — агенти працюють на повну",
+      why: "Профіль бренду, маржі, канали й голос клієнта в системі. Точність ШІ-рекомендацій максимальна.",
+      what_to_do: "Перегляньте інсайти інших агентів — тепер вони на ground truth.",
+    },
+    en: {
+      headline: "🎯 All data collected — agents at full precision",
+      why: "Brand profile, margins, channels and customer voice are all in. AI recommendations at peak quality.",
+      what_to_do: "Review insights from the rest of the fleet — they now run on ground truth.",
+    },
+  }),
 };
