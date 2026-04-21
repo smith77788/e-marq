@@ -319,7 +319,7 @@ function BrandProductsPage() {
                       {p.sku ?? "—"}
                     </TableCell>
                     <TableCell className="text-right tabular-nums">
-                      {formatMoneyExact(p.price_cents, p.currency)}
+                      {formatMoneyExact(p.price_cents)}
                     </TableCell>
                     <TableCell className="text-right tabular-nums">
                       <span className={p.stock === 0 ? "text-destructive" : undefined}>
