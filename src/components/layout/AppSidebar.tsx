@@ -86,8 +86,8 @@ const ADMIN_NAV: { labelKey: TKey; items: NavItem[] }[] = [
   {
     labelKey: "sb.agents",
     items: [
-      { labelKey: "sb.liveRuns", to: "/agents", icon: Activity },
-      { labelKey: "sb.agentLibrary", to: "/agents", icon: Cpu },
+      { labelKey: "sb.liveRuns", to: "/agents/live", icon: Activity },
+      { labelKey: "sb.agentLibrary", to: "/agents", icon: Cpu, exact: true },
       { labelKey: "sb.insightStream", to: "/admin", icon: Radio },
     ],
   },
