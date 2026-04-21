@@ -462,10 +462,18 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
   );
 }
 
-function Step7Team({ tenantId }: { tenantId: string }) {
+function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: string }) {
   const { t, lang } = useT();
   const qc = useQueryClient();
   const [email, setEmail] = useState("");
+
+  const { data: brand } = useQuery({
+    queryKey: ["tenant-name", tenantId],
+    queryFn: async () => {
+      const { data } = await supabase.from("tenants").select("name").eq("id", tenantId).maybeSingle();
+      return data?.name ?? "";
+    },
+  });
 
   const { data: invites = [] } = useQuery({
     queryKey: ["tenant-invitations", tenantId],
@@ -482,11 +490,26 @@ function Step7Team({ tenantId }: { tenantId: string }) {
 
   const inviteUrl = (token: string) => `${window.location.origin}/invite/${token}`;
 
+  const buildMailto = (recipientEmail: string, url: string) => {
+    const brandName = brand || tenantSlug;
+    const subject = lang === "ua"
+      ? `Запрошення до команди «${brandName}»`
+      : `You're invited to «${brandName}»`;
+    const body = lang === "ua"
+      ? `Привіт!\n\nЗапрошую тебе долучитися до команди бренду «${brandName}» в Oauther.\n\nПосилання для приєднання (дійсне 14 днів):\n${url}\n\nПросто відкрий його у браузері й увійди — доступ надасться автоматично.`
+      : `Hi!\n\nYou're invited to join the «${brandName}» brand team on Oauther.\n\nUse this link to accept (valid for 14 days):\n${url}\n\nJust open it in a browser and sign in — access will be granted automatically.`;
+    return `mailto:${encodeURIComponent(recipientEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
   const create = useMutation({
     mutationFn: async () => {
+      const trimmed = email.trim().toLowerCase();
+      if (!/\S+@\S+\.\S+/.test(trimmed)) {
+        throw new Error(lang === "ua" ? "Перевірте email — здається, він некоректний." : "Email looks invalid.");
+      }
       const { data, error } = await supabase.rpc("create_tenant_invitation", {
         _tenant_id: tenantId,
-        _email: email,
+        _email: trimmed,
         _role: "admin",
       });
       if (error) throw error;
@@ -495,16 +518,18 @@ function Step7Team({ tenantId }: { tenantId: string }) {
     onSuccess: async (res) => {
       setEmail("");
       qc.invalidateQueries({ queryKey: ["tenant-invitations", tenantId] });
+      qc.invalidateQueries({ queryKey: ["onboarding-status", tenantId] });
+      const url = inviteUrl(res.token);
       try {
-        await navigator.clipboard.writeText(inviteUrl(res.token));
+        await navigator.clipboard.writeText(url);
         toast.success(
           lang === "ua"
-            ? `Запрошення створено для ${res.email}. Посилання скопійовано в буфер.`
-            : `Invite created for ${res.email}. Link copied to clipboard.`,
+            ? `Запрошення для ${res.email} створено. Посилання вже у вашому буфері — вставте у будь-який месенджер чи лист.`
+            : `Invite for ${res.email} created. Link copied to clipboard — paste it into any messenger or email.`,
         );
       } catch {
         toast.success(
-          lang === "ua" ? `Запрошення створено для ${res.email}.` : `Invite created for ${res.email}.`,
+          lang === "ua" ? `Запрошення для ${res.email} створено.` : `Invite for ${res.email} created.`,
         );
       }
     },
@@ -517,14 +542,22 @@ function Step7Team({ tenantId }: { tenantId: string }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success(lang === "ua" ? "Запрошення відкликано" : "Invitation revoked");
+      toast.success(lang === "ua" ? "Запрошення скасовано." : "Invitation revoked.");
       qc.invalidateQueries({ queryKey: ["tenant-invitations", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const emailValid = /\S+@\S+\.\S+/.test(email.trim());
+
   return (
     <div className="space-y-3">
+      <div className="rounded-md border border-border bg-muted/20 p-3 text-xs text-muted-foreground">
+        {lang === "ua"
+          ? "Введіть email колеги. Ми створимо персональне посилання — копіюйте його або одразу відкрийте поштовий клієнт із готовим листом."
+          : "Type your teammate's email. We'll create a personal link — copy it or open your email client with a ready-to-send message."}
+      </div>
+
       <div className="flex gap-2">
         <Input
           value={email}
@@ -532,13 +565,13 @@ function Step7Team({ tenantId }: { tenantId: string }) {
           placeholder={t("onb.s7.emailPh")}
           type="email"
           onKeyDown={(e) => {
-            if (e.key === "Enter" && email && /\S+@\S+\.\S+/.test(email)) create.mutate();
+            if (e.key === "Enter" && emailValid) create.mutate();
           }}
         />
         <Button
           size="sm"
           onClick={() => create.mutate()}
-          disabled={create.isPending || !email || !/\S+@\S+\.\S+/.test(email)}
+          disabled={create.isPending || !emailValid}
         >
           {create.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
           {t("onb.s7.add")}
@@ -546,53 +579,94 @@ function Step7Team({ tenantId }: { tenantId: string }) {
       </div>
 
       {invites.length > 0 && (
-        <ul className="space-y-1 text-sm">
+        <ul className="space-y-1.5 text-sm">
           {invites.map((inv) => {
             const url = inviteUrl(inv.token);
             const isPending = inv.status === "pending";
             return (
               <li
                 key={inv.id}
-                className="flex flex-col gap-1 rounded-md border border-border bg-muted/20 px-2 py-2"
+                className="flex flex-col gap-1.5 rounded-md border border-border bg-muted/20 px-2 py-2"
               >
                 <div className="flex items-center gap-2">
                   <Check className={`h-3.5 w-3.5 ${isPending ? "text-success" : "text-muted-foreground"}`} />
                   <span className="font-medium">{inv.email}</span>
                   <span className="ml-auto text-xs text-muted-foreground">
                     {inv.status === "pending"
-                      ? t("onb.s7.invited")
+                      ? lang === "ua" ? "Очікує" : "Pending"
                       : inv.status === "accepted"
-                        ? lang === "ua" ? "Прийнято" : "Accepted"
+                        ? lang === "ua" ? "Прийнято ✓" : "Accepted ✓"
                         : inv.status}
                   </span>
                 </div>
                 {isPending && (
-                  <div className="flex items-center gap-1">
-                    <Input readOnly value={url} className="h-7 font-mono text-[10px]" />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="h-7 px-2"
-                      onClick={() => {
-                        navigator.clipboard.writeText(url).then(() =>
-                          toast.success(lang === "ua" ? "Скопійовано" : "Copied"),
-                        );
-                      }}
-                    >
-                      <Copy className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 px-2 text-destructive hover:text-destructive"
-                      onClick={() => revoke.mutate(inv.id)}
-                      disabled={revoke.isPending}
-                    >
-                      ×
-                    </Button>
-                  </div>
+                  <>
+                    <div className="flex items-center gap-1">
+                      <Input readOnly value={url} className="h-7 font-mono text-[10px]" />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-2"
+                        onClick={() => {
+                          navigator.clipboard.writeText(url).then(() =>
+                            toast.success(lang === "ua" ? "Скопійовано." : "Copied."),
+                          );
+                        }}
+                        title={lang === "ua" ? "Скопіювати посилання" : "Copy link"}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2 text-destructive hover:text-destructive"
+                        onClick={() => {
+                          if (confirm(lang === "ua" ? "Скасувати це запрошення?" : "Revoke this invitation?")) {
+                            revoke.mutate(inv.id);
+                          }
+                        }}
+                        disabled={revoke.isPending}
+                        title={lang === "ua" ? "Скасувати" : "Revoke"}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        className="h-7 px-2 text-xs"
+                        asChild
+                      >
+                        <a href={buildMailto(inv.email, url)}>
+                          <Mail className="mr-1 h-3 w-3" />
+                          {lang === "ua" ? "Відкрити лист у пошті" : "Open in email app"}
+                        </a>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-2 text-xs"
+                        asChild
+                      >
+                        <a
+                          href={`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(
+                            lang === "ua"
+                              ? `Запрошення до команди бренду «${brand || tenantSlug}»`
+                              : `Invite to «${brand || tenantSlug}»`,
+                          )}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {lang === "ua" ? "Надіслати в Telegram" : "Share via Telegram"}
+                        </a>
+                      </Button>
+                    </div>
+                  </>
                 )}
               </li>
             );
@@ -600,13 +674,14 @@ function Step7Team({ tenantId }: { tenantId: string }) {
         </ul>
       )}
 
-      <p className="text-xs text-muted-foreground">
+      <div className="rounded-md border border-primary/20 bg-primary/5 p-3 text-xs text-foreground/80">
         💡{" "}
         {lang === "ua"
-          ? "Надішли посилання колезі — після входу/реєстрації з тим самим email вони автоматично отримають доступ до бренду. Термін дії: 14 днів."
-          : "Send the link to your teammate — after they sign in with the same email, they'll get instant access. Valid for 14 days."}
-      </p>
+          ? "Надішліть посилання колезі будь-яким зручним способом (пошта, Telegram, месенджер). Після того як він відкриє його та увійде — отримає доступ автоматично. Термін дії посилання — 14 днів."
+          : "Share the link with your teammate any way you like (email, Telegram, messenger). Once they open it and sign in, access is granted automatically. The link is valid for 14 days."}
+      </div>
     </div>
   );
 }
+
 
