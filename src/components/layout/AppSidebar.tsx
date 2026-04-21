@@ -59,6 +59,15 @@ const OWNER_NAV: { labelKey: TKey; items: NavItem[] }[] = [
     ],
   },
   {
+    labelKey: "sb.shop",
+    items: [
+      { labelKey: "sb.products", to: "/brand/products", icon: Package },
+      { labelKey: "sb.orders", to: "/brand/orders", icon: ShoppingCart },
+      { labelKey: "sb.collections", to: "/brand/catalog", icon: Layers },
+      { labelKey: "sb.promotions", to: "/brand/promotions", icon: Tag },
+    ],
+  },
+  {
     labelKey: "sb.growth",
     items: [
       { labelKey: "sb.insights", to: "/brand", icon: Lightbulb },
