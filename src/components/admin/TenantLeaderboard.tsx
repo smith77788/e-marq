@@ -69,7 +69,7 @@ export function TenantLeaderboard({ rows }: Props) {
                     </span>
                   </div>
                   <p className="text-[11px] text-muted-foreground">
-                    {row.orders} замовл. · {row.insights} інсайтів · {row.agentRuns} запусків
+                    {row.orders} замовл. · {row.insights} підказок · {row.agentRuns} запусків
                   </p>
                 </div>
                 <div className="text-right">

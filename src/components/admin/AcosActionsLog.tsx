@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
+import { uk } from "date-fns/locale";
 import { CheckCircle2, History, MinusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
+import { MSG } from "@/lib/glossary";
 
 type Props = { tenantId: string };
 
@@ -23,10 +25,18 @@ type ActionRow = {
 };
 
 const ACTION_LABEL: Record<string, string> = {
-  winback_touch: "Winback touch",
-  abandoned_cart_email: "Abandoned-cart email",
-  reorder_request: "Reorder request",
-  create_seo_page: "Create SEO page",
+  winback_touch: "Повернення клієнта",
+  abandoned_cart_email: "Лист про покинутий кошик",
+  reorder_request: "Нагадування купити знову",
+  create_seo_page: "Створення SEO-сторінки",
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  applied: "виконано",
+  pending: "очікує",
+  failed: "помилка",
+  reverted: "скасовано",
+  measuring: "вимірюємо",
 };
 
 export function AcosActionsLog({ tenantId }: Props) {
@@ -66,29 +76,31 @@ export function AcosActionsLog({ tenantId }: Props) {
           <div>
             <CardTitle className="flex items-center gap-2 text-base">
               <History className="h-4 w-4 text-primary" />
-              Actions log
+              Журнал виконаних дій
             </CardTitle>
             <CardDescription>
-              Applied actions and measured outcomes — auto-refreshes every 30s.
+              Дії, які система вже виконала, та їхній реальний результат. Оновлюється кожні 30 секунд.
             </CardDescription>
           </div>
           <div className="flex flex-wrap gap-2 text-xs">
-            <Badge variant="outline">{totals.applied} applied</Badge>
-            <Badge variant="outline">{totals.measured} measured</Badge>
+            <Badge variant="outline">{totals.applied} виконано</Badge>
+            <Badge variant="outline">{totals.measured} виміряно</Badge>
             <Badge variant="outline" className="border-success/30 bg-success/10 text-success">
-              {totals.succeeded} succeeded
+              {totals.succeeded} спрацювало
             </Badge>
             <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary">
-              {Math.round(totals.revenue / 100).toLocaleString("uk-UA")} ₴ attributed
+              {Math.round(totals.revenue / 100).toLocaleString("uk-UA")} ₴ принесло
             </Badge>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <p className="text-sm text-muted-foreground">{MSG.loading}</p>
         ) : actions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No actions applied yet. Approve an insight, then click "Apply action".</p>
+          <p className="text-sm text-muted-foreground">
+            Поки що дій не виконано. Спочатку схваліть підказку, потім натисніть «Виконати дію».
+          </p>
         ) : (
           <ScrollArea className="max-h-[420px] pr-3">
             <div className="space-y-1.5">
@@ -102,33 +114,33 @@ export function AcosActionsLog({ tenantId }: Props) {
                       <Badge variant="outline" className="text-[10px]">
                         {ACTION_LABEL[a.action_type] ?? a.action_type}
                       </Badge>
-                      <Badge variant="secondary" className="text-[10px]">{a.status}</Badge>
+                      <Badge variant="secondary" className="text-[10px]">{STATUS_LABEL[a.status] ?? a.status}</Badge>
                       {a.measured_at ? (
                         succeeded ? (
                           <Badge className="border-success/30 bg-success/10 text-success" variant="outline">
-                            <CheckCircle2 className="mr-1 h-2.5 w-2.5" /> success
+                            <CheckCircle2 className="mr-1 h-2.5 w-2.5" /> спрацювало
                           </Badge>
                         ) : (
                           <Badge variant="outline" className="text-[10px]">
-                            <MinusCircle className="mr-1 h-2.5 w-2.5" /> no impact
+                            <MinusCircle className="mr-1 h-2.5 w-2.5" /> без ефекту
                           </Badge>
                         )
                       ) : (
-                        <Badge variant="outline" className="text-[10px]">measuring…</Badge>
+                        <Badge variant="outline" className="text-[10px]">вимірюємо…</Badge>
                       )}
                       <span className="ml-auto text-[10px] text-muted-foreground">
                         {a.applied_at
-                          ? formatDistanceToNow(new Date(a.applied_at), { addSuffix: true })
-                          : formatDistanceToNow(new Date(a.created_at), { addSuffix: true })}
+                          ? formatDistanceToNow(new Date(a.applied_at), { addSuffix: true, locale: uk })
+                          : formatDistanceToNow(new Date(a.created_at), { addSuffix: true, locale: uk })}
                       </span>
                     </div>
                     {a.expected_impact && (
-                      <p className="mt-1 text-[11px] text-muted-foreground">expected: {a.expected_impact}</p>
+                      <p className="mt-1 text-[11px] text-muted-foreground">очікували: {a.expected_impact}</p>
                     )}
                     {a.measured_at && (
                       <p className="mt-0.5 text-[11px] font-medium text-foreground">
-                        actual: {(impactCents / 100).toFixed(2)} ₴
-                        {typeof r?.recovered_orders === "number" && ` · ${r.recovered_orders} orders`}
+                        фактично: {(impactCents / 100).toFixed(2)} ₴
+                        {typeof r?.recovered_orders === "number" && ` · ${r.recovered_orders} замовлень`}
                       </p>
                     )}
                   </div>

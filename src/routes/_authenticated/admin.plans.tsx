@@ -1,6 +1,6 @@
 /**
- * Super-admin: plans catalog CRUD.
- * Edit pricing, limits, feature flags. Plans are referenced by tenant_subscriptions.
+ * Сторінка головного адміністратора: каталог тарифів.
+ * Тут можна редагувати ціни, ліміти, доступні можливості.
  */
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { MSG } from "@/lib/glossary";
 
 export const Route = createFileRoute("/_authenticated/admin/plans")({
   component: AdminPlansPage,
@@ -44,6 +45,17 @@ type Plan = {
   agents_allowed: string[];
 };
 
+const FIELD_LABEL: Record<string, string> = {
+  max_products: "Скільки товарів максимум",
+  max_orders_per_month: "Замовлень на місяць",
+  max_customers: "Клієнтів у базі",
+  max_ai_runs_per_month: "Запусків ШІ-помічників на місяць",
+  max_ai_credits_monthly_grant: "Кредитів ШІ щомісяця",
+  max_outbound_messages_per_month: "Повідомлень клієнтам на місяць",
+  max_storage_mb: "Місце для файлів (МБ)",
+  max_team_members: "Учасників у команді",
+};
+
 function AdminPlansPage() {
   const { isSuperAdmin, loading } = useAuth();
   const qc = useQueryClient();
@@ -66,12 +78,12 @@ function AdminPlansPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Plan saved");
+      toast.success(MSG.saved);
       setEditing(null);
       qc.invalidateQueries({ queryKey: ["plans-admin"] });
       qc.invalidateQueries({ queryKey: ["plans-catalog"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message || MSG.errSave),
   });
 
   const createPlan = useMutation({
@@ -79,18 +91,18 @@ function AdminPlansPage() {
       const newKey = `plan_${Date.now()}`;
       const { error } = await supabase.from("plans").insert({
         key: newKey,
-        name: "New plan",
-        description: "Edit me",
+        name: "Новий тариф",
+        description: "Опишіть тариф",
         sort_order: 99,
         is_public: false,
       });
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Plan created");
+      toast.success(MSG.created);
       qc.invalidateQueries({ queryKey: ["plans-admin"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message || MSG.errSave),
   });
 
   const deletePlan = useMutation({
@@ -99,19 +111,19 @@ function AdminPlansPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Plan deleted");
+      toast.success(MSG.deleted);
       qc.invalidateQueries({ queryKey: ["plans-admin"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message || MSG.errDelete),
   });
 
-  if (loading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (loading) return <p className="text-sm text-muted-foreground">{MSG.loading}</p>;
   if (!isSuperAdmin) {
     return (
       <Card>
-        <CardHeader><CardTitle>Access denied</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Доступ заборонено</CardTitle></CardHeader>
         <CardContent>
-          <Link to="/dashboard" className="text-primary hover:underline">← Back</Link>
+          <Link to="/dashboard" className="text-primary hover:underline">← На головну</Link>
         </CardContent>
       </Card>
     );
@@ -121,17 +133,19 @@ function AdminPlansPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Plans catalog</h1>
-          <p className="text-sm text-muted-foreground">Pricing, limits, feature flags. Affects all tenants.</p>
+          <h1 className="text-2xl font-bold tracking-tight">Каталог тарифів</h1>
+          <p className="text-sm text-muted-foreground">
+            Ціни, ліміти, доступні можливості. Зміни побачать усі бренди.
+          </p>
         </div>
         <Button onClick={() => createPlan.mutate()}>
           <Plus className="mr-1.5 h-4 w-4" />
-          New plan
+          Новий тариф
         </Button>
       </div>
 
       {plansQuery.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading plans…</p>
+        <p className="text-sm text-muted-foreground">Завантажуємо тарифи…</p>
       ) : (
         <div className="space-y-3">
           {plansQuery.data?.map((p) => (
@@ -142,7 +156,9 @@ function AdminPlansPage() {
               onEdit={() => setEditing(p)}
               onCancel={() => setEditing(null)}
               onSave={(patch) => savePlan.mutate(patch)}
-              onDelete={() => deletePlan.mutate(p.id)}
+              onDelete={() => {
+                if (window.confirm(MSG.confirmDelete)) deletePlan.mutate(p.id);
+              }}
               saving={savePlan.isPending}
             />
           ))}
@@ -166,7 +182,7 @@ function PlanCard({
   const [draft, setDraft] = useState<Plan>(plan);
   const numField = (k: keyof Plan, nullable = true) => (
     <div className="space-y-1">
-      <Label className="text-xs">{String(k)}</Label>
+      <Label className="text-xs">{FIELD_LABEL[String(k)] ?? String(k)}</Label>
       <Input
         type="number"
         value={(draft[k] as number | null) ?? ""}
@@ -174,7 +190,7 @@ function PlanCard({
           const v = e.target.value;
           setDraft({ ...draft, [k]: v === "" && nullable ? null : Number(v) } as Plan);
         }}
-        placeholder={nullable ? "(unlimited)" : "0"}
+        placeholder={nullable ? "(без обмежень)" : "0"}
       />
     </div>
   );
@@ -187,12 +203,12 @@ function PlanCard({
             <CardTitle className="flex items-center gap-2">
               {plan.name}
               <Badge variant="outline" className="font-mono text-[10px]">{plan.key}</Badge>
-              {!plan.is_active && <Badge variant="outline">inactive</Badge>}
-              {!plan.is_public && <Badge variant="outline">private</Badge>}
+              {!plan.is_active && <Badge variant="outline">вимкнено</Badge>}
+              {!plan.is_public && <Badge variant="outline">прихований</Badge>}
             </CardTitle>
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">{Math.round(plan.price_cents_monthly / 100).toLocaleString("uk-UA")} ₴/міс</span>
-              <Button size="sm" variant="outline" onClick={onEdit}>Edit</Button>
+              <Button size="sm" variant="outline" onClick={onEdit}>Редагувати</Button>
               <Button size="sm" variant="ghost" onClick={onDelete}>
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
@@ -202,12 +218,12 @@ function PlanCard({
         </CardHeader>
         <CardContent>
           <div className="grid gap-2 text-xs sm:grid-cols-3">
-            <div>Products: <strong>{plan.max_products ?? "∞"}</strong></div>
-            <div>Orders/mo: <strong>{plan.max_orders_per_month ?? "∞"}</strong></div>
-            <div>Customers: <strong>{plan.max_customers ?? "∞"}</strong></div>
-            <div>AI runs/mo: <strong>{plan.max_ai_runs_per_month ?? "∞"}</strong></div>
-            <div>AI credits grant: <strong>{plan.max_ai_credits_monthly_grant.toLocaleString()}</strong></div>
-            <div>Team members: <strong>{plan.max_team_members ?? "∞"}</strong></div>
+            <div>Товарів: <strong>{plan.max_products ?? "∞"}</strong></div>
+            <div>Замовлень/міс: <strong>{plan.max_orders_per_month ?? "∞"}</strong></div>
+            <div>Клієнтів: <strong>{plan.max_customers ?? "∞"}</strong></div>
+            <div>Запусків ШІ/міс: <strong>{plan.max_ai_runs_per_month ?? "∞"}</strong></div>
+            <div>Кредитів ШІ: <strong>{plan.max_ai_credits_monthly_grant.toLocaleString("uk-UA")}</strong></div>
+            <div>Учасників команди: <strong>{plan.max_team_members ?? "∞"}</strong></div>
           </div>
           <div className="mt-3 flex flex-wrap gap-1">
             {plan.features_enabled.map((f) => (
@@ -222,44 +238,44 @@ function PlanCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Edit: {plan.name}</CardTitle>
+        <CardTitle>Редагування: {plan.name}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1">
-            <Label>Key</Label>
+            <Label>Технічний ключ</Label>
             <Input value={draft.key} onChange={(e) => setDraft({ ...draft, key: e.target.value })} />
           </div>
           <div className="space-y-1">
-            <Label>Name</Label>
+            <Label>Назва тарифу</Label>
             <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
           </div>
         </div>
         <div className="space-y-1">
-          <Label>Description</Label>
+          <Label>Опис</Label>
           <Textarea value={draft.description ?? ""} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="space-y-1">
-            <Label>Price (cents/mo)</Label>
+            <Label>Ціна за місяць (копійки)</Label>
             <Input type="number" value={draft.price_cents_monthly} onChange={(e) => setDraft({ ...draft, price_cents_monthly: Number(e.target.value) })} />
           </div>
           <div className="space-y-1">
-            <Label>Price (cents/yr)</Label>
+            <Label>Ціна за рік (копійки)</Label>
             <Input type="number" value={draft.price_cents_yearly} onChange={(e) => setDraft({ ...draft, price_cents_yearly: Number(e.target.value) })} />
           </div>
           <div className="space-y-1">
-            <Label>Sort order</Label>
+            <Label>Порядок у списку</Label>
             <Input type="number" value={draft.sort_order} onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) })} />
           </div>
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
           <div className="flex items-center justify-between rounded-md border border-border p-2">
-            <Label>Public (shown on /pricing)</Label>
+            <Label>Видно на сторінці цін</Label>
             <Switch checked={draft.is_public} onCheckedChange={(v) => setDraft({ ...draft, is_public: v })} />
           </div>
           <div className="flex items-center justify-between rounded-md border border-border p-2">
-            <Label>Active</Label>
+            <Label>Тариф увімкнений</Label>
             <Switch checked={draft.is_active} onCheckedChange={(v) => setDraft({ ...draft, is_active: v })} />
           </div>
         </div>
@@ -274,7 +290,7 @@ function PlanCard({
           {numField("max_team_members")}
         </div>
         <div className="space-y-1">
-          <Label>Features enabled (comma-separated)</Label>
+          <Label>Можливості (через кому)</Label>
           <Input
             value={draft.features_enabled.join(", ")}
             onChange={(e) => setDraft({ ...draft, features_enabled: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
@@ -282,17 +298,17 @@ function PlanCard({
           />
         </div>
         <div className="space-y-1">
-          <Label>Agents allowed (comma-separated, empty = all)</Label>
+          <Label>Дозволені ШІ-помічники (через кому, порожнє = усі)</Label>
           <Input
             value={draft.agents_allowed.join(", ")}
             onChange={(e) => setDraft({ ...draft, agents_allowed: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
           />
         </div>
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={onCancel}>Cancel</Button>
+          <Button variant="ghost" onClick={onCancel}>Скасувати</Button>
           <Button onClick={() => onSave(draft)} disabled={saving}>
             <Save className="mr-1.5 h-4 w-4" />
-            Save
+            Зберегти
           </Button>
         </div>
       </CardContent>
