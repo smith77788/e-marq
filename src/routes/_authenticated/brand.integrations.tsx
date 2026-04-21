@@ -328,6 +328,54 @@ function IntegrationsHubPage() {
         tenantId={currentTenantId}
         onClose={() => setActive(null)}
       />
+
+      <Dialog open={!!syncTarget} onOpenChange={(o) => !o && setSyncTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Запустити синхронізацію</DialogTitle>
+            <DialogDescription>
+              {syncTarget?.name}: оберіть, які саме дані потягнути зараз.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <Label htmlFor="sync-entity">Тип даних</Label>
+            <Select
+              value={syncEntity}
+              onValueChange={(v) => setSyncEntity(v as "products" | "customers" | "orders")}
+            >
+              <SelectTrigger id="sync-entity">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {syncTarget?.imports.includes("products") && (
+                  <SelectItem value="products">Товари</SelectItem>
+                )}
+                {syncTarget?.imports.includes("customers") && (
+                  <SelectItem value="customers">Клієнти</SelectItem>
+                )}
+                {syncTarget?.imports.includes("orders") && (
+                  <SelectItem value="orders">Замовлення</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Імпортуємо до 1000 записів за раз. Запустити можна стільки разів, скільки треба —
+              дублі система розпізнає за зовнішнім ID.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSyncTarget(null)} disabled={!!syncing}>
+              Скасувати
+            </Button>
+            <Button
+              onClick={() => syncTarget && runSync(syncTarget.id, syncEntity)}
+              disabled={!!syncing}
+            >
+              {syncing ? "Синхронізую…" : "Запустити"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
