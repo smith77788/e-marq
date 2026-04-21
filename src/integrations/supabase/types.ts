@@ -2689,6 +2689,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_tenant_invitation: {
+        Args: { _email: string; _role?: string; _tenant_id: string }
+        Returns: Json
+      }
       get_all_tenants_overview: {
         Args: never
         Returns: {

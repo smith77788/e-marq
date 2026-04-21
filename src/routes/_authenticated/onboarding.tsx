@@ -392,8 +392,65 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
 function Step7Team({ tenantId }: { tenantId: string }) {
   const { t, lang } = useT();
-  const [emails, setEmails] = useState<string[]>([]);
+  const qc = useQueryClient();
   const [email, setEmail] = useState("");
+
+  const { data: invites = [] } = useQuery({
+    queryKey: ["tenant-invitations", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tenant_invitations")
+        .select("id, email, role, token, status, expires_at, created_at")
+        .eq("tenant_id", tenantId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const inviteUrl = (token: string) => `${window.location.origin}/invite/${token}`;
+
+  const create = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc("create_tenant_invitation", {
+        _tenant_id: tenantId,
+        _email: email,
+        _role: "admin",
+      });
+      if (error) throw error;
+      return data as { token: string; email: string };
+    },
+    onSuccess: async (res) => {
+      setEmail("");
+      qc.invalidateQueries({ queryKey: ["tenant-invitations", tenantId] });
+      try {
+        await navigator.clipboard.writeText(inviteUrl(res.token));
+        toast.success(
+          lang === "ua"
+            ? `Запрошення створено для ${res.email}. Посилання скопійовано в буфер.`
+            : `Invite created for ${res.email}. Link copied to clipboard.`,
+        );
+      } catch {
+        toast.success(
+          lang === "ua" ? `Запрошення створено для ${res.email}.` : `Invite created for ${res.email}.`,
+        );
+      }
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const revoke = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("tenant_invitations").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(lang === "ua" ? "Запрошення відкликано" : "Invitation revoked");
+      qc.invalidateQueries({ queryKey: ["tenant-invitations", tenantId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <div className="space-y-3">
       <div className="flex gap-2">
@@ -402,39 +459,80 @@ function Step7Team({ tenantId }: { tenantId: string }) {
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t("onb.s7.emailPh")}
           type="email"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && email && /\S+@\S+\.\S+/.test(email)) create.mutate();
+          }}
         />
         <Button
           size="sm"
-          onClick={() => {
-            if (email && /\S+@\S+/.test(email)) {
-              setEmails((arr) => [...arr, email]);
-              setEmail("");
-              toast.info(
-                lang === "ua"
-                  ? "Запрошення збережено локально (надсилання в наступному релізі)."
-                  : "Invite saved locally (delivery in next release).",
-              );
-            }
-          }}
+          onClick={() => create.mutate()}
+          disabled={create.isPending || !email || !/\S+@\S+\.\S+/.test(email)}
         >
+          {create.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
           {t("onb.s7.add")}
         </Button>
       </div>
-      {emails.length > 0 && (
+
+      {invites.length > 0 && (
         <ul className="space-y-1 text-sm">
-          {emails.map((e, i) => (
-            <li key={i} className="flex items-center gap-2 rounded-md border border-border bg-muted/20 px-2 py-1">
-              <Check className="h-3.5 w-3.5 text-success" /> {e}
-              <span className="ml-auto text-xs text-muted-foreground">{t("onb.s7.invited")}</span>
-            </li>
-          ))}
+          {invites.map((inv) => {
+            const url = inviteUrl(inv.token);
+            const isPending = inv.status === "pending";
+            return (
+              <li
+                key={inv.id}
+                className="flex flex-col gap-1 rounded-md border border-border bg-muted/20 px-2 py-2"
+              >
+                <div className="flex items-center gap-2">
+                  <Check className={`h-3.5 w-3.5 ${isPending ? "text-success" : "text-muted-foreground"}`} />
+                  <span className="font-medium">{inv.email}</span>
+                  <span className="ml-auto text-xs text-muted-foreground">
+                    {inv.status === "pending"
+                      ? t("onb.s7.invited")
+                      : inv.status === "accepted"
+                        ? lang === "ua" ? "Прийнято" : "Accepted"
+                        : inv.status}
+                  </span>
+                </div>
+                {isPending && (
+                  <div className="flex items-center gap-1">
+                    <Input readOnly value={url} className="h-7 font-mono text-[10px]" />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2"
+                      onClick={() => {
+                        navigator.clipboard.writeText(url).then(() =>
+                          toast.success(lang === "ua" ? "Скопійовано" : "Copied"),
+                        );
+                      }}
+                    >
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2 text-destructive hover:text-destructive"
+                      onClick={() => revoke.mutate(inv.id)}
+                      disabled={revoke.isPending}
+                    >
+                      ×
+                    </Button>
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
+
       <p className="text-xs text-muted-foreground">
         💡{" "}
         {lang === "ua"
-          ? "Поки що ми зберігаємо email-и; після підключення auth-invitations надішлемо запрошення автоматично. Можна пропустити."
-          : "Emails are stored locally for now. We'll wire auth invitations next; safe to skip."}
+          ? "Надішли посилання колезі — після входу/реєстрації з тим самим email вони автоматично отримають доступ до бренду. Термін дії: 14 днів."
+          : "Send the link to your teammate — after they sign in with the same email, they'll get instant access. Valid for 14 days."}
       </p>
     </div>
   );
