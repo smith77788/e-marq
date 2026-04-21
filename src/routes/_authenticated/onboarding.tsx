@@ -777,4 +777,73 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
   );
 }
 
+// -------------------- Loading / Error placeholders --------------------
+
+function OnboardingSkeleton({ label }: { label: string }) {
+  return (
+    <div className="mx-auto max-w-2xl space-y-6" aria-busy="true" aria-live="polite">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <Skeleton className="h-8 w-20" />
+      </div>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-3 w-10" />
+        </div>
+        <Skeleton className="h-2 w-full rounded-full" />
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <Skeleton key={i} className="h-7 w-7 rounded-md" />
+          ))}
+        </div>
+      </div>
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="mt-2 h-3 w-64" />
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-9 w-32" />
+        </CardContent>
+      </Card>
+      <p className="flex items-center gap-2 text-center text-xs text-muted-foreground">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        {label}
+      </p>
+    </div>
+  );
+}
+
+function OnboardingError({
+  message,
+  onRetry,
+  retrying,
+}: {
+  message: string;
+  onRetry: () => void;
+  retrying: boolean;
+}) {
+  return (
+    <Card className="mx-auto max-w-2xl border-destructive/30">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-destructive">
+          <AlertCircle className="h-5 w-5" />
+          Помилка завантаження
+        </CardTitle>
+        <CardDescription>{message}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button onClick={onRetry} disabled={retrying} size="sm">
+          <RefreshCw className={`mr-2 h-3.5 w-3.5 ${retrying ? "animate-spin" : ""}`} />
+          Спробувати ще раз
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
 
