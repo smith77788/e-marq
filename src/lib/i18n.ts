@@ -513,6 +513,25 @@ const dict = {
     "hb.cta.body": "Реєстрація безкоштовна. Перші 14 днів — повний доступ без обмежень.",
     "hb.cta.primary": "Створити акаунт",
     "hb.cta.secondary": "Поговорити з нами",
+
+    // Setup Readiness (bootstrap)
+    "readiness.title": "Готовність системи",
+    "readiness.desc": "Скільки даних про бізнес зібрано — від цього залежить точність 75+ агентів.",
+    "readiness.score": "Готовність",
+    "readiness.gapsFound": "Знайдено прогалин",
+    "readiness.allReady": "🎯 Усі дані зібрано — агенти працюють на повну",
+    "readiness.topGaps": "Що зробити в першу чергу",
+    "readiness.runScouts": "Перезапустити розвідників",
+    "readiness.running": "Запускаю…",
+    "readiness.lastRun": "Оновлено",
+    "readiness.never": "ще не запускалось",
+    "readiness.openChecklist": "Відкрити чек-лист",
+    "readiness.toastOk": "Розвідники запущені — оновлення з'явиться через хвилину",
+    "readiness.toastErr": "Не вдалося запустити розвідників",
+
+    // Brand: rediscover button
+    "brand.rediscover": "Переоцінити бізнес-контекст",
+    "brand.rediscoverDesc": "Запустити 8 розвідників: профіль, каталог, маржа, голос клієнта, канали, сезонність, інтеграції, прогалини.",
   },
   en: {
     "nav.brand": "My brand",
