@@ -29,6 +29,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { loadStorefrontShell } from "@/lib/storefront/loaders";
 import { useStorefrontCart, track } from "@/lib/storefront/cartContext";
 import { formatMoneyExact } from "@/lib/money";
+import { ShippingSelector } from "@/components/storefront/ShippingSelector";
+import type { NPSelection } from "@/lib/shipping/novaPoshta";
 
 type DiscountResult =
   | { valid: true; promo_id: string; name: string; type: string; discount_cents: number }
