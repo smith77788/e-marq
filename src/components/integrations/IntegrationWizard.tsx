@@ -123,29 +123,36 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
   // Зберегти інтеграцію (API key / webhook / REST) у tenant_integrations
   const saveConn = useMutation({
     mutationFn: async () => {
+      if (!integration) throw new Error("integration missing");
       const config: Record<string, unknown> = {};
       if (domain) config.domain = domain;
       if (restUrl) config.url = restUrl;
       const webhookSecret = isWebhook ? crypto.randomUUID().replace(/-/g, "") : null;
 
+      const payload: IntegrationInsert = {
+        tenant_id: tenantId,
+        provider: integration.id,
+        is_active: true,
+        credentials_encrypted: apiKey || null,
+        config: config as IntegrationInsert["config"],
+        webhook_secret: webhookSecret,
+      };
+
       const { data, error } = await supabase
         .from("tenant_integrations")
-        .upsert(
-          {
-            tenant_id: tenantId,
-            provider: integration.id,
-            is_active: true,
-            credentials_encrypted: apiKey || null,
-            config,
-            webhook_secret: webhookSecret,
-          },
-          { onConflict: "tenant_id,provider" },
-        )
+        .upsert(payload, { onConflict: "tenant_id,provider" })
         .select()
         .single();
       if (error) throw error;
       return data;
     },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tenant-integrations", tenantId] });
+      toast.success(MSG.saved);
+      setStep(3);
+    },
+    onError: (e: Error) => toast.error(MSG.errSave, { description: e.message }),
+  });
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["tenant-integrations", tenantId] });
       toast.success(MSG.saved);
