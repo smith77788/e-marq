@@ -8,7 +8,35 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/lib/i18n";
+import { MSG } from "@/lib/glossary";
 import type { InsightCopy, LocalizedCopy } from "@/lib/acos/insightCopy";
+
+const INSIGHT_TYPE_LABEL: Record<string, string> = {
+  low_engagement_product: "слабкий інтерес до товару",
+  abandoned_cart: "покинутий кошик",
+  stockout_predicted: "товар скоро закінчиться",
+  churn_risk: "ризик втратити клієнта",
+  cohort_segmentation: "групування клієнтів",
+  winback_triggered: "повернення клієнта",
+  ltv_score: "цінність клієнта",
+  loyalty_tier: "програма лояльності",
+  auto_promotion: "авто-промо",
+  bundle_recommendation: "набір товарів",
+  pricing_recommendation: "підбір ціни",
+  elasticity_signal: "реакція на ціну",
+  search_gap: "клієнти не знаходять",
+  seo_opportunity: "можливість для SEO",
+  aov_leak: "втрати в чеку",
+  cart_recovery: "повернення кошика",
+  checkout_friction: "перешкоди при оплаті",
+  anomaly_revenue_dip: "падіння виторгу",
+  anomaly_conversion_drop: "падіння конверсії",
+  restock_alert: "час поповнити склад",
+};
+
+function humanType(t: string) {
+  return INSIGHT_TYPE_LABEL[t] ?? t.replace(/_/g, " ");
+}
 
 type Props = { tenantId: string };
 
@@ -41,14 +69,14 @@ function pickCopy(metrics: Record<string, unknown>, lang: "ua" | "en"): InsightC
 async function authedFetch(path: string, body: unknown) {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
-  if (!token) throw new Error("Not signed in");
+  if (!token) throw new Error("Спочатку увійдіть у систему");
   const res = await fetch(path, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify(body),
   });
   const json = (await res.json().catch(() => ({}))) as Record<string, unknown> & { error?: string; details?: string };
-  if (!res.ok) throw new Error(typeof json.details === "string" ? json.details : typeof json.error === "string" ? json.error : `HTTP ${res.status}`);
+  if (!res.ok) throw new Error(typeof json.details === "string" ? json.details : typeof json.error === "string" ? json.error : MSG.errGeneric);
   return json;
 }
 
@@ -79,11 +107,15 @@ export function InsightsPanel({ tenantId }: Props) {
     onSuccess: (r) => {
       const result = r as { actual_result?: { queued_messages?: number }; action_type?: string };
       const queued = result.actual_result?.queued_messages ?? 0;
-      toast.success(queued > 0 ? `Applied — ${queued} customers queued` : `Action logged: ${result.action_type ?? "applied"}`);
+      toast.success(
+        queued > 0
+          ? `Готово · поставили в чергу ${queued} повідомлень клієнтам`
+          : MSG.applied,
+      );
       qc.invalidateQueries({ queryKey: ["insights", tenantId] });
       qc.invalidateQueries({ queryKey: ["revenue-feed", tenantId] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message || MSG.errApply),
   });
 
   const dismiss = useMutation({
@@ -92,10 +124,10 @@ export function InsightsPanel({ tenantId }: Props) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Dismissed");
+      toast.success(MSG.dismissed);
       qc.invalidateQueries({ queryKey: ["insights", tenantId] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message || MSG.errGeneric),
   });
 
   return (
@@ -132,7 +164,7 @@ export function InsightsPanel({ tenantId }: Props) {
                   <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
                     <Badge variant="outline" className={`text-[10px] ${style.cls}`}>
                       <Icon className="mr-1 h-3 w-3" />
-                      {i.insight_type.replace(/_/g, " ")}
+                      {humanType(i.insight_type)}
                     </Badge>
                     <Badge variant="outline" className="text-[10px]">
                       {Math.round(i.confidence * 100)}% {t("insights.confidence")}
