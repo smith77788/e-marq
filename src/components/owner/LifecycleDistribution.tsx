@@ -14,11 +14,11 @@ type Props = { tenantId: string };
 type Customer = { lifecycle_stage: string; total_spent_cents: number; total_orders: number };
 
 const STAGES = [
-  { key: "vip",      label: "VIP",                    color: "hsl(var(--primary))" },
-  { key: "active",   label: "Активні",                color: "hsl(var(--accent))" },
-  { key: "new",      label: "Нові",                   color: "hsl(var(--success))" },
-  { key: "at_risk",  label: "Можуть піти",            color: "hsl(var(--warning))" },
-  { key: "churned",  label: "Втрачені",               color: "hsl(var(--destructive))" },
+  { key: "vip",      label: "VIP",                    color: "var(--primary)" },
+  { key: "active",   label: "Активні",                color: "var(--accent)" },
+  { key: "new",      label: "Нові",                   color: "var(--success, var(--primary))" },
+  { key: "at_risk",  label: "Можуть піти",            color: "var(--warning, var(--primary))" },
+  { key: "churned",  label: "Втрачені",               color: "var(--destructive)" },
 ] as const;
 
 function fmtUsd(cents: number) {
@@ -107,7 +107,7 @@ export function LifecycleDistribution({ tenantId }: Props) {
                     innerRadius={48}
                     outerRadius={80}
                     paddingAngle={2}
-                    stroke="hsl(var(--background))"
+                    stroke="var(--background)"
                     strokeWidth={2}
                   >
                     {slices.filter((s) => s.count > 0).map((s) => (
@@ -116,10 +116,11 @@ export function LifecycleDistribution({ tenantId }: Props) {
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      background: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
+                      background: "var(--popover)",
+                      border: "1px solid var(--border)",
                       borderRadius: 8,
                       fontSize: 11,
+                      color: "var(--popover-foreground)",
                     }}
                     formatter={(value: number, _name, p) => {
                       const pct = total > 0 ? ((value / total) * 100).toFixed(1) : "0";
