@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
+import { formatMoney } from "@/lib/money";
 
 type Props = { tenantId: string };
 
@@ -28,25 +29,25 @@ type OutboundRow = {
 };
 
 const STATUS_STYLE: Record<string, { label: string; cls: string; Icon: typeof Clock }> = {
-  pending: { label: "Queued", cls: "bg-muted text-muted-foreground", Icon: Clock },
-  sent: { label: "Sent", cls: "bg-primary/10 text-primary border-primary/30", Icon: Send },
-  failed: { label: "Failed", cls: "bg-destructive/10 text-destructive border-destructive/30", Icon: XCircle },
-  replied: { label: "Replied", cls: "bg-warning/15 text-warning-foreground border-warning/40", Icon: MessageCircle },
-  converted: { label: "Converted", cls: "bg-success/15 text-success border-success/40", Icon: CheckCircle2 },
+  pending: { label: "У черзі", cls: "bg-muted text-muted-foreground", Icon: Clock },
+  sent: { label: "Надіслано", cls: "bg-primary/10 text-primary border-primary/30", Icon: Send },
+  failed: { label: "Помилка", cls: "bg-destructive/10 text-destructive border-destructive/30", Icon: XCircle },
+  replied: { label: "Відповіли", cls: "bg-warning/15 text-warning-foreground border-warning/40", Icon: MessageCircle },
+  converted: { label: "Куплено", cls: "bg-success/15 text-success border-success/40", Icon: CheckCircle2 },
 };
 
 const TRIGGER_LABEL: Record<string, string> = {
-  reorder: "Reorder ping",
-  winback: "Winback",
-  abandoned_cart: "Cart recovery",
-  sales_reply: "Sales reply",
+  reorder: "Повторне замовлення",
+  winback: "Повернення клієнта",
+  abandoned_cart: "Покинутий кошик",
+  sales_reply: "Відповідь продавця",
 };
 
 type EngineButton = { kind: "reorder" | "abandoned-cart" | "winback"; label: string; toast: string };
 const ENGINES: EngineButton[] = [
-  { kind: "reorder", label: "Reorder", toast: "Reorder engine" },
-  { kind: "abandoned-cart", label: "Recover carts", toast: "Cart recovery" },
-  { kind: "winback", label: "Winback", toast: "Winback" },
+  { kind: "reorder", label: "Повторні", toast: "Повторні замовлення" },
+  { kind: "abandoned-cart", label: "Кошики", toast: "Покинуті кошики" },
+  { kind: "winback", label: "Повернення", toast: "Повернення клієнтів" },
 ];
 
 async function authedFetch(path: string, body: unknown) {
@@ -110,7 +111,7 @@ export function RevenueFeed({ tenantId }: Props) {
     onSuccess: ({ kind, result }) => {
       const r = result as { sent?: number; queued?: number };
       const eng = ENGINES.find((e) => e.kind === kind);
-      toast.success(`${eng?.toast}: ${r.queued ?? 0} queued, ${r.sent ?? 0} sent`);
+      toast.success(`${eng?.toast}: ${r.queued ?? 0} у черзі, ${r.sent ?? 0} надіслано`);
       qc.invalidateQueries({ queryKey: ["revenue-feed", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -119,7 +120,7 @@ export function RevenueFeed({ tenantId }: Props) {
   const dispatch = useMutation({
     mutationFn: () => authedFetch("/hooks/engines/dispatch", { tenant_id: tenantId }),
     onSuccess: (r) => {
-      toast.success(`Dispatched ${(r as { sent?: number }).sent ?? 0} pending messages`);
+      toast.success(`Надіслано ${(r as { sent?: number }).sent ?? 0} повідомлень із черги`);
       qc.invalidateQueries({ queryKey: ["revenue-feed", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -140,10 +141,10 @@ export function RevenueFeed({ tenantId }: Props) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-primary" />
-              Revenue feed
+              Що приніс ШІ
             </CardTitle>
             <CardDescription>
-              What the system did for you. Auto-refreshes every 15s.
+              Дії автономних агентів. Оновлюється кожні 15 секунд.
             </CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -165,27 +166,27 @@ export function RevenueFeed({ tenantId }: Props) {
             ))}
             <Button onClick={() => dispatch.mutate()} disabled={dispatch.isPending} size="sm" variant="ghost">
               {dispatch.isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Send className="mr-2 h-3.5 w-3.5" />}
-              Send queued
+              Надіслати чергу
             </Button>
           </div>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Stat label="Sent" value={stats.sent} />
-          <Stat label="Replies" value={stats.replied} />
-          <Stat label="Converted" value={stats.converted} />
-          <Stat label="Pipeline" value={`$${(stats.pipeline / 100).toFixed(0)}`} sub="expected" highlight />
+          <Stat label="Надіслано" value={stats.sent} />
+          <Stat label="Відповіді" value={stats.replied} />
+          <Stat label="Куплено" value={stats.converted} />
+          <Stat label="Очікуваний дохід" value={formatMoney(stats.pipeline)} sub="прогноз" highlight />
         </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <p className="text-sm text-muted-foreground">Завантаження…</p>
         ) : rows.length === 0 ? (
           <div className="rounded-md border border-dashed border-border bg-muted/20 p-6 text-center">
             <Bot className="mx-auto h-8 w-8 text-muted-foreground/60" />
-            <p className="mt-3 text-sm font-medium">No autonomous activity yet</p>
+            <p className="mt-3 text-sm font-medium">Поки що автономної активності немає</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Click "Run reorder engine now" — system will check who's overdue and message them on Telegram.
+              Натисніть «Повторні» — система знайде клієнтів, у яких пора замовити, і напише їм у Telegram.
             </p>
           </div>
         ) : (
@@ -195,7 +196,7 @@ export function RevenueFeed({ tenantId }: Props) {
                 const s = STATUS_STYLE[r.status] ?? STATUS_STYLE.pending;
                 const StatusIcon = s.Icon;
                 const customerLabel =
-                  r.customers?.name ?? r.customers?.email ?? (r.customers?.telegram_username ? `@${r.customers.telegram_username}` : "anonymous");
+                  r.customers?.name ?? r.customers?.email ?? (r.customers?.telegram_username ? `@${r.customers.telegram_username}` : "анонім");
                 const ts = r.sent_at ?? r.scheduled_for;
                 return (
                   <div key={r.id} className="rounded-lg border border-border bg-card p-3">
@@ -216,7 +217,7 @@ export function RevenueFeed({ tenantId }: Props) {
                     </p>
                     {r.expected_impact_cents != null && (
                       <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-primary">
-                        <TrendingUp className="h-3 w-3" /> potential ${(r.expected_impact_cents / 100).toFixed(0)}
+                        <TrendingUp className="h-3 w-3" /> потенціал {formatMoney(r.expected_impact_cents)}
                       </p>
                     )}
                   </div>

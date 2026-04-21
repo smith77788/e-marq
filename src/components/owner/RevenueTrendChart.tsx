@@ -14,6 +14,7 @@ import { TrendingUp } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAnalyticsWindow } from "./AnalyticsWindow";
+import { formatMoney, formatNumber, HRYVNIA, PLATFORM_LOCALE } from "@/lib/money";
 
 type Props = { tenantId: string };
 
@@ -24,13 +25,9 @@ function dayKey(iso: string) {
   return iso.slice(0, 10); // YYYY-MM-DD
 }
 
-function fmtUsd(cents: number) {
-  return `$${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
-}
-
 function shortDate(key: string) {
   const d = new Date(key + "T00:00:00Z");
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return d.toLocaleDateString(PLATFORM_LOCALE, { month: "short", day: "numeric" });
 }
 
 export function RevenueTrendChart({ tenantId }: Props) {
@@ -100,10 +97,10 @@ export function RevenueTrendChart({ tenantId }: Props) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
           <TrendingUp className="h-4 w-4 text-primary" />
-          Revenue trend ({days} days)
+          Динаміка виторгу ({days} днів)
         </CardTitle>
         <CardDescription className="text-xs">
-          Total <span className="font-semibold text-foreground">{fmtUsd(totals.total)}</span> · AI-attributed <span className="font-semibold text-primary">{fmtUsd(totals.ai)}</span> ({totals.share}%)
+          Усього <span className="font-semibold text-foreground">{formatMoney(totals.total)}</span> · від ШІ <span className="font-semibold text-primary">{formatMoney(totals.ai)}</span> ({totals.share}%)
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -136,8 +133,8 @@ export function RevenueTrendChart({ tenantId }: Props) {
                   tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(v) => `$${v}`}
-                  width={48}
+                  tickFormatter={(v) => `${formatNumber(Number(v))} ${HRYVNIA}`}
+                  width={64}
                 />
                 <Tooltip
                   contentStyle={{
@@ -147,8 +144,8 @@ export function RevenueTrendChart({ tenantId }: Props) {
                     fontSize: 12,
                   }}
                   formatter={(value: number, name) => [
-                    `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
-                    name === "ai" ? "AI-attributed" : name === "organic" ? "Organic" : name,
+                    `${formatNumber(value)} ${HRYVNIA}`,
+                    name === "ai" ? "Від ШІ" : name === "organic" ? "Органіка" : name,
                   ]}
                   labelFormatter={(l) => `${l}`}
                 />

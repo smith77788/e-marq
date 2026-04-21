@@ -80,7 +80,7 @@ async function processCallback(cb: NonNullable<TgUpdate["callback_query"]>, appO
   const msgId = cb.message?.message_id;
   const parts = data.split(":");
   if (parts.length !== 3) {
-    await tgAnswerCallback(cb.id, "Bad payload");
+    await tgAnswerCallback(cb.id, "Невірний запит");
     return;
   }
   const [scope, op, id] = parts as [string, string, string];
@@ -92,7 +92,7 @@ async function processCallback(cb: NonNullable<TgUpdate["callback_query"]>, appO
     .eq("owner_telegram_chat_id", String(chatId))
     .maybeSingle();
   if (!cfgRow) {
-    await tgAnswerCallback(cb.id, "Not authorized");
+    await tgAnswerCallback(cb.id, "Немає прав");
     return;
   }
   const tenantId = cfgRow.tenant_id;
@@ -104,7 +104,7 @@ async function processCallback(cb: NonNullable<TgUpdate["callback_query"]>, appO
       .eq("id", id)
       .maybeSingle();
     if (!ins || ins.tenant_id !== tenantId) {
-      await tgAnswerCallback(cb.id, "Not found");
+      await tgAnswerCallback(cb.id, "Не знайдено");
       return;
     }
     if (op === "apply") {
@@ -113,15 +113,15 @@ async function processCallback(cb: NonNullable<TgUpdate["callback_query"]>, appO
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ insight_id: id }),
       });
-      await tgAnswerCallback(cb.id, res.ok ? "✅ Applied" : "Failed to apply");
-      if (msgId && res.ok) await tgEditMessage(chatId, msgId, `✅ <b>Applied:</b> ${ins.title}`);
+      await tgAnswerCallback(cb.id, res.ok ? "✅ Застосовано" : "Не вдалося застосувати");
+      if (msgId && res.ok) await tgEditMessage(chatId, msgId, `✅ <b>Застосовано:</b> ${ins.title}`);
     } else if (op === "dismiss") {
       await supabaseAdmin.from("ai_insights").update({ status: "dismissed" }).eq("id", id);
-      await tgAnswerCallback(cb.id, "Dismissed");
-      if (msgId) await tgEditMessage(chatId, msgId, `❌ <b>Dismissed:</b> ${ins.title}`);
+      await tgAnswerCallback(cb.id, "Сховано");
+      if (msgId) await tgEditMessage(chatId, msgId, `❌ <b>Сховано:</b> ${ins.title}`);
     } else if (op === "view") {
       const url = `${appOrigin}/brand?tenant=${tenantId}#insight-${id}`;
-      await tgAnswerCallback(cb.id, "Opening…");
+      await tgAnswerCallback(cb.id, "Відкриваю…");
       await sendTelegramText(String(chatId), `🔗 ${ins.title}\n${url}`);
     }
   } else if (scope === "a") {
@@ -131,7 +131,7 @@ async function processCallback(cb: NonNullable<TgUpdate["callback_query"]>, appO
       .eq("id", id)
       .maybeSingle();
     if (!act || act.tenant_id !== tenantId) {
-      await tgAnswerCallback(cb.id, "Not found");
+      await tgAnswerCallback(cb.id, "Не знайдено");
       return;
     }
     if (op === "apply") {
@@ -139,15 +139,15 @@ async function processCallback(cb: NonNullable<TgUpdate["callback_query"]>, appO
         .from("ai_actions")
         .update({ status: "applied", applied_at: new Date().toISOString() })
         .eq("id", id);
-      await tgAnswerCallback(cb.id, "✅ Applied");
-      if (msgId) await tgEditMessage(chatId, msgId, `✅ <b>Applied action:</b> ${act.action_type}`);
+      await tgAnswerCallback(cb.id, "✅ Застосовано");
+      if (msgId) await tgEditMessage(chatId, msgId, `✅ <b>Застосовано дію:</b> ${act.action_type}`);
     } else if (op === "dismiss") {
       await supabaseAdmin.from("ai_actions").update({ status: "dismissed" }).eq("id", id);
-      await tgAnswerCallback(cb.id, "Dismissed");
-      if (msgId) await tgEditMessage(chatId, msgId, `❌ <b>Dismissed:</b> ${act.action_type}`);
+      await tgAnswerCallback(cb.id, "Сховано");
+      if (msgId) await tgEditMessage(chatId, msgId, `❌ <b>Сховано:</b> ${act.action_type}`);
     } else if (op === "view") {
       const url = `${appOrigin}/brand?tenant=${tenantId}#action-${id}`;
-      await tgAnswerCallback(cb.id, "Opening…");
+      await tgAnswerCallback(cb.id, "Відкриваю…");
       await sendTelegramText(String(chatId), `🔗 ${act.action_type}\n${url}`);
     }
   } else if (scope === "n") {
@@ -157,20 +157,20 @@ async function processCallback(cb: NonNullable<TgUpdate["callback_query"]>, appO
       .eq("id", id)
       .maybeSingle();
     if (!n || n.tenant_id !== tenantId) {
-      await tgAnswerCallback(cb.id, "Not found");
+      await tgAnswerCallback(cb.id, "Не знайдено");
       return;
     }
     if (op === "read") {
       await supabaseAdmin.from("owner_notifications").update({ is_read: true }).eq("id", id);
-      await tgAnswerCallback(cb.id, "Marked as read");
+      await tgAnswerCallback(cb.id, "Позначено як прочитане");
       if (msgId) await tgEditMessage(chatId, msgId, `✓ ${n.title}`);
     } else if (op === "view") {
       const url = n.link ?? `${appOrigin}/brand?tenant=${tenantId}`;
-      await tgAnswerCallback(cb.id, "Opening…");
+      await tgAnswerCallback(cb.id, "Відкриваю…");
       await sendTelegramText(String(chatId), `🔗 ${n.title}\n${url}`);
     }
   } else {
-    await tgAnswerCallback(cb.id, "Unknown action");
+    await tgAnswerCallback(cb.id, "Невідома дія");
   }
 }
 
@@ -194,7 +194,7 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
       .eq("slug", slug)
       .maybeSingle();
     if (!tenant) {
-      await sendTelegramText(chatId, `Brand "${slug}" not found.`);
+      await sendTelegramText(chatId, `Бренд «${slug}» не знайдено.`);
       return;
     }
     const { error: rpcErr } = await supabaseAdmin
@@ -202,12 +202,12 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
       .update({ owner_telegram_chat_id: chatId })
       .eq("tenant_id", tenant.id);
     if (rpcErr) {
-      await sendTelegramText(chatId, `Could not bind: ${rpcErr.message}`);
+      await sendTelegramText(chatId, `Не вдалося привʼязати: ${rpcErr.message}`);
       return;
     }
     await sendTelegramText(
       chatId,
-      `🔔 You're now receiving owner notifications for <b>${tenant.name}</b>. Insights and pending agent actions will arrive here with Apply/Dismiss buttons.`,
+      `🔔 Тепер ви отримуєте сповіщення власника для <b>${tenant.name}</b>. Інсайти та дії агентів, що чекають підтвердження, прийдуть сюди з кнопками «Застосувати» / «Сховати».`,
     );
     return;
   }
@@ -222,7 +222,7 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
       .eq("slug", slug)
       .maybeSingle();
     if (!tenant) {
-      await sendTelegramText(chatId, `Brand "${slug}" not found. Ask the brand for the correct link.`);
+      await sendTelegramText(chatId, `Бренд «${slug}» не знайдено. Спитайте у бренду правильне посилання.`);
       return;
     }
     await supabaseAdmin
@@ -239,7 +239,7 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
     const brand = cfg?.brand_name ?? tenant.name;
     await sendTelegramText(
       chatId,
-      `👋 Welcome to <b>${brand}</b>! Ask me anything — I can show products, help you order, or notify you about new arrivals.`,
+      `👋 Вітаємо в <b>${brand}</b>! Запитайте, що завгодно — покажу товари, допоможу замовити або повідомлю про новинки.`,
     );
   }
 
@@ -247,7 +247,7 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
   if (text === "/start") {
     await sendTelegramText(
       chatId,
-      `Hi! Customers: <code>/start &lt;brand-slug&gt;</code>. Owners: <code>/start owner &lt;brand-slug&gt;</code>.`,
+      `Привіт! Клієнтам: <code>/start &lt;slug-бренду&gt;</code>. Власникам: <code>/start owner &lt;slug-бренду&gt;</code>.`,
     );
     return;
   }
@@ -262,7 +262,7 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
   if (!tenantId) {
     await sendTelegramText(
       chatId,
-      `You're not connected to any brand yet. Send <code>/start &lt;brand-slug&gt;</code> to begin.`,
+      `Ви ще не підключені до жодного бренду. Надішліть <code>/start &lt;slug-бренду&gt;</code>, щоб почати.`,
     );
     return;
   }
@@ -334,7 +334,7 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
   // ---- Intent: opt-out ----
   if (NO_PATTERNS.test(text)) {
     await supabaseAdmin.from("customers").update({ consent_marketing: false }).eq("id", customerId);
-    await sendTelegramText(chatId, "Got it — you're opted out. Reply START anytime to resume. 👋");
+    await sendTelegramText(chatId, "Зрозуміло — більше повідомлень не надсилаємо. Напишіть START, коли захочете відновити. 👋");
     return;
   }
 
@@ -346,7 +346,7 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
       const link = `${appOrigin}/s/${t?.slug ?? ""}/orders/${result.orderId}`;
       await sendTelegramText(
         chatId,
-        `Sweet! I prepared your order: $${(result.total / 100).toFixed(2)}.\n\nFinish here 👉 ${link}`,
+        `Чудово! Замовлення підготовлено: ${(result.total / 100).toFixed(0)} ₴.\n\nЗавершіть тут 👉 ${link}`,
       );
       await supabaseAdmin.from("ai_actions").insert({
         tenant_id: tenantId,
@@ -401,7 +401,7 @@ async function autoCreateReorder(
       tenant_id: tenantId,
       status: "pending",
       total_cents: total,
-      currency: "USD",
+      currency: "UAH",
       payment_method: "manual",
       customer_email: customer.email,
       customer_name: customer.name ?? lastOrder.customer_name,

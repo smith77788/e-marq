@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatMoney } from "@/lib/money";
 
 export type TenantLeaderRow = {
   id: string;
@@ -17,15 +18,11 @@ type Props = {
   rows: TenantLeaderRow[];
 };
 
-function formatMoney(cents: number) {
-  return `$${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
-}
-
 export function TenantLeaderboard({ rows }: Props) {
   if (rows.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-border bg-card/30 p-8 text-center text-sm text-muted-foreground">
-        No tenants yet. Create one to see the leaderboard.
+        Поки що немає брендів. Створіть перший — тут зʼявиться лідерборд.
       </div>
     );
   }
@@ -72,14 +69,14 @@ export function TenantLeaderboard({ rows }: Props) {
                     </span>
                   </div>
                   <p className="text-[11px] text-muted-foreground">
-                    {row.orders} orders · {row.insights} insights · {row.agentRuns} runs
+                    {row.orders} замовл. · {row.insights} інсайтів · {row.agentRuns} запусків
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-bold tabular-nums text-foreground">
                     {formatMoney(row.revenueCents)}
                   </p>
-                  <p className="text-[10px] text-muted-foreground">revenue</p>
+                  <p className="text-[10px] text-muted-foreground">виторг</p>
                 </div>
                 <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
               </div>
