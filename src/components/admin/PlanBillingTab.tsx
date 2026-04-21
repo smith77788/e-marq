@@ -83,7 +83,7 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
       const { error } = await supabase.rpc("change_tenant_plan", {
         _tenant_id: tenantId,
         _plan_key: planKey,
-        _reason: reason || null,
+        _reason: reason || undefined,
       });
       if (error) throw error;
     },
@@ -100,10 +100,11 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
   });
 
   const updateSub = useMutation({
-    mutationFn: async (patch: { status?: string; trial_ends_at?: string | null; overrides?: object; notes?: string | null }) => {
+    mutationFn: async (patch: { status?: string; trial_ends_at?: string | null; overrides?: Record<string, unknown>; notes?: string | null }) => {
       const { error } = await supabase
         .from("tenant_subscriptions")
-        .update(patch)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .update(patch as any)
         .eq("tenant_id", tenantId);
       if (error) throw error;
     },

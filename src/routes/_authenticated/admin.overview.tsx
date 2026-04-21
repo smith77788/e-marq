@@ -68,15 +68,6 @@ function AdminOverviewPage() {
     );
   }, [overviewQuery.data, search]);
 
-  if (loading) return <p className="text-sm text-muted-foreground">Loading…</p>;
-  if (!isSuperAdmin) {
-    return (
-      <Card>
-        <CardHeader><CardTitle>Access denied</CardTitle></CardHeader>
-      </Card>
-    );
-  }
-
   const totals = useMemo(() => {
     const rows = overviewQuery.data ?? [];
     return {
@@ -86,6 +77,15 @@ function AdminOverviewPage() {
       orders: rows.reduce((sum, r) => sum + Number(r.orders_this_period ?? 0), 0),
     };
   }, [overviewQuery.data]);
+
+  if (loading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (!isSuperAdmin) {
+    return (
+      <Card>
+        <CardHeader><CardTitle>Access denied</CardTitle></CardHeader>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
