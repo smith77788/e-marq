@@ -81,34 +81,49 @@ function track(
 }
 
 async function loadStorefront(slug: string) {
+  // Безпечне завантаження — `get_storefront_config` повертає лише UI/SEO/payments,
+  // НЕ розкриває owner_telegram_chat_id, bot tokens, internal features.
+  const { data: cfgData, error: cfgErr } = await supabase.rpc("get_storefront_config", { _slug: slug });
+  if (cfgErr) throw cfgErr;
+  if (!cfgData) throw notFound();
+
+  const cfgPayload = cfgData as {
+    tenant_id: string;
+    brand_name: string;
+    ui: Record<string, unknown>;
+    seo: Record<string, unknown>;
+    features: { payments?: PaymentsConfig };
+  };
+
+  // Tenant — публічно читається, але обмежено active. Беремо name+slug для UI.
   const { data: tenant, error: tErr } = await supabase
     .from("tenants")
     .select("id, name, slug, status")
-    .eq("slug", slug)
+    .eq("id", cfgPayload.tenant_id)
     .eq("status", "active")
     .maybeSingle();
   if (tErr) throw tErr;
   if (!tenant) throw notFound();
 
-  const [{ data: config, error: cErr }, { data: products, error: pErr }] = await Promise.all([
-    supabase
-      .from("tenant_configs")
-      .select("brand_name, ui, seo, features")
-      .eq("tenant_id", tenant.id)
-      .maybeSingle(),
-    supabase
-      .from("products")
-      .select("id, name, description, price_cents, currency, image_url, stock")
-      .eq("tenant_id", tenant.id)
-      .eq("is_active", true)
-      .order("created_at", { ascending: false }),
-  ]);
-  if (cErr) throw cErr;
+  // Products — RLS дозволяє anon читати лише is_active=true.
+  const { data: products, error: pErr } = await supabase
+    .from("products")
+    .select("id, name, description, price_cents, currency, image_url, stock")
+    .eq("tenant_id", tenant.id)
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
   if (pErr) throw pErr;
+
+  const config: ConfigRow = {
+    brand_name: cfgPayload.brand_name,
+    ui: cfgPayload.ui ?? null,
+    seo: cfgPayload.seo ?? null,
+    features: cfgPayload.features ?? null,
+  };
 
   return {
     tenant: tenant as TenantRow,
-    config: (config ?? null) as ConfigRow | null,
+    config,
     products: (products ?? []) as Product[],
   };
 }
