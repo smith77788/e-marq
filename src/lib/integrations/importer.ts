@@ -121,24 +121,29 @@ export async function runImport(input: ImportInput): Promise<ImportResult> {
           continue;
         }
         const status = (get(row, "status") || "pending").toLowerCase();
-        const validStatuses = ["pending", "paid", "shipped", "completed", "cancelled", "refunded"];
-        const finalStatus = validStatuses.includes(status) ? status : "pending";
-        const payload = {
+        const validStatuses = ["pending", "paid", "shipped", "completed", "cancelled", "refunded"] as const;
+        type OrderStatus = (typeof validStatuses)[number];
+        const finalStatus: OrderStatus = (validStatuses as readonly string[]).includes(status)
+          ? (status as OrderStatus)
+          : "pending";
+        // payment_method обмежений тригером БД до 'stripe_card' | 'manual'
+        const rawPm = get(row, "payment_method").toLowerCase();
+        const paymentMethod = rawPm === "stripe_card" || rawPm === "stripe" ? "stripe_card" : "manual";
+        const { error } = await supabase.from("orders").insert({
           tenant_id: tenantId,
           customer_name: customerName,
           customer_email: get(row, "customer_email").toLowerCase() || null,
           total_cents: totalCents,
           currency: (get(row, "currency") || "UAH").toUpperCase().slice(0, 3),
-          status: finalStatus as "pending" | "paid" | "shipped" | "completed" | "cancelled" | "refunded",
-          payment_method: get(row, "payment_method") || "manual",
+          status: finalStatus,
+          payment_method: paymentMethod,
           paid_at: finalStatus === "paid" ? new Date().toISOString() : null,
           metadata: {
             external_id: get(row, "external_id") || null,
             import_source: sourceProvider,
             import_job_id: job.id,
           },
-        };
-        const { error } = await supabase.from("orders").insert(payload);
+        });
         if (error) {
           failed++;
           errors.push({ row: i + 2, message: error.message });
