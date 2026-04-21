@@ -538,7 +538,7 @@ const dict = {
     "sb.allTenants": "All tenants",
     "sb.plansCatalog": "Plans catalog",
     "sb.adminUsers": "Users",
-    "sb.adminCommands": "Commands",
+    "sb.adminCommands": "⚡ System commands",
     "sb.liveRuns": "Live runs",
     "sb.agentLibrary": "Agent library",
     "sb.insightStream": "Insight stream",
