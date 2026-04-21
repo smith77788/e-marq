@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
+import { uk } from "date-fns/locale";
 import { AlertTriangle, CheckCircle2, ChevronDown, Lightbulb, Loader2, Sparkles, TrendingDown, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -170,7 +171,7 @@ export function InsightsPanel({ tenantId }: Props) {
                       {Math.round(i.confidence * 100)}% {t("insights.confidence")}
                     </Badge>
                     <span className="ml-auto text-[10px] text-muted-foreground">
-                      {formatDistanceToNow(new Date(i.created_at), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(i.created_at), { addSuffix: true, locale: uk })}
                     </span>
                   </div>
                   <p className="text-sm font-semibold text-foreground">{headline}</p>
