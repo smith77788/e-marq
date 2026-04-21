@@ -48,7 +48,9 @@ export const Route = createFileRoute("/track/$slug/js")({
   var initialType='content_viewed';
   if(/\\/(products?|p|item)\\//i.test(location.pathname))initialType='product_viewed';
   send(initialType,{title:document.title});
-  window.ACOS={track:send,sid:sid,tenant:TENANT};
+  var api={track:send,sid:sid,tenant:TENANT};
+  window.MARQ=api;
+  window.ACOS=api; // legacy alias — kept for backward compatibility
 })();`;
         return new Response(js, {
           status: 200,
