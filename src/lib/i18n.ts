@@ -998,6 +998,25 @@ const dict = {
     "hb.cta.body": "Signup is free. First 14 days — full access, no limits.",
     "hb.cta.primary": "Create account",
     "hb.cta.secondary": "Talk to us",
+
+    // Setup Readiness (bootstrap)
+    "readiness.title": "System readiness",
+    "readiness.desc": "How much business context is collected — drives the precision of all 75+ agents.",
+    "readiness.score": "Readiness",
+    "readiness.gapsFound": "Gaps found",
+    "readiness.allReady": "🎯 All data collected — agents at full precision",
+    "readiness.topGaps": "Fix these first",
+    "readiness.runScouts": "Re-run scouts",
+    "readiness.running": "Running…",
+    "readiness.lastRun": "Updated",
+    "readiness.never": "never run",
+    "readiness.openChecklist": "Open checklist",
+    "readiness.toastOk": "Scouts launched — refresh in a minute",
+    "readiness.toastErr": "Failed to start scouts",
+
+    // Brand: rediscover button
+    "brand.rediscover": "Re-discover business context",
+    "brand.rediscoverDesc": "Run all 8 scouts: profile, catalog, margin, voice, channels, seasonality, integrations, gaps.",
   },
 } satisfies Record<Lang, Record<string, string>>;
 
