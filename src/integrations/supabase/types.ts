@@ -1122,6 +1122,7 @@ export type Database = {
           tenant_id: string
           total_orders: number
           total_spent_cents: number
+          unsubscribe_token: string
           updated_at: string
           user_id: string | null
         }
@@ -1144,6 +1145,7 @@ export type Database = {
           tenant_id: string
           total_orders?: number
           total_spent_cents?: number
+          unsubscribe_token?: string
           updated_at?: string
           user_id?: string | null
         }
@@ -1166,6 +1168,7 @@ export type Database = {
           tenant_id?: string
           total_orders?: number
           total_spent_cents?: number
+          unsubscribe_token?: string
           updated_at?: string
           user_id?: string | null
         }
@@ -1381,6 +1384,67 @@ export type Database = {
           },
         ]
       }
+      email_campaign_recipients: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          customer_id: string | null
+          error: string | null
+          id: string
+          resend_message_id: string | null
+          sent_at: string | null
+          status: string
+          tenant_id: string
+          to_email: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          customer_id?: string | null
+          error?: string | null
+          id?: string
+          resend_message_id?: string | null
+          sent_at?: string | null
+          status?: string
+          tenant_id: string
+          to_email: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          customer_id?: string | null
+          error?: string | null
+          id?: string
+          resend_message_id?: string | null
+          sent_at?: string | null
+          status?: string
+          tenant_id?: string
+          to_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_campaign_recipients_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "email_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_campaign_recipients_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_campaign_recipients_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_campaigns: {
         Row: {
           clicks_count: number
@@ -1483,7 +1547,9 @@ export type Database = {
           bounced_at: string | null
           campaign_id: string | null
           clicked_at: string | null
+          complained_at: string | null
           created_at: string
+          delivered_at: string | null
           error: string | null
           id: string
           metadata: Json
@@ -1495,12 +1561,15 @@ export type Database = {
           template: string
           tenant_id: string
           to_email: string
+          unsubscribed_at: string | null
         }
         Insert: {
           bounced_at?: string | null
           campaign_id?: string | null
           clicked_at?: string | null
+          complained_at?: string | null
           created_at?: string
+          delivered_at?: string | null
           error?: string | null
           id?: string
           metadata?: Json
@@ -1512,12 +1581,15 @@ export type Database = {
           template: string
           tenant_id: string
           to_email: string
+          unsubscribed_at?: string | null
         }
         Update: {
           bounced_at?: string | null
           campaign_id?: string | null
           clicked_at?: string | null
+          complained_at?: string | null
           created_at?: string
+          delivered_at?: string | null
           error?: string | null
           id?: string
           metadata?: Json
@@ -1529,6 +1601,7 @@ export type Database = {
           template?: string
           tenant_id?: string
           to_email?: string
+          unsubscribed_at?: string | null
         }
         Relationships: [
           {
@@ -1540,6 +1613,44 @@ export type Database = {
           },
           {
             foreignKeyName: "email_sends_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_suppressions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          metadata: Json
+          reason: string
+          source_event_id: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          metadata?: Json
+          reason: string
+          source_event_id?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          metadata?: Json
+          reason?: string
+          source_event_id?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_suppressions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -3944,6 +4055,10 @@ export type Database = {
       increment_usage: {
         Args: { _delta?: number; _metric: string; _tenant_id: string }
         Returns: undefined
+      }
+      is_email_suppressed: {
+        Args: { _email: string; _tenant_id: string }
+        Returns: boolean
       }
       is_super_admin: { Args: never; Returns: boolean }
       is_tenant_admin: { Args: { _tenant_id: string }; Returns: boolean }

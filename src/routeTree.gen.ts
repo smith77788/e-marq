@@ -132,6 +132,9 @@ import { Route as HooksAgentsActionWatchdogRouteImport } from './routes/hooks/ag
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
 import { Route as ApiEmailOrderStatusRouteImport } from './routes/api/email.order-status'
 import { Route as ApiEmailOrderConfirmationRouteImport } from './routes/api/email.order-confirmation'
+import { Route as ApiEmailDomainVerifyRouteImport } from './routes/api/email.domain-verify'
+import { Route as ApiEmailDomainStatusRouteImport } from './routes/api/email.domain-status'
+import { Route as ApiEmailDomainSetupRouteImport } from './routes/api/email.domain-setup'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedBrandPromotionsRouteImport } from './routes/_authenticated/brand.promotions'
 import { Route as AuthenticatedBrandProductsRouteImport } from './routes/_authenticated/brand.products'
@@ -150,6 +153,8 @@ import { Route as SSlugProductsProductIdRouteImport } from './routes/s.$slug.pro
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
 import { Route as SSlugCollectionsHandleRouteImport } from './routes/s.$slug.collections.$handle'
 import { Route as ApiPublicShippingNpRouteImport } from './routes/api/public/shipping.np'
+import { Route as ApiPublicEmailUnsubscribeRouteImport } from './routes/api/public/email.unsubscribe'
+import { Route as ApiPublicEmailResendWebhookRouteImport } from './routes/api/public/email.resend-webhook'
 import { Route as ApiIntegrationsSyncProviderRouteImport } from './routes/api/integrations.sync.$provider'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
 import { Route as AuthenticatedAdminDntradeHealthTenantIdRouteImport } from './routes/_authenticated/admin.dntrade-health.$tenantId'
@@ -826,6 +831,21 @@ const ApiEmailOrderConfirmationRoute =
     path: '/api/email/order-confirmation',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiEmailDomainVerifyRoute = ApiEmailDomainVerifyRouteImport.update({
+  id: '/api/email/domain-verify',
+  path: '/api/email/domain-verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEmailDomainStatusRoute = ApiEmailDomainStatusRouteImport.update({
+  id: '/api/email/domain-status',
+  path: '/api/email/domain-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEmailDomainSetupRoute = ApiEmailDomainSetupRouteImport.update({
+  id: '/api/email/domain-setup',
+  path: '/api/email/domain-setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedInviteTokenRoute =
   AuthenticatedInviteTokenRouteImport.update({
     id: '/invite/$token',
@@ -927,6 +947,18 @@ const ApiPublicShippingNpRoute = ApiPublicShippingNpRouteImport.update({
   path: '/api/public/shipping/np',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicEmailUnsubscribeRoute =
+  ApiPublicEmailUnsubscribeRouteImport.update({
+    id: '/api/public/email/unsubscribe',
+    path: '/api/public/email/unsubscribe',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicEmailResendWebhookRoute =
+  ApiPublicEmailResendWebhookRouteImport.update({
+    id: '/api/public/email/resend-webhook',
+    path: '/api/public/email/resend-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiIntegrationsSyncProviderRoute =
   ApiIntegrationsSyncProviderRouteImport.update({
     id: '/api/integrations/sync/$provider',
@@ -981,6 +1013,9 @@ export interface FileRoutesByFullPath {
   '/brand/products': typeof AuthenticatedBrandProductsRoute
   '/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
+  '/api/email/domain-status': typeof ApiEmailDomainStatusRoute
+  '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
@@ -1092,6 +1127,8 @@ export interface FileRoutesByFullPath {
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
+  '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
+  '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -1126,6 +1163,9 @@ export interface FileRoutesByTo {
   '/brand/products': typeof AuthenticatedBrandProductsRoute
   '/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
+  '/api/email/domain-status': typeof ApiEmailDomainStatusRoute
+  '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
@@ -1237,6 +1277,8 @@ export interface FileRoutesByTo {
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
+  '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
+  '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -1274,6 +1316,9 @@ export interface FileRoutesById {
   '/_authenticated/brand/products': typeof AuthenticatedBrandProductsRoute
   '/_authenticated/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
+  '/api/email/domain-status': typeof ApiEmailDomainStatusRoute
+  '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
@@ -1385,6 +1430,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
+  '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
+  '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -1422,6 +1469,9 @@ export interface FileRouteTypes {
     | '/brand/products'
     | '/brand/promotions'
     | '/invite/$token'
+    | '/api/email/domain-setup'
+    | '/api/email/domain-status'
+    | '/api/email/domain-verify'
     | '/api/email/order-confirmation'
     | '/api/email/order-status'
     | '/hooks/actions/apply'
@@ -1533,6 +1583,8 @@ export interface FileRouteTypes {
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
     | '/api/integrations/sync/$provider'
+    | '/api/public/email/resend-webhook'
+    | '/api/public/email/unsubscribe'
     | '/api/public/shipping/np'
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
@@ -1567,6 +1619,9 @@ export interface FileRouteTypes {
     | '/brand/products'
     | '/brand/promotions'
     | '/invite/$token'
+    | '/api/email/domain-setup'
+    | '/api/email/domain-status'
+    | '/api/email/domain-verify'
     | '/api/email/order-confirmation'
     | '/api/email/order-status'
     | '/hooks/actions/apply'
@@ -1678,6 +1733,8 @@ export interface FileRouteTypes {
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
     | '/api/integrations/sync/$provider'
+    | '/api/public/email/resend-webhook'
+    | '/api/public/email/unsubscribe'
     | '/api/public/shipping/np'
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
@@ -1714,6 +1771,9 @@ export interface FileRouteTypes {
     | '/_authenticated/brand/products'
     | '/_authenticated/brand/promotions'
     | '/_authenticated/invite/$token'
+    | '/api/email/domain-setup'
+    | '/api/email/domain-status'
+    | '/api/email/domain-verify'
     | '/api/email/order-confirmation'
     | '/api/email/order-status'
     | '/hooks/actions/apply'
@@ -1825,6 +1885,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/dntrade-health/$tenantId'
     | '/_authenticated/admin/tenants/$tenantId'
     | '/api/integrations/sync/$provider'
+    | '/api/public/email/resend-webhook'
+    | '/api/public/email/unsubscribe'
     | '/api/public/shipping/np'
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
@@ -1843,6 +1905,9 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   HooksIngestRoute: typeof HooksIngestRoute
   SSlugRoute: typeof SSlugRouteWithChildren
+  ApiEmailDomainSetupRoute: typeof ApiEmailDomainSetupRoute
+  ApiEmailDomainStatusRoute: typeof ApiEmailDomainStatusRoute
+  ApiEmailDomainVerifyRoute: typeof ApiEmailDomainVerifyRoute
   ApiEmailOrderConfirmationRoute: typeof ApiEmailOrderConfirmationRoute
   ApiEmailOrderStatusRoute: typeof ApiEmailOrderStatusRoute
   HooksActionsApplyRoute: typeof HooksActionsApplyRoute
@@ -1948,6 +2013,8 @@ export interface RootRouteChildren {
   HooksTelegramPollRoute: typeof HooksTelegramPollRoute
   TrackSlugJsRoute: typeof TrackSlugJsRoute
   ApiIntegrationsSyncProviderRoute: typeof ApiIntegrationsSyncProviderRoute
+  ApiPublicEmailResendWebhookRoute: typeof ApiPublicEmailResendWebhookRoute
+  ApiPublicEmailUnsubscribeRoute: typeof ApiPublicEmailUnsubscribeRoute
   ApiPublicShippingNpRoute: typeof ApiPublicShippingNpRoute
   ApiPublicIntegrationsInboundProviderRoute: typeof ApiPublicIntegrationsInboundProviderRoute
 }
@@ -2815,6 +2882,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiEmailOrderConfirmationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/email/domain-verify': {
+      id: '/api/email/domain-verify'
+      path: '/api/email/domain-verify'
+      fullPath: '/api/email/domain-verify'
+      preLoaderRoute: typeof ApiEmailDomainVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/email/domain-status': {
+      id: '/api/email/domain-status'
+      path: '/api/email/domain-status'
+      fullPath: '/api/email/domain-status'
+      preLoaderRoute: typeof ApiEmailDomainStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/email/domain-setup': {
+      id: '/api/email/domain-setup'
+      path: '/api/email/domain-setup'
+      fullPath: '/api/email/domain-setup'
+      preLoaderRoute: typeof ApiEmailDomainSetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/invite/$token': {
       id: '/_authenticated/invite/$token'
       path: '/invite/$token'
@@ -2939,6 +3027,20 @@ declare module '@tanstack/react-router' {
       path: '/api/public/shipping/np'
       fullPath: '/api/public/shipping/np'
       preLoaderRoute: typeof ApiPublicShippingNpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/email/unsubscribe': {
+      id: '/api/public/email/unsubscribe'
+      path: '/api/public/email/unsubscribe'
+      fullPath: '/api/public/email/unsubscribe'
+      preLoaderRoute: typeof ApiPublicEmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/email/resend-webhook': {
+      id: '/api/public/email/resend-webhook'
+      path: '/api/public/email/resend-webhook'
+      fullPath: '/api/public/email/resend-webhook'
+      preLoaderRoute: typeof ApiPublicEmailResendWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/integrations/sync/$provider': {
@@ -3103,6 +3205,9 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   HooksIngestRoute: HooksIngestRoute,
   SSlugRoute: SSlugRouteWithChildren,
+  ApiEmailDomainSetupRoute: ApiEmailDomainSetupRoute,
+  ApiEmailDomainStatusRoute: ApiEmailDomainStatusRoute,
+  ApiEmailDomainVerifyRoute: ApiEmailDomainVerifyRoute,
   ApiEmailOrderConfirmationRoute: ApiEmailOrderConfirmationRoute,
   ApiEmailOrderStatusRoute: ApiEmailOrderStatusRoute,
   HooksActionsApplyRoute: HooksActionsApplyRoute,
@@ -3212,6 +3317,8 @@ const rootRouteChildren: RootRouteChildren = {
   HooksTelegramPollRoute: HooksTelegramPollRoute,
   TrackSlugJsRoute: TrackSlugJsRoute,
   ApiIntegrationsSyncProviderRoute: ApiIntegrationsSyncProviderRoute,
+  ApiPublicEmailResendWebhookRoute: ApiPublicEmailResendWebhookRoute,
+  ApiPublicEmailUnsubscribeRoute: ApiPublicEmailUnsubscribeRoute,
   ApiPublicShippingNpRoute: ApiPublicShippingNpRoute,
   ApiPublicIntegrationsInboundProviderRoute:
     ApiPublicIntegrationsInboundProviderRoute,
