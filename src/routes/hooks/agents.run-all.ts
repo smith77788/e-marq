@@ -76,6 +76,15 @@ const AGENTS = [
   "owner-playbook",
   "meta-prior-injector",
   "autonomous-seo-loop",
+  // Batch 11: bootstrap discoverers (run FIRST so working agents have ground truth)
+  "brand-profile",
+  "catalog-enricher",
+  "margin-estimator",
+  "customer-voice",
+  "channel-discovery",
+  "seasonality-detector",
+  "integration-scout",
+  "data-gap-auditor",
   // Batch 10: ops, retention, capital efficiency
   "shipping-optimizer",
   "return-predictor",
