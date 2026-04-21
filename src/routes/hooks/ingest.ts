@@ -281,6 +281,24 @@ export const Route = createFileRoute("/hooks/ingest")({
             (Array.isArray(p.line_items) && (p.line_items as unknown[])) ||
             (Array.isArray(p.products) && (p.products as unknown[])) ||
             [];
+
+          // Last-resort total: sum of items (price treated as currency-units, *100 → cents).
+          // Many storefronts (incl. MFD) send only per-item `price` in грн and no header total.
+          let totalCentsFinal = totalCents;
+          if (totalCentsFinal <= 0 && rawItems.length) {
+            let sum = 0;
+            for (const raw of rawItems) {
+              const it = (raw ?? {}) as Record<string, unknown>;
+              const qty = num(it.quantity) ?? num(it.qty) ?? 1;
+              const priceCents =
+                num(it.unit_price_cents) ??
+                num(it.price_cents) ??
+                (num(it.price) != null ? Math.round(num(it.price)! * 100) : 0) ??
+                0;
+              sum += (priceCents ?? 0) * qty;
+            }
+            totalCentsFinal = sum;
+          }
           const externalOrderId =
             (typeof p.order_id === "string" && p.order_id) ||
             (typeof p.orderId === "string" && p.orderId) ||
