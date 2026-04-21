@@ -67,7 +67,7 @@ function Index() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
             <Sparkles className="h-4 w-4 text-primary" />
-            ACOS
+            MARQ
           </Link>
           <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">
             <Link to="/how-it-works" className="hover:text-foreground transition-colors">{t("site.nav.how")}</Link>
@@ -176,7 +176,7 @@ function Index() {
         </div>
       </section>
 
-      {/* Why ACOS */}
+      {/* Why MARQ */}
       <section className="mx-auto max-w-6xl px-4 py-20">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
