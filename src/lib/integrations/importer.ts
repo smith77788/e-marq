@@ -75,7 +75,7 @@ export async function runImport(input: ImportInput): Promise<ImportResult> {
           skipped++;
           continue;
         }
-        const payload = {
+        const payload: ProductInsert = {
           tenant_id: tenantId,
           name,
           sku: get(row, "sku") || null,
