@@ -9,7 +9,8 @@
  */
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   AlertCircle,
   ArrowLeft,
@@ -24,6 +25,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { IntegrationCard } from "@/components/integrations/IntegrationCard";
@@ -35,6 +52,7 @@ import {
   type IntegrationCategory,
   type IntegrationDef,
 } from "@/lib/integrations/catalog";
+import { isConnectorSupported } from "@/lib/integrations/connectors";
 
 export const Route = createFileRoute("/_authenticated/brand/integrations")({
   component: IntegrationsHubPage,
