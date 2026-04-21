@@ -69,19 +69,27 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-sync")({
           const summary = await runFullDnTradeSync(supabaseAdmin, tenantId, apiKey, {
             kinds,
             modifiedFromIso,
+            integrationId: integ.id,
           });
 
           const totalProducts = summary.products.upserted;
           const totalCustomers = summary.customers.upserted;
           const totalOrders = summary.orders.inserted;
-          const hasErrors = summary.errors.length > 0;
+          const hasErrors = summary.errors.length > 0 || summary.mapping_errors.length > 0;
 
           await supabaseAdmin
             .from("tenant_integrations")
             .update({
               last_sync_at: new Date().toISOString(),
               last_sync_status: hasErrors ? "partial" : "success",
-              last_sync_error: hasErrors ? summary.errors.join(" | ") : null,
+              last_sync_error: hasErrors
+                ? [
+                    ...summary.errors,
+                    ...summary.mapping_errors
+                      .slice(0, 3)
+                      .map((e) => `${e.kind}#${e.external_id ?? "?"}: ${e.message}`),
+                  ].join(" | ")
+                : null,
               synced_products_count: totalProducts,
               synced_customers_count: totalCustomers,
               synced_orders_count: totalOrders,
