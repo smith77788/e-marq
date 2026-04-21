@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
+import { IntegrationGuide } from "@/components/owner/IntegrationGuide";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, type TKey } from "@/lib/i18n";
