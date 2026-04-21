@@ -96,6 +96,12 @@ const AGENTS = [
   "refund-risk",
   "lifecycle-trigger-tuner",
   "inventory-rebalance",
+  // Sprint 6: email lifecycle + restock
+  "email-abandoned-cart",
+  "email-winback",
+  "email-post-purchase",
+  "order-status-notifier",
+  "restock-notifier",
 ] as const;
 
 export const Route = createFileRoute("/hooks/agents/run-all")({

@@ -55,7 +55,7 @@ export const Route = createFileRoute("/hooks/agents/order-status-notifier")({
             .from("orders")
             .select("id, status, customer_email, updated_at")
             .eq("tenant_id", tenantId)
-            .in("status", TRACKED as unknown as string[])
+            .in("status", [...TRACKED])
             .gte("updated_at", since)
             .not("customer_email", "is", null)
             .limit(200);
