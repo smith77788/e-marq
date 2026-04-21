@@ -39,25 +39,24 @@ async function authenticateUser(req: Request): Promise<{ ok: true; userId: strin
 }
 
 async function userCanManageTenant(userId: string, tenantId: string): Promise<boolean> {
-  // Перевірка: користувач — власник/член tenant'у через members з відповідною роллю,
-  // або платформа-admin через user_roles.
-  const [members, roles] = await Promise.all([
-    supabaseAdmin
-      .from("members")
-      .select("role")
-      .eq("tenant_id", tenantId)
-      .eq("user_id", userId)
-      .maybeSingle(),
-    supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle(),
-  ]);
-  if (roles.data) return true;
-  const role = members.data?.role;
-  return role === "owner" || role === "admin" || role === "manager" || role === "staff";
+  // Платформа-адмін має доступ до всього.
+  const { data: superRole } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "super_admin")
+    .maybeSingle();
+  if (superRole) return true;
+
+  // Інакше — член tenant'у з роллю owner/admin/member.
+  const { data: membership } = await supabaseAdmin
+    .from("tenant_memberships")
+    .select("role")
+    .eq("tenant_id", tenantId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  const role = membership?.role;
+  return role === "owner" || role === "admin" || role === "member";
 }
 
 export const Route = createFileRoute("/api/email/order-status")({
