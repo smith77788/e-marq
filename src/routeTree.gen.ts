@@ -125,6 +125,7 @@ import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin.tenants'
 import { Route as AuthenticatedAdminPlansRouteImport } from './routes/_authenticated/admin.plans'
 import { Route as AuthenticatedAdminOverviewRouteImport } from './routes/_authenticated/admin.overview'
+import { Route as AuthenticatedAdminDntradeHealthRouteImport } from './routes/_authenticated/admin.dntrade-health'
 import { Route as AuthenticatedAdminCommandsRouteImport } from './routes/_authenticated/admin.commands'
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
@@ -760,6 +761,12 @@ const AuthenticatedAdminOverviewRoute =
     path: '/admin/overview',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAdminDntradeHealthRoute =
+  AuthenticatedAdminDntradeHealthRouteImport.update({
+    id: '/admin/dntrade-health',
+    path: '/admin/dntrade-health',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminCommandsRoute =
   AuthenticatedAdminCommandsRouteImport.update({
     id: '/admin/commands',
@@ -794,6 +801,7 @@ export interface FileRoutesByFullPath {
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
+  '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRoute
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
@@ -914,6 +922,7 @@ export interface FileRoutesByTo {
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
+  '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRoute
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
@@ -1036,6 +1045,7 @@ export interface FileRoutesById {
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/_authenticated/admin/commands': typeof AuthenticatedAdminCommandsRoute
+  '/_authenticated/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRoute
   '/_authenticated/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/_authenticated/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
@@ -1158,6 +1168,7 @@ export interface FileRouteTypes {
     | '/hooks/ingest'
     | '/s/$slug'
     | '/admin/commands'
+    | '/admin/dntrade-health'
     | '/admin/overview'
     | '/admin/plans'
     | '/admin/tenants'
@@ -1278,6 +1289,7 @@ export interface FileRouteTypes {
     | '/hooks/ingest'
     | '/s/$slug'
     | '/admin/commands'
+    | '/admin/dntrade-health'
     | '/admin/overview'
     | '/admin/plans'
     | '/admin/tenants'
@@ -1399,6 +1411,7 @@ export interface FileRouteTypes {
     | '/hooks/ingest'
     | '/s/$slug'
     | '/_authenticated/admin/commands'
+    | '/_authenticated/admin/dntrade-health'
     | '/_authenticated/admin/overview'
     | '/_authenticated/admin/plans'
     | '/_authenticated/admin/tenants'
@@ -2424,6 +2437,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOverviewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/dntrade-health': {
+      id: '/_authenticated/admin/dntrade-health'
+      path: '/admin/dntrade-health'
+      fullPath: '/admin/dntrade-health'
+      preLoaderRoute: typeof AuthenticatedAdminDntradeHealthRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/commands': {
       id: '/_authenticated/admin/commands'
       path: '/admin/commands'
@@ -2480,6 +2500,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedAdminCommandsRoute: typeof AuthenticatedAdminCommandsRoute
+  AuthenticatedAdminDntradeHealthRoute: typeof AuthenticatedAdminDntradeHealthRoute
   AuthenticatedAdminOverviewRoute: typeof AuthenticatedAdminOverviewRoute
   AuthenticatedAdminPlansRoute: typeof AuthenticatedAdminPlansRoute
   AuthenticatedAdminTenantsRoute: typeof AuthenticatedAdminTenantsRouteWithChildren
@@ -2495,6 +2516,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedAdminCommandsRoute: AuthenticatedAdminCommandsRoute,
+  AuthenticatedAdminDntradeHealthRoute: AuthenticatedAdminDntradeHealthRoute,
   AuthenticatedAdminOverviewRoute: AuthenticatedAdminOverviewRoute,
   AuthenticatedAdminPlansRoute: AuthenticatedAdminPlansRoute,
   AuthenticatedAdminTenantsRoute: AuthenticatedAdminTenantsRouteWithChildren,
