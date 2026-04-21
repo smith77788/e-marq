@@ -336,6 +336,20 @@ function DnTradeHealthContent() {
             Оновлюється кожну хвилину.
           </p>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            downloadHealthCsv(
+              (data.data?.logs ?? []).filter((l) => l.checked_at >= since24h),
+              `dntrade-health-24h.csv`,
+            )
+          }
+          disabled={(data.data?.logs ?? []).length === 0}
+          title="Експорт усіх перевірок за 24 год для технічної підтримки"
+        >
+          <Download className="mr-1 h-3.5 w-3.5" /> Експорт CSV · 24г
+        </Button>
       </div>
 
       {/* KPI */}
