@@ -184,9 +184,12 @@ export const Route = createFileRoute("/hooks/ingest")({
 
         // Optional: upsert customer (idempotent by email or telegram_chat_id).
         let customerId: string | null = null;
+        const isUuid = (s: unknown): s is string =>
+          typeof s === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
         if (body.customer) {
           const c = body.customer;
           const tg = c.telegram_chat_id != null ? String(c.telegram_chat_id) : null;
+          const safeUserId = isUuid(c.user_id) ? c.user_id : null;
           if (c.email) {
             const { data: existing } = await supabaseAdmin
               .from("customers")
@@ -202,7 +205,7 @@ export const Route = createFileRoute("/hooks/ingest")({
                   name: c.name ?? undefined,
                   telegram_chat_id: tg ?? undefined,
                   telegram_username: c.telegram_username ?? undefined,
-                  user_id: c.user_id ?? undefined,
+                  user_id: safeUserId ?? undefined,
                 })
                 .eq("id", existing.id);
             } else {
@@ -214,7 +217,7 @@ export const Route = createFileRoute("/hooks/ingest")({
                   name: c.name ?? null,
                   telegram_chat_id: tg,
                   telegram_username: c.telegram_username ?? null,
-                  user_id: c.user_id ?? null,
+                  user_id: safeUserId,
                 })
                 .select("id")
                 .single();
@@ -262,7 +265,7 @@ export const Route = createFileRoute("/hooks/ingest")({
             orderId = existing?.id ?? null;
           }
           if (!orderId) {
-            const { data: ord } = await supabaseAdmin
+            const { data: ord, error: ordErr } = await supabaseAdmin
               .from("orders")
               .insert({
                 tenant_id: tenantId,
@@ -272,13 +275,16 @@ export const Route = createFileRoute("/hooks/ingest")({
                 currency: (body.currency ?? "UAH").toUpperCase(),
                 customer_email: body.customer?.email ?? null,
                 customer_name: body.customer?.name ?? null,
-                customer_user_id: body.customer?.user_id ?? null,
+                customer_user_id: null, // FK to auth.users — never write external IDs
                 payment_method: "manual",
                 payment_ref: `${body.session_id ?? "anon"}:${body.total_cents}`,
-                metadata: { ingest: true, source: "pixel" } as never,
+                metadata: { ingest: true, source: "pixel", external_user_id: body.customer?.user_id ?? null } as never,
               })
               .select("id")
               .single();
+            if (ordErr) {
+              console.error("[ingest] order insert failed", ordErr);
+            }
             orderId = ord?.id ?? null;
 
             // Insert items if provided.
@@ -294,7 +300,8 @@ export const Route = createFileRoute("/hooks/ingest")({
                   unit_price_cents: it.unit_price_cents ?? 0,
                 }));
               if (itemsRows.length) {
-                await supabaseAdmin.from("order_items").insert(itemsRows);
+                const { error: itErr } = await supabaseAdmin.from("order_items").insert(itemsRows);
+                if (itErr) console.error("[ingest] order_items insert failed", itErr);
               }
             }
           }
@@ -304,6 +311,9 @@ export const Route = createFileRoute("/hooks/ingest")({
         if (customerId) payload.customer_id = customerId;
         if (typeFallback) payload.original_type = typeFallback;
         if (body.total_cents != null) payload.total_cents = body.total_cents;
+        // External user_id (from client's own auth) is preserved in payload only.
+        // events.user_id has a FK to auth.users — we must NOT write external IDs there.
+        if (body.customer?.user_id) payload.external_user_id = body.customer.user_id;
 
         const { error: evtErr } = await supabaseAdmin.from("events").insert({
           tenant_id: tenantId,
@@ -311,11 +321,14 @@ export const Route = createFileRoute("/hooks/ingest")({
           session_id: body.session_id ?? null,
           product_id: body.product_id ?? null,
           order_id: orderId,
-          user_id: body.customer?.user_id ?? null,
+          user_id: null, // never use external user_id here — see comment above
           created_at: body.created_at ?? new Date().toISOString(),
           payload: payload as never,
         });
-        if (evtErr) return jsonError("Failed to log event", 500, { details: evtErr.message });
+        if (evtErr) {
+          console.error("[ingest] event insert failed", evtErr);
+          return jsonError("Failed to log event", 500, { details: evtErr.message });
+        }
 
         return okJson({
           customer_id: customerId,
