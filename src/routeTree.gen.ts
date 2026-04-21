@@ -19,6 +19,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBrandRouteImport } from './routes/_authenticated/brand'
@@ -168,6 +169,11 @@ const HooksIngestRoute = HooksIngestRouteImport.update({
   id: '/hooks/ingest',
   path: '/hooks/ingest',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
@@ -728,6 +734,7 @@ export interface FileRoutesByFullPath {
   '/brand': typeof AuthenticatedBrandRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
@@ -839,6 +846,7 @@ export interface FileRoutesByTo {
   '/brand': typeof AuthenticatedBrandRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
@@ -952,6 +960,7 @@ export interface FileRoutesById {
   '/_authenticated/brand': typeof AuthenticatedBrandRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/_authenticated/admin/commands': typeof AuthenticatedAdminCommandsRoute
@@ -1065,6 +1074,7 @@ export interface FileRouteTypes {
     | '/brand'
     | '/dashboard'
     | '/onboarding'
+    | '/profile'
     | '/hooks/ingest'
     | '/s/$slug'
     | '/admin/commands'
@@ -1176,6 +1186,7 @@ export interface FileRouteTypes {
     | '/brand'
     | '/dashboard'
     | '/onboarding'
+    | '/profile'
     | '/hooks/ingest'
     | '/s/$slug'
     | '/admin/commands'
@@ -1288,6 +1299,7 @@ export interface FileRouteTypes {
     | '/_authenticated/brand'
     | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
+    | '/_authenticated/profile'
     | '/hooks/ingest'
     | '/s/$slug'
     | '/_authenticated/admin/commands'
@@ -1559,6 +1571,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/hooks/ingest'
       preLoaderRoute: typeof HooksIngestRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
@@ -2293,6 +2312,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedBrandRoute: typeof AuthenticatedBrandRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedAdminCommandsRoute: typeof AuthenticatedAdminCommandsRoute
   AuthenticatedAdminOverviewRoute: typeof AuthenticatedAdminOverviewRoute
   AuthenticatedAdminPlansRoute: typeof AuthenticatedAdminPlansRoute
@@ -2307,6 +2327,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedBrandRoute: AuthenticatedBrandRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedAdminCommandsRoute: AuthenticatedAdminCommandsRoute,
   AuthenticatedAdminOverviewRoute: AuthenticatedAdminOverviewRoute,
   AuthenticatedAdminPlansRoute: AuthenticatedAdminPlansRoute,
