@@ -8,7 +8,8 @@
 import { useEffect, useState, type ReactElement } from "react";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Copy, Loader2, Mail, Sparkles } from "lucide-react";
+import { AlertCircle, ArrowLeft, ArrowRight, Check, Copy, Loader2, Mail, RefreshCw, Sparkles } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,19 +35,26 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
 function OnboardingPage() {
   const search = useSearch({ from: "/_authenticated/onboarding" });
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { t, lang } = useT();
   const qc = useQueryClient();
 
-  const { data: tenants } = useQuery({
+  // Чекаємо доки відновиться сесія, щоб RLS-запити не падали через auth.uid()=null
+  const authReady = !authLoading && !!user;
+
+  const tenantsQuery = useQuery({
     queryKey: ["my-tenants", user?.id],
-    enabled: !!user,
+    enabled: authReady,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+    staleTime: 30_000,
     queryFn: async () => {
       const { data, error } = await supabase.from("tenants").select("id, name, slug").order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
   });
+  const tenants = tenantsQuery.data;
 
   // Auto-select tenant from URL or first one
   const tenantId = search.tenant ?? tenants?.[0]?.id;
@@ -60,11 +68,18 @@ function OnboardingPage() {
 
   const [step, setStep] = useState(0);
 
-  // Статуси завершення кожного кроку — рахуємо за реальними даними з бази
-  const { data: status } = useQuery({
+  // Статуси завершення кожного кроку — рахуємо за реальними даними з бази.
+  // Запит виконується тільки коли auth повністю готова, з retry і явним
+  // станом помилки, щоб тимчасові збої мережі не показували "0/7".
+  const statusQuery = useQuery({
     queryKey: ["onboarding-status", tenantId],
-    enabled: !!tenantId,
+    enabled: authReady && !!tenantId,
     refetchInterval: 8000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+    staleTime: 5_000,
     queryFn: async () => {
       if (!tenantId) return null;
       const [tn, prod, cust, cfg, tg, inv] = await Promise.all([
@@ -75,6 +90,10 @@ function OnboardingPage() {
         supabase.from("telegram_chat_routing").select("chat_id", { count: "exact", head: true }).eq("tenant_id", tenantId),
         supabase.from("tenant_invitations").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
       ]);
+      // Якщо хоч один із запитів повернув помилку — кидаємо, щоб React Query
+      // зробив retry, а UI показав чесний "Помилка" замість фейкового "0/7".
+      const firstErr = [tn.error, prod.error, cust.error, cfg.error, tg.error, inv.error].find(Boolean);
+      if (firstErr) throw firstErr;
       const features = (cfg.data?.features ?? {}) as Record<string, unknown>;
       return {
         s1: !!(tn.data?.name && tn.data.name.trim().length > 1),
@@ -87,6 +106,32 @@ function OnboardingPage() {
       };
     },
   });
+  const status = statusQuery.data;
+
+  // 1. Поки auth відновлюється — show skeleton, не редіректимо і не показуємо "пусто"
+  if (!authReady) {
+    return <OnboardingSkeleton label={lang === "ua" ? "Відновлюємо ваш сеанс…" : "Restoring your session…"} />;
+  }
+
+  // 2. Поки tenants ще вантажаться — show skeleton
+  if (tenantsQuery.isLoading) {
+    return <OnboardingSkeleton label={lang === "ua" ? "Завантажуємо ваші бренди…" : "Loading your brands…"} />;
+  }
+
+  // 3. Помилка завантаження tenants — даємо Retry
+  if (tenantsQuery.isError) {
+    return (
+      <OnboardingError
+        message={
+          lang === "ua"
+            ? "Не вдалося завантажити список ваших брендів. Перевірте інтернет і спробуйте ще раз."
+            : "Couldn't load your brands. Check your connection and try again."
+        }
+        onRetry={() => tenantsQuery.refetch()}
+        retrying={tenantsQuery.isFetching}
+      />
+    );
+  }
 
   if (!tenantId || !tenantSlug) {
     return (
@@ -102,6 +147,11 @@ function OnboardingPage() {
       </Card>
     );
   }
+
+  // 4. Перше завантаження статусів — показуємо скелетон над майстром,
+  // щоб не блимало "0/7" перед справжніми даними.
+  const statusLoading = statusQuery.isLoading || (statusQuery.isFetching && !status);
+  const statusError = statusQuery.isError && !status;
 
   const stepDone = (i: number): boolean => {
     if (!status) return false;
@@ -135,12 +185,48 @@ function OnboardingPage() {
 
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>
-            {lang === "ua" ? "Виконано" : "Completed"}: {doneCount} / {steps.length}
+          <span className="flex items-center gap-1.5">
+            {lang === "ua" ? "Виконано" : "Completed"}:{" "}
+            {statusLoading ? (
+              <Skeleton className="inline-block h-3 w-10 align-middle" />
+            ) : statusError ? (
+              <span className="text-destructive">— / {steps.length}</span>
+            ) : (
+              <>
+                {doneCount} / {steps.length}
+              </>
+            )}
+            {statusQuery.isFetching && !statusLoading && (
+              <Loader2 className="h-3 w-3 animate-spin text-muted-foreground/60" />
+            )}
           </span>
-          <span>{pct}%</span>
+          <span>
+            {statusLoading ? <Skeleton className="inline-block h-3 w-8 align-middle" /> : `${pct}%`}
+          </span>
         </div>
-        <Progress value={pct} className="h-2" />
+        <Progress value={statusLoading ? 0 : pct} className="h-2" />
+
+        {statusError && (
+          <div className="flex items-center justify-between gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+            <span className="flex items-center gap-1.5">
+              <AlertCircle className="h-3.5 w-3.5" />
+              {lang === "ua"
+                ? "Не вдалося оновити статуси кроків. Дані можуть бути застарілі."
+                : "Couldn't refresh step statuses. Data may be outdated."}
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-6 px-2 text-xs"
+              onClick={() => statusQuery.refetch()}
+              disabled={statusQuery.isFetching}
+            >
+              <RefreshCw className={`mr-1 h-3 w-3 ${statusQuery.isFetching ? "animate-spin" : ""}`} />
+              {lang === "ua" ? "Спробувати ще" : "Retry"}
+            </Button>
+          </div>
+        )}
+
         {/* Step dots: дозволяють перейти на будь-який крок одним кліком */}
         <div className="flex flex-wrap gap-1.5 pt-1">
           {steps.map((s, i) => {
@@ -152,7 +238,8 @@ function OnboardingPage() {
                 type="button"
                 onClick={() => setStep(i)}
                 title={t(s.titleKey)}
-                className={`flex h-7 min-w-[28px] items-center justify-center rounded-md border px-2 text-xs font-medium transition-colors ${
+                disabled={statusLoading}
+                className={`flex h-7 min-w-[28px] items-center justify-center rounded-md border px-2 text-xs font-medium transition-colors disabled:opacity-60 ${
                   active
                     ? "border-primary bg-primary text-primary-foreground"
                     : done
@@ -160,7 +247,13 @@ function OnboardingPage() {
                       : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/50"
                 }`}
               >
-                {done ? <Check className="h-3.5 w-3.5" /> : i + 1}
+                {statusLoading ? (
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-current opacity-40" />
+                ) : done ? (
+                  <Check className="h-3.5 w-3.5" />
+                ) : (
+                  i + 1
+                )}
               </button>
             );
           })}
@@ -684,4 +777,73 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
   );
 }
 
+// -------------------- Loading / Error placeholders --------------------
+
+function OnboardingSkeleton({ label }: { label: string }) {
+  return (
+    <div className="mx-auto max-w-2xl space-y-6" aria-busy="true" aria-live="polite">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <Skeleton className="h-8 w-20" />
+      </div>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-3 w-10" />
+        </div>
+        <Skeleton className="h-2 w-full rounded-full" />
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <Skeleton key={i} className="h-7 w-7 rounded-md" />
+          ))}
+        </div>
+      </div>
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="mt-2 h-3 w-64" />
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-9 w-32" />
+        </CardContent>
+      </Card>
+      <p className="flex items-center gap-2 text-center text-xs text-muted-foreground">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        {label}
+      </p>
+    </div>
+  );
+}
+
+function OnboardingError({
+  message,
+  onRetry,
+  retrying,
+}: {
+  message: string;
+  onRetry: () => void;
+  retrying: boolean;
+}) {
+  return (
+    <Card className="mx-auto max-w-2xl border-destructive/30">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-destructive">
+          <AlertCircle className="h-5 w-5" />
+          Помилка завантаження
+        </CardTitle>
+        <CardDescription>{message}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button onClick={onRetry} disabled={retrying} size="sm">
+          <RefreshCw className={`mr-2 h-3.5 w-3.5 ${retrying ? "animate-spin" : ""}`} />
+          Спробувати ще раз
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
 
