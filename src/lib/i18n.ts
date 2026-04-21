@@ -38,6 +38,8 @@ const dict = {
     "sb.crossTenant": "Огляд по всіх",
     "sb.allTenants": "Усі бренди",
     "sb.plansCatalog": "Каталог тарифів",
+    "sb.adminUsers": "Користувачі",
+    "sb.adminCommands": "Команди",
     "sb.liveRuns": "Запуски в ефірі",
     "sb.agentLibrary": "Бібліотека агентів",
     "sb.insightStream": "Потік інсайтів",
