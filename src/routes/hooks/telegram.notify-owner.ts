@@ -55,17 +55,26 @@ async function getBrandName(tenantId: string): Promise<string> {
 async function renderInsight(tenantId: string, insightId: string): Promise<RenderResult> {
   const { data } = await supabaseAdmin
     .from("ai_insights")
-    .select("id, title, description, expected_impact, risk_level, insight_type, status")
+    .select("id, title, description, expected_impact, risk_level, insight_type, status, metrics")
     .eq("id", insightId)
     .maybeSingle();
   if (!data || data.status === "applied" || data.status === "dismissed") return null;
   const brand = await getBrandName(tenantId);
+  // Перевага — людський «копірайт» з metrics._copy.ua, якщо він є.
+  const copyUa =
+    (data.metrics as Record<string, unknown> | null)?._copy &&
+    ((data.metrics as { _copy?: { ua?: { headline?: string; why?: string; what_to_do?: string } } })
+      ._copy?.ua);
+  const headline = copyUa?.headline || data.title;
+  const why = copyUa?.why || data.description || "";
+  const whatToDo = copyUa?.what_to_do || "";
   const text = [
-    `${severityEmoji(data.risk_level)} <b>${escapeHtml(brand)}</b> · <i>insight</i>`,
+    `${severityEmoji(data.risk_level)} <b>${escapeHtml(brand)}</b> · <i>підказка</i>`,
     "",
-    `<b>${escapeHtml(data.title)}</b>`,
-    data.description ? escapeHtml(data.description) : "",
-    data.expected_impact ? `\n💰 ${escapeHtml(data.expected_impact)}` : "",
+    `<b>${escapeHtml(headline)}</b>`,
+    why ? escapeHtml(why) : "",
+    whatToDo ? `\n👉 ${escapeHtml(whatToDo)}` : "",
+    data.expected_impact ? `\n💰 Очікуваний ефект: ${escapeHtml(data.expected_impact)}` : "",
   ]
     .filter(Boolean)
     .join("\n");
@@ -73,10 +82,10 @@ async function renderInsight(tenantId: string, insightId: string): Promise<Rende
     text,
     buttons: [
       [
-        { text: "✅ Apply", data: `i:apply:${insightId}` },
-        { text: "❌ Dismiss", data: `i:dismiss:${insightId}` },
+        { text: "✅ Зробити", data: `i:apply:${insightId}` },
+        { text: "❌ Сховати", data: `i:dismiss:${insightId}` },
       ],
-      [{ text: "🔗 View in dashboard", data: `i:view:${insightId}` }],
+      [{ text: "🔗 Відкрити в кабінеті", data: `i:view:${insightId}` }],
     ],
   };
 }
@@ -90,12 +99,14 @@ async function renderAction(tenantId: string, actionId: string): Promise<RenderR
   if (!data || data.status !== "pending") return null;
   const brand = await getBrandName(tenantId);
   const text = [
-    `🤖 <b>${escapeHtml(brand)}</b> · <i>agent action awaiting approval</i>`,
+    `🤖 <b>${escapeHtml(brand)}</b> · <i>дія, що чекає на твоє «так»</i>`,
     "",
-    `<b>${escapeHtml(data.action_type.replace(/_/g, " "))}</b>`,
-    `Agent: <code>${escapeHtml(data.agent_id)}</code>`,
-    data.target_entity ? `Target: ${escapeHtml(data.target_entity)} ${data.target_id ?? ""}` : "",
-    data.expected_impact ? `\n💰 ${escapeHtml(data.expected_impact)}` : "",
+    `<b>${escapeHtml(humanizeAction(data.action_type))}</b>`,
+    `Помічник: <i>${escapeHtml(humanizeAgent(data.agent_id))}</i>`,
+    data.target_entity
+      ? `Стосується: ${escapeHtml(humanizeEntity(data.target_entity))} ${data.target_id ?? ""}`
+      : "",
+    data.expected_impact ? `\n💰 Очікуваний ефект: ${escapeHtml(data.expected_impact)}` : "",
   ]
     .filter(Boolean)
     .join("\n");
@@ -103,10 +114,10 @@ async function renderAction(tenantId: string, actionId: string): Promise<RenderR
     text,
     buttons: [
       [
-        { text: "✅ Apply", data: `a:apply:${actionId}` },
-        { text: "❌ Dismiss", data: `a:dismiss:${actionId}` },
+        { text: "✅ Зробити", data: `a:apply:${actionId}` },
+        { text: "❌ Сховати", data: `a:dismiss:${actionId}` },
       ],
-      [{ text: "🔗 View in dashboard", data: `a:view:${actionId}` }],
+      [{ text: "🔗 Відкрити в кабінеті", data: `a:view:${actionId}` }],
     ],
   };
 }
@@ -120,7 +131,7 @@ async function renderNotification(tenantId: string, notifId: string): Promise<Re
   if (!data || data.is_read) return null;
   const brand = await getBrandName(tenantId);
   const text = [
-    `${severityEmoji(data.severity)} <b>${escapeHtml(brand)}</b> · <i>${escapeHtml(data.kind)}</i>`,
+    `${severityEmoji(data.severity)} <b>${escapeHtml(brand)}</b> · <i>${escapeHtml(humanizeKind(data.kind))}</i>`,
     "",
     `<b>${escapeHtml(data.title)}</b>`,
     data.body ? escapeHtml(data.body) : "",
@@ -128,10 +139,10 @@ async function renderNotification(tenantId: string, notifId: string): Promise<Re
     .filter(Boolean)
     .join("\n");
   const buttons: { text: string; data: string }[][] = [
-    [{ text: "✓ Mark as read", data: `n:read:${notifId}` }],
+    [{ text: "✓ Прочитано", data: `n:read:${notifId}` }],
   ];
   if (data.link) {
-    buttons.push([{ text: "🔗 Open", data: `n:view:${notifId}` }]);
+    buttons.push([{ text: "🔗 Відкрити", data: `n:view:${notifId}` }]);
   }
   return { text, buttons };
 }
