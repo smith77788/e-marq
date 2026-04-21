@@ -343,28 +343,7 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
 }
 
 function Step5Tracking({ tenantSlug }: { tenantSlug: string }) {
-  const { t } = useT();
-  const [copied, setCopied] = useState(false);
-  const snippet = useMemo(
-    () => `<script async src="${typeof window !== "undefined" ? window.location.origin : ""}/track/${tenantSlug}.js"></script>`,
-    [tenantSlug],
-  );
-  return (
-    <div className="space-y-3">
-      <pre className="overflow-x-auto rounded-md bg-muted/40 p-3 text-xs">{snippet}</pre>
-      <Button
-        size="sm"
-        onClick={async () => {
-          await navigator.clipboard.writeText(snippet);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        }}
-      >
-        <Copy className="mr-2 h-3.5 w-3.5" />
-        {copied ? t("onb.s5.copied") : t("onb.s5.copy")}
-      </Button>
-    </div>
-  );
+  return <IntegrationGuide tenantSlug={tenantSlug} />;
 }
 
 function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {

@@ -11,7 +11,7 @@ import { RevenueFeed } from "@/components/owner/RevenueFeed";
 import { CustomerRoster } from "@/components/owner/CustomerRoster";
 import { ChannelSetup } from "@/components/owner/ChannelSetup";
 import { InsightsPanel } from "@/components/owner/InsightsPanel";
-import { TrackingSnippet } from "@/components/owner/TrackingSnippet";
+import { IntegrationGuide } from "@/components/owner/IntegrationGuide";
 import { KpiDashboard } from "@/components/owner/KpiDashboard";
 import { RevenueTrendChart } from "@/components/owner/RevenueTrendChart";
 import { TopCustomers } from "@/components/owner/TopCustomers";
@@ -157,7 +157,7 @@ function BrandPage() {
         <ChannelSetup tenantId={current.id} tenantSlug={current.slug} />
       </div>
 
-      <TrackingSnippet tenantSlug={current.slug} />
+      <IntegrationGuide tenantSlug={current.slug} />
 
       <Card className="border-dashed">
         <CardHeader>
