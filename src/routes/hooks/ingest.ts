@@ -308,6 +308,9 @@ export const Route = createFileRoute("/hooks/ingest")({
         if (customerId) payload.customer_id = customerId;
         if (typeFallback) payload.original_type = typeFallback;
         if (body.total_cents != null) payload.total_cents = body.total_cents;
+        // External user_id (from client's own auth) is preserved in payload only.
+        // events.user_id has a FK to auth.users — we must NOT write external IDs there.
+        if (body.customer?.user_id) payload.external_user_id = body.customer.user_id;
 
         const { error: evtErr } = await supabaseAdmin.from("events").insert({
           tenant_id: tenantId,
@@ -315,11 +318,14 @@ export const Route = createFileRoute("/hooks/ingest")({
           session_id: body.session_id ?? null,
           product_id: body.product_id ?? null,
           order_id: orderId,
-          user_id: body.customer?.user_id ?? null,
+          user_id: null, // never use external user_id here — see comment above
           created_at: body.created_at ?? new Date().toISOString(),
           payload: payload as never,
         });
-        if (evtErr) return jsonError("Failed to log event", 500, { details: evtErr.message });
+        if (evtErr) {
+          console.error("[ingest] event insert failed", evtErr);
+          return jsonError("Failed to log event", 500, { details: evtErr.message });
+        }
 
         return okJson({
           customer_id: customerId,
