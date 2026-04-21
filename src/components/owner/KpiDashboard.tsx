@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAnalyticsWindow } from "./AnalyticsWindow";
 import { formatMoney } from "@/lib/money";
+import { DetailableElement, type DetailPayload } from "@/components/detail";
 
 type Props = { tenantId: string };
 
