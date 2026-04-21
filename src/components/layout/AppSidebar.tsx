@@ -106,7 +106,7 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
           </span>
           {!collapsed && (
             <div className="flex flex-col leading-tight">
-              <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">ACOS</span>
+              <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">MARQ</span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 {isSuperAdmin ? t("sb.missionControl") : brandName ?? t("sb.cockpit")}
               </span>
