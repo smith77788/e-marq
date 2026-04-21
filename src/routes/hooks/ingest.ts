@@ -184,9 +184,12 @@ export const Route = createFileRoute("/hooks/ingest")({
 
         // Optional: upsert customer (idempotent by email or telegram_chat_id).
         let customerId: string | null = null;
+        const isUuid = (s: unknown): s is string =>
+          typeof s === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
         if (body.customer) {
           const c = body.customer;
           const tg = c.telegram_chat_id != null ? String(c.telegram_chat_id) : null;
+          const safeUserId = isUuid(c.user_id) ? c.user_id : null;
           if (c.email) {
             const { data: existing } = await supabaseAdmin
               .from("customers")
@@ -202,7 +205,7 @@ export const Route = createFileRoute("/hooks/ingest")({
                   name: c.name ?? undefined,
                   telegram_chat_id: tg ?? undefined,
                   telegram_username: c.telegram_username ?? undefined,
-                  user_id: c.user_id ?? undefined,
+                  user_id: safeUserId ?? undefined,
                 })
                 .eq("id", existing.id);
             } else {
@@ -214,7 +217,7 @@ export const Route = createFileRoute("/hooks/ingest")({
                   name: c.name ?? null,
                   telegram_chat_id: tg,
                   telegram_username: c.telegram_username ?? null,
-                  user_id: c.user_id ?? null,
+                  user_id: safeUserId,
                 })
                 .select("id")
                 .single();
