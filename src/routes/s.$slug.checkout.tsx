@@ -10,11 +10,14 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ArrowLeft,
+  Award,
   CreditCard,
   Landmark,
   Loader2,
+  Sparkles,
   Tag,
   Trash2,
+  X,
   Plus,
   Minus,
 } from "lucide-react";
@@ -564,8 +567,14 @@ function CheckoutPage() {
                 </div>
                 {discount?.valid && (
                   <div className="flex justify-between text-primary">
-                    <span>Знижка</span>
+                    <span>Промокод</span>
                     <span className="tabular-nums">−{formatMoneyExact(discount.discount_cents)}</span>
+                  </div>
+                )}
+                {redeemApplied && (
+                  <div className="flex justify-between text-primary">
+                    <span>Бали лояльності ({redeemApplied.points})</span>
+                    <span className="tabular-nums">−{formatMoneyExact(redeemApplied.discountCents)}</span>
                   </div>
                 )}
               </div>
@@ -594,6 +603,76 @@ function CheckoutPage() {
                   </Button>
                 </div>
               </div>
+
+              {/* Loyalty block — visible only if program is active for this email */}
+              {loyalty?.programActive && (
+                <>
+                  <Separator />
+                  <div className="space-y-2 rounded-md border border-primary/20 bg-primary/5 p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs font-medium">
+                        <Award className="h-3.5 w-3.5 text-primary" />
+                        Бали лояльності
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        Баланс: <span className="font-semibold text-foreground tabular-nums">{loyalty.balance}</span>
+                      </span>
+                    </div>
+
+                    {loyalty.balance >= loyalty.minRedeem ? (
+                      redeemApplied ? (
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">
+                            Списано {redeemApplied.points} балів
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 px-2 text-xs"
+                            onClick={clearLoyalty}
+                          >
+                            <X className="mr-0.5 h-3 w-3" />
+                            Скасувати
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                          <Input
+                            type="number"
+                            min={loyalty.minRedeem}
+                            max={loyalty.balance}
+                            value={redeemPoints}
+                            onChange={(e) => setRedeemPoints(e.target.value)}
+                            placeholder={`від ${loyalty.minRedeem}`}
+                            className="h-8 text-xs tabular-nums"
+                            disabled={loyaltyChecking || submitting}
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8"
+                            onClick={applyLoyalty}
+                            disabled={!redeemPoints || loyaltyChecking || submitting}
+                          >
+                            {loyaltyChecking ? <Loader2 className="h-3 w-3 animate-spin" /> : "Списати"}
+                          </Button>
+                        </div>
+                      )
+                    ) : (
+                      <p className="text-[11px] text-muted-foreground">
+                        Накопичіть {loyalty.minRedeem} балів щоб обміняти на знижку.
+                      </p>
+                    )}
+
+                    {projectedEarnPoints > 0 && (
+                      <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                        <Sparkles className="h-3 w-3 text-primary" />
+                        Ви отримаєте <strong className="text-foreground">{projectedEarnPoints}</strong> балів за це замовлення
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
 
               <Separator />
 
