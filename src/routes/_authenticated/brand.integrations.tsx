@@ -266,10 +266,6 @@ function IntegrationsHubPage() {
           )}
         </TabsContent>
       </Tabs>
-
-      {/* Email-домен */}
-      <EmailDomainCard tenantId={currentTenantId} />
-
       {/* Журнал останніх імпортів */}
       <Card>
         <CardHeader>
