@@ -93,7 +93,7 @@ const GROWTH: NavGroup = {
   items: [
     { labelKey: "sb.insights", to: "/brand", hash: "insights", icon: Lightbulb, tone: "text-warning" },
     { labelKey: "sb.customers", to: "/brand", hash: "customers", icon: Users, tone: "text-info" },
-    { labelKey: "sb.agents", to: "/agents", icon: Bot, tone: "text-accent" },
+    { labelKey: "sb.agents", to: "/agents/library", icon: Bot, tone: "text-accent" },
   ],
 };
 
@@ -144,7 +144,7 @@ const ADMIN_AGENTS: NavGroup = {
   tone: "text-accent/70",
   items: [
     { labelKey: "sb.liveRuns", to: "/agents/live", icon: Activity, tone: "text-success" },
-    { labelKey: "sb.agentLibrary", to: "/agents", icon: Cpu, exact: true, tone: "text-accent" },
+    { labelKey: "sb.agentLibrary", to: "/agents/library", icon: Cpu, tone: "text-accent" },
     { labelKey: "sb.insightStream", to: "/admin/overview", icon: Radio, tone: "text-warning" },
   ],
 };
