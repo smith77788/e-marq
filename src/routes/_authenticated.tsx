@@ -98,18 +98,24 @@ function AuthenticatedShell({
           className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60"
         >
           <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
-          <div className="hidden items-center gap-2 sm:flex">
+          {/* LiveStatus pulse — visible from the smallest phones up. Super-admin
+              badge is ALWAYS visible (including mobile) so privileged status
+              is never accidentally hidden. */}
+          <div className="flex items-center gap-2">
             <LiveStatus />
-            {isSuperAdmin && (
-              <span className="rounded-full border border-accent/40 bg-accent/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent">
-                {t("hdr.superAdmin")}
-              </span>
-            )}
           </div>
+          {isSuperAdmin && (
+            <span
+              className="shrink-0 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent"
+              title={t("hdr.superAdmin")}
+            >
+              {t("hdr.superAdmin")}
+            </span>
+          )}
           <div className="ml-2 min-w-0 flex-1">
             <Breadcrumbs />
           </div>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
             <GlobalSearch />
             <TenantSwitcher />
             <NotificationCenter />
