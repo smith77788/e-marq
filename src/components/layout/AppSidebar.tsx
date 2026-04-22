@@ -124,6 +124,7 @@ const ADMIN_SYSTEM: NavGroup = {
   items: [
     { labelKey: "sb.adminCommands" as TKey, to: "/admin/commands", icon: Zap, tone: "text-warning" },
     { labelKey: "sb.missionControl", to: "/admin", icon: ShieldCheck, exact: true, tone: "text-destructive" },
+    { labelKey: "sb.healthMonitor" as TKey, to: "/admin/health", icon: HeartPulse, tone: "text-destructive" },
     { labelKey: "sb.crossTenant" as TKey, to: "/admin/overview", icon: Layers, tone: "text-info" },
     { labelKey: "sb.allTenants", to: "/admin/tenants", icon: Building2, tone: "text-primary" },
     { labelKey: "sb.plansCatalog" as TKey, to: "/admin/plans", icon: Coins, tone: "text-warning" },

@@ -172,6 +172,7 @@ import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminPlansRouteImport } from './routes/_authenticated/admin.plans'
 import { Route as AuthenticatedAdminOverviewRouteImport } from './routes/_authenticated/admin.overview'
 import { Route as AuthenticatedAdminLeadRadarRouteImport } from './routes/_authenticated/admin.lead-radar'
+import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin.health'
 import { Route as AuthenticatedAdminDntradeHealthRouteImport } from './routes/_authenticated/admin.dntrade-health'
 import { Route as AuthenticatedAdminCommandsRouteImport } from './routes/_authenticated/admin.commands'
 import { Route as SSlugProductsProductIdRouteImport } from './routes/s.$slug.products.$productId'
@@ -1090,6 +1091,12 @@ const AuthenticatedAdminLeadRadarRoute =
     path: '/admin/lead-radar',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAdminHealthRoute =
+  AuthenticatedAdminHealthRouteImport.update({
+    id: '/admin/health',
+    path: '/admin/health',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminDntradeHealthRoute =
   AuthenticatedAdminDntradeHealthRouteImport.update({
     id: '/admin/dntrade-health',
@@ -1252,6 +1259,7 @@ export interface FileRoutesByFullPath {
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
+  '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/lead-radar': typeof AuthenticatedAdminLeadRadarRoute
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
@@ -1439,6 +1447,7 @@ export interface FileRoutesByTo {
   '/m/$slug': typeof MSlugRoute
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
+  '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/lead-radar': typeof AuthenticatedAdminLeadRadarRoute
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
@@ -1629,6 +1638,7 @@ export interface FileRoutesById {
   '/s/$slug': typeof SSlugRouteWithChildren
   '/_authenticated/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/_authenticated/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
+  '/_authenticated/admin/health': typeof AuthenticatedAdminHealthRoute
   '/_authenticated/admin/lead-radar': typeof AuthenticatedAdminLeadRadarRoute
   '/_authenticated/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/_authenticated/admin/plans': typeof AuthenticatedAdminPlansRoute
@@ -1819,6 +1829,7 @@ export interface FileRouteTypes {
     | '/s/$slug'
     | '/admin/commands'
     | '/admin/dntrade-health'
+    | '/admin/health'
     | '/admin/lead-radar'
     | '/admin/overview'
     | '/admin/plans'
@@ -2006,6 +2017,7 @@ export interface FileRouteTypes {
     | '/m/$slug'
     | '/admin/commands'
     | '/admin/dntrade-health'
+    | '/admin/health'
     | '/admin/lead-radar'
     | '/admin/overview'
     | '/admin/plans'
@@ -2195,6 +2207,7 @@ export interface FileRouteTypes {
     | '/s/$slug'
     | '/_authenticated/admin/commands'
     | '/_authenticated/admin/dntrade-health'
+    | '/_authenticated/admin/health'
     | '/_authenticated/admin/lead-radar'
     | '/_authenticated/admin/overview'
     | '/_authenticated/admin/plans'
@@ -3657,6 +3670,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminLeadRadarRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/health': {
+      id: '/_authenticated/admin/health'
+      path: '/admin/health'
+      fullPath: '/admin/health'
+      preLoaderRoute: typeof AuthenticatedAdminHealthRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/dntrade-health': {
       id: '/_authenticated/admin/dntrade-health'
       path: '/admin/dntrade-health'
@@ -3907,6 +3927,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedAdminCommandsRoute: typeof AuthenticatedAdminCommandsRoute
   AuthenticatedAdminDntradeHealthRoute: typeof AuthenticatedAdminDntradeHealthRouteWithChildren
+  AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
   AuthenticatedAdminLeadRadarRoute: typeof AuthenticatedAdminLeadRadarRoute
   AuthenticatedAdminOverviewRoute: typeof AuthenticatedAdminOverviewRoute
   AuthenticatedAdminPlansRoute: typeof AuthenticatedAdminPlansRoute
@@ -3928,6 +3949,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminCommandsRoute: AuthenticatedAdminCommandsRoute,
   AuthenticatedAdminDntradeHealthRoute:
     AuthenticatedAdminDntradeHealthRouteWithChildren,
+  AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
   AuthenticatedAdminLeadRadarRoute: AuthenticatedAdminLeadRadarRoute,
   AuthenticatedAdminOverviewRoute: AuthenticatedAdminOverviewRoute,
   AuthenticatedAdminPlansRoute: AuthenticatedAdminPlansRoute,
