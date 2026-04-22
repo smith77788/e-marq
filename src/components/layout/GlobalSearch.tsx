@@ -83,7 +83,7 @@ type ProductHit = { id: string; tenant_id: string; name: string; sku: string | n
 type OrderHit = {
   id: string;
   tenant_id: string;
-  order_number: string | null;
+  payment_ref: string | null;
   customer_email: string | null;
   customer_name: string | null;
 };
@@ -164,10 +164,10 @@ export function GlobalSearch() {
           .limit(8),
         supabase
           .from("orders")
-          .select("id, tenant_id, order_number, customer_email, customer_name")
+          .select("id, tenant_id, payment_ref, customer_email, customer_name")
           .in("tenant_id", tenantIds)
           .or(
-            `order_number.ilike.${like},customer_email.ilike.${like},customer_name.ilike.${like}`,
+            `payment_ref.ilike.${like},customer_email.ilike.${like},customer_name.ilike.${like}`,
           )
           .order("created_at", { ascending: false })
           .limit(8),
@@ -322,7 +322,7 @@ export function GlobalSearch() {
                   >
                     <ShoppingCart className="mr-2 h-4 w-4 text-warning" />
                     <span className="flex-1 truncate">
-                      {o.order_number ? `#${o.order_number}` : o.id.slice(0, 8)}
+                      {o.payment_ref ? `#${o.payment_ref}` : `#${o.id.slice(0, 8)}`}
                     </span>
                     <span className="ml-2 truncate text-[10px] text-muted-foreground">
                       {o.customer_name ?? o.customer_email ?? ""}
