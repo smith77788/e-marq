@@ -92,6 +92,85 @@ type: feature
 - Default = ON (відсутність ключа трактується як увімкнено), щоб існуючі тенанти не зламалися ✅
 - `tsc --noEmit` чистий ✅
 
+### Sprint 10 — Bulk Promo Generator + Source-of-truth ✅ (готово)
+- `.lovable/MARQ_PROMPT_V2.md` зафіксовано як джерело істини ✅
+- Memory оновлено (`mem://features/marq-prompt-v2`) ✅
+- `BulkPromoGeneratorDialog.tsx` — генерація 1–500 кодів (percent_off / fixed_off / free_shipping), кастомний префікс, безконфліктна вибірка, CSV-експорт ✅
+- Інтегровано в `/brand/promotions` (кнопка «Bulk generate») ✅
+- 14 нових i18n ключів `bpr.bulk.*` (UA + EN) ✅
+
+### Sprint 11 — White-label Site Builder (планується) 🆕
+**Мета:** дати бренду згенерувати власний публічний сайт на основі шаблону **My Food Diary** (project ID `a74eaa2d-62ac-4a30-98d6-1c37f45f6f79`, https://basicfood.lovable.app) — повна функціональна копія під його бренд, видана у вигляді ZIP-архіву з готовим до деплою кодом.
+
+**Етап 11.1 — Реєстр шаблонів і брендингу (DB)**
+- Нова міграція `site_builder.sql`:
+  - `site_templates` (id, key="mfd", name, description, source_repo, source_commit, default_locale, is_active, preview_url, capabilities jsonb)
+  - `site_brand_profiles` (tenant_id, template_id, brand_name, tagline, description, logo_url, favicon_url, primary_color, accent_color, font_family, contact_email, contact_phone, social_links jsonb, custom_domain, locale, currency, legal_entity, address, updated_at) — UNIQUE(tenant_id, template_id)
+  - `site_builds` (id, tenant_id, template_id, status='queued|building|ready|failed', archive_url, archive_size_bytes, archive_sha256, manifest jsonb, error, requested_by, started_at, finished_at) — INDEX(tenant_id, created_at DESC)
+- RLS: тенант бачить тільки свої `site_brand_profiles` + `site_builds`; `site_templates` — read-only public
+- Storage bucket `site-builds` (private, signed URL ~24h)
+
+**Етап 11.2 — Snapshot шаблону MFD**
+- Server-only задача `hooks/site-builder.snapshot-mfd.ts`:
+  - Читає файли через `cross_project--read_project_file` (whitelist: src/**, public/**, package.json, vite.config.ts, tailwind.config.ts, index.html, supabase/migrations/**, README)
+  - Виключає: .env, supabase/.temp, node_modules, lockfiles, .lovable/**, *.log
+  - Зберігає манifest у `site_templates.capabilities.snapshot` + сирі файли в bucket `site-template-snapshots/mfd/<commit>/`
+- Запускається вручну адміністратором (не клієнтом)
+
+**Етап 11.3 — Підготовка контексту бренду**
+- `src/lib/site-builder/brandContext.ts`:
+  - `loadBrandProfile(tenantId, templateId)` — мердж `site_brand_profiles` + `tenant_configs` (logo, brand_name, seo, payment keys → only public ones)
+  - `validateBrandProfile()` — перевірка обов'язкових полів (brand_name, primary_color, contact_email)
+  - НЕ копіюємо приватні ключі (Resend, LiqPay private, Monobank token, MARQ_WEBHOOK_SECRET)
+
+**Етап 11.4 — UI: майстер у брендовому кабінеті**
+- Нова сторінка `/brand/site-builder`:
+  - Вкладка «Profile»: форма з усіма полями `site_brand_profiles` + preview логотипу/палітри
+  - Вкладка «Theme»: 5 пресетів кольорів (oklch tokens), live-preview карти/кнопки
+  - Вкладка «Content»: hero copy, about-us, food categories defaults (food_categories_seed), legal pages
+  - Вкладка «Builds»: список останніх 10 білдів зі статусом, sha256, кнопкою «Скачати ZIP» (signed URL)
+  - Кнопка «Згенерувати сайт» → POST на server function (нижче)
+- Sidebar: пункт «Site Builder» (sb.site_builder) у групі «Магазин»
+
+**Етап 11.5 — Білд-пайплайн (server function)**
+- `src/routes/api/site-builder.build.ts` (POST, auth required):
+  1. Перевірити права (owner / admin тенанта)
+  2. Валідувати `site_brand_profiles` запис
+  3. Створити `site_builds` row зі статусом `building`
+  4. Викликати `hooks/site-builder.run.ts` через fetch на `/hooks/site-builder/run` із `tenant_id` + `build_id`
+  5. Повернути `build_id` (фронт polling кожні 3с)
+
+- `src/routes/hooks/site-builder.run.ts` (server-only, secret-protected):
+  1. Завантажити snapshot шаблону з bucket
+  2. Прогнати through `applyBrandTransforms`:
+     - Замінити логотип, favicon, OG-image
+     - Підставити бренд-кольори в `src/index.css` (oklch tokens)
+     - Замінити SEO meta в `index.html` + всіх routes
+     - Згенерувати `.env.example` з placeholder-ами для Supabase URL/anon (НЕ власні ключі MARQ)
+     - Додати `BRAND_README.md` з інструкцією деплою
+  3. Створити ZIP через `JSZip` (Worker-сумісний) — структура: `<brand-slug>-site/...`
+  4. Залити в storage `site-builds/<tenant_id>/<build_id>.zip`
+  5. Оновити `site_builds` (status='ready', archive_url, sha256, size)
+  6. На failure → status='failed', error=stack
+
+**Етап 11.6 — Безпека**
+- ZIP НЕ містить: `MARQ_WEBHOOK_SECRET`, Resend API key, LiqPay private key, Monobank token, service-role keys, `.lovable/**`
+- Public anon Supabase URL/key → у `.env.example` як plaintext placeholder з коментарем «створіть свій проект»
+- Власник бренду генерує не частіше ніж раз на 5 хв (rate limit у server function)
+- ZIP signed URL живе 24h, після цього потрібно перегенерувати посилання
+
+**Етап 11.7 — Тести й перевірка**
+- `tsc --noEmit` чистий
+- Згенерований ZIP розпаковано → `npm install && npm run build` локально проходить
+- Брендовані кольори видно в built site
+- Жоден приватний секрет не потрапив у архів (grep тести)
+- Mobile (375px) UI білдер
+- i18n: усі нові тексти через `useT()` (UA + EN)
+
+**Залежності з MFD-проекту:**
+- Шаблон витягуємо з `cross_project` API під час snapshot-етапу
+- За кожним relevant апдейтом MFD адмін MARQ запускає re-snapshot → версія в `site_templates.source_commit`
+
 ## Абсолютні заборони
 - НЕ редагувати існуючі міграції
 - НЕ міняти agentRuntime.ts
