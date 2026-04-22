@@ -75,7 +75,7 @@ export const Route = createFileRoute("/api/site-builder/build")({
 
         // 3. Verify membership (defence-in-depth).
         const { data: isMember, error: memErr } = await userClient.rpc("is_tenant_member", {
-          tenant_id: body.tenant_id,
+          _tenant_id: body.tenant_id,
         });
         if (memErr) return jsonError(500, memErr.message);
         if (!isMember) return jsonError(403, "Not a member of this tenant");

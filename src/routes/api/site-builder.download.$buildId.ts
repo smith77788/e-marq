@@ -51,7 +51,7 @@ export const Route = createFileRoute("/api/site-builder/download/$buildId")({
 
         // Membership check via user-scoped client (RLS-aware).
         const { data: isMember, error: memErr } = await userClient.rpc("is_tenant_member", {
-          tenant_id: build.tenant_id,
+          _tenant_id: build.tenant_id,
         });
         if (memErr) return jsonError(500, memErr.message);
         if (!isMember) return jsonError(403, "Not a member of this tenant");

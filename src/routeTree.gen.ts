@@ -135,6 +135,7 @@ import { Route as HooksAgentsAntiFraudRouteImport } from './routes/hooks/agents.
 import { Route as HooksAgentsAnomalyDetectorRouteImport } from './routes/hooks/agents.anomaly-detector'
 import { Route as HooksAgentsActionWatchdogRouteImport } from './routes/hooks/agents.action-watchdog'
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
+import { Route as ApiSiteBuilderBuildRouteImport } from './routes/api/site-builder.build'
 import { Route as ApiEmailOrderStatusRouteImport } from './routes/api/email.order-status'
 import { Route as ApiEmailOrderConfirmationRouteImport } from './routes/api/email.order-confirmation'
 import { Route as ApiEmailDomainVerifyRouteImport } from './routes/api/email.domain-verify'
@@ -160,6 +161,7 @@ import { Route as AuthenticatedAdminCommandsRouteImport } from './routes/_authen
 import { Route as SSlugProductsProductIdRouteImport } from './routes/s.$slug.products.$productId'
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
 import { Route as SSlugCollectionsHandleRouteImport } from './routes/s.$slug.collections.$handle'
+import { Route as ApiSiteBuilderDownloadBuildIdRouteImport } from './routes/api/site-builder.download.$buildId'
 import { Route as ApiPublicShippingNpRouteImport } from './routes/api/public/shipping.np'
 import { Route as ApiPublicPaymentsWayforpayInitRouteImport } from './routes/api/public/payments.wayforpay-init'
 import { Route as ApiPublicPaymentsWayforpayCallbackRouteImport } from './routes/api/public/payments.wayforpay-callback'
@@ -864,6 +866,11 @@ const HooksActionsApplyRoute = HooksActionsApplyRouteImport.update({
   path: '/hooks/actions/apply',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSiteBuilderBuildRoute = ApiSiteBuilderBuildRouteImport.update({
+  id: '/api/site-builder/build',
+  path: '/api/site-builder/build',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiEmailOrderStatusRoute = ApiEmailOrderStatusRouteImport.update({
   id: '/api/email/order-status',
   path: '/api/email/order-status',
@@ -1002,6 +1009,12 @@ const SSlugCollectionsHandleRoute = SSlugCollectionsHandleRouteImport.update({
   path: '/collections/$handle',
   getParentRoute: () => SSlugRoute,
 } as any)
+const ApiSiteBuilderDownloadBuildIdRoute =
+  ApiSiteBuilderDownloadBuildIdRouteImport.update({
+    id: '/api/site-builder/download/$buildId',
+    path: '/api/site-builder/download/$buildId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicShippingNpRoute = ApiPublicShippingNpRouteImport.update({
   id: '/api/public/shipping/np',
   path: '/api/public/shipping/np',
@@ -1123,6 +1136,7 @@ export interface FileRoutesByFullPath {
   '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
+  '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
@@ -1247,6 +1261,7 @@ export interface FileRoutesByFullPath {
   '/api/public/payments/wayforpay-callback': typeof ApiPublicPaymentsWayforpayCallbackRoute
   '/api/public/payments/wayforpay-init': typeof ApiPublicPaymentsWayforpayInitRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
+  '/api/site-builder/download/$buildId': typeof ApiSiteBuilderDownloadBuildIdRoute
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
   '/s/$slug/products/$productId': typeof SSlugProductsProductIdRoute
@@ -1288,6 +1303,7 @@ export interface FileRoutesByTo {
   '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
+  '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
@@ -1412,6 +1428,7 @@ export interface FileRoutesByTo {
   '/api/public/payments/wayforpay-callback': typeof ApiPublicPaymentsWayforpayCallbackRoute
   '/api/public/payments/wayforpay-init': typeof ApiPublicPaymentsWayforpayInitRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
+  '/api/site-builder/download/$buildId': typeof ApiSiteBuilderDownloadBuildIdRoute
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
   '/s/$slug/products/$productId': typeof SSlugProductsProductIdRoute
@@ -1456,6 +1473,7 @@ export interface FileRoutesById {
   '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
+  '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
@@ -1580,6 +1598,7 @@ export interface FileRoutesById {
   '/api/public/payments/wayforpay-callback': typeof ApiPublicPaymentsWayforpayCallbackRoute
   '/api/public/payments/wayforpay-init': typeof ApiPublicPaymentsWayforpayInitRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
+  '/api/site-builder/download/$buildId': typeof ApiSiteBuilderDownloadBuildIdRoute
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
   '/s/$slug/products/$productId': typeof SSlugProductsProductIdRoute
@@ -1624,6 +1643,7 @@ export interface FileRouteTypes {
     | '/api/email/domain-verify'
     | '/api/email/order-confirmation'
     | '/api/email/order-status'
+    | '/api/site-builder/build'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
     | '/hooks/agents/anomaly-detector'
@@ -1748,6 +1768,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/wayforpay-callback'
     | '/api/public/payments/wayforpay-init'
     | '/api/public/shipping/np'
+    | '/api/site-builder/download/$buildId'
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
     | '/s/$slug/products/$productId'
@@ -1789,6 +1810,7 @@ export interface FileRouteTypes {
     | '/api/email/domain-verify'
     | '/api/email/order-confirmation'
     | '/api/email/order-status'
+    | '/api/site-builder/build'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
     | '/hooks/agents/anomaly-detector'
@@ -1913,6 +1935,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/wayforpay-callback'
     | '/api/public/payments/wayforpay-init'
     | '/api/public/shipping/np'
+    | '/api/site-builder/download/$buildId'
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
     | '/s/$slug/products/$productId'
@@ -1956,6 +1979,7 @@ export interface FileRouteTypes {
     | '/api/email/domain-verify'
     | '/api/email/order-confirmation'
     | '/api/email/order-status'
+    | '/api/site-builder/build'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
     | '/hooks/agents/anomaly-detector'
@@ -2080,6 +2104,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/wayforpay-callback'
     | '/api/public/payments/wayforpay-init'
     | '/api/public/shipping/np'
+    | '/api/site-builder/download/$buildId'
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
     | '/s/$slug/products/$productId'
@@ -2103,6 +2128,7 @@ export interface RootRouteChildren {
   ApiEmailDomainVerifyRoute: typeof ApiEmailDomainVerifyRoute
   ApiEmailOrderConfirmationRoute: typeof ApiEmailOrderConfirmationRoute
   ApiEmailOrderStatusRoute: typeof ApiEmailOrderStatusRoute
+  ApiSiteBuilderBuildRoute: typeof ApiSiteBuilderBuildRoute
   HooksActionsApplyRoute: typeof HooksActionsApplyRoute
   HooksAgentsActionWatchdogRoute: typeof HooksAgentsActionWatchdogRoute
   HooksAgentsAnomalyDetectorRoute: typeof HooksAgentsAnomalyDetectorRoute
@@ -2220,6 +2246,7 @@ export interface RootRouteChildren {
   ApiPublicPaymentsWayforpayCallbackRoute: typeof ApiPublicPaymentsWayforpayCallbackRoute
   ApiPublicPaymentsWayforpayInitRoute: typeof ApiPublicPaymentsWayforpayInitRoute
   ApiPublicShippingNpRoute: typeof ApiPublicShippingNpRoute
+  ApiSiteBuilderDownloadBuildIdRoute: typeof ApiSiteBuilderDownloadBuildIdRoute
   ApiPublicIntegrationsInboundProviderRoute: typeof ApiPublicIntegrationsInboundProviderRoute
 }
 
@@ -3107,6 +3134,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksActionsApplyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/site-builder/build': {
+      id: '/api/site-builder/build'
+      path: '/api/site-builder/build'
+      fullPath: '/api/site-builder/build'
+      preLoaderRoute: typeof ApiSiteBuilderBuildRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/email/order-status': {
       id: '/api/email/order-status'
       path: '/api/email/order-status'
@@ -3281,6 +3315,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/s/$slug/collections/$handle'
       preLoaderRoute: typeof SSlugCollectionsHandleRouteImport
       parentRoute: typeof SSlugRoute
+    }
+    '/api/site-builder/download/$buildId': {
+      id: '/api/site-builder/download/$buildId'
+      path: '/api/site-builder/download/$buildId'
+      fullPath: '/api/site-builder/download/$buildId'
+      preLoaderRoute: typeof ApiSiteBuilderDownloadBuildIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/shipping/np': {
       id: '/api/public/shipping/np'
@@ -3539,6 +3580,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiEmailDomainVerifyRoute: ApiEmailDomainVerifyRoute,
   ApiEmailOrderConfirmationRoute: ApiEmailOrderConfirmationRoute,
   ApiEmailOrderStatusRoute: ApiEmailOrderStatusRoute,
+  ApiSiteBuilderBuildRoute: ApiSiteBuilderBuildRoute,
   HooksActionsApplyRoute: HooksActionsApplyRoute,
   HooksAgentsActionWatchdogRoute: HooksAgentsActionWatchdogRoute,
   HooksAgentsAnomalyDetectorRoute: HooksAgentsAnomalyDetectorRoute,
@@ -3662,6 +3704,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicPaymentsWayforpayCallbackRoute,
   ApiPublicPaymentsWayforpayInitRoute: ApiPublicPaymentsWayforpayInitRoute,
   ApiPublicShippingNpRoute: ApiPublicShippingNpRoute,
+  ApiSiteBuilderDownloadBuildIdRoute: ApiSiteBuilderDownloadBuildIdRoute,
   ApiPublicIntegrationsInboundProviderRoute:
     ApiPublicIntegrationsInboundProviderRoute,
 }
