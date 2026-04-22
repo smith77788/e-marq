@@ -22,6 +22,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
 import { LOVABLE_AI_URL, DEFAULT_AI_MODEL, isLovableAiEnabled } from "@/lib/acos/aiKillswitch";
+import { answerIntent } from "@/lib/acos/intentAnswer";
 
 const MODEL = DEFAULT_AI_MODEL;
 const MAX_QUESTION_LEN = 500;
