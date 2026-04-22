@@ -418,18 +418,16 @@ function TopupDialog({
               </div>
             </TabsContent>
 
-            <TabsContent value="online" className="mt-3">
-              <div className="rounded-md border border-info/30 bg-info/5 p-3 text-xs text-foreground">
-                <p className="flex items-start gap-2">
-                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-info" />
-                  <span>
-                    Онлайн-оплата картою (LiqPay, WayForPay, Monobank Pay) для тарифу
-                    зʼявиться у наступному оновленні. Зараз доступний{" "}
-                    <strong>банківський переказ</strong> або <strong>кредит-нота</strong>{" "}
-                    від адміністратора.
-                  </span>
-                </p>
-              </div>
+            <TabsContent value="online" className="mt-3 space-y-3">
+              <ManagerRequestPanel
+                tenantId={tenantId}
+                credits={credits}
+                amountCents={uah * 100}
+                onCreated={() => {
+                  setOpen(false);
+                  onSuccess();
+                }}
+              />
             </TabsContent>
           </Tabs>
         </div>
