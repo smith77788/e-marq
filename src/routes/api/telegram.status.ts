@@ -71,7 +71,9 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-async function readActiveChannels(tenantId: string): Promise<{ telegram: boolean; instagram: boolean }> {
+async function readActiveChannels(
+  tenantId: string,
+): Promise<{ telegram: boolean; instagram: boolean }> {
   const { data } = await supabaseAdmin
     .from("outreach_settings")
     .select("value")
@@ -87,7 +89,11 @@ async function readActiveChannels(tenantId: string): Promise<{ telegram: boolean
 
 async function readBot(): Promise<
   | { ok: true; id: number; name: string; username: string | null }
-  | { ok: false; reason: "missing_lovable_key" | "missing_tg_key" | "request_failed"; detail?: string }
+  | {
+      ok: false;
+      reason: "missing_lovable_key" | "missing_tg_key" | "request_failed";
+      detail?: string;
+    }
 > {
   const lovableKey = process.env.LOVABLE_API_KEY;
   if (!lovableKey) return { ok: false, reason: "missing_lovable_key" };

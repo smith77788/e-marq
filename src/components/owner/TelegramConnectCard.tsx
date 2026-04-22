@@ -156,8 +156,8 @@ export function TelegramConnectCard({ tenantId, compact = false }: Props) {
 
           <p className="flex items-start gap-2 text-xs text-muted-foreground">
             <Sparkles className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-primary" />
-            Все відбувається в межах сайту: пошук, генерація відповідей, надсилання — без переходу
-            в окремі панелі.
+            Все відбувається в межах сайту: пошук, генерація відповідей, надсилання — без переходу в
+            окремі панелі.
           </p>
         </>
       ) : (
@@ -170,21 +170,19 @@ export function TelegramConnectCard({ tenantId, compact = false }: Props) {
               {status.data?.error ?? "Telegram-конектор ще не активовано."}
             </span>
           </div>
-          {status.data?.hint && (
-            <p className="text-xs text-muted-foreground">{status.data.hint}</p>
-          )}
+          {status.data?.hint && <p className="text-xs text-muted-foreground">{status.data.hint}</p>}
           <ol className="space-y-1.5 rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
             <li>
               1. У <span className="font-semibold text-foreground">@BotFather</span> створіть бота
               командою <code>/newbot</code> і скопіюйте токен.
             </li>
             <li>
-              2. Натисніть «Підключити Telegram» нижче — Lovable Cloud надійно збереже токен
-              і автоматично оновлюватиме його.
+              2. Натисніть «Підключити Telegram» нижче — Lovable Cloud надійно збереже токен і
+              автоматично оновлюватиме його.
             </li>
             <li>
-              3. Поверніться сюди й увімкніть Telegram-агенти однією кнопкою — все працюватиме
-              прямо в кабінеті.
+              3. Поверніться сюди й увімкніть Telegram-агенти однією кнопкою — все працюватиме прямо
+              в кабінеті.
             </li>
           </ol>
           <Button
