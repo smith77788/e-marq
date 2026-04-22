@@ -87,14 +87,12 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
   const [result, setResult] = useState<ImportResult | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
 
-  if (!integration) return null;
-
-  const Icon = integration.icon;
-  const isFileBased = integration.method === "csv" || integration.method === "sheets";
-  const isApiKey = integration.method === "apiKey";
-  const isWebhook = integration.method === "webhook";
-  const isRest = integration.method === "rest";
-  const isComingSoon = integration.status === "comingSoon";
+  const Icon = integration?.icon;
+  const isFileBased = integration?.method === "csv" || integration?.method === "sheets";
+  const isApiKey = integration?.method === "apiKey";
+  const isWebhook = integration?.method === "webhook";
+  const isRest = integration?.method === "rest";
+  const isComingSoon = integration?.status === "comingSoon";
 
   function reset() {
     setStep(1);
