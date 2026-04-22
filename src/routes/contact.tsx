@@ -10,17 +10,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MarketingHeader, MarketingFooter } from "@/components/marketing/MarketingShell";
 import { useT, tStatic } from "@/lib/i18n";
+import { buildSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: [
-      { title: tStatic("ct.metaTitle") },
-      { name: "description", content: tStatic("ct.metaDesc") },
-      { property: "og:title", content: tStatic("ct.metaTitle") },
-      { property: "og:description", content: tStatic("ct.metaDesc") },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
+  head: () =>
+    buildSeo({
+      title: tStatic("ct.metaTitle"),
+      description: tStatic("ct.metaDesc"),
+      path: "/contact",
+    }),
   component: ContactPage,
 });
 

@@ -27,6 +27,7 @@ import { HandbookSection } from "@/components/handbook/HandbookSection";
 import { HandbookToc, HandbookTocMobile } from "@/components/handbook/HandbookToc";
 import { HandbookConnectors } from "@/components/handbook/HandbookConnectors";
 import { useT, tStatic } from "@/lib/i18n";
+import { buildSeo } from "@/lib/seo";
 
 import heroImg from "@/assets/handbook-hero.jpg";
 import approvalImg from "@/assets/handbook-approval.jpg";
@@ -34,15 +35,13 @@ import integrationsImg from "@/assets/handbook-integrations.jpg";
 import pricingImg from "@/assets/handbook-pricing.jpg";
 
 export const Route = createFileRoute("/handbook")({
-  head: () => ({
-    meta: [
-      { title: tStatic("hb.metaTitle") },
-      { name: "description", content: tStatic("hb.metaDesc") },
-      { property: "og:title", content: tStatic("hb.metaTitle") },
-      { property: "og:description", content: tStatic("hb.metaDesc") },
-      { property: "og:type", content: "article" },
-    ],
-  }),
+  head: () =>
+    buildSeo({
+      title: tStatic("hb.metaTitle"),
+      description: tStatic("hb.metaDesc"),
+      path: "/handbook",
+      ogType: "article",
+    }),
   component: HandbookPage,
 });
 

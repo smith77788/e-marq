@@ -8,12 +8,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, tStatic } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
+import { NOINDEX_META } from "@/lib/seo";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: `${tStatic("auth.signinTitle")} — MARQ` },
       { name: "description", content: tStatic("auth.signinDesc") },
+      ...NOINDEX_META,
     ],
   }),
   component: LoginPage,

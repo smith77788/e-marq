@@ -5,17 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MarketingHeader, MarketingFooter } from "@/components/marketing/MarketingShell";
 import { useT, tStatic } from "@/lib/i18n";
+import { buildSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/agents")({
-  head: () => ({
-    meta: [
-      { title: tStatic("ag.metaTitle") },
-      { name: "description", content: tStatic("ag.metaDesc") },
-      { property: "og:title", content: tStatic("ag.metaTitle") },
-      { property: "og:description", content: tStatic("ag.metaDesc") },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
+  head: () =>
+    buildSeo({
+      title: tStatic("ag.metaTitle"),
+      description: tStatic("ag.metaDesc"),
+      path: "/agents",
+    }),
   component: Agents,
 });
 
