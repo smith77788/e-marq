@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, tStatic } from "@/lib/i18n";
-import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
+import { MarketingHeader, MarketingFooter } from "@/components/marketing/MarketingShell";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -24,6 +24,39 @@ export const Route = createFileRoute("/")({
       { name: "description", content: tStatic("home.metaDesc") },
       { property: "og:title", content: tStatic("home.title") },
       { property: "og:description", content: tStatic("home.metaDesc") },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "MARQ",
+          url: "https://e-marq.lovable.app",
+          logo: "https://e-marq.lovable.app/favicon.ico",
+          description: tStatic("home.metaDesc"),
+          contactPoint: [
+            {
+              "@type": "ContactPoint",
+              email: "hello@marq.app",
+              contactType: "customer support",
+              availableLanguage: ["Ukrainian", "English"],
+            },
+          ],
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "MARQ",
+          applicationCategory: "BusinessApplication",
+          operatingSystem: "Web",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+          description: tStatic("home.metaDesc"),
+        }),
+      },
     ],
   }),
   component: Index,
