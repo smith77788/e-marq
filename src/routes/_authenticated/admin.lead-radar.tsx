@@ -113,9 +113,13 @@ function LeadRadarPage() {
 
 function Content() {
   const qc = useQueryClient();
+  const { currentTenantId, tenants } = useTenantContext();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [previewSlug, setPreviewSlug] = useState<string | null>(null);
+
+  // Для super-admin без вибраного tenant'а — беремо перший доступний
+  const telegramTenantId = currentTenantId ?? tenants[0]?.tenant_id ?? null;
 
   const prospects = useQuery({
     queryKey: ["lead-prospects", statusFilter],
