@@ -243,7 +243,7 @@ export function RevenueFeed({ tenantId }: Props) {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Завантаження…</p>
+          <ListSkeleton rows={5} />
         ) : rows.length === 0 ? (
           <div className="rounded-md border border-dashed border-border bg-muted/20 p-6 text-center">
             <Bot className="mx-auto h-8 w-8 text-muted-foreground/60" />

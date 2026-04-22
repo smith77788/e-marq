@@ -196,7 +196,7 @@ export function AgentTimeline({ tenantId }: Props) {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Завантаження…</p>
+          <ListSkeleton rows={6} />
         ) : items.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             Поки немає подій. Коли агенти запрацюють і знайдуть закономірності — тут зʼявиться

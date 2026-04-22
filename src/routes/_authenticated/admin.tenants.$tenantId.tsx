@@ -314,7 +314,7 @@ function TenantDetailPage() {
   });
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Завантаження…</p>;
+    return <PageSkeleton blocks={4} />;
   }
 
   if (!isSuperAdmin) {

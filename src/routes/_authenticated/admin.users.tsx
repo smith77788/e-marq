@@ -143,7 +143,7 @@ function AdminUsersPage() {
         </CardHeader>
         <CardContent className="overflow-x-auto">
           {usersQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">Завантаження…</p>
+            <TableSkeleton rows={6} columns={6} />
           ) : (
             <Table>
               <TableHeader>

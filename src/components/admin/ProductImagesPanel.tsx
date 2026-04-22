@@ -294,7 +294,19 @@ export function ProductImagesPanel({ tenantId, productId, productName }: Props) 
 
         {/* Gallery */}
         {imagesQuery.isLoading ? (
-          <p className="text-sm text-muted-foreground">Завантаження…</p>
+          <div
+            role="status"
+            aria-busy="true"
+            aria-label="Loading images…"
+            className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"
+          >
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="aspect-square animate-pulse rounded-md border bg-primary/10"
+              />
+            ))}
+          </div>
         ) : images.length === 0 ? (
           <p className="text-center text-sm text-muted-foreground">Поки що без фото</p>
         ) : (

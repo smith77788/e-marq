@@ -81,7 +81,7 @@ function AdminTenantsPage() {
   });
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Завантаження…</p>;
+    return <PageSkeleton blocks={3} />;
   }
 
   if (!isSuperAdmin) {
@@ -174,7 +174,7 @@ function AdminTenantsPage() {
         </CardHeader>
         <CardContent>
           {tenantsQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">Завантаження…</p>
+            <TableSkeleton rows={5} columns={4} />
           ) : tenantsQuery.data && tenantsQuery.data.length > 0 ? (
             <div className="overflow-x-auto">
               <Table>

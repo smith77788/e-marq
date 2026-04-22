@@ -274,7 +274,10 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
                                 Товари у замовленні
                               </p>
                               {itemsQuery.isLoading ? (
-                                <p className="text-xs text-muted-foreground">Завантаження…</p>
+                                <div className="space-y-1.5" role="status" aria-busy="true">
+                                  <div className="h-3 w-3/4 animate-pulse rounded bg-primary/10" />
+                                  <div className="h-3 w-1/2 animate-pulse rounded bg-primary/10" />
+                                </div>
                               ) : itemsQuery.data && itemsQuery.data.length > 0 ? (
                                 <ul className="space-y-1 text-sm">
                                   {itemsQuery.data.map((it) => (

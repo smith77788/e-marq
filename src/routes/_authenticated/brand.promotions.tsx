@@ -283,7 +283,7 @@ function BrandPromotionsPage() {
     [t],
   );
 
-  if (loading) return <p className="text-sm text-muted-foreground">Завантаження…</p>;
+  if (loading) return <PageSkeleton blocks={2} />;
 
   if (!tenantsQuery.data || tenantsQuery.data.length === 0) {
     return (

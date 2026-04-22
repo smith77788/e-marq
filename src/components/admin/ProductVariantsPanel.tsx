@@ -297,7 +297,7 @@ export function ProductVariantsPanel({ tenantId, productId, hasVariants }: Props
         </div>
 
         {variantsQuery.isLoading ? (
-          <p className="text-sm text-muted-foreground">Завантаження…</p>
+          <TableSkeleton rows={3} columns={5} />
         ) : variants.length === 0 ? (
           <div className="rounded-md border border-dashed py-12 text-center">
             <p className="text-sm font-medium text-foreground">Ще немає варіантів</p>
