@@ -18,9 +18,7 @@ export async function authorizeOutreach(
   request: Request,
   desiredTenantId: string | null,
 ): Promise<OutreachAuth | { error: string; status: number }> {
-  const token = (request.headers.get("authorization") ?? "")
-    .replace(/^Bearer\s+/i, "")
-    .trim();
+  const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
   if (!token) return { error: "Missing bearer token", status: 401 };
 
   if (token === process.env.SUPABASE_PUBLISHABLE_KEY) return { kind: "cron" };
@@ -57,7 +55,10 @@ export async function authorizeOutreach(
 }
 
 /** Тенанти, для яких треба запускати агента (cron → всі активні; user → лише його). */
-export async function resolveTargetTenants(auth: OutreachAuth, hint: string | null): Promise<string[]> {
+export async function resolveTargetTenants(
+  auth: OutreachAuth,
+  hint: string | null,
+): Promise<string[]> {
   if (auth.kind === "member") return [auth.tenantId];
   if (auth.kind === "super") {
     if (hint) return [hint];

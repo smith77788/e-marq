@@ -39,7 +39,11 @@ const DEFAULTS: OutreachSettings = {
   telegram_max_posts_per_channel: 35,
   telegram_min_intent_score: 0.22,
   telegram_internal_lookback_days: 21,
-  default_landing: { url: "https://e-marq.lovable.app", utm_source: "outreach", utm_medium: "organic" },
+  default_landing: {
+    url: "https://e-marq.lovable.app",
+    utm_source: "outreach",
+    utm_medium: "organic",
+  },
   reddit_posting_enabled: false,
   telegram_posting_enabled: false,
   instagram_posting_enabled: false,
@@ -109,7 +113,10 @@ export function detectLanguage(text: string): "uk" | "ru" | "en" | "other" {
   return "uk";
 }
 
-export function scoreIntent(text: string, intentKeywords: string[]): {
+export function scoreIntent(
+  text: string,
+  intentKeywords: string[],
+): {
   score: number;
   matched: string[];
 } {
@@ -131,7 +138,11 @@ export function isBlocked(text: string, blockedKeywords: string[]): boolean {
   return blockedKeywords.some((k) => k && t.includes(k.toLowerCase()));
 }
 
-export async function fingerprint(channel: string, sourceUrl: string, snippet: string): Promise<string> {
+export async function fingerprint(
+  channel: string,
+  sourceUrl: string,
+  snippet: string,
+): Promise<string> {
   const data = `${channel}::${sourceUrl}::${snippet.slice(0, 200)}`;
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(data));
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");

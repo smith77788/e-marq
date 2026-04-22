@@ -108,11 +108,7 @@ export function removeAskPin(tenantId: string | null, pinId: string): void {
   }
 }
 
-export function updateAskPinAnswer(
-  tenantId: string | null,
-  pinId: string,
-  answer: string,
-): void {
+export function updateAskPinAnswer(tenantId: string | null, pinId: string, answer: string): void {
   if (!tenantId || !isBrowser()) return;
   try {
     const current = getAskPins(tenantId);

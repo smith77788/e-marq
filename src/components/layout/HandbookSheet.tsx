@@ -108,10 +108,7 @@ export function HandbookSheet({ open, onOpenChange }: HandbookSheetProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl"
-      >
+      <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl">
         <SheetHeader className="border-b border-border bg-card/30 px-5 py-4 text-left">
           <SheetTitle className="flex items-center gap-2 text-base">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
@@ -154,9 +151,7 @@ export function HandbookSheet({ open, onOpenChange }: HandbookSheetProps) {
             <Tabs value={tab} onValueChange={setTab}>
               <TabsContent value="quickstart" className="mt-0 space-y-3">
                 <SectionEyebrow icon={Rocket} text={t("hb.qs.eyebrow")} />
-                <h3 className="text-lg font-semibold text-foreground">
-                  {t("hb.qs.title")}
-                </h3>
+                <h3 className="text-lg font-semibold text-foreground">{t("hb.qs.title")}</h3>
                 <ol className="space-y-2.5">
                   {quickStart.map((k, i) => (
                     <li
@@ -174,9 +169,7 @@ export function HandbookSheet({ open, onOpenChange }: HandbookSheetProps) {
 
               <TabsContent value="owner" className="mt-0 space-y-3">
                 <SectionEyebrow icon={Users} text={t("hb.owner.eyebrow")} />
-                <h3 className="text-lg font-semibold text-foreground">
-                  {t("hb.owner.title")}
-                </h3>
+                <h3 className="text-lg font-semibold text-foreground">{t("hb.owner.title")}</h3>
                 <p className="text-sm text-muted-foreground">{t("hb.owner.lead")}</p>
                 <div className="grid gap-3">
                   {ownerFeatures.map((f, i) => (
@@ -187,9 +180,7 @@ export function HandbookSheet({ open, onOpenChange }: HandbookSheetProps) {
                         </span>
                         <div className="min-w-0">
                           <CardTitle className="text-sm">{t(f.titleKey)}</CardTitle>
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            {t(f.bodyKey)}
-                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">{t(f.bodyKey)}</p>
                         </div>
                       </CardHeader>
                     </Card>
@@ -199,9 +190,7 @@ export function HandbookSheet({ open, onOpenChange }: HandbookSheetProps) {
 
               <TabsContent value="admin" className="mt-0 space-y-3">
                 <SectionEyebrow icon={ShieldCheck} text={t("hb.admin.eyebrow")} />
-                <h3 className="text-lg font-semibold text-foreground">
-                  {t("hb.admin.title")}
-                </h3>
+                <h3 className="text-lg font-semibold text-foreground">{t("hb.admin.title")}</h3>
                 <p className="text-sm text-muted-foreground">{t("hb.admin.lead")}</p>
                 <div className="grid gap-3">
                   {adminFeatures.map((f, i) => (
@@ -212,9 +201,7 @@ export function HandbookSheet({ open, onOpenChange }: HandbookSheetProps) {
                         </span>
                         <div className="min-w-0">
                           <CardTitle className="text-sm">{t(f.titleKey)}</CardTitle>
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            {t(f.bodyKey)}
-                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">{t(f.bodyKey)}</p>
                         </div>
                       </CardHeader>
                     </Card>
@@ -224,9 +211,7 @@ export function HandbookSheet({ open, onOpenChange }: HandbookSheetProps) {
 
               <TabsContent value="agents" className="mt-0 space-y-3">
                 <SectionEyebrow icon={Bot} text={t("hb.ag.eyebrow")} />
-                <h3 className="text-lg font-semibold text-foreground">
-                  {t("hb.ag.title")}
-                </h3>
+                <h3 className="text-lg font-semibold text-foreground">{t("hb.ag.title")}</h3>
                 <p className="text-sm text-muted-foreground">{t("hb.ag.lead")}</p>
                 <div className="grid gap-3">
                   {agentCats.map((c) => (
@@ -247,9 +232,7 @@ export function HandbookSheet({ open, onOpenChange }: HandbookSheetProps) {
 
               <TabsContent value="integrations" className="mt-0 space-y-3">
                 <SectionEyebrow icon={Plug} text={t("hb.int.eyebrow")} />
-                <h3 className="text-lg font-semibold text-foreground">
-                  {t("hb.int.title")}
-                </h3>
+                <h3 className="text-lg font-semibold text-foreground">{t("hb.int.title")}</h3>
                 <p className="text-sm text-muted-foreground">{t("hb.int.lead")}</p>
                 <HandbookConnectors />
                 <p className="rounded-md border border-dashed border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
@@ -259,9 +242,7 @@ export function HandbookSheet({ open, onOpenChange }: HandbookSheetProps) {
 
               <TabsContent value="faq" className="mt-0 space-y-3">
                 <SectionEyebrow icon={HelpCircle} text={t("hb.faq.eyebrow")} />
-                <h3 className="text-lg font-semibold text-foreground">
-                  {t("hb.faq.title")}
-                </h3>
+                <h3 className="text-lg font-semibold text-foreground">{t("hb.faq.title")}</h3>
                 <div className="space-y-2.5">
                   {faqs.map((f) => (
                     <details
@@ -311,13 +292,7 @@ export function HandbookSheet({ open, onOpenChange }: HandbookSheetProps) {
   );
 }
 
-function SectionEyebrow({
-  icon: Icon,
-  text,
-}: {
-  icon: typeof BookOpen;
-  text: string;
-}) {
+function SectionEyebrow({ icon: Icon, text }: { icon: typeof BookOpen; text: string }) {
   return (
     <div className="flex items-center gap-2">
       <Badge variant="outline" className="border-primary/30 bg-primary/5 text-primary">

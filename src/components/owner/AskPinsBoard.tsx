@@ -106,9 +106,7 @@ export function AskPinsBoard() {
       } catch (e) {
         const msg = e instanceof Error ? e.message : "error";
         setPins((prev) =>
-          prev.map((p) =>
-            p.id === pin.id ? { ...p, loading: false, error: msg } : p,
-          ),
+          prev.map((p) => (p.id === pin.id ? { ...p, loading: false, error: msg } : p)),
         );
       }
     },
@@ -173,9 +171,7 @@ export function AskPinsBoard() {
                 className="group relative flex flex-col gap-2 rounded-md border bg-card/50 p-3 transition-colors hover:bg-card"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <p className="line-clamp-2 text-xs font-medium text-foreground">
-                    {pin.question}
-                  </p>
+                  <p className="line-clamp-2 text-xs font-medium text-foreground">{pin.question}</p>
                   <button
                     type="button"
                     onClick={() => removeAskPin(currentTenantId, pin.id)}

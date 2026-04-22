@@ -244,3 +244,13 @@ type: feature
   - Sign-out на mobile = «↩» з aria-label
   - Зменшено гепи `gap-2 sm:gap-3` + padding `px-2 sm:px-4`
 - ProspectRow stack на mobile (flex-col) → action-кнопки переходять на новий рядок, не вилазять
+
+### Sprint 17 — Code hygiene pass ✅
+- `prettier --write src/**` пройшов: відформатовано outreach-reddit-hunter, outreach-roi-collector, тощо
+- Виправлено 5 lint-помилок:
+  - `src/components/ui/input-otp.tsx` — прибрано `as any`, додано типізацію `OTPInputContext.slots`
+  - `src/routes/hooks/agents.outreach-instagram-hunter.ts` — sparse arrays `[, ""]` замінено на `?.[1] ?? ""`
+- TypeScript `tsc --noEmit` чистий (0 errors)
+- ESLint 0 errors (15 warnings — shadcn-ui fast-refresh, не критично)
+- Supabase linter: 2 WARN (extension in public + public bucket listing — не нові)
+- Console + network: жодних 4xx/5xx, жодних client-side runtime errors

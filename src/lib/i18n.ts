@@ -2362,7 +2362,7 @@ const dict = {
     "gs.groupRecent": "Recent",
     "gs.groupActions": "Quick actions",
     "gs.aiHeading": "Brand AI assistant",
-    "gs.aiHint": "Ask, e.g. \"How is this week's revenue?\"",
+    "gs.aiHint": 'Ask, e.g. "How is this week\'s revenue?"',
     "gs.aiThinking": "Analyzing brand data…",
     "gs.aiSuggestions": "Where to next",
     "gs.aiNoTenant": "Pick a brand in the switcher first",
@@ -2382,7 +2382,7 @@ const dict = {
     // AI Ask Pins board (cockpit)
     "pins.title": "Pinned AI questions",
     "pins.empty": "No pinned questions yet",
-    "pins.emptyHint": "Press ⌘K, type \"?\", find an answer and click 📌",
+    "pins.emptyHint": 'Press ⌘K, type "?", find an answer and click 📌',
     "pins.refresh": "Refresh",
     "pins.refreshAll": "Refresh all",
     "pins.refreshing": "refreshing…",

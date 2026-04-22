@@ -24,7 +24,9 @@ export function getAskHistory(tenantId: string | null): string[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((v): v is string => typeof v === "string" && v.length > 0).slice(0, MAX_ITEMS);
+    return parsed
+      .filter((v): v is string => typeof v === "string" && v.length > 0)
+      .slice(0, MAX_ITEMS);
   } catch {
     return [];
   }

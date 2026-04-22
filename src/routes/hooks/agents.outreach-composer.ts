@@ -25,8 +25,7 @@ function fallbackDrafts(brandName: string, promo: string, landing: string) {
     primary:
       `Привіт! Якщо шукаєте перевірений варіант — ми робимо ${brandName.toLowerCase()} в Україні. ` +
       `Промокод ${promo} дає -10%: ${landing}`,
-    alt:
-      `${brandName}: український бренд, доставка по всій країні. Промо ${promo} активний 30 днів — ${landing}`,
+    alt: `${brandName}: український бренд, доставка по всій країні. Промо ${promo} активний 30 днів — ${landing}`,
   };
 }
 
@@ -44,14 +43,20 @@ async function generateDrafts(args: {
 
   const memoryLines: string[] = [];
   if (args.hints.prefer_length) {
-    const target = args.hints.prefer_length === "short" ? "≤120"
-      : args.hints.prefer_length === "medium" ? "121-220" : "221-280";
+    const target =
+      args.hints.prefer_length === "short"
+        ? "≤120"
+        : args.hints.prefer_length === "medium"
+          ? "121-220"
+          : "221-280";
     memoryLines.push(`- Цільова довжина: ${target} симв. (з історії канала).`);
   }
   if (args.hints.prefer_tone) {
-    memoryLines.push(args.hints.prefer_tone === "question"
-      ? "- Закінчуй питанням до користувача."
-      : "- Тон-ствердження без питання.");
+    memoryLines.push(
+      args.hints.prefer_tone === "question"
+        ? "- Закінчуй питанням до користувача."
+        : "- Тон-ствердження без питання.",
+    );
   }
   if (args.hints.positive.length) {
     memoryLines.push("- Що працює:");
@@ -61,7 +66,9 @@ async function generateDrafts(args: {
     memoryLines.push("- Уникай:");
     for (const r of args.hints.negative) memoryLines.push(`  • ${r}`);
   }
-  const memBlock = memoryLines.length ? "\n\nУРОКИ З ПАМ'ЯТІ АГЕНТА:\n" + memoryLines.join("\n") : "";
+  const memBlock = memoryLines.length
+    ? "\n\nУРОКИ З ПАМ'ЯТІ АГЕНТА:\n" + memoryLines.join("\n")
+    : "";
 
   const systemPrompt =
     `Ти редактор спільнотного маркетингу для українського бренду ${args.brandName}. ` +
@@ -78,9 +85,12 @@ async function generateDrafts(args: {
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content:
-            `КОНТЕКСТ ДОПИСУ (${args.channel}):\n"""${args.lead_text.slice(0, 1500)}"""\n\n` +
-            `Тригери: ${args.matched.join(", ") || "—"}.\nЗгенеруй JSON.` },
+          {
+            role: "user",
+            content:
+              `КОНТЕКСТ ДОПИСУ (${args.channel}):\n"""${args.lead_text.slice(0, 1500)}"""\n\n` +
+              `Тригери: ${args.matched.join(", ") || "—"}.\nЗгенеруй JSON.`,
+          },
         ],
         temperature: 0.6,
       }),
@@ -128,11 +138,17 @@ async function runForTenant(tenantId: string, limit: number, onlyLeadId: string 
   for (const lead of leads ?? []) {
     stats.processed++;
     if (isBlocked(lead.content, settings.blocked_keywords)) {
-      await supabaseAdmin.from("outreach_leads").update({ status: "rejected" } as never).eq("id", lead.id);
+      await supabaseAdmin
+        .from("outreach_leads")
+        .update({ status: "rejected" } as never)
+        .eq("id", lead.id);
       stats.blocked++;
       continue;
     }
-    await supabaseAdmin.from("outreach_leads").update({ status: "composing" } as never).eq("id", lead.id);
+    await supabaseAdmin
+      .from("outreach_leads")
+      .update({ status: "composing" } as never)
+      .eq("id", lead.id);
 
     const promo = generatePromoCode();
     const landing = buildLandingUrl(settings.default_landing.url, lead.channel, lead.id);
@@ -147,11 +163,16 @@ async function runForTenant(tenantId: string, limit: number, onlyLeadId: string 
       lead_text: lead.content,
       channel: lead.channel,
       matched: lead.matched_keywords ?? [],
-      promo, landing, hints,
+      promo,
+      landing,
+      hints,
     });
 
     const action_type =
-      lead.channel === "reddit" || lead.channel === "blog" || lead.channel === "google" || lead.channel === "instagram"
+      lead.channel === "reddit" ||
+      lead.channel === "blog" ||
+      lead.channel === "google" ||
+      lead.channel === "instagram"
         ? "comment"
         : "reply";
 
@@ -168,11 +189,17 @@ async function runForTenant(tenantId: string, limit: number, onlyLeadId: string 
       status: "pending_review",
     } as never);
     if (aErr) {
-      await supabaseAdmin.from("outreach_leads").update({ status: "new" } as never).eq("id", lead.id);
+      await supabaseAdmin
+        .from("outreach_leads")
+        .update({ status: "new" } as never)
+        .eq("id", lead.id);
       stats.failed++;
       continue;
     }
-    await supabaseAdmin.from("outreach_leads").update({ status: "queued" } as never).eq("id", lead.id);
+    await supabaseAdmin
+      .from("outreach_leads")
+      .update({ status: "queued" } as never)
+      .eq("id", lead.id);
     stats.queued++;
   }
   return stats;
@@ -182,8 +209,13 @@ export const Route = createFileRoute("/hooks/agents/outreach-composer")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const body = (await request.clone().json().catch(() => ({}))) as {
-          tenant_id?: string; lead_id?: string; limit?: number;
+        const body = (await request
+          .clone()
+          .json()
+          .catch(() => ({}))) as {
+          tenant_id?: string;
+          lead_id?: string;
+          limit?: number;
         };
         const auth = await authorizeOutreach(request, body.tenant_id ?? null);
         if ("error" in auth) return jsonError(auth.error, auth.status);
