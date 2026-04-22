@@ -2,11 +2,23 @@
  * AiAskPanel — рендериться всередині CommandList коли користувач починає
  * запит з `?` або `>`. Викликає /api/ai/ask, показує stream-like loader,
  * відповідь, suggestions як натиснені CommandItem-и, а також історію
- * запитів (per-tenant, localStorage) та стартові підказки.
+ * запитів (per-tenant, localStorage), стартові підказки, та три унікальні
+ * швидкі дії: 📌 закріпити на дашборді, ⤓ експорт, копіювання.
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CommandGroup, CommandItem, CommandSeparator } from "@/components/ui/command";
-import { ArrowRight, Clock, History, Loader2, Sparkles, Trash2 } from "lucide-react";
+import {
+  ArrowRight,
+  Clock,
+  Copy,
+  Download,
+  History,
+  Loader2,
+  Pin,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
+import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import { useAiAsk } from "@/lib/useAiAsk";
 import {
@@ -15,6 +27,7 @@ import {
   getAskHistory,
   pushAskHistory,
 } from "@/lib/aiAskHistory";
+import { addAskPin, isPinned } from "@/lib/aiAskPins";
 
 type Props = {
   tenantId: string | null;
@@ -28,11 +41,27 @@ type Props = {
   onPickQuestion?: (question: string) => void;
 };
 
+function downloadAsTxt(question: string, answer: string): void {
+  if (typeof window === "undefined") return;
+  const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+  const body = `# AI Ask Export\n\nDate: ${new Date().toLocaleString()}\n\nQuestion:\n${question}\n\nAnswer:\n${answer}\n`;
+  const blob = new Blob([body], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `ai-ask-${stamp}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 export function AiAskPanel({ tenantId, question, onNavigate, onPickQuestion }: Props) {
   const { t } = useT();
   const { ask, loading, error, result, reset } = useAiAsk();
   const lastKey = useRef<string>("");
   const lastSavedKey = useRef<string>("");
+  const [pinnedFlash, setPinnedFlash] = useState(false);
 
   useEffect(() => {
     const trimmed = question.trim();
@@ -75,6 +104,7 @@ export function AiAskPanel({ tenantId, question, onNavigate, onPickQuestion }: P
   const trimmed = question.trim();
   const showStarters = trimmed.length < 3 && !loading && !result;
   const history = showStarters ? getAskHistory(tenantId) : [];
+  const alreadyPinned = result ? isPinned(tenantId, trimmed) : false;
 
   return (
     <>
@@ -92,20 +122,61 @@ export function AiAskPanel({ tenantId, question, onNavigate, onPickQuestion }: P
           </CommandItem>
         )}
         {!loading && !error && result && (
-          <CommandItem
-            value={`ai-answer::${result.answer.slice(0, 40)}`}
-            onSelect={() => {
-              if (typeof navigator !== "undefined" && navigator.clipboard) {
-                void navigator.clipboard.writeText(result.answer);
-              }
-            }}
-            className="items-start"
-          >
-            <Sparkles className="mr-2 mt-0.5 h-4 w-4 shrink-0 text-primary" />
-            <span className="whitespace-pre-wrap text-xs leading-relaxed text-foreground">
-              {result.answer}
-            </span>
-          </CommandItem>
+          <>
+            <CommandItem
+              value={`ai-answer::${result.answer.slice(0, 40)}`}
+              onSelect={() => {
+                if (typeof navigator !== "undefined" && navigator.clipboard) {
+                  void navigator.clipboard.writeText(result.answer);
+                  toast.success(t("gs.aiCopied"));
+                }
+              }}
+              className="items-start"
+            >
+              <Sparkles className="mr-2 mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <span className="whitespace-pre-wrap text-xs leading-relaxed text-foreground">
+                {result.answer}
+              </span>
+            </CommandItem>
+            <CommandItem
+              value={`ai-action-pin::${trimmed}`}
+              disabled={alreadyPinned || pinnedFlash}
+              onSelect={() => {
+                const pin = addAskPin(tenantId, trimmed, result.answer);
+                if (pin) {
+                  setPinnedFlash(true);
+                  toast.success(t("gs.aiPinned"));
+                }
+              }}
+            >
+              <Pin className="mr-2 h-4 w-4 text-primary" />
+              <span className="text-xs">
+                {alreadyPinned || pinnedFlash ? t("gs.aiPinned") : t("gs.aiPin")}
+              </span>
+            </CommandItem>
+            <CommandItem
+              value={`ai-action-export::${trimmed}`}
+              onSelect={() => {
+                downloadAsTxt(trimmed, result.answer);
+                toast.success(t("gs.aiExported"));
+              }}
+            >
+              <Download className="mr-2 h-4 w-4 text-info" />
+              <span className="text-xs">{t("gs.aiExport")}</span>
+            </CommandItem>
+            <CommandItem
+              value={`ai-action-copy::${trimmed}`}
+              onSelect={() => {
+                if (typeof navigator !== "undefined" && navigator.clipboard) {
+                  void navigator.clipboard.writeText(result.answer);
+                  toast.success(t("gs.aiCopied"));
+                }
+              }}
+            >
+              <Copy className="mr-2 h-4 w-4 text-muted-foreground" />
+              <span className="text-xs">{t("gs.aiCopy")}</span>
+            </CommandItem>
+          </>
         )}
         {showStarters && (
           <CommandItem disabled value="ai-hint">
