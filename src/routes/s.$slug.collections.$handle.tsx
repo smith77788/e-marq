@@ -16,6 +16,7 @@ import { loadCollectionProducts } from "@/lib/storefront/loaders";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { useT, tStatic } from "@/lib/i18n";
 import { canonicalUrl } from "@/lib/seo";
+import { collectionJsonLd } from "@/lib/storefront/jsonLd";
 
 type SortOpt = "manual" | "price_asc" | "price_desc" | "name_asc";
 
@@ -37,6 +38,12 @@ export const Route = createFileRoute("/s/$slug/collections/$handle")({
         ...(c.image_url ? [{ property: "og:image", content: c.image_url }] : []),
       ],
       links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(collectionJsonLd(loaderData, params.slug)),
+        },
+      ],
     };
   },
   notFoundComponent: () => (
