@@ -1,9 +1,10 @@
 /**
  * Global tenant context.
  * - Lists all tenants the current user is a member of (via get_my_tenants RPC).
+ * - For super-admin without memberships, falls back to ALL tenants from the
+ *   tenants table so they can immediately operate on any brand.
  * - Tracks the currently selected tenant; persists in localStorage and syncs
  *   with the ?tenant=... query param when on /brand or /onboarding.
- * - Used by TenantSwitcher and any component that needs the active tenant.
  */
 import {
   createContext,
@@ -40,7 +41,7 @@ const TenantCtx = createContext<Ctx | null>(null);
 const STORAGE_KEY = "marq.activeTenantId";
 
 export function TenantContextProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   const [currentTenantId, _setCurrent] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     return window.localStorage.getItem(STORAGE_KEY);
@@ -56,7 +57,35 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const tenants = useMemo(() => tenantsQuery.data ?? [], [tenantsQuery.data]);
+  // Fallback for super-admins: if they don't have any memberships yet, show
+  // every tenant so they can manage brands without joining each one manually.
+  const adminFallbackQuery = useQuery({
+    queryKey: ["admin-tenant-fallback"],
+    enabled: !!user && isSuperAdmin,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tenants")
+        .select("id, name, slug, status")
+        .order("name");
+      if (error) throw error;
+      return (data ?? []).map<MyTenant>((t) => ({
+        tenant_id: t.id,
+        tenant_name: t.name,
+        tenant_slug: t.slug,
+        membership_role: "super_admin",
+        plan_key: "—",
+        plan_name: "Admin",
+        status: t.status,
+      }));
+    },
+  });
+
+  const tenants = useMemo(() => {
+    const own = tenantsQuery.data ?? [];
+    if (own.length > 0) return own;
+    if (isSuperAdmin && adminFallbackQuery.data) return adminFallbackQuery.data;
+    return own;
+  }, [tenantsQuery.data, adminFallbackQuery.data, isSuperAdmin]);
 
   // Auto-select first tenant if nothing chosen yet, or if stored id is not in list
   useEffect(() => {
@@ -92,9 +121,17 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
       currentTenantId,
       current,
       setCurrentTenantId,
-      loading: tenantsQuery.isLoading,
+      loading: tenantsQuery.isLoading || (isSuperAdmin && adminFallbackQuery.isLoading),
     }),
-    [tenants, currentTenantId, current, setCurrentTenantId, tenantsQuery.isLoading],
+    [
+      tenants,
+      currentTenantId,
+      current,
+      setCurrentTenantId,
+      tenantsQuery.isLoading,
+      adminFallbackQuery.isLoading,
+      isSuperAdmin,
+    ],
   );
 
   return <TenantCtx.Provider value={value}>{children}</TenantCtx.Provider>;
