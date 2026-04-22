@@ -2592,6 +2592,293 @@ export type Database = {
           },
         ]
       }
+      outreach_actions: {
+        Row: {
+          action_type: string
+          channel: string
+          created_at: string
+          draft_alt_text: string | null
+          draft_text: string
+          failed_reason: string | null
+          id: string
+          landing_url: string
+          lead_id: string
+          posted_at: string | null
+          posted_url: string | null
+          promo_code: string | null
+          retry_count: number
+          scheduled_for: string | null
+          status: string
+          tenant_id: string
+          tone: string | null
+          tribunal_case_id: string | null
+          tribunal_verdict: string | null
+          updated_at: string
+          utm_campaign: string
+        }
+        Insert: {
+          action_type: string
+          channel: string
+          created_at?: string
+          draft_alt_text?: string | null
+          draft_text: string
+          failed_reason?: string | null
+          id?: string
+          landing_url: string
+          lead_id: string
+          posted_at?: string | null
+          posted_url?: string | null
+          promo_code?: string | null
+          retry_count?: number
+          scheduled_for?: string | null
+          status?: string
+          tenant_id: string
+          tone?: string | null
+          tribunal_case_id?: string | null
+          tribunal_verdict?: string | null
+          updated_at?: string
+          utm_campaign: string
+        }
+        Update: {
+          action_type?: string
+          channel?: string
+          created_at?: string
+          draft_alt_text?: string | null
+          draft_text?: string
+          failed_reason?: string | null
+          id?: string
+          landing_url?: string
+          lead_id?: string
+          posted_at?: string | null
+          posted_url?: string | null
+          promo_code?: string | null
+          retry_count?: number
+          scheduled_for?: string | null
+          status?: string
+          tenant_id?: string
+          tone?: string | null
+          tribunal_case_id?: string | null
+          tribunal_verdict?: string | null
+          updated_at?: string
+          utm_campaign?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_actions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_actions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outreach_leads: {
+        Row: {
+          author_handle: string | null
+          author_url: string | null
+          channel: string
+          content: string
+          created_at: string
+          discovered_at: string
+          fingerprint: string
+          geo_city: string | null
+          geo_country: string | null
+          id: string
+          intent_score: number
+          language: string | null
+          matched_keywords: string[]
+          raw_payload: Json
+          source_platform_id: string | null
+          source_url: string
+          status: string
+          tenant_id: string
+          title: string | null
+          topic_tags: string[]
+          updated_at: string
+        }
+        Insert: {
+          author_handle?: string | null
+          author_url?: string | null
+          channel: string
+          content: string
+          created_at?: string
+          discovered_at?: string
+          fingerprint: string
+          geo_city?: string | null
+          geo_country?: string | null
+          id?: string
+          intent_score?: number
+          language?: string | null
+          matched_keywords?: string[]
+          raw_payload?: Json
+          source_platform_id?: string | null
+          source_url: string
+          status?: string
+          tenant_id: string
+          title?: string | null
+          topic_tags?: string[]
+          updated_at?: string
+        }
+        Update: {
+          author_handle?: string | null
+          author_url?: string | null
+          channel?: string
+          content?: string
+          created_at?: string
+          discovered_at?: string
+          fingerprint?: string
+          geo_city?: string | null
+          geo_country?: string | null
+          id?: string
+          intent_score?: number
+          language?: string | null
+          matched_keywords?: string[]
+          raw_payload?: Json
+          source_platform_id?: string | null
+          source_url?: string
+          status?: string
+          tenant_id?: string
+          title?: string | null
+          topic_tags?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_leads_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outreach_metrics: {
+        Row: {
+          action_id: string
+          add_to_cart: number
+          channel: string
+          clicks: number
+          computed_at: string
+          conversion_rate: number
+          created_at: string
+          ctr: number
+          id: string
+          impressions: number
+          lead_id: string
+          orders_count: number
+          revenue: number
+          roi_per_action: number
+          tenant_id: string
+          updated_at: string
+          utm_campaign: string
+          visits: number
+        }
+        Insert: {
+          action_id: string
+          add_to_cart?: number
+          channel: string
+          clicks?: number
+          computed_at?: string
+          conversion_rate?: number
+          created_at?: string
+          ctr?: number
+          id?: string
+          impressions?: number
+          lead_id: string
+          orders_count?: number
+          revenue?: number
+          roi_per_action?: number
+          tenant_id: string
+          updated_at?: string
+          utm_campaign: string
+          visits?: number
+        }
+        Update: {
+          action_id?: string
+          add_to_cart?: number
+          channel?: string
+          clicks?: number
+          computed_at?: string
+          conversion_rate?: number
+          created_at?: string
+          ctr?: number
+          id?: string
+          impressions?: number
+          lead_id?: string
+          orders_count?: number
+          revenue?: number
+          roi_per_action?: number
+          tenant_id?: string
+          updated_at?: string
+          utm_campaign?: string
+          visits?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_metrics_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_metrics_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_metrics_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outreach_settings: {
+        Row: {
+          description: string | null
+          key: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          key: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          description?: string | null
+          key?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       owner_notifications: {
         Row: {
           body: string | null
