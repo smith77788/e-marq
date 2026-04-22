@@ -40,8 +40,9 @@ export const Route = createFileRoute("/hooks/agents/promo-portfolio")({
         const ctx = await authorizeAgentRequest(token, tenantId);
         if ("error" in ctx) return jsonError(ctx.error, ctx.status);
 
-        const handle = await startAgentRun("promo-portfolio", tenantId, ctx);
+        const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
+          const geo = await loadEffectiveGeoTargets(tenantId, AGENT_ID);
           const { data: promos } = await supabaseAdmin
             .from("promotions")
             .select("id, name, applies_to_segment, applies_to_product_ids, value, promo_type")
