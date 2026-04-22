@@ -710,7 +710,7 @@ function CheckoutPage() {
                 size="lg"
                 onClick={placeOrder}
                 disabled={
-                  submitting || !email.trim() || !shipping || noMethods || method === "stripe_card"
+                  submitting || !email.trim() || !shipping || noMethods
                 }
               >
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -724,5 +724,42 @@ function CheckoutPage() {
         </aside>
       </div>
     </main>
+  );
+}
+
+function PaymentOption({
+  id,
+  value,
+  icon,
+  title,
+  description,
+  badge,
+}: {
+  id: string;
+  value: PaymentMethod;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  badge?: string;
+}) {
+  return (
+    <label
+      htmlFor={id}
+      className="flex cursor-pointer items-start gap-3 rounded-md border p-3 hover:bg-accent/50"
+    >
+      <RadioGroupItem id={id} value={value} className="mt-1" />
+      <div className="flex-1">
+        <div className="flex items-center gap-2">
+          {icon}
+          <span className="text-sm font-medium">{title}</span>
+          {badge && (
+            <Badge variant="outline" className="text-[10px]">
+              {badge}
+            </Badge>
+          )}
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+      </div>
+    </label>
   );
 }
