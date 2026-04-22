@@ -63,13 +63,13 @@ export function Breadcrumbs() {
       aria-label="Хлібні крихти"
       className="hidden min-w-0 items-center gap-1 text-xs text-muted-foreground md:flex"
     >
-      <Link
-        to="/dashboard"
+      <a
+        href="/dashboard"
         className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
         aria-label="Головна"
       >
         <Home className="h-3.5 w-3.5" />
-      </Link>
+      </a>
       {crumbs.map((c, i) => (
         <span key={`${c.label}-${i}`} className="flex min-w-0 items-center gap-1">
           <ChevronRight className="h-3 w-3 text-muted-foreground/60" />
