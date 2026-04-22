@@ -100,7 +100,7 @@ const SETUP: NavGroup = {
   labelKey: "sb.setup",
   tone: "text-muted-foreground",
   items: [
-    { labelKey: "sb.channels", to: "/brand", icon: Plug, tone: "text-primary" },
+    { labelKey: "sb.channels", to: "/brand", hash: "channels", icon: Plug, tone: "text-primary" },
     { labelKey: "sb.integrations" as TKey, to: "/brand/integrations", icon: Puzzle, tone: "text-info" },
     { labelKey: "sb.onboarding", to: "/onboarding", icon: Sparkles, tone: "text-accent" },
     { labelKey: "sb.profile" as TKey, to: "/profile", icon: IdCard, exact: true, tone: "text-primary" },
