@@ -215,3 +215,17 @@ type: feature
 - Зведена статистика по N проєктах + людський plural ("3 нових записи у 2 проєктах")
 - Підказки (hint) автоматично додаються до toast (наприклад про відсутність INSTAGRAM_RSS_URL)
 - Застосовано в Lead Radar (admin.lead-radar.tsx) та Outreach Hunter (OutreachHunterTabs.tsx)
+
+### Sprint 14 — Brand-aware lead agents ✅
+- `src/lib/lead/brandContext.ts`: getAllTenantBrandContexts() + getTenantBrandContext()
+- Авто-синтез `bootstrap_facts.brand_profile` з products/seo/content_pages, якщо профілю ще немає
+- Web Prospector тепер генерує DuckDuckGo-запити з категорій і ключових слів КОЖНОГО тенанта (не hardcoded UA-нішами)
+- Social Engager пише outreach від імені бренда-джерела з тоном (editorial/conversational/minimal)
+- Content Magnet створює власний пакет SEO-магнітів під кожен бренд (категорії + фірмовий кейс), slug префіксований brand-slug
+- prospect.signals.discovered_for_tenant зберігає, який бренд знайшов prospect → social-engager пише саме від його імені
+- Toasts розширені: per_brand розподіл і "Опрацьовано N брендів"
+- Агенти працюють з першого дня без ручної настройки — bootstrap-дані синтезуються автоматично
+
+### Sprint 15 — Inline довідка замість зовнішніх посилань (TODO)
+- Усі посилання в адмінці, що зараз ведуть на окремі сторінки lovable, повинні відкривати inline-панель/Sheet з тим самим контентом
+- Перевірити Handbook, IntegrationGuide, TrackingSnippet — замінити href на DetailDrawer контент
