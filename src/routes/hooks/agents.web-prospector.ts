@@ -1,52 +1,57 @@
 /**
- * Lead Agent: Web Prospector
+ * Lead Agent: Web Prospector (brand-aware edition)
  *
- * Скан-агент шукає українські e-commerce бренди в інтернеті без зовнішніх
- * платних сервісів. Використовує безкоштовні DuckDuckGo lite + heuristics:
- *   - запити по нішах ("магазин X site:.ua", "купити Y instagram")
- *   - простий regex-парсинг сторінки результатів (HTML без JS)
- *   - збагачує prospect полями: website, можливий instagram, нішa
- *   - оцінює fit_score за наявністю ознак (price tag, "купити", немає бота)
+ * Скан-агент шукає потенційні бренди в інтернеті ПІД ТЕМАТИКУ КОЖНОГО
+ * АКТИВНОГО ТЕНАНТА. Замість одного hardcoded списку «українських ніш»
+ * тепер для кожного тенанта читається `brand_profile` (з авто-синтезом
+ * з products/seo, якщо профілю ще немає) і генеруються власні запити.
  *
- * Все працює всередині Worker'а через звичайний fetch — жодних API-ключів.
+ *   - DuckDuckGo lite (HTML без JS) — без API-ключів
+ *   - regex-парсинг сторінки результатів
+ *   - збагачення prospect: website / instagram / email / нішa / signals
+ *   - fit_score за наявністю «магазинних» ознак
+ *
+ * Все працює всередині Worker'а через звичайний fetch.
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { jsonError, jsonOk } from "@/lib/acos/agentRuntime";
 import { authorizeLeadAgent } from "@/lib/lead/auth";
-
-const NICHES = [
-  { q: "магазин косметика україна", niche: "cosmetics" },
-  { q: "магазин крафтова їжа", niche: "food" },
-  { q: "магазин дитячий одяг україна", niche: "kids_fashion" },
-  { q: "купити свічки україна shop", niche: "home_decor" },
-  { q: "магазин кави україна", niche: "coffee" },
-  { q: "магазин аксесуари україна shop", niche: "accessories" },
-];
+import { getAllTenantBrandContexts, type TenantBrandContext } from "@/lib/lead/brandContext";
 
 type Found = {
   url: string;
   title: string;
   snippet: string;
   niche: string;
+  source_query: string;
+  source_tenant_id: string;
+  source_tenant_brand: string;
 };
 
 const UA_TLD = /\.(ua|com\.ua)\b/i;
+const MAX_QUERIES_PER_TENANT = 4;
+const MAX_HITS_PER_QUERY = 6;
 
 async function searchDuckDuckGo(
   query: string,
 ): Promise<Array<{ url: string; title: string; snippet: string }>> {
   const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query + " site:.ua")}`;
-  const res = await fetch(url, {
-    headers: {
-      "User-Agent": "Mozilla/5.0 (compatible; MarqLeadBot/1.0; +https://marq.lovable.app/bots)",
-      Accept: "text/html,application/xhtml+xml",
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; MarqLeadBot/1.0; +https://e-marq.lovable.app/bots)",
+        Accept: "text/html,application/xhtml+xml",
+      },
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    return [];
+  }
   if (!res.ok) return [];
   const html = await res.text();
   const out: Array<{ url: string; title: string; snippet: string }> = [];
-  // DDG lite має блоки: <a class="result__a" href="...">title</a> ... <a class="result__snippet">snippet</a>
   const re =
     /<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<a[^>]+class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
   let m: RegExpExecArray | null;
@@ -86,7 +91,6 @@ function scoreSignals(html: string, snippet: string) {
     has_chatbot: /(intercom|crisp|tawk\.to|jivosite|userlike|gorgias|drift)/i.test(html),
     seems_handmade: /(хендмейд|handmade|майстерня)/i.test(snippet + html),
   };
-  // fit: чим більше «магазинних» ознак і чим менше готових ботів — тим краще
   let fit = 40;
   if (signals.has_price) fit += 20;
   if (signals.has_buy_cta) fit += 20;
@@ -99,9 +103,7 @@ function scoreSignals(html: string, snippet: string) {
 async function inspectSite(url: string): Promise<{ html: string } | null> {
   try {
     const r = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; MarqLeadBot/1.0)",
-      },
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; MarqLeadBot/1.0)" },
       signal: AbortSignal.timeout(8000),
     });
     if (!r.ok) return null;
@@ -127,18 +129,43 @@ export const Route = createFileRoute("/hooks/agents/web-prospector")({
         const auth = await authorizeLeadAgent(request);
         if ("error" in auth) return jsonError(auth.error, auth.status);
 
+        const tenants: TenantBrandContext[] = await getAllTenantBrandContexts();
+        if (tenants.length === 0) {
+          return jsonOk({
+            ok: true,
+            scanned: 0,
+            created: 0,
+            tenants: 0,
+            note: "Немає активних брендів — додайте бізнес, щоб агент почав шукати кандидатів під його тематику.",
+          });
+        }
+
+        // 1) Збираємо результати з пошуку для всіх брендів
         const found: Found[] = [];
-        for (const n of NICHES) {
-          const hits = await searchDuckDuckGo(n.q);
-          for (const h of hits.slice(0, 6)) {
-            found.push({ ...h, niche: n.niche });
+        const perTenant: Record<string, { queries: number; hits: number }> = {};
+
+        for (const t of tenants) {
+          const queries = t.search_queries.slice(0, MAX_QUERIES_PER_TENANT);
+          perTenant[t.tenant_id] = { queries: queries.length, hits: 0 };
+          for (const q of queries) {
+            const hits = await searchDuckDuckGo(q.q);
+            for (const h of hits.slice(0, MAX_HITS_PER_QUERY)) {
+              found.push({
+                ...h,
+                niche: q.niche,
+                source_query: q.q,
+                source_tenant_id: t.tenant_id,
+                source_tenant_brand: t.profile.brand_name,
+              });
+              perTenant[t.tenant_id].hits++;
+            }
           }
         }
 
+        // 2) Збагачуємо й пишемо у lead_prospects (дедуп по website_url)
         let created = 0;
         for (const f of found) {
           const origin = originOf(f.url);
-          // skip duplicates by website_url unique index
           const inspect = await inspectSite(origin);
           const html = inspect?.html ?? "";
           const insta = detectInstagram(html);
@@ -148,14 +175,18 @@ export const Route = createFileRoute("/hooks/agents/web-prospector")({
           const { error } = await supabaseAdmin.from("lead_prospects").upsert(
             {
               source: "web_prospector",
-              source_query: f.niche,
+              source_query: f.source_query,
               name: stripHtml(f.title).slice(0, 120) || origin.replace(/^https?:\/\//, ""),
               website_url: origin,
               instagram_handle: insta,
               email,
               niche: f.niche,
               fit_score: fit,
-              signals,
+              signals: {
+                ...signals,
+                discovered_for_tenant: f.source_tenant_id,
+                discovered_for_brand: f.source_tenant_brand,
+              },
               status: "discovered",
             },
             { onConflict: "lower((website_url))", ignoreDuplicates: true } as never,
@@ -163,7 +194,13 @@ export const Route = createFileRoute("/hooks/agents/web-prospector")({
           if (!error) created += 1;
         }
 
-        return jsonOk({ ok: true, scanned: found.length, created });
+        return jsonOk({
+          ok: true,
+          tenants: tenants.length,
+          scanned: found.length,
+          created,
+          per_tenant: perTenant,
+        });
       },
     },
   },

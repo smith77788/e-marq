@@ -1,9 +1,14 @@
 /**
- * Lead Agent: Social Engager
+ * Lead Agent: Social Engager (brand-aware edition)
  *
- * Готує безкоштовні «торкання» (outreach) до prospect'ів. Не надсилає
+ * Готує безкоштовні «торкання» (outreach) до prospect'ів. НЕ надсилає
  * листи самостійно — записує draft у `lead_outreach` (status=queued),
  * щоб супер-адмін одним кліком підтвердив або відредагував.
+ *
+ * Тепер копірайт підбирається під ГОЛОС І ТЕМАТИКУ КОЖНОГО ТЕНАНТА.
+ * Якщо для prospect'a у `signals.discovered_for_tenant` записано тенант,
+ * який його знайшов — outreach пишеться від імені того бренду. Інакше
+ * береться перший активний тенант як «джерело».
  *
  * Якщо передано `prospect_id`, опрацьовує лише його; інакше підбирає
  * до 20 кандидатів зі статусом `discovered`/`qualified` без свіжих торкань.
@@ -12,6 +17,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { jsonError, jsonOk } from "@/lib/acos/agentRuntime";
 import { authorizeLeadAgent } from "@/lib/lead/auth";
+import {
+  getAllTenantBrandContexts,
+  getTenantBrandContext,
+  type TenantBrandContext,
+} from "@/lib/lead/brandContext";
 
 type Prospect = {
   id: string;
@@ -27,24 +37,6 @@ function pickChannel(p: Prospect): { channel: string; intent: string } {
   if (p.email) return { channel: "email", intent: "first_touch" };
   if (p.instagram_handle) return { channel: "instagram_dm", intent: "first_touch" };
   return { channel: "web_form", intent: "first_touch" };
-}
-
-function craftMessage(p: Prospect): { subject: string; body: string; cta: string } {
-  const niche = p.niche ?? "ваш магазин";
-  const subject = `Як ${p.name} може зростати на 30% з MARQ`;
-  const body = [
-    `Привіт, команда ${p.name}!`,
-    ``,
-    `Я тестую безкоштовний AI-помічник MARQ для брендів у ніші «${niche}».`,
-    `Він автоматично відновлює покинуті кошики, повертає клієнтів,`,
-    `пише SEO-описи й тримає Telegram/Email-розсилки на автопілоті.`,
-    ``,
-    `Хочете 14 днів безкоштовно — без передоплати, без карти?`,
-    `Реєстрація — 60 секунд: https://marq.lovable.app/signup`,
-    ``,
-    `— команда MARQ`,
-  ].join("\n");
-  return { subject, body, cta: "https://marq.lovable.app/signup" };
 }
 
 async function loadOne(id: string): Promise<Prospect | null> {
@@ -68,6 +60,27 @@ async function loadBatch(): Promise<Prospect[]> {
   return (data as unknown as Prospect[]) ?? [];
 }
 
+/** Знайти бренд-джерело для outreach: спочатку той, що знайшов prospect; інакше перший активний. */
+async function pickSourceBrand(
+  prospect: Prospect,
+  contexts: TenantBrandContext[],
+): Promise<TenantBrandContext | null> {
+  const sigTenant =
+    typeof prospect.signals?.discovered_for_tenant === "string"
+      ? (prospect.signals.discovered_for_tenant as string)
+      : null;
+  if (sigTenant) {
+    const fromCache = contexts.find((c) => c.tenant_id === sigTenant);
+    if (fromCache) return fromCache;
+    try {
+      return await getTenantBrandContext(sigTenant);
+    } catch {
+      /* fall back below */
+    }
+  }
+  return contexts[0] ?? null;
+}
+
 export const Route = createFileRoute("/hooks/agents/social-engager")({
   server: {
     handlers: {
@@ -82,28 +95,49 @@ export const Route = createFileRoute("/hooks/agents/social-engager")({
           /* empty body — batch mode */
         }
 
+        const contexts = await getAllTenantBrandContexts();
+        if (contexts.length === 0) {
+          return jsonOk({
+            ok: true,
+            scanned: 0,
+            created: 0,
+            note: "Немає активних брендів-джерел. Додайте хоча б один бізнес, щоб писати outreach від його імені.",
+          });
+        }
+
         const prospects = body.prospect_id
           ? ([await loadOne(body.prospect_id)].filter(Boolean) as Prospect[])
           : await loadBatch();
 
         let created = 0;
+        const perBrand: Record<string, number> = {};
+
         for (const p of prospects) {
+          const source = await pickSourceBrand(p, contexts);
+          if (!source) continue;
+
           const { channel, intent } = pickChannel(p);
-          const msg = craftMessage(p);
+          const subject = source.outreach.subject(p.name);
+          const messageBody = source.outreach.body(p.name, p.niche);
+
           const { error } = await supabaseAdmin.from("lead_outreach").insert({
             prospect_id: p.id,
             channel,
             intent,
             status: "queued",
             payload: {
-              subject: msg.subject,
-              body: msg.body,
-              cta: msg.cta,
+              subject,
+              body: messageBody,
+              cta: source.outreach.cta,
               recipient: p.email ?? p.instagram_handle ?? p.website_url,
+              source_tenant_id: source.tenant_id,
+              source_brand: source.profile.brand_name,
+              tone: source.profile.tone,
             },
           });
           if (!error) {
             created += 1;
+            perBrand[source.profile.brand_name] = (perBrand[source.profile.brand_name] ?? 0) + 1;
             await supabaseAdmin
               .from("lead_prospects")
               .update({ status: "engaging", last_contacted_at: new Date().toISOString() })
@@ -111,7 +145,12 @@ export const Route = createFileRoute("/hooks/agents/social-engager")({
           }
         }
 
-        return jsonOk({ ok: true, scanned: prospects.length, created });
+        return jsonOk({
+          ok: true,
+          scanned: prospects.length,
+          created,
+          per_brand: perBrand,
+        });
       },
     },
   },
