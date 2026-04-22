@@ -47,6 +47,7 @@ type InsightRow = {
   expected_impact: string | null;
   metrics: Record<string, unknown>;
   status: string;
+  risk_level: "low" | "medium" | "high";
 };
 
 const ACTION_BY_TYPE: Record<string, { action_type: string; agent_id: string; target_entity?: string }> = {
