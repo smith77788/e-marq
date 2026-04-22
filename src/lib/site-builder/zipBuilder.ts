@@ -30,6 +30,9 @@ import {
   packageJson,
   envExample,
   assetsReadme,
+  fullIndexCss,
+  brandRemixGuide,
+  seedJson,
 } from "./templates";
 
 export type BuiltArchive = {
@@ -41,13 +44,24 @@ export type BuiltArchive = {
 export async function buildBrandArchive(ctx: SafeBrandContext): Promise<BuiltArchive> {
   const zip = new JSZip();
 
+  // Top-level docs (read first by the user).
   zip.file("README.md", brandReadme(ctx));
+  zip.file("REMIX_GUIDE.md", brandRemixGuide(ctx));
   zip.file("BRAND.md", brandMarkdown(ctx));
-  zip.file("theme.css", themeCss(ctx));
+
+  // Drop-in files for the remixed MFD project.
+  zip.file("src/index.css", fullIndexCss(ctx));
   zip.file("index.html", indexHtml(ctx));
-  zip.file("manifest.webmanifest", manifestWebmanifest(ctx));
+  zip.file("public/manifest.webmanifest", manifestWebmanifest(ctx));
   zip.file("package.json", packageJson(ctx));
   zip.file(".env.example", envExample(ctx));
+
+  // Brand content for one-shot Lovable-chat seeding.
+  zip.file("seed.json", seedJson(ctx));
+
+  // Legacy theme overlay kept for users who only want the color tokens.
+  zip.file("theme.css", themeCss(ctx));
+
   zip.file("assets/README.md", assetsReadme(ctx));
 
   // Manifest.json — machine-readable inventory for consumers / debugging.
