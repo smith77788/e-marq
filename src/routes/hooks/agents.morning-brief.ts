@@ -150,16 +150,42 @@ export const Route = createFileRoute("/hooks/agents/morning-brief")({
               risk_level: i.risk_level,
             }));
 
-          let summary = `Доброго ранку. Вчора зароблено ${formatCents(yRevenue)} `;
-          summary +=
-            revenueDelta >= 0
-              ? `(+${(revenueDelta * 100).toFixed(0)}% — ріст). `
-              : `(${(revenueDelta * 100).toFixed(0)}% — спад). `;
-          if (topActions.length) {
-            summary += `Чекає ${openInsights.data?.length ?? 0} нових інсайтів, з них ${topActions.filter((a) => a.risk_level === "high").length} високого пріоритету.`;
-          } else {
-            summary += `Нових інсайтів немає — все стабільно.`;
+          // Структуроване повідомлення з блоками: метрики → виграші → дії
+          const trendEmoji = revenueDelta > 0.1 ? "📈" : revenueDelta < -0.1 ? "📉" : "➡️";
+          const deltaTxt = `${revenueDelta >= 0 ? "+" : ""}${(revenueDelta * 100).toFixed(0)}%`;
+          const highCount = topActions.filter((a) => a.risk_level === "high").length;
+
+          const lines: string[] = [];
+          lines.push(`☀️ <b>Ранковий бриф</b> — ${digestDate}`);
+          lines.push("");
+          lines.push("📊 <b>Вчорашній день</b>");
+          lines.push(`• Виторг: <b>${formatCents(yRevenue)}</b> ${trendEmoji} ${deltaTxt}`);
+          lines.push(
+            `• Замовлень: <b>${yPaid.length}</b> · сесій: <b>${ySessions}</b> · CR <b>${(yConvRate * 100).toFixed(1)}%</b>`,
+          );
+          if (atRisk.data?.length) {
+            lines.push(
+              `• ⚠️ Ризик відтоку: <b>${atRisk.data.length}</b> клієнтів (~${formatCents(atRiskValue)})`,
+            );
           }
+
+          if (topActions.length) {
+            lines.push("");
+            lines.push(`💡 <b>Топ-${topActions.length} дій на сьогодні</b>`);
+            for (const a of topActions) {
+              const dot = a.risk_level === "high" ? "🔴" : a.risk_level === "medium" ? "🟡" : "🟢";
+              lines.push(`${dot} ${a.title}`);
+            }
+            if (highCount > 0) {
+              lines.push("");
+              lines.push(`🎯 <i>${highCount} високого пріоритету — варто почати з них</i>`);
+            }
+          } else {
+            lines.push("");
+            lines.push("✅ <i>Нових інсайтів немає — все стабільно</i>");
+          }
+
+          const summary = lines.join("\n");
 
           // Insert digest
           await supabaseAdmin.from("daily_digests").insert({

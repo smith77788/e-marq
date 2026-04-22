@@ -120,13 +120,6 @@ export const Route = createFileRoute("/hooks/agents/daily-digest-v2")({
             },
           ];
 
-          let summary = `Тижневий звіт: ${formatCents(twRev)} `;
-          summary +=
-            delta >= 0
-              ? `(+${(delta * 100).toFixed(0)}% — стабільне зростання). `
-              : `(${(delta * 100).toFixed(0)}% — потрібна увага). `;
-          summary += `Чекає ${insightsByRisk.high} інсайтів високого пріоритету.`;
-
           const recommended = (openInsights.data ?? [])
             .filter((i) => i.risk_level === "high")
             .slice(0, 5)
@@ -136,6 +129,43 @@ export const Route = createFileRoute("/hooks/agents/daily-digest-v2")({
               expected_impact: i.expected_impact,
               risk_level: i.risk_level,
             }));
+
+          // Структурований тижневий звіт
+          const trendEmoji = delta > 0.1 ? "🚀" : delta > 0 ? "📈" : delta > -0.1 ? "➡️" : "📉";
+          const deltaTxt = `${delta >= 0 ? "+" : ""}${(delta * 100).toFixed(0)}%`;
+          const totalOpen = (openInsights.data ?? []).length;
+
+          const lines: string[] = [];
+          lines.push(`📅 <b>Тижневий звіт</b> — ${digestDate}`);
+          lines.push("");
+          lines.push("💰 <b>Виторг тижня</b>");
+          lines.push(`• Цей тиждень: <b>${formatCents(twRev)}</b> ${trendEmoji} ${deltaTxt}`);
+          lines.push(`• Минулий: ${formatCents(pwRev)}`);
+          lines.push(`• Замовлень: <b>${tw.length}</b> (було ${pw.length})`);
+          lines.push("");
+          lines.push("🎯 <b>Інсайти відкрито</b>");
+          lines.push(
+            `🔴 ${insightsByRisk.high} високих · 🟡 ${insightsByRisk.medium} середніх · 🟢 ${insightsByRisk.low} низьких`,
+          );
+
+          if (recommended.length) {
+            lines.push("");
+            lines.push(`⚡️ <b>Що робити цього тижня</b>`);
+            for (const r of recommended.slice(0, 3)) {
+              lines.push(`• ${r.title}`);
+            }
+          }
+
+          lines.push("");
+          if (delta < -0.2) {
+            lines.push("⚠️ <i>Виторг просів — варто переглянути топ-інсайти</i>");
+          } else if (delta > 0.2) {
+            lines.push("🎉 <i>Сильний тиждень — продовжуємо</i>");
+          } else {
+            lines.push(`<i>${totalOpen} відкритих інсайтів усього</i>`);
+          }
+
+          const summary = lines.join("\n");
 
           await supabaseAdmin.from("daily_digests").insert({
             tenant_id: tenantId,
