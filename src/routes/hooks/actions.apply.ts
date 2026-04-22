@@ -125,7 +125,7 @@ export const Route = createFileRoute("/hooks/actions/apply")({
         // insight risk does not exceed the configured ceiling. Manual
         // applications by owners/admins always pass through.
         if (ctx.kind === "cron") {
-          const risk = (ins as unknown as { risk_level?: "low" | "medium" | "high" }).risk_level ?? "medium";
+          const risk = ins.risk_level ?? "medium";
           const { data: allowed } = await supabaseAdmin.rpc("can_auto_apply_action", {
             _tenant_id: ins.tenant_id,
             _agent_id: mapping.agent_id,
