@@ -16,6 +16,7 @@ import {
   Globe,
   Image as ImageIcon,
   Loader2,
+  MapPin,
   Palette,
   Save,
   Settings,
@@ -33,6 +34,13 @@ import { Separator } from "@/components/ui/separator";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { supabase } from "@/integrations/supabase/client";
 import { DomainsManager } from "@/components/owner/DomainsManager";
+import { RegionSelector } from "@/components/owner/RegionSelector";
+import {
+  DEFAULT_GEO_TARGETS,
+  parseGeoTargets,
+  summarizeGeo,
+  type GeoTargets,
+} from "@/lib/acos/geoTargets";
 
 export const Route = createFileRoute("/_authenticated/brand/settings")({
   component: StoreSettingsPage,
@@ -46,6 +54,7 @@ type TenantConfigRow = {
   ui: Json | null;
   seo: Json | null;
   bot: Json | null;
+  geo_targets: Json | null;
 };
 
 type StoreForm = {
@@ -58,6 +67,7 @@ type StoreForm = {
   og_image_url: string;
   bot_welcome: string;
   bot_system: string;
+  geo_targets: GeoTargets;
 };
 
 const DEFAULTS: StoreForm = {
@@ -70,6 +80,7 @@ const DEFAULTS: StoreForm = {
   og_image_url: "",
   bot_welcome: "Привіт! Як можу допомогти з покупкою?",
   bot_system: "",
+  geo_targets: DEFAULT_GEO_TARGETS,
 };
 
 function pickStr(o: Json | null, k: string, fallback = ""): string {
