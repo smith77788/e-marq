@@ -146,6 +146,9 @@ function HandbookPage() {
             aria-hidden
             decoding="async"
             fetchPriority="high"
+            loading="eager"
+            width={1920}
+            height={1080}
             className="h-full w-full object-cover opacity-25"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
@@ -248,6 +251,8 @@ function HandbookPage() {
                 alt=""
                 loading="lazy"
                 decoding="async"
+                width={1920}
+                height={1080}
                 className="h-48 w-full object-cover"
               />
             </Card>
@@ -342,6 +347,8 @@ function HandbookPage() {
                 alt=""
                 loading="lazy"
                 decoding="async"
+                width={1920}
+                height={1080}
                 className="h-44 w-full object-cover"
               />
             </Card>
@@ -365,6 +372,8 @@ function HandbookPage() {
                 alt=""
                 loading="lazy"
                 decoding="async"
+                width={1920}
+                height={1080}
                 className="h-40 w-full object-cover"
               />
             </Card>
