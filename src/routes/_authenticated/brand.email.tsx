@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useT } from "@/lib/i18n";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { EmailCampaignsCard } from "@/components/owner/EmailCampaignsCard";
+import { EmailCampaignWizard } from "@/components/owner/EmailCampaignWizard";
 import { EmailDomainCard } from "@/components/owner/EmailDomainCard";
 import { EmailAutomationsCard } from "@/components/owner/EmailAutomationsCard";
 
@@ -65,12 +66,17 @@ function BrandEmailPage() {
         <p className="text-sm text-muted-foreground">{t("be.subtitle")}</p>
       </div>
 
-      <Tabs defaultValue="campaigns" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="wizard" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="wizard">Майстер</TabsTrigger>
           <TabsTrigger value="campaigns">{t("be.tab.campaigns")}</TabsTrigger>
           <TabsTrigger value="automations">{t("be.tab.automations")}</TabsTrigger>
           <TabsTrigger value="settings">{t("be.tab.settings")}</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="wizard">
+          <EmailCampaignWizard tenantId={tenantId} />
+        </TabsContent>
 
         <TabsContent value="campaigns">
           <EmailCampaignsCard tenantId={tenantId} />
