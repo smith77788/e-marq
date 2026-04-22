@@ -178,40 +178,42 @@ function AdminTenantsPage() {
           {tenantsQuery.isLoading ? (
             <p className="text-sm text-muted-foreground">Завантаження…</p>
           ) : tenantsQuery.data && tenantsQuery.data.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Назва</TableHead>
-                  <TableHead>Адреса</TableHead>
-                  <TableHead>Статус</TableHead>
-                  <TableHead>Створено</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tenantsQuery.data.map((t) => (
-                  <TableRow key={t.id}>
-                    <TableCell className="font-medium">
-                      <Link
-                        to="/admin/tenants/$tenantId"
-                        params={{ tenantId: t.id }}
-                        className="hover:underline"
-                      >
-                        {t.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">/{t.slug}</TableCell>
-                    <TableCell>
-                      <Badge variant={t.status === "active" ? "default" : "outline"}>
-                        {STATUS_LABEL[t.status] ?? t.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {new Date(t.created_at).toLocaleDateString("uk-UA")}
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Назва</TableHead>
+                    <TableHead>Адреса</TableHead>
+                    <TableHead>Статус</TableHead>
+                    <TableHead>Створено</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {tenantsQuery.data.map((t) => (
+                    <TableRow key={t.id}>
+                      <TableCell className="font-medium">
+                        <Link
+                          to="/admin/tenants/$tenantId"
+                          params={{ tenantId: t.id }}
+                          className="hover:underline"
+                        >
+                          {t.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">/{t.slug}</TableCell>
+                      <TableCell>
+                        <Badge variant={t.status === "active" ? "default" : "outline"}>
+                          {STATUS_LABEL[t.status] ?? t.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {new Date(t.created_at).toLocaleDateString("uk-UA")}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           ) : (
             <p className="text-sm text-muted-foreground">Поки що брендів немає. Створіть перший вище.</p>
           )}
