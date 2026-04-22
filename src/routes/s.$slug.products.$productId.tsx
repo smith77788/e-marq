@@ -18,7 +18,8 @@ import { useStorefrontCart, track } from "@/lib/storefront/cartContext";
 import { formatMoneyExact } from "@/lib/money";
 import { RestockSubscribe } from "@/components/storefront/RestockSubscribe";
 import { canonicalUrl } from "@/lib/seo";
-import { productJsonLd } from "@/lib/storefront/jsonLd";
+import { productJsonLd, breadcrumbJsonLd } from "@/lib/storefront/jsonLd";
+import { tStatic } from "@/lib/i18n";
 
 export const Route = createFileRoute("/s/$slug/products/$productId")({
   loader: ({ params }) => loadProductDetail(params.slug, params.productId),
