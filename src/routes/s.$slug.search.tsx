@@ -7,7 +7,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { loadStorefrontShell, type StorefrontShell } from "@/lib/storefront/loaders";
-import { ProductCard } from "./s.$slug.index";
+import { ProductCard } from "@/components/storefront/ProductCard";
 import { z } from "zod";
 
 const searchSchema = z.object({
