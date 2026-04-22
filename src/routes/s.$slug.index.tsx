@@ -13,6 +13,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   loadStorefrontShell,
   loadCollections,
+  type CollectionSummary,
+  type StorefrontShell,
   type StorefrontProduct,
 } from "@/lib/storefront/loaders";
 import { useStorefrontCart, track } from "@/lib/storefront/cartContext";
@@ -38,12 +40,12 @@ function StorefrontIndex() {
   const { slug } = Route.useParams();
   const initial = Route.useLoaderData();
 
-  const { data } = useQuery({
+  const { data } = useQuery<{ shell: StorefrontShell; collections: CollectionSummary[] }>({
     queryKey: ["storefront-index", slug],
     queryFn: async () => {
       const [shell, collections] = await Promise.all([
         loadStorefrontShell(slug),
-        loadCollections(slug).catch(() => []),
+        loadCollections(slug).catch(() => [] as CollectionSummary[]),
       ]);
       return { shell, collections };
     },

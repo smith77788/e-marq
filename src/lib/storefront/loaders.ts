@@ -135,33 +135,59 @@ export async function loadStorefrontShell(slug: string): Promise<StorefrontShell
   let products: StorefrontProduct[] = [];
   const v2 = await supabase.rpc("get_storefront_products_v2", { _slug: slug });
   if (!v2.error && v2.data) {
-    products = (v2.data ?? []).map((p) => ({
-      id: p.id,
-      name: p.name,
-      description: p.description ?? null,
-      price_cents: p.price_cents,
-      compare_at_price_cents: p.compare_at_price_cents ?? null,
-      currency: p.currency,
-      image_url: p.image_url ?? null,
-      stock: p.stock ?? 0,
-      has_variants: p.has_variants ?? false,
-      tags: p.tags ?? [],
-      url_handle: p.url_handle ?? null,
-    }));
+    products = ((v2.data ?? []) as Array<Record<string, unknown>>).map((row) => {
+      const p = row as {
+        id: string;
+        name: string;
+        description?: string | null;
+        price_cents: number;
+        compare_at_price_cents?: number | null;
+        currency: string;
+        image_url?: string | null;
+        stock?: number;
+        has_variants?: boolean;
+        tags?: string[];
+        url_handle?: string | null;
+      };
+      return {
+        id: p.id,
+        name: p.name,
+        description: p.description ?? null,
+        price_cents: p.price_cents,
+        compare_at_price_cents: p.compare_at_price_cents ?? null,
+        currency: p.currency,
+        image_url: p.image_url ?? null,
+        stock: p.stock ?? 0,
+        has_variants: p.has_variants ?? false,
+        tags: p.tags ?? [],
+        url_handle: p.url_handle ?? null,
+      };
+    });
   } else {
     // Fallback to legacy v1
     const v1 = await supabase.rpc("get_storefront_products", { _slug: slug });
     if (v1.error) throw v1.error;
-    products = (v1.data ?? []).map((p) => ({
-      id: p.id,
-      name: p.name,
-      description: p.description ?? null,
-      price_cents: p.price_cents,
-      currency: p.currency,
-      image_url: p.image_url ?? null,
-      stock: p.stock_available ? 9999 : 0,
-      ...FALLBACK_PRODUCT,
-    }));
+    products = ((v1.data ?? []) as Array<Record<string, unknown>>).map((row) => {
+      const p = row as {
+        id: string;
+        name: string;
+        description?: string | null;
+        price_cents: number;
+        currency: string;
+        image_url?: string | null;
+        stock_available?: boolean;
+      };
+      return {
+        id: p.id,
+        name: p.name,
+        description: p.description ?? null,
+        price_cents: p.price_cents,
+        currency: p.currency,
+        image_url: p.image_url ?? null,
+        stock: p.stock_available ? 9999 : 0,
+        ...FALLBACK_PRODUCT,
+      };
+    });
   }
 
   const config: StorefrontConfig = {
