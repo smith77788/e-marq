@@ -43,6 +43,15 @@ export const Route = createFileRoute("/s/$slug/collections/$handle")({
           type: "application/ld+json",
           children: JSON.stringify(collectionJsonLd(loaderData, params.slug)),
         },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: tStatic("sf.breadcrumb.shop"), path: `/s/${params.slug}` },
+              { name: c.name, path: `/s/${params.slug}/collections/${params.handle}` },
+            ]),
+          ),
+        },
       ],
     };
   },
