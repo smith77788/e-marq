@@ -116,7 +116,7 @@ export const Route = createFileRoute("/api/orders/$orderId/telegram-message")({
 
         // ---- Authorize: caller must be a member of the tenant ----
         const { data: membership } = await supabaseAdmin
-          .from("tenant_members")
+          .from("tenant_memberships")
           .select("role")
           .eq("tenant_id", order.tenant_id)
           .eq("user_id", userId)
