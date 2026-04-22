@@ -3368,6 +3368,27 @@ export type Database = {
           },
         ]
       }
+      restock_subscribe_rate_limit: {
+        Row: {
+          bucket_hour: string
+          count: number
+          id: number
+          ip_hash: string
+        }
+        Insert: {
+          bucket_hour: string
+          count?: number
+          id?: number
+          ip_hash: string
+        }
+        Update: {
+          bucket_hour?: string
+          count?: number
+          id?: number
+          ip_hash?: string
+        }
+        Relationships: []
+      }
       search_queries: {
         Row: {
           clicked: boolean
@@ -4058,6 +4079,7 @@ export type Database = {
         Returns: boolean
       }
       cleanup_anon_rate_limit: { Args: never; Returns: undefined }
+      cleanup_restock_rate_limit: { Args: never; Returns: undefined }
       consume_ai_credits: {
         Args: {
           _amount: number
