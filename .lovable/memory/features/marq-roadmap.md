@@ -254,3 +254,10 @@ type: feature
 - ESLint 0 errors (15 warnings — shadcn-ui fast-refresh, не критично)
 - Supabase linter: 2 WARN (extension in public + public bucket listing — не нові)
 - Console + network: жодних 4xx/5xx, жодних client-side runtime errors
+
+### Sprint 18 — Власний Telegram-бот для Lead Radar / Outreach Hunter ✅
+- Новий API: `GET/POST /api/telegram/status` — getMe через connector gateway + керування `outreach_settings.active_channels.{telegram,instagram}`
+- Новий компонент `src/components/owner/TelegramConnectCard.tsx` — статус бота (@username), Switch для увімкнення Telegram-агентів, опціонально й Instagram
+- Інтегровано в Lead Radar (`/admin/lead-radar`) — картка під header
+- Якщо connector ще не підключено → інструкція @BotFather + кнопка «Підключити Telegram»
+- Усе залишається в межах кабінету: відповіді надсилаються через `sendTelegramText` без переходу в зовнішні панелі
