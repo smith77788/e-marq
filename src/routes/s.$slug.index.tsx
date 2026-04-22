@@ -34,7 +34,7 @@ export const Route = createFileRoute("/s/$slug/")({
         }))
       : [],
   }),
-  errorComponent: ({ error }) => (
+  errorComponent: ({ error }: { error: Error }) => (
     <div className="mx-auto max-w-6xl px-4 py-12 text-center">
       <p className="text-sm text-destructive">Помилка: {error.message}</p>
     </div>

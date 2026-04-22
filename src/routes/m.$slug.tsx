@@ -102,7 +102,7 @@ function MagnetPage() {
 
         {magnet.keywords.length > 0 && (
           <div className="mt-6 flex flex-wrap gap-1">
-            {magnet.keywords.map((k) => (
+            {magnet.keywords.map((k: string) => (
               <Badge key={k} variant="outline" className="text-[10px]">
                 {k}
               </Badge>

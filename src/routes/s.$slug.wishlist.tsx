@@ -28,7 +28,7 @@ export const Route = createFileRoute("/s/$slug/wishlist")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  errorComponent: ({ error }) => (
+  errorComponent: ({ error }: { error: Error }) => (
     <div className="mx-auto max-w-4xl px-4 py-12 text-center">
       <p className="text-sm text-destructive">
         {tStatic("sf.wishlist.error")}: {error.message}
