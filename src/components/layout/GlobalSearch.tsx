@@ -231,10 +231,16 @@ export function GlobalSearch() {
         className="hidden h-9 gap-2 px-2.5 text-xs text-muted-foreground sm:flex"
         onClick={() => setOpen(true)}
         aria-label={t("gs.openLabel")}
+        aria-keyshortcuts="Meta+K Control+K"
+        aria-haspopup="dialog"
+        aria-expanded={open}
       >
-        <Search className="h-3.5 w-3.5" />
+        <Search className="h-3.5 w-3.5" aria-hidden="true" />
         <span className="hidden md:inline">{t("gs.placeholder")}</span>
-        <kbd className="ml-1 hidden items-center gap-0.5 rounded border bg-muted px-1.5 py-0.5 text-[10px] font-mono md:inline-flex">
+        <kbd
+          aria-hidden="true"
+          className="ml-1 hidden items-center gap-0.5 rounded border bg-muted px-1.5 py-0.5 text-[10px] font-mono md:inline-flex"
+        >
           <span className="text-xs">⌘</span>K
         </kbd>
       </Button>
@@ -244,8 +250,11 @@ export function GlobalSearch() {
         className="h-9 w-9 sm:hidden"
         onClick={() => setOpen(true)}
         aria-label={t("gs.openLabel")}
+        aria-keyshortcuts="Meta+K Control+K"
+        aria-haspopup="dialog"
+        aria-expanded={open}
       >
-        <Search className="h-4 w-4" />
+        <Search className="h-4 w-4" aria-hidden="true" />
       </Button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
