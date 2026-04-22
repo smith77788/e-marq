@@ -1,9 +1,14 @@
 /**
  * Mission Control — головний дашборд super-admin.
- * Структуровано в логічні секції з eyebrow-заголовками для чіткої ієрархії.
+ * Performance:
+ *   - Two-stage data load: critical (tenants+orders) renders header instantly,
+ *     heavy (insights+runs+actions+customers) streams in below.
+ *   - Modern shimmer skeletons + stagger reveal.
+ *   - 60s background refetch on critical, 90s on detail.
  */
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -23,6 +28,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { CockpitSkeleton, SectionReveal } from "@/components/ui/cockpit-skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, type TKey } from "@/lib/i18n";
@@ -38,26 +44,13 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 function MissionControlPage() {
   const { isSuperAdmin, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-12 w-72" />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-28" />
-          ))}
-        </div>
-        <Skeleton className="h-64" />
-      </div>
-    );
-  }
-
+  if (loading) return <CockpitSkeleton variant="admin" />;
   if (!isSuperAdmin) return <Navigate to="/brand" />;
   return <MissionControlContent />;
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Header section                                                            */
+/*  Header                                                                    */
 /* -------------------------------------------------------------------------- */
 
 function MissionHeader({ t }: { t: (k: TKey) => string }) {
@@ -135,23 +128,45 @@ function SectionHeader({
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Main content                                                              */
+/*  Main content — split into critical + deferred queries                     */
 /* -------------------------------------------------------------------------- */
 
 function MissionControlContent() {
   const { t } = useT();
-  const sinceIso = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const since24hIso = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const sinceIso = useMemo(
+    () => new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    [],
+  );
+  const since24hIso = useMemo(
+    () => new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    [],
+  );
 
-  const overview = useQuery({
-    queryKey: ["mc-overview"],
+  // 🔥 CRITICAL: tenants + orders (renders top stats fast)
+  const critical = useQuery({
+    queryKey: ["mc-critical", sinceIso],
     queryFn: async () => {
-      const [tenants, orders, insights, runs, customers, actions] = await Promise.all([
+      const [tenants, orders] = await Promise.all([
         supabase.from("tenants").select("id, name, slug, status, created_at"),
         supabase
           .from("orders")
           .select("tenant_id, total_cents, status, created_at")
           .gte("created_at", sinceIso),
+      ]);
+      return {
+        tenants: tenants.data ?? [],
+        orders: orders.data ?? [],
+      };
+    },
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+
+  // 🐌 DETAIL: insights + runs + actions + customers (streams in below)
+  const detail = useQuery({
+    queryKey: ["mc-detail", sinceIso, since24hIso],
+    queryFn: async () => {
+      const [insights, runs, customers, actions] = await Promise.all([
         supabase
           .from("ai_insights")
           .select("tenant_id, status, created_at, risk_level")
@@ -167,57 +182,49 @@ function MissionControlContent() {
           .gte("created_at", sinceIso),
       ]);
       return {
-        tenants: tenants.data ?? [],
-        orders: orders.data ?? [],
         insights: insights.data ?? [],
         runs: runs.data ?? [],
         customers: customers.data ?? [],
         actions: actions.data ?? [],
       };
     },
-    refetchInterval: 60_000,
+    refetchInterval: 90_000,
+    staleTime: 60_000,
   });
 
-  if (overview.isLoading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-32 w-full" />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-28" />
-          ))}
-        </div>
-        <div className="grid gap-4 lg:grid-cols-3">
-          <Skeleton className="h-80 lg:col-span-2" />
-          <Skeleton className="h-80" />
-        </div>
-      </div>
-    );
+  // While CRITICAL is loading — full skeleton
+  if (critical.isLoading || !critical.data) {
+    return <CockpitSkeleton variant="admin" />;
   }
 
-  const data = overview.data!;
-  const totalRevenue = data.orders
+  const cData = critical.data;
+  const dData = detail.data; // may be undefined while still loading
+
+  const totalRevenue = cData.orders
     .filter((o) => o.status === "paid")
     .reduce((s, o) => s + (o.total_cents ?? 0), 0);
-  const paidOrders = data.orders.filter((o) => o.status === "paid").length;
-  const pendingInsights = data.insights.filter((i) => i.status === "pending").length;
-  const highRiskInsights = data.insights.filter((i) => i.risk_level === "high").length;
-  const failedRuns = data.runs.filter((r) => r.status === "failed").length;
-  const successRuns = data.runs.filter((r) => r.status === "ok").length;
-  const pendingActions = data.actions.filter((a) => a.status === "pending").length;
-  const activeTenants = data.tenants.filter((t) => t.status === "active").length;
+  const paidOrders = cData.orders.filter((o) => o.status === "paid").length;
+  const activeTenants = cData.tenants.filter((t) => t.status === "active").length;
 
-  // Build leaderboard
-  const leaderRows: TenantLeaderRow[] = data.tenants
-    .map((t) => {
-      const tenantOrders = data.orders.filter((o) => o.tenant_id === t.id && o.status === "paid");
-      const tenantInsights = data.insights.filter((i) => i.tenant_id === t.id);
-      const tenantRuns = data.runs.filter((r) => r.tenant_id === t.id);
+  const pendingInsights = dData?.insights.filter((i) => i.status === "pending").length ?? 0;
+  const highRiskInsights = dData?.insights.filter((i) => i.risk_level === "high").length ?? 0;
+  const failedRuns = dData?.runs.filter((r) => r.status === "failed").length ?? 0;
+  const successRuns = dData?.runs.filter((r) => r.status === "ok").length ?? 0;
+  const pendingActions = dData?.actions.filter((a) => a.status === "pending").length ?? 0;
+  const customersCount = dData?.customers.length ?? 0;
+  const runsTotal = dData?.runs.length ?? 0;
+
+  // Build leaderboard (needs both queries)
+  const leaderRows: TenantLeaderRow[] = cData.tenants
+    .map((tn) => {
+      const tenantOrders = cData.orders.filter((o) => o.tenant_id === tn.id && o.status === "paid");
+      const tenantInsights = dData?.insights.filter((i) => i.tenant_id === tn.id) ?? [];
+      const tenantRuns = dData?.runs.filter((r) => r.tenant_id === tn.id) ?? [];
       return {
-        id: t.id,
-        name: t.name,
-        slug: t.slug,
-        status: t.status,
+        id: tn.id,
+        name: tn.name,
+        slug: tn.slug,
+        status: tn.status,
         revenueCents: tenantOrders.reduce((s, o) => s + (o.total_cents ?? 0), 0),
         orders: tenantOrders.length,
         insights: tenantInsights.length,
@@ -227,9 +234,9 @@ function MissionControlContent() {
     .sort((a, b) => b.revenueCents - a.revenueCents)
     .slice(0, 10);
 
-  // Build daily revenue points
+  // Daily revenue points (critical only)
   const byDay = new Map<string, { revenue: number; orders: number }>();
-  for (const o of data.orders) {
+  for (const o of cData.orders) {
     if (o.status !== "paid") continue;
     const day = (o.created_at as string).slice(0, 10);
     const cur = byDay.get(day) ?? { revenue: 0, orders: 0 };
@@ -241,46 +248,48 @@ function MissionControlContent() {
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([day, v]) => ({ day, ...v }));
 
-  // Health grid
-  const healthRows = Array.from(
-    data.runs
-      .reduce((acc, r) => {
-        const cur = acc.get(r.agent_id) ?? {
-          agent_id: r.agent_id,
-          runs_total: 0,
-          runs_failed: 0,
-          insights_created: 0,
-        };
-        cur.runs_total += 1;
-        if (r.status === "failed") cur.runs_failed += 1;
-        cur.insights_created += r.insights_created ?? 0;
-        acc.set(r.agent_id, cur);
-        return acc;
-      }, new Map<string, { agent_id: string; runs_total: number; runs_failed: number; insights_created: number }>())
-      .values(),
-  );
+  // Health grid (detail only)
+  const healthRows = dData
+    ? Array.from(
+        dData.runs
+          .reduce((acc, r) => {
+            const cur = acc.get(r.agent_id) ?? {
+              agent_id: r.agent_id,
+              runs_total: 0,
+              runs_failed: 0,
+              insights_created: 0,
+            };
+            cur.runs_total += 1;
+            if (r.status === "failed") cur.runs_failed += 1;
+            cur.insights_created += r.insights_created ?? 0;
+            acc.set(r.agent_id, cur);
+            return acc;
+          }, new Map<string, { agent_id: string; runs_total: number; runs_failed: number; insights_created: number }>())
+          .values(),
+      )
+    : [];
 
-  // Health badges for top header
   const fleetHealthy = failedRuns === 0;
   const insightsLoad = pendingInsights + pendingActions;
+  const detailReady = !!dData;
 
   return (
-    <div className="space-y-8">
-      {/* HERO */}
+    <div className="reveal-stagger space-y-8">
+      {/* HERO — instant */}
       <MissionHeader t={t} />
 
-      {/* SECTION 1 — пульс системи */}
+      {/* SECTION 1 — пульс системи (critical) */}
       <section className="space-y-4">
         <SectionHeader
           eyebrow="01 · стан системи"
           title="Пульс мережі за 30 днів"
-          hint="Оновлення кожну хвилину"
+          hint={detailReady ? "Оновлення кожну хвилину" : "Підвантажуємо деталі…"}
           icon={Activity}
         />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <MissionStatCard
             label={t("mc.activeTenants")}
-            value={data.tenants.length}
+            value={cData.tenants.length}
             hint={`${activeTenants} активних`}
             icon={Building2}
             tone="primary"
@@ -292,55 +301,77 @@ function MissionControlContent() {
             icon={DollarSign}
             tone="success"
           />
-          <MissionStatCard
-            label="Клієнтська база"
-            value={data.customers.length.toLocaleString("uk-UA")}
-            hint="усі бренди"
-            icon={Users}
-            tone="info"
-          />
-          <MissionStatCard
-            label="Запуски ШІ · 24h"
-            value={data.runs.length}
-            hint={`${successRuns} ✓ · ${failedRuns} ✗`}
-            icon={Cpu}
-            tone={failedRuns > successRuns / 4 ? "destructive" : "primary"}
-          />
+          {detailReady ? (
+            <SectionReveal>
+              <MissionStatCard
+                label="Клієнтська база"
+                value={customersCount.toLocaleString("uk-UA")}
+                hint="усі бренди"
+                icon={Users}
+                tone="info"
+              />
+            </SectionReveal>
+          ) : (
+            <Skeleton className="h-28 rounded-xl" />
+          )}
+          {detailReady ? (
+            <SectionReveal>
+              <MissionStatCard
+                label="Запуски ШІ · 24h"
+                value={runsTotal}
+                hint={`${successRuns} ✓ · ${failedRuns} ✗`}
+                icon={Cpu}
+                tone={failedRuns > successRuns / 4 ? "destructive" : "primary"}
+              />
+            </SectionReveal>
+          ) : (
+            <Skeleton className="h-28 rounded-xl" />
+          )}
         </div>
       </section>
 
-      {/* SECTION 2 — увага потрібна */}
+      {/* SECTION 2 — увага потрібна (detail) */}
       <section className="space-y-4">
         <SectionHeader
           eyebrow="02 · потребує уваги"
           title="Інсайти, дії та ризики"
           icon={AlertTriangle}
         />
-        <div className="grid gap-3 sm:grid-cols-3">
-          <AttentionCard
-            label="Інсайти на черзі"
-            value={pendingInsights}
-            highlight={highRiskInsights}
-            highlightLabel="високого ризику"
-            icon={Lightbulb}
-            tone={highRiskInsights > 5 ? "warning" : "info"}
-            href="/admin/overview#stream"
-          />
-          <AttentionCard
-            label="Дії очікують apply"
-            value={pendingActions}
-            icon={Zap}
-            tone={pendingActions > 10 ? "warning" : "primary"}
-            href="/admin/commands"
-          />
-          <AttentionCard
-            label="Здоров'я агентів"
-            value={fleetHealthy ? "OK" : `${failedRuns} fail`}
-            icon={fleetHealthy ? CheckCircle2 : AlertTriangle}
-            tone={fleetHealthy ? "success" : "destructive"}
-            href="/admin/health"
-          />
-        </div>
+        {detailReady ? (
+          <SectionReveal>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <AttentionCard
+                label="Інсайти на черзі"
+                value={pendingInsights}
+                highlight={highRiskInsights}
+                highlightLabel="високого ризику"
+                icon={Lightbulb}
+                tone={highRiskInsights > 5 ? "warning" : "info"}
+                href="/admin/overview"
+              />
+              <AttentionCard
+                label="Дії очікують apply"
+                value={pendingActions}
+                icon={Zap}
+                tone={pendingActions > 10 ? "warning" : "primary"}
+                href="/admin/commands"
+              />
+              <AttentionCard
+                label="Здоров'я агентів"
+                value={fleetHealthy ? "OK" : `${failedRuns} fail`}
+                icon={fleetHealthy ? CheckCircle2 : AlertTriangle}
+                tone={fleetHealthy ? "success" : "destructive"}
+                href="/admin/health"
+              />
+            </div>
+          </SectionReveal>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-24 rounded-xl" />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* SECTION 3 — пульс по часу + лідери */}
@@ -348,7 +379,7 @@ function MissionControlContent() {
         <SectionHeader
           eyebrow="03 · аналітика"
           title="Cross-tenant pulse"
-          hint={`${insightsLoad} відкритих сигналів`}
+          hint={detailReady ? `${insightsLoad} відкритих сигналів` : undefined}
           icon={Sparkles}
         />
         <div className="grid gap-4 lg:grid-cols-3">
@@ -368,7 +399,17 @@ function MissionControlContent() {
               <CardDescription className="text-xs">ТОП-10 за виторгом 30д</CardDescription>
             </CardHeader>
             <CardContent>
-              <TenantLeaderboard rows={leaderRows} />
+              {detailReady ? (
+                <SectionReveal>
+                  <TenantLeaderboard rows={leaderRows} />
+                </SectionReveal>
+              ) : (
+                <div className="space-y-2">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <Skeleton key={i} className="h-9 w-full" />
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -379,12 +420,22 @@ function MissionControlContent() {
         <SectionHeader
           eyebrow="04 · флот агентів"
           title="Здоров'я та активність · 24 години"
-          hint={`${healthRows.length} агентів запускалися`}
+          hint={detailReady ? `${healthRows.length} агентів запускалися` : undefined}
           icon={Cpu}
         />
         <Card className="border-border/60 bg-card/60 backdrop-blur">
           <CardContent className="pt-6">
-            <SystemHealthGrid rows={healthRows} />
+            {detailReady ? (
+              <SectionReveal>
+                <SystemHealthGrid rows={healthRows} />
+              </SectionReveal>
+            ) : (
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16" />
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </section>
