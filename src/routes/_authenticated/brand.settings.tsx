@@ -101,7 +101,7 @@ function StoreSettingsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tenant_configs")
-        .select("tenant_id, brand_name, ui, seo, bot")
+        .select("tenant_id, brand_name, ui, seo, bot, geo_targets")
         .eq("tenant_id", tenantId!)
         .maybeSingle();
       if (error) throw error;
@@ -125,6 +125,7 @@ function StoreSettingsPage() {
       og_image_url: pickStr(r.seo, "og_image_url", ""),
       bot_welcome: pickStr(r.bot, "welcome_message", DEFAULTS.bot_welcome),
       bot_system: pickStr(r.bot, "system_prompt", ""),
+      geo_targets: parseGeoTargets(r.geo_targets) ?? DEFAULT_GEO_TARGETS,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cfgQuery.data?.tenant_id]);
@@ -153,6 +154,7 @@ function StoreSettingsPage() {
           welcome_message: form.bot_welcome.trim(),
           system_prompt: form.bot_system.trim(),
         } as Json,
+        geo_targets: form.geo_targets as unknown as Json,
       };
       const { error } = await supabase
         .from("tenant_configs")
