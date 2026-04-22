@@ -15,24 +15,28 @@ import {
 import { loadCollectionProducts } from "@/lib/storefront/loaders";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { useT, tStatic } from "@/lib/i18n";
+import { canonicalUrl } from "@/lib/seo";
 
 type SortOpt = "manual" | "price_asc" | "price_desc" | "name_asc";
 
 export const Route = createFileRoute("/s/$slug/collections/$handle")({
   loader: ({ params }) => loadCollectionProducts(params.slug, params.handle),
-  head: ({ loaderData }) => {
+  head: ({ loaderData, params }) => {
     if (!loaderData) return { meta: [] };
     const c = loaderData.collection;
     const title = c.seo_title ?? c.name;
     const description = c.seo_description ?? c.description ?? `${c.name} — товари в наявності.`;
+    const url = canonicalUrl(`/s/${params.slug}/collections/${params.handle}`);
     return {
       meta: [
         { title },
         { name: "description", content: description.slice(0, 160) },
         { property: "og:title", content: title },
         { property: "og:description", content: description.slice(0, 160) },
+        { property: "og:url", content: url },
         ...(c.image_url ? [{ property: "og:image", content: c.image_url }] : []),
       ],
+      links: [{ rel: "canonical", href: url }],
     };
   },
   notFoundComponent: () => (
