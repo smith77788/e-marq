@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { EmptyState } from "@/components/ui/empty-state";
 import { supabase } from "@/integrations/supabase/client";
 
 type DomainRow = {
@@ -229,9 +230,12 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
           {list.isLoading ? (
             <p className="text-sm text-muted-foreground">Завантажую…</p>
           ) : (list.data ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Поки що жодного власного домену. Додайте перший вище.
-            </p>
+            <EmptyState
+              variant="inline"
+              icon={Globe}
+              title="Поки що жодного власного домену"
+              description="Додайте перший домен у формі вище — і ми згенеруємо DNS-токен для верифікації."
+            />
           ) : (
             (list.data ?? []).map((d) => (
               <div

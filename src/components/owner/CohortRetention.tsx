@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Layers } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { supabase } from "@/integrations/supabase/client";
 
 type Props = { tenantId: string };
@@ -97,9 +98,12 @@ export function CohortRetention({ tenantId }: Props) {
       </CardHeader>
       <CardContent>
         {totalCustomers === 0 ? (
-          <div className="rounded-md border border-dashed border-border bg-muted/20 p-4 text-center text-xs text-muted-foreground">
-            Поки немає даних. Потрібен хоча б один покупець із першим замовленням.
-          </div>
+          <EmptyState
+            variant="inline"
+            icon={Layers}
+            title="Поки немає даних для когорт"
+            description="Потрібен хоча б один покупець із першим замовленням, щоб побудувати retention-карту."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-[10px]">
