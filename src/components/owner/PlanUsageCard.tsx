@@ -17,7 +17,8 @@ import { trackBilling } from "@/lib/billingTelemetry";
 
 export function PlanUsageCard({ tenantId }: { tenantId: string }) {
   const navigate = useNavigate();
-  const { data, isLoading } = useQuery({
+  const { loading: tenantLoading } = useTenantContext();
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["plan-summary", tenantId],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_tenant_plan_summary", {
