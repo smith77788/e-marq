@@ -7,6 +7,7 @@ import { AppSidebar } from "@/components/layout/AppSidebar";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { LiveStatus } from "@/components/layout/LiveStatus";
 import { InsightToasts } from "@/components/layout/InsightToasts";
+import { NotificationCenter } from "@/components/layout/NotificationCenter";
 import { TenantSwitcher } from "@/components/layout/TenantSwitcher";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { MfaChallengeGate } from "@/components/layout/MfaChallengeGate";
@@ -90,6 +91,7 @@ function AuthenticatedShell({
           </div>
           <div className="ml-auto flex items-center gap-2">
             <TenantSwitcher />
+            <NotificationCenter />
             <LanguageSwitcher />
             <ThemeToggle />
             <span className="hidden max-w-[180px] truncate text-xs text-muted-foreground md:inline">
