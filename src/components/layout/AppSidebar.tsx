@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import { HandbookSheet } from "@/components/layout/HandbookSheet";
 import {
   Activity,
   BookOpen,
@@ -378,14 +379,13 @@ export function AppSidebar({ isSuperAdmin, brandName, tenantSlug }: Props) {
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip={t("sb.handbook")}>
-              <Link
-                to="/handbook"
-                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
-              >
-                <BookOpen className="h-4 w-4 text-info" />
-                {!collapsed && <span>{t("sb.handbook")}</span>}
-              </Link>
+            <SidebarMenuButton
+              tooltip={t("sb.handbook")}
+              onClick={() => setHandbookOpen(true)}
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
+            >
+              <BookOpen className="h-4 w-4 text-info" />
+              {!collapsed && <span>{t("sb.handbook")}</span>}
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
