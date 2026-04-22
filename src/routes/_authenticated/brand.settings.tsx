@@ -435,6 +435,11 @@ function StoreSettingsPage() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* DOMAIN */}
+          <TabsContent value="domain" className="mt-4 space-y-4">
+            <DomainsManager tenantId={tenantId} />
+          </TabsContent>
         </Tabs>
       )}
     </div>
