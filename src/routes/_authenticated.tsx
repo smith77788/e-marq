@@ -11,6 +11,7 @@ import { NotificationCenter } from "@/components/layout/NotificationCenter";
 import { GlobalSearch } from "@/components/layout/GlobalSearch";
 import { TenantSwitcher } from "@/components/layout/TenantSwitcher";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { RecentPagesTracker } from "@/components/layout/RecentPagesTracker";
 import { MfaChallengeGate } from "@/components/layout/MfaChallengeGate";
 import { TenantContextProvider, useTenantContext } from "@/hooks/useTenantContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -133,6 +134,7 @@ function AuthenticatedShell({
           </div>
         </main>
         <InsightToasts />
+        <RecentPagesTracker />
       </SidebarInset>
     </SidebarProvider>
   );
