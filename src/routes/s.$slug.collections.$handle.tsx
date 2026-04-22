@@ -100,6 +100,19 @@ function CollectionPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
+      <nav aria-label="Breadcrumb" className="mb-4">
+        <ol className="flex items-center gap-1 text-xs text-muted-foreground">
+          <li>
+            <Link to="/s/$slug" params={{ slug }} className="hover:text-foreground">
+              {t("sf.breadcrumb.shop")}
+            </Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li className="line-clamp-1 text-foreground" aria-current="page">
+            {data.collection.name}
+          </li>
+        </ol>
+      </nav>
       <header className="mb-6 space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
           {data.collection.name}
