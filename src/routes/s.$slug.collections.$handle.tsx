@@ -2,7 +2,7 @@
  * Storefront collection detail — products inside a single collection.
  */
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -16,7 +16,7 @@ import { loadCollectionProducts } from "@/lib/storefront/loaders";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { useT, tStatic } from "@/lib/i18n";
 import { canonicalUrl } from "@/lib/seo";
-import { collectionJsonLd } from "@/lib/storefront/jsonLd";
+import { collectionJsonLd, breadcrumbJsonLd } from "@/lib/storefront/jsonLd";
 
 type SortOpt = "manual" | "price_asc" | "price_desc" | "name_asc";
 
@@ -42,6 +42,15 @@ export const Route = createFileRoute("/s/$slug/collections/$handle")({
         {
           type: "application/ld+json",
           children: JSON.stringify(collectionJsonLd(loaderData, params.slug)),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: tStatic("sf.breadcrumb.shop"), path: `/s/${params.slug}` },
+              { name: c.name, path: `/s/${params.slug}/collections/${params.handle}` },
+            ]),
+          ),
         },
       ],
     };
@@ -91,6 +100,19 @@ function CollectionPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
+      <nav aria-label="Breadcrumb" className="mb-4">
+        <ol className="flex items-center gap-1 text-xs text-muted-foreground">
+          <li>
+            <Link to="/s/$slug" params={{ slug }} className="hover:text-foreground">
+              {t("sf.breadcrumb.shop")}
+            </Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li className="line-clamp-1 text-foreground" aria-current="page">
+            {data.collection.name}
+          </li>
+        </ol>
+      </nav>
       <header className="mb-6 space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
           {data.collection.name}

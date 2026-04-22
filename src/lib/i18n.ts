@@ -1364,6 +1364,7 @@ const dict = {
     "sf.collection.sort.priceAsc": "Ціна ↑",
     "sf.collection.sort.priceDesc": "Ціна ↓",
     "sf.collection.sort.nameAsc": "За назвою",
+    "sf.breadcrumb.shop": "Магазин",
   },
   en: {
     "nav.brand": "My brand",
@@ -2635,6 +2636,7 @@ const dict = {
     "sf.collection.sort.priceAsc": "Price ↑",
     "sf.collection.sort.priceDesc": "Price ↓",
     "sf.collection.sort.nameAsc": "By name",
+    "sf.breadcrumb.shop": "Shop",
   },
 } satisfies Record<Lang, Record<string, string>>;
 
