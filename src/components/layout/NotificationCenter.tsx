@@ -10,7 +10,6 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
   Bell,
@@ -58,21 +57,22 @@ function severityIcon(severity: string, kind: string) {
   return <Info className="h-4 w-4 text-muted-foreground" />;
 }
 
-function formatRelative(iso: string, locale: string) {
+function formatRelative(iso: string, lang: string) {
+  const isUk = lang === "uk";
   const diffMs = Date.now() - new Date(iso).getTime();
   const sec = Math.round(diffMs / 1000);
   const min = Math.round(sec / 60);
   const hr = Math.round(min / 60);
   const day = Math.round(hr / 24);
-  if (sec < 60) return locale === "uk" ? "щойно" : "just now";
-  if (min < 60) return locale === "uk" ? `${min} хв тому` : `${min}m ago`;
-  if (hr < 24) return locale === "uk" ? `${hr} год тому` : `${hr}h ago`;
-  if (day < 7) return locale === "uk" ? `${day} дн тому` : `${day}d ago`;
+  if (sec < 60) return isUk ? "щойно" : "just now";
+  if (min < 60) return isUk ? `${min} хв тому` : `${min}m ago`;
+  if (hr < 24) return isUk ? `${hr} год тому` : `${hr}h ago`;
+  if (day < 7) return isUk ? `${day} дн тому` : `${day}d ago`;
   return new Date(iso).toLocaleDateString();
 }
 
 export function NotificationCenter() {
-  const { t, locale } = useT();
+  const { t, lang } = useT();
   const { user } = useAuth();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
