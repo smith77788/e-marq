@@ -159,6 +159,12 @@ import { Route as SSlugProductsProductIdRouteImport } from './routes/s.$slug.pro
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
 import { Route as SSlugCollectionsHandleRouteImport } from './routes/s.$slug.collections.$handle'
 import { Route as ApiPublicShippingNpRouteImport } from './routes/api/public/shipping.np'
+import { Route as ApiPublicPaymentsWayforpayInitRouteImport } from './routes/api/public/payments.wayforpay-init'
+import { Route as ApiPublicPaymentsWayforpayCallbackRouteImport } from './routes/api/public/payments.wayforpay-callback'
+import { Route as ApiPublicPaymentsMonobankInitRouteImport } from './routes/api/public/payments.monobank-init'
+import { Route as ApiPublicPaymentsMonobankCallbackRouteImport } from './routes/api/public/payments.monobank-callback'
+import { Route as ApiPublicPaymentsLiqpayInitRouteImport } from './routes/api/public/payments.liqpay-init'
+import { Route as ApiPublicPaymentsLiqpayCallbackRouteImport } from './routes/api/public/payments.liqpay-callback'
 import { Route as ApiPublicEmailUnsubscribeRouteImport } from './routes/api/public/email.unsubscribe'
 import { Route as ApiPublicEmailResendWebhookRouteImport } from './routes/api/public/email.resend-webhook'
 import { Route as ApiIntegrationsSyncProviderRouteImport } from './routes/api/integrations.sync.$provider'
@@ -988,6 +994,42 @@ const ApiPublicShippingNpRoute = ApiPublicShippingNpRouteImport.update({
   path: '/api/public/shipping/np',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPaymentsWayforpayInitRoute =
+  ApiPublicPaymentsWayforpayInitRouteImport.update({
+    id: '/api/public/payments/wayforpay-init',
+    path: '/api/public/payments/wayforpay-init',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicPaymentsWayforpayCallbackRoute =
+  ApiPublicPaymentsWayforpayCallbackRouteImport.update({
+    id: '/api/public/payments/wayforpay-callback',
+    path: '/api/public/payments/wayforpay-callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicPaymentsMonobankInitRoute =
+  ApiPublicPaymentsMonobankInitRouteImport.update({
+    id: '/api/public/payments/monobank-init',
+    path: '/api/public/payments/monobank-init',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicPaymentsMonobankCallbackRoute =
+  ApiPublicPaymentsMonobankCallbackRouteImport.update({
+    id: '/api/public/payments/monobank-callback',
+    path: '/api/public/payments/monobank-callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicPaymentsLiqpayInitRoute =
+  ApiPublicPaymentsLiqpayInitRouteImport.update({
+    id: '/api/public/payments/liqpay-init',
+    path: '/api/public/payments/liqpay-init',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicPaymentsLiqpayCallbackRoute =
+  ApiPublicPaymentsLiqpayCallbackRouteImport.update({
+    id: '/api/public/payments/liqpay-callback',
+    path: '/api/public/payments/liqpay-callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicEmailUnsubscribeRoute =
   ApiPublicEmailUnsubscribeRouteImport.update({
     id: '/api/public/email/unsubscribe',
@@ -1183,6 +1225,12 @@ export interface FileRoutesByFullPath {
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
   '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
   '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
+  '/api/public/payments/liqpay-callback': typeof ApiPublicPaymentsLiqpayCallbackRoute
+  '/api/public/payments/liqpay-init': typeof ApiPublicPaymentsLiqpayInitRoute
+  '/api/public/payments/monobank-callback': typeof ApiPublicPaymentsMonobankCallbackRoute
+  '/api/public/payments/monobank-init': typeof ApiPublicPaymentsMonobankInitRoute
+  '/api/public/payments/wayforpay-callback': typeof ApiPublicPaymentsWayforpayCallbackRoute
+  '/api/public/payments/wayforpay-init': typeof ApiPublicPaymentsWayforpayInitRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -1340,6 +1388,12 @@ export interface FileRoutesByTo {
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
   '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
   '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
+  '/api/public/payments/liqpay-callback': typeof ApiPublicPaymentsLiqpayCallbackRoute
+  '/api/public/payments/liqpay-init': typeof ApiPublicPaymentsLiqpayInitRoute
+  '/api/public/payments/monobank-callback': typeof ApiPublicPaymentsMonobankCallbackRoute
+  '/api/public/payments/monobank-init': typeof ApiPublicPaymentsMonobankInitRoute
+  '/api/public/payments/wayforpay-callback': typeof ApiPublicPaymentsWayforpayCallbackRoute
+  '/api/public/payments/wayforpay-init': typeof ApiPublicPaymentsWayforpayInitRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -1500,6 +1554,12 @@ export interface FileRoutesById {
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
   '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
   '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
+  '/api/public/payments/liqpay-callback': typeof ApiPublicPaymentsLiqpayCallbackRoute
+  '/api/public/payments/liqpay-init': typeof ApiPublicPaymentsLiqpayInitRoute
+  '/api/public/payments/monobank-callback': typeof ApiPublicPaymentsMonobankCallbackRoute
+  '/api/public/payments/monobank-init': typeof ApiPublicPaymentsMonobankInitRoute
+  '/api/public/payments/wayforpay-callback': typeof ApiPublicPaymentsWayforpayCallbackRoute
+  '/api/public/payments/wayforpay-init': typeof ApiPublicPaymentsWayforpayInitRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
@@ -1660,6 +1720,12 @@ export interface FileRouteTypes {
     | '/api/integrations/sync/$provider'
     | '/api/public/email/resend-webhook'
     | '/api/public/email/unsubscribe'
+    | '/api/public/payments/liqpay-callback'
+    | '/api/public/payments/liqpay-init'
+    | '/api/public/payments/monobank-callback'
+    | '/api/public/payments/monobank-init'
+    | '/api/public/payments/wayforpay-callback'
+    | '/api/public/payments/wayforpay-init'
     | '/api/public/shipping/np'
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
@@ -1817,6 +1883,12 @@ export interface FileRouteTypes {
     | '/api/integrations/sync/$provider'
     | '/api/public/email/resend-webhook'
     | '/api/public/email/unsubscribe'
+    | '/api/public/payments/liqpay-callback'
+    | '/api/public/payments/liqpay-init'
+    | '/api/public/payments/monobank-callback'
+    | '/api/public/payments/monobank-init'
+    | '/api/public/payments/wayforpay-callback'
+    | '/api/public/payments/wayforpay-init'
     | '/api/public/shipping/np'
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
@@ -1976,6 +2048,12 @@ export interface FileRouteTypes {
     | '/api/integrations/sync/$provider'
     | '/api/public/email/resend-webhook'
     | '/api/public/email/unsubscribe'
+    | '/api/public/payments/liqpay-callback'
+    | '/api/public/payments/liqpay-init'
+    | '/api/public/payments/monobank-callback'
+    | '/api/public/payments/monobank-init'
+    | '/api/public/payments/wayforpay-callback'
+    | '/api/public/payments/wayforpay-init'
     | '/api/public/shipping/np'
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
@@ -2110,6 +2188,12 @@ export interface RootRouteChildren {
   ApiIntegrationsSyncProviderRoute: typeof ApiIntegrationsSyncProviderRoute
   ApiPublicEmailResendWebhookRoute: typeof ApiPublicEmailResendWebhookRoute
   ApiPublicEmailUnsubscribeRoute: typeof ApiPublicEmailUnsubscribeRoute
+  ApiPublicPaymentsLiqpayCallbackRoute: typeof ApiPublicPaymentsLiqpayCallbackRoute
+  ApiPublicPaymentsLiqpayInitRoute: typeof ApiPublicPaymentsLiqpayInitRoute
+  ApiPublicPaymentsMonobankCallbackRoute: typeof ApiPublicPaymentsMonobankCallbackRoute
+  ApiPublicPaymentsMonobankInitRoute: typeof ApiPublicPaymentsMonobankInitRoute
+  ApiPublicPaymentsWayforpayCallbackRoute: typeof ApiPublicPaymentsWayforpayCallbackRoute
+  ApiPublicPaymentsWayforpayInitRoute: typeof ApiPublicPaymentsWayforpayInitRoute
   ApiPublicShippingNpRoute: typeof ApiPublicShippingNpRoute
   ApiPublicIntegrationsInboundProviderRoute: typeof ApiPublicIntegrationsInboundProviderRoute
 }
@@ -3166,6 +3250,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicShippingNpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/payments/wayforpay-init': {
+      id: '/api/public/payments/wayforpay-init'
+      path: '/api/public/payments/wayforpay-init'
+      fullPath: '/api/public/payments/wayforpay-init'
+      preLoaderRoute: typeof ApiPublicPaymentsWayforpayInitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/payments/wayforpay-callback': {
+      id: '/api/public/payments/wayforpay-callback'
+      path: '/api/public/payments/wayforpay-callback'
+      fullPath: '/api/public/payments/wayforpay-callback'
+      preLoaderRoute: typeof ApiPublicPaymentsWayforpayCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/payments/monobank-init': {
+      id: '/api/public/payments/monobank-init'
+      path: '/api/public/payments/monobank-init'
+      fullPath: '/api/public/payments/monobank-init'
+      preLoaderRoute: typeof ApiPublicPaymentsMonobankInitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/payments/monobank-callback': {
+      id: '/api/public/payments/monobank-callback'
+      path: '/api/public/payments/monobank-callback'
+      fullPath: '/api/public/payments/monobank-callback'
+      preLoaderRoute: typeof ApiPublicPaymentsMonobankCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/payments/liqpay-init': {
+      id: '/api/public/payments/liqpay-init'
+      path: '/api/public/payments/liqpay-init'
+      fullPath: '/api/public/payments/liqpay-init'
+      preLoaderRoute: typeof ApiPublicPaymentsLiqpayInitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/payments/liqpay-callback': {
+      id: '/api/public/payments/liqpay-callback'
+      path: '/api/public/payments/liqpay-callback'
+      fullPath: '/api/public/payments/liqpay-callback'
+      preLoaderRoute: typeof ApiPublicPaymentsLiqpayCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/email/unsubscribe': {
       id: '/api/public/email/unsubscribe'
       path: '/api/public/email/unsubscribe'
@@ -3484,6 +3610,14 @@ const rootRouteChildren: RootRouteChildren = {
   ApiIntegrationsSyncProviderRoute: ApiIntegrationsSyncProviderRoute,
   ApiPublicEmailResendWebhookRoute: ApiPublicEmailResendWebhookRoute,
   ApiPublicEmailUnsubscribeRoute: ApiPublicEmailUnsubscribeRoute,
+  ApiPublicPaymentsLiqpayCallbackRoute: ApiPublicPaymentsLiqpayCallbackRoute,
+  ApiPublicPaymentsLiqpayInitRoute: ApiPublicPaymentsLiqpayInitRoute,
+  ApiPublicPaymentsMonobankCallbackRoute:
+    ApiPublicPaymentsMonobankCallbackRoute,
+  ApiPublicPaymentsMonobankInitRoute: ApiPublicPaymentsMonobankInitRoute,
+  ApiPublicPaymentsWayforpayCallbackRoute:
+    ApiPublicPaymentsWayforpayCallbackRoute,
+  ApiPublicPaymentsWayforpayInitRoute: ApiPublicPaymentsWayforpayInitRoute,
   ApiPublicShippingNpRoute: ApiPublicShippingNpRoute,
   ApiPublicIntegrationsInboundProviderRoute:
     ApiPublicIntegrationsInboundProviderRoute,

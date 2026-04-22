@@ -36,6 +36,15 @@ export type TenantConfigValues = {
     manual_instructions: string;
     manual_contact: string;
     currency: string;
+    liqpay_enabled: boolean;
+    liqpay_public_key: string;
+    liqpay_private_key: string;
+    wayforpay_enabled: boolean;
+    wayforpay_merchant_account: string;
+    wayforpay_secret_key: string;
+    wayforpay_merchant_domain: string;
+    monobank_enabled: boolean;
+    monobank_token: string;
   };
 };
 
@@ -93,6 +102,15 @@ export function normalizeConfig(input: {
       manual_instructions: str(payments.manual_instructions, DEFAULT_MANUAL_INSTRUCTIONS),
       manual_contact: str(payments.manual_contact, ""),
       currency: str(payments.currency, "UAH"),
+      liqpay_enabled: bool(payments.liqpay_enabled, false),
+      liqpay_public_key: str(payments.liqpay_public_key, ""),
+      liqpay_private_key: str(payments.liqpay_private_key, ""),
+      wayforpay_enabled: bool(payments.wayforpay_enabled, false),
+      wayforpay_merchant_account: str(payments.wayforpay_merchant_account, ""),
+      wayforpay_secret_key: str(payments.wayforpay_secret_key, ""),
+      wayforpay_merchant_domain: str(payments.wayforpay_merchant_domain, ""),
+      monobank_enabled: bool(payments.monobank_enabled, false),
+      monobank_token: str(payments.monobank_token, ""),
     },
   };
 }
