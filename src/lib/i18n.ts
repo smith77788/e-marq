@@ -1282,8 +1282,13 @@ const dict = {
     "insights.tech": "Technical details",
 
     "toast.newInsight": "New insight",
+    "toast.criticalInsight": "Critical insight",
+    "toast.highInsight": "High-priority insight",
     "toast.actionApplied": "Action applied",
     "toast.agentCompleted": "Agent completed",
+    "toast.agentFailed": "Agent failed",
+    "toast.openLabel": "Open",
+    "toast.detailsLabel": "Details",
 
     "onb.title": "7-step quick start",
     "onb.subtitle": "Set up your autonomous Revenue OS. You can come back to finish anytime.",
