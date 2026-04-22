@@ -3,6 +3,7 @@ import { Check, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { MarketingHeader, MarketingFooter } from "@/components/marketing/MarketingShell";
 import { useT, tStatic } from "@/lib/i18n";
 
 export const Route = createFileRoute("/pricing")({
@@ -52,6 +53,7 @@ function Pricing() {
 
   return (
     <main className="min-h-screen bg-background">
+      <MarketingHeader />
       <section className="border-b border-border bg-gradient-to-br from-primary/10 via-background to-background">
         <div className="mx-auto max-w-4xl px-4 py-16 text-center">
           <Badge variant="outline" className="border-primary/30 bg-primary/5 text-primary">
@@ -100,6 +102,7 @@ function Pricing() {
 
         <p className="mt-10 text-center text-xs text-muted-foreground">{t("pr.note")}</p>
       </section>
+      <MarketingFooter />
     </main>
   );
 }
