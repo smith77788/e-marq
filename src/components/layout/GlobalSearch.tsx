@@ -39,9 +39,11 @@ import {
 } from "@/components/ui/command";
 import { useT } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
+import { useTenantContext } from "@/hooks/useTenantContext";
 import { supabase } from "@/integrations/supabase/client";
 import { getRecentPages } from "@/lib/recentPages";
 import { QUICK_ACTIONS, toggleThemeMode, type QuickAction } from "@/lib/quickActions";
+import { AiAskPanel } from "@/components/layout/AiAskPanel";
 
 type StaticEntry = {
   label: string;
