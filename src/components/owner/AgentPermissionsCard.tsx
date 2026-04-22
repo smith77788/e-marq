@@ -274,6 +274,36 @@ export function AgentPermissionsCard({ tenantId, agentId }: Props) {
           />
         </div>
 
+        {/* Geo region override (only for geo-aware agents) */}
+        {GEO_AWARE_AGENTS.has(agentId) && (
+          <Collapsible defaultOpen={!!draft.geo_targets}>
+            <div className="rounded-lg border border-border/60">
+              <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 p-3 text-left hover:bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <div>
+                    <div className="text-sm font-medium">Регіон агента</div>
+                    <div className="text-xs text-muted-foreground">
+                      {draft.geo_targets
+                        ? summarizeGeo(draft.geo_targets)
+                        : "Наслідується з налаштувань бренду"}
+                    </div>
+                  </div>
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="border-t border-border/60 p-3">
+                <RegionSelector
+                  value={draft.geo_targets}
+                  onChange={(g) => setDraft({ ...draft, geo_targets: g })}
+                  inheritHint="За замовчуванням агент використовує регіон з налаштувань бренду. Задайте власний, щоб перевизначити."
+                  onClear={() => setDraft({ ...draft, geo_targets: null })}
+                  compact
+                />
+              </CollapsibleContent>
+            </div>
+          </Collapsible>
+        )}
+
         <Button
           onClick={() => saveMut.mutate()}
           disabled={!dirty || saveMut.isPending}
