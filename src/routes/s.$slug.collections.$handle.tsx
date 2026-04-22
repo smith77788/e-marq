@@ -60,7 +60,7 @@ export const Route = createFileRoute("/s/$slug/collections/$handle")({
       <p className="text-sm text-muted-foreground">{tStatic("sf.collection.notFound")}</p>
     </div>
   ),
-  errorComponent: ({ error }) => (
+  errorComponent: ({ error }: { error: Error }) => (
     <div className="mx-auto max-w-4xl px-4 py-12 text-center">
       <p className="text-sm text-destructive">
         {tStatic("sf.collection.error")}: {error.message}

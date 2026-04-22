@@ -60,7 +60,7 @@ export const Route = createFileRoute("/s/$slug/products/$productId")({
       ],
     };
   },
-  errorComponent: ({ error }) => (
+  errorComponent: ({ error }: { error: Error }) => (
     <div className="mx-auto max-w-4xl px-4 py-12 text-center">
       <p className="text-sm text-destructive">Не вдалося завантажити товар: {error.message}</p>
     </div>

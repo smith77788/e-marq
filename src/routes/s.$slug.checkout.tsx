@@ -71,7 +71,7 @@ export const Route = createFileRoute("/s/$slug/checkout")({
   head: () => ({
     meta: [{ title: "Оформлення замовлення" }, { name: "robots", content: "noindex" }],
   }),
-  errorComponent: ({ error }) => (
+  errorComponent: ({ error }: { error: Error }) => (
     <div className="mx-auto max-w-2xl px-4 py-12 text-center">
       <p className="text-sm text-destructive">Помилка: {error.message}</p>
     </div>

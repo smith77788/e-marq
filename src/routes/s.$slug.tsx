@@ -59,7 +59,7 @@ export const Route = createFileRoute("/s/$slug")({
       </div>
     </div>
   ),
-  errorComponent: ({ error }) => (
+  errorComponent: ({ error }: { error: Error }) => (
     <div className="flex min-h-screen items-center justify-center px-4">
       <p className="text-sm text-destructive">Не вдалося завантажити магазин: {error.message}</p>
     </div>
