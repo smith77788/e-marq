@@ -25,7 +25,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useT } from "@/lib/i18n";
+import { useT, type TKey } from "@/lib/i18n";
 import { MissionStatCard } from "@/components/admin/MissionStatCard";
 import { TenantLeaderboard, type TenantLeaderRow } from "@/components/admin/TenantLeaderboard";
 import { SystemHealthGrid } from "@/components/admin/SystemHealthGrid";
@@ -60,7 +60,7 @@ function MissionControlPage() {
 /*  Header section                                                            */
 /* -------------------------------------------------------------------------- */
 
-function MissionHeader({ t }: { t: (k: never) => string }) {
+function MissionHeader({ t }: { t: (k: TKey) => string }) {
   return (
     <header className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-card/60 to-accent/5 p-6 shadow-elegant backdrop-blur">
       <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
