@@ -184,6 +184,7 @@ import { Route as ApiPublicMarqInsightsRouteImport } from './routes/api/public/m
 import { Route as ApiPublicMarqEventsRouteImport } from './routes/api/public/marq.events'
 import { Route as ApiPublicEmailUnsubscribeRouteImport } from './routes/api/public/email.unsubscribe'
 import { Route as ApiPublicEmailResendWebhookRouteImport } from './routes/api/public/email.resend-webhook'
+import { Route as ApiOrdersOrderIdTelegramMessageRouteImport } from './routes/api/orders.$orderId.telegram-message'
 import { Route as ApiIntegrationsSyncProviderRouteImport } from './routes/api/integrations.sync.$provider'
 import { Route as AuthenticatedBrandProductsProductIdRouteImport } from './routes/_authenticated/brand.products.$productId'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
@@ -1153,6 +1154,12 @@ const ApiPublicEmailResendWebhookRoute =
     path: '/api/public/email/resend-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiOrdersOrderIdTelegramMessageRoute =
+  ApiOrdersOrderIdTelegramMessageRouteImport.update({
+    id: '/api/orders/$orderId/telegram-message',
+    path: '/api/orders/$orderId/telegram-message',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiIntegrationsSyncProviderRoute =
   ApiIntegrationsSyncProviderRouteImport.update({
     id: '/api/integrations/sync/$provider',
@@ -1347,6 +1354,7 @@ export interface FileRoutesByFullPath {
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/brand/products/$productId': typeof AuthenticatedBrandProductsProductIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
+  '/api/orders/$orderId/telegram-message': typeof ApiOrdersOrderIdTelegramMessageRoute
   '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
   '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
   '/api/public/marq/events': typeof ApiPublicMarqEventsRoute
@@ -1527,6 +1535,7 @@ export interface FileRoutesByTo {
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/brand/products/$productId': typeof AuthenticatedBrandProductsProductIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
+  '/api/orders/$orderId/telegram-message': typeof ApiOrdersOrderIdTelegramMessageRoute
   '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
   '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
   '/api/public/marq/events': typeof ApiPublicMarqEventsRoute
@@ -1710,6 +1719,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/_authenticated/brand/products/$productId': typeof AuthenticatedBrandProductsProductIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
+  '/api/orders/$orderId/telegram-message': typeof ApiOrdersOrderIdTelegramMessageRoute
   '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
   '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
   '/api/public/marq/events': typeof ApiPublicMarqEventsRoute
@@ -1893,6 +1903,7 @@ export interface FileRouteTypes {
     | '/admin/tenants/$tenantId'
     | '/brand/products/$productId'
     | '/api/integrations/sync/$provider'
+    | '/api/orders/$orderId/telegram-message'
     | '/api/public/email/resend-webhook'
     | '/api/public/email/unsubscribe'
     | '/api/public/marq/events'
@@ -2073,6 +2084,7 @@ export interface FileRouteTypes {
     | '/admin/tenants/$tenantId'
     | '/brand/products/$productId'
     | '/api/integrations/sync/$provider'
+    | '/api/orders/$orderId/telegram-message'
     | '/api/public/email/resend-webhook'
     | '/api/public/email/unsubscribe'
     | '/api/public/marq/events'
@@ -2255,6 +2267,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tenants/$tenantId'
     | '/_authenticated/brand/products/$productId'
     | '/api/integrations/sync/$provider'
+    | '/api/orders/$orderId/telegram-message'
     | '/api/public/email/resend-webhook'
     | '/api/public/email/unsubscribe'
     | '/api/public/marq/events'
@@ -2406,6 +2419,7 @@ export interface RootRouteChildren {
   HooksTelegramPollRoute: typeof HooksTelegramPollRoute
   TrackSlugJsRoute: typeof TrackSlugJsRoute
   ApiIntegrationsSyncProviderRoute: typeof ApiIntegrationsSyncProviderRoute
+  ApiOrdersOrderIdTelegramMessageRoute: typeof ApiOrdersOrderIdTelegramMessageRoute
   ApiPublicEmailResendWebhookRoute: typeof ApiPublicEmailResendWebhookRoute
   ApiPublicEmailUnsubscribeRoute: typeof ApiPublicEmailUnsubscribeRoute
   ApiPublicMarqEventsRoute: typeof ApiPublicMarqEventsRoute
@@ -3649,6 +3663,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicEmailResendWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/orders/$orderId/telegram-message': {
+      id: '/api/orders/$orderId/telegram-message'
+      path: '/api/orders/$orderId/telegram-message'
+      fullPath: '/api/orders/$orderId/telegram-message'
+      preLoaderRoute: typeof ApiOrdersOrderIdTelegramMessageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/integrations/sync/$provider': {
       id: '/api/integrations/sync/$provider'
       path: '/api/integrations/sync/$provider'
@@ -3970,6 +3991,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksTelegramPollRoute: HooksTelegramPollRoute,
   TrackSlugJsRoute: TrackSlugJsRoute,
   ApiIntegrationsSyncProviderRoute: ApiIntegrationsSyncProviderRoute,
+  ApiOrdersOrderIdTelegramMessageRoute: ApiOrdersOrderIdTelegramMessageRoute,
   ApiPublicEmailResendWebhookRoute: ApiPublicEmailResendWebhookRoute,
   ApiPublicEmailUnsubscribeRoute: ApiPublicEmailUnsubscribeRoute,
   ApiPublicMarqEventsRoute: ApiPublicMarqEventsRoute,
