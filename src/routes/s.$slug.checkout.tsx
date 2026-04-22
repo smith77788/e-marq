@@ -95,20 +95,28 @@ function CheckoutPage() {
     staleTime: 30_000,
   });
 
-  const payments = shell.config.features?.payments ?? {
+  const payments = (shell.config.features?.payments ?? {
     manual_enabled: true,
-  };
+  }) as Record<string, unknown>;
 
   const manualEnabled = payments.manual_enabled !== false;
-  const stripeEnabled = payments.stripe_enabled === true;
-  const noMethods = !manualEnabled && !stripeEnabled;
-  const defaultMethod: "manual" | "stripe_card" = manualEnabled ? "manual" : "stripe_card";
+  const liqpayEnabled = payments.liqpay_enabled === true;
+  const wayforpayEnabled = payments.wayforpay_enabled === true;
+  const monobankEnabled = payments.monobank_enabled === true;
+  const availableMethods: PaymentMethod[] = [
+    ...(manualEnabled ? (["manual"] as const) : []),
+    ...(liqpayEnabled ? (["liqpay"] as const) : []),
+    ...(wayforpayEnabled ? (["wayforpay"] as const) : []),
+    ...(monobankEnabled ? (["monobank"] as const) : []),
+  ];
+  const noMethods = availableMethods.length === 0;
+  const defaultMethod: PaymentMethod = availableMethods[0] ?? "manual";
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [shipping, setShipping] = useState<NPSelection | null>(null);
-  const [method, setMethod] = useState<"manual" | "stripe_card">(defaultMethod);
+  const [method, setMethod] = useState<PaymentMethod>(defaultMethod);
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState<DiscountResult | null>(null);
   const [validatingPromo, setValidatingPromo] = useState(false);
