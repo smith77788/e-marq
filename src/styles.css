@@ -215,6 +215,21 @@
   ::-webkit-scrollbar-thumb:hover {
     background: oklch(1 0 0 / 14%);
   }
+
+  /*
+   * A11y: Global focus-visible baseline for native interactive elements.
+   * Ensures any unstyled <button>/<a>/[role=button]/[tabindex] still shows
+   * a visible keyboard focus ring. Components that set their own
+   * `focus-visible:outline-none` (shadcn Button/Input/etc.) override this.
+   */
+  a:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  [tabindex]:not([tabindex="-1"]):focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
 }
 
 @layer utilities {
