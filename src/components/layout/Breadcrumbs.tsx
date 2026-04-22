@@ -3,7 +3,7 @@
  * Будує крихти на основі першого матчу router-а та статичної мапи розділів.
  * Тонкий і малопомітний — ставимо акцент на іконку розділу + дрібний текст.
  */
-import { Link, useLocation } from "@tanstack/react-router";
+import { useLocation } from "@tanstack/react-router";
 import { ChevronRight, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 
