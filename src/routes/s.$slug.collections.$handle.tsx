@@ -16,7 +16,7 @@ import { loadCollectionProducts } from "@/lib/storefront/loaders";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { useT, tStatic } from "@/lib/i18n";
 import { canonicalUrl } from "@/lib/seo";
-import { collectionJsonLd } from "@/lib/storefront/jsonLd";
+import { collectionJsonLd, breadcrumbJsonLd } from "@/lib/storefront/jsonLd";
 
 type SortOpt = "manual" | "price_asc" | "price_desc" | "name_asc";
 
