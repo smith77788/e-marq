@@ -29,17 +29,16 @@ function parseRss(xml: string, hashtag: string): IgPost[] {
   let m: RegExpExecArray | null;
   while ((m = itemRx.exec(xml)) && out.length < 15) {
     const block = m[1];
-    const link = (block.match(/<link>([\s\S]*?)<\/link>/) ?? [, ""])[1].trim();
-    const title = (block.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/) ?? [
-      ,
-      "",
-    ])[1].trim();
-    const desc = (block.match(
-      /<description>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/description>/,
-    ) ?? [, ""])[1]
+    const link = (block.match(/<link>([\s\S]*?)<\/link>/)?.[1] ?? "").trim();
+    const title = (
+      block.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/)?.[1] ?? ""
+    ).trim();
+    const desc = (
+      block.match(/<description>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/description>/)?.[1] ?? ""
+    )
       .replace(/<[^>]+>/g, " ")
       .trim();
-    const pub = (block.match(/<pubDate>([\s\S]*?)<\/pubDate>/) ?? [, ""])[1].trim();
+    const pub = (block.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1] ?? "").trim();
     const caption = [title, desc].filter(Boolean).join(" — ").slice(0, 1500);
     if (!link || !caption) continue;
     out.push({ url: link, caption, hashtag, posted_at: pub || undefined });
