@@ -86,7 +86,7 @@ function BrandPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="reveal-stagger space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
