@@ -89,7 +89,7 @@ async function request<T>(
   }
 
   let attempt = 0;
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     const res = await fetch(url.toString(), {
       method,

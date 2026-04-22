@@ -46,13 +46,7 @@ type Props = {
   onClear?: () => void;
 };
 
-export function RegionSelector({
-  value,
-  onChange,
-  compact = false,
-  inheritHint,
-  onClear,
-}: Props) {
+export function RegionSelector({ value, onChange, compact = false, inheritHint, onClear }: Props) {
   const current = value ?? DEFAULT_GEO_TARGETS;
   const [query, setQuery] = useState("");
   const [npResults, setNpResults] = useState<NPCity[]>([]);
@@ -100,7 +94,7 @@ export function RegionSelector({
     onChange({
       ...current,
       country: code,
-      cities: [],          // reset cities when country switches
+      cities: [], // reset cities when country switches
       whole_country: true, // safe default
     });
     setQuery("");
@@ -147,8 +141,7 @@ export function RegionSelector({
           <SelectContent>
             {COMMON_COUNTRIES.map((c) => (
               <SelectItem key={c.code} value={c.code}>
-                <span className="font-mono text-xs text-muted-foreground">{c.code}</span>{" "}
-                {c.nameUk}
+                <span className="font-mono text-xs text-muted-foreground">{c.code}</span> {c.nameUk}
               </SelectItem>
             ))}
           </SelectContent>
@@ -177,11 +170,7 @@ export function RegionSelector({
           {current.cities.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {current.cities.map((c) => (
-                <Badge
-                  key={c.name}
-                  variant="secondary"
-                  className="gap-1 pr-1 font-normal"
-                >
+                <Badge key={c.name} variant="secondary" className="gap-1 pr-1 font-normal">
                   {c.name}
                   <button
                     type="button"
@@ -224,9 +213,7 @@ export function RegionSelector({
                         <span>
                           <span className="font-medium">{c.name}</span>
                           {c.area && (
-                            <span className="ml-1.5 text-xs text-muted-foreground">
-                              {c.area}
-                            </span>
+                            <span className="ml-1.5 text-xs text-muted-foreground">{c.area}</span>
                           )}
                         </span>
                         {!taken && <Plus className="h-3.5 w-3.5 text-primary" />}

@@ -9,11 +9,7 @@
  * Availability: Schema.org URLs (https://schema.org/InStock, /OutOfStock).
  */
 import { canonicalUrl } from "@/lib/seo";
-import type {
-  CollectionDetail,
-  ProductDetail,
-  StorefrontShell,
-} from "@/lib/storefront/loaders";
+import type { CollectionDetail, ProductDetail, StorefrontShell } from "@/lib/storefront/loaders";
 
 const SCHEMA = "https://schema.org";
 

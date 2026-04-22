@@ -60,9 +60,7 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
           const since = new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString();
           const { data: itemsRaw } = await supabaseAdmin
             .from("order_items")
-            .select(
-              "product_id, quantity, unit_price_cents, created_at, orders!inner(metadata)",
-            )
+            .select("product_id, quantity, unit_price_cents, created_at, orders!inner(metadata)")
             .eq("tenant_id", tenantId)
             .gte("created_at", since)
             .not("product_id", "is", null);
