@@ -20,6 +20,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
 import { Route as HandbookDntradeWebhookRouteImport } from './routes/handbook.dntrade-webhook'
+import { Route as ApiMarqKeysRouteImport } from './routes/api/marq-keys'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -233,6 +234,11 @@ const HandbookDntradeWebhookRoute = HandbookDntradeWebhookRouteImport.update({
   id: '/dntrade-webhook',
   path: '/dntrade-webhook',
   getParentRoute: () => HandbookRoute,
+} as any)
+const ApiMarqKeysRoute = ApiMarqKeysRouteImport.update({
+  id: '/api/marq-keys',
+  path: '/api/marq-keys',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
@@ -1130,6 +1136,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/api/marq-keys': typeof ApiMarqKeysRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
@@ -1301,6 +1308,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/api/marq-keys': typeof ApiMarqKeysRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
@@ -1473,6 +1481,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/api/marq-keys': typeof ApiMarqKeysRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/s/$slug': typeof SSlugRouteWithChildren
@@ -1646,6 +1655,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/profile'
+    | '/api/marq-keys'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
     | '/s/$slug'
@@ -1817,6 +1827,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/profile'
+    | '/api/marq-keys'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
     | '/admin/commands'
@@ -1988,6 +1999,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
     | '/_authenticated/profile'
+    | '/api/marq-keys'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
     | '/s/$slug'
@@ -2157,6 +2169,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
   SignupRoute: typeof SignupRoute
+  ApiMarqKeysRoute: typeof ApiMarqKeysRoute
   HooksIngestRoute: typeof HooksIngestRoute
   SSlugRoute: typeof SSlugRouteWithChildren
   ApiEmailCampaignSendRoute: typeof ApiEmailCampaignSendRoute
@@ -2368,6 +2381,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/handbook/dntrade-webhook'
       preLoaderRoute: typeof HandbookDntradeWebhookRouteImport
       parentRoute: typeof HandbookRoute
+    }
+    '/api/marq-keys': {
+      id: '/api/marq-keys'
+      path: '/api/marq-keys'
+      fullPath: '/api/marq-keys'
+      preLoaderRoute: typeof ApiMarqKeysRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
@@ -3633,6 +3653,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
   SignupRoute: SignupRoute,
+  ApiMarqKeysRoute: ApiMarqKeysRoute,
   HooksIngestRoute: HooksIngestRoute,
   SSlugRoute: SSlugRouteWithChildren,
   ApiEmailCampaignSendRoute: ApiEmailCampaignSendRoute,
