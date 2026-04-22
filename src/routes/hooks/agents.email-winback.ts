@@ -27,6 +27,7 @@ import {
 } from "@/lib/acos/agentRuntime";
 import { sendEmailViaGateway } from "@/lib/email/resendGateway";
 import { renderWinback } from "@/lib/email/marketingTemplates";
+import { isEmailAutomationEnabled } from "@/lib/acos/emailAutomationFlags";
 
 const AGENT_ID = "email_winback";
 const TEMPLATE = "winback";
@@ -68,6 +69,10 @@ export const Route = createFileRoute("/hooks/agents/email-winback")({
 
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
+          if (!(await isEmailAutomationEnabled(tenantId, "winback"))) {
+            await finishAgentRun(handle, 0, { reason: "disabled_by_owner" });
+            return jsonOk({ insights_created: 0, sent: 0, reason: "disabled_by_owner" });
+          }
           const now = Date.now();
           const dayMs = 86_400_000;
           const minLastOrder = new Date(now - MAX_DAYS_DORMANT * dayMs).toISOString();

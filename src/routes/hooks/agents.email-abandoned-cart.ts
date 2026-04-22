@@ -23,6 +23,7 @@ import {
 } from "@/lib/acos/agentRuntime";
 import { sendEmailViaGateway } from "@/lib/email/resendGateway";
 import { renderAbandonedCart } from "@/lib/email/marketingTemplates";
+import { isEmailAutomationEnabled } from "@/lib/acos/emailAutomationFlags";
 
 const AGENT_ID = "email_abandoned_cart";
 const TEMPLATE = "abandoned_cart";
@@ -51,6 +52,10 @@ export const Route = createFileRoute("/hooks/agents/email-abandoned-cart")({
 
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
+          if (!(await isEmailAutomationEnabled(tenantId, "abandoned_cart"))) {
+            await finishAgentRun(handle, 0, { reason: "disabled_by_owner" });
+            return jsonOk({ insights_created: 0, sent: 0, reason: "disabled_by_owner" });
+          }
           const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
 
           const [{ data: tenant }, { data: cfg }] = await Promise.all([

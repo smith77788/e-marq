@@ -24,6 +24,7 @@ import {
 } from "@/lib/acos/agentRuntime";
 import { sendEmailViaGateway } from "@/lib/email/resendGateway";
 import { renderRestock } from "@/lib/email/marketingTemplates";
+import { isEmailAutomationEnabled } from "@/lib/acos/emailAutomationFlags";
 
 const AGENT_ID = "restock_notifier";
 const TEMPLATE = "restock";
@@ -51,6 +52,10 @@ export const Route = createFileRoute("/hooks/agents/restock-notifier")({
 
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
+          if (!(await isEmailAutomationEnabled(tenantId, "restock"))) {
+            await finishAgentRun(handle, 0, { reason: "disabled_by_owner" });
+            return jsonOk({ insights_created: 0, sent: 0, reason: "disabled_by_owner" });
+          }
           const [{ data: tenant }, { data: cfg }] = await Promise.all([
             supabaseAdmin.from("tenants").select("slug, name").eq("id", tenantId).maybeSingle(),
             supabaseAdmin.from("tenant_configs").select("brand_name").eq("tenant_id", tenantId).maybeSingle(),
