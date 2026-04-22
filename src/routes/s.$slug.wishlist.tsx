@@ -16,18 +16,23 @@ import { loadStorefrontShell, type StorefrontShell } from "@/lib/storefront/load
 import { useStorefrontCart } from "@/lib/storefront/cartContext";
 import { useWishlist } from "@/hooks/useWishlist";
 import { ProductCard } from "@/components/storefront/ProductCard";
+import { useT, tStatic } from "@/lib/i18n";
 
 export const Route = createFileRoute("/s/$slug/wishlist")({
   loader: ({ params }) => loadStorefrontShell(params.slug),
   head: ({ loaderData }) => ({
     meta: [
-      { title: `Обране — ${loaderData?.config?.brand_name ?? "Магазин"}` },
+      {
+        title: `${tStatic("sf.wishlist.titleSuffix")} — ${loaderData?.config?.brand_name ?? tStatic("sf.shop.fallback")}`,
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
   errorComponent: ({ error }) => (
     <div className="mx-auto max-w-4xl px-4 py-12 text-center">
-      <p className="text-sm text-destructive">Помилка: {error.message}</p>
+      <p className="text-sm text-destructive">
+        {tStatic("sf.wishlist.error")}: {error.message}
+      </p>
     </div>
   ),
   component: WishlistPage,
@@ -38,6 +43,7 @@ function WishlistPage() {
   const initial = Route.useLoaderData();
   const { tenantId } = useStorefrontCart();
   const wishlist = useWishlist(tenantId);
+  const { t } = useT();
 
   const { data } = useQuery<StorefrontShell>({
     queryKey: ["storefront-shell", slug],
@@ -55,16 +61,16 @@ function WishlistPage() {
     <main className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Обране</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("sf.wishlist.heading")}</h1>
           <p className="text-sm text-muted-foreground">
             {liked.length === 0
-              ? "У вас поки немає збережених товарів"
-              : `${liked.length} ${pluralize(liked.length)} у списку`}
+              ? t("sf.wishlist.empty")
+              : `${liked.length} ${pluralize(liked.length)} ${t("sf.wishlist.countSuffix")}`}
           </p>
         </div>
         {liked.length > 0 && (
           <Button variant="ghost" size="sm" onClick={wishlist.clear}>
-            Очистити список
+            {t("sf.wishlist.clear")}
           </Button>
         )}
       </div>
@@ -72,14 +78,11 @@ function WishlistPage() {
       {liked.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
-            <Heart className="h-10 w-10 text-muted-foreground" />
-            <p className="max-w-sm text-sm text-muted-foreground">
-              Натисніть ❤ на картці товару, щоб зберегти його сюди — список збережеться на цьому
-              пристрої навіть після закриття вкладки.
-            </p>
+            <Heart className="h-10 w-10 text-muted-foreground" aria-hidden="true" />
+            <p className="max-w-sm text-sm text-muted-foreground">{t("sf.wishlist.hint")}</p>
             <Button asChild>
               <Link to="/s/$slug" params={{ slug }}>
-                Перейти до каталогу
+                {t("sf.wishlist.toCatalog")}
               </Link>
             </Button>
           </CardContent>
