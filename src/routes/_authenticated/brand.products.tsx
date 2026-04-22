@@ -308,6 +308,10 @@ function BrandProductsPage() {
                         <img
                           src={p.image_url}
                           alt={p.name}
+                          loading="lazy"
+                          decoding="async"
+                          width={40}
+                          height={40}
                           className="h-10 w-10 rounded object-cover"
                         />
                       ) : (

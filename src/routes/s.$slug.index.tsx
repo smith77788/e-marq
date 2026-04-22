@@ -67,6 +67,10 @@ function StorefrontIndex() {
               <img
                 src={ui.hero_image}
                 alt=""
+                decoding="async"
+                fetchPriority="high"
+                width={192}
+                height={192}
                 className="h-40 w-40 shrink-0 rounded-xl object-cover sm:h-48 sm:w-48"
               />
             )}
@@ -92,6 +96,7 @@ function StorefrontIndex() {
                     src={c.image_url}
                     alt={c.name}
                     loading="lazy"
+                    decoding="async"
                     className="h-full w-full object-cover transition-transform group-hover:scale-105"
                   />
                 ) : (

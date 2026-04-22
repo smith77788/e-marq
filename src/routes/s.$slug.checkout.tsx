@@ -421,6 +421,10 @@ function CheckoutPage() {
                     <img
                       src={product.image_url}
                       alt={product.name}
+                      loading="lazy"
+                      decoding="async"
+                      width={48}
+                      height={48}
                       className="h-12 w-12 rounded object-cover"
                     />
                   ) : (

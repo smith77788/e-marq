@@ -131,6 +131,10 @@ function ProductDetailPage() {
               <img
                 src={galleryImages[activeImage]?.url}
                 alt={galleryImages[activeImage]?.alt ?? product.name}
+                decoding="async"
+                fetchPriority="high"
+                width={800}
+                height={800}
                 className="h-full w-full object-cover"
               />
             ) : (
@@ -151,7 +155,7 @@ function ProductDetailPage() {
                   }`}
                   aria-label={`Фото ${i + 1}`}
                 >
-                  <img src={img.url} alt="" className="h-full w-full object-cover" />
+                  <img src={img.url} alt="" loading="lazy" decoding="async" width={64} height={64} className="h-full w-full object-cover" />
                 </button>
               ))}
             </div>
