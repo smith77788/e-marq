@@ -426,6 +426,7 @@ export function AppSidebar({ isSuperAdmin, brandName, tenantSlug }: Props) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+      <HandbookSheet open={handbookOpen} onOpenChange={setHandbookOpen} />
     </Sidebar>
   );
 }
