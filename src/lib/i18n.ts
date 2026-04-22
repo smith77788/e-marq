@@ -912,6 +912,15 @@ const dict = {
     "hm.failCount": "{n} критичних",
     "hm.lastChecked": "Оновлено {time}",
 
+    // Notification center
+    "notif.title": "Сповіщення",
+    "notif.markAll": "Прочитати все",
+    "notif.markedAll": "Усі сповіщення позначено прочитаними",
+    "notif.tabUnread": "Непрочитані",
+    "notif.tabAll": "Усі",
+    "notif.empty": "Поки що нічого немає",
+    "notif.emptyUnread": "Немає непрочитаних — все чисто ✨",
+
     // MFA / 2FA
     "mfa.title": "Двофакторна автентифікація",
     "mfa.subtitle": "Захистіть вхід кодом з застосунку (Google Authenticator, 1Password, Authy).",
@@ -2027,6 +2036,15 @@ const dict = {
     "hm.warnCount": "{n} need attention",
     "hm.failCount": "{n} critical",
     "hm.lastChecked": "Updated {time}",
+
+    // Notification center
+    "notif.title": "Notifications",
+    "notif.markAll": "Mark all read",
+    "notif.markedAll": "All notifications marked as read",
+    "notif.tabUnread": "Unread",
+    "notif.tabAll": "All",
+    "notif.empty": "Nothing here yet",
+    "notif.emptyUnread": "No unread — you're all caught up ✨",
 
     // MFA / 2FA
     "mfa.title": "Two-factor authentication",
