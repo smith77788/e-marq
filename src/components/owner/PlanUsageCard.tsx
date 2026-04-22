@@ -106,9 +106,7 @@ export function PlanUsageCard({ tenantId }: { tenantId: string }) {
               });
             }}
           >
-            {tenantLoading || isLoading ? (
-              <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-            ) : null}
+            {tenantLoading || isLoading ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
             Оплата та баланс <ExternalLink className="ml-1 h-3 w-3" />
           </Button>
         </div>
