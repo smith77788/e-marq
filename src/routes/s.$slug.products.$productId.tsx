@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { loadProductDetail, type StorefrontVariant } from "@/lib/storefront/loaders";
 import { useStorefrontCart, track } from "@/lib/storefront/cartContext";
 import { formatMoneyExact } from "@/lib/money";
+import { RestockSubscribe } from "@/components/storefront/RestockSubscribe";
 
 export const Route = createFileRoute("/s/$slug/products/$productId")({
   loader: ({ params }) => loadProductDetail(params.slug, params.productId),
@@ -254,6 +255,14 @@ function ProductDetailPage() {
               </>
             )}
           </Button>
+
+          {outOfStock && (
+            <RestockSubscribe
+              tenantId={cart.tenantId}
+              productId={product.id}
+              variantId={selectedVariant?.id ?? null}
+            />
+          )}
 
           {product.description && (
             <Card>
