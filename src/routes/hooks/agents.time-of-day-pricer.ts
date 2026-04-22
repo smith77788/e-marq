@@ -15,6 +15,8 @@ import {
   startAgentRun,
   type AgentInsightInput,
 } from "@/lib/acos/agentRuntime";
+import { loadEffectiveGeoTargets } from "@/lib/acos/loadGeoTargets";
+import { rowMatchesGeo, summarizeGeo } from "@/lib/acos/geoTargets";
 
 const AGENT_ID = "time-of-day-pricer";
 

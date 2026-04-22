@@ -19,6 +19,10 @@ import {
   jsonOk,
   startAgentRun,
 } from "@/lib/acos/agentRuntime";
+import { loadEffectiveGeoTargets } from "@/lib/acos/loadGeoTargets";
+import { rowMatchesGeo, summarizeGeo } from "@/lib/acos/geoTargets";
+
+const AGENT_ID = "predictive-pricing";
 
 export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
   server: {
