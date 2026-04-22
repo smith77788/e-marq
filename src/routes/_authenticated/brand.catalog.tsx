@@ -365,7 +365,8 @@ function BrandCollectionsPage() {
               </Button>
             </div>
           ) : (
-            <Table>
+            <div className="overflow-x-auto">
+              <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("bc.col.name")}</TableHead>
@@ -413,7 +414,8 @@ function BrandCollectionsPage() {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

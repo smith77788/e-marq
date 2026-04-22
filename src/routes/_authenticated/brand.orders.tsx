@@ -264,7 +264,8 @@ function BrandOrdersPage() {
               <p className="mt-1 text-xs text-muted-foreground">{t("bo.empty.desc")}</p>
             </div>
           ) : (
-            <Table>
+            <div className="overflow-x-auto">
+              <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("bo.col.number")}</TableHead>
@@ -310,7 +311,8 @@ function BrandOrdersPage() {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
