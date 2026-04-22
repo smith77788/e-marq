@@ -7,6 +7,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { renderMarkdown } from "@/lib/markdown";
 
 type Magnet = {
   id: string;
@@ -114,49 +115,3 @@ function MagnetPage() {
   );
 }
 
-function escapeHtml(s: string) {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function renderMarkdown(src: string): string {
-  const lines = src.split("\n");
-  const out: string[] = [];
-  let inList = false;
-  for (const raw of lines) {
-    const line = raw.trim();
-    if (!line) {
-      if (inList) {
-        out.push("</ul>");
-        inList = false;
-      }
-      continue;
-    }
-    if (/^#{1,6}\s/.test(line)) {
-      if (inList) {
-        out.push("</ul>");
-        inList = false;
-      }
-      const m = /^(#{1,6})\s+(.+)$/.exec(line)!;
-      const level = m[1].length;
-      out.push(`<h${level}>${escapeHtml(m[2])}</h${level}>`);
-    } else if (/^[-*]\s/.test(line)) {
-      if (!inList) {
-        out.push("<ul>");
-        inList = true;
-      }
-      out.push(`<li>${escapeHtml(line.replace(/^[-*]\s+/, ""))}</li>`);
-    } else {
-      if (inList) {
-        out.push("</ul>");
-        inList = false;
-      }
-      out.push(`<p>${escapeHtml(line)}</p>`);
-    }
-  }
-  if (inList) out.push("</ul>");
-  return out.join("\n");
-}

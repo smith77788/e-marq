@@ -181,6 +181,12 @@ type: feature
 - Шаблон витягуємо з `cross_project` API під час snapshot-етапу
 - За кожним relevant апдейтом MFD адмін MARQ запускає re-snapshot → версія в `site_templates.source_commit`
 
+### Sprint 12 — Inline превʼю контенту в адмінці ✅ (готово)
+- Усі посилання, які раніше відкривали `/m/<slug>` в новій вкладці lovable, тепер відкривають **MagnetPreviewDialog** (модал) одразу в адмінці.
+- Спільна утиліта `src/lib/markdown.ts` (renderMarkdown + escapeHtml) для inline-показу. `m.$slug.tsx` теж її використовує.
+- У модалі: повний body, мета-опис, теги, статистика views/signups, кнопка «Відкрити публічну сторінку» для шерингу.
+- **Правило для майбутніх фіч:** усі внутрішні артефакти (магніти, content_pages, drafts, insights body) показувати inline через Dialog/Drawer, а не через переходи на окремі публічні сторінки. Публічні `/m/`, `/s/` лишаються тільки для зовнішніх читачів.
+
 ## Абсолютні заборони
 - НЕ редагувати існуючі міграції
 - НЕ міняти agentRuntime.ts

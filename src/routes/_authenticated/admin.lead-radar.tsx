@@ -28,6 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { OutreachHunterSection } from "@/components/admin/OutreachHunterTabs";
+import { MagnetPreviewDialog } from "@/components/admin/MagnetPreviewDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/lead-radar")({
   component: LeadRadarPage,
@@ -102,6 +103,7 @@ function Content() {
   const qc = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [previewSlug, setPreviewSlug] = useState<string | null>(null);
 
   const prospects = useQuery({
     queryKey: ["lead-prospects", statusFilter],
@@ -368,12 +370,11 @@ function Content() {
               ) : (
                 <div className="divide-y divide-border">
                   {(magnets.data ?? []).map((m) => (
-                    <a
+                    <button
                       key={m.id}
-                      href={`/m/${m.slug}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block px-4 py-3 transition-colors hover:bg-muted/40"
+                      type="button"
+                      onClick={() => setPreviewSlug(m.slug)}
+                      className="block w-full text-left px-4 py-3 transition-colors hover:bg-muted/40"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="min-w-0">
@@ -392,7 +393,7 @@ function Content() {
                           )}
                         </div>
                       </div>
-                    </a>
+                    </button>
                   ))}
                 </div>
               )}
@@ -404,6 +405,12 @@ function Content() {
           <OutreachHunterSection />
         </TabsContent>
       </Tabs>
+
+      <MagnetPreviewDialog
+        slug={previewSlug}
+        open={previewSlug !== null}
+        onOpenChange={(v) => !v && setPreviewSlug(null)}
+      />
     </div>
   );
 }
