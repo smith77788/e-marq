@@ -8,9 +8,9 @@
  * Stateless per call — engine is responsible for scheduling.
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { LOVABLE_AI_URL, DEFAULT_AI_MODEL, isLovableAiEnabled } from "@/lib/acos/aiKillswitch";
 
-const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-2.5-flash";
+const MODEL = DEFAULT_AI_MODEL;
 
 type InboundRow = {
   id: string;
