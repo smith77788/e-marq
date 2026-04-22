@@ -1040,6 +1040,8 @@ const dict = {
     "gs.groupOrders": "Замовлення",
     "gs.groupCustomers": "Клієнти",
     "gs.groupInsights": "Інсайти",
+    "gs.groupRecent": "Нещодавні",
+    "gs.groupActions": "Швидкі дії",
 
     // Notification center
     "notif.title": "Сповіщення",
@@ -2328,6 +2330,8 @@ const dict = {
     "gs.groupOrders": "Orders",
     "gs.groupCustomers": "Customers",
     "gs.groupInsights": "Insights",
+    "gs.groupRecent": "Recent",
+    "gs.groupActions": "Quick actions",
 
     // Notification center
     "notif.title": "Notifications",
