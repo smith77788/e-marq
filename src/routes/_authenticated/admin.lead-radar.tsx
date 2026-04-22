@@ -83,7 +83,16 @@ const STATUSES = [
   "converted",
   "rejected",
   "unreachable",
-];
+] as const;
+const STATUS_LABEL: Record<string, string> = {
+  all: "усі",
+  discovered: "знайдені",
+  qualified: "відібрані",
+  engaging: "у роботі",
+  converted: "стали клієнтами",
+  rejected: "відхилені",
+  unreachable: "не вдалось зв'язатись",
+};
 const STATUS_TONE: Record<string, string> = {
   discovered: "border-info/40 text-info",
   qualified: "border-primary/40 text-primary",
@@ -203,51 +212,64 @@ function Content() {
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
           <Button
             size="sm"
             variant="outline"
             disabled={runAgent.isPending}
             onClick={() => runAgent.mutate("web-prospector")}
+            className="w-full sm:w-auto"
           >
-            <Globe className="mr-1.5 h-3.5 w-3.5" /> Web Prospector
+            {runAgent.isPending && runAgent.variables === "web-prospector" ? (
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Globe className="mr-1.5 h-3.5 w-3.5" />
+            )}
+            Знайти бренди в інтернеті
           </Button>
           <Button
             size="sm"
             variant="outline"
             disabled={runAgent.isPending}
             onClick={() => runAgent.mutate("social-engager")}
+            className="w-full sm:w-auto"
           >
-            <Instagram className="mr-1.5 h-3.5 w-3.5" /> Social Engager
+            {runAgent.isPending && runAgent.variables === "social-engager" ? (
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Instagram className="mr-1.5 h-3.5 w-3.5" />
+            )}
+            Підготувати листи
           </Button>
           <Button
             size="sm"
             disabled={runAgent.isPending}
             onClick={() => runAgent.mutate("content-magnet")}
+            className="w-full sm:w-auto"
           >
-            {runAgent.isPending ? (
+            {runAgent.isPending && runAgent.variables === "content-magnet" ? (
               <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
             ) : (
               <Magnet className="mr-1.5 h-3.5 w-3.5" />
             )}
-            Content Magnet
+            Згенерувати SEO-сторінки
           </Button>
         </div>
       </header>
 
       <Tabs defaultValue="prospects">
-        <TabsList className="flex w-full flex-wrap">
-          <TabsTrigger value="prospects" className="gap-1.5">
+        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-muted/40 p-1">
+          <TabsTrigger value="prospects" className="gap-1.5 text-xs">
             <Target className="h-3.5 w-3.5" /> Кандидати
           </TabsTrigger>
-          <TabsTrigger value="outreach" className="gap-1.5">
-            <Send className="h-3.5 w-3.5" /> Outreach
+          <TabsTrigger value="outreach" className="gap-1.5 text-xs">
+            <Send className="h-3.5 w-3.5" /> Звернення
           </TabsTrigger>
-          <TabsTrigger value="magnets" className="gap-1.5">
+          <TabsTrigger value="magnets" className="gap-1.5 text-xs">
             <Magnet className="h-3.5 w-3.5" /> Контент-магніти
           </TabsTrigger>
-          <TabsTrigger value="hunter" className="gap-1.5">
-            <Sparkles className="h-3.5 w-3.5" /> Outreach Hunter
+          <TabsTrigger value="hunter" className="gap-1.5 text-xs">
+            <Sparkles className="h-3.5 w-3.5" /> Глибокий пошук
           </TabsTrigger>
         </TabsList>
 
@@ -265,7 +287,7 @@ function Content() {
                     : "border-border bg-card text-muted-foreground hover:bg-muted/50"
                 }`}
               >
-                {s}
+                {STATUS_LABEL[s] ?? s}
               </button>
             ))}
             <Input
@@ -462,15 +484,19 @@ function ProspectRow({ prospect }: { prospect: Prospect }) {
 
   return (
     <div className="px-4 py-3">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="truncate text-sm font-semibold text-foreground">{prospect.name}</p>
             <Badge variant="outline" className={STATUS_TONE[prospect.status] ?? "border-border"}>
-              {prospect.status}
+              {STATUS_LABEL[prospect.status] ?? prospect.status}
             </Badge>
-            <Badge variant="secondary" className="font-mono text-[10px]">
-              fit {prospect.fit_score}
+            <Badge
+              variant="secondary"
+              className="font-mono text-[10px]"
+              title="Оцінка релевантності 0–100"
+            >
+              відповідність {prospect.fit_score}
             </Badge>
             {prospect.niche && (
               <Badge variant="outline" className="text-[10px]">
@@ -503,10 +529,10 @@ function ProspectRow({ prospect }: { prospect: Prospect }) {
             {prospect.email && <span>✉ {prospect.email}</span>}
           </div>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5 sm:flex-nowrap">
           <Button size="sm" variant="ghost" disabled={busy} onClick={reachOut}>
             <Sparkles className="mr-1 h-3.5 w-3.5" />
-            Outreach
+            Написати
           </Button>
           <Button
             size="sm"
@@ -515,7 +541,7 @@ function ProspectRow({ prospect }: { prospect: Prospect }) {
             onClick={() => updateStatus("qualified")}
           >
             <Play className="mr-1 h-3.5 w-3.5" />
-            Qualify
+            Відібрати
           </Button>
           <Button
             size="sm"
