@@ -80,6 +80,7 @@ const SHOP: NavGroup = {
     { labelKey: "sb.promotions", to: "/brand/promotions", icon: Tag, tone: "text-accent" },
     { labelKey: "sb.email" as TKey, to: "/brand/email", icon: Mail, tone: "text-primary" },
     { labelKey: "sb.siteBuilder" as TKey, to: "/brand/site-builder", icon: Wand2, tone: "text-accent" },
+    { labelKey: "sb.storeSettings" as TKey, to: "/brand/settings", icon: Settings, tone: "text-primary" },
   ],
 };
 

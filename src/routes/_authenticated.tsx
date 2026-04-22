@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { LiveStatus } from "@/components/layout/LiveStatus";
 import { InsightToasts } from "@/components/layout/InsightToasts";
 import { TenantSwitcher } from "@/components/layout/TenantSwitcher";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { TenantContextProvider, useTenantContext } from "@/hooks/useTenantContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
@@ -80,6 +81,9 @@ function AuthenticatedShell({
                 {t("hdr.superAdmin")}
               </span>
             )}
+          </div>
+          <div className="ml-2 min-w-0 flex-1">
+            <Breadcrumbs />
           </div>
           <div className="ml-auto flex items-center gap-2">
             <TenantSwitcher />
