@@ -216,8 +216,8 @@ MARQ.track('purchase_completed', {
               <Snippet code={universalSnippet} small />
             </div>
             <p className="text-xs text-muted-foreground">
-              Для покупок Shopify і WooCommerce окремо потрібен webhook (додамо в наступному оновленні).
-              Поки що оплата фіксується скриптом на сторінці подяки після замовлення.
+              Скрипт фіксує покупку на сторінці подяки. Для серверної верифікації Shopify/WooCommerce
+              скористайтеся вебхуком — конфігурація у розділі <em>Імпорт</em> → відповідний конектор.
             </p>
           </TabsContent>
         </Tabs>

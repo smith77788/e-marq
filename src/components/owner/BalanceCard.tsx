@@ -18,16 +18,22 @@ import {
   ArrowDownCircle,
   ArrowUpCircle,
   Banknote,
+  CheckCircle2,
+  Clock,
   Coins,
   Copy,
   CreditCard,
   History,
   Info,
   Loader2,
+  Phone,
   Plus,
+  Send,
   Sparkles,
   Wallet,
+  XCircle,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -242,6 +248,15 @@ export function BalanceCard({
             <p className="text-xs text-muted-foreground">Операцій ще не було.</p>
           )}
         </div>
+
+        <Separator />
+
+        <div>
+          <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <Send className="h-3.5 w-3.5" /> Заявки на онлайн-оплату
+          </div>
+          <TopupRequestsList tenantId={tenantId} />
+        </div>
       </CardContent>
     </Card>
   );
@@ -369,7 +384,7 @@ function TopupDialog({
                 <Sparkles className="h-3.5 w-3.5" /> Кредит-нота (адмін)
               </TabsTrigger>
               <TabsTrigger value="online" className="flex-1 gap-1.5">
-                <CreditCard className="h-3.5 w-3.5" /> Онлайн
+                <CreditCard className="h-3.5 w-3.5" /> Через менеджера
               </TabsTrigger>
             </TabsList>
 
@@ -412,18 +427,16 @@ function TopupDialog({
               </div>
             </TabsContent>
 
-            <TabsContent value="online" className="mt-3">
-              <div className="rounded-md border border-info/30 bg-info/5 p-3 text-xs text-foreground">
-                <p className="flex items-start gap-2">
-                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-info" />
-                  <span>
-                    Онлайн-оплата картою (LiqPay, WayForPay, Monobank Pay) для тарифу
-                    зʼявиться у наступному оновленні. Зараз доступний{" "}
-                    <strong>банківський переказ</strong> або <strong>кредит-нота</strong>{" "}
-                    від адміністратора.
-                  </span>
-                </p>
-              </div>
+            <TabsContent value="online" className="mt-3 space-y-3">
+              <ManagerRequestPanel
+                tenantId={tenantId}
+                credits={credits}
+                amountCents={uah * 100}
+                onCreated={() => {
+                  setOpen(false);
+                  onSuccess();
+                }}
+              />
             </TabsContent>
           </Tabs>
         </div>
@@ -487,6 +500,232 @@ function BankRow({
           <Copy className="h-3 w-3" />
         </button>
       </div>
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Заявка на онлайн-оплату через менеджера
+// ────────────────────────────────────────────────────────────────────────────
+
+type ManagerRequestPanelProps = {
+  tenantId: string;
+  credits: number;
+  amountCents: number;
+  onCreated: () => void;
+};
+
+function ManagerRequestPanel({
+  tenantId,
+  credits,
+  amountCents,
+  onCreated,
+}: ManagerRequestPanelProps) {
+  const qc = useQueryClient();
+  const [method, setMethod] = useState<"card" | "bank" | "crypto" | "other">("card");
+  const [contact, setContact] = useState("");
+  const [note, setNote] = useState("");
+
+  const mut = useMutation({
+    mutationFn: async () => {
+      if (!contact.trim()) throw new Error("Вкажіть контакт для звʼязку");
+      const { error } = await supabase.from("topup_requests").insert({
+        tenant_id: tenantId,
+        credits,
+        amount_cents: amountCents,
+        currency: "UAH",
+        payment_method: method,
+        contact: contact.trim(),
+        note: note.trim() || null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Заявку прийнято — менеджер звʼяжеться найближчим часом");
+      qc.invalidateQueries({ queryKey: ["topup-requests", tenantId] });
+      setContact("");
+      setNote("");
+      onCreated();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-md border border-info/30 bg-info/5 p-3 text-xs text-foreground">
+        <p className="flex items-start gap-2">
+          <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-info" />
+          <span>
+            Залиште заявку — менеджер MARQ перетелефонує протягом 1 робочого дня,
+            погодить спосіб оплати (карта, СБП, крипто, інвойс) і одразу зарахує
+            кредити після надходження коштів.
+          </span>
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-xs">Бажаний спосіб оплати</Label>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {(
+            [
+              { id: "card", label: "Карта" },
+              { id: "bank", label: "Інвойс" },
+              { id: "crypto", label: "Крипто" },
+              { id: "other", label: "Інше" },
+            ] as const
+          ).map((opt) => (
+            <button
+              type="button"
+              key={opt.id}
+              onClick={() => setMethod(opt.id)}
+              className={`rounded-md border px-3 py-1.5 text-xs transition-colors ${
+                method === opt.id
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="topup-contact" className="text-xs">
+          Контакт для звʼязку *
+        </Label>
+        <Input
+          id="topup-contact"
+          value={contact}
+          onChange={(e) => setContact(e.target.value)}
+          placeholder="Telegram, телефон або e-mail"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="topup-note" className="text-xs">
+          Коментар (необовʼязково)
+        </Label>
+        <Textarea
+          id="topup-note"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Напр., потрібен інвойс на ТОВ, оплата до 25-го"
+          rows={3}
+        />
+      </div>
+
+      <Button
+        onClick={() => mut.mutate()}
+        disabled={mut.isPending || credits < 100}
+        className="w-full"
+      >
+        {mut.isPending ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          <Send className="mr-2 h-4 w-4" />
+        )}
+        Надіслати заявку на {credits.toLocaleString("uk-UA")} кредитів
+      </Button>
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Журнал заявок (показуємо у BalanceCard окремою секцією)
+// ────────────────────────────────────────────────────────────────────────────
+
+type TopupRequest = {
+  id: string;
+  credits: number;
+  amount_cents: number;
+  currency: string;
+  payment_method: string;
+  contact: string | null;
+  status: "new" | "in_review" | "paid" | "cancelled";
+  manager_note: string | null;
+  created_at: string;
+};
+
+const STATUS_META: Record<
+  TopupRequest["status"],
+  { label: string; tone: string; Icon: typeof Clock }
+> = {
+  new: {
+    label: "Нова",
+    tone: "border-info/40 text-info",
+    Icon: Clock,
+  },
+  in_review: {
+    label: "У роботі",
+    tone: "border-warning/40 text-warning",
+    Icon: Phone,
+  },
+  paid: {
+    label: "Оплачено",
+    tone: "border-success/40 text-success",
+    Icon: CheckCircle2,
+  },
+  cancelled: {
+    label: "Скасовано",
+    tone: "border-destructive/40 text-destructive",
+    Icon: XCircle,
+  },
+};
+
+export function TopupRequestsList({ tenantId }: { tenantId: string }) {
+  const q = useQuery({
+    queryKey: ["topup-requests", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("topup_requests")
+        .select(
+          "id, credits, amount_cents, currency, payment_method, contact, status, manager_note, created_at",
+        )
+        .eq("tenant_id", tenantId)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return (data ?? []) as TopupRequest[];
+    },
+  });
+
+  if (q.isLoading) return <p className="text-xs text-muted-foreground">Завантажую заявки…</p>;
+  if (!q.data || q.data.length === 0) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        Поки що немає заявок на онлайн-оплату.
+      </p>
+    );
+  }
+
+  return (
+    <div className="divide-y divide-border rounded-md border border-border">
+      {q.data.map((r) => {
+        const meta = STATUS_META[r.status];
+        return (
+          <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 px-3 py-2 text-xs">
+            <div className="flex min-w-0 items-center gap-2">
+              <Badge variant="outline" className={meta.tone}>
+                <meta.Icon className="mr-1 h-3 w-3" />
+                {meta.label}
+              </Badge>
+              <div className="min-w-0">
+                <p className="truncate text-foreground">
+                  {r.credits.toLocaleString("uk-UA")} кредитів · {(r.amount_cents / 100).toFixed(0)} {r.currency}
+                </p>
+                <p className="text-muted-foreground">
+                  {new Date(r.created_at).toLocaleString("uk-UA")} · {r.payment_method}
+                  {r.contact ? ` · ${r.contact}` : ""}
+                </p>
+                {r.manager_note && (
+                  <p className="mt-0.5 text-muted-foreground">💬 {r.manager_note}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
