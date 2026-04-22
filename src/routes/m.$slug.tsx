@@ -7,6 +7,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { renderMarkdown } from "@/lib/markdown";
 
 type Magnet = {
   id: string;
