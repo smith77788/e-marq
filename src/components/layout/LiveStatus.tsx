@@ -25,10 +25,10 @@ export function LiveStatus({ tenantId }: { tenantId?: string | null }) {
 
   return (
     <div className="flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1 text-xs">
-      <span className={live ? "pulse-dot" : "inline-block h-2 w-2 rounded-full bg-muted-foreground/40"} />
-      <span className="font-medium text-foreground">
-        {live ? "Агенти працюють" : "Спокій"}
-      </span>
+      <span
+        className={live ? "pulse-dot" : "inline-block h-2 w-2 rounded-full bg-muted-foreground/40"}
+      />
+      <span className="font-medium text-foreground">{live ? "Агенти працюють" : "Спокій"}</span>
       {data !== undefined && (
         <span className="text-muted-foreground">· {data} запусків / 15 хв</span>
       )}

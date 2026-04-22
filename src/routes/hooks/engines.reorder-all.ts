@@ -49,11 +49,15 @@ async function runReorderForTenant(tenantId: string): Promise<{ queued: number }
   const cutoff = new Date().toISOString();
   const cadence = await getCadenceMultiplier(tenantId, "reorder");
   const cooldownDays = 14 * cadence;
-  const recentlyContactedCutoff = new Date(Date.now() - cooldownDays * 24 * 3600 * 1000).toISOString();
+  const recentlyContactedCutoff = new Date(
+    Date.now() - cooldownDays * 24 * 3600 * 1000,
+  ).toISOString();
 
   const { data: candidates, error } = await supabaseAdmin
     .from("customers")
-    .select("id, email, name, telegram_chat_id, total_orders, avg_order_cents, predicted_next_order_at, last_contacted_at")
+    .select(
+      "id, email, name, telegram_chat_id, total_orders, avg_order_cents, predicted_next_order_at, last_contacted_at",
+    )
     .eq("tenant_id", tenantId)
     .gte("total_orders", 2)
     .eq("consent_marketing", true)

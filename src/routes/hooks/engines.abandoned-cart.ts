@@ -32,7 +32,9 @@ type CheckoutEvent = {
   created_at: string;
 };
 
-export async function runAbandonedCartForTenant(tenantId: string): Promise<{ queued: number; skipped: number }> {
+export async function runAbandonedCartForTenant(
+  tenantId: string,
+): Promise<{ queued: number; skipped: number }> {
   // Window: events between 30min and 24h old (give checkout 30min to complete naturally)
   const minAgeMs = 30 * 60 * 1000;
   const maxAgeMs = 24 * 3600 * 1000;
@@ -73,13 +75,25 @@ export async function runAbandonedCartForTenant(tenantId: string): Promise<{ que
 
   // Dedup per customer in this batch
   const seenCustomers = new Set<string>();
-  let queued = 0, skipped = 0;
+  let queued = 0,
+    skipped = 0;
   for (const ev of starts as CheckoutEvent[]) {
-    if (ev.session_id && completedSessions.has(ev.session_id)) { skipped++; continue; }
-    if (ev.user_id && completedUsers.has(ev.user_id)) { skipped++; continue; }
+    if (ev.session_id && completedSessions.has(ev.session_id)) {
+      skipped++;
+      continue;
+    }
+    if (ev.user_id && completedUsers.has(ev.user_id)) {
+      skipped++;
+      continue;
+    }
 
     // Find a customer record. Prefer payload.email/customer_id, fallback user_id.
-    const payload = ev.payload as { email?: string; customer_id?: string; cart_value_cents?: number; product_names?: string[] };
+    const payload = ev.payload as {
+      email?: string;
+      customer_id?: string;
+      cart_value_cents?: number;
+      product_names?: string[];
+    };
     let customerId: string | null = payload.customer_id ?? null;
     if (!customerId && payload.email) {
       const { data: c } = await supabaseAdmin
@@ -99,8 +113,14 @@ export async function runAbandonedCartForTenant(tenantId: string): Promise<{ que
         .maybeSingle();
       customerId = c?.id ?? null;
     }
-    if (!customerId) { skipped++; continue; }
-    if (seenCustomers.has(customerId)) { skipped++; continue; }
+    if (!customerId) {
+      skipped++;
+      continue;
+    }
+    if (seenCustomers.has(customerId)) {
+      skipped++;
+      continue;
+    }
     seenCustomers.add(customerId);
 
     // Cooldown: did we already cart-recover this customer recently?
@@ -112,10 +132,16 @@ export async function runAbandonedCartForTenant(tenantId: string): Promise<{ que
       .eq("trigger_kind", "abandoned_cart")
       .gte("created_at", cooldownIso)
       .limit(1);
-    if (recent && recent.length > 0) { skipped++; continue; }
+    if (recent && recent.length > 0) {
+      skipped++;
+      continue;
+    }
 
     const channel = await pickChannelForCustomer(customerId);
-    if (!channel) { skipped++; continue; }
+    if (!channel) {
+      skipped++;
+      continue;
+    }
 
     const { data: customer } = await supabaseAdmin
       .from("customers")
@@ -144,7 +170,10 @@ export async function runAbandonedCartForTenant(tenantId: string): Promise<{ que
     });
     if (!insErr) {
       queued++;
-      await supabaseAdmin.from("customers").update({ last_contacted_at: new Date().toISOString() }).eq("id", customerId);
+      await supabaseAdmin
+        .from("customers")
+        .update({ last_contacted_at: new Date().toISOString() })
+        .eq("id", customerId);
     } else {
       skipped++;
     }
@@ -157,7 +186,9 @@ export const Route = createFileRoute("/hooks/engines/abandoned-cart")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -175,12 +206,17 @@ export const Route = createFileRoute("/hooks/engines/abandoned-cart")({
           const { queued, skipped } = await runAbandonedCartForTenant(tenantId);
           const dispatch = await dispatchTenantOutbound(tenantId, 100);
           await finishAgentRun(handle, queued, {
-            queued, skipped, sent: dispatch.sent, failed: dispatch.failed,
+            queued,
+            skipped,
+            sent: dispatch.sent,
+            failed: dispatch.failed,
           });
           return jsonOk({ queued, skipped, sent: dispatch.sent, failed: dispatch.failed });
         } catch (err) {
           await failAgentRun(handle, err);
-          return jsonError("Abandoned cart engine failed", 500, { details: err instanceof Error ? err.message : String(err) });
+          return jsonError("Abandoned cart engine failed", 500, {
+            details: err instanceof Error ? err.message : String(err),
+          });
         }
       },
     },

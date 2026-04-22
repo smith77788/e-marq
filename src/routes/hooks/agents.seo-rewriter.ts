@@ -39,9 +39,7 @@ export const Route = createFileRoute("/hooks/agents/seo-rewriter")({
         const handle = await startAgentRun("seo-rewriter", tenantId, ctx);
         try {
           // Pull last 30d performance per page
-          const since = new Date(Date.now() - 30 * 24 * 3600 * 1000)
-            .toISOString()
-            .slice(0, 10);
+          const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString().slice(0, 10);
           const { data: perf } = await supabaseAdmin
             .from("content_performance")
             .select("page_id, search_impressions, search_clicks")

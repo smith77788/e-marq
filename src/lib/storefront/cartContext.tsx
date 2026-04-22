@@ -186,10 +186,7 @@ export function CartProvider({
   }, [cart, productCache]);
 
   const cartCount = cartLines.reduce((s, l) => s + l.quantity, 0);
-  const totalCents = cartLines.reduce(
-    (s, l) => s + l.product.price_cents * l.quantity,
-    0,
-  );
+  const totalCents = cartLines.reduce((s, l) => s + l.product.price_cents * l.quantity, 0);
   const currency = cartLines[0]?.product.currency ?? "UAH";
 
   const value = useMemo<CartCtx>(

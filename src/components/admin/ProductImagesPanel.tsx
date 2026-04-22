@@ -13,15 +13,7 @@
 import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  ArrowDown,
-  ArrowUp,
-  ImagePlus,
-  Loader2,
-  Star,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { ArrowDown, ArrowUp, ImagePlus, Loader2, Star, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -83,8 +75,7 @@ export function ProductImagesPanel({ tenantId, productId, productName }: Props) 
     if (!files || files.length === 0) return;
     setBusy(true);
     try {
-      let nextPos =
-        images.length > 0 ? Math.max(...images.map((i) => i.position)) + 1 : 0;
+      let nextPos = images.length > 0 ? Math.max(...images.map((i) => i.position)) + 1 : 0;
       let firstUrl: string | null = null;
 
       for (const file of Array.from(files)) {
@@ -132,8 +123,7 @@ export function ProductImagesPanel({ tenantId, productId, productName }: Props) 
     mutationFn: async () => {
       const url = externalUrl.trim();
       if (!url) throw new Error("Введіть URL");
-      const nextPos =
-        images.length > 0 ? Math.max(...images.map((i) => i.position)) + 1 : 0;
+      const nextPos = images.length > 0 ? Math.max(...images.map((i) => i.position)) + 1 : 0;
       const isPrimary = images.length === 0;
       const { error } = await supabase.from("product_images").insert({
         tenant_id: tenantId,
@@ -213,10 +203,7 @@ export function ProductImagesPanel({ tenantId, productId, productName }: Props) 
         const remaining = images.filter((i) => i.id !== img.id);
         const next = remaining.sort((a, b) => a.position - b.position)[0];
         if (next) {
-          await supabase
-            .from("product_images")
-            .update({ is_primary: true })
-            .eq("id", next.id);
+          await supabase.from("product_images").update({ is_primary: true }).eq("id", next.id);
           await syncPrimaryToProduct(next.url);
         } else {
           await syncPrimaryToProduct(null);
@@ -319,7 +306,13 @@ export function ProductImagesPanel({ tenantId, productId, productName }: Props) 
                   key={img.id}
                   className="group relative aspect-square overflow-hidden rounded-md border bg-muted"
                 >
-                  <img src={img.url} alt={img.alt ?? ""} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                  <img
+                    src={img.url}
+                    alt={img.alt ?? ""}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
                   {img.is_primary && (
                     <Badge className="absolute left-1.5 top-1.5 bg-primary text-primary-foreground">
                       <Star className="mr-1 h-3 w-3" /> Головне

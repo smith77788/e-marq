@@ -71,12 +71,16 @@ export const Route = createFileRoute("/hooks/agents/churn-risk")({
           for (const [email, list] of byCustomer.entries()) {
             if (list.length < 4) continue;
             vipCount++;
-            list.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+            list.sort(
+              (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+            );
             const last = new Date(list[list.length - 1].created_at);
             const intervals: number[] = [];
             for (let i = 1; i < list.length; i++) {
               intervals.push(
-                (new Date(list[i].created_at).getTime() - new Date(list[i - 1].created_at).getTime()) / 86400000,
+                (new Date(list[i].created_at).getTime() -
+                  new Date(list[i - 1].created_at).getTime()) /
+                  86400000,
               );
             }
             const avg = intervals.reduce((s, x) => s + x, 0) / intervals.length;
@@ -117,7 +121,10 @@ export const Route = createFileRoute("/hooks/agents/churn-risk")({
           insights.sort((a, b) => {
             const am = a.metrics as { total_spent_cents?: number; drift_ratio?: number };
             const bm = b.metrics as { total_spent_cents?: number; drift_ratio?: number };
-            return (bm.total_spent_cents ?? 0) * (bm.drift_ratio ?? 0) - (am.total_spent_cents ?? 0) * (am.drift_ratio ?? 0);
+            return (
+              (bm.total_spent_cents ?? 0) * (bm.drift_ratio ?? 0) -
+              (am.total_spent_cents ?? 0) * (am.drift_ratio ?? 0)
+            );
           });
           const top = insights.slice(0, 30);
           const created = await insertInsightsDedup(top);
@@ -135,7 +142,9 @@ export const Route = createFileRoute("/hooks/agents/churn-risk")({
           });
         } catch (e) {
           await failAgentRun(handle, e);
-          return jsonError("Agent failed", 500, { details: e instanceof Error ? e.message : String(e) });
+          return jsonError("Agent failed", 500, {
+            details: e instanceof Error ? e.message : String(e),
+          });
         }
       },
     },

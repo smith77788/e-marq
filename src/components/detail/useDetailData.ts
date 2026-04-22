@@ -13,9 +13,7 @@ export function useDetailData(handle: DetailHandle | null, staleTime = 30_000) {
   const enabled = !!handle && (!!handle.fetchDetail || !!handle.payload);
 
   const query = useQuery<DetailPayload>({
-    queryKey: handle
-      ? detailQueryKey(handle.resourceType, handle.elementId)
-      : ["detail", "noop"],
+    queryKey: handle ? detailQueryKey(handle.resourceType, handle.elementId) : ["detail", "noop"],
     enabled,
     staleTime,
     queryFn: async () => {

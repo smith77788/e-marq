@@ -43,13 +43,18 @@ export type OutboundDetailRow = {
   expected_impact_cents: number | null;
   actual_revenue_cents: number | null;
   customer_id: string | null;
-  customers?: { name: string | null; email: string | null; telegram_username: string | null } | null;
+  customers?: {
+    name: string | null;
+    email: string | null;
+    telegram_username: string | null;
+  } | null;
 };
 
 export function buildOutboundPayload(r: OutboundDetailRow): DetailPayload {
   const status = STATUS_LABEL[r.status] ?? STATUS_LABEL.pending;
   const customerLabel =
-    r.customers?.name ?? r.customers?.email ??
+    r.customers?.name ??
+    r.customers?.email ??
     (r.customers?.telegram_username ? `@${r.customers.telegram_username}` : "анонім");
 
   const metrics: MetricBlock[] = [
@@ -58,17 +63,27 @@ export function buildOutboundPayload(r: OutboundDetailRow): DetailPayload {
     { label: "Клієнт", value: customerLabel },
   ];
   if (r.expected_impact_cents != null) {
-    metrics.push({ label: "Прогноз доходу", value: formatMoney(r.expected_impact_cents), tone: "primary" });
+    metrics.push({
+      label: "Прогноз доходу",
+      value: formatMoney(r.expected_impact_cents),
+      tone: "primary",
+    });
   }
   if (r.actual_revenue_cents != null) {
-    metrics.push({ label: "Фактичний дохід", value: formatMoney(r.actual_revenue_cents), tone: "success" });
+    metrics.push({
+      label: "Фактичний дохід",
+      value: formatMoney(r.actual_revenue_cents),
+      tone: "success",
+    });
   }
 
   const log: DetailPayload["events_log"] = [];
   log.push({ id: "scheduled", at: r.scheduled_for, title: "Заплановано", icon: "info" });
   if (r.sent_at) log.push({ id: "sent", at: r.sent_at, title: "Надіслано клієнту", icon: "info" });
-  if (r.replied_at) log.push({ id: "replied", at: r.replied_at, title: "Клієнт відповів", icon: "warning" });
-  if (r.converted_at) log.push({ id: "converted", at: r.converted_at, title: "Зробив покупку", icon: "success" });
+  if (r.replied_at)
+    log.push({ id: "replied", at: r.replied_at, title: "Клієнт відповів", icon: "warning" });
+  if (r.converted_at)
+    log.push({ id: "converted", at: r.converted_at, title: "Зробив покупку", icon: "success" });
   log.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
 
   return {
@@ -79,10 +94,10 @@ export function buildOutboundPayload(r: OutboundDetailRow): DetailPayload {
     description: r.body.replace(/<[^>]+>/g, ""),
     events_log: log,
     metadata: {
-      "ID": r.id,
-      "Канал": r.channel,
-      "Тригер": r.trigger_kind,
-      "Статус": r.status,
+      ID: r.id,
+      Канал: r.channel,
+      Тригер: r.trigger_kind,
+      Статус: r.status,
     },
   };
 }
@@ -114,7 +129,8 @@ export function buildInsightPayload(i: InsightDetailRow): DetailPayload {
     { label: "Ризик", value: i.risk_level, tone: RISK_TONE[i.risk_level] ?? "default" },
     { label: "Статус", value: i.status },
   ];
-  if (i.expected_impact) metrics.push({ label: "Очікуваний ефект", value: i.expected_impact, tone: "success" });
+  if (i.expected_impact)
+    metrics.push({ label: "Очікуваний ефект", value: i.expected_impact, tone: "success" });
 
   return {
     title: i.title,
@@ -127,7 +143,10 @@ export function buildInsightPayload(i: InsightDetailRow): DetailPayload {
       Object.entries(i.metrics ?? {})
         .filter(([k]) => !k.startsWith("_"))
         .slice(0, 12)
-        .map(([k, v]) => [k, typeof v === "object" ? JSON.stringify(v) : (v as string | number | boolean | null)]),
+        .map(([k, v]) => [
+          k,
+          typeof v === "object" ? JSON.stringify(v) : (v as string | number | boolean | null),
+        ]),
     ),
   };
 }
@@ -167,10 +186,15 @@ const STAGE_LABEL: Record<string, string> = {
   dormant: "сплячий",
 };
 
-export async function fetchCustomerDetail(tenantId: string, customerId: string): Promise<DetailPayload> {
+export async function fetchCustomerDetail(
+  tenantId: string,
+  customerId: string,
+): Promise<DetailPayload> {
   const { data: c, error } = await supabase
     .from("customers")
-    .select("id, name, email, telegram_username, telegram_chat_id, lifecycle_stage, total_orders, total_spent_cents, last_order_at, predicted_next_order_at, consent_marketing, avg_order_cents, avg_cycle_days, first_order_at")
+    .select(
+      "id, name, email, telegram_username, telegram_chat_id, lifecycle_stage, total_orders, total_spent_cents, last_order_at, predicted_next_order_at, consent_marketing, avg_order_cents, avg_cycle_days, first_order_at",
+    )
     .eq("id", customerId)
     .eq("tenant_id", tenantId)
     .maybeSingle();
@@ -178,7 +202,13 @@ export async function fetchCustomerDetail(tenantId: string, customerId: string):
   if (!c) throw new Error("Клієнт не знайдений");
 
   // Recent orders attached by customer email match (orders.customer_user_id is auth.users.id, not customers.id).
-  let orders: { id: string; created_at: string; total_cents: number; status: string; payment_method: string }[] = [];
+  let orders: {
+    id: string;
+    created_at: string;
+    total_cents: number;
+    status: string;
+    payment_method: string;
+  }[] = [];
   if (c.email) {
     const { data } = await supabase
       .from("orders")
@@ -195,7 +225,13 @@ export async function fetchCustomerDetail(tenantId: string, customerId: string):
 
 export function buildCustomerPayload(
   c: CustomerDetailRow,
-  recentOrders: { id: string; created_at: string; total_cents: number; status: string; payment_method: string }[] = [],
+  recentOrders: {
+    id: string;
+    created_at: string;
+    total_cents: number;
+    status: string;
+    payment_method: string;
+  }[] = [],
 ): DetailPayload {
   const stageLabel = STAGE_LABEL[c.lifecycle_stage] ?? c.lifecycle_stage;
   const stageTone = STAGE_TONE[c.lifecycle_stage] ?? "default";
@@ -219,8 +255,10 @@ export function buildCustomerPayload(
   }
 
   const log: DetailPayload["events_log"] = [];
-  if (c.first_order_at) log.push({ id: "first", at: c.first_order_at, title: "Перше замовлення", icon: "info" });
-  if (c.last_order_at) log.push({ id: "last", at: c.last_order_at, title: "Останнє замовлення", icon: "info" });
+  if (c.first_order_at)
+    log.push({ id: "first", at: c.first_order_at, title: "Перше замовлення", icon: "info" });
+  if (c.last_order_at)
+    log.push({ id: "last", at: c.last_order_at, title: "Останнє замовлення", icon: "info" });
   for (const o of recentOrders) {
     log.push({
       id: `o-${o.id}`,
@@ -235,7 +273,8 @@ export function buildCustomerPayload(
   const channels: string[] = [];
   if (c.email) channels.push(`Email: ${c.email}`);
   if (c.telegram_username) channels.push(`Telegram: @${c.telegram_username}`);
-  if (c.telegram_chat_id && !c.telegram_username) channels.push(`Telegram: chat ${c.telegram_chat_id}`);
+  if (c.telegram_chat_id && !c.telegram_username)
+    channels.push(`Telegram: chat ${c.telegram_chat_id}`);
 
   return {
     title: c.name ?? c.email ?? (c.telegram_username ? `@${c.telegram_username}` : "Анонім"),
@@ -247,9 +286,9 @@ export function buildCustomerPayload(
       : undefined,
     events_log: log,
     metadata: {
-      "ID": c.id,
-      "Email": c.email ?? "—",
-      "Telegram": c.telegram_username ? `@${c.telegram_username}` : (c.telegram_chat_id ?? "—"),
+      ID: c.id,
+      Email: c.email ?? "—",
+      Telegram: c.telegram_username ? `@${c.telegram_username}` : (c.telegram_chat_id ?? "—"),
       "Згода на розсилки": c.consent_marketing ? "так" : "ні",
     },
   };
@@ -281,7 +320,15 @@ export function buildTimelinePayload(args: {
       { label: "Тип", value: kindLabel[args.kind] },
       { label: "Коли", value: formatDistanceToNow(args.ts, { addSuffix: true, locale: uk }) },
     ],
-    events_log: [{ id: "happened", at: new Date(args.ts).toISOString(), title: args.title, description: args.detail, icon: "info" }],
+    events_log: [
+      {
+        id: "happened",
+        at: new Date(args.ts).toISOString(),
+        title: args.title,
+        description: args.detail,
+        icon: "info",
+      },
+    ],
   };
 }
 
@@ -307,16 +354,24 @@ export function buildStorefrontProductPayload(p: StorefrontProductRow): DetailPa
       tone: inStock ? "success" : "destructive",
     },
     metrics: [
-      { label: "Ціна", value: `${(p.price_cents / 100).toFixed(2)} ${p.currency}`, tone: "primary" },
+      {
+        label: "Ціна",
+        value: `${(p.price_cents / 100).toFixed(2)} ${p.currency}`,
+        tone: "primary",
+      },
       { label: "Валюта", value: p.currency },
-      { label: "Статус", value: inStock ? "Доступний" : "Недоступний", tone: inStock ? "success" : "destructive" },
+      {
+        label: "Статус",
+        value: inStock ? "Доступний" : "Недоступний",
+        tone: inStock ? "success" : "destructive",
+      },
     ],
     description: p.description ?? "Опис відсутній. Зверніться до продавця для деталей.",
     media: p.image_url ? [{ url: p.image_url, alt: p.name, kind: "image" }] : [],
     metadata: {
-      "ID": p.id,
-      "Валюта": p.currency,
-      "Наявність": inStock ? "так" : "ні",
+      ID: p.id,
+      Валюта: p.currency,
+      Наявність: inStock ? "так" : "ні",
     },
   };
 }

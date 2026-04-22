@@ -36,7 +36,9 @@ export const Route = createFileRoute("/hooks/agents/second-order-nurture")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -57,7 +59,9 @@ export const Route = createFileRoute("/hooks/agents/second-order-nurture")({
 
           const { data, error } = await supabaseAdmin
             .from("customers")
-            .select("id, email, name, total_orders, total_spent_cents, last_order_at, first_order_at")
+            .select(
+              "id, email, name, total_orders, total_spent_cents, last_order_at, first_order_at",
+            )
             .eq("tenant_id", tenantId)
             .eq("total_orders", 1)
             .gte("first_order_at", min)
@@ -85,7 +89,12 @@ export const Route = createFileRoute("/hooks/agents/second-order-nurture")({
             .limit(2_000);
           const orderToCust = new Map<string, CustRow>();
           for (const o of orders ?? []) {
-            const c = targets.find((t) => t.email && o.customer_email && t.email.toLowerCase() === o.customer_email.toLowerCase());
+            const c = targets.find(
+              (t) =>
+                t.email &&
+                o.customer_email &&
+                t.email.toLowerCase() === o.customer_email.toLowerCase(),
+            );
             if (c) orderToCust.set(o.id, c);
           }
           const orderIds = Array.from(orderToCust.keys());

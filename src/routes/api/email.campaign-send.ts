@@ -104,19 +104,17 @@ async function loadSegment(tenantId: string, segment: Segment): Promise<Customer
 
   switch (segment) {
     case "active":
-      q = q.gt("total_orders", 0).gte(
-        "last_order_at",
-        new Date(Date.now() - 90 * 86_400_000).toISOString(),
-      );
+      q = q
+        .gt("total_orders", 0)
+        .gte("last_order_at", new Date(Date.now() - 90 * 86_400_000).toISOString());
       break;
     case "vip":
       q = q.gte("total_spent_cents", 500_000); // ≥ 5 000 UAH
       break;
     case "lapsed":
-      q = q.gt("total_orders", 0).lt(
-        "last_order_at",
-        new Date(Date.now() - 90 * 86_400_000).toISOString(),
-      );
+      q = q
+        .gt("total_orders", 0)
+        .lt("last_order_at", new Date(Date.now() - 90 * 86_400_000).toISOString());
       break;
     case "all":
     default:
@@ -127,10 +125,7 @@ async function loadSegment(tenantId: string, segment: Segment): Promise<Customer
   return (data ?? []) as CustomerRow[];
 }
 
-async function filterSuppressed(
-  tenantId: string,
-  emails: string[],
-): Promise<Set<string>> {
+async function filterSuppressed(tenantId: string, emails: string[]): Promise<Set<string>> {
   if (emails.length === 0) return new Set();
   const { data } = await supabaseAdmin
     .from("email_suppressions")
@@ -190,9 +185,7 @@ export const Route = createFileRoute("/api/email/campaign-send")({
         if (html.length > 200_000) return jsonResponse({ error: "html_too_large" }, 413);
 
         const segment: Segment =
-          body.segment === "active" ||
-          body.segment === "vip" ||
-          body.segment === "lapsed"
+          body.segment === "active" || body.segment === "vip" || body.segment === "lapsed"
             ? body.segment
             : "all";
 

@@ -37,12 +37,7 @@ import {
   Zap,
 } from "lucide-react";
 
-export type IntegrationCategory =
-  | "ecommerce"
-  | "accounting"
-  | "ukraine"
-  | "universal"
-  | "payments";
+export type IntegrationCategory = "ecommerce" | "accounting" | "ukraine" | "universal" | "payments";
 
 export type IntegrationStatus =
   | "ready" // Повністю працює одразу після введення ключа
@@ -448,7 +443,10 @@ export const CATEGORIES: { id: IntegrationCategory; label: string; icon: LucideI
 export const STATUS_LABELS: Record<IntegrationStatus, { label: string; tone: string }> = {
   ready: { label: "Готово до підключення", tone: "bg-success/15 text-success border-success/30" },
   beta: { label: "У бета-режимі", tone: "bg-primary/15 text-primary border-primary/30" },
-  webhookOnly: { label: "Тільки через webhook", tone: "bg-secondary/30 text-foreground border-border" },
+  webhookOnly: {
+    label: "Тільки через webhook",
+    tone: "bg-secondary/30 text-foreground border-border",
+  },
   manualOnly: { label: "Через CSV-експорт", tone: "bg-secondary/30 text-foreground border-border" },
   comingSoon: { label: "Скоро", tone: "bg-muted text-muted-foreground border-border" },
 };

@@ -46,7 +46,10 @@ function extractSignature(header: string | null): string | null {
   if (!trimmed) return null;
   const eq = trimmed.indexOf("=");
   if (eq > 0 && trimmed.slice(0, eq).toLowerCase() === "sha256") {
-    return trimmed.slice(eq + 1).trim().toLowerCase();
+    return trimmed
+      .slice(eq + 1)
+      .trim()
+      .toLowerCase();
   }
   return trimmed.toLowerCase();
 }
@@ -59,8 +62,7 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-webhook")({
         const tenantId = url.searchParams.get("tenant");
         const querySecret = url.searchParams.get("secret");
         const sigHeader =
-          request.headers.get("x-dntrade-signature") ??
-          request.headers.get("x-webhook-signature");
+          request.headers.get("x-dntrade-signature") ?? request.headers.get("x-webhook-signature");
 
         if (!tenantId) return jsonError("tenant query required", 400);
 
@@ -69,9 +71,7 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-webhook")({
 
         const { data: integ, error: loadErr } = await supabaseAdmin
           .from("tenant_integrations")
-          .select(
-            "id, tenant_id, credentials_encrypted, webhook_secret, is_active, last_sync_at",
-          )
+          .select("id, tenant_id, credentials_encrypted, webhook_secret, is_active, last_sync_at")
           .eq("tenant_id", tenantId)
           .eq("provider", "dntrade")
           .maybeSingle();
@@ -88,9 +88,7 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-webhook")({
 
         const providedSig = extractSignature(sigHeader);
         if (providedSig) {
-          const expected = createHmac("sha256", integ.webhook_secret)
-            .update(rawBody)
-            .digest("hex");
+          const expected = createHmac("sha256", integ.webhook_secret).update(rawBody).digest("hex");
           if (safeEqualHex(providedSig, expected)) {
             authed = true;
             authMethod = "hmac";
@@ -139,8 +137,7 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-webhook")({
               integrationId: integ.id,
             },
           );
-          const hasErrors =
-            summary.errors.length > 0 || summary.mapping_errors.length > 0;
+          const hasErrors = summary.errors.length > 0 || summary.mapping_errors.length > 0;
 
           await supabaseAdmin
             .from("tenant_integrations")
@@ -150,9 +147,7 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-webhook")({
               last_sync_error: hasErrors
                 ? [
                     ...summary.errors,
-                    ...summary.mapping_errors
-                      .slice(0, 3)
-                      .map((e) => `${e.kind}:${e.message}`),
+                    ...summary.mapping_errors.slice(0, 3).map((e) => `${e.kind}:${e.message}`),
                   ].join(" | ")
                 : null,
               synced_products_count: summary.products.upserted,

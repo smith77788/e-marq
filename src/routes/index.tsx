@@ -28,39 +28,39 @@ export const Route = createFileRoute("/")({
     return {
       meta: seo.meta,
       links: seo.links,
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          name: "MARQ",
-          url: "https://e-marq.lovable.app",
-          logo: "https://e-marq.lovable.app/favicon.ico",
-          description: tStatic("home.metaDesc"),
-          contactPoint: [
-            {
-              "@type": "ContactPoint",
-              email: "hello@marq.app",
-              contactType: "customer support",
-              availableLanguage: ["Ukrainian", "English"],
-            },
-          ],
-        }),
-      },
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "SoftwareApplication",
-          name: "MARQ",
-          applicationCategory: "BusinessApplication",
-          operatingSystem: "Web",
-          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-          description: tStatic("home.metaDesc"),
-        }),
-      },
-    ],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "MARQ",
+            url: "https://e-marq.lovable.app",
+            logo: "https://e-marq.lovable.app/favicon.ico",
+            description: tStatic("home.metaDesc"),
+            contactPoint: [
+              {
+                "@type": "ContactPoint",
+                email: "hello@marq.app",
+                contactType: "customer support",
+                availableLanguage: ["Ukrainian", "English"],
+              },
+            ],
+          }),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "MARQ",
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "Web",
+            offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+            description: tStatic("home.metaDesc"),
+          }),
+        },
+      ],
     };
   },
   component: Index,
@@ -78,9 +78,24 @@ function Index() {
   }, [loading, user, navigate]);
 
   const loops = [
-    { icon: AlertOctagon, title: t("home.loops.churnTitle"), desc: t("home.loops.churnDesc"), impact: t("home.loops.churnImpact") },
-    { icon: Boxes, title: t("home.loops.stockTitle"), desc: t("home.loops.stockDesc"), impact: t("home.loops.stockImpact") },
-    { icon: TrendingUp, title: t("home.loops.aovTitle"), desc: t("home.loops.aovDesc"), impact: t("home.loops.aovImpact") },
+    {
+      icon: AlertOctagon,
+      title: t("home.loops.churnTitle"),
+      desc: t("home.loops.churnDesc"),
+      impact: t("home.loops.churnImpact"),
+    },
+    {
+      icon: Boxes,
+      title: t("home.loops.stockTitle"),
+      desc: t("home.loops.stockDesc"),
+      impact: t("home.loops.stockImpact"),
+    },
+    {
+      icon: TrendingUp,
+      title: t("home.loops.aovTitle"),
+      desc: t("home.loops.aovDesc"),
+      impact: t("home.loops.aovImpact"),
+    },
   ];
 
   const how = [
@@ -100,7 +115,6 @@ function Index() {
   return (
     <main className="min-h-screen bg-background">
       <MarketingHeader />
-
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border">
@@ -128,9 +142,7 @@ function Index() {
               <Link to="/login">{t("home.heroCtaSecondary")}</Link>
             </Button>
           </div>
-          <p className="mt-6 text-xs text-muted-foreground">
-            {t("home.heroNote")}
-          </p>
+          <p className="mt-6 text-xs text-muted-foreground">{t("home.heroNote")}</p>
         </div>
       </section>
 
@@ -205,9 +217,7 @@ function Index() {
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               {t("home.why.title")}
             </h2>
-            <p className="mt-4 text-base text-muted-foreground">
-              {t("home.why.body")}
-            </p>
+            <p className="mt-4 text-base text-muted-foreground">{t("home.why.body")}</p>
           </div>
           <div className="space-y-4">
             {why.map((item) => {
@@ -234,9 +244,7 @@ function Index() {
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {t("home.cta.title")}
           </h2>
-          <p className="mt-4 text-base text-muted-foreground">
-            {t("home.cta.body")}
-          </p>
+          <p className="mt-4 text-base text-muted-foreground">{t("home.cta.body")}</p>
           <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
             <Button asChild size="lg">
               <Link to="/signup">{t("home.cta.primary")}</Link>

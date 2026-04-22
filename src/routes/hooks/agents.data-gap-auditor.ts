@@ -44,7 +44,9 @@ export const Route = createFileRoute("/hooks/agents/data-gap-auditor")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -192,7 +194,8 @@ export const Route = createFileRoute("/hooks/agents/data-gap-auditor")({
               insight_type: "bootstrap_all_ready",
               affected_layer: "setup",
               title: "🎯 Усі дані зібрано — агенти працюють на повну",
-              description: "Профіль бренду, маржі, канали та голос клієнта в системі. Немає блокерів для агентів.",
+              description:
+                "Профіль бренду, маржі, канали та голос клієнта в системі. Немає блокерів для агентів.",
               expected_impact: "Точність ШІ-рекомендацій максимальна",
               confidence: 1,
               risk_level: "low",

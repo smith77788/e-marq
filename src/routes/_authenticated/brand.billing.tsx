@@ -46,7 +46,9 @@ function BrandBillingPage() {
     queryKey: ["plan-summary", tenantId],
     enabled: !!tenantId,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_tenant_plan_summary", { _tenant_id: tenantId! });
+      const { data, error } = await supabase.rpc("get_tenant_plan_summary", {
+        _tenant_id: tenantId!,
+      });
       if (error) throw error;
       return data as PlanSummary | null;
     },
@@ -55,9 +57,13 @@ function BrandBillingPage() {
   if (!tenantId) {
     return (
       <Card>
-        <CardHeader><CardTitle>Бренд не обрано</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Бренд не обрано</CardTitle>
+        </CardHeader>
         <CardContent>
-          <Link to="/brand" className="text-primary hover:underline">← Назад на головну</Link>
+          <Link to="/brand" className="text-primary hover:underline">
+            ← Назад на головну
+          </Link>
         </CardContent>
       </Card>
     );
@@ -68,13 +74,17 @@ function BrandBillingPage() {
   return (
     <div className="space-y-6">
       <div>
-        <Link to="/brand" search={{ tenant: tenantId }} className="text-xs text-muted-foreground hover:text-foreground">
+        <Link
+          to="/brand"
+          search={{ tenant: tenantId }}
+          className="text-xs text-muted-foreground hover:text-foreground"
+        >
           ← Назад до {current?.tenant_name ?? "брендa"}
         </Link>
         <h1 className="mt-2 text-2xl font-bold tracking-tight">Тарифний план</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Обери тариф — і користуйся всім без обмежень за хвилинами чи кредитами.
-          Ліміти стосуються лише обсягу (товари, замовлення, клієнти).
+          Обери тариф — і користуйся всім без обмежень за хвилинами чи кредитами. Ліміти стосуються
+          лише обсягу (товари, замовлення, клієнти).
         </p>
       </div>
 
@@ -87,7 +97,10 @@ function BrandBillingPage() {
               <PlanBadge planKey={summary.plan.key} planName={summary.plan.name} />
             </CardTitle>
             <CardDescription>
-              Статус: {SUB_STATUS_LABEL[summary.subscription.status] ?? summary.subscription.status} · Період {new Date(summary.subscription.current_period_start).toLocaleDateString("uk-UA")} → {new Date(summary.subscription.current_period_end).toLocaleDateString("uk-UA")}
+              Статус: {SUB_STATUS_LABEL[summary.subscription.status] ?? summary.subscription.status}{" "}
+              · Період{" "}
+              {new Date(summary.subscription.current_period_start).toLocaleDateString("uk-UA")} →{" "}
+              {new Date(summary.subscription.current_period_end).toLocaleDateString("uk-UA")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -98,9 +111,7 @@ function BrandBillingPage() {
 
       <BalanceCard tenantId={tenantId} tenantSlug={current?.tenant_slug ?? "brand"} />
 
-      {summary && (
-        <OwnerPlanSwitcher tenantId={tenantId} currentPlanKey={summary.plan.key} />
-      )}
+      {summary && <OwnerPlanSwitcher tenantId={tenantId} currentPlanKey={summary.plan.key} />}
     </div>
   );
 }

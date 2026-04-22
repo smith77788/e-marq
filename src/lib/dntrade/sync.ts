@@ -149,7 +149,12 @@ export async function syncDnTradeProducts(
           ? await sb.from("products").update(payload).eq("id", existingId)
           : await sb.from("products").insert(payload);
         if (error) {
-          errors.push({ kind: "products", external_id: p.product_id, message: error.message, raw: p });
+          errors.push({
+            kind: "products",
+            external_id: p.product_id,
+            message: error.message,
+            raw: p,
+          });
         } else {
           upserted++;
         }
@@ -216,7 +221,12 @@ export async function syncDnTradeCustomers(
           ? await sb.from("customers").update(payload).eq("id", existingId)
           : await sb.from("customers").insert(payload);
         if (error) {
-          errors.push({ kind: "customers", external_id: p.external_id, message: error.message, raw: p });
+          errors.push({
+            kind: "customers",
+            external_id: p.external_id,
+            message: error.message,
+            raw: p,
+          });
         } else {
           upserted++;
         }
@@ -385,9 +395,9 @@ export async function syncDnTradeOrders(
           const itemRows = cart.map((c) => ({
             tenant_id: tenantId,
             order_id: orderRow.id,
-            product_id: c.product_id ? productIdMap.get(c.product_id) ?? null : null,
+            product_id: c.product_id ? (productIdMap.get(c.product_id) ?? null) : null,
             product_name:
-              c.title ?? (c.product_id ? productNameMap.get(c.product_id) ?? "Item" : "Item"),
+              c.title ?? (c.product_id ? (productNameMap.get(c.product_id) ?? "Item") : "Item"),
             quantity: Math.max(1, Math.floor(Number(c.quantity ?? 1))),
             unit_price_cents: priceToCents(c.price),
           }));
@@ -443,21 +453,42 @@ export async function runFullDnTradeSync(
 
   if (kinds.includes("products")) {
     try {
-      summary.products = await syncDnTradeProducts(sb, tenantId, apiKey, opts, mapping_errors, productSamples);
+      summary.products = await syncDnTradeProducts(
+        sb,
+        tenantId,
+        apiKey,
+        opts,
+        mapping_errors,
+        productSamples,
+      );
     } catch (e) {
       summary.errors.push(`products: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
   if (kinds.includes("customers")) {
     try {
-      summary.customers = await syncDnTradeCustomers(sb, tenantId, apiKey, opts, mapping_errors, customerSamples);
+      summary.customers = await syncDnTradeCustomers(
+        sb,
+        tenantId,
+        apiKey,
+        opts,
+        mapping_errors,
+        customerSamples,
+      );
     } catch (e) {
       summary.errors.push(`customers: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
   if (kinds.includes("orders")) {
     try {
-      summary.orders = await syncDnTradeOrders(sb, tenantId, apiKey, opts, mapping_errors, orderSamples);
+      summary.orders = await syncDnTradeOrders(
+        sb,
+        tenantId,
+        apiKey,
+        opts,
+        mapping_errors,
+        orderSamples,
+      );
     } catch (e) {
       summary.errors.push(`orders: ${e instanceof Error ? e.message : String(e)}`);
     }
@@ -471,10 +502,7 @@ export async function runFullDnTradeSync(
     };
   } else if (opts.integrationId && mapping_errors.length > 0) {
     // Persist (best-effort) — keep last ~100 errors per integration to avoid bloat.
-    await sb
-      .from("dntrade_sync_errors")
-      .delete()
-      .eq("integration_id", opts.integrationId);
+    await sb.from("dntrade_sync_errors").delete().eq("integration_id", opts.integrationId);
     const rows = mapping_errors.slice(0, 100).map((err) => ({
       tenant_id: tenantId,
       integration_id: opts.integrationId!,

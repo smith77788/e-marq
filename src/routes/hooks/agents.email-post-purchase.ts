@@ -29,14 +29,20 @@ const AGENT_ID = "email_post_purchase";
 const TEMPLATE = "post_purchase";
 
 function appBase(): string {
-  return (process.env.PUBLIC_APP_URL || process.env.VITE_PUBLIC_APP_URL || "https://e-marq.lovable.app").replace(/\/+$/, "");
+  return (
+    process.env.PUBLIC_APP_URL ||
+    process.env.VITE_PUBLIC_APP_URL ||
+    "https://e-marq.lovable.app"
+  ).replace(/\/+$/, "");
 }
 
 export const Route = createFileRoute("/hooks/agents/email-post-purchase")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -62,7 +68,11 @@ export const Route = createFileRoute("/hooks/agents/email-post-purchase")({
 
           const [{ data: tenant }, { data: cfg }] = await Promise.all([
             supabaseAdmin.from("tenants").select("slug, name").eq("id", tenantId).maybeSingle(),
-            supabaseAdmin.from("tenant_configs").select("brand_name").eq("tenant_id", tenantId).maybeSingle(),
+            supabaseAdmin
+              .from("tenant_configs")
+              .select("brand_name")
+              .eq("tenant_id", tenantId)
+              .maybeSingle(),
           ]);
           if (!tenant) {
             await finishAgentRun(handle, 0, { reason: "no_tenant" });
@@ -123,13 +133,22 @@ export const Route = createFileRoute("/hooks/agents/email-post-purchase")({
           let sent = 0;
           let skipped = 0;
           for (const o of orders) {
-            if (sentOrderIds.has(o.id)) { skipped++; continue; }
+            if (sentOrderIds.has(o.id)) {
+              skipped++;
+              continue;
+            }
             const email = o.customer_email!;
             const customer = cMap.get(email.toLowerCase());
             // Якщо клієнт відписався від маркетингу — не надсилаємо
-            if (customer && customer.consent_marketing === false) { skipped++; continue; }
+            if (customer && customer.consent_marketing === false) {
+              skipped++;
+              continue;
+            }
             const productNames = itemsByOrder.get(o.id) ?? [];
-            if (!productNames.length) { skipped++; continue; }
+            if (!productNames.length) {
+              skipped++;
+              continue;
+            }
 
             const reviewUrl = `${storeUrl}/orders/${o.id}`;
             const unsubToken = customer?.unsubscribe_token ?? "";
@@ -180,7 +199,9 @@ export const Route = createFileRoute("/hooks/agents/email-post-purchase")({
           return jsonOk({ insights_created: 0, sent, skipped, considered: orders.length });
         } catch (err) {
           await failAgentRun(handle, err);
-          return jsonError("Post-purchase email failed", 500, { details: err instanceof Error ? err.message : String(err) });
+          return jsonError("Post-purchase email failed", 500, {
+            details: err instanceof Error ? err.message : String(err),
+          });
         }
       },
     },

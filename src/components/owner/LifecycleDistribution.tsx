@@ -14,11 +14,11 @@ type Props = { tenantId: string };
 type Customer = { lifecycle_stage: string; total_spent_cents: number; total_orders: number };
 
 const STAGES = [
-  { key: "vip",      label: "VIP",                    color: "var(--primary)" },
-  { key: "active",   label: "Активні",                color: "var(--accent)" },
-  { key: "new",      label: "Нові",                   color: "var(--success, var(--primary))" },
-  { key: "at_risk",  label: "Можуть піти",            color: "var(--warning, var(--primary))" },
-  { key: "churned",  label: "Втрачені",               color: "var(--destructive)" },
+  { key: "vip", label: "VIP", color: "var(--primary)" },
+  { key: "active", label: "Активні", color: "var(--accent)" },
+  { key: "new", label: "Нові", color: "var(--success, var(--primary))" },
+  { key: "at_risk", label: "Можуть піти", color: "var(--warning, var(--primary))" },
+  { key: "churned", label: "Втрачені", color: "var(--destructive)" },
 ] as const;
 
 function fmtUsd(cents: number) {
@@ -72,7 +72,9 @@ export function LifecycleDistribution({ tenantId }: Props) {
             Розподіл клієнтів за стадіями
           </CardTitle>
         </CardHeader>
-        <CardContent><div className="h-48 animate-pulse rounded-md bg-muted/30" /></CardContent>
+        <CardContent>
+          <div className="h-48 animate-pulse rounded-md bg-muted/30" />
+        </CardContent>
       </Card>
     );
   }
@@ -110,9 +112,11 @@ export function LifecycleDistribution({ tenantId }: Props) {
                     stroke="var(--background)"
                     strokeWidth={2}
                   >
-                    {slices.filter((s) => s.count > 0).map((s) => (
-                      <Cell key={s.key} fill={s.color} />
-                    ))}
+                    {slices
+                      .filter((s) => s.count > 0)
+                      .map((s) => (
+                        <Cell key={s.key} fill={s.color} />
+                      ))}
                   </Pie>
                   <Tooltip
                     contentStyle={{
@@ -124,28 +128,43 @@ export function LifecycleDistribution({ tenantId }: Props) {
                     }}
                     formatter={(value: number, _name, p) => {
                       const pct = total > 0 ? ((value / total) * 100).toFixed(1) : "0";
-                      const slice = slices.find((s) => s.label === (p?.payload as { label: string })?.label);
-                      return [`${value} (${pct}%) · ${fmtUsd(slice?.revenue ?? 0)}`, p?.payload?.label as string];
+                      const slice = slices.find(
+                        (s) => s.label === (p?.payload as { label: string })?.label,
+                      );
+                      return [
+                        `${value} (${pct}%) · ${fmtUsd(slice?.revenue ?? 0)}`,
+                        p?.payload?.label as string,
+                      ];
                     }}
                   />
                 </PieChart>
               </ResponsiveContainer>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-2xl font-bold text-foreground">{total}</span>
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">клієнтів</span>
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  клієнтів
+                </span>
               </div>
             </div>
             <ul className="flex-1 space-y-1.5 text-xs w-full">
               {slices.map((s) => {
                 const pct = total > 0 ? Math.round((s.count / total) * 100) : 0;
                 return (
-                  <li key={s.key} className="flex items-center justify-between gap-2 rounded-md border border-border/60 bg-card/50 px-2 py-1.5">
+                  <li
+                    key={s.key}
+                    className="flex items-center justify-between gap-2 rounded-md border border-border/60 bg-card/50 px-2 py-1.5"
+                  >
                     <div className="flex items-center gap-2">
-                      <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: s.color }} />
+                      <span
+                        className="inline-block h-2.5 w-2.5 rounded-full"
+                        style={{ background: s.color }}
+                      />
                       <span className="font-medium text-foreground">{s.label}</span>
                     </div>
                     <div className="flex items-center gap-3 text-muted-foreground">
-                      <span className="tabular-nums">{s.count} · {pct}%</span>
+                      <span className="tabular-nums">
+                        {s.count} · {pct}%
+                      </span>
                       <span className="tabular-nums text-primary">{fmtUsd(s.revenue)}</span>
                     </div>
                   </li>

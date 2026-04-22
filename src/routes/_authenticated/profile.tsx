@@ -25,7 +25,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -143,8 +149,7 @@ function ProfilePage() {
       toast.success("Налаштування збережено");
       qc.invalidateQueries({ queryKey: ["user-prefs", user?.id] });
     },
-    onError: (e: unknown) =>
-      toast.error(e instanceof Error ? e.message : "Помилка збереження"),
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Помилка збереження"),
   });
 
   useEffect(() => {
@@ -243,11 +248,21 @@ function ProfilePage() {
 
       <Tabs defaultValue="general">
         <TabsList className="flex w-full max-w-3xl flex-wrap">
-          <TabsTrigger value="general" className="gap-1.5"><UserRound className="h-3.5 w-3.5" /> Загальне</TabsTrigger>
-          <TabsTrigger value="security" className="gap-1.5"><Shield className="h-3.5 w-3.5" /> Безпека</TabsTrigger>
-          <TabsTrigger value="notifications" className="gap-1.5"><Bell className="h-3.5 w-3.5" /> Сповіщення</TabsTrigger>
-          <TabsTrigger value="brands" className="gap-1.5"><Building2 className="h-3.5 w-3.5" /> Бренди</TabsTrigger>
-          <TabsTrigger value="billing" className="gap-1.5"><Crown className="h-3.5 w-3.5" /> Тариф</TabsTrigger>
+          <TabsTrigger value="general" className="gap-1.5">
+            <UserRound className="h-3.5 w-3.5" /> Загальне
+          </TabsTrigger>
+          <TabsTrigger value="security" className="gap-1.5">
+            <Shield className="h-3.5 w-3.5" /> Безпека
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="gap-1.5">
+            <Bell className="h-3.5 w-3.5" /> Сповіщення
+          </TabsTrigger>
+          <TabsTrigger value="brands" className="gap-1.5">
+            <Building2 className="h-3.5 w-3.5" /> Бренди
+          </TabsTrigger>
+          <TabsTrigger value="billing" className="gap-1.5">
+            <Crown className="h-3.5 w-3.5" /> Тариф
+          </TabsTrigger>
         </TabsList>
 
         {/* GENERAL */}
@@ -299,17 +314,32 @@ function ProfilePage() {
 
               <div className="space-y-2">
                 <Label htmlFor="full-name">Імʼя</Label>
-                <Input id="full-name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Ваше імʼя" />
+                <Input
+                  id="full-name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Ваше імʼя"
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="bio">Про себе</Label>
-                <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Короткий опис" className="min-h-28" />
+                <Textarea
+                  id="bio"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="Короткий опис"
+                  className="min-h-28"
+                />
               </div>
 
               <div className="flex justify-end">
                 <Button onClick={handleSaveProfile} disabled={savingProfile}>
-                  {savingProfile ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  {savingProfile ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
                   Зберегти
                 </Button>
               </div>
@@ -318,7 +348,9 @@ function ProfilePage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Languages className="h-4 w-4 text-info" /> Інтерфейс</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Languages className="h-4 w-4 text-info" /> Інтерфейс
+              </CardTitle>
               <CardDescription>Мова і тема відображення.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
@@ -328,7 +360,9 @@ function ProfilePage() {
                   value={prefs?.locale ?? "ua"}
                   onValueChange={(v) => prefsMut.mutate({ locale: v as "ua" | "en" })}
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ua">Українська</SelectItem>
                     <SelectItem value="en">English</SelectItem>
@@ -336,12 +370,18 @@ function ProfilePage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="flex items-center gap-1.5"><Sun className="h-3.5 w-3.5" /> Тема</Label>
+                <Label className="flex items-center gap-1.5">
+                  <Sun className="h-3.5 w-3.5" /> Тема
+                </Label>
                 <Select
                   value={prefs?.theme ?? "system"}
-                  onValueChange={(v) => prefsMut.mutate({ theme: v as "system" | "light" | "dark" })}
+                  onValueChange={(v) =>
+                    prefsMut.mutate({ theme: v as "system" | "light" | "dark" })
+                  }
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="system">Системна</SelectItem>
                     <SelectItem value="dark">Темна (cockpit)</SelectItem>
@@ -359,23 +399,41 @@ function ProfilePage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><KeyRound className="h-4 w-4 text-warning" /> Зміна пароля</CardTitle>
-              <CardDescription>Мінімум 8 символів. Після зміни ви залишаєтеся в системі.</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <KeyRound className="h-4 w-4 text-warning" /> Зміна пароля
+              </CardTitle>
+              <CardDescription>
+                Мінімум 8 символів. Після зміни ви залишаєтеся в системі.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="space-y-2">
                 <Label htmlFor="new-pw">Новий пароль</Label>
-                <Input id="new-pw" type="password" autoComplete="new-password"
-                  value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                <Input
+                  id="new-pw"
+                  type="password"
+                  autoComplete="new-password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="new-pw2">Підтвердіть пароль</Label>
-                <Input id="new-pw2" type="password" autoComplete="new-password"
-                  value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                <Input
+                  id="new-pw2"
+                  type="password"
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
               </div>
               <div className="flex justify-end">
                 <Button onClick={handleChangePassword} disabled={savingPassword}>
-                  {savingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
+                  {savingPassword ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <KeyRound className="h-4 w-4" />
+                  )}
                   Змінити пароль
                 </Button>
               </div>
@@ -394,14 +452,16 @@ function ProfilePage() {
             <CardContent>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" size="sm">Видалити мій акаунт</Button>
+                  <Button variant="destructive" size="sm">
+                    Видалити мій акаунт
+                  </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Видалити акаунт?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Зверніться до супер-адміністратора — він обробить запит протягом 24 год.
-                      Це обмеження зроблено навмисно, щоб запобігти випадковим видаленням.
+                      Зверніться до супер-адміністратора — він обробить запит протягом 24 год. Це
+                      обмеження зроблено навмисно, щоб запобігти випадковим видаленням.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -420,7 +480,9 @@ function ProfilePage() {
         <TabsContent value="notifications" className="mt-4 space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Bell className="h-4 w-4 text-accent" /> Канали сповіщень</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-4 w-4 text-accent" /> Канали сповіщень
+              </CardTitle>
               <CardDescription>Як отримувати алерти від агентів та системи.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -450,7 +512,9 @@ function ProfilePage() {
         <TabsContent value="brands" className="mt-4 space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Building2 className="h-4 w-4 text-primary" /> Мої бренди</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-primary" /> Мої бренди
+              </CardTitle>
               <CardDescription>Бренди, де ви маєте доступ.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -462,7 +526,9 @@ function ProfilePage() {
                     <li key={t.tenant_id} className="flex items-center justify-between py-3">
                       <div>
                         <p className="font-medium">{t.tenant_name}</p>
-                        <p className="text-xs text-muted-foreground">/{t.tenant_slug} · {t.membership_role}</p>
+                        <p className="text-xs text-muted-foreground">
+                          /{t.tenant_slug} · {t.membership_role}
+                        </p>
                       </div>
                       <Badge variant="outline">{t.plan_name}</Badge>
                     </li>
@@ -485,13 +551,23 @@ function ProfilePage() {
                     <CardTitle className="flex flex-wrap items-center gap-2">
                       <Crown className="h-4 w-4 text-warning" />
                       Підписка бренду {current?.tenant_name ? `· ${current.tenant_name}` : ""}
-                      <PlanBadge planKey={summaryQuery.data.plan.key} planName={summaryQuery.data.plan.name} />
+                      <PlanBadge
+                        planKey={summaryQuery.data.plan.key}
+                        planName={summaryQuery.data.plan.name}
+                      />
                     </CardTitle>
                     <CardDescription>
-                      Статус: {SUB_STATUS_LABEL[summaryQuery.data.subscription.status] ?? summaryQuery.data.subscription.status} ·
-                      Період {new Date(summaryQuery.data.subscription.current_period_start).toLocaleDateString("uk-UA")}
+                      Статус:{" "}
+                      {SUB_STATUS_LABEL[summaryQuery.data.subscription.status] ??
+                        summaryQuery.data.subscription.status}{" "}
+                      · Період{" "}
+                      {new Date(
+                        summaryQuery.data.subscription.current_period_start,
+                      ).toLocaleDateString("uk-UA")}
                       {" → "}
-                      {new Date(summaryQuery.data.subscription.current_period_end).toLocaleDateString("uk-UA")}
+                      {new Date(
+                        summaryQuery.data.subscription.current_period_end,
+                      ).toLocaleDateString("uk-UA")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -500,7 +576,10 @@ function ProfilePage() {
                 </Card>
 
                 {canManagePlan ? (
-                  <OwnerPlanSwitcher tenantId={tenantId} currentPlanKey={summaryQuery.data.plan.key} />
+                  <OwnerPlanSwitcher
+                    tenantId={tenantId}
+                    currentPlanKey={summaryQuery.data.plan.key}
+                  />
                 ) : (
                   <Card>
                     <CardContent className="pt-6 text-sm text-muted-foreground">

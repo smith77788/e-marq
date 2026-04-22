@@ -70,8 +70,11 @@ async function pullShopify(input: ConnectorPullInput): Promise<ConnectorPullResu
   const apiVersion = "2024-10";
 
   const resource =
-    input.entityKind === "products" ? "products" :
-    input.entityKind === "customers" ? "customers" : "orders";
+    input.entityKind === "products"
+      ? "products"
+      : input.entityKind === "customers"
+        ? "customers"
+        : "orders";
 
   const url = new URL(`https://${domain}/admin/api/${apiVersion}/${resource}.json`);
   url.searchParams.set("limit", String(limit));
@@ -100,7 +103,9 @@ async function pullShopify(input: ConnectorPullInput): Promise<ConnectorPullResu
         sku: asString(v.sku),
         price_cents: centsFromMajor(v.price),
         stock: centsFromMinor(v.inventory_quantity),
-        description: asString(it.body_html).replace(/<[^>]+>/g, "").slice(0, 2000),
+        description: asString(it.body_html)
+          .replace(/<[^>]+>/g, "")
+          .slice(0, 2000),
         image_url: asString((images[0] as { src?: string } | undefined)?.src),
         currency: "UAH",
       };
@@ -116,7 +121,9 @@ async function pullShopify(input: ConnectorPullInput): Promise<ConnectorPullResu
     // orders
     const customer = (it.customer as Record<string, unknown>) ?? {};
     return {
-      customer_name: `${asString(customer.first_name)} ${asString(customer.last_name)}`.trim() || asString(it.email),
+      customer_name:
+        `${asString(customer.first_name)} ${asString(customer.last_name)}`.trim() ||
+        asString(it.email),
       customer_email: asString(it.email ?? customer.email),
       total_cents: centsFromMajor(it.total_price),
       currency: asString(it.currency || "UAH"),
@@ -141,8 +148,11 @@ async function pullWooCommerce(input: ConnectorPullInput): Promise<ConnectorPull
   const limit = Math.min(input.limit ?? DEFAULT_LIMIT, 100);
 
   const resource =
-    input.entityKind === "products" ? "products" :
-    input.entityKind === "customers" ? "customers" : "orders";
+    input.entityKind === "products"
+      ? "products"
+      : input.entityKind === "customers"
+        ? "customers"
+        : "orders";
 
   const url = `${base}/wp-json/wc/v3/${resource}?per_page=${limit}`;
   const auth = "Basic " + btoa(`${ck}:${cs}`);
@@ -161,7 +171,9 @@ async function pullWooCommerce(input: ConnectorPullInput): Promise<ConnectorPull
         sku: asString(it.sku),
         price_cents: centsFromMajor(it.price),
         stock: centsFromMinor(it.stock_quantity),
-        description: asString(it.short_description).replace(/<[^>]+>/g, "").slice(0, 2000),
+        description: asString(it.short_description)
+          .replace(/<[^>]+>/g, "")
+          .slice(0, 2000),
         image_url: asString((images[0] as { src?: string } | undefined)?.src),
         currency: "UAH",
       };
@@ -196,7 +208,9 @@ async function pullStripe(input: ConnectorPullInput): Promise<ConnectorPullResul
   const key = ensure(input.credentials, "Stripe Restricted Key");
   const limit = Math.min(input.limit ?? DEFAULT_LIMIT, 100);
   if (input.entityKind === "products") {
-    throw new Error("Stripe не зберігає товари у каталозі — використайте customers або transactions.");
+    throw new Error(
+      "Stripe не зберігає товари у каталозі — використайте customers або transactions.",
+    );
   }
 
   const resource = input.entityKind === "customers" ? "customers" : "charges";
@@ -291,8 +305,11 @@ async function pullPoster(input: ConnectorPullInput): Promise<ConnectorPullResul
   const limit = Math.min(input.limit ?? DEFAULT_LIMIT, 250);
 
   const method =
-    input.entityKind === "products" ? "menu.getProducts" :
-    input.entityKind === "customers" ? "clients.getClients" : "transactions.getTransactions";
+    input.entityKind === "products"
+      ? "menu.getProducts"
+      : input.entityKind === "customers"
+        ? "clients.getClients"
+        : "transactions.getTransactions";
 
   const url = `https://${domain}/api/${method}?token=${encodeURIComponent(token)}&num=${limit}`;
   const res = await fetch(url);
@@ -310,7 +327,9 @@ async function pullPoster(input: ConnectorPullInput): Promise<ConnectorPullResul
         name: asString(it.product_name),
         sku: asString(it.product_code),
         price_cents: centsFromMinor(
-          typeof it.price === "object" && it.price ? Object.values(it.price as Record<string, unknown>)[0] : it.price,
+          typeof it.price === "object" && it.price
+            ? Object.values(it.price as Record<string, unknown>)[0]
+            : it.price,
         ),
         stock: 0,
         description: asString(it.product_description),
@@ -344,7 +363,10 @@ async function pullPoster(input: ConnectorPullInput): Promise<ConnectorPullResul
 // GOOGLE SHEETS (публічний URL → CSV-export)
 // ─────────────────────────────────────────────────────────────────────────────
 async function pullGoogleSheets(input: ConnectorPullInput): Promise<ConnectorPullResult> {
-  const sheetUrl = ensure((input.config.url as string) ?? input.credentials ?? "", "URL Google-таблиці");
+  const sheetUrl = ensure(
+    (input.config.url as string) ?? input.credentials ?? "",
+    "URL Google-таблиці",
+  );
   // Витягуємо /spreadsheets/d/{ID}/...
   const m = sheetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
   if (!m) throw new Error("Не вдалось розпізнати ID таблиці у URL");
@@ -355,11 +377,15 @@ async function pullGoogleSheets(input: ConnectorPullInput): Promise<ConnectorPul
 
   const res = await safeFetch(csvUrl);
   if (!res.ok) {
-    throw new Error(`Не вдалось завантажити Google Sheet (${res.status}). Перевірте, що доступ "будь-хто з посиланням".`);
+    throw new Error(
+      `Не вдалось завантажити Google Sheet (${res.status}). Перевірте, що доступ "будь-хто з посиланням".`,
+    );
   }
   const text = await res.text();
   const parsed = Papa.parse<ParsedRow>(text, { header: true, skipEmptyLines: true });
-  const rows = (parsed.data ?? []).filter((r) => Object.values(r).some((v) => v != null && v !== ""));
+  const rows = (parsed.data ?? []).filter((r) =>
+    Object.values(r).some((v) => v != null && v !== ""),
+  );
   return { rows, mapping: {} };
 }
 
@@ -380,8 +406,10 @@ async function pullRest(input: ConnectorPullInput): Promise<ConnectorPullResult>
   // Підтримуємо: масив, або об'єкт з {data: [...]} або {results: [...]}
   let items: Array<Record<string, unknown>> = [];
   if (Array.isArray(json)) items = json;
-  else if (Array.isArray((json as { data?: unknown }).data)) items = (json as { data: Array<Record<string, unknown>> }).data;
-  else if (Array.isArray((json as { results?: unknown }).results)) items = (json as { results: Array<Record<string, unknown>> }).results;
+  else if (Array.isArray((json as { data?: unknown }).data))
+    items = (json as { data: Array<Record<string, unknown>> }).data;
+  else if (Array.isArray((json as { results?: unknown }).results))
+    items = (json as { results: Array<Record<string, unknown>> }).results;
   else throw new Error("Очікувано масив у відповіді або поле data/results.");
   const rows: ParsedRow[] = items.map((it): ParsedRow => {
     const out: ParsedRow = {};
@@ -396,7 +424,15 @@ function identityMapping(entityKind: EntityKind): Record<string, string> {
   const fields: Record<EntityKind, string[]> = {
     products: ["name", "sku", "price_cents", "stock", "description", "image_url", "currency"],
     customers: ["name", "email", "phone", "telegram_username"],
-    orders: ["customer_name", "customer_email", "total_cents", "currency", "status", "payment_method", "external_id"],
+    orders: [
+      "customer_name",
+      "customer_email",
+      "total_cents",
+      "currency",
+      "status",
+      "payment_method",
+      "external_id",
+    ],
   };
   const m: Record<string, string> = {};
   for (const f of fields[entityKind]) m[f] = f;

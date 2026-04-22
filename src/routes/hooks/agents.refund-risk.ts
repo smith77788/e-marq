@@ -22,7 +22,9 @@ export const Route = createFileRoute("/hooks/agents/refund-risk")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -101,7 +103,9 @@ export const Route = createFileRoute("/hooks/agents/refund-risk")({
           return jsonOk({ insights_created: created });
         } catch (e) {
           await failAgentRun(handle, e);
-          return jsonError("Refund risk failed", 500, { details: e instanceof Error ? e.message : String(e) });
+          return jsonError("Refund risk failed", 500, {
+            details: e instanceof Error ? e.message : String(e),
+          });
         }
       },
     },

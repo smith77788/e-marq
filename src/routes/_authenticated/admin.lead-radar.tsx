@@ -72,7 +72,15 @@ type Magnet = {
   created_at: string;
 };
 
-const STATUSES = ["all", "discovered", "qualified", "engaging", "converted", "rejected", "unreachable"];
+const STATUSES = [
+  "all",
+  "discovered",
+  "qualified",
+  "engaging",
+  "converted",
+  "rejected",
+  "unreachable",
+];
 const STATUS_TONE: Record<string, string> = {
   discovered: "border-info/40 text-info",
   qualified: "border-primary/40 text-primary",
@@ -156,9 +164,7 @@ function Content() {
     },
     onSuccess: (data, variant) => {
       toast.success(
-        `${variant} завершив роботу: створено ${
-          (data as { created?: number }).created ?? 0
-        }`,
+        `${variant} завершив роботу: створено ${(data as { created?: number }).created ?? 0}`,
       );
       qc.invalidateQueries({ queryKey: ["lead-prospects"] });
       qc.invalidateQueries({ queryKey: ["lead-magnets"] });
@@ -294,9 +300,7 @@ function Content() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Останні дії outreach</CardTitle>
-              <CardDescription>
-                Як саме агенти вже звертались до знайдених брендів.
-              </CardDescription>
+              <CardDescription>Як саме агенти вже звертались до знайдених брендів.</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               {outreach.isLoading ? (
@@ -347,8 +351,7 @@ function Content() {
             <CardHeader>
               <CardTitle className="text-base">Контент-магніти</CardTitle>
               <CardDescription>
-                Безкоштовні SEO-сторінки з лідогенерацією. Доступні за{" "}
-                <code>/m/&lt;slug&gt;</code>.
+                Безкоштовні SEO-сторінки з лідогенерацією. Доступні за <code>/m/&lt;slug&gt;</code>.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
@@ -370,9 +373,7 @@ function Content() {
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-foreground">
-                            {m.title}
-                          </p>
+                          <p className="truncate text-sm font-medium text-foreground">{m.title}</p>
                           <p className="truncate text-xs text-muted-foreground">
                             /m/{m.slug} · {m.topic ?? "general"}
                           </p>
@@ -463,7 +464,12 @@ function ProspectRow({ prospect }: { prospect: Prospect }) {
           </div>
           <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
             {prospect.website_url && (
-              <a href={prospect.website_url} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+              <a
+                href={prospect.website_url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-primary hover:underline"
+              >
                 {prospect.website_url}
               </a>
             )}
@@ -485,7 +491,12 @@ function ProspectRow({ prospect }: { prospect: Prospect }) {
             <Sparkles className="mr-1 h-3.5 w-3.5" />
             Outreach
           </Button>
-          <Button size="sm" variant="outline" disabled={busy} onClick={() => updateStatus("qualified")}>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={busy}
+            onClick={() => updateStatus("qualified")}
+          >
             <Play className="mr-1 h-3.5 w-3.5" />
             Qualify
           </Button>

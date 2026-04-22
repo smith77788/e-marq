@@ -57,9 +57,7 @@ export function TenantSwitcher() {
     const owned = tenants ?? [];
     if (!isSuperAdmin) return owned;
     const ownedIds = new Set(owned.map((t) => t.tenant_id));
-    const extras: Array<MyTenant & { isAdminOnly?: boolean }> = (
-      adminTenantsQuery.data ?? []
-    )
+    const extras: Array<MyTenant & { isAdminOnly?: boolean }> = (adminTenantsQuery.data ?? [])
       .filter((t) => !ownedIds.has(t.id))
       .map((t) => ({
         tenant_id: t.id,
@@ -113,9 +111,7 @@ export function TenantSwitcher() {
         >
           <span className="flex items-center gap-1.5 truncate">
             <Building2 className="h-3.5 w-3.5 text-primary" />
-            <span className="truncate font-medium">
-              {current?.tenant_name ?? "Оберіть бренд"}
-            </span>
+            <span className="truncate font-medium">{current?.tenant_name ?? "Оберіть бренд"}</span>
             {current?.tenant_slug && (
               <span className="hidden truncate font-mono text-[10px] text-muted-foreground sm:inline">
                 /{current.tenant_slug}
@@ -143,7 +139,10 @@ export function TenantSwitcher() {
             </div>
             <div className="flex items-center gap-1">
               {t.isAdminOnly ? (
-                <Badge variant="outline" className="border-destructive/40 text-destructive text-[10px]">
+                <Badge
+                  variant="outline"
+                  className="border-destructive/40 text-destructive text-[10px]"
+                >
                   <ShieldCheck className="mr-1 h-2.5 w-2.5" /> admin
                 </Badge>
               ) : (
@@ -151,9 +150,7 @@ export function TenantSwitcher() {
                   {t.plan_name}
                 </Badge>
               )}
-              {current?.tenant_id === t.tenant_id && (
-                <Check className="h-3.5 w-3.5 text-primary" />
-              )}
+              {current?.tenant_id === t.tenant_id && <Check className="h-3.5 w-3.5 text-primary" />}
             </div>
           </DropdownMenuItem>
         ))}

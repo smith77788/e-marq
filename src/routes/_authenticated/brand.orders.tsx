@@ -16,13 +16,7 @@ import { CheckCircle2, Package, Search, Truck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -179,7 +173,12 @@ function BrandOrdersPage() {
       }
       const { error } = await supabase.from("orders").update(patch).eq("id", id);
       if (error) throw error;
-      if (status === "paid" || status === "fulfilled" || status === "cancelled" || status === "refunded") {
+      if (
+        status === "paid" ||
+        status === "fulfilled" ||
+        status === "cancelled" ||
+        status === "refunded"
+      ) {
         void sendOrderStatusEmail(id, status);
       }
     },
@@ -248,11 +247,21 @@ function BrandOrdersPage() {
             </div>
             <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
               <TabsList className="h-9">
-                <TabsTrigger value="all" className="text-xs">{t("bo.tab.all")}</TabsTrigger>
-                <TabsTrigger value="pending" className="text-xs">{t("bo.tab.pending")}</TabsTrigger>
-                <TabsTrigger value="paid" className="text-xs">{t("bo.tab.paid")}</TabsTrigger>
-                <TabsTrigger value="fulfilled" className="text-xs">{t("bo.tab.fulfilled")}</TabsTrigger>
-                <TabsTrigger value="cancelled" className="text-xs">{t("bo.tab.cancelled")}</TabsTrigger>
+                <TabsTrigger value="all" className="text-xs">
+                  {t("bo.tab.all")}
+                </TabsTrigger>
+                <TabsTrigger value="pending" className="text-xs">
+                  {t("bo.tab.pending")}
+                </TabsTrigger>
+                <TabsTrigger value="paid" className="text-xs">
+                  {t("bo.tab.paid")}
+                </TabsTrigger>
+                <TabsTrigger value="fulfilled" className="text-xs">
+                  {t("bo.tab.fulfilled")}
+                </TabsTrigger>
+                <TabsTrigger value="cancelled" className="text-xs">
+                  {t("bo.tab.cancelled")}
+                </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -266,60 +275,58 @@ function BrandOrdersPage() {
           ) : (
             <div className="overflow-x-auto">
               <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("bo.col.number")}</TableHead>
-                  <TableHead>{t("bo.col.customer")}</TableHead>
-                  <TableHead className="text-right">{t("bo.col.total")}</TableHead>
-                  <TableHead>{t("bo.col.status")}</TableHead>
-                  <TableHead className="hidden md:table-cell">{t("bo.col.payment")}</TableHead>
-                  <TableHead className="hidden md:table-cell">{t("bo.col.date")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((o) => (
-                  <TableRow
-                    key={o.id}
-                    className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    onClick={() => setOpened(o)}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Відкрити замовлення #${o.id.slice(0, 8)}`}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setOpened(o);
-                      }
-                    }}
-                  >
-                    <TableCell className="font-mono text-xs">
-                      #{o.id.slice(0, 8)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm font-medium text-foreground">
-                        {o.customer_name ?? "—"}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {o.customer_email ?? ""}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums font-medium">
-                      {formatMoneyExact(o.total_cents)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={STATUS_VARIANT[o.status]}>
-                        {t(`bo.status.${o.status}` as never)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
-                      {o.payment_method}
-                    </TableCell>
-                    <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
-                      {format(new Date(o.created_at), "dd MMM, HH:mm")}
-                    </TableCell>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("bo.col.number")}</TableHead>
+                    <TableHead>{t("bo.col.customer")}</TableHead>
+                    <TableHead className="text-right">{t("bo.col.total")}</TableHead>
+                    <TableHead>{t("bo.col.status")}</TableHead>
+                    <TableHead className="hidden md:table-cell">{t("bo.col.payment")}</TableHead>
+                    <TableHead className="hidden md:table-cell">{t("bo.col.date")}</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((o) => (
+                    <TableRow
+                      key={o.id}
+                      className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      onClick={() => setOpened(o)}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Відкрити замовлення #${o.id.slice(0, 8)}`}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setOpened(o);
+                        }
+                      }}
+                    >
+                      <TableCell className="font-mono text-xs">#{o.id.slice(0, 8)}</TableCell>
+                      <TableCell>
+                        <div className="text-sm font-medium text-foreground">
+                          {o.customer_name ?? "—"}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {o.customer_email ?? ""}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums font-medium">
+                        {formatMoneyExact(o.total_cents)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={STATUS_VARIANT[o.status]}>
+                          {t(`bo.status.${o.status}` as never)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
+                        {o.payment_method}
+                      </TableCell>
+                      <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
+                        {format(new Date(o.created_at), "dd MMM, HH:mm")}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
               </Table>
             </div>
           )}
@@ -404,7 +411,10 @@ function BrandOrdersPage() {
                   ) : (
                     <div className="divide-y divide-border">
                       {(itemsQuery.data ?? []).map((it) => (
-                        <div key={it.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                        <div
+                          key={it.id}
+                          className="flex items-center justify-between px-3 py-2 text-sm"
+                        >
                           <span className="flex-1 truncate">
                             {it.product_name}{" "}
                             <span className="text-muted-foreground">× {it.quantity}</span>

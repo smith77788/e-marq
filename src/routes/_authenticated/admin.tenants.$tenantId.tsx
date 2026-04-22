@@ -349,7 +349,11 @@ function TenantDetailPage() {
   }
 
   const tenant = tenantQuery.data;
-  const T_STATUS: Record<string, string> = { active: "активний", suspended: "призупинено", inactive: "вимкнено" };
+  const T_STATUS: Record<string, string> = {
+    active: "активний",
+    suspended: "призупинено",
+    inactive: "вимкнено",
+  };
 
   return (
     <div className="space-y-6">
@@ -390,7 +394,8 @@ function TenantDetailPage() {
 
         <TabsContent value="acos-debug" className="space-y-4">
           <p className="text-xs text-muted-foreground">
-            Технічна панель для відлагодження роботи агентів. Не використовується власниками брендів у звичайному режимі.
+            Технічна панель для відлагодження роботи агентів. Не використовується власниками брендів
+            у звичайному режимі.
           </p>
           <AcosOverviewTab tenantId={tenantId} />
           <AcosInsightsQueue tenantId={tenantId} />
@@ -404,12 +409,15 @@ function TenantDetailPage() {
               value={productsQuery.data?.length ?? 0}
               loading={productsQuery.isLoading}
             />
-            <StatCard label="Замовлень" value={ordersQuery.data ?? 0} loading={ordersQuery.isLoading} />
+            <StatCard
+              label="Замовлень"
+              value={ordersQuery.data ?? 0}
+              loading={ordersQuery.isLoading}
+            />
             <StatCard label="Подій" value={eventsQuery.data ?? 0} loading={eventsQuery.isLoading} />
           </div>
 
           <TenantAnalytics tenantId={tenantId} />
-
 
           <Card>
             <CardHeader>
@@ -422,7 +430,9 @@ function TenantDetailPage() {
                 <dt className="text-muted-foreground">ID власника</dt>
                 <dd className="font-mono text-xs text-foreground">{tenant.owner_user_id}</dd>
                 <dt className="text-muted-foreground">Створено</dt>
-                <dd className="text-foreground">{new Date(tenant.created_at).toLocaleString("uk-UA")}</dd>
+                <dd className="text-foreground">
+                  {new Date(tenant.created_at).toLocaleString("uk-UA")}
+                </dd>
               </dl>
             </CardContent>
           </Card>
@@ -444,10 +454,7 @@ function TenantDetailPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="acos-scale">Розмір набору</Label>
-                  <Select
-                    value={acosScale}
-                    onValueChange={(v) => setAcosScale(v as AcosScale)}
-                  >
+                  <Select value={acosScale} onValueChange={(v) => setAcosScale(v as AcosScale)}>
                     <SelectTrigger id="acos-scale">
                       <SelectValue />
                     </SelectTrigger>
@@ -502,7 +509,9 @@ function TenantDetailPage() {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Клієнтів: </span>
-                      <span className="font-medium text-foreground">{lastAcosResult.customers}</span>
+                      <span className="font-medium text-foreground">
+                        {lastAcosResult.customers}
+                      </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Замовлень: </span>
@@ -678,8 +687,8 @@ function TenantDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Видалити товар?</AlertDialogTitle>
             <AlertDialogDescription>
-              Товар <span className="font-medium">{deleting?.name}</span> буде видалено назавжди.
-              Цю дію не можна скасувати.
+              Товар <span className="font-medium">{deleting?.name}</span> буде видалено назавжди. Цю
+              дію не можна скасувати.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -707,12 +716,13 @@ function TenantDetailPage() {
                 <p>Буде створено реалістичний набір даних за останні 90 днів:</p>
                 <ul className="ml-4 list-disc space-y-1">
                   <li>
-                    <span className="font-medium">{ACOS_CATALOG_SIZE} товарів</span> — одяг,
-                    взуття, аксесуари та аудіо (зокрема 2 з ризиком закінчитись на складі)
+                    <span className="font-medium">{ACOS_CATALOG_SIZE} товарів</span> — одяг, взуття,
+                    аксесуари та аудіо (зокрема 2 з ризиком закінчитись на складі)
                   </li>
                   <li>
                     <span className="font-medium">
-                      {acosScale === "small" ? "120" : acosScale === "medium" ? "250" : "600"} клієнтів
+                      {acosScale === "small" ? "120" : acosScale === "medium" ? "250" : "600"}{" "}
+                      клієнтів
                     </span>{" "}
                     із 5 типових груп (нові, разові, постійні, найцінніші активні та найцінніші, що
                     можуть піти)
@@ -728,7 +738,9 @@ function TenantDetailPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={generateAcosMutation.isPending}>Скасувати</AlertDialogCancel>
+            <AlertDialogCancel disabled={generateAcosMutation.isPending}>
+              Скасувати
+            </AlertDialogCancel>
             <AlertDialogAction
               disabled={generateAcosMutation.isPending}
               onClick={(e) => {
@@ -748,8 +760,11 @@ function TenantDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Очистити всі дані бренду?</AlertDialogTitle>
             <AlertDialogDescription>
-              Буде назавжди видалено <span className="font-medium">всі товари, замовлення,
-              позиції замовлень та події</span> цього бренду. Цю дію не можна скасувати.
+              Буде назавжди видалено{" "}
+              <span className="font-medium">
+                всі товари, замовлення, позиції замовлень та події
+              </span>{" "}
+              цього бренду. Цю дію не можна скасувати.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -784,4 +799,3 @@ function StatCard({ label, value, loading }: { label: string; value: number; loa
     </Card>
   );
 }
-

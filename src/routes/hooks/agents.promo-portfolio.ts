@@ -96,7 +96,9 @@ export const Route = createFileRoute("/hooks/agents/promo-portfolio")({
               risk_level: "medium" as const,
               metrics: {
                 overlapping_count: overlapping.length,
-                examples: overlapping.slice(0, 5).map(([pid, names]) => ({ product_id: pid, promos: names })),
+                examples: overlapping
+                  .slice(0, 5)
+                  .map(([pid, names]) => ({ product_id: pid, promos: names })),
               },
               dedup_key: `promo_overlap::${overlapping.length}`,
             });

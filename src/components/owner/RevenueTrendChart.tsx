@@ -9,7 +9,15 @@
  */
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { TrendingUp } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -101,7 +109,9 @@ export function RevenueTrendChart({ tenantId }: Props) {
           Динаміка виторгу ({days} днів)
         </CardTitle>
         <CardDescription className="text-xs">
-          Усього <span className="font-semibold text-foreground">{formatMoney(totals.total)}</span> · від ШІ <span className="font-semibold text-primary">{formatMoney(totals.ai)}</span> ({totals.share}%)
+          Усього <span className="font-semibold text-foreground">{formatMoney(totals.total)}</span>{" "}
+          · від ШІ <span className="font-semibold text-primary">{formatMoney(totals.ai)}</span> (
+          {totals.share}%)
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -121,7 +131,11 @@ export function RevenueTrendChart({ tenantId }: Props) {
                     <stop offset="100%" stopColor={CHART.primary} stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray={CHART.gridDash} stroke={CHART.gridStroke} vertical={false} />
+                <CartesianGrid
+                  strokeDasharray={CHART.gridDash}
+                  stroke={CHART.gridStroke}
+                  vertical={false}
+                />
                 <XAxis
                   dataKey="label"
                   tick={CHART.tickStyle}

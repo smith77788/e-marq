@@ -1,7 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { Bot, CheckCircle2, Clock, Loader2, MessageCircle, Send, TrendingUp, XCircle, Zap } from "lucide-react";
+import {
+  Bot,
+  CheckCircle2,
+  Clock,
+  Loader2,
+  MessageCircle,
+  Send,
+  TrendingUp,
+  XCircle,
+  Zap,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,15 +37,31 @@ type OutboundRow = {
   expected_impact_cents: number | null;
   actual_revenue_cents: number | null;
   customer_id: string | null;
-  customers?: { name: string | null; email: string | null; telegram_username: string | null } | null;
+  customers?: {
+    name: string | null;
+    email: string | null;
+    telegram_username: string | null;
+  } | null;
 };
 
 const STATUS_STYLE: Record<string, { label: string; cls: string; Icon: typeof Clock }> = {
   pending: { label: "У черзі", cls: "bg-muted text-muted-foreground", Icon: Clock },
   sent: { label: "Надіслано", cls: "bg-primary/10 text-primary border-primary/30", Icon: Send },
-  failed: { label: "Помилка", cls: "bg-destructive/10 text-destructive border-destructive/30", Icon: XCircle },
-  replied: { label: "Відповіли", cls: "bg-warning/15 text-warning-foreground border-warning/40", Icon: MessageCircle },
-  converted: { label: "Куплено", cls: "bg-success/15 text-success border-success/40", Icon: CheckCircle2 },
+  failed: {
+    label: "Помилка",
+    cls: "bg-destructive/10 text-destructive border-destructive/30",
+    Icon: XCircle,
+  },
+  replied: {
+    label: "Відповіли",
+    cls: "bg-warning/15 text-warning-foreground border-warning/40",
+    Icon: MessageCircle,
+  },
+  converted: {
+    label: "Куплено",
+    cls: "bg-success/15 text-success border-success/40",
+    Icon: CheckCircle2,
+  },
 };
 
 const TRIGGER_LABEL: Record<string, string> = {
@@ -45,7 +71,11 @@ const TRIGGER_LABEL: Record<string, string> = {
   sales_reply: "Відповідь продавця",
 };
 
-type EngineButton = { kind: "reorder" | "abandoned-cart" | "winback"; label: string; toast: string };
+type EngineButton = {
+  kind: "reorder" | "abandoned-cart" | "winback";
+  label: string;
+  toast: string;
+};
 const ENGINES: EngineButton[] = [
   { kind: "reorder", label: "Повторні", toast: "Повторні замовлення" },
   { kind: "abandoned-cart", label: "Кошики", toast: "Покинуті кошики" },
@@ -61,9 +91,19 @@ async function authedFetch(path: string, body: unknown) {
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify(body),
   });
-  const json = (await res.json().catch(() => ({}))) as Record<string, unknown> & { success?: boolean; error?: string; details?: string };
+  const json = (await res.json().catch(() => ({}))) as Record<string, unknown> & {
+    success?: boolean;
+    error?: string;
+    details?: string;
+  };
   if (!res.ok || json.success === false) {
-    throw new Error(typeof json.details === "string" ? json.details : typeof json.error === "string" ? json.error : `HTTP ${res.status}`);
+    throw new Error(
+      typeof json.details === "string"
+        ? json.details
+        : typeof json.error === "string"
+          ? json.error
+          : `HTTP ${res.status}`,
+    );
   }
   return json;
 }
@@ -96,7 +136,12 @@ export function RevenueFeed({ tenantId }: Props) {
       .channel(`revenue-feed-${tenantId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "outbound_messages", filter: `tenant_id=eq.${tenantId}` },
+        {
+          event: "*",
+          schema: "public",
+          table: "outbound_messages",
+          filter: `tenant_id=eq.${tenantId}`,
+        },
         () => qc.invalidateQueries({ queryKey: ["revenue-feed", tenantId] }),
       )
       .subscribe();
@@ -129,11 +174,15 @@ export function RevenueFeed({ tenantId }: Props) {
   });
 
   const stats = {
-    sent: rows.filter((r) => r.status === "sent" || r.status === "replied" || r.status === "converted").length,
+    sent: rows.filter(
+      (r) => r.status === "sent" || r.status === "replied" || r.status === "converted",
+    ).length,
     replied: rows.filter((r) => r.status === "replied" || r.status === "converted").length,
     converted: rows.filter((r) => r.status === "converted").length,
     revenue: rows.reduce((s, r) => s + (r.actual_revenue_cents ?? 0), 0),
-    pipeline: rows.filter((r) => r.status === "sent" || r.status === "replied").reduce((s, r) => s + (r.expected_impact_cents ?? 0), 0),
+    pipeline: rows
+      .filter((r) => r.status === "sent" || r.status === "replied")
+      .reduce((s, r) => s + (r.expected_impact_cents ?? 0), 0),
   };
 
   return (
@@ -145,9 +194,7 @@ export function RevenueFeed({ tenantId }: Props) {
               <Bot className="h-5 w-5 text-primary" />
               Що приніс ШІ
             </CardTitle>
-            <CardDescription>
-              Дії автономних агентів. Оновлюється кожні 15 секунд.
-            </CardDescription>
+            <CardDescription>Дії автономних агентів. Оновлюється кожні 15 секунд.</CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
             {ENGINES.map((e) => (
@@ -166,8 +213,17 @@ export function RevenueFeed({ tenantId }: Props) {
                 {e.label}
               </Button>
             ))}
-            <Button onClick={() => dispatch.mutate()} disabled={dispatch.isPending} size="sm" variant="ghost">
-              {dispatch.isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Send className="mr-2 h-3.5 w-3.5" />}
+            <Button
+              onClick={() => dispatch.mutate()}
+              disabled={dispatch.isPending}
+              size="sm"
+              variant="ghost"
+            >
+              {dispatch.isPending ? (
+                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Send className="mr-2 h-3.5 w-3.5" />
+              )}
               Надіслати чергу
             </Button>
           </div>
@@ -177,7 +233,12 @@ export function RevenueFeed({ tenantId }: Props) {
           <Stat label="Надіслано" value={stats.sent} />
           <Stat label="Відповіді" value={stats.replied} />
           <Stat label="Куплено" value={stats.converted} />
-          <Stat label="Очікуваний дохід" value={formatMoney(stats.pipeline)} sub="прогноз" highlight />
+          <Stat
+            label="Очікуваний дохід"
+            value={formatMoney(stats.pipeline)}
+            sub="прогноз"
+            highlight
+          />
         </div>
       </CardHeader>
       <CardContent>
@@ -188,7 +249,8 @@ export function RevenueFeed({ tenantId }: Props) {
             <Bot className="mx-auto h-8 w-8 text-muted-foreground/60" />
             <p className="mt-3 text-sm font-medium">Поки що автономної активності немає</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Натисніть «Повторні» — система знайде клієнтів, у яких пора замовити, і напише їм у Telegram.
+              Натисніть «Повторні» — система знайде клієнтів, у яких пора замовити, і напише їм у
+              Telegram.
             </p>
           </div>
         ) : (
@@ -198,7 +260,9 @@ export function RevenueFeed({ tenantId }: Props) {
                 const s = STATUS_STYLE[r.status] ?? STATUS_STYLE.pending;
                 const StatusIcon = s.Icon;
                 const customerLabel =
-                  r.customers?.name ?? r.customers?.email ?? (r.customers?.telegram_username ? `@${r.customers.telegram_username}` : "анонім");
+                  r.customers?.name ??
+                  r.customers?.email ??
+                  (r.customers?.telegram_username ? `@${r.customers.telegram_username}` : "анонім");
                 const ts = r.sent_at ?? r.scheduled_for;
                 return (
                   <DetailableElement
@@ -215,8 +279,12 @@ export function RevenueFeed({ tenantId }: Props) {
                           <StatusIcon className="mr-1 h-3 w-3" />
                           {s.label}
                         </Badge>
-                        <Badge variant="outline" className="text-[10px]">{TRIGGER_LABEL[r.trigger_kind] ?? r.trigger_kind}</Badge>
-                        <Badge variant="secondary" className="text-[10px]">{r.channel}</Badge>
+                        <Badge variant="outline" className="text-[10px]">
+                          {TRIGGER_LABEL[r.trigger_kind] ?? r.trigger_kind}
+                        </Badge>
+                        <Badge variant="secondary" className="text-[10px]">
+                          {r.channel}
+                        </Badge>
                         <span className="ml-auto text-[10px] text-muted-foreground">
                           {formatDistanceToNow(new Date(ts), { addSuffix: true })}
                         </span>
@@ -227,7 +295,8 @@ export function RevenueFeed({ tenantId }: Props) {
                       </p>
                       {r.expected_impact_cents != null && (
                         <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-primary">
-                          <TrendingUp className="h-3 w-3" /> потенціал {formatMoney(r.expected_impact_cents)}
+                          <TrendingUp className="h-3 w-3" /> потенціал{" "}
+                          {formatMoney(r.expected_impact_cents)}
                         </p>
                       )}
                     </div>
@@ -242,11 +311,27 @@ export function RevenueFeed({ tenantId }: Props) {
   );
 }
 
-function Stat({ label, value, sub, highlight }: { label: string; value: number | string; sub?: string; highlight?: boolean }) {
+function Stat({
+  label,
+  value,
+  sub,
+  highlight,
+}: {
+  label: string;
+  value: number | string;
+  sub?: string;
+  highlight?: boolean;
+}) {
   return (
-    <div className={`rounded-md border p-3 ${highlight ? "border-primary/30 bg-primary/5" : "border-border bg-card"}`}>
-      <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className={`mt-1 text-lg font-bold ${highlight ? "text-primary" : "text-foreground"}`}>{value}</p>
+    <div
+      className={`rounded-md border p-3 ${highlight ? "border-primary/30 bg-primary/5" : "border-border bg-card"}`}
+    >
+      <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </p>
+      <p className={`mt-1 text-lg font-bold ${highlight ? "text-primary" : "text-foreground"}`}>
+        {value}
+      </p>
       {sub && <p className="text-[10px] text-muted-foreground">{sub}</p>}
     </div>
   );

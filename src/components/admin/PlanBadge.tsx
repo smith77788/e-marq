@@ -9,14 +9,21 @@ const PLAN_STYLES: Record<string, string> = {
   enterprise: "border-warning/40 text-warning bg-warning/5",
 };
 
-export function PlanBadge({ planKey, planName, className }: {
+export function PlanBadge({
+  planKey,
+  planName,
+  className,
+}: {
   planKey: string;
   planName?: string;
   className?: string;
 }) {
   const style = PLAN_STYLES[planKey] ?? PLAN_STYLES.free;
   return (
-    <Badge variant="outline" className={cn(style, "uppercase text-[10px] font-semibold tracking-wide", className)}>
+    <Badge
+      variant="outline"
+      className={cn(style, "uppercase text-[10px] font-semibold tracking-wide", className)}
+    >
       {planName ?? planKey}
     </Badge>
   );

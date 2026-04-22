@@ -60,7 +60,9 @@ export const Route = createFileRoute("/hooks/engines/reorder")({
           // Self-tuning: cadence multiplier shifts the recency cooldown.
           const cadence = await getCadenceMultiplier(tenantId, "reorder");
           const cooldownDays = 14 * cadence;
-          const recentlyContactedCutoff = new Date(Date.now() - cooldownDays * 24 * 3600 * 1000).toISOString();
+          const recentlyContactedCutoff = new Date(
+            Date.now() - cooldownDays * 24 * 3600 * 1000,
+          ).toISOString();
 
           const { data: candidates, error } = await supabaseAdmin
             .from("customers")
@@ -84,7 +86,9 @@ export const Route = createFileRoute("/hooks/engines/reorder")({
             // Find last bought product (best-effort)
             const { data: lastItems } = await supabaseAdmin
               .from("order_items")
-              .select("product_name, product_id, orders!inner(customer_email, tenant_id, paid_at, status)")
+              .select(
+                "product_name, product_id, orders!inner(customer_email, tenant_id, paid_at, status)",
+              )
               .eq("tenant_id", tenantId)
               .eq("orders.customer_email", c.email ?? "")
               .eq("orders.status", "paid")
@@ -139,7 +143,9 @@ export const Route = createFileRoute("/hooks/engines/reorder")({
           });
         } catch (err) {
           await failAgentRun(handle, err);
-          return jsonError("Reorder engine failed", 500, { details: err instanceof Error ? err.message : String(err) });
+          return jsonError("Reorder engine failed", 500, {
+            details: err instanceof Error ? err.message : String(err),
+          });
         }
       },
     },

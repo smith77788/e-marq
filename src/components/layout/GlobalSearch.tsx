@@ -73,9 +73,24 @@ const PAGES_ADMIN: StaticEntry[] = [
   { label: "Admin · All tenants", hint: "/admin/tenants", to: "/admin/tenants", icon: Building2 },
   { label: "Admin · Plans catalog", hint: "/admin/plans", to: "/admin/plans", icon: Compass },
   { label: "Admin · Users", hint: "/admin/users", to: "/admin/users", icon: Users },
-  { label: "Admin · Top-up requests", hint: "/admin/topup-requests", to: "/admin/topup-requests", icon: Compass },
-  { label: "Admin · Lead Radar", hint: "/admin/lead-radar", to: "/admin/lead-radar", icon: Compass },
-  { label: "Admin · DN Trade Health", hint: "/admin/dntrade-health", to: "/admin/dntrade-health", icon: Compass },
+  {
+    label: "Admin · Top-up requests",
+    hint: "/admin/topup-requests",
+    to: "/admin/topup-requests",
+    icon: Compass,
+  },
+  {
+    label: "Admin · Lead Radar",
+    hint: "/admin/lead-radar",
+    to: "/admin/lead-radar",
+    icon: Compass,
+  },
+  {
+    label: "Admin · DN Trade Health",
+    hint: "/admin/dntrade-health",
+    to: "/admin/dntrade-health",
+    icon: Compass,
+  },
   { label: "Admin · Commands", hint: "/admin/commands", to: "/admin/commands", icon: Compass },
 ];
 
@@ -166,9 +181,7 @@ export function GlobalSearch() {
           .from("orders")
           .select("id, tenant_id, payment_ref, customer_email, customer_name")
           .in("tenant_id", tenantIds)
-          .or(
-            `payment_ref.ilike.${like},customer_email.ilike.${like},customer_name.ilike.${like}`,
-          )
+          .or(`payment_ref.ilike.${like},customer_email.ilike.${like},customer_name.ilike.${like}`)
           .order("created_at", { ascending: false })
           .limit(8),
         supabase
@@ -199,9 +212,7 @@ export function GlobalSearch() {
     const all = isSuperAdmin ? [...PAGES_ADMIN, ...PAGES_OWNER] : PAGES_OWNER;
     if (debounced.length < 2) return all.slice(0, 8);
     const q = debounced.toLowerCase();
-    return all.filter(
-      (p) => p.label.toLowerCase().includes(q) || p.hint.toLowerCase().includes(q),
-    );
+    return all.filter((p) => p.label.toLowerCase().includes(q) || p.hint.toLowerCase().includes(q));
   }, [debounced, isSuperAdmin]);
 
   const go = useCallback(
@@ -217,11 +228,11 @@ export function GlobalSearch() {
   const hasAnyResult =
     showResults &&
     !!results &&
-    (results.products.length +
+    results.products.length +
       results.orders.length +
       results.customers.length +
       results.insights.length >
-      0);
+      0;
 
   return (
     <>
@@ -387,9 +398,7 @@ export function GlobalSearch() {
           )}
 
           {!showResults && (
-            <div className="px-3 py-2 text-[11px] text-muted-foreground">
-              {t("gs.tipMinChars")}
-            </div>
+            <div className="px-3 py-2 text-[11px] text-muted-foreground">{t("gs.tipMinChars")}</div>
           )}
         </CommandList>
       </CommandDialog>

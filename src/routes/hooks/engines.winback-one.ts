@@ -24,7 +24,9 @@ async function aiOffer(opts: {
 }): Promise<string> {
   const apiKey = process.env.LOVABLE_API_KEY;
   const fallback = `Hey ${opts.firstName} — it's been a while! ${
-    opts.favoriteProduct ? `Want me to set aside a ${opts.favoriteProduct} for you?` : "Anything you'd like me to put on hold for you?"
+    opts.favoriteProduct
+      ? `Want me to set aside a ${opts.favoriteProduct} for you?`
+      : "Anything you'd like me to put on hold for you?"
   }`;
   if (!apiKey) return fallback;
   const sys = `You write SHORT winback messages for D2C brand "${opts.brandName}". Tone: warm, friendly, never desperate. 1-2 short sentences. Never mention "discount". Never claim to be AI.`;
@@ -35,7 +37,10 @@ async function aiOffer(opts: {
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: MODEL,
-        messages: [{ role: "system", content: sys }, { role: "user", content: user }],
+        messages: [
+          { role: "system", content: sys },
+          { role: "user", content: user },
+        ],
         temperature: 0.7,
       }),
     });
@@ -72,15 +77,21 @@ export const Route = createFileRoute("/hooks/engines/winback-one")({
         if (!customer.consent_marketing) return jsonError("customer opted out", 400);
 
         const channel = await pickChannelForCustomer(customer.id);
-        if (!channel) return jsonError("no reachable channel for customer (no email/telegram)", 400);
+        if (!channel)
+          return jsonError("no reachable channel for customer (no email/telegram)", 400);
 
         const { data: tenantCfg } = await supabaseAdmin
-          .from("tenant_configs").select("brand_name").eq("tenant_id", body.tenant_id).maybeSingle();
+          .from("tenant_configs")
+          .select("brand_name")
+          .eq("tenant_id", body.tenant_id)
+          .maybeSingle();
 
         // Find favorite product
         const { data: items } = await supabaseAdmin
           .from("order_items")
-          .select("product_name, quantity, order_id, orders!inner(customer_user_id, customer_email, status)")
+          .select(
+            "product_name, quantity, order_id, orders!inner(customer_user_id, customer_email, status)",
+          )
           .eq("tenant_id", body.tenant_id)
           .eq("orders.status", "paid")
           .limit(50);
@@ -88,14 +99,17 @@ export const Route = createFileRoute("/hooks/engines/winback-one")({
         for (const it of items ?? []) {
           const o = (it as never as { orders: { customer_email: string | null } }).orders;
           // Match by email since customers.email may be the link
-          if (o) counts.set(it.product_name, (counts.get(it.product_name) ?? 0) + (it.quantity ?? 1));
+          if (o)
+            counts.set(it.product_name, (counts.get(it.product_name) ?? 0) + (it.quantity ?? 1));
         }
-        const favorite = counts.size > 0
-          ? [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0]
-          : null;
+        const favorite =
+          counts.size > 0 ? [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0] : null;
 
         const daysSince = customer.last_order_at
-          ? Math.max(1, Math.floor((Date.now() - new Date(customer.last_order_at).getTime()) / 86_400_000))
+          ? Math.max(
+              1,
+              Math.floor((Date.now() - new Date(customer.last_order_at).getTime()) / 86_400_000),
+            )
           : 90;
         const firstName = (customer.name ?? "").split(" ")[0] || "there";
 

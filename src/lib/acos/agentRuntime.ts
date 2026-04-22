@@ -26,9 +26,7 @@ export type AgentInsightInput = {
   dedup_key: string;
 };
 
-export type AuthContext =
-  | { kind: "cron" }
-  | { kind: "user"; userId: string };
+export type AuthContext = { kind: "cron" } | { kind: "user"; userId: string };
 
 /**
  * Verify bearer token. Cron uses anon key; user must be super_admin or member of tenant.
@@ -55,7 +53,11 @@ export async function authorizeAgentRequest(
   const userId = data.claims.sub;
   const [roleRes, memberRes] = await Promise.all([
     supabaseAdmin.from("user_roles").select("role").eq("user_id", userId).eq("role", "super_admin"),
-    supabaseAdmin.from("tenant_memberships").select("role").eq("user_id", userId).eq("tenant_id", tenantId),
+    supabaseAdmin
+      .from("tenant_memberships")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("tenant_id", tenantId),
   ]);
   if ((roleRes.data ?? []).length > 0) return { kind: "user", userId };
   if ((memberRes.data ?? []).length > 0) return { kind: "user", userId };

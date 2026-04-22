@@ -26,13 +26,7 @@ import {
   TestTube2,
   Users,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -279,9 +273,7 @@ export function EmailCampaignWizard({ tenantId }: { tenantId: string }) {
                     onClick={() => setSegment(s)}
                     className={cn(
                       "rounded-lg border p-3 text-left transition-colors",
-                      sel
-                        ? "border-primary bg-primary/5"
-                        : "border-border/60 hover:border-border",
+                      sel ? "border-primary bg-primary/5" : "border-border/60 hover:border-border",
                     )}
                   >
                     <div className="flex items-center justify-between">
@@ -292,9 +284,7 @@ export function EmailCampaignWizard({ tenantId }: { tenantId: string }) {
                         {counts.isLoading ? "…" : c}
                       </Badge>
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {SEGMENT_LABELS[s].desc}
-                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">{SEGMENT_LABELS[s].desc}</p>
                   </button>
                 );
               })}
@@ -373,8 +363,8 @@ export function EmailCampaignWizard({ tenantId }: { tenantId: string }) {
                   className="min-h-[280px] font-mono text-xs"
                 />
                 <p className="text-[11px] text-muted-foreground">
-                  Підтримується <code>{`{{unsubscribe_url}}`}</code> — підставиться
-                  per-recipient. Якщо плейсхолдера немає, footer додасться автоматично.
+                  Підтримується <code>{`{{unsubscribe_url}}`}</code> — підставиться per-recipient.
+                  Якщо плейсхолдера немає, footer додасться автоматично.
                 </p>
               </div>
               <div className="space-y-1.5">
@@ -426,9 +416,7 @@ export function EmailCampaignWizard({ tenantId }: { tenantId: string }) {
                 <Button
                   type="button"
                   variant="outline"
-                  disabled={
-                    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(testEmail) || sendMutation.isPending
-                  }
+                  disabled={!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(testEmail) || sendMutation.isPending}
                   onClick={() => sendMutation.mutate("test")}
                 >
                   <TestTube2 className="mr-1.5 h-3.5 w-3.5" />
@@ -452,7 +440,7 @@ export function EmailCampaignWizard({ tenantId }: { tenantId: string }) {
           {step < 4 ? (
             <Button
               type="button"
-              onClick={() => setStep((s) => ((s + 1) as Step))}
+              onClick={() => setStep((s) => (s + 1) as Step)}
               disabled={!canProceed[step]}
             >
               Далі <ArrowRight className="ml-1.5 h-3.5 w-3.5" />

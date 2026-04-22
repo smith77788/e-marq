@@ -21,10 +21,26 @@ function HowItWorks() {
   const { t } = useT();
 
   const stages = [
-    { icon: Database, title: t("how.s1.title"), points: [t("how.s1.p1"), t("how.s1.p2"), t("how.s1.p3")] },
-    { icon: Zap, title: t("how.s2.title"), points: [t("how.s2.p1"), t("how.s2.p2"), t("how.s2.p3"), t("how.s2.p4")] },
-    { icon: CheckCircle2, title: t("how.s3.title"), points: [t("how.s3.p1"), t("how.s3.p2"), t("how.s3.p3")] },
-    { icon: Brain, title: t("how.s4.title"), points: [t("how.s4.p1"), t("how.s4.p2"), t("how.s4.p3")] },
+    {
+      icon: Database,
+      title: t("how.s1.title"),
+      points: [t("how.s1.p1"), t("how.s1.p2"), t("how.s1.p3")],
+    },
+    {
+      icon: Zap,
+      title: t("how.s2.title"),
+      points: [t("how.s2.p1"), t("how.s2.p2"), t("how.s2.p3"), t("how.s2.p4")],
+    },
+    {
+      icon: CheckCircle2,
+      title: t("how.s3.title"),
+      points: [t("how.s3.p1"), t("how.s3.p2"), t("how.s3.p3")],
+    },
+    {
+      icon: Brain,
+      title: t("how.s4.title"),
+      points: [t("how.s4.p1"), t("how.s4.p2"), t("how.s4.p3")],
+    },
   ];
 
   return (
@@ -44,7 +60,9 @@ function HowItWorks() {
           </p>
           <div className="mt-8 flex items-center justify-center gap-3">
             <Button asChild size="lg">
-              <Link to="/signup">{t("how.ctaStart")} <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              <Link to="/signup">
+                {t("how.ctaStart")} <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
               <Link to="/agents">{t("how.ctaAgents")}</Link>
@@ -96,8 +114,12 @@ function HowItWorks() {
             {t("how.bottom.title")}
           </h2>
           <div className="mt-6 flex items-center justify-center gap-3">
-            <Button asChild size="lg"><Link to="/signup">{t("how.ctaStart")}</Link></Button>
-            <Button asChild size="lg" variant="outline"><Link to="/pricing">{t("how.bottom.viewPrices")}</Link></Button>
+            <Button asChild size="lg">
+              <Link to="/signup">{t("how.ctaStart")}</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/pricing">{t("how.bottom.viewPrices")}</Link>
+            </Button>
           </div>
         </div>
       </section>

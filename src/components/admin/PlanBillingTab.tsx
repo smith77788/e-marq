@@ -40,7 +40,9 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
   const summaryQuery = useQuery({
     queryKey: ["plan-summary", tenantId],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_tenant_plan_summary", { _tenant_id: tenantId });
+      const { data, error } = await supabase.rpc("get_tenant_plan_summary", {
+        _tenant_id: tenantId,
+      });
       if (error) throw error;
       return data as PlanSummary | null;
     },
@@ -64,7 +66,9 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tenant_subscriptions")
-        .select("id, plan_id, status, trial_ends_at, current_period_start, current_period_end, overrides, notes")
+        .select(
+          "id, plan_id, status, trial_ends_at, current_period_start, current_period_end, overrides, notes",
+        )
         .eq("tenant_id", tenantId)
         .maybeSingle();
       if (error) throw error;
@@ -108,7 +112,12 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
   });
 
   const updateSub = useMutation({
-    mutationFn: async (patch: { status?: string; trial_ends_at?: string | null; overrides?: Record<string, unknown>; notes?: string | null }) => {
+    mutationFn: async (patch: {
+      status?: string;
+      trial_ends_at?: string | null;
+      overrides?: Record<string, unknown>;
+      notes?: string | null;
+    }) => {
       const { error } = await supabase
         .from("tenant_subscriptions")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -140,7 +149,8 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
             {sub && <Badge variant="outline">{STATUS_LABELS[sub.status] ?? sub.status}</Badge>}
           </CardTitle>
           <CardDescription>
-            Період: {sub ? new Date(sub.current_period_start).toLocaleDateString("uk-UA") : "—"} → {sub ? new Date(sub.current_period_end).toLocaleDateString("uk-UA") : "—"}
+            Період: {sub ? new Date(sub.current_period_start).toLocaleDateString("uk-UA") : "—"} →{" "}
+            {sub ? new Date(sub.current_period_end).toLocaleDateString("uk-UA") : "—"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -151,12 +161,19 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
       <Card>
         <CardHeader>
           <CardTitle>Змінити тариф</CardTitle>
-          <CardDescription>При переході нараховуються нові щомісячні AI-кредити, статус — «активний».</CardDescription>
+          <CardDescription>
+            При переході нараховуються нові щомісячні AI-кредити, статус — «активний».
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid gap-2">
             <Label htmlFor="reason">Причина (необов'язково)</Label>
-            <Input id="reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Чому змінюємо тариф?" />
+            <Input
+              id="reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Чому змінюємо тариф?"
+            />
           </div>
           <div className="flex flex-wrap gap-2">
             {plansQuery.data?.map((p) => (
@@ -169,7 +186,9 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
               >
                 {p.name}
                 <span className="ml-2 text-[10px] text-muted-foreground">
-                  {p.price_cents_monthly === 0 ? "безкоштовно" : `${Math.round(p.price_cents_monthly / 100).toLocaleString("uk-UA")} ₴/міс`}
+                  {p.price_cents_monthly === 0
+                    ? "безкоштовно"
+                    : `${Math.round(p.price_cents_monthly / 100).toLocaleString("uk-UA")} ₴/міс`}
                 </span>
               </Button>
             ))}
@@ -187,11 +206,10 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Статус</Label>
-                <Select
-                  value={sub.status}
-                  onValueChange={(v) => updateSub.mutate({ status: v })}
-                >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select value={sub.status} onValueChange={(v) => updateSub.mutate({ status: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="trial">Пробний період</SelectItem>
                     <SelectItem value="active">Активний</SelectItem>
@@ -205,7 +223,9 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
                 <Label>Пробний період закінчується</Label>
                 <Input
                   type="date"
-                  defaultValue={sub.trial_ends_at ? new Date(sub.trial_ends_at).toISOString().slice(0, 10) : ""}
+                  defaultValue={
+                    sub.trial_ends_at ? new Date(sub.trial_ends_at).toISOString().slice(0, 10) : ""
+                  }
                   onBlur={(e) => updateSub.mutate({ trial_ends_at: e.target.value || null })}
                 />
               </div>
@@ -213,10 +233,10 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
             <div className="space-y-2">
               <Label>Особисті ліміти (JSON)</Label>
               <p className="text-xs text-muted-foreground">
-                Ключі: max_products (товари), max_orders_per_month (замовлення/міс),
-                max_customers (клієнти), max_ai_runs_per_month (запуски AI/міс),
-                max_outbound_messages_per_month (повідомлення/міс), max_storage_mb (сховище),
-                max_team_members (учасники команди). Вкажи null — щоб без ліміту.
+                Ключі: max_products (товари), max_orders_per_month (замовлення/міс), max_customers
+                (клієнти), max_ai_runs_per_month (запуски AI/міс), max_outbound_messages_per_month
+                (повідомлення/міс), max_storage_mb (сховище), max_team_members (учасники команди).
+                Вкажи null — щоб без ліміту.
               </p>
               <Textarea
                 rows={6}
@@ -255,7 +275,9 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
               {historyQuery.data.map((h) => (
                 <li key={h.id} className="rounded border border-border bg-muted/20 p-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-muted-foreground">{new Date(h.created_at).toLocaleString("uk-UA")}</span>
+                    <span className="font-mono text-muted-foreground">
+                      {new Date(h.created_at).toLocaleString("uk-UA")}
+                    </span>
                   </div>
                   <div className="mt-1 text-foreground">
                     {h.reason || <span className="italic text-muted-foreground">Без причини</span>}

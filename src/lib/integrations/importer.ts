@@ -130,16 +130,29 @@ export async function runImport(input: ImportInput): Promise<ImportResult> {
         const rawStatus = (get(row, "status") || "pending").toLowerCase().trim();
         type OrderStatus = "pending" | "paid" | "fulfilled" | "cancelled" | "refunded";
         const statusMap: Record<string, OrderStatus> = {
-          pending: "pending", new: "pending", processing: "pending", "оплата очікується": "pending",
-          paid: "paid", оплачено: "paid", complete: "paid",
-          shipped: "fulfilled", completed: "fulfilled", fulfilled: "fulfilled", delivered: "fulfilled", доставлено: "fulfilled",
-          cancelled: "cancelled", canceled: "cancelled", скасовано: "cancelled",
-          refunded: "refunded", повернено: "refunded",
+          pending: "pending",
+          new: "pending",
+          processing: "pending",
+          "оплата очікується": "pending",
+          paid: "paid",
+          оплачено: "paid",
+          complete: "paid",
+          shipped: "fulfilled",
+          completed: "fulfilled",
+          fulfilled: "fulfilled",
+          delivered: "fulfilled",
+          доставлено: "fulfilled",
+          cancelled: "cancelled",
+          canceled: "cancelled",
+          скасовано: "cancelled",
+          refunded: "refunded",
+          повернено: "refunded",
         };
         const finalStatus: OrderStatus = statusMap[rawStatus] ?? "pending";
         // payment_method обмежений тригером БД до 'stripe_card' | 'manual'
         const rawPm = get(row, "payment_method").toLowerCase();
-        const paymentMethod = rawPm === "stripe_card" || rawPm === "stripe" ? "stripe_card" : "manual";
+        const paymentMethod =
+          rawPm === "stripe_card" || rawPm === "stripe" ? "stripe_card" : "manual";
         const orderPayload: OrderInsert = {
           tenant_id: tenantId,
           customer_name: customerName,

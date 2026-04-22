@@ -68,7 +68,13 @@ const COCKPIT: NavGroup = {
   labelKey: "sb.cockpit",
   tone: "text-primary/70",
   items: [
-    { labelKey: "sb.overview", to: "/brand", icon: LayoutDashboard, exact: true, tone: "text-primary" },
+    {
+      labelKey: "sb.overview",
+      to: "/brand",
+      icon: LayoutDashboard,
+      exact: true,
+      tone: "text-primary",
+    },
     { labelKey: "sb.revenue", to: "/dashboard", icon: Gauge, exact: true, tone: "text-success" },
   ],
 };
@@ -82,8 +88,18 @@ const SHOP: NavGroup = {
     { labelKey: "sb.collections", to: "/brand/catalog", icon: Layers, tone: "text-info" },
     { labelKey: "sb.promotions", to: "/brand/promotions", icon: Tag, tone: "text-accent" },
     { labelKey: "sb.email" as TKey, to: "/brand/email", icon: Mail, tone: "text-primary" },
-    { labelKey: "sb.siteBuilder" as TKey, to: "/brand/site-builder", icon: Wand2, tone: "text-accent" },
-    { labelKey: "sb.storeSettings" as TKey, to: "/brand/settings", icon: Settings, tone: "text-primary" },
+    {
+      labelKey: "sb.siteBuilder" as TKey,
+      to: "/brand/site-builder",
+      icon: Wand2,
+      tone: "text-accent",
+    },
+    {
+      labelKey: "sb.storeSettings" as TKey,
+      to: "/brand/settings",
+      icon: Settings,
+      tone: "text-primary",
+    },
   ],
 };
 
@@ -91,7 +107,13 @@ const GROWTH: NavGroup = {
   labelKey: "sb.growth",
   tone: "text-accent/70",
   items: [
-    { labelKey: "sb.insights", to: "/brand", hash: "insights", icon: Lightbulb, tone: "text-warning" },
+    {
+      labelKey: "sb.insights",
+      to: "/brand",
+      hash: "insights",
+      icon: Lightbulb,
+      tone: "text-warning",
+    },
     { labelKey: "sb.customers", to: "/brand", hash: "customers", icon: Users, tone: "text-info" },
     { labelKey: "sb.agents", to: "/agents/library", icon: Bot, tone: "text-accent" },
   ],
@@ -102,9 +124,20 @@ const SETUP: NavGroup = {
   tone: "text-muted-foreground",
   items: [
     { labelKey: "sb.channels", to: "/brand", hash: "channels", icon: Plug, tone: "text-primary" },
-    { labelKey: "sb.integrations" as TKey, to: "/brand/integrations", icon: Puzzle, tone: "text-info" },
+    {
+      labelKey: "sb.integrations" as TKey,
+      to: "/brand/integrations",
+      icon: Puzzle,
+      tone: "text-info",
+    },
     { labelKey: "sb.onboarding", to: "/onboarding", icon: Sparkles, tone: "text-accent" },
-    { labelKey: "sb.profile" as TKey, to: "/profile", icon: IdCard, exact: true, tone: "text-primary" },
+    {
+      labelKey: "sb.profile" as TKey,
+      to: "/profile",
+      icon: IdCard,
+      exact: true,
+      tone: "text-primary",
+    },
   ],
 };
 
@@ -112,7 +145,12 @@ const BILLING: NavGroup = {
   labelKey: "sb.billing" as TKey,
   tone: "text-warning/70",
   items: [
-    { labelKey: "sb.planBilling" as TKey, to: "/brand/billing", icon: CreditCard, tone: "text-warning" },
+    {
+      labelKey: "sb.planBilling" as TKey,
+      to: "/brand/billing",
+      icon: CreditCard,
+      tone: "text-warning",
+    },
   ],
 };
 
@@ -122,14 +160,40 @@ const ADMIN_SYSTEM: NavGroup = {
   labelKey: "sb.system",
   tone: "text-destructive/70",
   items: [
-    { labelKey: "sb.adminCommands" as TKey, to: "/admin/commands", icon: Zap, tone: "text-warning" },
-    { labelKey: "sb.missionControl", to: "/admin", icon: ShieldCheck, exact: true, tone: "text-destructive" },
-    { labelKey: "sb.healthMonitor" as TKey, to: "/admin/health", icon: HeartPulse, tone: "text-destructive" },
+    {
+      labelKey: "sb.adminCommands" as TKey,
+      to: "/admin/commands",
+      icon: Zap,
+      tone: "text-warning",
+    },
+    {
+      labelKey: "sb.missionControl",
+      to: "/admin",
+      icon: ShieldCheck,
+      exact: true,
+      tone: "text-destructive",
+    },
+    {
+      labelKey: "sb.healthMonitor" as TKey,
+      to: "/admin/health",
+      icon: HeartPulse,
+      tone: "text-destructive",
+    },
     { labelKey: "sb.crossTenant" as TKey, to: "/admin/overview", icon: Layers, tone: "text-info" },
     { labelKey: "sb.allTenants", to: "/admin/tenants", icon: Building2, tone: "text-primary" },
     { labelKey: "sb.plansCatalog" as TKey, to: "/admin/plans", icon: Coins, tone: "text-warning" },
-    { labelKey: "sb.adminUsers" as TKey, to: "/admin/users", icon: UsersRound, tone: "text-accent" },
-    { labelKey: "sb.topupRequests" as TKey, to: "/admin/topup-requests", icon: CreditCard, tone: "text-success" },
+    {
+      labelKey: "sb.adminUsers" as TKey,
+      to: "/admin/users",
+      icon: UsersRound,
+      tone: "text-accent",
+    },
+    {
+      labelKey: "sb.topupRequests" as TKey,
+      to: "/admin/topup-requests",
+      icon: CreditCard,
+      tone: "text-success",
+    },
     { labelKey: "sb.leadRadar" as TKey, to: "/admin/lead-radar", icon: Radio, tone: "text-accent" },
     {
       labelKey: "sb.dntradeHealth" as TKey,
@@ -222,9 +286,7 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
         {groups.map((group, gi) => (
           <SidebarGroup
             key={`${group.labelKey}-${gi}`}
-            className={cn(
-              gi > 0 && "mt-1 border-t border-sidebar-border/60 pt-2",
-            )}
+            className={cn(gi > 0 && "mt-1 border-t border-sidebar-border/60 pt-2")}
           >
             <SidebarGroupLabel
               className={cn(

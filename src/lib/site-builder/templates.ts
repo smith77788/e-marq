@@ -134,9 +134,7 @@ body {
 
 export function indexHtml(ctx: SafeBrandContext): string {
   const { profile } = ctx;
-  const title = profile.tagline
-    ? `${profile.brand_name} — ${profile.tagline}`
-    : profile.brand_name;
+  const title = profile.tagline ? `${profile.brand_name} — ${profile.tagline}` : profile.brand_name;
   const desc = profile.description || profile.tagline || profile.brand_name;
   const ogImage = profile.og_image_url || "";
   const lang = profile.locale === "en" ? "en" : "uk";
@@ -486,9 +484,11 @@ about-копію в розділ «Про нас», категорії в кат
 
 ## Крок 10 — Кастомний домен (опційно)
 
-${profile.custom_domain
-  ? `Ваш домен \`${profile.custom_domain}\` — підключіть у **Settings → Domains**.`
-  : `**Settings → Domains** → додайте свій домен і налаштуйте DNS.`}
+${
+  profile.custom_domain
+    ? `Ваш домен \`${profile.custom_domain}\` — підключіть у **Settings → Domains**.`
+    : `**Settings → Domains** → додайте свій домен і налаштуйте DNS.`
+}
 
 ---
 

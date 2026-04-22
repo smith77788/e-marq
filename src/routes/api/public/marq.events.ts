@@ -65,17 +65,15 @@ export const Route = createFileRoute("/api/public/marq/events")({
           if (current >= RATE_LIMIT_PER_MINUTE) {
             return jsonResponse({ error: "Rate limit exceeded" }, { status: 429 });
           }
-          await supabaseAdmin
-            .from("anon_event_rate_limit")
-            .upsert(
-              {
-                tenant_id: auth.tenantId,
-                session_id: body.session_id,
-                bucket_minute: bucketIso,
-                count: current + 1,
-              },
-              { onConflict: "tenant_id,session_id,bucket_minute" },
-            );
+          await supabaseAdmin.from("anon_event_rate_limit").upsert(
+            {
+              tenant_id: auth.tenantId,
+              session_id: body.session_id,
+              bucket_minute: bucketIso,
+              count: current + 1,
+            },
+            { onConflict: "tenant_id,session_id,bucket_minute" },
+          );
         }
 
         const { error } = await supabaseAdmin.from("events").insert({

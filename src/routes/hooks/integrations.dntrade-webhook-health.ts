@@ -29,9 +29,7 @@ function jsonStatus(body: unknown, status: number): Response {
   });
 }
 
-export const Route = createFileRoute(
-  "/hooks/integrations/dntrade-webhook-health",
-)({
+export const Route = createFileRoute("/hooks/integrations/dntrade-webhook-health")({
   server: {
     handlers: {
       GET: async ({ request }) => {
@@ -71,8 +69,7 @@ export const Route = createFileRoute(
         const blockers: string[] = [];
         if (!checks.is_active) blockers.push("Інтеграція вимкнена.");
         if (!checks.api_key_configured) blockers.push("Не задано API key.");
-        if (!checks.webhook_secret_configured)
-          blockers.push("Не згенеровано webhook_secret.");
+        if (!checks.webhook_secret_configured) blockers.push("Не згенеровано webhook_secret.");
 
         const ready = blockers.length === 0;
 
@@ -101,8 +98,7 @@ export const Route = createFileRoute(
           last_sync_at: integ.last_sync_at,
           last_sync_status: integ.last_sync_status,
           last_sync_error: integ.last_sync_error,
-          last_sync_age_seconds:
-            lastSyncAgeMs == null ? null : Math.round(lastSyncAgeMs / 1000),
+          last_sync_age_seconds: lastSyncAgeMs == null ? null : Math.round(lastSyncAgeMs / 1000),
         };
 
         return jsonStatus(body, ready ? 200 : 503);

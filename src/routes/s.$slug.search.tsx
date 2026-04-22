@@ -47,9 +47,7 @@ function SearchPage() {
   const results = useMemo(() => {
     if (!query) return [];
     return data.products.filter((p) => {
-      const haystack = [p.name, p.description ?? "", ...(p.tags ?? [])]
-        .join(" ")
-        .toLowerCase();
+      const haystack = [p.name, p.description ?? "", ...(p.tags ?? [])].join(" ").toLowerCase();
       return haystack.includes(query);
     });
   }, [data.products, query]);

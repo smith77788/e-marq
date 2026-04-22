@@ -152,8 +152,7 @@ function StoreSettingsPage() {
       toast.success("Налаштування магазину збережено");
       qc.invalidateQueries({ queryKey: ["tenant-config", tenantId] });
     },
-    onError: (e: unknown) =>
-      toast.error(e instanceof Error ? e.message : "Не вдалося зберегти"),
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Не вдалося зберегти"),
   });
 
   if (!tenantId) {
@@ -346,9 +345,7 @@ function StoreSettingsPage() {
                 <CardTitle className="flex items-center gap-2">
                   <Globe className="h-4 w-4 text-success" /> SEO та соцмережі
                 </CardTitle>
-                <CardDescription>
-                  Меташки для Google та превʼю в месенджерах.
-                </CardDescription>
+                <CardDescription>Меташки для Google та превʼю в месенджерах.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="space-y-2">
@@ -360,9 +357,7 @@ function StoreSettingsPage() {
                     placeholder="Напр., Basic Food — здорова їжа з доставкою"
                     maxLength={70}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    {form.seo_title.length}/60
-                  </p>
+                  <p className="text-xs text-muted-foreground">{form.seo_title.length}/60</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="seo-desc">Description (до 160 символів)</Label>
@@ -374,9 +369,7 @@ function StoreSettingsPage() {
                     maxLength={200}
                     className="min-h-24"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    {form.seo_description.length}/160
-                  </p>
+                  <p className="text-xs text-muted-foreground">{form.seo_description.length}/160</p>
                 </div>
                 <Separator />
                 <div className="space-y-2">

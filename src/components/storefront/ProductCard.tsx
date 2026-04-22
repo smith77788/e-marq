@@ -17,13 +17,7 @@ import { formatMoneyExact } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import type { StorefrontProduct } from "@/lib/storefront/loaders";
 
-export function ProductCard({
-  product,
-  slug,
-}: {
-  product: StorefrontProduct;
-  slug: string;
-}) {
+export function ProductCard({ product, slug }: { product: StorefrontProduct; slug: string }) {
   const { tenantId } = useStorefrontCart();
   const cart = useStorefrontCart();
   const wishlist = useWishlist(tenantId);

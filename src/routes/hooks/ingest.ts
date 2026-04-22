@@ -185,7 +185,8 @@ export const Route = createFileRoute("/hooks/ingest")({
         // Optional: upsert customer (idempotent by email or telegram_chat_id).
         let customerId: string | null = null;
         const isUuid = (s: unknown): s is string =>
-          typeof s === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+          typeof s === "string" &&
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
         if (body.customer) {
           const c = body.customer;
           const tg = c.telegram_chat_id != null ? String(c.telegram_chat_id) : null;
@@ -259,7 +260,8 @@ export const Route = createFileRoute("/hooks/ingest")({
           const p = (body.payload ?? {}) as Record<string, unknown>;
           const num = (v: unknown): number | null => {
             if (typeof v === "number" && Number.isFinite(v)) return Math.round(v);
-            if (typeof v === "string" && v.trim() !== "" && !isNaN(Number(v))) return Math.round(Number(v));
+            if (typeof v === "string" && v.trim() !== "" && !isNaN(Number(v)))
+              return Math.round(Number(v));
             return null;
           };
           // Probe top-level then common payload keys (cents preferred, fallback to currency-units * 100)
@@ -308,7 +310,8 @@ export const Route = createFileRoute("/hooks/ingest")({
           // Fingerprint for idempotency: prefer external order id, fall back
           // to session+total. Prevents duplicate orders on beacon retries.
           const fingerprint =
-            externalOrderId ?? `${body.session_id ?? "anon"}:${totalCents}:${body.created_at ?? "now"}`;
+            externalOrderId ??
+            `${body.session_id ?? "anon"}:${totalCents}:${body.created_at ?? "now"}`;
 
           if (!orderId) {
             const { data: existing } = await supabaseAdmin
@@ -368,7 +371,10 @@ export const Route = createFileRoute("/hooks/ingest")({
                     tenant_id: tenantId!,
                     order_id: orderId!,
                     product_id:
-                      (typeof it.product_id === "string" && isUuid(it.product_id) && it.product_id) || null,
+                      (typeof it.product_id === "string" &&
+                        isUuid(it.product_id) &&
+                        it.product_id) ||
+                      null,
                     product_name: name,
                     quantity: qty,
                     unit_price_cents: priceCents ?? 0,

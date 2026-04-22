@@ -78,7 +78,9 @@ export function CohortRetention({ tenantId }: Props) {
             Утримання покупців по місяцях
           </CardTitle>
         </CardHeader>
-        <CardContent><div className="h-48 animate-pulse rounded-md bg-muted/30" /></CardContent>
+        <CardContent>
+          <div className="h-48 animate-pulse rounded-md bg-muted/30" />
+        </CardContent>
       </Card>
     );
   }
@@ -93,7 +95,8 @@ export function CohortRetention({ tenantId }: Props) {
           Утримання покупців · 6 місяців
         </CardTitle>
         <CardDescription className="text-xs">
-          Скільки % покупців із кожного місяця продовжують купувати в наступні. Яскравіше — більше повертаються.
+          Скільки % покупців із кожного місяця продовжують купувати в наступні. Яскравіше — більше
+          повертаються.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -112,7 +115,9 @@ export function CohortRetention({ tenantId }: Props) {
                   <th className="text-left px-2 py-1 font-medium">Місяць</th>
                   <th className="text-right px-2 py-1 font-medium">Покупців</th>
                   {[0, 1, 2, 3, 4, 5].map((m) => (
-                    <th key={m} className="text-center px-1 py-1 font-medium">+{m} міс</th>
+                    <th key={m} className="text-center px-1 py-1 font-medium">
+                      +{m} міс
+                    </th>
                   ))}
                 </tr>
               </thead>

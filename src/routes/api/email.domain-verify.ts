@@ -12,7 +12,9 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const RESEND_GATEWAY = "https://connector-gateway.lovable.dev/resend";
 
-async function authUser(req: Request): Promise<{ ok: true; userId: string } | { ok: false; status: number; error: string }> {
+async function authUser(
+  req: Request,
+): Promise<{ ok: true; userId: string } | { ok: false; status: number; error: string }> {
   const auth = req.headers.get("authorization");
   if (!auth?.startsWith("Bearer ")) return { ok: false, status: 401, error: "missing_bearer" };
   const token = auth.slice(7).trim();
@@ -65,7 +67,8 @@ export const Route = createFileRoute("/api/email/domain-verify")({
           return jsonResponse({ error: "invalid_json" }, 400);
         }
         const tenantId = typeof body.tenantId === "string" ? body.tenantId.trim() : "";
-        if (!/^[0-9a-f-]{36}$/i.test(tenantId)) return jsonResponse({ error: "invalid_tenant" }, 400);
+        if (!/^[0-9a-f-]{36}$/i.test(tenantId))
+          return jsonResponse({ error: "invalid_tenant" }, 400);
         if (!(await userCanManageTenant(auth.userId, tenantId))) {
           return jsonResponse({ error: "forbidden" }, 403);
         }
@@ -82,7 +85,8 @@ export const Route = createFileRoute("/api/email/domain-verify")({
 
         const lovableKey = process.env.LOVABLE_API_KEY;
         const resendKey = process.env.RESEND_API_KEY;
-        if (!lovableKey || !resendKey) return jsonResponse({ error: "Resend connector not linked" }, 500);
+        if (!lovableKey || !resendKey)
+          return jsonResponse({ error: "Resend connector not linked" }, 500);
 
         try {
           // Trigger verification

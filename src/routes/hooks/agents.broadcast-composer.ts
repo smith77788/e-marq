@@ -24,7 +24,9 @@ export const Route = createFileRoute("/hooks/agents/broadcast-composer")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -146,7 +148,11 @@ export const Route = createFileRoute("/hooks/agents/broadcast-composer")({
 
           const created = await insertInsightsDedup(insights);
           await finishAgentRun(handle, created, { themes: insights.length });
-          return jsonOk({ run_id: handle.runId, themes: insights.length, insights_created: created });
+          return jsonOk({
+            run_id: handle.runId,
+            themes: insights.length,
+            insights_created: created,
+          });
         } catch (e) {
           await failAgentRun(handle, e);
           return jsonError("Agent failed", 500, {

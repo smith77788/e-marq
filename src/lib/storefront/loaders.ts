@@ -206,10 +206,7 @@ export type ProductDetail = {
   images: StorefrontImage[];
 };
 
-export async function loadProductDetail(
-  slug: string,
-  productId: string,
-): Promise<ProductDetail> {
+export async function loadProductDetail(slug: string, productId: string): Promise<ProductDetail> {
   const { data, error } = await supabase.rpc("get_storefront_product_detail", {
     _slug: slug,
     _product_id: productId,

@@ -58,7 +58,9 @@ export const Route = createFileRoute("/hooks/agents/attribution")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -77,7 +79,9 @@ export const Route = createFileRoute("/hooks/agents/attribution")({
           const since = new Date(Date.now() - 14 * 86_400_000).toISOString();
           const { data: orderData, error: orderErr } = await supabaseAdmin
             .from("orders")
-            .select("id, customer_user_id, customer_email, total_cents, paid_at, created_at, metadata")
+            .select(
+              "id, customer_user_id, customer_email, total_cents, paid_at, created_at, metadata",
+            )
             .eq("tenant_id", tenantId)
             .eq("status", "paid")
             .gte("created_at", since)

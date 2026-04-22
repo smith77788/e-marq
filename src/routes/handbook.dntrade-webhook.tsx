@@ -6,13 +6,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Activity, ArrowLeft, CheckCircle2, KeyRound, ShieldAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute("/handbook/dntrade-webhook")({
   head: () => ({
@@ -92,10 +86,9 @@ function DnTradeDocsPage() {
             DN Trade · Webhook та health
           </h1>
           <p className="text-base text-muted-foreground">
-            Цей документ — для тих, хто інтегрує магазин MARQ із DN Trade
-            (dntrade.com.ua) і хоче приймати push-події про зміни, а також
-            автоматично перевіряти стан інтеграції з зовнішніх систем
-            моніторингу.
+            Цей документ — для тих, хто інтегрує магазин MARQ із DN Trade (dntrade.com.ua) і хоче
+            приймати push-події про зміни, а також автоматично перевіряти стан інтеграції з
+            зовнішніх систем моніторингу.
           </p>
         </div>
 
@@ -131,14 +124,11 @@ function DnTradeDocsPage() {
 
         {/* Webhook */}
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-            Webhook-приймач
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            URL формату:
-          </p>
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground">Webhook-приймач</h2>
+          <p className="text-sm text-muted-foreground">URL формату:</p>
           <CodeBlock>
-            POST https://e-marq.lovable.app/hooks/integrations/dntrade-webhook?tenant=&lt;tenant_id&gt;
+            POST
+            https://e-marq.lovable.app/hooks/integrations/dntrade-webhook?tenant=&lt;tenant_id&gt;
           </CodeBlock>
           <p className="text-sm text-muted-foreground">
             <strong className="text-foreground">Аутентифікація</strong> — один з двох варіантів
@@ -190,12 +180,7 @@ function DnTradeDocsPage() {
                 title="Disabled / no API key"
                 desc="Інтеграція вимкнена або не введено DN Trade ApiKey — повторний виклик не допоможе, поки не виправлено в адмінці."
               />
-              <StatusRow
-                code="500"
-                variant="err"
-                title="DB error"
-                desc="Внутрішня помилка БД."
-              />
+              <StatusRow code="500" variant="err" title="DB error" desc="Внутрішня помилка БД." />
               <StatusRow
                 code="502"
                 variant="err"
@@ -217,7 +202,8 @@ function DnTradeDocsPage() {
             зовнішніх uptime-моніторів (UptimeRobot, Better Uptime тощо).
           </p>
           <CodeBlock>
-            GET https://e-marq.lovable.app/hooks/integrations/dntrade-webhook-health?tenant=&lt;tenant_id&gt;
+            GET
+            https://e-marq.lovable.app/hooks/integrations/dntrade-webhook-health?tenant=&lt;tenant_id&gt;
           </CodeBlock>
 
           <div className="space-y-2">
@@ -286,7 +272,8 @@ function DnTradeDocsPage() {
                   <li>«Не згенеровано webhook_secret.»</li>
                 </ul>
                 <p className="mt-2">
-                  За наявності хоча б одного blockers — статус <span className="font-mono">503</span>.
+                  За наявності хоча б одного blockers — статус{" "}
+                  <span className="font-mono">503</span>.
                 </p>
               </CardContent>
             </Card>

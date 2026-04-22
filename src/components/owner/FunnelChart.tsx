@@ -12,11 +12,11 @@ import { supabase } from "@/integrations/supabase/client";
 type Props = { tenantId: string };
 
 const STEPS: Array<{ key: string; label: string; types: string[] }> = [
-  { key: "session", label: "Зайшли на сайт",       types: ["session_start"] },
-  { key: "view",    label: "Переглянули товар",    types: ["product_viewed"] },
-  { key: "cart",    label: "Додали в кошик",       types: ["add_to_cart"] },
-  { key: "checkout",label: "Почали оформлення",    types: ["checkout_started"] },
-  { key: "purchase",label: "Оплатили",             types: ["purchase_completed"] },
+  { key: "session", label: "Зайшли на сайт", types: ["session_start"] },
+  { key: "view", label: "Переглянули товар", types: ["product_viewed"] },
+  { key: "cart", label: "Додали в кошик", types: ["add_to_cart"] },
+  { key: "checkout", label: "Почали оформлення", types: ["checkout_started"] },
+  { key: "purchase", label: "Оплатили", types: ["purchase_completed"] },
 ];
 
 const STEP_COLORS = [
@@ -66,7 +66,9 @@ export function FunnelChart({ tenantId }: Props) {
             Лійка продажів
           </CardTitle>
         </CardHeader>
-        <CardContent><div className="h-48 animate-pulse rounded-md bg-muted/30" /></CardContent>
+        <CardContent>
+          <div className="h-48 animate-pulse rounded-md bg-muted/30" />
+        </CardContent>
       </Card>
     );
   }
@@ -97,11 +99,12 @@ export function FunnelChart({ tenantId }: Props) {
                 <div className="flex items-center gap-2 text-muted-foreground">
                   {i > 0 && dropoff > 0 && (
                     <span className="inline-flex items-center gap-0.5 text-[10px] text-destructive/80">
-                      <TrendingDown className="h-3 w-3" />
-                      −{dropoff}%
+                      <TrendingDown className="h-3 w-3" />−{dropoff}%
                     </span>
                   )}
-                  <span className="font-mono text-[11px] text-foreground">{count.toLocaleString()}</span>
+                  <span className="font-mono text-[11px] text-foreground">
+                    {count.toLocaleString()}
+                  </span>
                 </div>
               </div>
               <div className="relative h-7 rounded-md bg-muted/30 overflow-hidden">

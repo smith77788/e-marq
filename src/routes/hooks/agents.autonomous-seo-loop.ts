@@ -28,7 +28,9 @@ export const Route = createFileRoute("/hooks/agents/autonomous-seo-loop")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -46,7 +48,9 @@ export const Route = createFileRoute("/hooks/agents/autonomous-seo-loop")({
           const since = new Date(Date.now() - 60 * 86_400_000).toISOString();
           const { data: pages, error } = await supabaseAdmin
             .from("content_pages")
-            .select("id, slug, title, agent, published_at, is_published, agent_generated, content_type")
+            .select(
+              "id, slug, title, agent, published_at, is_published, agent_generated, content_type",
+            )
             .eq("tenant_id", tenantId)
             .eq("agent_generated", true)
             .eq("is_published", true)

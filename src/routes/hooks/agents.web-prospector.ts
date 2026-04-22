@@ -33,12 +33,13 @@ type Found = {
 
 const UA_TLD = /\.(ua|com\.ua)\b/i;
 
-async function searchDuckDuckGo(query: string): Promise<Array<{ url: string; title: string; snippet: string }>> {
+async function searchDuckDuckGo(
+  query: string,
+): Promise<Array<{ url: string; title: string; snippet: string }>> {
   const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query + " site:.ua")}`;
   const res = await fetch(url, {
     headers: {
-      "User-Agent":
-        "Mozilla/5.0 (compatible; MarqLeadBot/1.0; +https://marq.lovable.app/bots)",
+      "User-Agent": "Mozilla/5.0 (compatible; MarqLeadBot/1.0; +https://marq.lovable.app/bots)",
       Accept: "text/html,application/xhtml+xml",
     },
   });
@@ -50,7 +51,9 @@ async function searchDuckDuckGo(query: string): Promise<Array<{ url: string; tit
     /<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<a[^>]+class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(html)) && out.length < 10) {
-    const href = decodeURIComponent(m[1].replace(/^\/\/duckduckgo\.com\/l\/\?uddg=/, "").split("&")[0]);
+    const href = decodeURIComponent(
+      m[1].replace(/^\/\/duckduckgo\.com\/l\/\?uddg=/, "").split("&")[0],
+    );
     const title = stripHtml(m[2]).trim();
     const snippet = stripHtml(m[3]).trim();
     if (UA_TLD.test(href) && /^https?:\/\//.test(href)) out.push({ url: href, title, snippet });
@@ -59,7 +62,10 @@ async function searchDuckDuckGo(query: string): Promise<Array<{ url: string; tit
 }
 
 function stripHtml(s: string) {
-  return s.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&nbsp;/g, " ");
+  return s
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&nbsp;/g, " ");
 }
 
 function detectInstagram(html: string): string | null {

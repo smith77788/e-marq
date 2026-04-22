@@ -18,10 +18,7 @@ import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import {
-  isConnectorSupported,
-  runConnectorPull,
-} from "@/lib/integrations/connectors";
+import { isConnectorSupported, runConnectorPull } from "@/lib/integrations/connectors";
 import { parsePriceToCents, type EntityKind } from "@/lib/integrations/parser";
 
 type ProductInsert = Database["public"]["Tables"]["products"]["Insert"];
@@ -85,7 +82,8 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
             .eq("provider", provider)
             .maybeSingle();
           if (integErr) return jsonResponse({ error: integErr.message }, 403);
-          if (!integ) return jsonResponse({ error: "Інтеграцію не знайдено або немає доступу." }, 404);
+          if (!integ)
+            return jsonResponse({ error: "Інтеграцію не знайдено або немає доступу." }, 404);
           if (!integ.is_active) return jsonResponse({ error: "Інтеграція деактивована." }, 400);
 
           // 4. Тягнемо дані з зовнішнього API.
@@ -131,7 +129,9 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
           if (jobErr || !job) return jsonResponse({ error: jobErr?.message ?? "job error" }, 500);
 
           // 6. Імпорт.
-          let imported = 0, failed = 0, skipped = 0;
+          let imported = 0,
+            failed = 0,
+            skipped = 0;
           const errors: Array<{ row: number; message: string }> = [];
           const get = (row: Record<string, unknown>, canonical: string) => {
             const col = pulled.mapping[canonical] ?? canonical;
@@ -144,7 +144,10 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
             try {
               if (entityKind === "products") {
                 const name = get(row, "name");
-                if (!name) { skipped++; continue; }
+                if (!name) {
+                  skipped++;
+                  continue;
+                }
                 const payload: ProductInsert = {
                   tenant_id: tenantId,
                   name,
@@ -158,37 +161,61 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
                   metadata: { import_source: provider, import_job_id: job.id },
                 };
                 const { error } = await supabaseAdmin.from("products").insert(payload);
-                if (error) { failed++; errors.push({ row: i + 1, message: error.message }); }
-                else imported++;
+                if (error) {
+                  failed++;
+                  errors.push({ row: i + 1, message: error.message });
+                } else imported++;
               } else if (entityKind === "customers") {
                 const name = get(row, "name");
-                if (!name) { skipped++; continue; }
+                if (!name) {
+                  skipped++;
+                  continue;
+                }
                 const payload: CustomerInsert = {
                   tenant_id: tenantId,
                   name,
                   email: get(row, "email").toLowerCase() || null,
                   telegram_username: get(row, "telegram_username") || null,
-                  metadata: { phone: get(row, "phone") || null, import_source: provider, import_job_id: job.id },
+                  metadata: {
+                    phone: get(row, "phone") || null,
+                    import_source: provider,
+                    import_job_id: job.id,
+                  },
                 };
                 const { error } = await supabaseAdmin.from("customers").insert(payload);
-                if (error) { failed++; errors.push({ row: i + 1, message: error.message }); }
-                else imported++;
+                if (error) {
+                  failed++;
+                  errors.push({ row: i + 1, message: error.message });
+                } else imported++;
               } else if (entityKind === "orders") {
                 const customerName = get(row, "customer_name");
                 const totalCents = parsePriceToCents(get(row, "total_cents"));
-                if (!customerName || !totalCents) { skipped++; continue; }
+                if (!customerName || !totalCents) {
+                  skipped++;
+                  continue;
+                }
                 const rawStatus = (get(row, "status") || "pending").toLowerCase();
                 type OS = "pending" | "paid" | "fulfilled" | "cancelled" | "refunded";
                 const map: Record<string, OS> = {
-                  pending: "pending", new: "pending", processing: "pending", on_hold: "pending",
-                  paid: "paid", complete: "paid", succeeded: "paid",
-                  shipped: "fulfilled", completed: "fulfilled", fulfilled: "fulfilled", delivered: "fulfilled",
-                  cancelled: "cancelled", canceled: "cancelled",
+                  pending: "pending",
+                  new: "pending",
+                  processing: "pending",
+                  on_hold: "pending",
+                  paid: "paid",
+                  complete: "paid",
+                  succeeded: "paid",
+                  shipped: "fulfilled",
+                  completed: "fulfilled",
+                  fulfilled: "fulfilled",
+                  delivered: "fulfilled",
+                  cancelled: "cancelled",
+                  canceled: "cancelled",
                   refunded: "refunded",
                 };
                 const finalStatus: OS = map[rawStatus] ?? "pending";
                 const rawPm = get(row, "payment_method").toLowerCase();
-                const paymentMethod = rawPm === "stripe_card" || rawPm === "stripe" ? "stripe_card" : "manual";
+                const paymentMethod =
+                  rawPm === "stripe_card" || rawPm === "stripe" ? "stripe_card" : "manual";
                 const payload: OrderInsert = {
                   tenant_id: tenantId,
                   customer_name: customerName,
@@ -198,11 +225,17 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
                   status: finalStatus,
                   payment_method: paymentMethod,
                   paid_at: finalStatus === "paid" ? new Date().toISOString() : null,
-                  metadata: { external_id: get(row, "external_id") || null, import_source: provider, import_job_id: job.id },
+                  metadata: {
+                    external_id: get(row, "external_id") || null,
+                    import_source: provider,
+                    import_job_id: job.id,
+                  },
                 };
                 const { error } = await supabaseAdmin.from("orders").insert(payload);
-                if (error) { failed++; errors.push({ row: i + 1, message: error.message }); }
-                else imported++;
+                if (error) {
+                  failed++;
+                  errors.push({ row: i + 1, message: error.message });
+                } else imported++;
               }
             } catch (e) {
               failed++;
@@ -240,10 +273,7 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
             errors: errors.slice(0, 10),
           });
         } catch (e) {
-          return jsonResponse(
-            { error: e instanceof Error ? e.message : "internal error" },
-            500,
-          );
+          return jsonResponse({ error: e instanceof Error ? e.message : "internal error" }, 500);
         }
       },
     },

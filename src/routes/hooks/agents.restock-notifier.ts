@@ -30,14 +30,20 @@ const AGENT_ID = "restock_notifier";
 const TEMPLATE = "restock";
 
 function appBase(): string {
-  return (process.env.PUBLIC_APP_URL || process.env.VITE_PUBLIC_APP_URL || "https://e-marq.lovable.app").replace(/\/+$/, "");
+  return (
+    process.env.PUBLIC_APP_URL ||
+    process.env.VITE_PUBLIC_APP_URL ||
+    "https://e-marq.lovable.app"
+  ).replace(/\/+$/, "");
 }
 
 export const Route = createFileRoute("/hooks/agents/restock-notifier")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -58,7 +64,11 @@ export const Route = createFileRoute("/hooks/agents/restock-notifier")({
           }
           const [{ data: tenant }, { data: cfg }] = await Promise.all([
             supabaseAdmin.from("tenants").select("slug, name").eq("id", tenantId).maybeSingle(),
-            supabaseAdmin.from("tenant_configs").select("brand_name").eq("tenant_id", tenantId).maybeSingle(),
+            supabaseAdmin
+              .from("tenant_configs")
+              .select("brand_name")
+              .eq("tenant_id", tenantId)
+              .maybeSingle(),
           ]);
           if (!tenant) {
             await finishAgentRun(handle, 0, { reason: "no_tenant" });
@@ -121,7 +131,10 @@ export const Route = createFileRoute("/hooks/agents/restock-notifier")({
               // Restock — "ти просив повідомити", тому це не маркетинг — це
               // явно запитана дія; але якщо клієнт відписався від маркетингу
               // повністю, поважаємо це.
-              if (customer && customer.consent_marketing === false) { totalSkipped++; continue; }
+              if (customer && customer.consent_marketing === false) {
+                totalSkipped++;
+                continue;
+              }
 
               const unsubToken = customer?.unsubscribe_token ?? "";
               const unsubUrl = unsubToken
@@ -200,7 +213,9 @@ export const Route = createFileRoute("/hooks/agents/restock-notifier")({
           });
         } catch (err) {
           await failAgentRun(handle, err);
-          return jsonError("Restock notifier failed", 500, { details: err instanceof Error ? err.message : String(err) });
+          return jsonError("Restock notifier failed", 500, {
+            details: err instanceof Error ? err.message : String(err),
+          });
         }
       },
     },

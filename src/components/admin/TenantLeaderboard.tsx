@@ -61,9 +61,7 @@ export function TenantLeaderboard({ rows }: Props) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-semibold text-foreground">
-                      {row.name}
-                    </p>
+                    <p className="truncate text-sm font-semibold text-foreground">{row.name}</p>
                     <span className="rounded-full bg-muted/60 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
                       /{row.slug}
                     </span>

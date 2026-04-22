@@ -35,7 +35,9 @@ export const Route = createFileRoute("/hooks/agents/sales-bot-all")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         if (!(await isAuthorized(token))) return jsonError("Unauthorized", 401);
 
         const { data: tenants, error } = await supabaseAdmin

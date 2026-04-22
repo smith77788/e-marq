@@ -22,13 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
@@ -135,8 +129,7 @@ function ProductDetailEditor() {
       const trimmedName = name.trim();
       if (!trimmedName) throw new Error("Назва обовʼязкова");
       const priceNum = Number(priceDollars);
-      if (!Number.isFinite(priceNum) || priceNum < 0)
-        throw new Error("Ціна має бути числом ≥ 0");
+      if (!Number.isFinite(priceNum) || priceNum < 0) throw new Error("Ціна має бути числом ≥ 0");
       const compareNum = compareAt ? Number(compareAt) : null;
       if (compareNum != null && (!Number.isFinite(compareNum) || compareNum < 0))
         throw new Error("Ціна до знижки має бути числом ≥ 0");
@@ -321,9 +314,7 @@ function ProductDetailEditor() {
                     disabled={product.has_variants}
                   />
                   {product.has_variants && (
-                    <p className="text-[10px] text-muted-foreground">
-                      Керується через варіанти
-                    </p>
+                    <p className="text-[10px] text-muted-foreground">Керується через варіанти</p>
                   )}
                 </div>
                 <div className="space-y-1.5">

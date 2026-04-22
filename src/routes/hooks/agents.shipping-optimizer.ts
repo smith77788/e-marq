@@ -22,7 +22,9 @@ export const Route = createFileRoute("/hooks/agents/shipping-optimizer")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -47,7 +49,10 @@ export const Route = createFileRoute("/hooks/agents/shipping-optimizer")({
             .limit(1000);
 
           // Aggregate by region/method from metadata.shipping
-          const buckets = new Map<string, { count: number; totalCents: number; deliveryDays: number[] }>();
+          const buckets = new Map<
+            string,
+            { count: number; totalCents: number; deliveryDays: number[] }
+          >();
           for (const o of orders ?? []) {
             const meta = (o.metadata ?? {}) as Record<string, unknown>;
             const shipping = (meta.shipping ?? {}) as Record<string, unknown>;
@@ -67,9 +72,10 @@ export const Route = createFileRoute("/hooks/agents/shipping-optimizer")({
           for (const [key, b] of buckets) {
             if (b.count < 5) continue;
             const avgCost = b.totalCents / b.count;
-            const avgDays = b.deliveryDays.length > 0
-              ? b.deliveryDays.reduce((s, d) => s + d, 0) / b.deliveryDays.length
-              : 0;
+            const avgDays =
+              b.deliveryDays.length > 0
+                ? b.deliveryDays.reduce((s, d) => s + d, 0) / b.deliveryDays.length
+                : 0;
             // Flag when avg cost > $15 OR avg delivery > 7 days
             if (avgCost > 1500 || avgDays > 7) {
               insights.push({
@@ -78,9 +84,10 @@ export const Route = createFileRoute("/hooks/agents/shipping-optimizer")({
                 affected_layer: "fulfillment",
                 title: `📦 Дорога/повільна доставка: ${key}`,
                 description: `За 30 днів — ${b.count} замовлень. Середня вартість ${(avgCost / 100).toFixed(2)} ₴, доставка ${avgDays.toFixed(1)} дн.`,
-                expected_impact: avgCost > 1500
-                  ? `Зниження ціни на 15% → економія ~${((avgCost * 0.15 * b.count) / 100).toFixed(0)} ₴/міс`
-                  : `Скорочення часу доставки підвищить repeat rate`,
+                expected_impact:
+                  avgCost > 1500
+                    ? `Зниження ціни на 15% → економія ~${((avgCost * 0.15 * b.count) / 100).toFixed(0)} ₴/міс`
+                    : `Скорочення часу доставки підвищить repeat rate`,
                 confidence: 0.7,
                 risk_level: "medium",
                 metrics: {
@@ -100,7 +107,9 @@ export const Route = createFileRoute("/hooks/agents/shipping-optimizer")({
           return jsonOk({ insights_created: created });
         } catch (e) {
           await failAgentRun(handle, e);
-          return jsonError("Shipping optimizer failed", 500, { details: e instanceof Error ? e.message : String(e) });
+          return jsonError("Shipping optimizer failed", 500, {
+            details: e instanceof Error ? e.message : String(e),
+          });
         }
       },
     },

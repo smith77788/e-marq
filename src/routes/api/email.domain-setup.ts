@@ -14,7 +14,9 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const RESEND_GATEWAY = "https://connector-gateway.lovable.dev/resend";
 
-async function authUser(req: Request): Promise<{ ok: true; userId: string } | { ok: false; status: number; error: string }> {
+async function authUser(
+  req: Request,
+): Promise<{ ok: true; userId: string } | { ok: false; status: number; error: string }> {
   const auth = req.headers.get("authorization");
   if (!auth?.startsWith("Bearer ")) return { ok: false, status: 401, error: "missing_bearer" };
   const token = auth.slice(7).trim();
@@ -78,7 +80,8 @@ export const Route = createFileRoute("/api/email/domain-setup")({
         }
 
         const tenantId = typeof body.tenantId === "string" ? body.tenantId.trim() : "";
-        if (!/^[0-9a-f-]{36}$/i.test(tenantId)) return jsonResponse({ error: "invalid_tenant" }, 400);
+        if (!/^[0-9a-f-]{36}$/i.test(tenantId))
+          return jsonResponse({ error: "invalid_tenant" }, 400);
 
         const domain = typeof body.domain === "string" ? body.domain.trim().toLowerCase() : "";
         if (!DOMAIN_RX.test(domain)) return jsonResponse({ error: "invalid_domain" }, 400);
@@ -89,9 +92,11 @@ export const Route = createFileRoute("/api/email/domain-setup")({
           return jsonResponse({ error: "from_email_domain_mismatch" }, 400);
         }
 
-        const fromName = typeof body.from_name === "string" ? body.from_name.trim().slice(0, 80) : "";
+        const fromName =
+          typeof body.from_name === "string" ? body.from_name.trim().slice(0, 80) : "";
         const replyTo = typeof body.reply_to === "string" ? body.reply_to.trim() : "";
-        if (replyTo && !EMAIL_RX.test(replyTo)) return jsonResponse({ error: "invalid_reply_to" }, 400);
+        if (replyTo && !EMAIL_RX.test(replyTo))
+          return jsonResponse({ error: "invalid_reply_to" }, 400);
         const region = typeof body.region === "string" ? body.region : "eu-west-1";
 
         if (!(await userCanManageTenant(auth.userId, tenantId))) {
@@ -129,9 +134,14 @@ export const Route = createFileRoute("/api/email/domain-setup")({
             // If domain already exists in Resend, look it up.
             if (r.status === 422 || (j.message ?? "").toLowerCase().includes("already")) {
               const list = await fetch(`${RESEND_GATEWAY}/domains`, {
-                headers: { Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": resendKey },
+                headers: {
+                  Authorization: `Bearer ${lovableKey}`,
+                  "X-Connection-Api-Key": resendKey,
+                },
               });
-              const lj = (await list.json().catch(() => ({}))) as { data?: Array<{ id: string; name: string; status: string }> };
+              const lj = (await list.json().catch(() => ({}))) as {
+                data?: Array<{ id: string; name: string; status: string }>;
+              };
               const existing = (lj.data ?? []).find((d) => d.name?.toLowerCase() === domain);
               if (existing) {
                 resendDomainId = existing.id;
@@ -178,17 +188,19 @@ export const Route = createFileRoute("/api/email/domain-setup")({
           .maybeSingle();
 
         const upErr = existing
-          ? (await supabaseAdmin
-              .from("tenant_configs")
-              .update({ features: features as never })
-              .eq("tenant_id", tenantId)).error
-          : (await supabaseAdmin
-              .from("tenant_configs")
-              .insert({
+          ? (
+              await supabaseAdmin
+                .from("tenant_configs")
+                .update({ features: features as never })
+                .eq("tenant_id", tenantId)
+            ).error
+          : (
+              await supabaseAdmin.from("tenant_configs").insert({
                 tenant_id: tenantId,
                 brand_name: domain,
                 features: features as never,
-              })).error;
+              })
+            ).error;
         if (upErr) return jsonResponse({ error: upErr.message }, 500);
 
         return jsonResponse({

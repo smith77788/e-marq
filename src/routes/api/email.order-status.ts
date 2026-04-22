@@ -18,7 +18,9 @@ import { loadOrderEmailContext, alreadySent, logEmailSend } from "@/lib/email/or
 const ALLOWED_STATUSES = ["paid", "fulfilled", "cancelled", "refunded"] as const;
 type AllowedStatus = (typeof ALLOWED_STATUSES)[number];
 
-async function authenticateUser(req: Request): Promise<{ ok: true; userId: string } | { ok: false; status: number; error: string }> {
+async function authenticateUser(
+  req: Request,
+): Promise<{ ok: true; userId: string } | { ok: false; status: number; error: string }> {
   const auth = req.headers.get("authorization");
   if (!auth?.startsWith("Bearer ")) {
     return { ok: false, status: 401, error: "missing_bearer" };

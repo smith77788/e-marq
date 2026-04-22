@@ -35,7 +35,9 @@ export const Route = createFileRoute("/hooks/agents/order-status-notifier")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -85,10 +87,16 @@ export const Route = createFileRoute("/hooks/agents/order-status-notifier")({
           for (const o of orders) {
             const status = o.status as Tracked;
             const template = `order_status_${status}`;
-            if (sentSet.has(`${o.id}::${template}`)) { skipped++; continue; }
+            if (sentSet.has(`${o.id}::${template}`)) {
+              skipped++;
+              continue;
+            }
 
             const ctxRes = await loadOrderEmailContext(o.id);
-            if (!ctxRes.ok) { skipped++; continue; }
+            if (!ctxRes.ok) {
+              skipped++;
+              continue;
+            }
 
             const { subject, html, text } = renderOrderStatusUpdate({
               ...ctxRes.ctx,
@@ -128,7 +136,9 @@ export const Route = createFileRoute("/hooks/agents/order-status-notifier")({
           return jsonOk({ insights_created: 0, sent, skipped, considered: orders.length });
         } catch (err) {
           await failAgentRun(handle, err);
-          return jsonError("Order status notifier failed", 500, { details: err instanceof Error ? err.message : String(err) });
+          return jsonError("Order status notifier failed", 500, {
+            details: err instanceof Error ? err.message : String(err),
+          });
         }
       },
     },

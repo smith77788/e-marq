@@ -30,14 +30,20 @@ const TEMPLATE = "abandoned_cart";
 const DEDUP_DAYS = 7;
 
 function appBase(): string {
-  return (process.env.PUBLIC_APP_URL || process.env.VITE_PUBLIC_APP_URL || "https://e-marq.lovable.app").replace(/\/+$/, "");
+  return (
+    process.env.PUBLIC_APP_URL ||
+    process.env.VITE_PUBLIC_APP_URL ||
+    "https://e-marq.lovable.app"
+  ).replace(/\/+$/, "");
 }
 
 export const Route = createFileRoute("/hooks/agents/email-abandoned-cart")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -60,7 +66,11 @@ export const Route = createFileRoute("/hooks/agents/email-abandoned-cart")({
 
           const [{ data: tenant }, { data: cfg }] = await Promise.all([
             supabaseAdmin.from("tenants").select("slug, name").eq("id", tenantId).maybeSingle(),
-            supabaseAdmin.from("tenant_configs").select("brand_name").eq("tenant_id", tenantId).maybeSingle(),
+            supabaseAdmin
+              .from("tenant_configs")
+              .select("brand_name")
+              .eq("tenant_id", tenantId)
+              .maybeSingle(),
           ]);
           if (!tenant) {
             await finishAgentRun(handle, 0, { reason: "no_tenant" });
@@ -128,15 +138,27 @@ export const Route = createFileRoute("/hooks/agents/email-abandoned-cart")({
           let skipped = 0;
           for (const a of attempts) {
             const customer = a.customer_id ? cMap.get(a.customer_id) : null;
-            if (!customer || !customer.email) { skipped++; continue; }
-            if (!customer.consent_marketing) { skipped++; continue; }
-            if (sentSet.has(customer.email.toLowerCase())) { skipped++; continue; }
+            if (!customer || !customer.email) {
+              skipped++;
+              continue;
+            }
+            if (!customer.consent_marketing) {
+              skipped++;
+              continue;
+            }
+            if (sentSet.has(customer.email.toLowerCase())) {
+              skipped++;
+              continue;
+            }
 
             const items = (a.cart_items as Array<{ product_id?: string }> | null) ?? [];
             const productNames = items
               .map((it) => (it.product_id ? pMap.get(it.product_id) : null))
               .filter((n): n is string => !!n);
-            if (!productNames.length) { skipped++; continue; }
+            if (!productNames.length) {
+              skipped++;
+              continue;
+            }
 
             const unsubUrl = `${appBase()}/api/public/email/unsubscribe?t=${encodeURIComponent(customer.unsubscribe_token)}`;
             const { subject, html, text } = renderAbandonedCart({

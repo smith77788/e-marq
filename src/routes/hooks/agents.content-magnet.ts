@@ -86,21 +86,19 @@ export const Route = createFileRoute("/hooks/agents/content-magnet")({
 
         let created = 0;
         for (const m of SEED) {
-          const { error } = await supabaseAdmin
-            .from("lead_magnets")
-            .upsert(
-              {
-                slug: m.slug,
-                title: m.title,
-                meta_description: m.meta_description,
-                topic: m.topic,
-                keywords: m.keywords,
-                body_md: m.body_md,
-                cta_url: "/signup",
-                is_published: true,
-              },
-              { onConflict: "slug", ignoreDuplicates: true } as never,
-            );
+          const { error } = await supabaseAdmin.from("lead_magnets").upsert(
+            {
+              slug: m.slug,
+              title: m.title,
+              meta_description: m.meta_description,
+              topic: m.topic,
+              keywords: m.keywords,
+              body_md: m.body_md,
+              cta_url: "/signup",
+              is_published: true,
+            },
+            { onConflict: "slug", ignoreDuplicates: true } as never,
+          );
           if (!error) created += 1;
         }
         return jsonOk({ ok: true, seeded: SEED.length, created });

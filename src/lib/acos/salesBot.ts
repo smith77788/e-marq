@@ -22,7 +22,13 @@ type InboundRow = {
   created_at: string;
 };
 
-type ProductLite = { id: string; name: string; price_cents: number; currency: string; stock: number };
+type ProductLite = {
+  id: string;
+  name: string;
+  price_cents: number;
+  currency: string;
+  stock: number;
+};
 
 /** Fuzzy match: does the reply mention a product name (case-insensitive substring)? */
 function findMentionedProduct(reply: string, catalogue: ProductLite[]): ProductLite | null {
@@ -55,10 +61,11 @@ async function aiReply(opts: {
   const hasUkrainianMarkers = /[іїєґ]/.test(lastLower);
   const hasRussianOnlyMarkers = /[ыёэъ]/.test(lastLower);
   const looksEnglish = !hasCyrillic && /[a-z]/.test(lastLower);
-  const lang =
-    looksEnglish ? "English"
-    : hasRussianOnlyMarkers && !hasUkrainianMarkers ? "Russian"
-    : "Ukrainian";
+  const lang = looksEnglish
+    ? "English"
+    : hasRussianOnlyMarkers && !hasUkrainianMarkers
+      ? "Russian"
+      : "Ukrainian";
 
   const sys = [
     `You are the autonomous sales assistant for the Ukrainian D2C brand "${opts.brandName}".`,
@@ -71,8 +78,15 @@ async function aiReply(opts: {
     `Never say you are an AI. Never make up products or prices. Never invent links.`,
     opts.lastBought ? `Customer's last purchase: ${opts.lastBought}.` : "",
     `Catalogue (max 8 shown):`,
-    ...opts.catalogue.slice(0, 8).map((p) => `- ${p.name} — ${(p.price_cents / 100).toFixed(0)} ₴${p.stock > 0 ? "" : " (немає в наявності)"}`),
-  ].filter(Boolean).join("\n");
+    ...opts.catalogue
+      .slice(0, 8)
+      .map(
+        (p) =>
+          `- ${p.name} — ${(p.price_cents / 100).toFixed(0)} ₴${p.stock > 0 ? "" : " (немає в наявності)"}`,
+      ),
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   const messages: { role: string; content: string }[] = [
     { role: "system", content: sys },
@@ -105,7 +119,10 @@ async function aiReply(opts: {
 }
 
 /** Process pending inbound conversations for a tenant. Returns reply count. */
-export async function runSalesBotForTenant(tenantId: string, limit = 20): Promise<{ replied: number; skipped: number }> {
+export async function runSalesBotForTenant(
+  tenantId: string,
+  limit = 20,
+): Promise<{ replied: number; skipped: number }> {
   // Pull recent inbound (last 24h) that we haven't auto-replied to yet
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
   const { data: inbound } = await supabaseAdmin
@@ -121,12 +138,20 @@ export async function runSalesBotForTenant(tenantId: string, limit = 20): Promis
 
   // Brand name + slug for storefront link
   const [{ data: cfg }, { data: tenantRow }] = await Promise.all([
-    supabaseAdmin.from("tenant_configs").select("brand_name").eq("tenant_id", tenantId).maybeSingle(),
+    supabaseAdmin
+      .from("tenant_configs")
+      .select("brand_name")
+      .eq("tenant_id", tenantId)
+      .maybeSingle(),
     supabaseAdmin.from("tenants").select("slug").eq("id", tenantId).maybeSingle(),
   ]);
   const brandName = cfg?.brand_name ?? "this brand";
-  const publicBase = process.env.PUBLIC_APP_URL ?? process.env.SUPABASE_URL?.replace(/\.supabase\.co.*$/, ".lovable.app") ?? null;
-  const storefrontBase = tenantRow?.slug && publicBase ? `${publicBase.replace(/\/$/, "")}/s/${tenantRow.slug}` : null;
+  const publicBase =
+    process.env.PUBLIC_APP_URL ??
+    process.env.SUPABASE_URL?.replace(/\.supabase\.co.*$/, ".lovable.app") ??
+    null;
+  const storefrontBase =
+    tenantRow?.slug && publicBase ? `${publicBase.replace(/\/$/, "")}/s/${tenantRow.slug}` : null;
 
   // Catalogue
   const { data: products } = await supabaseAdmin
@@ -148,9 +173,13 @@ export async function runSalesBotForTenant(tenantId: string, limit = 20): Promis
     queue.push(r);
   }
 
-  let replied = 0, skipped = 0;
+  let replied = 0,
+    skipped = 0;
   for (const r of queue) {
-    if (!r.customer_id) { skipped++; continue; }
+    if (!r.customer_id) {
+      skipped++;
+      continue;
+    }
 
     // Skip if we already queued/sent an outbound after this inbound
     const { data: alreadySent } = await supabaseAdmin
@@ -161,14 +190,20 @@ export async function runSalesBotForTenant(tenantId: string, limit = 20): Promis
       .eq("trigger_kind", "sales_reply")
       .gte("created_at", r.created_at)
       .limit(1);
-    if (alreadySent && alreadySent.length > 0) { skipped++; continue; }
+    if (alreadySent && alreadySent.length > 0) {
+      skipped++;
+      continue;
+    }
 
     const { data: customer } = await supabaseAdmin
       .from("customers")
       .select("name, telegram_chat_id")
       .eq("id", r.customer_id)
       .maybeSingle();
-    if (!customer?.telegram_chat_id && r.channel === "telegram") { skipped++; continue; }
+    if (!customer?.telegram_chat_id && r.channel === "telegram") {
+      skipped++;
+      continue;
+    }
 
     const { data: history } = await supabaseAdmin
       .from("conversations")
@@ -194,7 +229,10 @@ export async function runSalesBotForTenant(tenantId: string, limit = 20): Promis
       lastBought: lastItem?.[0]?.product_name ?? null,
       lastInbound: r.body,
     });
-    if (!reply) { skipped++; continue; }
+    if (!reply) {
+      skipped++;
+      continue;
+    }
 
     await supabaseAdmin.from("outbound_messages").insert({
       tenant_id: tenantId,

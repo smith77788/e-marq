@@ -37,7 +37,9 @@ type Outbound = {
   sent_at: string;
 };
 
-async function runFeedbackForTenant(tenantId: string): Promise<{ measured: number; conversions: number; revenue: number }> {
+async function runFeedbackForTenant(
+  tenantId: string,
+): Promise<{ measured: number; conversions: number; revenue: number }> {
   const cutoff = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
   const { data: rows } = await supabaseAdmin
     .from("outbound_messages")
@@ -49,7 +51,9 @@ async function runFeedbackForTenant(tenantId: string): Promise<{ measured: numbe
     .lte("sent_at", cutoff)
     .limit(200);
 
-  let measured = 0, conversions = 0, totalRevenue = 0;
+  let measured = 0,
+    conversions = 0,
+    totalRevenue = 0;
   const policyAgg: Record<string, { trials: number; wins: number; revenue: number }> = {};
 
   for (const r of (rows ?? []) as Outbound[]) {
@@ -57,16 +61,25 @@ async function runFeedbackForTenant(tenantId: string): Promise<{ measured: numbe
     policyAgg[r.trigger_kind].trials++;
 
     if (!r.customer_id) {
-      await supabaseAdmin.from("outbound_messages").update({ actual_revenue_cents: 0 }).eq("id", r.id);
+      await supabaseAdmin
+        .from("outbound_messages")
+        .update({ actual_revenue_cents: 0 })
+        .eq("id", r.id);
       measured++;
       continue;
     }
 
     const { data: customer } = await supabaseAdmin
-      .from("customers").select("email").eq("id", r.customer_id).maybeSingle();
+      .from("customers")
+      .select("email")
+      .eq("id", r.customer_id)
+      .maybeSingle();
     const email = customer?.email ?? null;
     if (!email) {
-      await supabaseAdmin.from("outbound_messages").update({ actual_revenue_cents: 0 }).eq("id", r.id);
+      await supabaseAdmin
+        .from("outbound_messages")
+        .update({ actual_revenue_cents: 0 })
+        .eq("id", r.id);
       measured++;
       continue;
     }
@@ -138,15 +151,21 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop-all")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         if (!(await isAuthorized(token))) return jsonError("Unauthorized", 401);
 
         const { data: tenants, error } = await supabaseAdmin
-          .from("tenants").select("id, slug").eq("status", "active");
+          .from("tenants")
+          .select("id, slug")
+          .eq("status", "active");
         if (error) return jsonError("Failed to load tenants", 500, { details: error.message });
 
         const outcomes: Array<Record<string, unknown>> = [];
-        let totalMeasured = 0, totalConversions = 0, totalRevenue = 0;
+        let totalMeasured = 0,
+          totalConversions = 0,
+          totalRevenue = 0;
         for (const t of tenants ?? []) {
           try {
             const r = await runFeedbackForTenant(t.id);
@@ -164,7 +183,11 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop-all")({
         }
         return jsonOk({
           tenants_processed: outcomes.length,
-          totals: { measured: totalMeasured, conversions: totalConversions, revenue_cents: totalRevenue },
+          totals: {
+            measured: totalMeasured,
+            conversions: totalConversions,
+            revenue_cents: totalRevenue,
+          },
           outcomes,
         });
       },

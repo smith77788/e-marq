@@ -161,12 +161,10 @@ export function AcosOverviewTab({ tenantId }: Props) {
           ) : insights.length === 0 ? (
             <div className="rounded-md border border-dashed border-border bg-muted/20 p-6 text-center">
               <Sparkles className="mx-auto h-8 w-8 text-muted-foreground/60" />
-              <p className="mt-3 text-sm font-medium text-foreground">
-                Поки що підказок немає
-              </p>
+              <p className="mt-3 text-sm font-medium text-foreground">Поки що підказок немає</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Агенти ще не запускались для цього бренду. Згенеруйте демо-дані або підключіть реальне джерело —
-                і агенти почнуть формувати підказки на схвалення.
+                Агенти ще не запускались для цього бренду. Згенеруйте демо-дані або підключіть
+                реальне джерело — і агенти почнуть формувати підказки на схвалення.
               </p>
             </div>
           ) : null}
@@ -210,8 +208,8 @@ export function AcosOverviewTab({ tenantId }: Props) {
         <CardHeader>
           <CardTitle className="text-base">Що система робить для цього бренду</CardTitle>
           <CardDescription>
-            Підключіть один раз — агенти працюють за розкладом, знаходять можливості для виторгу
-            і ставлять їх у чергу на ваше одне натискання «Так».
+            Підключіть один раз — агенти працюють за розкладом, знаходять можливості для виторгу і
+            ставлять їх у чергу на ваше одне натискання «Так».
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">
@@ -221,8 +219,8 @@ export function AcosOverviewTab({ tenantId }: Props) {
             </div>
             <p>
               <span className="font-medium text-foreground">Агенти аналізують</span> — щоденно
-              переглядають замовлення, клієнтів, товари та події, шукаючи ризик відтоку,
-              зникнення товару, втрати в чеку, можливості ціни та SEO.
+              переглядають замовлення, клієнтів, товари та події, шукаючи ризик відтоку, зникнення
+              товару, втрати в чеку, можливості ціни та SEO.
             </p>
           </div>
           <div className="flex gap-3">
@@ -240,8 +238,8 @@ export function AcosOverviewTab({ tenantId }: Props) {
             </div>
             <p>
               <span className="font-medium text-foreground">Ви схвалюєте одним натисканням</span> —
-              система виконує дію (повернення клієнта, поповнення, промо, зміна ціни)
-              і відстежує реальний ефект у виторгу.
+              система виконує дію (повернення клієнта, поповнення, промо, зміна ціни) і відстежує
+              реальний ефект у виторгу.
             </p>
           </div>
           <div className="flex gap-3">
@@ -250,8 +248,8 @@ export function AcosOverviewTab({ tenantId }: Props) {
             </div>
             <p>
               <span className="font-medium text-foreground">Памʼять навчається</span> — те, що
-              спрацювало, повторюється; що ні — більше не пропонується. З кожним тижнем система
-              стає точнішою саме під ваш бренд.
+              спрацювало, повторюється; що ні — більше не пропонується. З кожним тижнем система стає
+              точнішою саме під ваш бренд.
             </p>
           </div>
         </CardContent>

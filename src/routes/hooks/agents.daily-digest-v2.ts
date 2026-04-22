@@ -27,7 +27,9 @@ export const Route = createFileRoute("/hooks/agents/daily-digest-v2")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -58,7 +60,10 @@ export const Route = createFileRoute("/hooks/agents/daily-digest-v2")({
             (d) => (d.metrics as Record<string, unknown>)?.weekly === true,
           );
           if (alreadyWeekly) {
-            await finishAgentRun(handle, 0, { reason: "already_generated", digest_date: digestDate });
+            await finishAgentRun(handle, 0, {
+              reason: "already_generated",
+              digest_date: digestDate,
+            });
             return jsonOk({ insights_created: 0, reason: "already_generated" });
           }
 

@@ -93,8 +93,12 @@ function BrandPage() {
             <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
               <Bot className="h-4 w-4 text-primary-foreground" />
             </span>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">{current.tenant_name}</h1>
-            <Badge variant="outline" className="font-mono text-[10px]">/{current.tenant_slug}</Badge>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              {current.tenant_name}
+            </h1>
+            <Badge variant="outline" className="font-mono text-[10px]">
+              /{current.tenant_slug}
+            </Badge>
             <Badge variant="outline" className="border-success/40 text-success text-[10px]">
               <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
               {t("brand.live")}
@@ -132,12 +136,16 @@ function BrandPage() {
 
       <AnalyticsWindowProvider initial={30}>
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("brand.revenuePerf")}</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            {t("brand.revenuePerf")}
+          </h2>
           <AnalyticsWindowToggle />
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">
-          <div className="lg:col-span-2"><RevenueTrendChart tenantId={current.tenant_id} /></div>
+          <div className="lg:col-span-2">
+            <RevenueTrendChart tenantId={current.tenant_id} />
+          </div>
           <FunnelChart tenantId={current.tenant_id} />
         </div>
 
@@ -149,7 +157,9 @@ function BrandPage() {
         <CohortRetention tenantId={current.tenant_id} />
       </div>
 
-      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("brand.autonomousFleet")}</h2>
+      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        {t("brand.autonomousFleet")}
+      </h2>
 
       <AgentHealthHeatmap tenantId={current.tenant_id} />
 
@@ -163,7 +173,9 @@ function BrandPage() {
 
       <MemoryInspector tenantId={current.tenant_id} />
 
-      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("brand.customersChannels")}</h2>
+      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        {t("brand.customersChannels")}
+      </h2>
 
       <section id="customers" className="scroll-mt-24 space-y-6">
         <TopCustomers tenantId={current.tenant_id} />

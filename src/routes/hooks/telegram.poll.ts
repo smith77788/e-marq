@@ -18,7 +18,8 @@ const TG_GATEWAY = "https://connector-gateway.lovable.dev/telegram";
 const MAX_RUNTIME_MS = 55_000;
 const MIN_REMAINING_MS = 5_000;
 
-const YES_PATTERNS = /\b(yes|yeah|yep|yup|sure|ok|okay|давай|так|ага|добре|order|купую|беру|готов|хочу)\b/i;
+const YES_PATTERNS =
+  /\b(yes|yeah|yep|yup|sure|ok|okay|давай|так|ага|добре|order|купую|беру|готов|хочу)\b/i;
 const NO_PATTERNS = /\b(stop|unsubscribe|відпис|стоп|не треба|не зараз|не цікаво|opt[- ]out)\b/i;
 
 type TgUpdate = {
@@ -49,11 +50,19 @@ async function tgAnswerCallback(callbackId: string, text?: string): Promise<void
       "X-Connection-Api-Key": tgKey,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ callback_query_id: callbackId, text: text ?? "Готово", show_alert: false }),
+    body: JSON.stringify({
+      callback_query_id: callbackId,
+      text: text ?? "Готово",
+      show_alert: false,
+    }),
   }).catch(() => undefined);
 }
 
-async function tgEditMessage(chatId: string | number, messageId: number, html: string): Promise<void> {
+async function tgEditMessage(
+  chatId: string | number,
+  messageId: number,
+  html: string,
+): Promise<void> {
   const lovableKey = process.env.LOVABLE_API_KEY;
   const tgKey = process.env.TELEGRAM_API_KEY;
   if (!lovableKey || !tgKey) return;
@@ -86,7 +95,10 @@ function getInternalAgentAuthHeaders(): HeadersInit {
       };
 }
 
-async function processCallback(cb: NonNullable<TgUpdate["callback_query"]>, appOrigin: string): Promise<void> {
+async function processCallback(
+  cb: NonNullable<TgUpdate["callback_query"]>,
+  appOrigin: string,
+): Promise<void> {
   const data = cb.data ?? "";
   const chatId = cb.message?.chat.id ?? cb.from.id;
   const msgId = cb.message?.message_id;
@@ -133,7 +145,8 @@ async function processCallback(cb: NonNullable<TgUpdate["callback_query"]>, appO
           `⚠️ Не вдалося застосувати інсайт${errorText ? `: ${errorText.slice(0, 180)}` : "."}`,
         );
       }
-      if (msgId && res.ok) await tgEditMessage(chatId, msgId, `✅ <b>Застосовано:</b> ${ins.title}`);
+      if (msgId && res.ok)
+        await tgEditMessage(chatId, msgId, `✅ <b>Застосовано:</b> ${ins.title}`);
     } else if (op === "dismiss") {
       await supabaseAdmin.from("ai_insights").update({ status: "dismissed" }).eq("id", id);
       await tgAnswerCallback(cb.id, "Сховано");
@@ -159,7 +172,8 @@ async function processCallback(cb: NonNullable<TgUpdate["callback_query"]>, appO
         .update({ status: "applied", applied_at: new Date().toISOString() })
         .eq("id", id);
       await tgAnswerCallback(cb.id, "✅ Застосовано");
-      if (msgId) await tgEditMessage(chatId, msgId, `✅ <b>Застосовано дію:</b> ${act.action_type}`);
+      if (msgId)
+        await tgEditMessage(chatId, msgId, `✅ <b>Застосовано дію:</b> ${act.action_type}`);
     } else if (op === "dismiss") {
       await supabaseAdmin.from("ai_actions").update({ status: "dismissed" }).eq("id", id);
       await tgAnswerCallback(cb.id, "Сховано");
@@ -241,7 +255,10 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
       .eq("slug", slug)
       .maybeSingle();
     if (!tenant) {
-      await sendTelegramText(chatId, `Бренд «${slug}» не знайдено. Спитайте у бренду правильне посилання.`);
+      await sendTelegramText(
+        chatId,
+        `Бренд «${slug}» не знайдено. Спитайте у бренду правильне посилання.`,
+      );
       return;
     }
     await supabaseAdmin
@@ -329,7 +346,11 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
   await supabaseAdmin.from("events").insert({
     tenant_id: tenantId,
     type: "message_received",
-    payload: { channel: "telegram", customer_id: customerId, body_preview: text.slice(0, 200) } as never,
+    payload: {
+      channel: "telegram",
+      customer_id: customerId,
+      body_preview: text.slice(0, 200),
+    } as never,
   });
 
   // ---- Mark recent outbound as replied ----
@@ -353,15 +374,26 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
   // ---- Intent: opt-out ----
   if (NO_PATTERNS.test(text)) {
     await supabaseAdmin.from("customers").update({ consent_marketing: false }).eq("id", customerId);
-    await sendTelegramText(chatId, "Зрозуміло — більше повідомлень не надсилаємо. Напишіть START, коли захочете відновити. 👋");
+    await sendTelegramText(
+      chatId,
+      "Зрозуміло — більше повідомлень не надсилаємо. Напишіть START, коли захочете відновити. 👋",
+    );
     return;
   }
 
   // ---- Intent: confirm reorder/winback ----
-  if (YES_PATTERNS.test(text) && lastOutbound && (lastOutbound.trigger_kind === "reorder" || lastOutbound.trigger_kind === "winback")) {
+  if (
+    YES_PATTERNS.test(text) &&
+    lastOutbound &&
+    (lastOutbound.trigger_kind === "reorder" || lastOutbound.trigger_kind === "winback")
+  ) {
     const result = await autoCreateReorder(tenantId, customerId);
     if (result) {
-      const { data: t } = await supabaseAdmin.from("tenants").select("slug").eq("id", tenantId).maybeSingle();
+      const { data: t } = await supabaseAdmin
+        .from("tenants")
+        .select("slug")
+        .eq("id", tenantId)
+        .maybeSingle();
       const link = `${appOrigin}/s/${t?.slug ?? ""}/orders/${result.orderId}`;
       await sendTelegramText(
         chatId,
@@ -375,7 +407,11 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
         applied_at: new Date().toISOString(),
         target_entity: "orders",
         target_id: result.orderId,
-        parameters: { customer_id: customerId, source_outbound_id: lastOutbound.id, total_cents: result.total } as never,
+        parameters: {
+          customer_id: customerId,
+          source_outbound_id: lastOutbound.id,
+          total_cents: result.total,
+        } as never,
         actual_result: { order_id: result.orderId } as never,
       });
       return;
@@ -480,12 +516,19 @@ export const Route = createFileRoute("/hooks/telegram/poll")({
               "X-Connection-Api-Key": tgKey,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ offset, timeout, allowed_updates: ["message", "callback_query"] }),
+            body: JSON.stringify({
+              offset,
+              timeout,
+              allowed_updates: ["message", "callback_query"],
+            }),
           });
           if (!res.ok) {
             const errText = await res.text().catch(() => "");
             return new Response(
-              JSON.stringify({ ok: false, error: `getUpdates ${res.status}: ${errText.slice(0, 300)}` }),
+              JSON.stringify({
+                ok: false,
+                error: `getUpdates ${res.status}: ${errText.slice(0, 300)}`,
+              }),
               { status: 200, headers: { "Content-Type": "application/json" } },
             );
           }
@@ -513,10 +556,10 @@ export const Route = createFileRoute("/hooks/telegram/poll")({
             .eq("id", 1);
         }
 
-        return new Response(
-          JSON.stringify({ ok: true, processed, offset }),
-          { status: 200, headers: { "Content-Type": "application/json" } },
-        );
+        return new Response(JSON.stringify({ ok: true, processed, offset }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
       },
       GET: async () =>
         new Response(JSON.stringify({ ok: true, hint: "POST to trigger long-poll" }), {

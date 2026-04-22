@@ -2,7 +2,11 @@
  * Public surface for the universal detail system.
  * Import from "@/components/detail" everywhere else.
  */
-export { DetailControllerProvider, useDetailController, useOptionalDetailController } from "./DetailController";
+export {
+  DetailControllerProvider,
+  useDetailController,
+  useOptionalDetailController,
+} from "./DetailController";
 export { DetailableElement } from "./DetailableElement";
 export { DetailDrawer } from "./DetailDrawer";
 export { useDetailData, detailQueryKey } from "./useDetailData";

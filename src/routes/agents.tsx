@@ -90,18 +90,26 @@ function Agents() {
                 <CardContent className="space-y-3">
                   <p className="text-sm font-medium text-primary">→ {a.impact}</p>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("ag.signals")}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      {t("ag.signals")}
+                    </p>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {a.triggers.map((tr) => (
-                        <Badge key={tr} variant="outline" className="text-[10px]">{tr}</Badge>
+                        <Badge key={tr} variant="outline" className="text-[10px]">
+                          {tr}
+                        </Badge>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("ag.action")}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      {t("ag.action")}
+                    </p>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {a.actions.map((act) => (
-                        <Badge key={act} variant="secondary" className="text-[10px]">{act}</Badge>
+                        <Badge key={act} variant="secondary" className="text-[10px]">
+                          {act}
+                        </Badge>
                       ))}
                     </div>
                   </div>
@@ -112,7 +120,9 @@ function Agents() {
         </div>
 
         <div className="mt-12 text-center">
-          <Button asChild size="lg"><Link to="/signup">{t("ag.runOnStore")}</Link></Button>
+          <Button asChild size="lg">
+            <Link to="/signup">{t("ag.runOnStore")}</Link>
+          </Button>
         </div>
       </section>
       <MarketingFooter />

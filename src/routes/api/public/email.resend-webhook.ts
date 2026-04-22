@@ -87,13 +87,19 @@ async function verifySvixSignature(
 
   const key = await crypto.subtle.importKey(
     "raw",
-    keyBytes.buffer.slice(keyBytes.byteOffset, keyBytes.byteOffset + keyBytes.byteLength) as ArrayBuffer,
+    keyBytes.buffer.slice(
+      keyBytes.byteOffset,
+      keyBytes.byteOffset + keyBytes.byteLength,
+    ) as ArrayBuffer,
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"],
   );
   const toSignBytes = new TextEncoder().encode(`${svixId}.${svixTs}.${rawBody}`);
-  const toSign = toSignBytes.buffer.slice(toSignBytes.byteOffset, toSignBytes.byteOffset + toSignBytes.byteLength) as ArrayBuffer;
+  const toSign = toSignBytes.buffer.slice(
+    toSignBytes.byteOffset,
+    toSignBytes.byteOffset + toSignBytes.byteLength,
+  ) as ArrayBuffer;
   const sigBuf = await crypto.subtle.sign("HMAC", key, toSign);
   const expected = new Uint8Array(sigBuf);
 
@@ -127,7 +133,9 @@ async function applyEventToSend(
 ): Promise<{ tenantId: string | null }> {
   const { data: send } = await supabaseAdmin
     .from("email_sends")
-    .select("id, tenant_id, to_email, status, delivered_at, opened_at, clicked_at, bounced_at, complained_at, unsubscribed_at")
+    .select(
+      "id, tenant_id, to_email, status, delivered_at, opened_at, clicked_at, bounced_at, complained_at, unsubscribed_at",
+    )
     .eq("resend_message_id", resendId)
     .maybeSingle();
 
@@ -172,7 +180,10 @@ async function applyEventToSend(
   }
 
   if (Object.keys(patch).length > 0) {
-    await supabaseAdmin.from("email_sends").update(patch as never).eq("id", send.id);
+    await supabaseAdmin
+      .from("email_sends")
+      .update(patch as never)
+      .eq("id", send.id);
   }
 
   // For campaign sends, propagate to email_campaign_recipients too.

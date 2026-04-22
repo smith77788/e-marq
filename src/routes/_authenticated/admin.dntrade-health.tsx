@@ -24,13 +24,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { downloadHealthCsv } from "@/lib/dntrade/healthCsv";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -147,21 +141,23 @@ function DnTradeHealthContent() {
     refetchInterval: 60_000,
     queryFn: async () => {
       // Health log за 7 днів — для трендів і агрегації.
-      const logRes = await (supabase as unknown as {
-        from: (t: string) => {
-          select: (cols: string) => {
-            gte: (
-              c: string,
-              v: string,
-            ) => {
-              order: (
+      const logRes = await (
+        supabase as unknown as {
+          from: (t: string) => {
+            select: (cols: string) => {
+              gte: (
                 c: string,
-                opts: { ascending: boolean },
-              ) => Promise<{ data: HealthRow[] | null; error: unknown }>;
+                v: string,
+              ) => {
+                order: (
+                  c: string,
+                  opts: { ascending: boolean },
+                ) => Promise<{ data: HealthRow[] | null; error: unknown }>;
+              };
             };
           };
-        };
-      })
+        }
+      )
         .from("dntrade_health_log")
         .select(
           "id, tenant_id, integration_id, status, http_status, ready, blockers, warnings, last_sync_status, last_sync_age_seconds, checked_at",
@@ -280,10 +276,7 @@ function DnTradeHealthContent() {
 
   // Tenant table with % unhealthy.
   const tenantRows = useMemo(() => {
-    const perTenant = new Map<
-      string,
-      { total: number; bad: number; latest: HealthRow | null }
-    >();
+    const perTenant = new Map<string, { total: number; bad: number; latest: HealthRow | null }>();
     for (const l of last24) {
       const cur = perTenant.get(l.tenant_id) ?? { total: 0, bad: 0, latest: null };
       cur.total += 1;
@@ -301,9 +294,7 @@ function DnTradeHealthContent() {
         pctBad: v.total ? Math.round((v.bad / v.total) * 100) : 0,
       }))
       .sort(
-        (a, b) =>
-          b.pctBad - a.pctBad ||
-          (a.tenant?.name ?? "").localeCompare(b.tenant?.name ?? ""),
+        (a, b) => b.pctBad - a.pctBad || (a.tenant?.name ?? "").localeCompare(b.tenant?.name ?? ""),
       );
   }, [last24, tenantMap]);
 
@@ -332,8 +323,8 @@ function DnTradeHealthContent() {
             DN Trade · Health
           </h1>
           <p className="text-sm text-muted-foreground">
-            Тренд стану інтеграцій по всіх брендах · топ блокерів · алерти.
-            Оновлюється кожну хвилину.
+            Тренд стану інтеграцій по всіх брендах · топ блокерів · алерти. Оновлюється кожну
+            хвилину.
           </p>
         </div>
         <Button
@@ -370,9 +361,7 @@ function DnTradeHealthContent() {
             <CardDescription className="flex items-center gap-1.5 text-xs text-success">
               <CheckCircle2 className="h-3.5 w-3.5" /> Працює
             </CardDescription>
-            <CardTitle className="text-3xl font-bold text-success">
-              {kpi.healthyPct}%
-            </CardTitle>
+            <CardTitle className="text-3xl font-bold text-success">{kpi.healthyPct}%</CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
             {kpi.healthy} з {kpi.total} перевірок
@@ -383,9 +372,7 @@ function DnTradeHealthContent() {
             <CardDescription className="flex items-center gap-1.5 text-xs text-warning">
               <TriangleAlert className="h-3.5 w-3.5" /> З попередженнями
             </CardDescription>
-            <CardTitle className="text-3xl font-bold text-warning">
-              {kpi.degradedPct}%
-            </CardTitle>
+            <CardTitle className="text-3xl font-bold text-warning">{kpi.degradedPct}%</CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
             {kpi.degraded} перевірок з попередженнями
@@ -478,9 +465,7 @@ function DnTradeHealthContent() {
             <CardTitle className="flex items-center gap-2 text-base">
               <ShieldAlert className="h-4 w-4 text-destructive" /> Найчастіші проблеми · 24 год
             </CardTitle>
-            <CardDescription className="text-xs">
-              Що найчастіше ламає інтеграцію
-            </CardDescription>
+            <CardDescription className="text-xs">Що найчастіше ламає інтеграцію</CardDescription>
           </CardHeader>
           <CardContent>
             {topReasons.blockers.length === 0 ? (
@@ -549,72 +534,72 @@ function DnTradeHealthContent() {
             </p>
           ) : (
             <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tenant</TableHead>
-                  <TableHead>Стан</TableHead>
-                  <TableHead className="text-right">% bad · 24г</TableHead>
-                  <TableHead className="text-right">Перевірок</TableHead>
-                  <TableHead>Останній check</TableHead>
-                  <TableHead>Last sync</TableHead>
-                  <TableHead className="text-right"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tenantRows.map((row) => (
-                  <TableRow key={row.tenantId}>
-                    <TableCell className="font-medium">
-                      {row.tenant?.name ?? row.tenantId.slice(0, 8)}
-                      {row.tenant?.slug && (
-                        <div className="text-[11px] text-muted-foreground">
-                          /{row.tenant.slug}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={row.latest.status} />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <span
-                        className={
-                          row.pctBad > 50
-                            ? "font-semibold text-destructive"
-                            : row.pctBad > 20
-                              ? "font-semibold text-warning"
-                              : "text-success"
-                        }
-                      >
-                        {row.pctBad}%
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      {row.total}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {new Date(row.latest.checked_at).toLocaleString("uk-UA")}
-                    </TableCell>
-                    <TableCell className="text-xs">
-                      {row.latest.last_sync_status ?? "—"}
-                      {row.latest.last_sync_age_seconds != null && (
-                        <span className="ml-1 text-muted-foreground">
-                          ({Math.round(row.latest.last_sync_age_seconds / 3600)}г)
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Link
-                        to="/admin/dntrade-health/$tenantId"
-                        params={{ tenantId: row.tenantId }}
-                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                      >
-                        30д <ExternalLink className="h-3 w-3" />
-                      </Link>
-                    </TableCell>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tenant</TableHead>
+                    <TableHead>Стан</TableHead>
+                    <TableHead className="text-right">% bad · 24г</TableHead>
+                    <TableHead className="text-right">Перевірок</TableHead>
+                    <TableHead>Останній check</TableHead>
+                    <TableHead>Last sync</TableHead>
+                    <TableHead className="text-right"></TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {tenantRows.map((row) => (
+                    <TableRow key={row.tenantId}>
+                      <TableCell className="font-medium">
+                        {row.tenant?.name ?? row.tenantId.slice(0, 8)}
+                        {row.tenant?.slug && (
+                          <div className="text-[11px] text-muted-foreground">
+                            /{row.tenant.slug}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={row.latest.status} />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <span
+                          className={
+                            row.pctBad > 50
+                              ? "font-semibold text-destructive"
+                              : row.pctBad > 20
+                                ? "font-semibold text-warning"
+                                : "text-success"
+                          }
+                        >
+                          {row.pctBad}%
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right text-muted-foreground">
+                        {row.total}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {new Date(row.latest.checked_at).toLocaleString("uk-UA")}
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {row.latest.last_sync_status ?? "—"}
+                        {row.latest.last_sync_age_seconds != null && (
+                          <span className="ml-1 text-muted-foreground">
+                            ({Math.round(row.latest.last_sync_age_seconds / 3600)}г)
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link
+                          to="/admin/dntrade-health/$tenantId"
+                          params={{ tenantId: row.tenantId }}
+                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                        >
+                          30д <ExternalLink className="h-3 w-3" />
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
         </CardContent>
@@ -632,9 +617,7 @@ function DnTradeHealthContent() {
         </CardHeader>
         <CardContent>
           {(data.data?.notifications ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Алертів немає — інтеграції стабільні.
-            </p>
+            <p className="text-sm text-muted-foreground">Алертів немає — інтеграції стабільні.</p>
           ) : (
             <ul className="space-y-2">
               {data.data!.notifications.map((n) => {
@@ -653,9 +636,7 @@ function DnTradeHealthContent() {
                         )}
                         <div className="flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-sm font-medium text-foreground">
-                              {n.title}
-                            </span>
+                            <span className="text-sm font-medium text-foreground">{n.title}</span>
                             <Badge variant="outline" className="text-[10px]">
                               {tenant?.name ?? n.tenant_id.slice(0, 8)}
                             </Badge>
@@ -705,10 +686,9 @@ function DnTradeHealthContent() {
             <code className="rounded bg-background/60 px-1">dntrade_sync_errors</code>.
           </p>
           <p>
-            Алерт у{" "}
-            <code className="rounded bg-background/60 px-1">owner_notifications</code> створюється,
-            якщо tenant залишається unhealthy ≥ 30&nbsp;хв або зафіксовано ≥ 3 partial-синки за
-            останні 6&nbsp;год. Дедуп — 24&nbsp;години на тип повідомлення.
+            Алерт у <code className="rounded bg-background/60 px-1">owner_notifications</code>{" "}
+            створюється, якщо tenant залишається unhealthy ≥ 30&nbsp;хв або зафіксовано ≥ 3
+            partial-синки за останні 6&nbsp;год. Дедуп — 24&nbsp;години на тип повідомлення.
           </p>
         </CardContent>
       </Card>

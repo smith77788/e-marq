@@ -156,9 +156,10 @@ mirrorToMarq({
 
           <TabsContent value="universal" className="space-y-3 pt-4">
             <p className="text-xs text-muted-foreground">
-              Найпростіший варіант. Підходить для Tilda, Webflow, Wix, лендінгів та звичайних сайтів.
-              Сам відстежує перегляди сторінок і продуктові картки. Для кошика й оплати додай
-              ручні події через <code className="rounded bg-muted px-1">window.MARQ.track(тип, дані)</code>.
+              Найпростіший варіант. Підходить для Tilda, Webflow, Wix, лендінгів та звичайних
+              сайтів. Сам відстежує перегляди сторінок і продуктові картки. Для кошика й оплати
+              додай ручні події через{" "}
+              <code className="rounded bg-muted px-1">window.MARQ.track(тип, дані)</code>.
             </p>
             <Snippet code={universalSnippet} />
             <details className="rounded-md border border-dashed border-border bg-muted/20 p-3 text-xs">
@@ -181,12 +182,14 @@ MARQ.track('purchase_completed', {
                 Рекомендовано
               </Badge>
               <p className="text-xs text-muted-foreground">
-                Для React, Vite або Next-застосунку, який уже зберігає події у власну базу.
-                Дублюємо ті самі дані в MARQ через <code>sendBeacon</code> — без затримок інтерфейсу.
+                Для React, Vite або Next-застосунку, який уже зберігає події у власну базу. Дублюємо
+                ті самі дані в MARQ через <code>sendBeacon</code> — без затримок інтерфейсу.
               </p>
             </div>
             <div className="space-y-2">
-              <p className="text-xs font-medium">1. Створи файл <code className="rounded bg-muted px-1">src/lib/marqMirror.ts</code>:</p>
+              <p className="text-xs font-medium">
+                1. Створи файл <code className="rounded bg-muted px-1">src/lib/marqMirror.ts</code>:
+              </p>
               <Snippet code={mirrorHelper} small maxH="max-h-72" />
             </div>
             <div className="space-y-2">
@@ -216,8 +219,9 @@ MARQ.track('purchase_completed', {
               <Snippet code={universalSnippet} small />
             </div>
             <p className="text-xs text-muted-foreground">
-              Скрипт фіксує покупку на сторінці подяки. Для серверної верифікації Shopify/WooCommerce
-              скористайтеся вебхуком — конфігурація у розділі <em>Імпорт</em> → відповідний конектор.
+              Скрипт фіксує покупку на сторінці подяки. Для серверної верифікації
+              Shopify/WooCommerce скористайтеся вебхуком — конфігурація у розділі <em>Імпорт</em> →
+              відповідний конектор.
             </p>
           </TabsContent>
         </Tabs>
@@ -226,7 +230,15 @@ MARQ.track('purchase_completed', {
   );
 }
 
-function Snippet({ code, small = false, maxH = "" }: { code: string; small?: boolean; maxH?: string }) {
+function Snippet({
+  code,
+  small = false,
+  maxH = "",
+}: {
+  code: string;
+  small?: boolean;
+  maxH?: string;
+}) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -247,7 +259,12 @@ function Snippet({ code, small = false, maxH = "" }: { code: string; small?: boo
       >
         {code}
       </pre>
-      <Button size="sm" variant="ghost" className="absolute right-1.5 top-1.5 h-7 px-2" onClick={copy}>
+      <Button
+        size="sm"
+        variant="ghost"
+        className="absolute right-1.5 top-1.5 h-7 px-2"
+        onClick={copy}
+      >
         {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
       </Button>
     </div>

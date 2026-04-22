@@ -177,7 +177,11 @@ export const Route = createFileRoute("/api/public/payments/monobank-callback")({
             });
             return new Response("rpc_failed", { status: 500 });
           }
-        } else if (status.status === "failure" || status.status === "expired" || status.status === "reversed") {
+        } else if (
+          status.status === "failure" ||
+          status.status === "expired" ||
+          status.status === "reversed"
+        ) {
           await supabaseAdmin.rpc("mark_payment_failed", {
             _order_id: orderId,
             _provider: "monobank",

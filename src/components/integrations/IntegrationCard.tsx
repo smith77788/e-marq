@@ -8,11 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  METHOD_LABELS,
-  STATUS_LABELS,
-  type IntegrationDef,
-} from "@/lib/integrations/catalog";
+import { METHOD_LABELS, STATUS_LABELS, type IntegrationDef } from "@/lib/integrations/catalog";
 
 type Props = {
   integration: IntegrationDef;
@@ -31,7 +27,14 @@ const IMPORT_LABELS: Record<string, string> = {
   events: "події",
 };
 
-export function IntegrationCard({ integration, isConnected, canSync, syncing, onSelect, onSync }: Props) {
+export function IntegrationCard({
+  integration,
+  isConnected,
+  canSync,
+  syncing,
+  onSelect,
+  onSync,
+}: Props) {
   const Icon = integration.icon;
   const status = STATUS_LABELS[integration.status];
   const isComingSoon = integration.status === "comingSoon";

@@ -58,22 +58,39 @@ export function HandbookConnectors() {
         const Icon = c.icon;
         const available = "available" in c && c.available;
         return (
-          <Card key={c.id} className="relative overflow-hidden border-border/60 bg-card/40 backdrop-blur">
-            <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${c.accent} opacity-50`} />
+          <Card
+            key={c.id}
+            className="relative overflow-hidden border-border/60 bg-card/40 backdrop-blur"
+          >
+            <div
+              className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${c.accent} opacity-50`}
+            />
             <CardHeader className="relative">
               <div className="flex items-center justify-between">
-                <span className={`inline-flex h-10 w-10 items-center justify-center rounded-lg bg-background/60 ${c.iconColor}`}>
+                <span
+                  className={`inline-flex h-10 w-10 items-center justify-center rounded-lg bg-background/60 ${c.iconColor}`}
+                >
                   <Icon className="h-5 w-5" />
                 </span>
-                <Badge variant={available ? "default" : "outline"} className="text-[10px] uppercase tracking-wider">
+                <Badge
+                  variant={available ? "default" : "outline"}
+                  className="text-[10px] uppercase tracking-wider"
+                >
                   {available ? t("hb.conn.available" as never) : t("hb.conn.soon" as never)}
                 </Badge>
               </div>
               <CardTitle className="text-base">{t(c.nameKey as never)}</CardTitle>
-              <CardDescription className="text-xs leading-relaxed">{t(c.descKey as never)}</CardDescription>
+              <CardDescription className="text-xs leading-relaxed">
+                {t(c.descKey as never)}
+              </CardDescription>
             </CardHeader>
             <CardContent className="relative">
-              <Button size="sm" variant={available ? "default" : "secondary"} disabled={!available} className="w-full">
+              <Button
+                size="sm"
+                variant={available ? "default" : "secondary"}
+                disabled={!available}
+                className="w-full"
+              >
                 {available ? (
                   <>
                     <Sparkles className="mr-1.5 h-3.5 w-3.5" />

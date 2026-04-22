@@ -111,7 +111,10 @@ export function validateBrandContext(ctx: SafeBrandContext): ValidationError[] {
   if (!ctx.profile.brand_name.trim()) {
     errors.push({ field: "brand_name", message: "Brand name is required" });
   }
-  if (!ctx.profile.primary_color.startsWith("oklch") && !ctx.profile.primary_color.startsWith("#")) {
+  if (
+    !ctx.profile.primary_color.startsWith("oklch") &&
+    !ctx.profile.primary_color.startsWith("#")
+  ) {
     errors.push({
       field: "primary_color",
       message: "Primary color must be oklch(...) or #hex",

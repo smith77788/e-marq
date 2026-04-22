@@ -46,18 +46,15 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-sync")({
         if (loadErr) return jsonError(`DB error: ${loadErr.message}`, 500);
         if (!integ) return jsonError("DN Trade integration not configured for this tenant", 404);
         if (!integ.is_active) return jsonError("Integration is disabled", 409);
-        if (!integ.credentials_encrypted)
-          return jsonError("Missing API key", 409);
+        if (!integ.credentials_encrypted) return jsonError("Missing API key", 409);
 
         const apiKey = integ.credentials_encrypted;
-        const kinds = (body.kinds && body.kinds.length > 0
-          ? body.kinds
-          : ["products", "customers", "orders"]
+        const kinds = (
+          body.kinds && body.kinds.length > 0 ? body.kinds : ["products", "customers", "orders"]
         ).filter((k): k is "products" | "customers" | "orders" =>
           ["products", "customers", "orders"].includes(k),
         );
-        const modifiedFromIso =
-          body.full === true ? undefined : integ.last_sync_at ?? undefined;
+        const modifiedFromIso = body.full === true ? undefined : (integ.last_sync_at ?? undefined);
 
         // Mark started
         await supabaseAdmin

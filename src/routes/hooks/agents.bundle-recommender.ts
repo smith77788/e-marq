@@ -64,7 +64,18 @@ export const Route = createFileRoute("/hooks/agents/bundle-recommender")({
 
           // Single-product counts and pair counts
           const single = new Map<string, number>();
-          const pair = new Map<string, { a: string; b: string; nameA: string; nameB: string; priceA: number; priceB: number; count: number }>();
+          const pair = new Map<
+            string,
+            {
+              a: string;
+              b: string;
+              nameA: string;
+              nameB: string;
+              priceA: number;
+              priceB: number;
+              count: number;
+            }
+          >();
           let totalOrders = 0;
           for (const [, list] of orderItems) {
             totalOrders++;
@@ -82,9 +93,12 @@ export const Route = createFileRoute("/hooks/agents/bundle-recommender")({
                 const ia = list.find((x) => x.id === a)!;
                 const ib = list.find((x) => x.id === b)!;
                 const existing = pair.get(key) ?? {
-                  a, b,
-                  nameA: ia.name, nameB: ib.name,
-                  priceA: ia.price, priceB: ib.price,
+                  a,
+                  b,
+                  nameA: ia.name,
+                  nameB: ib.name,
+                  priceA: ia.price,
+                  priceB: ib.price,
                   count: 0,
                 };
                 existing.count += 1;

@@ -71,9 +71,7 @@ function MagnetPage() {
             <Sparkles className="mr-1 h-3 w-3" />
             {magnet.topic ?? "Гайд"}
           </Badge>
-          <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground">
-            {magnet.title}
-          </h1>
+          <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground">{magnet.title}</h1>
           {magnet.meta_description && (
             <p className="mt-4 max-w-2xl text-base text-muted-foreground">
               {magnet.meta_description}

@@ -25,11 +25,20 @@ type DomainStatus = {
   reply_to: string | null;
   resend_domain_id: string | null;
   resend_status: string | null; // 'pending' | 'verified' | 'failed' | null
-  records: Array<{ record: string; name: string; type: string; value: string; ttl?: string; status?: string }> | null;
+  records: Array<{
+    record: string;
+    name: string;
+    type: string;
+    value: string;
+    ttl?: string;
+    status?: string;
+  }> | null;
   error?: string;
 };
 
-async function authUser(req: Request): Promise<{ ok: true; userId: string } | { ok: false; status: number; error: string }> {
+async function authUser(
+  req: Request,
+): Promise<{ ok: true; userId: string } | { ok: false; status: number; error: string }> {
   const auth = req.headers.get("authorization");
   if (!auth?.startsWith("Bearer ")) return { ok: false, status: 401, error: "missing_bearer" };
   const token = auth.slice(7).trim();
@@ -101,7 +110,8 @@ export const Route = createFileRoute("/api/email/domain-status")({
           from_email: typeof email.from_email === "string" ? email.from_email : null,
           from_name: typeof email.from_name === "string" ? email.from_name : null,
           reply_to: typeof email.reply_to === "string" ? email.reply_to : null,
-          resend_domain_id: typeof email.resend_domain_id === "string" ? email.resend_domain_id : null,
+          resend_domain_id:
+            typeof email.resend_domain_id === "string" ? email.resend_domain_id : null,
           resend_status: null,
           records: null,
         };

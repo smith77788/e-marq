@@ -9,7 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { loadProductDetail, type ProductDetail, type StorefrontVariant } from "@/lib/storefront/loaders";
+import {
+  loadProductDetail,
+  type ProductDetail,
+  type StorefrontVariant,
+} from "@/lib/storefront/loaders";
 import { useStorefrontCart, track } from "@/lib/storefront/cartContext";
 import { formatMoneyExact } from "@/lib/money";
 import { RestockSubscribe } from "@/components/storefront/RestockSubscribe";
@@ -92,8 +96,7 @@ function ProductDetailPage() {
 
   // Active price/stock — variant overrides product
   const activePriceCents = selectedVariant?.price_cents ?? product.price_cents;
-  const activeCompareAt =
-    selectedVariant?.compare_at_price_cents ?? product.compare_at_price_cents;
+  const activeCompareAt = selectedVariant?.compare_at_price_cents ?? product.compare_at_price_cents;
   const activeStock = selectedVariant?.stock ?? product.stock;
   const showDiscount = !!activeCompareAt && activeCompareAt > activePriceCents;
   const discountPct = showDiscount
@@ -155,7 +158,15 @@ function ProductDetailPage() {
                   }`}
                   aria-label={`Фото ${i + 1}`}
                 >
-                  <img src={img.url} alt="" loading="lazy" decoding="async" width={64} height={64} className="h-full w-full object-cover" />
+                  <img
+                    src={img.url}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    width={64}
+                    height={64}
+                    className="h-full w-full object-cover"
+                  />
                 </button>
               ))}
             </div>

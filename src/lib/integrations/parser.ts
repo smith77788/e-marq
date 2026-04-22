@@ -19,7 +19,10 @@ export type ParseResult = {
 };
 
 /** Канонічні поля цільових сутностей. */
-export const CANONICAL_FIELDS: Record<EntityKind, { id: string; label: string; required?: boolean }[]> = {
+export const CANONICAL_FIELDS: Record<
+  EntityKind,
+  { id: string; label: string; required?: boolean }[]
+> = {
   products: [
     { id: "name", label: "Назва товару", required: true },
     { id: "sku", label: "Артикул / SKU" },
@@ -102,7 +105,9 @@ async function parseCsv(file: File): Promise<ParseResult> {
       delimiter: "", // auto-detect
       complete: (res) => {
         const headers = res.meta.fields ?? [];
-        const rows = (res.data ?? []).filter((r) => Object.values(r).some((v) => v != null && v !== ""));
+        const rows = (res.data ?? []).filter((r) =>
+          Object.values(r).some((v) => v != null && v !== ""),
+        );
         resolve({ headers, rows, totalRows: rows.length });
       },
       error: (err: Error) => reject(err),
@@ -138,8 +143,11 @@ export function autoMap(headers: string[], entityKind: EntityKind): Record<strin
 /** Перетворити рядок у вартість в копійках (підтримує "12,50", "12.50 UAH", "1 200,00"). */
 export function parsePriceToCents(raw: unknown): number {
   if (raw == null || raw === "") return 0;
-  const s = String(raw).replace(/\s/g, "").replace(/[^\d.,-]/g, "");
-  const normalized = s.includes(",") && !s.includes(".") ? s.replace(",", ".") : s.replace(/,/g, "");
+  const s = String(raw)
+    .replace(/\s/g, "")
+    .replace(/[^\d.,-]/g, "");
+  const normalized =
+    s.includes(",") && !s.includes(".") ? s.replace(",", ".") : s.replace(/,/g, "");
   const n = parseFloat(normalized);
   return Number.isFinite(n) ? Math.round(n * 100) : 0;
 }

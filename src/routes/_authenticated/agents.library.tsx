@@ -277,9 +277,16 @@ function ModeBadge({ mode }: { mode: "off" | "suggest" | "auto" }) {
         ? "border-muted-foreground/30 bg-muted text-muted-foreground"
         : "border-warning/30 bg-warning/10 text-warning";
   const label =
-    mode === "auto" ? t("ag.cab.modeAuto") : mode === "off" ? t("ag.cab.modeOff") : t("ag.cab.modeSuggest");
+    mode === "auto"
+      ? t("ag.cab.modeAuto")
+      : mode === "off"
+        ? t("ag.cab.modeOff")
+        : t("ag.cab.modeSuggest");
   return (
-    <Badge variant="outline" className={cn("text-[10px] font-semibold uppercase tracking-wide", cls)}>
+    <Badge
+      variant="outline"
+      className={cn("text-[10px] font-semibold uppercase tracking-wide", cls)}
+    >
       {label}
     </Badge>
   );

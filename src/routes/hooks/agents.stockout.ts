@@ -50,7 +50,9 @@ export const Route = createFileRoute("/hooks/agents/stockout")({
               .limit(1000),
             supabaseAdmin
               .from("order_items")
-              .select("product_id, quantity, unit_price_cents, orders!inner(status, created_at, tenant_id)")
+              .select(
+                "product_id, quantity, unit_price_cents, orders!inner(status, created_at, tenant_id)",
+              )
               .eq("tenant_id", tenantId)
               .gte("orders.created_at", since)
               .eq("orders.status", "paid")
@@ -75,8 +77,13 @@ export const Route = createFileRoute("/hooks/agents/stockout")({
             if (velocity <= 0.3) continue; // skip slow movers
             const dos = velocity > 0 ? p.stock / velocity : Infinity;
             if (dos >= 7) continue;
-            const lostRevenueCents = Math.round((p.price_cents ?? 0) * velocity * Math.max(0, 7 - dos));
-            const confidence = Math.min(0.95, 0.5 + Math.min((7 - dos) / 7, 1) * 0.3 + Math.min(velocity / 5, 1) * 0.15);
+            const lostRevenueCents = Math.round(
+              (p.price_cents ?? 0) * velocity * Math.max(0, 7 - dos),
+            );
+            const confidence = Math.min(
+              0.95,
+              0.5 + Math.min((7 - dos) / 7, 1) * 0.3 + Math.min(velocity / 5, 1) * 0.15,
+            );
             const risk = dos < 2 ? "high" : dos < 4 ? "medium" : "low";
             const reorderQty = Math.max(20, Math.ceil(velocity * 30)); // 30-day cover
             insights.push({
@@ -124,7 +131,9 @@ export const Route = createFileRoute("/hooks/agents/stockout")({
           });
         } catch (e) {
           await failAgentRun(handle, e);
-          return jsonError("Agent failed", 500, { details: e instanceof Error ? e.message : String(e) });
+          return jsonError("Agent failed", 500, {
+            details: e instanceof Error ? e.message : String(e),
+          });
         }
       },
     },

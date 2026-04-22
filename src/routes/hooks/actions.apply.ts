@@ -9,9 +9,16 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { authorizeAgentRequest, jsonError, jsonOk } from "@/lib/acos/agentRuntime";
 import { pickChannelForCustomer } from "@/lib/acos/channels";
 
-async function queueVipProductNudges(tenantId: string, productId: string, sourceInsightId: string): Promise<number> {
+async function queueVipProductNudges(
+  tenantId: string,
+  productId: string,
+  sourceInsightId: string,
+): Promise<number> {
   const { data: product } = await supabaseAdmin
-    .from("products").select("id, name, price_cents").eq("id", productId).maybeSingle();
+    .from("products")
+    .select("id, name, price_cents")
+    .eq("id", productId)
+    .maybeSingle();
   if (!product) return 0;
   const { data: vips } = await supabaseAdmin
     .from("customers")
@@ -28,9 +35,15 @@ async function queueVipProductNudges(tenantId: string, productId: string, source
     const firstName = (c.name ?? "").split(" ")[0] || "there";
     const body = `Hey ${firstName} — have you tried our <b>${product.name}</b>? It's been getting lots of attention lately. Want me to add one to your next order?`;
     const { error } = await supabaseAdmin.from("outbound_messages").insert({
-      tenant_id: tenantId, customer_id: c.id, channel, trigger_kind: "promo",
-      template_key: "promo.feature_product.v1", body, status: "pending",
-      expected_impact_cents: product.price_cents, related_product_id: product.id,
+      tenant_id: tenantId,
+      customer_id: c.id,
+      channel,
+      trigger_kind: "promo",
+      template_key: "promo.feature_product.v1",
+      body,
+      status: "pending",
+      expected_impact_cents: product.price_cents,
+      related_product_id: product.id,
       metadata: { source_insight_id: sourceInsightId } as never,
     });
     if (!error) queued++;
@@ -50,15 +63,50 @@ type InsightRow = {
   risk_level: "low" | "medium" | "high";
 };
 
-const ACTION_BY_TYPE: Record<string, { action_type: string; agent_id: string; target_entity?: string }> = {
-  churn_risk: { action_type: "winback_touch", agent_id: "churn_risk_predictor", target_entity: "customer" },
-  stockout_predicted: { action_type: "reorder_request", agent_id: "stockout_predictor", target_entity: "product" },
-  aov_leak: { action_type: "abandoned_cart_email", agent_id: "aov_leak_detector", target_entity: "product" },
-  search_gap: { action_type: "create_seo_page", agent_id: "search_gap_detector", target_entity: "search_term" },
-  low_engagement_product: { action_type: "vip_product_nudge", agent_id: "aov_optimizer", target_entity: "product" },
-  cart_abandon: { action_type: "vip_product_nudge", agent_id: "aov_optimizer", target_entity: "product" },
-  price_optimization: { action_type: "update_price", agent_id: "price_optimizer", target_entity: "product" },
-  price_revert: { action_type: "revert_price", agent_id: "price_revert_safety", target_entity: "product" },
+const ACTION_BY_TYPE: Record<
+  string,
+  { action_type: string; agent_id: string; target_entity?: string }
+> = {
+  churn_risk: {
+    action_type: "winback_touch",
+    agent_id: "churn_risk_predictor",
+    target_entity: "customer",
+  },
+  stockout_predicted: {
+    action_type: "reorder_request",
+    agent_id: "stockout_predictor",
+    target_entity: "product",
+  },
+  aov_leak: {
+    action_type: "abandoned_cart_email",
+    agent_id: "aov_leak_detector",
+    target_entity: "product",
+  },
+  search_gap: {
+    action_type: "create_seo_page",
+    agent_id: "search_gap_detector",
+    target_entity: "search_term",
+  },
+  low_engagement_product: {
+    action_type: "vip_product_nudge",
+    agent_id: "aov_optimizer",
+    target_entity: "product",
+  },
+  cart_abandon: {
+    action_type: "vip_product_nudge",
+    agent_id: "aov_optimizer",
+    target_entity: "product",
+  },
+  price_optimization: {
+    action_type: "update_price",
+    agent_id: "price_optimizer",
+    target_entity: "product",
+  },
+  price_revert: {
+    action_type: "revert_price",
+    agent_id: "price_revert_safety",
+    target_entity: "product",
+  },
 };
 
 async function applyPriceUpdate(
@@ -106,7 +154,9 @@ export const Route = createFileRoute("/hooks/actions/apply")({
         // Look up insight to learn tenant_id (needed for authz)
         const { data: insight, error: insErr } = await supabaseAdmin
           .from("ai_insights")
-          .select("id, tenant_id, insight_type, affected_layer, title, expected_impact, metrics, status, risk_level")
+          .select(
+            "id, tenant_id, insight_type, affected_layer, title, expected_impact, metrics, status, risk_level",
+          )
           .eq("id", insightId)
           .single();
         if (insErr || !insight) return jsonError("Insight not found", 404);
@@ -132,7 +182,12 @@ export const Route = createFileRoute("/hooks/actions/apply")({
             _risk: risk,
           });
           if (!allowed) {
-            return jsonOk({ skipped: true, reason: "permissions_blocked", agent_id: mapping.agent_id, risk });
+            return jsonOk({
+              skipped: true,
+              reason: "permissions_blocked",
+              agent_id: mapping.agent_id,
+              risk,
+            });
           }
         }
 
@@ -144,14 +199,17 @@ export const Route = createFileRoute("/hooks/actions/apply")({
           suggested_price_cents?: number;
           source_action_id?: string;
         };
-        const targetId = mapping.target_entity === "product" ? m.product_id ?? null : null;
+        const targetId = mapping.target_entity === "product" ? (m.product_id ?? null) : null;
 
         // Side effects per action_type
         let sideEffect: Record<string, unknown> = { note: "Action recorded." };
         if (mapping.action_type === "vip_product_nudge" && targetId) {
           const queued = await queueVipProductNudges(ins.tenant_id, targetId, ins.id);
           sideEffect = { queued_messages: queued };
-        } else if ((mapping.action_type === "update_price" || mapping.action_type === "revert_price") && targetId) {
+        } else if (
+          (mapping.action_type === "update_price" || mapping.action_type === "revert_price") &&
+          targetId
+        ) {
           sideEffect = await applyPriceUpdate(ins.tenant_id, targetId, m);
           if (mapping.action_type === "revert_price" && m.source_action_id) {
             // Mark the original update_price action as reverted
@@ -186,7 +244,8 @@ export const Route = createFileRoute("/hooks/actions/apply")({
           .insert(insertRow)
           .select("id")
           .single();
-        if (actErr || !action) return jsonError("Failed to log action", 500, { details: actErr?.message });
+        if (actErr || !action)
+          return jsonError("Failed to log action", 500, { details: actErr?.message });
 
         const { error: updErr } = await supabaseAdmin
           .from("ai_insights")

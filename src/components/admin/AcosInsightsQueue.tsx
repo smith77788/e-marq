@@ -121,16 +121,28 @@ async function authedFetch(path: string, body: unknown) {
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify(body),
   });
-  const json = (await res.json().catch(() => ({}))) as Record<string, unknown> & { success?: boolean; error?: string; details?: string };
+  const json = (await res.json().catch(() => ({}))) as Record<string, unknown> & {
+    success?: boolean;
+    error?: string;
+    details?: string;
+  };
   if (!res.ok || json.success === false) {
-    throw new Error(typeof json.details === "string" ? json.details : typeof json.error === "string" ? json.error : MSG.errGeneric);
+    throw new Error(
+      typeof json.details === "string"
+        ? json.details
+        : typeof json.error === "string"
+          ? json.error
+          : MSG.errGeneric,
+    );
   }
   return json;
 }
 
 export function AcosInsightsQueue({ tenantId }: Props) {
   const qc = useQueryClient();
-  const [statusFilter, setStatusFilter] = useState<"all" | "new" | "in_review" | "approved" | "applied">("new");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "new" | "in_review" | "approved" | "applied"
+  >("new");
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
   const { data: insights = [], isLoading } = useQuery({
@@ -158,7 +170,9 @@ export function AcosInsightsQueue({ tenantId }: Props) {
   const runAll = useMutation({
     mutationFn: () => authedFetch("/hooks/agents/run-all", { tenant_id: tenantId }),
     onSuccess: (r) => {
-      toast.success(`Готово · усі ШІ-помічники відпрацювали. Нових підказок: ${r.insights_created ?? 0}`);
+      toast.success(
+        `Готово · усі ШІ-помічники відпрацювали. Нових підказок: ${r.insights_created ?? 0}`,
+      );
       qc.invalidateQueries({ queryKey: ["acos-insights-queue", tenantId] });
       qc.invalidateQueries({ queryKey: ["acos-insights", tenantId] });
       qc.invalidateQueries({ queryKey: ["acos-agent-runs", tenantId] });
@@ -170,7 +184,9 @@ export function AcosInsightsQueue({ tenantId }: Props) {
     mutationFn: (agent: string) => authedFetch(`/hooks/agents/${agent}`, { tenant_id: tenantId }),
     onSuccess: (r, agent) => {
       const label = SINGLE_AGENTS.find((a) => a.id === agent)?.label ?? agent;
-      toast.success(`Готово · «${label}» завершив роботу. Нових підказок: ${r.insights_created ?? 0}`);
+      toast.success(
+        `Готово · «${label}» завершив роботу. Нових підказок: ${r.insights_created ?? 0}`,
+      );
       qc.invalidateQueries({ queryKey: ["acos-insights-queue", tenantId] });
       qc.invalidateQueries({ queryKey: ["acos-insights", tenantId] });
       qc.invalidateQueries({ queryKey: ["acos-agent-runs", tenantId] });
@@ -185,9 +201,11 @@ export function AcosInsightsQueue({ tenantId }: Props) {
     },
     onSuccess: (_d, vars) => {
       toast.success(
-        vars.status === "approved" ? MSG.approved
-        : vars.status === "dismissed" ? MSG.dismissed
-        : MSG.updated,
+        vars.status === "approved"
+          ? MSG.approved
+          : vars.status === "dismissed"
+            ? MSG.dismissed
+            : MSG.updated,
       );
       qc.invalidateQueries({ queryKey: ["acos-insights-queue", tenantId] });
       qc.invalidateQueries({ queryKey: ["acos-insights", tenantId] });
@@ -196,7 +214,8 @@ export function AcosInsightsQueue({ tenantId }: Props) {
   });
 
   const applyAction = useMutation({
-    mutationFn: (insightId: string) => authedFetch("/hooks/actions/apply", { insight_id: insightId }),
+    mutationFn: (insightId: string) =>
+      authedFetch("/hooks/actions/apply", { insight_id: insightId }),
     onSuccess: () => {
       toast.success(MSG.applied);
       qc.invalidateQueries({ queryKey: ["acos-insights-queue", tenantId] });
@@ -235,7 +254,11 @@ export function AcosInsightsQueue({ tenantId }: Props) {
           </div>
           <div className="flex flex-wrap gap-1.5">
             <Button onClick={() => runAll.mutate()} disabled={runAll.isPending} size="sm">
-              {runAll.isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
+              {runAll.isPending ? (
+                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="mr-2 h-3.5 w-3.5" />
+              )}
               Запустити всіх ШІ-помічників
             </Button>
           </div>
@@ -274,7 +297,9 @@ export function AcosInsightsQueue({ tenantId }: Props) {
                 }`}
               >
                 {STATUS_LABEL[f] ?? f}
-                {f !== "all" && counts[f] > 0 && <span className="ml-1.5 opacity-70">{counts[f]}</span>}
+                {f !== "all" && counts[f] > 0 && (
+                  <span className="ml-1.5 opacity-70">{counts[f]}</span>
+                )}
               </button>
             ))}
           </div>
@@ -329,22 +354,36 @@ export function AcosInsightsQueue({ tenantId }: Props) {
                   <div key={ins.id} className="rounded-lg border border-border bg-card p-3">
                     <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
                       <Icon className="h-3.5 w-3.5 text-primary" />
-                      <Badge variant="outline" className={`text-[10px] ${RISK_STYLES[ins.risk_level] ?? ""}`}>
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] ${RISK_STYLES[ins.risk_level] ?? ""}`}
+                      >
                         {RISK_LABEL[ins.risk_level] ?? ins.risk_level}
                       </Badge>
-                      <Badge variant="outline" className="text-[10px]">{humanType(ins.insight_type)}</Badge>
+                      <Badge variant="outline" className="text-[10px]">
+                        {humanType(ins.insight_type)}
+                      </Badge>
                       {ins.affected_layer && (
-                        <Badge variant="secondary" className="text-[10px]">{LAYER_LABEL[ins.affected_layer] ?? ins.affected_layer}</Badge>
+                        <Badge variant="secondary" className="text-[10px]">
+                          {LAYER_LABEL[ins.affected_layer] ?? ins.affected_layer}
+                        </Badge>
                       )}
-                      <Badge variant="outline" className="text-[10px]">впевненість {(ins.confidence * 100).toFixed(0)}%</Badge>
+                      <Badge variant="outline" className="text-[10px]">
+                        впевненість {(ins.confidence * 100).toFixed(0)}%
+                      </Badge>
                       <span className="ml-auto text-[10px] text-muted-foreground">
-                        {formatDistanceToNow(new Date(ins.created_at), { addSuffix: true, locale: uk })}
+                        {formatDistanceToNow(new Date(ins.created_at), {
+                          addSuffix: true,
+                          locale: uk,
+                        })}
                       </span>
                     </div>
                     <p className="text-sm font-medium text-foreground">{ins.title}</p>
                     <p className="mt-1 text-xs text-muted-foreground">{ins.description}</p>
                     {ins.expected_impact && (
-                      <p className="mt-1 text-xs font-medium text-primary">→ {ins.expected_impact}</p>
+                      <p className="mt-1 text-xs font-medium text-primary">
+                        → {ins.expected_impact}
+                      </p>
                     )}
                     <MetricsLine type={ins.insight_type} m={m} />
                     <div className="mt-2 flex flex-wrap gap-1.5">
@@ -409,8 +448,13 @@ function MetricsLine({ type, m }: { type: string; m: Record<string, unknown> }) 
   if (type === "churn_risk") {
     return (
       <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground sm:grid-cols-4">
-        <div><span className="text-foreground">{num("order_count")}</span> замовлень</div>
-        <div>{Math.round(((num("total_spent_cents") ?? 0) as number) / 100).toLocaleString("uk-UA")} ₴ загалом</div>
+        <div>
+          <span className="text-foreground">{num("order_count")}</span> замовлень
+        </div>
+        <div>
+          {Math.round(((num("total_spent_cents") ?? 0) as number) / 100).toLocaleString("uk-UA")} ₴
+          загалом
+        </div>
         <div>{num("recency_days")?.toFixed(0)} днів мовчить</div>
         <div>{num("drift_ratio")?.toFixed(2)}× довше звичайного</div>
       </div>
@@ -419,7 +463,9 @@ function MetricsLine({ type, m }: { type: string; m: Record<string, unknown> }) 
   if (type === "stockout_predicted") {
     return (
       <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground sm:grid-cols-4">
-        <div><span className="text-foreground">{num("stock")}</span> на складі</div>
+        <div>
+          <span className="text-foreground">{num("stock")}</span> на складі
+        </div>
         <div>{num("velocity_per_day")?.toFixed(2)} продажів/день</div>
         <div>{num("days_of_supply")?.toFixed(1)} днів вистачить</div>
         <div>замовити {num("suggested_reorder_qty")} шт</div>
@@ -429,10 +475,17 @@ function MetricsLine({ type, m }: { type: string; m: Record<string, unknown> }) 
   if (type === "aov_leak") {
     return (
       <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground sm:grid-cols-4">
-        <div><span className="text-foreground">{num("abandoned_sessions")}</span> покинули</div>
+        <div>
+          <span className="text-foreground">{num("abandoned_sessions")}</span> покинули
+        </div>
         <div>{num("abandoned_checkouts")} застрягли на оплаті</div>
         <div>можна повернути ~{num("recoverable_sessions")}</div>
-        <div>{Math.round(((num("recoverable_revenue_cents") ?? 0) as number) / 100).toLocaleString("uk-UA")} ₴ потенціал</div>
+        <div>
+          {Math.round(((num("recoverable_revenue_cents") ?? 0) as number) / 100).toLocaleString(
+            "uk-UA",
+          )}{" "}
+          ₴ потенціал
+        </div>
       </div>
     );
   }

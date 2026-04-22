@@ -43,7 +43,13 @@ import {
 const AGENT_ID = "price_optimizer";
 const WINDOW_DAYS = 60;
 
-type ProductRow = { id: string; name: string; price_cents: number; is_active: boolean; stock: number };
+type ProductRow = {
+  id: string;
+  name: string;
+  price_cents: number;
+  is_active: boolean;
+  stock: number;
+};
 
 function fmtUsd(cents: number) {
   return `${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })} ₴`;
@@ -53,7 +59,9 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -101,7 +109,9 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
               .limit(50_000),
             supabaseAdmin
               .from("order_items")
-              .select("product_id, quantity, unit_price_cents, orders!inner(status, paid_at, tenant_id)")
+              .select(
+                "product_id, quantity, unit_price_cents, orders!inner(status, paid_at, tenant_id)",
+              )
               .eq("tenant_id", tenantId)
               .eq("orders.status", "paid")
               .gte("orders.paid_at", since)
@@ -179,7 +189,7 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
             if (views >= 80 && v2c < 0.04) {
               const newPrice = Math.round(p.price_cents * 0.9);
               // assume conversion doubles at 10% lower
-              const projectedMonthlyUnits = (carts * 2) * (30 / WINDOW_DAYS) * 0.5;
+              const projectedMonthlyUnits = carts * 2 * (30 / WINDOW_DAYS) * 0.5;
               const projectedRev = projectedMonthlyUnits * newPrice;
               const upliftMonthly = Math.round(projectedRev - monthlyRev);
               insights.push({
@@ -188,7 +198,10 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
                 affected_layer: "pricing",
                 title: `${p.name}: lower price by 10% (low engagement)`,
                 description: `Last ${WINDOW_DAYS}d: ${views} views but only ${carts} carts (${(v2c * 100).toFixed(1)}% v→c). Price may be the friction. Test ${fmtUsd(p.price_cents)} → ${fmtUsd(newPrice)}.`,
-                expected_impact: upliftMonthly > 0 ? `+${fmtUsd(upliftMonthly)}/mo at 2x conversion` : `breakeven at 2x conversion`,
+                expected_impact:
+                  upliftMonthly > 0
+                    ? `+${fmtUsd(upliftMonthly)}/mo at 2x conversion`
+                    : `breakeven at 2x conversion`,
                 confidence: 0.55,
                 risk_level: "medium",
                 metrics: {

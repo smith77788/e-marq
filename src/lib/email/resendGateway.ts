@@ -63,9 +63,7 @@ type TenantEmailSettings = {
   resend_status?: string;
 };
 
-async function loadTenantEmailSettings(
-  tenantId: string,
-): Promise<TenantEmailSettings | null> {
+async function loadTenantEmailSettings(tenantId: string): Promise<TenantEmailSettings | null> {
   const { data } = await supabaseAdmin
     .from("tenant_configs")
     .select("features")
@@ -104,9 +102,7 @@ async function isSuppressed(
 
 function buildUnsubscribeUrl(token: string): string {
   const base =
-    process.env.PUBLIC_APP_URL ||
-    process.env.VITE_PUBLIC_APP_URL ||
-    "https://e-marq.lovable.app";
+    process.env.PUBLIC_APP_URL || process.env.VITE_PUBLIC_APP_URL || "https://e-marq.lovable.app";
   const trimmed = base.replace(/\/+$/, "");
   return `${trimmed}/api/public/email/unsubscribe?t=${encodeURIComponent(token)}`;
 }
@@ -121,7 +117,9 @@ export async function sendEmailViaGateway(input: SendEmailInput): Promise<SendEm
   const to = String(input.to ?? "").trim();
   if (!isValidEmail(to)) return { ok: false, error: `Invalid recipient email: ${to}` };
 
-  const subject = String(input.subject ?? "").trim().slice(0, 200);
+  const subject = String(input.subject ?? "")
+    .trim()
+    .slice(0, 200);
   if (!subject) return { ok: false, error: "Subject is required" };
 
   const html = String(input.html ?? "");
@@ -154,15 +152,9 @@ export async function sendEmailViaGateway(input: SendEmailInput): Promise<SendEm
     DEFAULT_FROM
   ).trim();
 
-  const fromName = (
-    input.fromName ||
-    tenantSettings?.from_name ||
-    DEFAULT_FROM_NAME
-  ).trim();
+  const fromName = (input.fromName || tenantSettings?.from_name || DEFAULT_FROM_NAME).trim();
 
-  const fromHeader = fromName
-    ? `${fromName.replace(/[<>]/g, "")} <${fromEmail}>`
-    : fromEmail;
+  const fromHeader = fromName ? `${fromName.replace(/[<>]/g, "")} <${fromEmail}>` : fromEmail;
 
   const replyTo = input.replyTo || tenantSettings?.reply_to || "";
 

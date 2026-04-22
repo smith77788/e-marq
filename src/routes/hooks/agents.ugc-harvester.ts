@@ -96,7 +96,8 @@ export const Route = createFileRoute("/hooks/agents/ugc-harvester")({
               affected_layer: "social_proof",
               title: `Всього ${totalUgc} відгуків — мало для довіри`,
               description: `Бренди з 20+ відгуків мають у ~1.4× вищу конверсію на storefront.`,
-              expected_impact: "Запусти регулярний пост-purchase запит — ціль 20+ відгуків за квартал.",
+              expected_impact:
+                "Запусти регулярний пост-purchase запит — ціль 20+ відгуків за квартал.",
               confidence: 0.75,
               risk_level: "low",
               metrics: {

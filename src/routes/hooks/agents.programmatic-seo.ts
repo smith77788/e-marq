@@ -45,18 +45,12 @@ export const Route = createFileRoute("/hooks/agents/programmatic-seo")({
               .eq("tenant_id", tenantId)
               .eq("is_active", true)
               .limit(50),
-            supabaseAdmin
-              .from("content_pages")
-              .select("slug")
-              .eq("tenant_id", tenantId),
+            supabaseAdmin.from("content_pages").select("slug").eq("tenant_id", tenantId),
             supabaseAdmin
               .from("search_queries")
               .select("query")
               .eq("tenant_id", tenantId)
-              .gte(
-                "occurred_at",
-                new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString(),
-              ),
+              .gte("occurred_at", new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString()),
           ]);
 
           if (!products?.length) {

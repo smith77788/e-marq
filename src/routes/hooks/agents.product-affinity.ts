@@ -70,7 +70,10 @@ export const Route = createFileRoute("/hooks/agents/product-affinity")({
           }
 
           // Group orders by customer key
-          const byCustomer = new Map<string, { paidAt: string; productIds: string[]; names: Map<string, string> }[]>();
+          const byCustomer = new Map<
+            string,
+            { paidAt: string; productIds: string[]; names: Map<string, string> }[]
+          >();
           for (const o of orders) {
             const key = o.customer_user_id ?? o.customer_email?.toLowerCase();
             if (!key || !o.paid_at) continue;
@@ -78,12 +81,22 @@ export const Route = createFileRoute("/hooks/agents/product-affinity")({
             const its = itemsByOrder.get(o.id) ?? [];
             const nm = new Map<string, string>();
             for (const i of its) nm.set(i.id, i.name);
-            list.push({ paidAt: o.paid_at, productIds: [...new Set(its.map((i) => i.id))], names: nm });
+            list.push({
+              paidAt: o.paid_at,
+              productIds: [...new Set(its.map((i) => i.id))],
+              names: nm,
+            });
             byCustomer.set(key, list);
           }
 
           // Build sequential transitions: for each customer, look at consecutive orders
-          type Trans = { from: string; to: string; fromName: string; toName: string; count: number };
+          type Trans = {
+            from: string;
+            to: string;
+            fromName: string;
+            toName: string;
+            count: number;
+          };
           const transitions = new Map<string, Trans>();
           for (const [, oList] of byCustomer) {
             if (oList.length < 2) continue;

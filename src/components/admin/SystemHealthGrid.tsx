@@ -33,7 +33,9 @@ const STATUS_META: Record<
 export function SystemHealthGrid({ rows }: Props) {
   if (rows.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">За останні 24 години агенти ще не запускались.</p>
+      <p className="text-sm text-muted-foreground">
+        За останні 24 години агенти ще не запускались.
+      </p>
     );
   }
   // Aggregate by agent_id

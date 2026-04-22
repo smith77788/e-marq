@@ -105,10 +105,7 @@ export type WayForPayCallback = {
   processingDate?: number;
 };
 
-export function verifyWayForPayCallback(
-  secretKey: string,
-  payload: WayForPayCallback,
-): boolean {
+export function verifyWayForPayCallback(secretKey: string, payload: WayForPayCallback): boolean {
   const src = [
     payload.merchantAccount,
     payload.orderReference,
@@ -128,7 +125,10 @@ export function verifyWayForPayCallback(
   return diff === 0;
 }
 
-export function buildWayForPayAck(secretKey: string, orderReference: string): {
+export function buildWayForPayAck(
+  secretKey: string,
+  orderReference: string,
+): {
   orderReference: string;
   status: "accept";
   time: number;

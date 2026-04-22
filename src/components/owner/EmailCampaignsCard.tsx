@@ -20,13 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -221,8 +215,7 @@ export function EmailCampaignsCard({ tenantId }: { tenantId: string }) {
     return segmentCountsQuery.data.find((s) => s.segment === segment)?.count ?? 0;
   }, [segment, segmentCountsQuery.data]);
 
-  const canSubmit =
-    name.trim().length > 0 && subject.trim().length > 0 && html.trim().length > 50;
+  const canSubmit = name.trim().length > 0 && subject.trim().length > 0 && html.trim().length > 50;
   const canTest =
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(testEmail) &&
     subject.trim().length > 0 &&
@@ -238,7 +231,8 @@ export function EmailCampaignsCard({ tenantId }: { tenantId: string }) {
               Email-розсилки
             </CardTitle>
             <CardDescription className="text-xs">
-              Створіть кампанію по сегменту клієнтів. Підписані з consent_marketing=true; suppressed (bounce, complaint, unsubscribe) — пропускаються автоматично.
+              Створіть кампанію по сегменту клієнтів. Підписані з consent_marketing=true; suppressed
+              (bounce, complaint, unsubscribe) — пропускаються автоматично.
             </CardDescription>
           </div>
         </div>
@@ -330,7 +324,8 @@ export function EmailCampaignsCard({ tenantId }: { tenantId: string }) {
               placeholder="<html>..."
             />
             <p className="text-xs text-muted-foreground">
-              Підтримується <code className="font-mono">{`{{unsubscribe_url}}`}</code> — буде підставлено per-recipient. Якщо плейсхолдера немає, footer додасться автоматично.
+              Підтримується <code className="font-mono">{`{{unsubscribe_url}}`}</code> — буде
+              підставлено per-recipient. Якщо плейсхолдера немає, footer додасться автоматично.
             </p>
           </div>
 
@@ -362,7 +357,8 @@ export function EmailCampaignsCard({ tenantId }: { tenantId: string }) {
             <div className="text-xs text-muted-foreground">
               {segmentCount !== null && (
                 <span>
-                  Цільова аудиторія: <strong className="text-foreground">{segmentCount}</strong> одержувачів
+                  Цільова аудиторія: <strong className="text-foreground">{segmentCount}</strong>{" "}
+                  одержувачів
                 </span>
               )}
             </div>
@@ -429,12 +425,7 @@ export function EmailCampaignsCard({ tenantId }: { tenantId: string }) {
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[60vh] overflow-auto rounded-md border border-border bg-white">
-            <iframe
-              title="email-preview"
-              srcDoc={html}
-              className="h-[60vh] w-full"
-              sandbox=""
-            />
+            <iframe title="email-preview" srcDoc={html} className="h-[60vh] w-full" sandbox="" />
           </div>
         </DialogContent>
       </Dialog>
@@ -445,11 +436,16 @@ export function EmailCampaignsCard({ tenantId }: { tenantId: string }) {
           <DialogHeader>
             <DialogTitle>Підтвердити відправку</DialogTitle>
             <DialogDescription>
-              Кампанія «<strong>{name}</strong>» буде надіслана на <strong>{segmentCount}</strong> одержувачів сегменту «{SEGMENT_LABELS[segment]}». Цю дію не можна скасувати.
+              Кампанія «<strong>{name}</strong>» буде надіслана на <strong>{segmentCount}</strong>{" "}
+              одержувачів сегменту «{SEGMENT_LABELS[segment]}». Цю дію не можна скасувати.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={sendMutation.isPending}>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmOpen(false)}
+              disabled={sendMutation.isPending}
+            >
               Скасувати
             </Button>
             <Button onClick={() => sendMutation.mutate("real")} disabled={sendMutation.isPending}>

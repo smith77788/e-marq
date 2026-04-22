@@ -25,7 +25,9 @@ export const Route = createFileRoute("/hooks/agents/nurture-roi")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -72,7 +74,8 @@ export const Route = createFileRoute("/hooks/agents/nurture-roi")({
           const avgRoi = totalCount > 0 ? totalRev / totalCount : 0;
 
           const insights: AgentInsightInput[] = [];
-          const breakdown: Record<string, { count: number; revenue: number; roi_per_msg: number }> = {};
+          const breakdown: Record<string, { count: number; revenue: number; roi_per_msg: number }> =
+            {};
           for (const [trigger, s] of byTrigger) {
             const roi = s.count > 0 ? s.revenue / s.count : 0;
             breakdown[trigger] = { count: s.count, revenue: s.revenue, roi_per_msg: roi };

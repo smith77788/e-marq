@@ -51,10 +51,8 @@ export type TenantConfigValues = {
 
 type AnyRecord = Record<string, unknown>;
 
-const str = (v: unknown, fallback = ""): string =>
-  typeof v === "string" ? v : fallback;
-const bool = (v: unknown, fallback = false): boolean =>
-  typeof v === "boolean" ? v : fallback;
+const str = (v: unknown, fallback = ""): string => (typeof v === "string" ? v : fallback);
+const bool = (v: unknown, fallback = false): boolean => (typeof v === "boolean" ? v : fallback);
 const obj = (v: unknown): AnyRecord =>
   v && typeof v === "object" && !Array.isArray(v) ? (v as AnyRecord) : {};
 
@@ -72,7 +70,9 @@ export function normalizeConfig(input: {
   const features = obj(input.features);
   const bot = obj(input.bot);
   const seo = obj(input.seo);
-  const payments = obj((features as AnyRecord).payments ?? (input as AnyRecord & { payments?: unknown }).payments);
+  const payments = obj(
+    (features as AnyRecord).payments ?? (input as AnyRecord & { payments?: unknown }).payments,
+  );
   const theme = str(ui.theme, "system");
   return {
     brand_name: str(input.brand_name, ""),
@@ -185,9 +185,7 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
             placeholder="Наприклад: Сонячна Пекарня"
             required
           />
-          {errors.brand_name && (
-            <p className="text-xs text-destructive">{errors.brand_name}</p>
-          )}
+          {errors.brand_name && <p className="text-xs text-destructive">{errors.brand_name}</p>}
         </div>
       </section>
 
@@ -258,10 +256,7 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
 
       {/* Можливості */}
       <section className="space-y-3">
-        <SectionHeader
-          title="Можливості"
-          description="Увімкніть або вимкніть функції магазину."
-        />
+        <SectionHeader title="Можливості" description="Увімкніть або вимкніть функції магазину." />
         <FeatureToggle
           label="ШІ-помічник у магазині"
           description="Маленький чат у вітрині, який відповідає клієнтам і радить товари."
@@ -319,7 +314,8 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
             maxLength={MAX_WELCOME}
           />
           <p className="text-[11px] text-muted-foreground">
-            Перше повідомлення, яке побачить клієнт у чаті. {values.bot.welcome_message.length}/{MAX_WELCOME}
+            Перше повідомлення, яке побачить клієнт у чаті. {values.bot.welcome_message.length}/
+            {MAX_WELCOME}
           </p>
         </div>
         <div className="grid gap-2">
@@ -327,16 +323,14 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
           <Textarea
             id="system_prompt"
             value={values.bot.system_prompt}
-            onChange={(e) =>
-              update("bot", { system_prompt: e.target.value.slice(0, MAX_PROMPT) })
-            }
+            onChange={(e) => update("bot", { system_prompt: e.target.value.slice(0, MAX_PROMPT) })}
             placeholder="Ти — приязний консультант магазину {brand}. Завжди радь товари з нашого каталогу. Відповідай українською, коротко і по суті."
             rows={5}
             maxLength={MAX_PROMPT}
           />
           <p className="text-[11px] text-muted-foreground">
-            Опишіть характер помічника простими словами: який тон, що пропонувати, чого уникати.
-            {" "}{values.bot.system_prompt.length}/{MAX_PROMPT}
+            Опишіть характер помічника простими словами: який тон, що пропонувати, чого уникати.{" "}
+            {values.bot.system_prompt.length}/{MAX_PROMPT}
           </p>
         </div>
       </section>
@@ -381,8 +375,8 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
             placeholder="https://приклад.ua/cover.jpg"
           />
           <p className="text-[11px] text-muted-foreground">
-            Що покаже Facebook чи Telegram, коли хтось поділиться посиланням на ваш магазин.
-            Розмір 1200×630.
+            Що покаже Facebook чи Telegram, коли хтось поділиться посиланням на ваш магазин. Розмір
+            1200×630.
           </p>
         </div>
       </section>
@@ -391,10 +385,7 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
 
       {/* Оплата */}
       <section className="space-y-3">
-        <SectionHeader
-          title="Оплата"
-          description="Як саме клієнт буде платити за замовлення."
-        />
+        <SectionHeader title="Оплата" description="Як саме клієнт буде платити за замовлення." />
         <div className="grid gap-2">
           <Label htmlFor="payments_currency">Валюта (3 літери)</Label>
           <Input
@@ -406,9 +397,7 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
             placeholder="UAH"
             maxLength={3}
           />
-          {errors.currency && (
-            <p className="text-xs text-destructive">{errors.currency}</p>
-          )}
+          {errors.currency && <p className="text-xs text-destructive">{errors.currency}</p>}
           <p className="text-[11px] text-muted-foreground">
             UAH — гривня, USD — долар, EUR — євро.
           </p>
@@ -432,9 +421,7 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
               <Textarea
                 id="manual_instructions"
                 value={values.payments.manual_instructions}
-                onChange={(e) =>
-                  update("payments", { manual_instructions: e.target.value })
-                }
+                onChange={(e) => update("payments", { manual_instructions: e.target.value })}
                 rows={5}
                 placeholder={DEFAULT_MANUAL_INSTRUCTIONS}
               />
@@ -442,8 +429,8 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
                 <p className="text-xs text-destructive">{errors.manual_instructions}</p>
               )}
               <p className="text-xs text-muted-foreground">
-                Цей текст побачить клієнт після оформлення замовлення. Напишіть номер картки,
-                IBAN або інший спосіб переказу.
+                Цей текст побачить клієнт після оформлення замовлення. Напишіть номер картки, IBAN
+                або інший спосіб переказу.
               </p>
             </div>
             <div className="grid gap-2">
@@ -484,9 +471,7 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
                 <Input
                   id="liqpay_public_key"
                   value={values.payments.liqpay_public_key}
-                  onChange={(e) =>
-                    update("payments", { liqpay_public_key: e.target.value.trim() })
-                  }
+                  onChange={(e) => update("payments", { liqpay_public_key: e.target.value.trim() })}
                   placeholder="i00000000000"
                   autoComplete="off"
                 />
@@ -517,7 +502,8 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
             <div>
               <p className="text-sm font-medium text-foreground">WayForPay</p>
               <p className="text-xs text-muted-foreground">
-                Українські картки, Privat24, Apple/Google Pay. Дані — у кабінеті WayForPay → Налаштування.
+                Українські картки, Privat24, Apple/Google Pay. Дані — у кабінеті WayForPay →
+                Налаштування.
               </p>
             </div>
             <Switch
@@ -592,9 +578,7 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
                 id="mono_token"
                 type="password"
                 value={values.payments.monobank_token}
-                onChange={(e) =>
-                  update("payments", { monobank_token: e.target.value.trim() })
-                }
+                onChange={(e) => update("payments", { monobank_token: e.target.value.trim() })}
                 placeholder="••••••••"
                 autoComplete="off"
               />

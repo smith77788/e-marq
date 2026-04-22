@@ -22,7 +22,9 @@ export const Route = createFileRoute("/hooks/agents/payment-retry")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -40,7 +42,9 @@ export const Route = createFileRoute("/hooks/agents/payment-retry")({
           const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
           const { data: stuck } = await supabaseAdmin
             .from("orders")
-            .select("id, total_cents, customer_email, customer_name, payment_method, created_at, status")
+            .select(
+              "id, total_cents, customer_email, customer_name, payment_method, created_at, status",
+            )
             .eq("tenant_id", tenantId)
             .eq("status", "pending")
             .gte("created_at", since)
@@ -82,7 +86,9 @@ export const Route = createFileRoute("/hooks/agents/payment-retry")({
           return jsonOk({ insights_created: created, recoverable_cents: totalRecoverable });
         } catch (e) {
           await failAgentRun(handle, e);
-          return jsonError("Payment retry failed", 500, { details: e instanceof Error ? e.message : String(e) });
+          return jsonError("Payment retry failed", 500, {
+            details: e instanceof Error ? e.message : String(e),
+          });
         }
       },
     },

@@ -138,10 +138,7 @@ export function OrderTelegramChat({
           thread.map((m) => {
             const outbound = m.direction === "outbound";
             return (
-              <div
-                key={m.id}
-                className={`flex ${outbound ? "justify-end" : "justify-start"}`}
-              >
+              <div key={m.id} className={`flex ${outbound ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-[80%] rounded-lg px-3 py-2 text-xs ${
                     outbound
@@ -150,7 +147,9 @@ export function OrderTelegramChat({
                   }`}
                 >
                   <p className="whitespace-pre-wrap break-words">{m.body}</p>
-                  <p className={`mt-1 text-[10px] ${outbound ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                  <p
+                    className={`mt-1 text-[10px] ${outbound ? "text-primary-foreground/70" : "text-muted-foreground"}`}
+                  >
                     {format(new Date(m.created_at), "dd MMM, HH:mm")}
                   </p>
                 </div>

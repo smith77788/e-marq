@@ -5,7 +5,15 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Brain, CheckCircle2, Loader2, Power, PowerOff, TrendingDown, TrendingUp } from "lucide-react";
+import {
+  Brain,
+  CheckCircle2,
+  Loader2,
+  Power,
+  PowerOff,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -79,7 +87,9 @@ export function MemoryInspector({ tenantId }: Props) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ai_memory")
-        .select("id, agent, category, pattern_key, learned_rule, confidence, success_count, failure_count, avg_impact, is_active, last_observed_at")
+        .select(
+          "id, agent, category, pattern_key, learned_rule, confidence, success_count, failure_count, avg_impact, is_active, last_observed_at",
+        )
         .eq("tenant_id", tenantId)
         .order("confidence", { ascending: false })
         .limit(100);
@@ -91,10 +101,7 @@ export function MemoryInspector({ tenantId }: Props) {
 
   const toggle = useMutation({
     mutationFn: async ({ id, next }: { id: string; next: boolean }) => {
-      const { error } = await supabase
-        .from("ai_memory")
-        .update({ is_active: next })
-        .eq("id", id);
+      const { error } = await supabase.from("ai_memory").update({ is_active: next }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: (_, vars) => {
@@ -116,7 +123,8 @@ export function MemoryInspector({ tenantId }: Props) {
     const active = list.filter((m) => m.is_active).length;
     const totalSuccess = list.reduce((s, m) => s + m.success_count, 0);
     const totalFailure = list.reduce((s, m) => s + m.failure_count, 0);
-    const winRate = totalSuccess + totalFailure > 0 ? totalSuccess / (totalSuccess + totalFailure) : 0;
+    const winRate =
+      totalSuccess + totalFailure > 0 ? totalSuccess / (totalSuccess + totalFailure) : 0;
     return { active, total: list.length, winRate };
   }, [memories]);
 
@@ -134,10 +142,13 @@ export function MemoryInspector({ tenantId }: Props) {
             </CardDescription>
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span><strong className="text-foreground">{stats.active}</strong>/{stats.total} увімкнено</span>
+            <span>
+              <strong className="text-foreground">{stats.active}</strong>/{stats.total} увімкнено
+            </span>
             <span className="flex items-center gap-1">
               <CheckCircle2 className="h-3 w-3 text-success" />
-              <strong className="text-foreground">{(stats.winRate * 100).toFixed(0)}%</strong> успішних
+              <strong className="text-foreground">{(stats.winRate * 100).toFixed(0)}%</strong>{" "}
+              успішних
             </span>
           </div>
         </div>
@@ -169,7 +180,9 @@ export function MemoryInspector({ tenantId }: Props) {
                 <li
                   key={m.id}
                   className={`rounded-lg border p-3 transition-colors ${
-                    m.is_active ? "border-border bg-card" : "border-dashed border-border/60 bg-muted/30 opacity-70"
+                    m.is_active
+                      ? "border-border bg-card"
+                      : "border-dashed border-border/60 bg-muted/30 opacity-70"
                   }`}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-2">
@@ -178,12 +191,17 @@ export function MemoryInspector({ tenantId }: Props) {
                         <Badge variant="secondary" className="text-[10px]">
                           {AGENT_LABELS[m.agent] ?? m.agent}
                         </Badge>
-                        <Badge variant="outline" className="text-[10px]">{m.category}</Badge>
+                        <Badge variant="outline" className="text-[10px]">
+                          {m.category}
+                        </Badge>
                         {impactBadge(m.avg_impact)}
                       </div>
-                      <p className="text-sm font-medium text-foreground">{formatRule(m.learned_rule || m.pattern_key)}</p>
+                      <p className="text-sm font-medium text-foreground">
+                        {formatRule(m.learned_rule || m.pattern_key)}
+                      </p>
                       <p className="mt-0.5 text-[11px] text-muted-foreground">
-                        {m.success_count}✓ / {m.failure_count}✗ · востаннє {new Date(m.last_observed_at).toLocaleDateString("uk-UA")}
+                        {m.success_count}✓ / {m.failure_count}✗ · востаннє{" "}
+                        {new Date(m.last_observed_at).toLocaleDateString("uk-UA")}
                       </p>
                     </div>
                     <Button
@@ -195,9 +213,13 @@ export function MemoryInspector({ tenantId }: Props) {
                       {toggle.isPending && toggle.variables?.id === m.id ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : m.is_active ? (
-                        <><PowerOff className="mr-1 h-3.5 w-3.5" /> Вимкнути</>
+                        <>
+                          <PowerOff className="mr-1 h-3.5 w-3.5" /> Вимкнути
+                        </>
                       ) : (
-                        <><Power className="mr-1 h-3.5 w-3.5" /> Увімкнути</>
+                        <>
+                          <Power className="mr-1 h-3.5 w-3.5" /> Увімкнути
+                        </>
                       )}
                     </Button>
                   </div>

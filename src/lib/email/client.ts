@@ -26,7 +26,9 @@ export async function sendOrderStatusEmail(
   newStatus: "paid" | "fulfilled" | "cancelled" | "refunded",
 ): Promise<void> {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     const token = session?.access_token;
     if (!token) {
       console.warn("[email] status update skipped: no session");

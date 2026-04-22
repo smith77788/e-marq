@@ -28,7 +28,9 @@ export const Route = createFileRoute("/hooks/agents/conflict-resolver")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -47,7 +49,9 @@ export const Route = createFileRoute("/hooks/agents/conflict-resolver")({
           const [actionsRes, existingRes] = await Promise.all([
             supabaseAdmin
               .from("ai_actions")
-              .select("id, agent_id, action_type, target_entity, target_id, status, parameters, created_at")
+              .select(
+                "id, agent_id, action_type, target_entity, target_id, status, parameters, created_at",
+              )
               .eq("tenant_id", tenantId)
               .gte("created_at", since)
               .in("status", ["pending", "applied"])

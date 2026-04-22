@@ -45,7 +45,11 @@ const statusBadge = (status: string) => {
     case "verified":
       return <Badge className="bg-success/15 text-success border-success/30">Verified</Badge>;
     case "verifying":
-      return <Badge variant="outline" className="border-info/40 text-info">Verifying…</Badge>;
+      return (
+        <Badge variant="outline" className="border-info/40 text-info">
+          Verifying…
+        </Badge>
+      );
     case "pending":
       return <Badge variant="outline">Pending DNS</Badge>;
     case "failed":
@@ -75,7 +79,11 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
 
   const addMut = useMutation({
     mutationFn: async () => {
-      const d = newDomain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/$/, "");
+      const d = newDomain
+        .trim()
+        .toLowerCase()
+        .replace(/^https?:\/\//, "")
+        .replace(/\/$/, "");
       if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(d)) throw new Error("Невалідний домен");
       const { error } = await supabase
         .from("tenant_domains")
@@ -124,8 +132,7 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
       }
       qc.invalidateQueries({ queryKey: ["tenant-domains", tenantId] });
     },
-    onError: (e: unknown) =>
-      toast.error(e instanceof Error ? e.message : "Не вдалося перевірити"),
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Не вдалося перевірити"),
   });
 
   const setPrimaryMut = useMutation({
@@ -173,8 +180,8 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
           </CardTitle>
           <CardDescription>
             Підключіть свій домен (наприклад, <span className="font-mono">shop.brand.com</span>),
-            щоб вітрина відкривалась за вашою адресою. Реєстрація домену
-            відбувається у вашого реєстратора.
+            щоб вітрина відкривалась за вашою адресою. Реєстрація домену відбувається у вашого
+            реєстратора.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -188,7 +195,10 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
                 onChange={(e) => setNewDomain(e.target.value)}
                 disabled={addMut.isPending}
               />
-              <Button onClick={() => addMut.mutate()} disabled={addMut.isPending || !newDomain.trim()}>
+              <Button
+                onClick={() => addMut.mutate()}
+                disabled={addMut.isPending || !newDomain.trim()}
+              >
                 {addMut.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
@@ -238,10 +248,7 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
             />
           ) : (
             (list.data ?? []).map((d) => (
-              <div
-                key={d.id}
-                className="rounded-lg border border-border bg-card/50 p-3 space-y-2"
-              >
+              <div key={d.id} className="rounded-lg border border-border bg-card/50 p-3 space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-sm font-medium text-foreground">

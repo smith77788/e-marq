@@ -53,7 +53,8 @@ export const Route = createFileRoute("/hooks/agents/customer-churn-predictor")({
 
           const now = Date.now();
           let scored = 0;
-          const ranked: { id: string; name: string; prob: number; reason: string; ltv: number }[] = [];
+          const ranked: { id: string; name: string; prob: number; reason: string; ltv: number }[] =
+            [];
 
           for (const c of customers) {
             if (!c.last_order_at) continue;
@@ -95,22 +96,21 @@ export const Route = createFileRoute("/hooks/agents/customer-churn-predictor")({
             }
 
             // Persist
-            await supabaseAdmin
-              .from("customer_ltv_scores")
-              .upsert(
-                [
-                  {
-                    tenant_id: tenantId!,
-                    customer_id: c.id,
-                    churn_probability: prob,
-                    churn_reason: reason,
-                    predicted_ltv_cents: c.total_spent_cents ?? 0,
-                    predicted_orders_12m: prob > 0.7 ? 0 : Math.max(1, Math.round(12 / Math.max(cycle ?? 60, 30))),
-                    computed_at: new Date().toISOString(),
-                  },
-                ],
-                { onConflict: "tenant_id,customer_id", ignoreDuplicates: false },
-              );
+            await supabaseAdmin.from("customer_ltv_scores").upsert(
+              [
+                {
+                  tenant_id: tenantId!,
+                  customer_id: c.id,
+                  churn_probability: prob,
+                  churn_reason: reason,
+                  predicted_ltv_cents: c.total_spent_cents ?? 0,
+                  predicted_orders_12m:
+                    prob > 0.7 ? 0 : Math.max(1, Math.round(12 / Math.max(cycle ?? 60, 30))),
+                  computed_at: new Date().toISOString(),
+                },
+              ],
+              { onConflict: "tenant_id,customer_id", ignoreDuplicates: false },
+            );
             scored++;
 
             if (prob >= 0.7 && (c.total_spent_cents ?? 0) >= 5000) {
@@ -126,24 +126,26 @@ export const Route = createFileRoute("/hooks/agents/customer-churn-predictor")({
 
           ranked.sort((a, b) => b.ltv * b.prob - a.ltv * a.prob);
 
-          const insights: Parameters<typeof insertInsightsDedup>[0] = ranked.slice(0, 5).map((r) => ({
-            tenant_id: tenantId!,
-            insight_type: "high_value_churn_risk",
-            affected_layer: "lifecycle",
-            title: `Високий ризик: ${r.name} (LTV ${(r.ltv / 100).toFixed(0)} ₴)`,
-            description: `Churn-probability ${(r.prob * 100).toFixed(0)}% — причина: ${r.reason}.`,
-            expected_impact: `Win-back з знижкою 15-20% повертає ~25-35% таких клієнтів.`,
-            confidence: r.prob,
-            risk_level: r.ltv >= 20000 ? "high" : "medium",
-            metrics: {
-              customer_id: r.id,
-              customer_name: r.name,
-              churn_probability: r.prob,
-              churn_reason: r.reason,
-              ltv_cents: r.ltv,
-            },
-            dedup_key: `churn-high::${r.id}`,
-          }));
+          const insights: Parameters<typeof insertInsightsDedup>[0] = ranked
+            .slice(0, 5)
+            .map((r) => ({
+              tenant_id: tenantId!,
+              insight_type: "high_value_churn_risk",
+              affected_layer: "lifecycle",
+              title: `Високий ризик: ${r.name} (LTV ${(r.ltv / 100).toFixed(0)} ₴)`,
+              description: `Churn-probability ${(r.prob * 100).toFixed(0)}% — причина: ${r.reason}.`,
+              expected_impact: `Win-back з знижкою 15-20% повертає ~25-35% таких клієнтів.`,
+              confidence: r.prob,
+              risk_level: r.ltv >= 20000 ? "high" : "medium",
+              metrics: {
+                customer_id: r.id,
+                customer_name: r.name,
+                churn_probability: r.prob,
+                churn_reason: r.reason,
+                ltv_cents: r.ltv,
+              },
+              dedup_key: `churn-high::${r.id}`,
+            }));
 
           const created = await insertInsightsDedup(insights);
           await finishAgentRun(handle, created, {

@@ -22,7 +22,9 @@ export const Route = createFileRoute("/hooks/agents/inventory-rebalance")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -50,7 +52,7 @@ export const Route = createFileRoute("/hooks/agents/inventory-rebalance")({
             return jsonOk({ insights_created: 0 });
           }
 
-          const productIds = products.map(p => p.id);
+          const productIds = products.map((p) => p.id);
           const since = new Date(Date.now() - 60 * 86_400_000).toISOString();
           const { data: recentSales } = await supabaseAdmin
             .from("order_items")
@@ -100,7 +102,9 @@ export const Route = createFileRoute("/hooks/agents/inventory-rebalance")({
           return jsonOk({ insights_created: created, dead_capital_cents: totalDeadCapital });
         } catch (e) {
           await failAgentRun(handle, e);
-          return jsonError("Inventory rebalance failed", 500, { details: e instanceof Error ? e.message : String(e) });
+          return jsonError("Inventory rebalance failed", 500, {
+            details: e instanceof Error ? e.message : String(e),
+          });
         }
       },
     },

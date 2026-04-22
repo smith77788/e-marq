@@ -34,7 +34,9 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -60,11 +62,17 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop")({
             .lte("sent_at", cutoff)
             .limit(200);
 
-          let measured = 0, conversions = 0, totalRevenue = 0;
+          let measured = 0,
+            conversions = 0,
+            totalRevenue = 0;
           const policyAgg: Record<string, { trials: number; wins: number; revenue: number }> = {};
 
           for (const r of (rows ?? []) as Outbound[]) {
-            policyAgg[r.trigger_kind] = policyAgg[r.trigger_kind] ?? { trials: 0, wins: 0, revenue: 0 };
+            policyAgg[r.trigger_kind] = policyAgg[r.trigger_kind] ?? {
+              trials: 0,
+              wins: 0,
+              revenue: 0,
+            };
             policyAgg[r.trigger_kind].trials++;
 
             if (!r.customer_id) {
@@ -93,7 +101,9 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop")({
             }
 
             const sentAt = r.sent_at;
-            const windowEnd = new Date(new Date(sentAt).getTime() + 7 * 24 * 3600 * 1000).toISOString();
+            const windowEnd = new Date(
+              new Date(sentAt).getTime() + 7 * 24 * 3600 * 1000,
+            ).toISOString();
             const { data: orders } = await supabaseAdmin
               .from("orders")
               .select("total_cents")
@@ -154,11 +164,16 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop")({
             }
           }
 
-          await finishAgentRun(handle, measured, { conversions, total_revenue_cents: totalRevenue });
+          await finishAgentRun(handle, measured, {
+            conversions,
+            total_revenue_cents: totalRevenue,
+          });
           return jsonOk({ measured, conversions, total_revenue_cents: totalRevenue });
         } catch (err) {
           await failAgentRun(handle, err);
-          return jsonError("Feedback loop failed", 500, { details: err instanceof Error ? err.message : String(err) });
+          return jsonError("Feedback loop failed", 500, {
+            details: err instanceof Error ? err.message : String(err),
+          });
         }
       },
     },

@@ -17,13 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -310,17 +304,11 @@ function BrandPromotionsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            {t("bpr.title")}
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("bpr.title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("bpr.subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setBulkOpen(true)}
-          >
+          <Button size="sm" variant="outline" onClick={() => setBulkOpen(true)}>
             <Layers className="mr-1.5 h-3.5 w-3.5" />
             {t("bpr.bulk.button")}
           </Button>
@@ -333,11 +321,7 @@ function BrandPromotionsPage() {
 
       <LoyaltyCard tenantId={tenantId!} />
 
-      <BulkPromoGeneratorDialog
-        tenantId={tenantId!}
-        open={bulkOpen}
-        onOpenChange={setBulkOpen}
-      />
+      <BulkPromoGeneratorDialog tenantId={tenantId!} open={bulkOpen} onOpenChange={setBulkOpen} />
 
       <Card>
         <CardContent className="p-0">
@@ -367,9 +351,7 @@ function BrandPromotionsPage() {
                 {promos.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell>
-                      <div className="font-mono text-sm font-medium">
-                        {p.code ?? "—"}
-                      </div>
+                      <div className="font-mono text-sm font-medium">{p.code ?? "—"}</div>
                       <div className="text-xs text-muted-foreground">{p.name}</div>
                     </TableCell>
                     <TableCell className="text-xs">
