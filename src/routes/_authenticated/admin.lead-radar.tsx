@@ -164,7 +164,7 @@ function Content() {
       });
       const json = (await r.json().catch(() => ({}))) as Record<string, unknown>;
       if (!r.ok) throw new Error(String(json.error ?? `HTTP ${r.status}`));
-      return { agent: variant, payload: json };
+      return { agent, payload: json };
     },
     onSuccess: ({ agent, payload }) => {
       toast.success(`${agentLabel(agent)} відпрацював`, {
