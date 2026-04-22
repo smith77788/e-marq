@@ -11,7 +11,8 @@ import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Layers, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Layers, Pencil, Plus, Sparkles, Tag, Trash2 } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -326,14 +327,18 @@ function BrandPromotionsPage() {
       <Card>
         <CardContent className="p-0">
           {isEmpty ? (
-            <div className="px-6 py-12 text-center">
-              <p className="text-sm font-medium text-foreground">{t("bpr.empty.title")}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{t("bpr.empty.desc")}</p>
-              <Button className="mt-4" onClick={() => setCreating(true)}>
-                <Plus className="mr-1.5 h-3.5 w-3.5" />
-                {t("bpr.new")}
-              </Button>
-            </div>
+            <EmptyState
+              variant="inline"
+              icon={Tag}
+              title={t("bpr.empty.title")}
+              description={t("bpr.empty.desc")}
+              action={
+                <Button onClick={() => setCreating(true)}>
+                  <Plus className="mr-1.5 h-3.5 w-3.5" />
+                  {t("bpr.new")}
+                </Button>
+              }
+            />
           ) : (
             <Table>
               <TableHeader>

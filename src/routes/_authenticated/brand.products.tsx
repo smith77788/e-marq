@@ -10,7 +10,8 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ExternalLink, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { ExternalLink, Package, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -274,14 +275,18 @@ function BrandProductsPage() {
         </CardHeader>
         <CardContent className="p-0">
           {isEmpty ? (
-            <div className="px-6 py-12 text-center">
-              <p className="text-sm font-medium text-foreground">{t("bp.empty.title")}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{t("bp.empty.desc")}</p>
-              <Button className="mt-4" onClick={() => setCreateOpen(true)}>
-                <Plus className="mr-1.5 h-3.5 w-3.5" />
-                {t("bp.new")}
-              </Button>
-            </div>
+            <EmptyState
+              variant="inline"
+              icon={Package}
+              title={t("bp.empty.title")}
+              description={t("bp.empty.desc")}
+              action={
+                <Button onClick={() => setCreateOpen(true)}>
+                  <Plus className="mr-1.5 h-3.5 w-3.5" />
+                  {t("bp.new")}
+                </Button>
+              }
+            />
           ) : (
             <Table>
               <TableHeader>
