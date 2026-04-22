@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { buildSeo } from "@/lib/seo";
 import { useEffect } from "react";
 import {
   AlertOctagon,
@@ -60,7 +61,8 @@ export const Route = createFileRoute("/")({
         }),
       },
     ],
-  }),
+    };
+  },
   component: Index,
 });
 
