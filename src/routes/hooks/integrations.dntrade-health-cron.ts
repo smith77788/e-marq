@@ -201,8 +201,8 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-health-cron")(
                   severity: "high",
                   channel: "in_app",
                   title: "DN Trade інтеграція не працює",
-                  body: `Стан "${h.status}" уже ${streak} хв. Причини: ${h.blockers.join("; ") || "невідомо"}.`,
-                  link: "/brand",
+                  body: `Стан "${h.status}" уже ${streak} хв. Причини: ${h.blockers.join("; ") || "невідомо"}. Відкрийте розділ Інтеграції та внесіть API key.`,
+                  link: "/brand/integrations",
                   metadata: {
                     streak_minutes: streak,
                     blockers: h.blockers,
@@ -231,7 +231,7 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-health-cron")(
                   channel: "in_app",
                   title: "DN Trade: повторювані помилки синхронізації",
                   body: `${partialCount} часткових синків за останні ${ALERT_PARTIAL_WINDOW_HOURS} год. Перевірте мапінг товарів/клієнтів.`,
-                  link: "/brand",
+                  link: "/brand/integrations",
                   metadata: {
                     partial_count: partialCount,
                     window_hours: ALERT_PARTIAL_WINDOW_HOURS,
