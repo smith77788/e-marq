@@ -155,7 +155,9 @@ function BrandPage() {
 
       <RevenueFeed tenantId={current.tenant_id} />
 
-      <InsightsPanel tenantId={current.tenant_id} />
+      <section id="insights" className="scroll-mt-24 space-y-6">
+        <InsightsPanel tenantId={current.tenant_id} />
+      </section>
 
       <AgentTimeline tenantId={current.tenant_id} />
 
@@ -163,12 +165,15 @@ function BrandPage() {
 
       <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("brand.customersChannels")}</h2>
 
-      <TopCustomers tenantId={current.tenant_id} />
+      <section id="customers" className="scroll-mt-24 space-y-6">
+        <TopCustomers tenantId={current.tenant_id} />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <CustomerRoster tenantId={current.tenant_id} />
+          <ChannelSetup tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
+        </div>
+      </section>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <CustomerRoster tenantId={current.tenant_id} />
-        <ChannelSetup tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
-      </div>
+      <section id="channels" className="scroll-mt-24" aria-hidden />
 
       <IntegrationGuide tenantSlug={current.tenant_slug} />
 

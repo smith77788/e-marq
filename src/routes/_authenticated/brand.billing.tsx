@@ -12,6 +12,7 @@ import { useTenantContext } from "@/hooks/useTenantContext";
 import { UsageMeters, type PlanSummary } from "@/components/admin/UsageMeters";
 import { PlanBadge } from "@/components/admin/PlanBadge";
 import { OwnerPlanSwitcher } from "@/components/owner/OwnerPlanSwitcher";
+import { BalanceCard } from "@/components/owner/BalanceCard";
 
 type Search = { tenant?: string };
 
@@ -94,6 +95,8 @@ function BrandBillingPage() {
           </CardContent>
         </Card>
       )}
+
+      <BalanceCard tenantId={tenantId} tenantSlug={current?.tenant_slug ?? "brand"} />
 
       {summary && (
         <OwnerPlanSwitcher tenantId={tenantId} currentPlanKey={summary.plan.key} />

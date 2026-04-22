@@ -48,6 +48,8 @@ import { useT, type TKey } from "@/lib/i18n";
 type NavItem = {
   labelKey: TKey;
   to: string;
+  /** Optional hash anchor (`#section`) appended to the link href. */
+  hash?: string;
   icon: typeof LayoutDashboard;
   exact?: boolean;
   /** Tailwind text-color class for the icon when inactive (group accent). */
@@ -88,8 +90,8 @@ const GROWTH: NavGroup = {
   labelKey: "sb.growth",
   tone: "text-accent/70",
   items: [
-    { labelKey: "sb.insights", to: "/brand", icon: Lightbulb, tone: "text-warning" },
-    { labelKey: "sb.customers", to: "/brand", icon: Users, tone: "text-info" },
+    { labelKey: "sb.insights", to: "/brand", hash: "insights", icon: Lightbulb, tone: "text-warning" },
+    { labelKey: "sb.customers", to: "/brand", hash: "customers", icon: Users, tone: "text-info" },
     { labelKey: "sb.agents", to: "/agents", icon: Bot, tone: "text-accent" },
   ],
 };
@@ -98,7 +100,7 @@ const SETUP: NavGroup = {
   labelKey: "sb.setup",
   tone: "text-muted-foreground",
   items: [
-    { labelKey: "sb.channels", to: "/brand", icon: Plug, tone: "text-primary" },
+    { labelKey: "sb.channels", to: "/brand", hash: "channels", icon: Plug, tone: "text-primary" },
     { labelKey: "sb.integrations" as TKey, to: "/brand/integrations", icon: Puzzle, tone: "text-info" },
     { labelKey: "sb.onboarding", to: "/onboarding", icon: Sparkles, tone: "text-accent" },
     { labelKey: "sb.profile" as TKey, to: "/profile", icon: IdCard, exact: true, tone: "text-primary" },
@@ -140,7 +142,7 @@ const ADMIN_AGENTS: NavGroup = {
   items: [
     { labelKey: "sb.liveRuns", to: "/agents/live", icon: Activity, tone: "text-success" },
     { labelKey: "sb.agentLibrary", to: "/agents", icon: Cpu, exact: true, tone: "text-accent" },
-    { labelKey: "sb.insightStream", to: "/admin", icon: Radio, tone: "text-warning" },
+    { labelKey: "sb.insightStream", to: "/admin/overview", icon: Radio, tone: "text-warning" },
   ],
 };
 
@@ -207,11 +209,12 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
                     ? location.pathname === item.to
                     : location.pathname.startsWith(item.to);
                   const label = t(item.labelKey);
+                  const href = item.hash ? `${item.to}#${item.hash}` : item.to;
                   return (
-                    <SidebarMenuItem key={`${group.labelKey}-${item.labelKey}-${item.to}`}>
+                    <SidebarMenuItem key={`${group.labelKey}-${item.labelKey}-${href}`}>
                       <SidebarMenuButton asChild tooltip={label}>
-                        <Link
-                          to={item.to}
+                        <a
+                          href={href}
                           className={cn(
                             "group/nav relative flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-all",
                             isActive
@@ -234,7 +237,7 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
                             )}
                           />
                           {!collapsed && <span className="truncate">{label}</span>}
-                        </Link>
+                        </a>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
