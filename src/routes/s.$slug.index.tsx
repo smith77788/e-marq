@@ -13,6 +13,7 @@ import {
   type StorefrontShell,
 } from "@/lib/storefront/loaders";
 import { ProductCard } from "@/components/storefront/ProductCard";
+import { canonicalUrl } from "@/lib/seo";
 
 export const Route = createFileRoute("/s/$slug/")({
   loader: async ({ params }) => {
@@ -22,6 +23,10 @@ export const Route = createFileRoute("/s/$slug/")({
     ]);
     return { shell, collections };
   },
+  head: ({ params }) => ({
+    links: [{ rel: "canonical", href: canonicalUrl(`/s/${params.slug}`) }],
+    meta: [{ property: "og:url", content: canonicalUrl(`/s/${params.slug}`) }],
+  }),
   errorComponent: ({ error }) => (
     <div className="mx-auto max-w-6xl px-4 py-12 text-center">
       <p className="text-sm text-destructive">Помилка: {error.message}</p>
