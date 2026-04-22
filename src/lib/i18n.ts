@@ -805,6 +805,8 @@ const dict = {
     "sb.plansCatalog": "Plans catalog",
     "sb.adminUsers": "Users",
     "sb.dntradeHealth": "DN Trade · Health",
+    "sb.topupRequests": "Top-up requests",
+    "sb.leadRadar": "Lead Radar",
     "sb.adminCommands": "⚡ System commands",
     "sb.liveRuns": "Live runs",
     "sb.agentLibrary": "Agent library",

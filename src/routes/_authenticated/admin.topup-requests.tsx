@@ -244,6 +244,9 @@ function ProcessDialog({ row }: { row: Row }) {
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState<string>(row.manager_note ?? "");
 
+  // ensure controlled input never receives null
+  const noteValue = note ?? "";
+
   const updateStatus = useMutation({
     mutationFn: async (next: Status) => {
       if (next === "paid") {
