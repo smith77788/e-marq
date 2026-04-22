@@ -7,7 +7,7 @@
  * dialog all in one) has been split: this layout owns the chrome and cart,
  * children own page bodies.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   createFileRoute,
   Link,
@@ -16,7 +16,7 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ShoppingCart, Search, Loader2, Plus, Minus, Trash2 } from "lucide-react";
+import { ShoppingCart, Search, Loader2, Plus, Minus, Trash2, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -27,12 +27,13 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
-import { loadStorefrontShell } from "@/lib/storefront/loaders";
+import { loadStorefrontShell, type StorefrontShell } from "@/lib/storefront/loaders";
 import {
   CartProvider,
   useStorefrontCart,
   track,
 } from "@/lib/storefront/cartContext";
+import { useWishlist } from "@/hooks/useWishlist";
 import { formatMoneyExact } from "@/lib/money";
 
 export const Route = createFileRoute("/s/$slug")({
@@ -80,7 +81,7 @@ function StorefrontLayout() {
   const { slug } = Route.useParams();
   const initial = Route.useLoaderData();
 
-  const { data } = useQuery<Awaited<ReturnType<typeof loadStorefrontShell>>>({
+  const { data } = useQuery<StorefrontShell>({
     queryKey: ["storefront-shell", slug],
     queryFn: () => loadStorefrontShell(slug),
     initialData: initial,
@@ -122,7 +123,7 @@ function StorefrontLayout() {
   return (
     <div className="min-h-screen bg-background" style={themeStyle}>
       <CartProvider tenantId={tenant.id} brand={brand} slug={slug} initialProducts={cartProducts}>
-        <StorefrontHeader brand={brand} slug={slug} />
+        <StorefrontHeader brand={brand} slug={slug} products={data.products} />
         <Outlet />
         <footer className="border-t py-6">
           <div className="mx-auto max-w-6xl px-4 text-center text-xs text-muted-foreground">
@@ -135,10 +136,66 @@ function StorefrontLayout() {
   );
 }
 
-function StorefrontHeader({ brand, slug }: { brand: string; slug: string }) {
-  const { cartCount, setCartOpen } = useStorefrontCart();
+type SearchSuggestion = {
+  id: string;
+  name: string;
+  image_url: string | null;
+  price_cents: number;
+};
+
+function StorefrontHeader({
+  brand,
+  slug,
+  products,
+}: {
+  brand: string;
+  slug: string;
+  products: StorefrontShell["products"];
+}) {
+  const { cartCount, setCartOpen, tenantId } = useStorefrontCart();
+  const wishlist = useWishlist(tenantId);
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (!wrapperRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    window.addEventListener("mousedown", onClick);
+    return () => window.removeEventListener("mousedown", onClick);
+  }, [open]);
+
+  const suggestions = useMemo<SearchSuggestion[]>(() => {
+    const query = q.trim().toLowerCase();
+    if (query.length < 2) return [];
+    const out: SearchSuggestion[] = [];
+    for (const p of products) {
+      const haystack = [p.name, p.description ?? "", ...(p.tags ?? [])]
+        .join(" ")
+        .toLowerCase();
+      if (haystack.includes(query)) {
+        out.push({
+          id: p.id,
+          name: p.name,
+          image_url: p.image_url,
+          price_cents: p.price_cents,
+        });
+        if (out.length >= 6) break;
+      }
+    }
+    return out;
+  }, [q, products]);
+
+  const submit = () => {
+    const trimmed = q.trim();
+    if (!trimmed) return;
+    setOpen(false);
+    navigate({ to: "/s/$slug/search", params: { slug }, search: { q: trimmed } });
+  };
 
   return (
     <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur">
@@ -150,26 +207,83 @@ function StorefrontHeader({ brand, slug }: { brand: string; slug: string }) {
         >
           {brand}
         </Link>
-        <form
-          className="ml-auto flex flex-1 items-center gap-2 sm:max-w-sm"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const trimmed = q.trim();
-            if (!trimmed) return;
-            navigate({ to: "/s/$slug/search", params: { slug }, search: { q: trimmed } });
-          }}
+        <div ref={wrapperRef} className="relative ml-auto flex flex-1 items-center sm:max-w-sm">
+          <form
+            className="flex w-full items-center gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              submit();
+            }}
+          >
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                value={q}
+                onChange={(e) => {
+                  setQ(e.target.value);
+                  setOpen(true);
+                }}
+                onFocus={() => setOpen(true)}
+                placeholder="Пошук товарів…"
+                className="h-9 pl-8 text-sm"
+                aria-label="Пошук товарів"
+                aria-autocomplete="list"
+                aria-expanded={open && suggestions.length > 0}
+              />
+            </div>
+          </form>
+          {open && suggestions.length > 0 && (
+            <div
+              role="listbox"
+              className="absolute left-0 right-0 top-11 z-20 max-h-80 overflow-y-auto rounded-md border border-border bg-popover shadow-lg"
+            >
+              {suggestions.map((s) => (
+                <button
+                  type="button"
+                  role="option"
+                  key={s.id}
+                  onClick={() => {
+                    setOpen(false);
+                    setQ("");
+                    navigate({
+                      to: "/s/$slug/products/$productId",
+                      params: { slug, productId: s.id },
+                    });
+                  }}
+                  className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-accent"
+                >
+                  {s.image_url ? (
+                    <img src={s.image_url} alt="" className="h-8 w-8 rounded object-cover" />
+                  ) : (
+                    <div className="h-8 w-8 rounded bg-muted" />
+                  )}
+                  <span className="line-clamp-1 flex-1">{s.name}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+                    {formatMoneyExact(s.price_cents)}
+                  </span>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={submit}
+                className="block w-full border-t border-border px-3 py-2 text-left text-xs font-medium text-primary hover:bg-accent"
+              >
+                Показати всі результати →
+              </button>
+            </div>
+          )}
+        </div>
+        <Link
+          to="/s/$slug/wishlist"
+          params={{ slug }}
+          aria-label={`Обране (${wishlist.count})`}
+          className="relative inline-flex h-9 shrink-0 items-center gap-1 rounded-md border border-input bg-background px-2 text-sm hover:bg-accent"
         >
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Пошук товарів…"
-              className="h-9 pl-8 text-sm"
-              aria-label="Пошук товарів"
-            />
-          </div>
-        </form>
+          <Heart className={wishlist.count > 0 ? "h-4 w-4 fill-destructive text-destructive" : "h-4 w-4"} />
+          {wishlist.count > 0 && (
+            <span className="tabular-nums">{wishlist.count}</span>
+          )}
+        </Link>
         <Button
           size="sm"
           variant="outline"

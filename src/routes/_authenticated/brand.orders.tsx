@@ -45,13 +45,16 @@ import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
 import { formatMoneyExact } from "@/lib/money";
 import { sendOrderStatusEmail } from "@/lib/email/client";
+import { OrderTelegramChat } from "@/components/owner/OrderTelegramChat";
 
 type OrderStatus = "pending" | "paid" | "fulfilled" | "cancelled" | "refunded";
 
 type OrderRow = {
   id: string;
+  tenant_id: string;
   customer_email: string | null;
   customer_name: string | null;
+  customer_user_id: string | null;
   status: OrderStatus;
   total_cents: number;
   currency: string;
@@ -130,7 +133,7 @@ function BrandOrdersPage() {
       const { data, error } = await supabase
         .from("orders")
         .select(
-          "id, customer_email, customer_name, status, total_cents, currency, payment_method, payment_ref, paid_at, shipping_address, shipping_method, shipping_cost_cents, tracking_number, tracking_url, fulfilled_at, notes, created_at",
+          "id, tenant_id, customer_email, customer_name, customer_user_id, status, total_cents, currency, payment_method, payment_ref, paid_at, shipping_address, shipping_method, shipping_cost_cents, tracking_number, tracking_url, fulfilled_at, notes, created_at",
         )
         .eq("tenant_id", tenantId!)
         .order("created_at", { ascending: false })
@@ -480,6 +483,19 @@ function BrandOrdersPage() {
                   </section>
                 </>
               )}
+
+              <Separator className="my-6" />
+              <section>
+                <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Telegram-чат з клієнтом
+                </h4>
+                <OrderTelegramChat
+                  orderId={opened.id}
+                  tenantId={opened.tenant_id}
+                  customerEmail={opened.customer_email}
+                  customerUserId={opened.customer_user_id}
+                />
+              </section>
             </>
           )}
         </SheetContent>

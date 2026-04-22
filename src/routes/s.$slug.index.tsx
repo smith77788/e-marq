@@ -4,9 +4,9 @@
  * via the same query key.
  */
 import { useEffect, useState } from "react";
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Check, ShoppingCart } from "lucide-react";
+import { Check, Heart, ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,7 +18,9 @@ import {
   type StorefrontProduct,
 } from "@/lib/storefront/loaders";
 import { useStorefrontCart, track } from "@/lib/storefront/cartContext";
+import { useWishlist } from "@/hooks/useWishlist";
 import { formatMoneyExact } from "@/lib/money";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/s/$slug/")({
   loader: async ({ params }) => {
@@ -152,7 +154,9 @@ export function ProductCard({
 }) {
   const { tenantId } = useStorefrontCart();
   const cart = useStorefrontCart();
+  const wishlist = useWishlist(tenantId);
   const inCart = cart.cart[product.id]?.quantity ?? 0;
+  const liked = wishlist.has(product.id);
   const [viewed, setViewed] = useState(false);
 
   useEffect(() => {
@@ -198,10 +202,28 @@ export function ProductCard({
             </Badge>
           )}
           {outOfStock && (
-            <Badge className="absolute right-2 top-2" variant="secondary">
+            <Badge className="absolute right-2 top-12" variant="secondary">
               Немає
             </Badge>
           )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              wishlist.toggle(product.id);
+            }}
+            aria-label={liked ? "Прибрати з обраного" : "Додати в обране"}
+            aria-pressed={liked}
+            className={cn(
+              "absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full border bg-background/80 backdrop-blur transition-colors",
+              liked
+                ? "border-destructive/40 text-destructive"
+                : "border-border text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Heart className={cn("h-4 w-4", liked && "fill-current")} />
+          </button>
         </div>
       </Link>
       <CardContent className="flex flex-1 flex-col gap-3 p-4">

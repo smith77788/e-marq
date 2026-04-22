@@ -29,6 +29,7 @@ import { Route as AuthenticatedBrandRouteImport } from './routes/_authenticated/
 import { Route as SSlugIndexRouteImport } from './routes/s.$slug.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as TrackSlugJsRouteImport } from './routes/track.$slug.js'
+import { Route as SSlugWishlistRouteImport } from './routes/s.$slug.wishlist'
 import { Route as SSlugSearchRouteImport } from './routes/s.$slug.search'
 import { Route as SSlugCheckoutRouteImport } from './routes/s.$slug.checkout'
 import { Route as HooksTelegramPollRouteImport } from './routes/hooks/telegram.poll'
@@ -183,6 +184,7 @@ import { Route as ApiPublicMarqInsightsRouteImport } from './routes/api/public/m
 import { Route as ApiPublicMarqEventsRouteImport } from './routes/api/public/marq.events'
 import { Route as ApiPublicEmailUnsubscribeRouteImport } from './routes/api/public/email.unsubscribe'
 import { Route as ApiPublicEmailResendWebhookRouteImport } from './routes/api/public/email.resend-webhook'
+import { Route as ApiOrdersOrderIdTelegramMessageRouteImport } from './routes/api/orders.$orderId.telegram-message'
 import { Route as ApiIntegrationsSyncProviderRouteImport } from './routes/api/integrations.sync.$provider'
 import { Route as AuthenticatedBrandProductsProductIdRouteImport } from './routes/_authenticated/brand.products.$productId'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
@@ -287,6 +289,11 @@ const TrackSlugJsRoute = TrackSlugJsRouteImport.update({
   id: '/track/$slug/js',
   path: '/track/$slug/js',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SSlugWishlistRoute = SSlugWishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => SSlugRoute,
 } as any)
 const SSlugSearchRoute = SSlugSearchRouteImport.update({
   id: '/search',
@@ -1147,6 +1154,12 @@ const ApiPublicEmailResendWebhookRoute =
     path: '/api/public/email/resend-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiOrdersOrderIdTelegramMessageRoute =
+  ApiOrdersOrderIdTelegramMessageRouteImport.update({
+    id: '/api/orders/$orderId/telegram-message',
+    path: '/api/orders/$orderId/telegram-message',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiIntegrationsSyncProviderRoute =
   ApiIntegrationsSyncProviderRouteImport.update({
     id: '/api/integrations/sync/$provider',
@@ -1333,6 +1346,7 @@ export interface FileRoutesByFullPath {
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/s/$slug/checkout': typeof SSlugCheckoutRoute
   '/s/$slug/search': typeof SSlugSearchRoute
+  '/s/$slug/wishlist': typeof SSlugWishlistRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/s/$slug/': typeof SSlugIndexRoute
@@ -1340,6 +1354,7 @@ export interface FileRoutesByFullPath {
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/brand/products/$productId': typeof AuthenticatedBrandProductsProductIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
+  '/api/orders/$orderId/telegram-message': typeof ApiOrdersOrderIdTelegramMessageRoute
   '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
   '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
   '/api/public/marq/events': typeof ApiPublicMarqEventsRoute
@@ -1512,6 +1527,7 @@ export interface FileRoutesByTo {
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/s/$slug/checkout': typeof SSlugCheckoutRoute
   '/s/$slug/search': typeof SSlugSearchRoute
+  '/s/$slug/wishlist': typeof SSlugWishlistRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/s/$slug': typeof SSlugIndexRoute
@@ -1519,6 +1535,7 @@ export interface FileRoutesByTo {
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/brand/products/$productId': typeof AuthenticatedBrandProductsProductIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
+  '/api/orders/$orderId/telegram-message': typeof ApiOrdersOrderIdTelegramMessageRoute
   '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
   '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
   '/api/public/marq/events': typeof ApiPublicMarqEventsRoute
@@ -1694,6 +1711,7 @@ export interface FileRoutesById {
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/s/$slug/checkout': typeof SSlugCheckoutRoute
   '/s/$slug/search': typeof SSlugSearchRoute
+  '/s/$slug/wishlist': typeof SSlugWishlistRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/s/$slug/': typeof SSlugIndexRoute
@@ -1701,6 +1719,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/_authenticated/brand/products/$productId': typeof AuthenticatedBrandProductsProductIdRoute
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
+  '/api/orders/$orderId/telegram-message': typeof ApiOrdersOrderIdTelegramMessageRoute
   '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
   '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
   '/api/public/marq/events': typeof ApiPublicMarqEventsRoute
@@ -1876,6 +1895,7 @@ export interface FileRouteTypes {
     | '/hooks/telegram/poll'
     | '/s/$slug/checkout'
     | '/s/$slug/search'
+    | '/s/$slug/wishlist'
     | '/track/$slug/js'
     | '/admin/'
     | '/s/$slug/'
@@ -1883,6 +1903,7 @@ export interface FileRouteTypes {
     | '/admin/tenants/$tenantId'
     | '/brand/products/$productId'
     | '/api/integrations/sync/$provider'
+    | '/api/orders/$orderId/telegram-message'
     | '/api/public/email/resend-webhook'
     | '/api/public/email/unsubscribe'
     | '/api/public/marq/events'
@@ -2055,6 +2076,7 @@ export interface FileRouteTypes {
     | '/hooks/telegram/poll'
     | '/s/$slug/checkout'
     | '/s/$slug/search'
+    | '/s/$slug/wishlist'
     | '/track/$slug/js'
     | '/admin'
     | '/s/$slug'
@@ -2062,6 +2084,7 @@ export interface FileRouteTypes {
     | '/admin/tenants/$tenantId'
     | '/brand/products/$productId'
     | '/api/integrations/sync/$provider'
+    | '/api/orders/$orderId/telegram-message'
     | '/api/public/email/resend-webhook'
     | '/api/public/email/unsubscribe'
     | '/api/public/marq/events'
@@ -2236,6 +2259,7 @@ export interface FileRouteTypes {
     | '/hooks/telegram/poll'
     | '/s/$slug/checkout'
     | '/s/$slug/search'
+    | '/s/$slug/wishlist'
     | '/track/$slug/js'
     | '/_authenticated/admin/'
     | '/s/$slug/'
@@ -2243,6 +2267,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tenants/$tenantId'
     | '/_authenticated/brand/products/$productId'
     | '/api/integrations/sync/$provider'
+    | '/api/orders/$orderId/telegram-message'
     | '/api/public/email/resend-webhook'
     | '/api/public/email/unsubscribe'
     | '/api/public/marq/events'
@@ -2394,6 +2419,7 @@ export interface RootRouteChildren {
   HooksTelegramPollRoute: typeof HooksTelegramPollRoute
   TrackSlugJsRoute: typeof TrackSlugJsRoute
   ApiIntegrationsSyncProviderRoute: typeof ApiIntegrationsSyncProviderRoute
+  ApiOrdersOrderIdTelegramMessageRoute: typeof ApiOrdersOrderIdTelegramMessageRoute
   ApiPublicEmailResendWebhookRoute: typeof ApiPublicEmailResendWebhookRoute
   ApiPublicEmailUnsubscribeRoute: typeof ApiPublicEmailUnsubscribeRoute
   ApiPublicMarqEventsRoute: typeof ApiPublicMarqEventsRoute
@@ -2551,6 +2577,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/track/$slug/js'
       preLoaderRoute: typeof TrackSlugJsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/s/$slug/wishlist': {
+      id: '/s/$slug/wishlist'
+      path: '/wishlist'
+      fullPath: '/s/$slug/wishlist'
+      preLoaderRoute: typeof SSlugWishlistRouteImport
+      parentRoute: typeof SSlugRoute
     }
     '/s/$slug/search': {
       id: '/s/$slug/search'
@@ -3630,6 +3663,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicEmailResendWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/orders/$orderId/telegram-message': {
+      id: '/api/orders/$orderId/telegram-message'
+      path: '/api/orders/$orderId/telegram-message'
+      fullPath: '/api/orders/$orderId/telegram-message'
+      preLoaderRoute: typeof ApiOrdersOrderIdTelegramMessageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/integrations/sync/$provider': {
       id: '/api/integrations/sync/$provider'
       path: '/api/integrations/sync/$provider'
@@ -3796,6 +3836,7 @@ const HandbookRouteWithChildren = HandbookRoute._addFileChildren(
 interface SSlugRouteChildren {
   SSlugCheckoutRoute: typeof SSlugCheckoutRoute
   SSlugSearchRoute: typeof SSlugSearchRoute
+  SSlugWishlistRoute: typeof SSlugWishlistRoute
   SSlugIndexRoute: typeof SSlugIndexRoute
   SSlugCollectionsHandleRoute: typeof SSlugCollectionsHandleRoute
   SSlugOrdersOrderIdRoute: typeof SSlugOrdersOrderIdRoute
@@ -3805,6 +3846,7 @@ interface SSlugRouteChildren {
 const SSlugRouteChildren: SSlugRouteChildren = {
   SSlugCheckoutRoute: SSlugCheckoutRoute,
   SSlugSearchRoute: SSlugSearchRoute,
+  SSlugWishlistRoute: SSlugWishlistRoute,
   SSlugIndexRoute: SSlugIndexRoute,
   SSlugCollectionsHandleRoute: SSlugCollectionsHandleRoute,
   SSlugOrdersOrderIdRoute: SSlugOrdersOrderIdRoute,
@@ -3949,6 +3991,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksTelegramPollRoute: HooksTelegramPollRoute,
   TrackSlugJsRoute: TrackSlugJsRoute,
   ApiIntegrationsSyncProviderRoute: ApiIntegrationsSyncProviderRoute,
+  ApiOrdersOrderIdTelegramMessageRoute: ApiOrdersOrderIdTelegramMessageRoute,
   ApiPublicEmailResendWebhookRoute: ApiPublicEmailResendWebhookRoute,
   ApiPublicEmailUnsubscribeRoute: ApiPublicEmailUnsubscribeRoute,
   ApiPublicMarqEventsRoute: ApiPublicMarqEventsRoute,
