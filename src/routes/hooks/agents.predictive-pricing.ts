@@ -194,7 +194,11 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
           }
 
           const created = await insertInsightsDedup(insights);
-          await finishAgentRun(handle, created, { products_analyzed: byProduct.size });
+          await finishAgentRun(handle, created, {
+            products_analyzed: byProduct.size,
+            geo: summarizeGeo(geo, "en"),
+            items_in_scope: items.length,
+          });
           return jsonOk({ insights_created: created });
         } catch (err) {
           await failAgentRun(handle, err);
