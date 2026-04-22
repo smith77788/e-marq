@@ -219,6 +219,25 @@ export function GlobalSearch() {
     return all.filter((p) => p.label.toLowerCase().includes(q) || p.hint.toLowerCase().includes(q));
   }, [debounced, isSuperAdmin]);
 
+  // Recent visits — only when palette is open + no active query (idle state).
+  const recent = useMemo(() => {
+    if (!open || debounced.length >= 2) return [];
+    return getRecentPages().slice(0, 5);
+  }, [open, debounced]);
+
+  // Quick actions — Linear/Raycast-style. Filtered by query + admin flag.
+  const quickActions = useMemo(() => {
+    const visible = QUICK_ACTIONS.filter((a) => !a.requiresSuperAdmin || isSuperAdmin);
+    if (debounced.length < 2) return visible.slice(0, 6);
+    const q = debounced.toLowerCase();
+    return visible.filter(
+      (a) =>
+        a.label.toLowerCase().includes(q) ||
+        a.hint.toLowerCase().includes(q) ||
+        (a.keywords ?? []).some((k) => k.toLowerCase().includes(q)),
+    );
+  }, [debounced, isSuperAdmin]);
+
   const go = useCallback(
     (to: string, hash?: string) => {
       setOpen(false);
@@ -226,6 +245,24 @@ export function GlobalSearch() {
       void navigate({ to: to as never, hash });
     },
     [navigate],
+  );
+
+  const runQuickAction = useCallback(
+    (a: QuickAction) => {
+      if (a.kind === "nav" && a.to) {
+        go(a.to, a.hash);
+        return;
+      }
+      if (a.kind === "fx") {
+        if (a.fx === "toggle-theme") {
+          toggleThemeMode();
+        } else if (a.fx === "reload") {
+          if (typeof window !== "undefined") window.location.reload();
+        }
+        setOpen(false);
+      }
+    },
+    [go],
   );
 
   const showResults = debounced.length >= 2;
