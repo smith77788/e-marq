@@ -18,16 +18,22 @@ import {
   ArrowDownCircle,
   ArrowUpCircle,
   Banknote,
+  CheckCircle2,
+  Clock,
   Coins,
   Copy,
   CreditCard,
   History,
   Info,
   Loader2,
+  Phone,
   Plus,
+  Send,
   Sparkles,
   Wallet,
+  XCircle,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
