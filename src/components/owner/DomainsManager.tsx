@@ -40,8 +40,11 @@ type DomainRow = {
 
 const statusBadge = (status: string) => {
   switch (status) {
+    case "active":
     case "verified":
       return <Badge className="bg-success/15 text-success border-success/30">Verified</Badge>;
+    case "verifying":
+      return <Badge variant="outline" className="border-info/40 text-info">Verifying…</Badge>;
     case "pending":
       return <Badge variant="outline">Pending DNS</Badge>;
     case "failed":
@@ -89,18 +92,39 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
 
   const verifyMut = useMutation({
     mutationFn: async (id: string) => {
-      // Спрощено: оновлюємо last_checked_at, статус буде оновлений
-      // окремим cron-перевіряючим (поза цим UI). Тут — лише ручний пінг.
-      const { error } = await supabase
-        .from("tenant_domains")
-        .update({ last_checked_at: new Date().toISOString() })
-        .eq("id", id);
-      if (error) throw error;
+      const session = (await supabase.auth.getSession()).data.session;
+      if (!session) throw new Error("Авторизуйтеся");
+      const r = await fetch("/api/domains/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ domainId: id }),
+      });
+      const json = (await r.json().catch(() => ({}))) as {
+        ok?: boolean;
+        verified?: boolean;
+        issues?: string[];
+        error?: string;
+      };
+      if (!r.ok) throw new Error(json.error ?? `HTTP ${r.status}`);
+      return json;
     },
-    onSuccess: () => {
-      toast.success("Запит на перевірку відправлено. Статус оновиться протягом 5–60 хв.");
+    onSuccess: (data) => {
+      if (data.verified) {
+        toast.success("Домен підтверджено ✓");
+      } else {
+        toast.error(
+          data.issues && data.issues.length > 0
+            ? data.issues.join(" · ")
+            : "Перевірка не пройшла. Перевірте DNS і спробуйте ще раз.",
+        );
+      }
       qc.invalidateQueries({ queryKey: ["tenant-domains", tenantId] });
     },
+    onError: (e: unknown) =>
+      toast.error(e instanceof Error ? e.message : "Не вдалося перевірити"),
   });
 
   const setPrimaryMut = useMutation({
@@ -288,6 +312,10 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
                           <CheckCircle2 className="h-3.5 w-3.5 text-success" /> Підтверджено{" "}
                           {new Date(d.verified_at).toLocaleDateString("uk-UA")}
                         </>
+                      ) : d.status === "failed" ? (
+                        <>
+                          <XCircle className="h-3.5 w-3.5 text-destructive" /> Помилка перевірки
+                        </>
                       ) : d.last_checked_at ? (
                         <>
                           <Loader2 className="h-3.5 w-3.5 animate-spin" /> Перевіряємо…
@@ -300,6 +328,12 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
                     </div>
                   </div>
                 </div>
+
+                {d.notes && d.status !== "active" && (
+                  <p className="rounded bg-destructive/10 px-2 py-1 text-[11px] text-destructive">
+                    {d.notes}
+                  </p>
+                )}
               </div>
             ))
           )}
