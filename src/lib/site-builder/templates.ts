@@ -223,11 +223,18 @@ export function envExample(ctx: SafeBrandContext): string {
   return `# Environment variables for ${ctx.profile.brand_name}
 # DO NOT commit this file once filled in.
 
-# Your own Supabase project (create at https://lovable.dev or https://supabase.com)
+# === Your own Lovable Cloud / Supabase project ===
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-public-anon-key
 
-# Optional: payment gateways (you must register your own merchant accounts)
+# === MARQ Shared Engine (powers all 86 ACOS agents) ===
+# Get these from your MARQ dashboard → Brand → Site Builder → "Generate API key".
+# The key is shown ONCE — copy it immediately.
+VITE_MARQ_API_BASE=https://e-marq.lovable.app
+VITE_MARQ_TENANT_ID=${ctx.tenant.id}
+VITE_MARQ_PUBLIC_KEY=marq_pk_xxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxx
+
+# === Optional: payment gateways (your own merchant accounts) ===
 # LIQPAY_PUBLIC_KEY=
 # LIQPAY_PRIVATE_KEY=
 # WAYFORPAY_MERCHANT_ACCOUNT=
