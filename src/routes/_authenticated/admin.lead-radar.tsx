@@ -29,6 +29,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { OutreachHunterSection } from "@/components/admin/OutreachHunterTabs";
 import { MagnetPreviewDialog } from "@/components/admin/MagnetPreviewDialog";
+import { friendlyAgentSummary, friendlyAgentError, agentLabel } from "@/lib/outreach/agentSummary";
 
 export const Route = createFileRoute("/_authenticated/admin/lead-radar")({
   component: LeadRadarPage,
@@ -162,18 +163,19 @@ function Content() {
         body: JSON.stringify({}),
       });
       const json = (await r.json().catch(() => ({}))) as Record<string, unknown>;
-      if (!r.ok) throw new Error(String(json.error ?? "Помилка"));
-      return json;
+      if (!r.ok) throw new Error(String(json.error ?? `HTTP ${r.status}`));
+      return { agent: variant, payload: json };
     },
-    onSuccess: (data, variant) => {
-      toast.success(
-        `${variant} завершив роботу: створено ${(data as { created?: number }).created ?? 0}`,
-      );
+    onSuccess: ({ agent, payload }) => {
+      toast.success(`${agentLabel(agent)} відпрацював`, {
+        description: friendlyAgentSummary(agent, payload),
+      });
       qc.invalidateQueries({ queryKey: ["lead-prospects"] });
       qc.invalidateQueries({ queryKey: ["lead-magnets"] });
       qc.invalidateQueries({ queryKey: ["lead-outreach"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error("Не вдалося запустити агента", { description: friendlyAgentError(e.message) }),
   });
 
   const filteredProspects = useMemo(() => {
