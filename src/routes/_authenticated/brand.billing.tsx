@@ -33,32 +33,48 @@ export const Route = createFileRoute("/_authenticated/brand/billing")({
 
 function BrandBillingPage() {
   const { tenant: urlTenant } = useSearch({ from: "/_authenticated/brand/billing" });
-  const { current, currentTenantId, setCurrentTenantId } = useTenantContext();
+  const { current, currentTenantId, setCurrentTenantId, tenants, loading } = useTenantContext();
 
   // Sync URL → context
   useEffect(() => {
     if (urlTenant && urlTenant !== currentTenantId) setCurrentTenantId(urlTenant);
   }, [urlTenant, currentTenantId, setCurrentTenantId]);
 
-  const tenantId = urlTenant ?? currentTenantId ?? current?.tenant_id;
+  // Резолвимо ефективний tenantId: URL → context → перший tenant зі списку
+  const effectiveTenantId =
+    urlTenant ?? currentTenantId ?? current?.tenant_id ?? tenants[0]?.tenant_id ?? null;
 
   const summaryQuery = useQuery({
-    queryKey: ["plan-summary", tenantId],
-    enabled: !!tenantId,
+    queryKey: ["plan-summary", effectiveTenantId],
+    enabled: !!effectiveTenantId,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_tenant_plan_summary", {
-        _tenant_id: tenantId!,
+        _tenant_id: effectiveTenantId!,
       });
       if (error) throw error;
       return data as PlanSummary | null;
     },
   });
 
-  if (!tenantId) {
+  // Поки tenant context завантажується — показуємо skeleton, НЕ редіректимо
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Завантаження…</CardTitle>
+          <CardDescription>Підбираємо ваш бренд</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  // Реально немає брендів
+  if (!effectiveTenantId) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Бренд не обрано</CardTitle>
+          <CardDescription>У вас ще немає підключених брендів.</CardDescription>
         </CardHeader>
         <CardContent>
           <Link to="/brand" className="text-primary hover:underline">
@@ -70,16 +86,17 @@ function BrandBillingPage() {
   }
 
   const summary = summaryQuery.data;
+  const activeTenant = tenants.find((t) => t.tenant_id === effectiveTenantId) ?? current;
 
   return (
     <div className="space-y-6">
       <div>
         <Link
           to="/brand"
-          search={{ tenant: tenantId }}
+          search={{ tenant: effectiveTenantId }}
           className="text-xs text-muted-foreground hover:text-foreground"
         >
-          ← Назад до {current?.tenant_name ?? "брендa"}
+          ← Назад до {activeTenant?.tenant_name ?? "бренда"}
         </Link>
         <h1 className="mt-2 text-2xl font-bold tracking-tight">Тарифний план</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -109,9 +126,14 @@ function BrandBillingPage() {
         </Card>
       )}
 
-      <BalanceCard tenantId={tenantId} tenantSlug={current?.tenant_slug ?? "brand"} />
+      <BalanceCard
+        tenantId={effectiveTenantId}
+        tenantSlug={activeTenant?.tenant_slug ?? "brand"}
+      />
 
-      {summary && <OwnerPlanSwitcher tenantId={tenantId} currentPlanKey={summary.plan.key} />}
+      {summary && (
+        <OwnerPlanSwitcher tenantId={effectiveTenantId} currentPlanKey={summary.plan.key} />
+      )}
     </div>
   );
 }
