@@ -370,12 +370,11 @@ function Content() {
               ) : (
                 <div className="divide-y divide-border">
                   {(magnets.data ?? []).map((m) => (
-                    <a
+                    <button
                       key={m.id}
-                      href={`/m/${m.slug}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block px-4 py-3 transition-colors hover:bg-muted/40"
+                      type="button"
+                      onClick={() => setPreviewSlug(m.slug)}
+                      className="block w-full text-left px-4 py-3 transition-colors hover:bg-muted/40"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="min-w-0">
@@ -394,7 +393,7 @@ function Content() {
                           )}
                         </div>
                       </div>
-                    </a>
+                    </button>
                   ))}
                 </div>
               )}
