@@ -3443,6 +3443,219 @@ export type Database = {
           },
         ]
       }
+      site_brand_profiles: {
+        Row: {
+          about_copy: string | null
+          accent_color: string
+          address: string | null
+          brand_name: string
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          currency: string
+          custom_domain: string | null
+          description: string | null
+          favicon_url: string | null
+          font_family: string
+          food_categories_seed: Json
+          hero_copy: string | null
+          id: string
+          legal_entity: string | null
+          legal_pages: Json
+          locale: string
+          logo_url: string | null
+          og_image_url: string | null
+          primary_color: string
+          social_links: Json
+          tagline: string | null
+          template_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          about_copy?: string | null
+          accent_color?: string
+          address?: string | null
+          brand_name: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          currency?: string
+          custom_domain?: string | null
+          description?: string | null
+          favicon_url?: string | null
+          font_family?: string
+          food_categories_seed?: Json
+          hero_copy?: string | null
+          id?: string
+          legal_entity?: string | null
+          legal_pages?: Json
+          locale?: string
+          logo_url?: string | null
+          og_image_url?: string | null
+          primary_color?: string
+          social_links?: Json
+          tagline?: string | null
+          template_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          about_copy?: string | null
+          accent_color?: string
+          address?: string | null
+          brand_name?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          currency?: string
+          custom_domain?: string | null
+          description?: string | null
+          favicon_url?: string | null
+          font_family?: string
+          food_categories_seed?: Json
+          hero_copy?: string | null
+          id?: string
+          legal_entity?: string | null
+          legal_pages?: Json
+          locale?: string
+          logo_url?: string | null
+          og_image_url?: string | null
+          primary_color?: string
+          social_links?: Json
+          tagline?: string | null
+          template_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_brand_profiles_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "site_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_brand_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_builds: {
+        Row: {
+          archive_path: string | null
+          archive_sha256: string | null
+          archive_size_bytes: number | null
+          created_at: string
+          error: string | null
+          finished_at: string | null
+          id: string
+          manifest: Json
+          requested_by: string | null
+          started_at: string | null
+          status: string
+          template_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          archive_path?: string | null
+          archive_sha256?: string | null
+          archive_size_bytes?: number | null
+          created_at?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          manifest?: Json
+          requested_by?: string | null
+          started_at?: string | null
+          status?: string
+          template_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          archive_path?: string | null
+          archive_sha256?: string | null
+          archive_size_bytes?: number | null
+          created_at?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          manifest?: Json
+          requested_by?: string | null
+          started_at?: string | null
+          status?: string
+          template_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_builds_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "site_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_builds_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_templates: {
+        Row: {
+          capabilities: Json
+          created_at: string
+          default_locale: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          preview_url: string | null
+          source_commit: string | null
+          source_project_id: string | null
+          template_key: string
+          updated_at: string
+        }
+        Insert: {
+          capabilities?: Json
+          created_at?: string
+          default_locale?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          preview_url?: string | null
+          source_commit?: string | null
+          source_project_id?: string | null
+          template_key: string
+          updated_at?: string
+        }
+        Update: {
+          capabilities?: Json
+          created_at?: string
+          default_locale?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          preview_url?: string | null
+          source_commit?: string | null
+          source_project_id?: string | null
+          template_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       social_proof_events: {
         Row: {
           created_at: string
