@@ -39,9 +39,11 @@ import {
 } from "@/components/ui/command";
 import { useT } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
+import { useTenantContext } from "@/hooks/useTenantContext";
 import { supabase } from "@/integrations/supabase/client";
 import { getRecentPages } from "@/lib/recentPages";
 import { QUICK_ACTIONS, toggleThemeMode, type QuickAction } from "@/lib/quickActions";
+import { AiAskPanel } from "@/components/layout/AiAskPanel";
 
 type StaticEntry = {
   label: string;
@@ -130,10 +132,13 @@ function useDebounced<T>(value: T, ms: number): T {
 export function GlobalSearch() {
   const { t } = useT();
   const { user, isSuperAdmin } = useAuth();
+  const { currentTenantId } = useTenantContext();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const debounced = useDebounced(query.trim(), 220);
+  const isAiMode = query.trimStart().startsWith("?") || query.trimStart().startsWith(">");
+  const aiQuestion = isAiMode ? query.trimStart().replace(/^[?>]+\s*/, "") : "";
 
   // ⌘K / Ctrl+K shortcut
   useEffect(() => {
@@ -166,7 +171,7 @@ export function GlobalSearch() {
     staleTime: 60_000,
   });
 
-  const enabled = open && debounced.length >= 2 && tenantIds.length > 0;
+  const enabled = open && !isAiMode && debounced.length >= 2 && tenantIds.length > 0;
 
   const { data: results, isFetching } = useQuery({
     queryKey: ["gs-results", debounced, tenantIds.join(",")],
@@ -308,25 +313,33 @@ export function GlobalSearch() {
         <Search className="h-4 w-4" aria-hidden="true" />
       </Button>
 
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={!isAiMode}>
         <CommandInput
           placeholder={t("gs.inputPlaceholder")}
           value={query}
           onValueChange={setQuery}
         />
         <CommandList>
-          {isFetching && showResults && (
+          {isAiMode && (
+            <AiAskPanel
+              tenantId={currentTenantId}
+              question={aiQuestion}
+              onNavigate={(to) => go(to)}
+            />
+          )}
+
+          {!isAiMode && isFetching && showResults && (
             <div className="flex items-center justify-center py-3 text-xs text-muted-foreground">
               <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
               {t("gs.searching")}
             </div>
           )}
 
-          {showResults && !isFetching && !hasAnyResult && pages.length === 0 && (
+          {!isAiMode && showResults && !isFetching && !hasAnyResult && pages.length === 0 && (
             <CommandEmpty>{t("gs.noResults")}</CommandEmpty>
           )}
 
-          {recent.length > 0 && (
+          {!isAiMode && recent.length > 0 && (
             <CommandGroup heading={t("gs.groupRecent")}>
               {recent.map((r) => (
                 <CommandItem
@@ -344,7 +357,7 @@ export function GlobalSearch() {
             </CommandGroup>
           )}
 
-          {quickActions.length > 0 && (
+          {!isAiMode && quickActions.length > 0 && (
             <>
               {recent.length > 0 && <CommandSeparator />}
               <CommandGroup heading={t("gs.groupActions")}>
@@ -368,7 +381,7 @@ export function GlobalSearch() {
             </>
           )}
 
-          {pages.length > 0 && (
+          {!isAiMode && pages.length > 0 && (
             <>
               {(recent.length > 0 || quickActions.length > 0) && <CommandSeparator />}
               <CommandGroup heading={t("gs.groupPages")}>
@@ -392,7 +405,7 @@ export function GlobalSearch() {
             </>
           )}
 
-          {showResults && results && results.products.length > 0 && (
+          {!isAiMode && showResults && results && results.products.length > 0 && (
             <>
               <CommandSeparator />
               <CommandGroup heading={t("gs.groupProducts")}>
@@ -415,7 +428,7 @@ export function GlobalSearch() {
             </>
           )}
 
-          {showResults && results && results.orders.length > 0 && (
+          {!isAiMode && showResults && results && results.orders.length > 0 && (
             <>
               <CommandSeparator />
               <CommandGroup heading={t("gs.groupOrders")}>
@@ -438,7 +451,7 @@ export function GlobalSearch() {
             </>
           )}
 
-          {showResults && results && results.customers.length > 0 && (
+          {!isAiMode && showResults && results && results.customers.length > 0 && (
             <>
               <CommandSeparator />
               <CommandGroup heading={t("gs.groupCustomers")}>
@@ -461,7 +474,7 @@ export function GlobalSearch() {
             </>
           )}
 
-          {showResults && results && results.insights.length > 0 && (
+          {!isAiMode && showResults && results && results.insights.length > 0 && (
             <>
               <CommandSeparator />
               <CommandGroup heading={t("gs.groupInsights")}>
@@ -482,8 +495,11 @@ export function GlobalSearch() {
             </>
           )}
 
-          {!showResults && (
-            <div className="px-3 py-2 text-[11px] text-muted-foreground">{t("gs.tipMinChars")}</div>
+          {!isAiMode && !showResults && (
+            <div className="px-3 py-2 text-[11px] text-muted-foreground">
+              {t("gs.tipMinChars")}
+              <span className="mt-1 block text-primary/80">{t("gs.aiTriggerHint")}</span>
+            </div>
           )}
         </CommandList>
       </CommandDialog>
