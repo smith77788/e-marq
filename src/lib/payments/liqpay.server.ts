@@ -1,0 +1,93 @@
+/**
+ * LiqPay (Privat24) — server-only helpers.
+ *
+ * Документація: https://www.liqpay.ua/documentation/api
+ *
+ * Підпис: base64( SHA1( private_key + data + private_key ) ),
+ * де data = base64(JSON.stringify(params)).
+ *
+ * Server only — private_key НЕ можна виставляти клієнту.
+ */
+import { createHash } from "node:crypto";
+
+const LIQPAY_CHECKOUT_URL = "https://www.liqpay.ua/api/3/checkout";
+
+export type LiqPayParams = {
+  publicKey: string;
+  privateKey: string;
+  amount: number; // у валюті (наприклад 350.50 UAH)
+  currency: string; // UAH | USD | EUR
+  description: string;
+  orderId: string;
+  resultUrl: string; // куди редіректнути користувача після оплати (UI)
+  serverUrl: string; // куди LiqPay POST'не webhook
+};
+
+export type LiqPayInitOutput = {
+  data: string;
+  signature: string;
+  checkoutUrl: string;
+};
+
+function base64(input: string): string {
+  return Buffer.from(input, "utf8").toString("base64");
+}
+
+function sha1Base64(input: string): string {
+  return createHash("sha1").update(input, "utf8").digest("base64");
+}
+
+export function buildLiqPayCheckout(p: LiqPayParams): LiqPayInitOutput {
+  const params = {
+    public_key: p.publicKey,
+    version: 3,
+    action: "pay",
+    amount: Number(p.amount.toFixed(2)),
+    currency: p.currency,
+    description: p.description,
+    order_id: p.orderId,
+    result_url: p.resultUrl,
+    server_url: p.serverUrl,
+    sandbox: 0,
+  };
+  const data = base64(JSON.stringify(params));
+  const signature = sha1Base64(p.privateKey + data + p.privateKey);
+  return { data, signature, checkoutUrl: LIQPAY_CHECKOUT_URL };
+}
+
+export function verifyLiqPaySignature(
+  privateKey: string,
+  data: string,
+  signature: string,
+): boolean {
+  if (!data || !signature || !privateKey) return false;
+  const expected = sha1Base64(privateKey + data + privateKey);
+  // Constant-time compare
+  if (expected.length !== signature.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) {
+    diff |= expected.charCodeAt(i) ^ signature.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+export type LiqPayCallbackPayload = {
+  status: string; // success | failure | error | reversed | sandbox | wait_accept | ...
+  order_id: string;
+  amount: number;
+  currency: string;
+  transaction_id?: number | string;
+  payment_id?: number | string;
+  err_code?: string;
+  err_description?: string;
+};
+
+export function parseLiqPayCallback(data: string): LiqPayCallbackPayload {
+  const json = Buffer.from(data, "base64").toString("utf8");
+  return JSON.parse(json) as LiqPayCallbackPayload;
+}
+
+/** Статуси, які LiqPay вважає успішною оплатою. */
+export function isLiqPaySuccess(status: string): boolean {
+  return status === "success" || status === "wait_compensation" || status === "sandbox";
+}
