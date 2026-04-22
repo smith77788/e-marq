@@ -33,6 +33,8 @@ import {
   fullIndexCss,
   brandRemixGuide,
   seedJson,
+  marqClientTs,
+  agentsReadme,
 } from "./templates";
 
 export type BuiltArchive = {
