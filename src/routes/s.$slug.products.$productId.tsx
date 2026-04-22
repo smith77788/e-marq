@@ -17,6 +17,7 @@ import {
 import { useStorefrontCart, track } from "@/lib/storefront/cartContext";
 import { formatMoneyExact } from "@/lib/money";
 import { RestockSubscribe } from "@/components/storefront/RestockSubscribe";
+import { canonicalUrl } from "@/lib/seo";
 
 export const Route = createFileRoute("/s/$slug/products/$productId")({
   loader: ({ params }) => loadProductDetail(params.slug, params.productId),
@@ -37,7 +38,7 @@ export const Route = createFileRoute("/s/$slug/products/$productId")({
       links: [
         {
           rel: "canonical",
-          href: `/s/${params.slug}/products/${params.productId}`,
+          href: canonicalUrl(`/s/${params.slug}/products/${params.productId}`),
         },
       ],
     };
