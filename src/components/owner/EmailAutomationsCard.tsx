@@ -130,7 +130,7 @@ export function EmailAutomationsCard({ tenantId }: { tenantId: string }) {
       };
       const { error } = await supabase
         .from("tenant_configs")
-        .update({ features: updatedFeatures as unknown as Record<string, unknown> })
+        .update({ features: updatedFeatures as never })
         .eq("tenant_id", tenantId);
       if (error) throw error;
       return next;
