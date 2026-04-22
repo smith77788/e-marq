@@ -4,15 +4,17 @@
  */
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Crown } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { UsageMeters, type PlanSummary } from "@/components/admin/UsageMeters";
 import { PlanBadge } from "@/components/admin/PlanBadge";
 import { OwnerPlanSwitcher } from "@/components/owner/OwnerPlanSwitcher";
 import { BalanceCard } from "@/components/owner/BalanceCard";
+import { trackBilling } from "@/lib/billingTelemetry";
 
 type Search = { tenant?: string };
 
