@@ -188,7 +188,7 @@ function useRunAgent() {
       });
       const json = (await r.json().catch(() => ({}))) as Record<string, unknown>;
       if (!r.ok) throw new Error(String(json.error ?? `HTTP ${r.status}`));
-      return { agent, ...json };
+      return { agent, ...json } as { agent: string; summary?: unknown };
     },
     onSuccess: (data) => {
       toast.success(`Агент ${data.agent} відпрацював`, {
