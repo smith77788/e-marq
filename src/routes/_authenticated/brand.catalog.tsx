@@ -13,6 +13,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { FolderTree, Pencil, Plus, Trash2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -346,7 +347,9 @@ function BrandCollectionsPage() {
 
       <Card>
         <CardContent className="p-0">
-          {isEmpty ? (
+          {collectionsQuery.isLoading ? (
+            <TableSkeleton rows={5} columns={5} />
+          ) : isEmpty ? (
             <EmptyState
               variant="inline"
               icon={FolderTree}
