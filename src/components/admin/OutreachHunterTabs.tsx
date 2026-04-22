@@ -34,6 +34,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
+import { friendlyAgentSummary, friendlyAgentError, agentLabel } from "@/lib/outreach/agentSummary";
 
 // ───────── Типи ─────────
 type OutreachLead = {
@@ -188,20 +189,18 @@ function useRunAgent() {
       });
       const json = (await r.json().catch(() => ({}))) as Record<string, unknown>;
       if (!r.ok) throw new Error(String(json.error ?? `HTTP ${r.status}`));
-      return { agent, ...json } as { agent: string; summary?: unknown };
+      return { agent, payload: json } as { agent: string; payload: unknown };
     },
-    onSuccess: (data) => {
-      toast.success(`Агент ${data.agent} відпрацював`, {
-        description:
-          typeof data.summary === "object" && data.summary !== null
-            ? JSON.stringify(data.summary).slice(0, 200)
-            : undefined,
+    onSuccess: ({ agent, payload }) => {
+      toast.success(`${agentLabel(agent)} відпрацював`, {
+        description: friendlyAgentSummary(agent, payload),
       });
       qc.invalidateQueries({ queryKey: ["outreach-leads"] });
       qc.invalidateQueries({ queryKey: ["outreach-actions"] });
       qc.invalidateQueries({ queryKey: ["outreach-metrics"] });
     },
-    onError: (e: Error) => toast.error("Помилка запуску", { description: e.message }),
+    onError: (e: Error) =>
+      toast.error("Не вдалося запустити агента", { description: friendlyAgentError(e.message) }),
   });
 }
 

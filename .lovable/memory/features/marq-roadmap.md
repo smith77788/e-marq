@@ -207,3 +207,11 @@ type: feature
 - [ ] Loading через Skeleton
 - [ ] Errors через sonner toast
 - [ ] Нові агенти видно в AcosAgentRuns
+
+### Sprint 13 — Human-friendly agent toasts ✅
+- `src/lib/outreach/agentSummary.ts`: friendlyAgentSummary / friendlyAgentError / agentLabel
+- Toast більше не показує сирий JSON `{"<tenantId>":{"skipped":"instagram_inactive"}}`
+- Замість `instagram_inactive` користувач бачить "Instagram вимкнено в налаштуваннях outreach"
+- Зведена статистика по N проєктах + людський plural ("3 нових записи у 2 проєктах")
+- Підказки (hint) автоматично додаються до toast (наприклад про відсутність INSTAGRAM_RSS_URL)
+- Застосовано в Lead Radar (admin.lead-radar.tsx) та Outreach Hunter (OutreachHunterTabs.tsx)
