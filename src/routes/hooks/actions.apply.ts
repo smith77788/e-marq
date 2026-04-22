@@ -119,6 +119,22 @@ export const Route = createFileRoute("/hooks/actions/apply")({
           agent_id: "orchestrator",
         };
 
+        // Permission enforcement: when triggered by cron (autonomous loop),
+        // only proceed if the owner has set this agent to `auto` mode AND the
+        // insight risk does not exceed the configured ceiling. Manual
+        // applications by owners/admins always pass through.
+        if (ctx.kind === "cron") {
+          const risk = (ins as unknown as { risk_level?: "low" | "medium" | "high" }).risk_level ?? "medium";
+          const { data: allowed } = await supabaseAdmin.rpc("can_auto_apply_action", {
+            _tenant_id: ins.tenant_id,
+            _agent_id: mapping.agent_id,
+            _risk: risk,
+          });
+          if (!allowed) {
+            return jsonOk({ skipped: true, reason: "permissions_blocked", agent_id: mapping.agent_id, risk });
+          }
+        }
+
         const m = ins.metrics as {
           product_id?: string;
           email?: string;
