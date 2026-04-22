@@ -319,8 +319,6 @@ function BrandPromotionsPage() {
         </Button>
       </div>
 
-      <EmailCampaignsCard tenantId={tenantId!} />
-
       <LoyaltyCard tenantId={tenantId!} />
 
       <Card>

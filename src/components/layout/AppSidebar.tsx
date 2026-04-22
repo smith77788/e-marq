@@ -13,6 +13,7 @@ import {
   Layers,
   LayoutDashboard,
   Lightbulb,
+  Mail,
   Package,
   Plug,
   Puzzle,
@@ -65,6 +66,7 @@ const OWNER_NAV: { labelKey: TKey; items: NavItem[] }[] = [
       { labelKey: "sb.orders", to: "/brand/orders", icon: ShoppingCart },
       { labelKey: "sb.collections", to: "/brand/catalog", icon: Layers },
       { labelKey: "sb.promotions", to: "/brand/promotions", icon: Tag },
+      { labelKey: "sb.email" as TKey, to: "/brand/email", icon: Mail },
     ],
   },
   {
