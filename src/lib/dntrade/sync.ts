@@ -123,7 +123,7 @@ export async function syncDnTradeProducts(
     fetched += items.length;
 
     const dnIds = items.map((p) => p.product_id).filter(Boolean);
-    let byDnId = new Map<string, string>();
+    const byDnId = new Map<string, string>();
     if (!opts.dryRun && dnIds.length > 0) {
       const { data: existing } = await sb
         .from("products")

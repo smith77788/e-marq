@@ -87,7 +87,6 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
   const [result, setResult] = useState<ImportResult | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
 
-  const Icon = integration?.icon;
   const isFileBased = integration?.method === "csv" || integration?.method === "sheets";
   const isApiKey = integration?.method === "apiKey";
   const isWebhook = integration?.method === "webhook";
@@ -154,6 +153,9 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
     },
     onError: (e: Error) => toast.error(MSG.errSave, { description: e.message }),
   });
+
+  if (!integration) return null;
+  const Icon = integration.icon;
 
   async function runImportNow() {
     if (!parsedFile || !integration) return;
