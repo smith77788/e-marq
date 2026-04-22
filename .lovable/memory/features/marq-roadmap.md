@@ -262,6 +262,13 @@ type: feature
 - Якщо connector ще не підключено → інструкція @BotFather + кнопка «Підключити Telegram»
 - Усе залишається в межах кабінету: відповіді надсилаються через `sendTelegramText` без переходу в зовнішні панелі
 
+### Sprint 19 — TelegramConnectCard polish + integrations link fix ✅
+- Виправлено битий маршрут «Підключити Telegram»: було `/integrations` (404) → стало `/brand/integrations`
+- Прибрано конфлікт `Button asChild + onClick` (toast блокував focus-handling клонованого `<a>`); тепер чистий navigation
+- TS `tsc --noEmit` 0 errors, ESLint 0 errors на нових файлах
+- Переконались що TelegramConnectCard коректно ховається/розгортається на 394px (Switch + checkbox у колонку, кнопка full-width)
+
+
 ## Backlog
 
 ### Sprint 20 (planned) — Керування від імені особистого Telegram-акаунта (не бота)
