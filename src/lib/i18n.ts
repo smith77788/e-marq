@@ -484,6 +484,7 @@ const dict = {
     "hb.toc.pricing": "Скільки коштує",
     "hb.toc.quickstart": "Швидкий старт",
     "hb.toc.faq": "Часті питання",
+    "hb.openFullPage": "Відкрити повний посібник",
 
     // What is MARQ
     "hb.what.eyebrow": "Що таке MARQ",
@@ -1844,6 +1845,7 @@ const dict = {
     "hb.toc.pricing": "Pricing",
     "hb.toc.quickstart": "Quick start",
     "hb.toc.faq": "FAQ",
+    "hb.openFullPage": "Open full handbook",
     "hb.what.eyebrow": "What MARQ is",
     "hb.what.title": "It's like cruise control for your store",
     "hb.what.lead":
