@@ -154,10 +154,7 @@ function BrandBillingPage() {
         </Card>
       )}
 
-      <BalanceCard
-        tenantId={effectiveTenantId}
-        tenantSlug={activeTenant?.tenant_slug ?? "brand"}
-      />
+      <BalanceCard tenantId={effectiveTenantId} tenantSlug={activeTenant?.tenant_slug ?? "brand"} />
 
       {summary && (
         <OwnerPlanSwitcher tenantId={effectiveTenantId} currentPlanKey={summary.plan.key} />
