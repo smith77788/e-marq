@@ -48,6 +48,8 @@ import { useT, type TKey } from "@/lib/i18n";
 type NavItem = {
   labelKey: TKey;
   to: string;
+  /** Optional hash anchor (`#section`) appended to the link href. */
+  hash?: string;
   icon: typeof LayoutDashboard;
   exact?: boolean;
   /** Tailwind text-color class for the icon when inactive (group accent). */
