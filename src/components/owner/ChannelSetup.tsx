@@ -69,12 +69,17 @@ export function ChannelSetup({ tenantId, tenantSlug }: Props) {
           </div>
           <div className="flex gap-2">
             <Input readOnly value={deepLink} className="font-mono text-xs" />
-            <Button size="sm" variant="outline" onClick={() => copy(deepLink, "Посилання")}>
-              <Copy className="h-3.5 w-3.5" />
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => copy(deepLink, "Посилання")}
+              aria-label="Копіювати посилання"
+            >
+              <Copy className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
             <Button size="sm" variant="outline" asChild>
-              <a href={deepLink} target="_blank" rel="noreferrer">
-                <ExternalLink className="h-3.5 w-3.5" />
+              <a href={deepLink} target="_blank" rel="noreferrer" aria-label="Відкрити посилання у новій вкладці">
+                <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
               </a>
             </Button>
           </div>

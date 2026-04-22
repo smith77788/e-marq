@@ -181,8 +181,13 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
                   </div>
                   <div className="flex items-center gap-1">
                     <Button size="sm" variant="ghost" onClick={() => copyInviteLink(inv.token)}>Копіювати посилання</Button>
-                    <Button size="sm" variant="ghost" onClick={() => cancelInvite.mutate(inv.id)}>
-                      <Trash2 className="h-3.5 w-3.5" />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => cancelInvite.mutate(inv.id)}
+                      aria-label={`Скасувати запрошення для ${inv.email}`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                     </Button>
                   </div>
                 </li>
@@ -215,8 +220,13 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
                         <SelectItem value="owner">Власник</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Button size="sm" variant="ghost" onClick={() => removeMember.mutate(m.user_id)}>
-                      <Trash2 className="h-3.5 w-3.5" />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => removeMember.mutate(m.user_id)}
+                      aria-label="Видалити учасника"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                     </Button>
                   </div>
                 </li>
