@@ -313,7 +313,7 @@ export function GlobalSearch() {
         <Search className="h-4 w-4" aria-hidden="true" />
       </Button>
 
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={!isAiMode}>
         <CommandInput
           placeholder={t("gs.inputPlaceholder")}
           value={query}
