@@ -95,8 +95,20 @@ export function PlanUsageCard({ tenantId }: { tenantId: string }) {
             size="sm"
             variant="outline"
             type="button"
-            onClick={() => void navigate({ to: "/brand/billing", search: { tenant: tenantId } })}
+            disabled={tenantLoading || !tenantId || !data || isError}
+            aria-busy={tenantLoading || isLoading}
+            onClick={() => {
+              trackBilling(tenantId, "billing.cta_click", { plan_key: data.plan.key });
+              void navigate({ to: "/brand/billing", search: { tenant: tenantId } }).catch((e) => {
+                trackBilling(tenantId, "billing.nav_failed", {
+                  error: e instanceof Error ? e.message : String(e),
+                });
+              });
+            }}
           >
+            {tenantLoading || isLoading ? (
+              <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+            ) : null}
             Оплата та баланс <ExternalLink className="ml-1 h-3 w-3" />
           </Button>
         </div>
