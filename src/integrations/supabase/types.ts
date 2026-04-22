@@ -4164,6 +4164,68 @@ export type Database = {
         }
         Relationships: []
       }
+      topup_requests: {
+        Row: {
+          amount_cents: number
+          contact: string | null
+          created_at: string
+          credits: number
+          currency: string
+          handled_at: string | null
+          handled_by: string | null
+          id: string
+          manager_note: string | null
+          note: string | null
+          payment_method: string
+          requested_by: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          contact?: string | null
+          created_at?: string
+          credits: number
+          currency?: string
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          manager_note?: string | null
+          note?: string | null
+          payment_method?: string
+          requested_by?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          contact?: string | null
+          created_at?: string
+          credits?: number
+          currency?: string
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          manager_note?: string | null
+          note?: string | null
+          payment_method?: string
+          requested_by?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topup_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ugc_items: {
         Row: {
           body: string | null
