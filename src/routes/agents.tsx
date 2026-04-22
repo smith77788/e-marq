@@ -3,6 +3,7 @@ import { Boxes, Search, ShoppingCart, Sparkles, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { MarketingHeader, MarketingFooter } from "@/components/marketing/MarketingShell";
 import { useT, tStatic } from "@/lib/i18n";
 
 export const Route = createFileRoute("/agents")({
@@ -58,6 +59,7 @@ function Agents() {
 
   return (
     <main className="min-h-screen bg-background">
+      <MarketingHeader />
       <section className="border-b border-border bg-gradient-to-br from-primary/10 via-background to-background">
         <div className="mx-auto max-w-4xl px-4 py-16 text-center">
           <Badge variant="outline" className="border-primary/30 bg-primary/5 text-primary">
@@ -115,6 +117,7 @@ function Agents() {
           <Button asChild size="lg"><Link to="/signup">{t("ag.runOnStore")}</Link></Button>
         </div>
       </section>
+      <MarketingFooter />
     </main>
   );
 }

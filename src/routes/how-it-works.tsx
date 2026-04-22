@@ -3,6 +3,7 @@ import { ArrowRight, Brain, CheckCircle2, Database, RefreshCw, Sparkles, Zap } f
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { MarketingHeader, MarketingFooter } from "@/components/marketing/MarketingShell";
 import { useT, tStatic } from "@/lib/i18n";
 
 export const Route = createFileRoute("/how-it-works")({
@@ -30,6 +31,7 @@ function HowItWorks() {
 
   return (
     <main className="min-h-screen bg-background">
+      <MarketingHeader />
       <section className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-background" />
         <div className="relative mx-auto max-w-4xl px-4 py-20 text-center">
@@ -101,6 +103,7 @@ function HowItWorks() {
           </div>
         </div>
       </section>
+      <MarketingFooter />
     </main>
   );
 }
