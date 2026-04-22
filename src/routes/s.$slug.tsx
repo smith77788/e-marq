@@ -81,7 +81,7 @@ function StorefrontLayout() {
   const { slug } = Route.useParams();
   const initial = Route.useLoaderData();
 
-  const { data } = useQuery<Awaited<ReturnType<typeof loadStorefrontShell>>>({
+  const { data } = useQuery<StorefrontShell>({
     queryKey: ["storefront-shell", slug],
     queryFn: () => loadStorefrontShell(slug),
     initialData: initial,
