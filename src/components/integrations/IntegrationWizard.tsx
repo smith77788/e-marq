@@ -501,8 +501,9 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
                         size="icon"
                         variant="outline"
                         onClick={() => copy(saveConn.data!.webhook_secret!)}
+                        aria-label="Копіювати секретний підпис"
                       >
-                        <Copy className="h-4 w-4" />
+                        <Copy className="h-4 w-4" aria-hidden="true" />
                       </Button>
                     </div>
                   </div>
