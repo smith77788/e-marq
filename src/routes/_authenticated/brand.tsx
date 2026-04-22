@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Bot, Settings } from "lucide-react";
+import { Bot, Settings, Wand2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { useTenantContext } from "@/hooks/useTenantContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
 import { RevenueFeed } from "@/components/owner/RevenueFeed";
@@ -39,95 +39,96 @@ export const Route = createFileRoute("/_authenticated/brand")({
 });
 
 function BrandPage() {
-  const { tenant: tenantId } = useSearch({ from: "/_authenticated/brand" });
-  const { user, loading } = useAuth();
+  const { tenant: tenantSearchId } = useSearch({ from: "/_authenticated/brand" });
+  const { loading: authLoading } = useAuth();
   const { t } = useT();
   const navigate = useNavigate();
+  const { tenants, current, currentTenantId, setCurrentTenantId, loading } = useTenantContext();
 
-  const { data: tenants } = useQuery({
-    queryKey: ["my-tenants", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tenants")
-        .select("id, name, slug, status")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
-  // Auto-select first tenant if none in URL
+  // Sync ?tenant=… in URL with the global tenant context (in either direction).
   useEffect(() => {
-    if (!tenantId && tenants && tenants.length > 0) {
-      navigate({ to: "/brand", search: { tenant: tenants[0].id }, replace: true });
+    if (loading) return;
+    // 1) URL has tenant → activate it in context
+    if (tenantSearchId && tenantSearchId !== currentTenantId) {
+      const found = tenants.find((tt) => tt.tenant_id === tenantSearchId);
+      if (found) {
+        setCurrentTenantId(tenantSearchId);
+        return;
+      }
     }
-  }, [tenantId, tenants, navigate]);
+    // 2) URL has no tenant but context does → push to URL (replace)
+    if (!tenantSearchId && currentTenantId) {
+      void navigate({
+        to: "/brand",
+        search: { tenant: currentTenantId },
+        replace: true,
+      });
+    }
+  }, [tenantSearchId, currentTenantId, tenants, loading, navigate, setCurrentTenantId]);
 
-  const current = tenants?.find((t) => t.id === tenantId);
-
-  if (loading) return <p className="text-sm text-muted-foreground">Завантаження…</p>;
+  if (authLoading || loading) {
+    return <p className="text-sm text-muted-foreground">{t("common.loading")}</p>;
+  }
 
   if (!tenants || tenants.length === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>У вас ще немає бренду</CardTitle>
-          <CardDescription>
-            Попросіть супер-адміністратора створити бренд і призначити вас власником.
-          </CardDescription>
+          <CardTitle>{t("brand.noBrandTitle")}</CardTitle>
+          <CardDescription>{t("brand.noBrandDesc")}</CardDescription>
         </CardHeader>
       </Card>
     );
   }
 
   if (!current) {
-    return <p className="text-sm text-muted-foreground">Завантажую бренд…</p>;
+    return <p className="text-sm text-muted-foreground">{t("brand.loadingBrand")}</p>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
               <Bot className="h-4 w-4 text-primary-foreground" />
             </span>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">{current.name}</h1>
-            <Badge variant="outline" className="font-mono text-[10px]">/{current.slug}</Badge>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">{current.tenant_name}</h1>
+            <Badge variant="outline" className="font-mono text-[10px]">/{current.tenant_slug}</Badge>
             <Badge variant="outline" className="border-success/40 text-success text-[10px]">
               <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
               {t("brand.live")}
             </Badge>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("brand.missionSubtitle")}
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("brand.missionSubtitle")}</p>
         </div>
-        {tenants.length > 1 && (
-          <select
-            className="h-9 rounded-md border border-border bg-background px-3 text-sm"
-            value={tenantId}
-            onChange={(e) => navigate({ to: "/brand", search: { tenant: e.target.value } })}
-          >
-            {tenants.map((t) => (
-              <option key={t.id} value={t.id}>{t.name}</option>
-            ))}
-          </select>
-        )}
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/brand/site-builder">
+              <Wand2 className="mr-1.5 h-3.5 w-3.5 text-accent" />
+              Конструктор сайту
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/s/$slug" params={{ slug: current.tenant_slug }}>
+              <Settings className="mr-1.5 h-3.5 w-3.5 text-primary" />
+              Відкрити магазин
+            </Link>
+          </Button>
+        </div>
       </div>
 
-      <SetupChecklist tenantId={current.id} tenantSlug={current.slug} />
+      <SetupChecklist tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
 
-      <SetupReadinessCard tenantId={current.id} tenantSlug={current.slug} />
+      <SetupReadinessCard tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
 
-      <PlanUsageCard tenantId={current.id} />
+      <PlanUsageCard tenantId={current.tenant_id} />
 
-      <OwnerTelegramBindCard tenantId={current.id} tenantSlug={current.slug} />
+      <OwnerTelegramBindCard tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
 
-      <DnTradeIntegrationCard tenantId={current.id} />
+      <DnTradeIntegrationCard tenantId={current.tenant_id} />
 
-      <CockpitHero tenantId={current.id} />
+      <CockpitHero tenantId={current.tenant_id} />
 
       <AnalyticsWindowProvider initial={30}>
         <div className="flex items-center justify-between">
@@ -136,40 +137,40 @@ function BrandPage() {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">
-          <div className="lg:col-span-2"><RevenueTrendChart tenantId={current.id} /></div>
-          <FunnelChart tenantId={current.id} />
+          <div className="lg:col-span-2"><RevenueTrendChart tenantId={current.tenant_id} /></div>
+          <FunnelChart tenantId={current.tenant_id} />
         </div>
 
-        <KpiDashboard tenantId={current.id} />
+        <KpiDashboard tenantId={current.tenant_id} />
       </AnalyticsWindowProvider>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <LifecycleDistribution tenantId={current.id} />
-        <CohortRetention tenantId={current.id} />
+        <LifecycleDistribution tenantId={current.tenant_id} />
+        <CohortRetention tenantId={current.tenant_id} />
       </div>
 
       <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("brand.autonomousFleet")}</h2>
 
-      <AgentHealthHeatmap tenantId={current.id} />
+      <AgentHealthHeatmap tenantId={current.tenant_id} />
 
-      <RevenueFeed tenantId={current.id} />
+      <RevenueFeed tenantId={current.tenant_id} />
 
-      <InsightsPanel tenantId={current.id} />
+      <InsightsPanel tenantId={current.tenant_id} />
 
-      <AgentTimeline tenantId={current.id} />
+      <AgentTimeline tenantId={current.tenant_id} />
 
-      <MemoryInspector tenantId={current.id} />
+      <MemoryInspector tenantId={current.tenant_id} />
 
       <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("brand.customersChannels")}</h2>
 
-      <TopCustomers tenantId={current.id} />
+      <TopCustomers tenantId={current.tenant_id} />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <CustomerRoster tenantId={current.id} />
-        <ChannelSetup tenantId={current.id} tenantSlug={current.slug} />
+        <CustomerRoster tenantId={current.tenant_id} />
+        <ChannelSetup tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
       </div>
 
-      <IntegrationGuide tenantSlug={current.slug} />
+      <IntegrationGuide tenantSlug={current.tenant_slug} />
 
       <Card className="border-dashed">
         <CardHeader>
@@ -178,7 +179,19 @@ function BrandPage() {
             Магазин і каталог
           </CardTitle>
           <CardDescription className="text-xs">
-            Ваш публічний магазин: <Link to="/s/$slug" params={{ slug: current.slug }} className="text-primary hover:underline">/s/{current.slug}</Link>. Товарами та замовленнями керуйте у розділі бренду.
+            Ваш публічний магазин:{" "}
+            <Link
+              to="/s/$slug"
+              params={{ slug: current.tenant_slug }}
+              className="text-primary hover:underline"
+            >
+              /s/{current.tenant_slug}
+            </Link>
+            . Дизайн, контент і колір магазину налаштовуйте у{" "}
+            <Link to="/brand/site-builder" className="text-primary hover:underline">
+              Конструкторі сайту
+            </Link>
+            .
           </CardDescription>
         </CardHeader>
       </Card>

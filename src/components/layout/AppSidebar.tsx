@@ -50,83 +50,102 @@ type NavItem = {
   to: string;
   icon: typeof LayoutDashboard;
   exact?: boolean;
+  /** Tailwind text-color class for the icon when inactive (group accent). */
+  tone?: string;
 };
 
-const OWNER_NAV: { labelKey: TKey; items: NavItem[] }[] = [
-  {
-    labelKey: "sb.cockpit",
-    items: [
-      { labelKey: "sb.overview", to: "/brand", icon: LayoutDashboard },
-      { labelKey: "sb.revenue", to: "/dashboard", icon: Gauge },
-    ],
-  },
-  {
-    labelKey: "sb.shop",
-    items: [
-      { labelKey: "sb.products", to: "/brand/products", icon: Package },
-      { labelKey: "sb.orders", to: "/brand/orders", icon: ShoppingCart },
-      { labelKey: "sb.collections", to: "/brand/catalog", icon: Layers },
-      { labelKey: "sb.promotions", to: "/brand/promotions", icon: Tag },
-      { labelKey: "sb.email" as TKey, to: "/brand/email", icon: Mail },
-      { labelKey: "sb.siteBuilder" as TKey, to: "/brand/site-builder", icon: Wand2 },
-    ],
-  },
-  {
-    labelKey: "sb.growth",
-    items: [
-      { labelKey: "sb.insights", to: "/brand", icon: Lightbulb },
-      { labelKey: "sb.customers", to: "/brand", icon: Users },
-      { labelKey: "sb.agents", to: "/agents", icon: Bot },
-    ],
-  },
-  {
-    labelKey: "sb.setup",
-    items: [
-      { labelKey: "sb.channels", to: "/brand", icon: Plug },
-      { labelKey: "sb.integrations" as TKey, to: "/brand/integrations", icon: Puzzle },
-      { labelKey: "sb.onboarding", to: "/onboarding", icon: Sparkles },
-      { labelKey: "sb.profile" as TKey, to: "/profile", icon: IdCard, exact: true },
-    ],
-  },
-  {
-    labelKey: "sb.billing" as TKey,
-    items: [{ labelKey: "sb.planBilling" as TKey, to: "/brand/billing", icon: CreditCard }],
-  },
-];
+type NavGroup = {
+  labelKey: TKey;
+  /** Tailwind text-color class for the group label (subtle accent). */
+  tone?: string;
+  items: NavItem[];
+};
 
-const ADMIN_NAV: { labelKey: TKey; items: NavItem[] }[] = [
-  {
-    labelKey: "sb.brandLabel",
-    items: [
-      { labelKey: "sb.billing", to: "/brand/billing", icon: CreditCard },
-      { labelKey: "sb.profile" as TKey, to: "/profile", icon: IdCard, exact: true },
-    ],
-  },
-  {
-    labelKey: "sb.system",
-    items: [
-      { labelKey: "sb.adminCommands" as TKey, to: "/admin/commands", icon: Zap },
-      { labelKey: "sb.missionControl", to: "/admin", icon: ShieldCheck, exact: true },
-      { labelKey: "sb.crossTenant" as TKey, to: "/admin/overview", icon: Layers },
-      { labelKey: "sb.allTenants", to: "/admin/tenants", icon: Building2 },
-      { labelKey: "sb.plansCatalog" as TKey, to: "/admin/plans", icon: Coins },
-      { labelKey: "sb.adminUsers" as TKey, to: "/admin/users", icon: UsersRound },
-      {
-        labelKey: "sb.dntradeHealth" as TKey,
-        to: "/admin/dntrade-health",
-        icon: HeartPulse,
-      },
-    ],
-  },
-  {
-    labelKey: "sb.agents",
-    items: [
-      { labelKey: "sb.liveRuns", to: "/agents/live", icon: Activity },
-      { labelKey: "sb.agentLibrary", to: "/agents", icon: Cpu, exact: true },
-      { labelKey: "sb.insightStream", to: "/admin", icon: Radio },
-    ],
-  },
-];
+const COCKPIT: NavGroup = {
+  labelKey: "sb.cockpit",
+  tone: "text-primary/70",
+  items: [
+    { labelKey: "sb.overview", to: "/brand", icon: LayoutDashboard, tone: "text-primary" },
+    { labelKey: "sb.revenue", to: "/dashboard", icon: Gauge, tone: "text-success" },
+  ],
+};
+
+const SHOP: NavGroup = {
+  labelKey: "sb.shop",
+  tone: "text-info/70",
+  items: [
+    { labelKey: "sb.products", to: "/brand/products", icon: Package, tone: "text-info" },
+    { labelKey: "sb.orders", to: "/brand/orders", icon: ShoppingCart, tone: "text-warning" },
+    { labelKey: "sb.collections", to: "/brand/catalog", icon: Layers, tone: "text-info" },
+    { labelKey: "sb.promotions", to: "/brand/promotions", icon: Tag, tone: "text-accent" },
+    { labelKey: "sb.email" as TKey, to: "/brand/email", icon: Mail, tone: "text-primary" },
+    { labelKey: "sb.siteBuilder" as TKey, to: "/brand/site-builder", icon: Wand2, tone: "text-accent" },
+  ],
+};
+
+const GROWTH: NavGroup = {
+  labelKey: "sb.growth",
+  tone: "text-accent/70",
+  items: [
+    { labelKey: "sb.insights", to: "/brand", icon: Lightbulb, tone: "text-warning" },
+    { labelKey: "sb.customers", to: "/brand", icon: Users, tone: "text-info" },
+    { labelKey: "sb.agents", to: "/agents", icon: Bot, tone: "text-accent" },
+  ],
+};
+
+const SETUP: NavGroup = {
+  labelKey: "sb.setup",
+  tone: "text-muted-foreground",
+  items: [
+    { labelKey: "sb.channels", to: "/brand", icon: Plug, tone: "text-primary" },
+    { labelKey: "sb.integrations" as TKey, to: "/brand/integrations", icon: Puzzle, tone: "text-info" },
+    { labelKey: "sb.onboarding", to: "/onboarding", icon: Sparkles, tone: "text-accent" },
+    { labelKey: "sb.profile" as TKey, to: "/profile", icon: IdCard, exact: true, tone: "text-primary" },
+  ],
+};
+
+const BILLING: NavGroup = {
+  labelKey: "sb.billing" as TKey,
+  tone: "text-warning/70",
+  items: [
+    { labelKey: "sb.planBilling" as TKey, to: "/brand/billing", icon: CreditCard, tone: "text-warning" },
+  ],
+};
+
+const OWNER_NAV: NavGroup[] = [COCKPIT, SHOP, GROWTH, SETUP, BILLING];
+
+const ADMIN_SYSTEM: NavGroup = {
+  labelKey: "sb.system",
+  tone: "text-destructive/70",
+  items: [
+    { labelKey: "sb.adminCommands" as TKey, to: "/admin/commands", icon: Zap, tone: "text-warning" },
+    { labelKey: "sb.missionControl", to: "/admin", icon: ShieldCheck, exact: true, tone: "text-destructive" },
+    { labelKey: "sb.crossTenant" as TKey, to: "/admin/overview", icon: Layers, tone: "text-info" },
+    { labelKey: "sb.allTenants", to: "/admin/tenants", icon: Building2, tone: "text-primary" },
+    { labelKey: "sb.plansCatalog" as TKey, to: "/admin/plans", icon: Coins, tone: "text-warning" },
+    { labelKey: "sb.adminUsers" as TKey, to: "/admin/users", icon: UsersRound, tone: "text-accent" },
+    {
+      labelKey: "sb.dntradeHealth" as TKey,
+      to: "/admin/dntrade-health",
+      icon: HeartPulse,
+      tone: "text-destructive",
+    },
+  ],
+};
+
+const ADMIN_AGENTS: NavGroup = {
+  labelKey: "sb.agents",
+  tone: "text-accent/70",
+  items: [
+    { labelKey: "sb.liveRuns", to: "/agents/live", icon: Activity, tone: "text-success" },
+    { labelKey: "sb.agentLibrary", to: "/agents", icon: Cpu, exact: true, tone: "text-accent" },
+    { labelKey: "sb.insightStream", to: "/admin", icon: Radio, tone: "text-warning" },
+  ],
+};
+
+// Адмін бачить системні розділи + повний доступ до всіх бренд-розділів,
+// щоб міг керувати магазином обраного бренду без перемикань ролей.
+const ADMIN_NAV: NavGroup[] = [ADMIN_SYSTEM, ADMIN_AGENTS, COCKPIT, SHOP, GROWTH, SETUP, BILLING];
 
 type Props = {
   isSuperAdmin: boolean;
@@ -145,10 +164,11 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
       <SidebarHeader className="border-b border-sidebar-border">
         <Link
           to={isSuperAdmin ? "/admin" : "/brand"}
-          className="flex items-center gap-2 px-2 py-1.5"
+          className="flex items-center gap-2 px-2 py-1.5 transition-opacity hover:opacity-90"
         >
           <span className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
             <Bot className="h-4 w-4 text-primary-foreground" />
+            <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-success ring-2 ring-sidebar animate-pulse" />
           </span>
           {!collapsed && (
             <div className="flex flex-col leading-tight">
@@ -164,9 +184,19 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
       </SidebarHeader>
 
       <SidebarContent>
-        {groups.map((group) => (
-          <SidebarGroup key={group.labelKey}>
-            <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        {groups.map((group, gi) => (
+          <SidebarGroup
+            key={`${group.labelKey}-${gi}`}
+            className={cn(
+              gi > 0 && "mt-1 border-t border-sidebar-border/60 pt-2",
+            )}
+          >
+            <SidebarGroupLabel
+              className={cn(
+                "text-[10px] uppercase tracking-[0.2em]",
+                group.tone ?? "text-muted-foreground",
+              )}
+            >
               {t(group.labelKey)}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -177,23 +207,29 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
                     : location.pathname.startsWith(item.to);
                   const label = t(item.labelKey);
                   return (
-                    <SidebarMenuItem key={`${group.labelKey}-${item.labelKey}`}>
+                    <SidebarMenuItem key={`${group.labelKey}-${item.labelKey}-${item.to}`}>
                       <SidebarMenuButton asChild tooltip={label}>
                         <Link
                           to={item.to}
                           className={cn(
-                            "group/nav flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-all",
+                            "group/nav relative flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-all",
                             isActive
                               ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-glow"
                               : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
                           )}
                         >
+                          {isActive && (
+                            <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary" />
+                          )}
                           <item.icon
                             className={cn(
                               "h-4 w-4 shrink-0 transition-colors",
                               isActive
                                 ? "text-primary"
-                                : "text-muted-foreground group-hover/nav:text-foreground",
+                                : cn(
+                                    item.tone ?? "text-muted-foreground",
+                                    "opacity-80 group-hover/nav:opacity-100",
+                                  ),
                             )}
                           />
                           {!collapsed && <span className="truncate">{label}</span>}
@@ -216,7 +252,7 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
                 to="/handbook"
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
               >
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
+                <BookOpen className="h-4 w-4 text-info" />
                 {!collapsed && <span>{t("sb.handbook")}</span>}
               </Link>
             </SidebarMenuButton>
@@ -227,7 +263,7 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
                 to="/dashboard"
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
               >
-                <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+                <ShoppingBag className="h-4 w-4 text-success" />
                 {!collapsed && <span>{t("sb.storefront")}</span>}
               </Link>
             </SidebarMenuButton>
@@ -238,7 +274,7 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
                 to="/onboarding"
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
               >
-                <Settings className="h-4 w-4 text-muted-foreground" />
+                <Settings className="h-4 w-4 text-accent" />
                 {!collapsed && <span>{t("sb.settings")}</span>}
               </Link>
             </SidebarMenuButton>
