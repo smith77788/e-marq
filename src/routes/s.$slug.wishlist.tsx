@@ -15,7 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { loadStorefrontShell, type StorefrontShell } from "@/lib/storefront/loaders";
 import { useStorefrontCart } from "@/lib/storefront/cartContext";
 import { useWishlist } from "@/hooks/useWishlist";
-import { ProductCard } from "./s.$slug.index";
+import { ProductCard } from "@/components/storefront/ProductCard";
 
 export const Route = createFileRoute("/s/$slug/wishlist")({
   loader: ({ params }) => loadStorefrontShell(params.slug),

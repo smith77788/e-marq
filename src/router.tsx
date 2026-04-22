@@ -59,7 +59,11 @@ export const getRouter = () => {
     routeTree,
     context: {},
     scrollRestoration: true,
-    defaultPreloadStaleTime: 0,
+    // Prefetch route chunks + loader on hover/focus → instant navigation.
+    // Default 50ms intent delay avoids over-fetching when user just passes by.
+    defaultPreload: "intent",
+    // Reuse preloaded loader data for 30s before re-fetching on actual nav.
+    defaultPreloadStaleTime: 30_000,
     defaultErrorComponent: DefaultErrorComponent,
   });
 

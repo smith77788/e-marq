@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { loadCollectionProducts } from "@/lib/storefront/loaders";
-import { ProductCard } from "./s.$slug.index";
+import { ProductCard } from "@/components/storefront/ProductCard";
 
 type SortOpt = "manual" | "price_asc" | "price_desc" | "name_asc";
 
