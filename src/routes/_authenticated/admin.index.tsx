@@ -60,7 +60,7 @@ function MissionControlPage() {
 /*  Header section                                                            */
 /* -------------------------------------------------------------------------- */
 
-function MissionHeader({ t }: { t: (k: string) => string }) {
+function MissionHeader({ t }: { t: (k: never) => string }) {
   return (
     <header className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-card/60 to-accent/5 p-6 shadow-elegant backdrop-blur">
       <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />

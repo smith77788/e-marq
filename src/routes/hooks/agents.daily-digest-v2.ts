@@ -120,6 +120,16 @@ export const Route = createFileRoute("/hooks/agents/daily-digest-v2")({
             },
           ];
 
+          const recommended = (openInsights.data ?? [])
+            .filter((i) => i.risk_level === "high")
+            .slice(0, 5)
+            .map((i) => ({
+              insight_id: i.id,
+              title: i.title,
+              expected_impact: i.expected_impact,
+              risk_level: i.risk_level,
+            }));
+
           // Структурований тижневий звіт
           const trendEmoji = delta > 0.1 ? "🚀" : delta > 0 ? "📈" : delta > -0.1 ? "➡️" : "📉";
           const deltaTxt = `${delta >= 0 ? "+" : ""}${(delta * 100).toFixed(0)}%`;
@@ -156,16 +166,6 @@ export const Route = createFileRoute("/hooks/agents/daily-digest-v2")({
           }
 
           const summary = lines.join("\n");
-
-          const recommended = (openInsights.data ?? [])
-            .filter((i) => i.risk_level === "high")
-            .slice(0, 5)
-            .map((i) => ({
-              insight_id: i.id,
-              title: i.title,
-              expected_impact: i.expected_impact,
-              risk_level: i.risk_level,
-            }));
 
           await supabaseAdmin.from("daily_digests").insert({
             tenant_id: tenantId,
