@@ -42,6 +42,8 @@ const dict = {
     "sb.plansCatalog": "Каталог тарифів",
     "sb.adminUsers": "Користувачі",
     "sb.dntradeHealth": "DN Trade · Health",
+    "sb.topupRequests": "Заявки на оплату",
+    "sb.leadRadar": "Lead Radar",
     "sb.adminCommands": "⚡ Команди системи",
     "sb.liveRuns": "Запуски в ефірі",
     "sb.agentLibrary": "Бібліотека агентів",

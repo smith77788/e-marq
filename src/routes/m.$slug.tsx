@@ -29,8 +29,6 @@ export const Route = createFileRoute("/m/$slug")({
       .maybeSingle();
     if (error) throw error;
     if (!data) throw notFound();
-    // best-effort view counter (RLS дозволяє анонімний read; counter оновить агент пізніше)
-    void supabase.rpc("noop_marker", {}).catch(() => undefined);
     return { magnet: data as Magnet };
   },
   head: ({ loaderData }) => {

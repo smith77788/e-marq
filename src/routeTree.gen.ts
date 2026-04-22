@@ -18,6 +18,7 @@ import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SSlugRouteImport } from './routes/s.$slug'
+import { Route as MSlugRouteImport } from './routes/m.$slug'
 import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
 import { Route as HandbookDntradeWebhookRouteImport } from './routes/handbook.dntrade-webhook'
 import { Route as ApiMarqKeysRouteImport } from './routes/api/marq-keys'
@@ -50,12 +51,14 @@ import { Route as HooksEnginesAbandonedCartAllRouteImport } from './routes/hooks
 import { Route as HooksEnginesAbandonedCartRouteImport } from './routes/hooks/engines.abandoned-cart'
 import { Route as HooksDemoSeedRouteImport } from './routes/hooks/demo.seed'
 import { Route as HooksAgentsWinbackRoiRouteImport } from './routes/hooks/agents.winback-roi'
+import { Route as HooksAgentsWebProspectorRouteImport } from './routes/hooks/agents.web-prospector'
 import { Route as HooksAgentsVipConciergeRouteImport } from './routes/hooks/agents.vip-concierge'
 import { Route as HooksAgentsUgcHarvesterRouteImport } from './routes/hooks/agents.ugc-harvester'
 import { Route as HooksAgentsTimeOfDayPricerRouteImport } from './routes/hooks/agents.time-of-day-pricer'
 import { Route as HooksAgentsTickRouteImport } from './routes/hooks/agents.tick'
 import { Route as HooksAgentsStockoutRouteImport } from './routes/hooks/agents.stockout'
 import { Route as HooksAgentsSocialProofLiveRouteImport } from './routes/hooks/agents.social-proof-live'
+import { Route as HooksAgentsSocialEngagerRouteImport } from './routes/hooks/agents.social-engager'
 import { Route as HooksAgentsShippingOptimizerRouteImport } from './routes/hooks/agents.shipping-optimizer'
 import { Route as HooksAgentsSeoRewriterRouteImport } from './routes/hooks/agents.seo-rewriter'
 import { Route as HooksAgentsSegmentationRouteImport } from './routes/hooks/agents.segmentation'
@@ -114,6 +117,7 @@ import { Route as HooksAgentsCustomerChurnPredictorRouteImport } from './routes/
 import { Route as HooksAgentsCsatDispatcherRouteImport } from './routes/hooks/agents.csat-dispatcher'
 import { Route as HooksAgentsCronAllRouteImport } from './routes/hooks/agents.cron-all'
 import { Route as HooksAgentsContentVelocityRouteImport } from './routes/hooks/agents.content-velocity'
+import { Route as HooksAgentsContentMagnetRouteImport } from './routes/hooks/agents.content-magnet'
 import { Route as HooksAgentsConflictResolverRouteImport } from './routes/hooks/agents.conflict-resolver'
 import { Route as HooksAgentsCohortEngineRouteImport } from './routes/hooks/agents.cohort-engine'
 import { Route as HooksAgentsChurnRiskRouteImport } from './routes/hooks/agents.churn-risk'
@@ -155,9 +159,11 @@ import { Route as AuthenticatedBrandCatalogRouteImport } from './routes/_authent
 import { Route as AuthenticatedBrandBillingRouteImport } from './routes/_authenticated/brand.billing'
 import { Route as AuthenticatedAgentsLiveRouteImport } from './routes/_authenticated/agents.live'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
+import { Route as AuthenticatedAdminTopupRequestsRouteImport } from './routes/_authenticated/admin.topup-requests'
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin.tenants'
 import { Route as AuthenticatedAdminPlansRouteImport } from './routes/_authenticated/admin.plans'
 import { Route as AuthenticatedAdminOverviewRouteImport } from './routes/_authenticated/admin.overview'
+import { Route as AuthenticatedAdminLeadRadarRouteImport } from './routes/_authenticated/admin.lead-radar'
 import { Route as AuthenticatedAdminDntradeHealthRouteImport } from './routes/_authenticated/admin.dntrade-health'
 import { Route as AuthenticatedAdminCommandsRouteImport } from './routes/_authenticated/admin.commands'
 import { Route as SSlugProductsProductIdRouteImport } from './routes/s.$slug.products.$productId'
@@ -224,6 +230,11 @@ const IndexRoute = IndexRouteImport.update({
 const SSlugRoute = SSlugRouteImport.update({
   id: '/s/$slug',
   path: '/s/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MSlugRoute = MSlugRouteImport.update({
+  id: '/m/$slug',
+  path: '/m/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HooksIngestRoute = HooksIngestRouteImport.update({
@@ -397,6 +408,12 @@ const HooksAgentsWinbackRoiRoute = HooksAgentsWinbackRoiRouteImport.update({
   path: '/hooks/agents/winback-roi',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsWebProspectorRoute =
+  HooksAgentsWebProspectorRouteImport.update({
+    id: '/hooks/agents/web-prospector',
+    path: '/hooks/agents/web-prospector',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsVipConciergeRoute = HooksAgentsVipConciergeRouteImport.update({
   id: '/hooks/agents/vip-concierge',
   path: '/hooks/agents/vip-concierge',
@@ -427,6 +444,12 @@ const HooksAgentsSocialProofLiveRoute =
   HooksAgentsSocialProofLiveRouteImport.update({
     id: '/hooks/agents/social-proof-live',
     path: '/hooks/agents/social-proof-live',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsSocialEngagerRoute =
+  HooksAgentsSocialEngagerRouteImport.update({
+    id: '/hooks/agents/social-engager',
+    path: '/hooks/agents/social-engager',
     getParentRoute: () => rootRouteImport,
   } as any)
 const HooksAgentsShippingOptimizerRoute =
@@ -756,6 +779,12 @@ const HooksAgentsContentVelocityRoute =
     path: '/hooks/agents/content-velocity',
     getParentRoute: () => rootRouteImport,
   } as any)
+const HooksAgentsContentMagnetRoute =
+  HooksAgentsContentMagnetRouteImport.update({
+    id: '/hooks/agents/content-magnet',
+    path: '/hooks/agents/content-magnet',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsConflictResolverRoute =
   HooksAgentsConflictResolverRouteImport.update({
     id: '/hooks/agents/conflict-resolver',
@@ -981,6 +1010,12 @@ const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   path: '/admin/users',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAdminTopupRequestsRoute =
+  AuthenticatedAdminTopupRequestsRouteImport.update({
+    id: '/admin/topup-requests',
+    path: '/admin/topup-requests',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminTenantsRoute =
   AuthenticatedAdminTenantsRouteImport.update({
     id: '/admin/tenants',
@@ -996,6 +1031,12 @@ const AuthenticatedAdminOverviewRoute =
   AuthenticatedAdminOverviewRouteImport.update({
     id: '/admin/overview',
     path: '/admin/overview',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAdminLeadRadarRoute =
+  AuthenticatedAdminLeadRadarRouteImport.update({
+    id: '/admin/lead-radar',
+    path: '/admin/lead-radar',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedAdminDntradeHealthRoute =
@@ -1146,12 +1187,15 @@ export interface FileRoutesByFullPath {
   '/api/marq-keys': typeof ApiMarqKeysRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
+  '/m/$slug': typeof MSlugRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
+  '/admin/lead-radar': typeof AuthenticatedAdminLeadRadarRoute
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
+  '/admin/topup-requests': typeof AuthenticatedAdminTopupRequestsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
@@ -1193,6 +1237,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cohort-engine': typeof HooksAgentsCohortEngineRoute
   '/hooks/agents/conflict-resolver': typeof HooksAgentsConflictResolverRoute
+  '/hooks/agents/content-magnet': typeof HooksAgentsContentMagnetRoute
   '/hooks/agents/content-velocity': typeof HooksAgentsContentVelocityRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/csat-dispatcher': typeof HooksAgentsCsatDispatcherRoute
@@ -1251,12 +1296,14 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/seo-rewriter': typeof HooksAgentsSeoRewriterRoute
   '/hooks/agents/shipping-optimizer': typeof HooksAgentsShippingOptimizerRoute
+  '/hooks/agents/social-engager': typeof HooksAgentsSocialEngagerRoute
   '/hooks/agents/social-proof-live': typeof HooksAgentsSocialProofLiveRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/agents/tick': typeof HooksAgentsTickRoute
   '/hooks/agents/time-of-day-pricer': typeof HooksAgentsTimeOfDayPricerRoute
   '/hooks/agents/ugc-harvester': typeof HooksAgentsUgcHarvesterRoute
   '/hooks/agents/vip-concierge': typeof HooksAgentsVipConciergeRoute
+  '/hooks/agents/web-prospector': typeof HooksAgentsWebProspectorRoute
   '/hooks/agents/winback-roi': typeof HooksAgentsWinbackRoiRoute
   '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
@@ -1319,11 +1366,14 @@ export interface FileRoutesByTo {
   '/api/marq-keys': typeof ApiMarqKeysRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
+  '/m/$slug': typeof MSlugRoute
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
+  '/admin/lead-radar': typeof AuthenticatedAdminLeadRadarRoute
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
+  '/admin/topup-requests': typeof AuthenticatedAdminTopupRequestsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
@@ -1365,6 +1415,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cohort-engine': typeof HooksAgentsCohortEngineRoute
   '/hooks/agents/conflict-resolver': typeof HooksAgentsConflictResolverRoute
+  '/hooks/agents/content-magnet': typeof HooksAgentsContentMagnetRoute
   '/hooks/agents/content-velocity': typeof HooksAgentsContentVelocityRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/csat-dispatcher': typeof HooksAgentsCsatDispatcherRoute
@@ -1423,12 +1474,14 @@ export interface FileRoutesByTo {
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/seo-rewriter': typeof HooksAgentsSeoRewriterRoute
   '/hooks/agents/shipping-optimizer': typeof HooksAgentsShippingOptimizerRoute
+  '/hooks/agents/social-engager': typeof HooksAgentsSocialEngagerRoute
   '/hooks/agents/social-proof-live': typeof HooksAgentsSocialProofLiveRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/agents/tick': typeof HooksAgentsTickRoute
   '/hooks/agents/time-of-day-pricer': typeof HooksAgentsTimeOfDayPricerRoute
   '/hooks/agents/ugc-harvester': typeof HooksAgentsUgcHarvesterRoute
   '/hooks/agents/vip-concierge': typeof HooksAgentsVipConciergeRoute
+  '/hooks/agents/web-prospector': typeof HooksAgentsWebProspectorRoute
   '/hooks/agents/winback-roi': typeof HooksAgentsWinbackRoiRoute
   '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
@@ -1493,12 +1546,15 @@ export interface FileRoutesById {
   '/api/marq-keys': typeof ApiMarqKeysRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
+  '/m/$slug': typeof MSlugRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/_authenticated/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/_authenticated/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
+  '/_authenticated/admin/lead-radar': typeof AuthenticatedAdminLeadRadarRoute
   '/_authenticated/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/_authenticated/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
+  '/_authenticated/admin/topup-requests': typeof AuthenticatedAdminTopupRequestsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/_authenticated/brand/billing': typeof AuthenticatedBrandBillingRoute
@@ -1540,6 +1596,7 @@ export interface FileRoutesById {
   '/hooks/agents/churn-risk': typeof HooksAgentsChurnRiskRoute
   '/hooks/agents/cohort-engine': typeof HooksAgentsCohortEngineRoute
   '/hooks/agents/conflict-resolver': typeof HooksAgentsConflictResolverRoute
+  '/hooks/agents/content-magnet': typeof HooksAgentsContentMagnetRoute
   '/hooks/agents/content-velocity': typeof HooksAgentsContentVelocityRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
   '/hooks/agents/csat-dispatcher': typeof HooksAgentsCsatDispatcherRoute
@@ -1598,12 +1655,14 @@ export interface FileRoutesById {
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/seo-rewriter': typeof HooksAgentsSeoRewriterRoute
   '/hooks/agents/shipping-optimizer': typeof HooksAgentsShippingOptimizerRoute
+  '/hooks/agents/social-engager': typeof HooksAgentsSocialEngagerRoute
   '/hooks/agents/social-proof-live': typeof HooksAgentsSocialProofLiveRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
   '/hooks/agents/tick': typeof HooksAgentsTickRoute
   '/hooks/agents/time-of-day-pricer': typeof HooksAgentsTimeOfDayPricerRoute
   '/hooks/agents/ugc-harvester': typeof HooksAgentsUgcHarvesterRoute
   '/hooks/agents/vip-concierge': typeof HooksAgentsVipConciergeRoute
+  '/hooks/agents/web-prospector': typeof HooksAgentsWebProspectorRoute
   '/hooks/agents/winback-roi': typeof HooksAgentsWinbackRoiRoute
   '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
@@ -1668,12 +1727,15 @@ export interface FileRouteTypes {
     | '/api/marq-keys'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
+    | '/m/$slug'
     | '/s/$slug'
     | '/admin/commands'
     | '/admin/dntrade-health'
+    | '/admin/lead-radar'
     | '/admin/overview'
     | '/admin/plans'
     | '/admin/tenants'
+    | '/admin/topup-requests'
     | '/admin/users'
     | '/agents/live'
     | '/brand/billing'
@@ -1715,6 +1777,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cohort-engine'
     | '/hooks/agents/conflict-resolver'
+    | '/hooks/agents/content-magnet'
     | '/hooks/agents/content-velocity'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/csat-dispatcher'
@@ -1773,12 +1836,14 @@ export interface FileRouteTypes {
     | '/hooks/agents/segmentation'
     | '/hooks/agents/seo-rewriter'
     | '/hooks/agents/shipping-optimizer'
+    | '/hooks/agents/social-engager'
     | '/hooks/agents/social-proof-live'
     | '/hooks/agents/stockout'
     | '/hooks/agents/tick'
     | '/hooks/agents/time-of-day-pricer'
     | '/hooks/agents/ugc-harvester'
     | '/hooks/agents/vip-concierge'
+    | '/hooks/agents/web-prospector'
     | '/hooks/agents/winback-roi'
     | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
@@ -1841,11 +1906,14 @@ export interface FileRouteTypes {
     | '/api/marq-keys'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
+    | '/m/$slug'
     | '/admin/commands'
     | '/admin/dntrade-health'
+    | '/admin/lead-radar'
     | '/admin/overview'
     | '/admin/plans'
     | '/admin/tenants'
+    | '/admin/topup-requests'
     | '/admin/users'
     | '/agents/live'
     | '/brand/billing'
@@ -1887,6 +1955,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cohort-engine'
     | '/hooks/agents/conflict-resolver'
+    | '/hooks/agents/content-magnet'
     | '/hooks/agents/content-velocity'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/csat-dispatcher'
@@ -1945,12 +2014,14 @@ export interface FileRouteTypes {
     | '/hooks/agents/segmentation'
     | '/hooks/agents/seo-rewriter'
     | '/hooks/agents/shipping-optimizer'
+    | '/hooks/agents/social-engager'
     | '/hooks/agents/social-proof-live'
     | '/hooks/agents/stockout'
     | '/hooks/agents/tick'
     | '/hooks/agents/time-of-day-pricer'
     | '/hooks/agents/ugc-harvester'
     | '/hooks/agents/vip-concierge'
+    | '/hooks/agents/web-prospector'
     | '/hooks/agents/winback-roi'
     | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
@@ -2014,12 +2085,15 @@ export interface FileRouteTypes {
     | '/api/marq-keys'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
+    | '/m/$slug'
     | '/s/$slug'
     | '/_authenticated/admin/commands'
     | '/_authenticated/admin/dntrade-health'
+    | '/_authenticated/admin/lead-radar'
     | '/_authenticated/admin/overview'
     | '/_authenticated/admin/plans'
     | '/_authenticated/admin/tenants'
+    | '/_authenticated/admin/topup-requests'
     | '/_authenticated/admin/users'
     | '/_authenticated/agents/live'
     | '/_authenticated/brand/billing'
@@ -2061,6 +2135,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/churn-risk'
     | '/hooks/agents/cohort-engine'
     | '/hooks/agents/conflict-resolver'
+    | '/hooks/agents/content-magnet'
     | '/hooks/agents/content-velocity'
     | '/hooks/agents/cron-all'
     | '/hooks/agents/csat-dispatcher'
@@ -2119,12 +2194,14 @@ export interface FileRouteTypes {
     | '/hooks/agents/segmentation'
     | '/hooks/agents/seo-rewriter'
     | '/hooks/agents/shipping-optimizer'
+    | '/hooks/agents/social-engager'
     | '/hooks/agents/social-proof-live'
     | '/hooks/agents/stockout'
     | '/hooks/agents/tick'
     | '/hooks/agents/time-of-day-pricer'
     | '/hooks/agents/ugc-harvester'
     | '/hooks/agents/vip-concierge'
+    | '/hooks/agents/web-prospector'
     | '/hooks/agents/winback-roi'
     | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
@@ -2184,6 +2261,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   ApiMarqKeysRoute: typeof ApiMarqKeysRoute
   HooksIngestRoute: typeof HooksIngestRoute
+  MSlugRoute: typeof MSlugRoute
   SSlugRoute: typeof SSlugRouteWithChildren
   ApiEmailCampaignSendRoute: typeof ApiEmailCampaignSendRoute
   ApiEmailDomainSetupRoute: typeof ApiEmailDomainSetupRoute
@@ -2214,6 +2292,7 @@ export interface RootRouteChildren {
   HooksAgentsChurnRiskRoute: typeof HooksAgentsChurnRiskRoute
   HooksAgentsCohortEngineRoute: typeof HooksAgentsCohortEngineRoute
   HooksAgentsConflictResolverRoute: typeof HooksAgentsConflictResolverRoute
+  HooksAgentsContentMagnetRoute: typeof HooksAgentsContentMagnetRoute
   HooksAgentsContentVelocityRoute: typeof HooksAgentsContentVelocityRoute
   HooksAgentsCronAllRoute: typeof HooksAgentsCronAllRoute
   HooksAgentsCsatDispatcherRoute: typeof HooksAgentsCsatDispatcherRoute
@@ -2272,12 +2351,14 @@ export interface RootRouteChildren {
   HooksAgentsSegmentationRoute: typeof HooksAgentsSegmentationRoute
   HooksAgentsSeoRewriterRoute: typeof HooksAgentsSeoRewriterRoute
   HooksAgentsShippingOptimizerRoute: typeof HooksAgentsShippingOptimizerRoute
+  HooksAgentsSocialEngagerRoute: typeof HooksAgentsSocialEngagerRoute
   HooksAgentsSocialProofLiveRoute: typeof HooksAgentsSocialProofLiveRoute
   HooksAgentsStockoutRoute: typeof HooksAgentsStockoutRoute
   HooksAgentsTickRoute: typeof HooksAgentsTickRoute
   HooksAgentsTimeOfDayPricerRoute: typeof HooksAgentsTimeOfDayPricerRoute
   HooksAgentsUgcHarvesterRoute: typeof HooksAgentsUgcHarvesterRoute
   HooksAgentsVipConciergeRoute: typeof HooksAgentsVipConciergeRoute
+  HooksAgentsWebProspectorRoute: typeof HooksAgentsWebProspectorRoute
   HooksAgentsWinbackRoiRoute: typeof HooksAgentsWinbackRoiRoute
   HooksDemoSeedRoute: typeof HooksDemoSeedRoute
   HooksEnginesAbandonedCartRoute: typeof HooksEnginesAbandonedCartRoute
@@ -2379,6 +2460,13 @@ declare module '@tanstack/react-router' {
       path: '/s/$slug'
       fullPath: '/s/$slug'
       preLoaderRoute: typeof SSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/m/$slug': {
+      id: '/m/$slug'
+      path: '/m/$slug'
+      fullPath: '/m/$slug'
+      preLoaderRoute: typeof MSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/ingest': {
@@ -2605,6 +2693,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsWinbackRoiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/web-prospector': {
+      id: '/hooks/agents/web-prospector'
+      path: '/hooks/agents/web-prospector'
+      fullPath: '/hooks/agents/web-prospector'
+      preLoaderRoute: typeof HooksAgentsWebProspectorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/vip-concierge': {
       id: '/hooks/agents/vip-concierge'
       path: '/hooks/agents/vip-concierge'
@@ -2645,6 +2740,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/social-proof-live'
       fullPath: '/hooks/agents/social-proof-live'
       preLoaderRoute: typeof HooksAgentsSocialProofLiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/social-engager': {
+      id: '/hooks/agents/social-engager'
+      path: '/hooks/agents/social-engager'
+      fullPath: '/hooks/agents/social-engager'
+      preLoaderRoute: typeof HooksAgentsSocialEngagerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/shipping-optimizer': {
@@ -3053,6 +3155,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsContentVelocityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/content-magnet': {
+      id: '/hooks/agents/content-magnet'
+      path: '/hooks/agents/content-magnet'
+      fullPath: '/hooks/agents/content-magnet'
+      preLoaderRoute: typeof HooksAgentsContentMagnetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/conflict-resolver': {
       id: '/hooks/agents/conflict-resolver'
       path: '/hooks/agents/conflict-resolver'
@@ -3340,6 +3449,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/topup-requests': {
+      id: '/_authenticated/admin/topup-requests'
+      path: '/admin/topup-requests'
+      fullPath: '/admin/topup-requests'
+      preLoaderRoute: typeof AuthenticatedAdminTopupRequestsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/tenants': {
       id: '/_authenticated/admin/tenants'
       path: '/admin/tenants'
@@ -3359,6 +3475,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/overview'
       fullPath: '/admin/overview'
       preLoaderRoute: typeof AuthenticatedAdminOverviewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin/lead-radar': {
+      id: '/_authenticated/admin/lead-radar'
+      path: '/admin/lead-radar'
+      fullPath: '/admin/lead-radar'
+      preLoaderRoute: typeof AuthenticatedAdminLeadRadarRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin/dntrade-health': {
@@ -3604,9 +3727,11 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedAdminCommandsRoute: typeof AuthenticatedAdminCommandsRoute
   AuthenticatedAdminDntradeHealthRoute: typeof AuthenticatedAdminDntradeHealthRouteWithChildren
+  AuthenticatedAdminLeadRadarRoute: typeof AuthenticatedAdminLeadRadarRoute
   AuthenticatedAdminOverviewRoute: typeof AuthenticatedAdminOverviewRoute
   AuthenticatedAdminPlansRoute: typeof AuthenticatedAdminPlansRoute
   AuthenticatedAdminTenantsRoute: typeof AuthenticatedAdminTenantsRouteWithChildren
+  AuthenticatedAdminTopupRequestsRoute: typeof AuthenticatedAdminTopupRequestsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAgentsLiveRoute: typeof AuthenticatedAgentsLiveRoute
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
@@ -3621,9 +3746,11 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminCommandsRoute: AuthenticatedAdminCommandsRoute,
   AuthenticatedAdminDntradeHealthRoute:
     AuthenticatedAdminDntradeHealthRouteWithChildren,
+  AuthenticatedAdminLeadRadarRoute: AuthenticatedAdminLeadRadarRoute,
   AuthenticatedAdminOverviewRoute: AuthenticatedAdminOverviewRoute,
   AuthenticatedAdminPlansRoute: AuthenticatedAdminPlansRoute,
   AuthenticatedAdminTenantsRoute: AuthenticatedAdminTenantsRouteWithChildren,
+  AuthenticatedAdminTopupRequestsRoute: AuthenticatedAdminTopupRequestsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAgentsLiveRoute: AuthenticatedAgentsLiveRoute,
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
@@ -3677,6 +3804,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   ApiMarqKeysRoute: ApiMarqKeysRoute,
   HooksIngestRoute: HooksIngestRoute,
+  MSlugRoute: MSlugRoute,
   SSlugRoute: SSlugRouteWithChildren,
   ApiEmailCampaignSendRoute: ApiEmailCampaignSendRoute,
   ApiEmailDomainSetupRoute: ApiEmailDomainSetupRoute,
@@ -3707,6 +3835,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsChurnRiskRoute: HooksAgentsChurnRiskRoute,
   HooksAgentsCohortEngineRoute: HooksAgentsCohortEngineRoute,
   HooksAgentsConflictResolverRoute: HooksAgentsConflictResolverRoute,
+  HooksAgentsContentMagnetRoute: HooksAgentsContentMagnetRoute,
   HooksAgentsContentVelocityRoute: HooksAgentsContentVelocityRoute,
   HooksAgentsCronAllRoute: HooksAgentsCronAllRoute,
   HooksAgentsCsatDispatcherRoute: HooksAgentsCsatDispatcherRoute,
@@ -3766,12 +3895,14 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsSegmentationRoute: HooksAgentsSegmentationRoute,
   HooksAgentsSeoRewriterRoute: HooksAgentsSeoRewriterRoute,
   HooksAgentsShippingOptimizerRoute: HooksAgentsShippingOptimizerRoute,
+  HooksAgentsSocialEngagerRoute: HooksAgentsSocialEngagerRoute,
   HooksAgentsSocialProofLiveRoute: HooksAgentsSocialProofLiveRoute,
   HooksAgentsStockoutRoute: HooksAgentsStockoutRoute,
   HooksAgentsTickRoute: HooksAgentsTickRoute,
   HooksAgentsTimeOfDayPricerRoute: HooksAgentsTimeOfDayPricerRoute,
   HooksAgentsUgcHarvesterRoute: HooksAgentsUgcHarvesterRoute,
   HooksAgentsVipConciergeRoute: HooksAgentsVipConciergeRoute,
+  HooksAgentsWebProspectorRoute: HooksAgentsWebProspectorRoute,
   HooksAgentsWinbackRoiRoute: HooksAgentsWinbackRoiRoute,
   HooksDemoSeedRoute: HooksDemoSeedRoute,
   HooksEnginesAbandonedCartRoute: HooksEnginesAbandonedCartRoute,

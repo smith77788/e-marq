@@ -127,6 +127,8 @@ const ADMIN_SYSTEM: NavGroup = {
     { labelKey: "sb.allTenants", to: "/admin/tenants", icon: Building2, tone: "text-primary" },
     { labelKey: "sb.plansCatalog" as TKey, to: "/admin/plans", icon: Coins, tone: "text-warning" },
     { labelKey: "sb.adminUsers" as TKey, to: "/admin/users", icon: UsersRound, tone: "text-accent" },
+    { labelKey: "sb.topupRequests" as TKey, to: "/admin/topup-requests", icon: CreditCard, tone: "text-success" },
+    { labelKey: "sb.leadRadar" as TKey, to: "/admin/lead-radar", icon: Radio, tone: "text-accent" },
     {
       labelKey: "sb.dntradeHealth" as TKey,
       to: "/admin/dntrade-health",

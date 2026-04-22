@@ -242,7 +242,7 @@ function RequestRow({ row }: { row: Row }) {
 function ProcessDialog({ row }: { row: Row }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [note, setNote] = useState(row.manager_note ?? "");
+  const [note, setNote] = useState<string>(row.manager_note ?? "");
 
   const updateStatus = useMutation({
     mutationFn: async (next: Status) => {
