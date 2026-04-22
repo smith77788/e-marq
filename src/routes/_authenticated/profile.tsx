@@ -40,6 +40,7 @@ import {
 import { PlanBadge } from "@/components/admin/PlanBadge";
 import { UsageMeters, type PlanSummary } from "@/components/admin/UsageMeters";
 import { OwnerPlanSwitcher } from "@/components/owner/OwnerPlanSwitcher";
+import { MfaSetupCard } from "@/components/owner/MfaSetupCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -354,6 +355,8 @@ function ProfilePage() {
 
         {/* SECURITY */}
         <TabsContent value="security" className="mt-4 space-y-4">
+          <MfaSetupCard />
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><KeyRound className="h-4 w-4 text-warning" /> Зміна пароля</CardTitle>

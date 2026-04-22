@@ -9,6 +9,7 @@ import { LiveStatus } from "@/components/layout/LiveStatus";
 import { InsightToasts } from "@/components/layout/InsightToasts";
 import { TenantSwitcher } from "@/components/layout/TenantSwitcher";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { MfaChallengeGate } from "@/components/layout/MfaChallengeGate";
 import { TenantContextProvider, useTenantContext } from "@/hooks/useTenantContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
@@ -46,13 +47,15 @@ function AuthenticatedLayout() {
   }
 
   return (
-    <TenantContextProvider>
-      <AuthenticatedShell
-        userEmail={user.email ?? ""}
-        isSuperAdmin={isSuperAdmin}
-        onSignOut={handleSignOut}
-      />
-    </TenantContextProvider>
+    <MfaChallengeGate>
+      <TenantContextProvider>
+        <AuthenticatedShell
+          userEmail={user.email ?? ""}
+          isSuperAdmin={isSuperAdmin}
+          onSignOut={handleSignOut}
+        />
+      </TenantContextProvider>
+    </MfaChallengeGate>
   );
 }
 
