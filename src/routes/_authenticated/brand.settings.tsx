@@ -143,7 +143,7 @@ function StoreSettingsPage() {
       };
       const { error } = await supabase
         .from("tenant_configs")
-        .upsert([merged], { onConflict: "tenant_id" });
+        .upsert(merged as never, { onConflict: "tenant_id" });
       if (error) throw error;
     },
     onSuccess: () => {
