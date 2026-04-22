@@ -27,8 +27,10 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTenantContext } from "@/hooks/useTenantContext";
 import { OutreachHunterSection } from "@/components/admin/OutreachHunterTabs";
 import { MagnetPreviewDialog } from "@/components/admin/MagnetPreviewDialog";
+import { TelegramConnectCard } from "@/components/owner/TelegramConnectCard";
 import { friendlyAgentSummary, friendlyAgentError, agentLabel } from "@/lib/outreach/agentSummary";
 
 export const Route = createFileRoute("/_authenticated/admin/lead-radar")({
@@ -111,9 +113,13 @@ function LeadRadarPage() {
 
 function Content() {
   const qc = useQueryClient();
+  const { currentTenantId, tenants } = useTenantContext();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [previewSlug, setPreviewSlug] = useState<string | null>(null);
+
+  // Для super-admin без вибраного tenant'а — беремо перший доступний
+  const telegramTenantId = currentTenantId ?? tenants[0]?.tenant_id ?? null;
 
   const prospects = useQuery({
     queryKey: ["lead-prospects", statusFilter],
@@ -256,6 +262,8 @@ function Content() {
           </Button>
         </div>
       </header>
+
+      {telegramTenantId && <TelegramConnectCard tenantId={telegramTenantId} />}
 
       <Tabs defaultValue="prospects">
         <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-muted/40 p-1">
