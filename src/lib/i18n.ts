@@ -113,6 +113,9 @@ const dict = {
     "toast.agentFailed": "Агент впав з помилкою",
     "toast.openLabel": "Відкрити",
     "toast.detailsLabel": "Деталі",
+    "a11y.skipToContent": "Перейти до основного вмісту",
+    "a11y.mainNav": "Головна навігація",
+    "a11y.mainContent": "Основний вміст",
 
     // Onboarding wizard (existing keys preserved)
     "onb.title": "Швидкий старт за 7 кроків",
@@ -1289,6 +1292,9 @@ const dict = {
     "toast.agentFailed": "Agent failed",
     "toast.openLabel": "Open",
     "toast.detailsLabel": "Details",
+    "a11y.skipToContent": "Skip to main content",
+    "a11y.mainNav": "Main navigation",
+    "a11y.mainContent": "Main content",
 
     "onb.title": "7-step quick start",
     "onb.subtitle": "Set up your autonomous Revenue OS. You can come back to finish anytime.",
