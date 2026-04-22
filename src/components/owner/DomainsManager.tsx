@@ -312,6 +312,10 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
                           <CheckCircle2 className="h-3.5 w-3.5 text-success" /> Підтверджено{" "}
                           {new Date(d.verified_at).toLocaleDateString("uk-UA")}
                         </>
+                      ) : d.status === "failed" ? (
+                        <>
+                          <XCircle className="h-3.5 w-3.5 text-destructive" /> Помилка перевірки
+                        </>
                       ) : d.last_checked_at ? (
                         <>
                           <Loader2 className="h-3.5 w-3.5 animate-spin" /> Перевіряємо…
@@ -324,6 +328,12 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
                     </div>
                   </div>
                 </div>
+
+                {d.notes && d.status !== "active" && (
+                  <p className="rounded bg-destructive/10 px-2 py-1 text-[11px] text-destructive">
+                    {d.notes}
+                  </p>
+                )}
               </div>
             ))
           )}
