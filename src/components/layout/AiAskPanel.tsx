@@ -13,6 +13,7 @@ import {
   Copy,
   Download,
   History,
+  Link2,
   Loader2,
   Pin,
   Sparkles,
