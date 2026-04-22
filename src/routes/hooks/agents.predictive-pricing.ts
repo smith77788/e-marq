@@ -19,6 +19,10 @@ import {
   jsonOk,
   startAgentRun,
 } from "@/lib/acos/agentRuntime";
+import { loadEffectiveGeoTargets } from "@/lib/acos/loadGeoTargets";
+import { rowMatchesGeo, summarizeGeo } from "@/lib/acos/geoTargets";
+
+const AGENT_ID = "predictive-pricing";
 
 export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
   server: {
@@ -38,8 +42,10 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
         const ctx = await authorizeAgentRequest(token, tenantId);
         if ("error" in ctx) return jsonError(ctx.error, ctx.status);
 
-        const handle = await startAgentRun("predictive-pricing", tenantId, ctx);
+        const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
+          const geo = await loadEffectiveGeoTargets(tenantId, AGENT_ID);
+
           const { data: products } = await supabaseAdmin
             .from("products")
             .select("id, name, price_cents")
@@ -50,18 +56,26 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
             return jsonOk({ insights_created: 0 });
           }
 
-          // Load 60d order_items per product
+          // Load 60d order_items per product (joined with order metadata for geo filter)
           const since = new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString();
-          const { data: items } = await supabaseAdmin
+          const { data: itemsRaw } = await supabaseAdmin
             .from("order_items")
-            .select("product_id, quantity, unit_price_cents, created_at")
+            .select(
+              "product_id, quantity, unit_price_cents, created_at, orders!inner(metadata)",
+            )
             .eq("tenant_id", tenantId)
             .gte("created_at", since)
             .not("product_id", "is", null);
 
+          const items = (itemsRaw ?? []).filter((r) => {
+            const ord = (r as unknown as { orders?: { metadata?: Record<string, unknown> | null } })
+              .orders;
+            return rowMatchesGeo({ metadata: ord?.metadata ?? null }, geo);
+          });
+
           // Group by product → list of (price, qty, day)
           const byProduct = new Map<string, { price: number; qty: number; day: string }[]>();
-          for (const it of items ?? []) {
+          for (const it of items) {
             if (!it.product_id) continue;
             const list = byProduct.get(it.product_id) ?? [];
             list.push({
@@ -180,7 +194,11 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
           }
 
           const created = await insertInsightsDedup(insights);
-          await finishAgentRun(handle, created, { products_analyzed: byProduct.size });
+          await finishAgentRun(handle, created, {
+            products_analyzed: byProduct.size,
+            geo: summarizeGeo(geo, "en"),
+            items_in_scope: items.length,
+          });
           return jsonOk({ insights_created: created });
         } catch (err) {
           await failAgentRun(handle, err);

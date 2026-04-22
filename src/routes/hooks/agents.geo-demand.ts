@@ -15,6 +15,8 @@ import {
   startAgentRun,
   type AgentInsightInput,
 } from "@/lib/acos/agentRuntime";
+import { loadEffectiveGeoTargets } from "@/lib/acos/loadGeoTargets";
+import { rowMatchesGeo, summarizeGeo } from "@/lib/acos/geoTargets";
 
 const AGENT_ID = "geo-demand";
 
@@ -39,8 +41,9 @@ export const Route = createFileRoute("/hooks/agents/geo-demand")({
 
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
+          const geo = await loadEffectiveGeoTargets(tenantId, AGENT_ID);
           const since = new Date(Date.now() - 30 * 86_400_000).toISOString();
-          const { data: orders } = await supabaseAdmin
+          const { data: ordersRaw } = await supabaseAdmin
             .from("orders")
             .select("total_cents, metadata, created_at")
             .eq("tenant_id", tenantId)
@@ -48,8 +51,13 @@ export const Route = createFileRoute("/hooks/agents/geo-demand")({
             .gte("created_at", since)
             .limit(2000);
 
+          // Filter by effective geo targets (country + optional cities)
+          const orders = (ordersRaw ?? []).filter((o) =>
+            rowMatchesGeo({ metadata: o.metadata as Record<string, unknown> | null }, geo),
+          );
+
           const byRegion = new Map<string, { count: number; cents: number }>();
-          for (const o of orders ?? []) {
+          for (const o of orders) {
             const meta = (o.metadata ?? {}) as Record<string, unknown>;
             const shipping = (meta.shipping ?? {}) as Record<string, unknown>;
             const region = String(shipping.country ?? shipping.region ?? meta.country ?? "unknown");
@@ -64,8 +72,8 @@ export const Route = createFileRoute("/hooks/agents/geo-demand")({
             return jsonOk({ insights_created: 0 });
           }
 
-          const totalOrders = orders?.length ?? 1;
-          const totalCents = (orders ?? []).reduce((s, o) => s + o.total_cents, 0);
+          const totalOrders = orders.length || 1;
+          const totalCents = orders.reduce((s, o) => s + o.total_cents, 0);
           const insights: AgentInsightInput[] = [];
 
           for (const [region, b] of byRegion) {
@@ -97,7 +105,11 @@ export const Route = createFileRoute("/hooks/agents/geo-demand")({
           }
 
           const created = await insertInsightsDedup(insights);
-          await finishAgentRun(handle, created, { regions: byRegion.size });
+          await finishAgentRun(handle, created, {
+            regions: byRegion.size,
+            geo: summarizeGeo(geo, "en"),
+            orders_in_scope: orders.length,
+          });
           return jsonOk({ insights_created: created });
         } catch (e) {
           await failAgentRun(handle, e);
