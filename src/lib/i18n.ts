@@ -1048,6 +1048,9 @@ const dict = {
     "gs.aiSuggestions": "Куди далі",
     "gs.aiNoTenant": "Спершу оберіть бренд у перемикачі",
     "gs.aiTriggerHint": "Почніть з ? щоб запитати AI по даних бренду",
+    "gs.aiHistory": "Нещодавні запити",
+    "gs.aiStarters": "Спробуйте запитати",
+    "gs.aiClearHistory": "Очистити історію",
 
     // Notification center
     "notif.title": "Сповіщення",
@@ -2344,6 +2347,9 @@ const dict = {
     "gs.aiSuggestions": "Where to next",
     "gs.aiNoTenant": "Pick a brand in the switcher first",
     "gs.aiTriggerHint": "Start with ? to ask AI about your brand data",
+    "gs.aiHistory": "Recent questions",
+    "gs.aiStarters": "Try asking",
+    "gs.aiClearHistory": "Clear history",
 
     // Notification center
     "notif.title": "Notifications",
