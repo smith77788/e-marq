@@ -138,11 +138,11 @@ export function AgentPermissionsCard({ tenantId, agentId }: Props) {
         notify_on_apply: draft.notify_on_apply,
         weekly_run_limit: draft.weekly_run_limit,
         last_changed_by: userId,
-        geo_targets: draft.geo_targets as unknown as Record<string, unknown> | null,
+        geo_targets: (draft.geo_targets as unknown) ?? null,
       };
       const { error } = await supabase
         .from("agent_permissions")
-        .upsert(payload, { onConflict: "tenant_id,agent_id" });
+        .upsert(payload as never, { onConflict: "tenant_id,agent_id" });
       if (error) throw error;
     },
     onSuccess: () => {
