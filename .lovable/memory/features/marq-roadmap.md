@@ -80,7 +80,17 @@ type: feature
 - `EmailDomainCard` перенесено з `/brand/integrations` → `/brand/email#settings` ✅
 - Sidebar → новий пункт «Email» (sb.email) у групі «Магазин» ✅
 - i18n: 18 нових ключів (UA + EN) для табів і автоматизацій ✅
-- TODO (Sprint 9): агенти `email-*` мають читати `features.email_automations.{key}` і поважати OFF
+
+### Sprint 9 — Email automation flags wiring ✅ (готово)
+- Новий helper `src/lib/acos/emailAutomationFlags.ts` — `isEmailAutomationEnabled(tenantId, key)` ✅
+- Усі 5 email-агентів роблять early-return з `reason: "disabled_by_owner"` коли власник вимкнув toggle: ✅
+  - `agents.email-abandoned-cart` → `abandoned_cart`
+  - `agents.email-winback` → `winback`
+  - `agents.email-post-purchase` → `post_purchase`
+  - `agents.order-status-notifier` → `order_status`
+  - `agents.restock-notifier` → `restock`
+- Default = ON (відсутність ключа трактується як увімкнено), щоб існуючі тенанти не зламалися ✅
+- `tsc --noEmit` чистий ✅
 
 ## Абсолютні заборони
 - НЕ редагувати існуючі міграції

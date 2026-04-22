@@ -23,6 +23,7 @@ import {
 } from "@/lib/acos/agentRuntime";
 import { sendEmailViaGateway } from "@/lib/email/resendGateway";
 import { renderPostPurchase } from "@/lib/email/marketingTemplates";
+import { isEmailAutomationEnabled } from "@/lib/acos/emailAutomationFlags";
 
 const AGENT_ID = "email_post_purchase";
 const TEMPLATE = "post_purchase";
@@ -50,6 +51,10 @@ export const Route = createFileRoute("/hooks/agents/email-post-purchase")({
 
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
+          if (!(await isEmailAutomationEnabled(tenantId, "post_purchase"))) {
+            await finishAgentRun(handle, 0, { reason: "disabled_by_owner" });
+            return jsonOk({ insights_created: 0, sent: 0, reason: "disabled_by_owner" });
+          }
           const now = Date.now();
           const dayMs = 86_400_000;
           const minFulfilled = new Date(now - 8 * dayMs).toISOString();

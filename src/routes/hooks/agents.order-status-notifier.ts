@@ -25,6 +25,7 @@ import {
 import { sendEmailViaGateway } from "@/lib/email/resendGateway";
 import { renderOrderStatusUpdate } from "@/lib/email/templates";
 import { loadOrderEmailContext } from "@/lib/email/orderContext";
+import { isEmailAutomationEnabled } from "@/lib/acos/emailAutomationFlags";
 
 const AGENT_ID = "order_status_notifier";
 const TRACKED = ["paid", "fulfilled", "cancelled", "refunded"] as const;
@@ -49,6 +50,10 @@ export const Route = createFileRoute("/hooks/agents/order-status-notifier")({
 
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
+          if (!(await isEmailAutomationEnabled(tenantId, "order_status"))) {
+            await finishAgentRun(handle, 0, { reason: "disabled_by_owner" });
+            return jsonOk({ insights_created: 0, sent: 0, reason: "disabled_by_owner" });
+          }
           const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
 
           const { data: orders } = await supabaseAdmin
