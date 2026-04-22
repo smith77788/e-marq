@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Bot,
   Building2,
+  Clock,
   Compass,
   Lightbulb,
   Loader2,
@@ -25,6 +26,7 @@ import {
   Search,
   ShoppingCart,
   Users,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +41,8 @@ import {
 import { useT } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { getRecentPages } from "@/lib/recentPages";
+import { QUICK_ACTIONS, toggleThemeMode, type QuickAction } from "@/lib/quickActions";
 
 type StaticEntry = {
   label: string;
