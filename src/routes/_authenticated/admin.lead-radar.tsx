@@ -405,6 +405,12 @@ function Content() {
           <OutreachHunterSection />
         </TabsContent>
       </Tabs>
+
+      <MagnetPreviewDialog
+        slug={previewSlug}
+        open={previewSlug !== null}
+        onOpenChange={(v) => !v && setPreviewSlug(null)}
+      />
     </div>
   );
 }
