@@ -106,8 +106,13 @@ const dict = {
 
     // Real-time toasts
     "toast.newInsight": "Новий інсайт",
+    "toast.criticalInsight": "Критичний інсайт",
+    "toast.highInsight": "Інсайт високого пріоритету",
     "toast.actionApplied": "Дію застосовано",
     "toast.agentCompleted": "Агент завершив роботу",
+    "toast.agentFailed": "Агент впав з помилкою",
+    "toast.openLabel": "Відкрити",
+    "toast.detailsLabel": "Деталі",
 
     // Onboarding wizard (existing keys preserved)
     "onb.title": "Швидкий старт за 7 кроків",
