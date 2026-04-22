@@ -14,9 +14,11 @@ import {
   CreditCard,
   Landmark,
   Loader2,
+  Smartphone,
   Sparkles,
   Tag,
   Trash2,
+  Wallet,
   X,
   Plus,
   Minus,
@@ -35,6 +37,7 @@ import { formatMoneyExact } from "@/lib/money";
 import { ShippingSelector } from "@/components/storefront/ShippingSelector";
 import type { NPSelection } from "@/lib/shipping/novaPoshta";
 import { sendOrderConfirmationEmail } from "@/lib/email/client";
+import { startGatewayPayment, type PaymentMethod } from "@/lib/payments/client";
 
 type DiscountResult =
   | { valid: true; promo_id: string; name: string; type: string; discount_cents: number }
