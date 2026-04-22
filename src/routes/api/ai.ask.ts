@@ -44,7 +44,6 @@ export const Route = createFileRoute("/api/ai/ask")({
       POST: async ({ request }) => {
         const url = process.env.SUPABASE_URL;
         const anon = process.env.SUPABASE_PUBLISHABLE_KEY;
-        const lovableKey = process.env.LOVABLE_API_KEY;
         if (!url || !anon) return jsonError("Server not configured", 500);
 
         const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
