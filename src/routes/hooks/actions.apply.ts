@@ -105,7 +105,7 @@ export const Route = createFileRoute("/hooks/actions/apply")({
         // Look up insight to learn tenant_id (needed for authz)
         const { data: insight, error: insErr } = await supabaseAdmin
           .from("ai_insights")
-          .select("id, tenant_id, insight_type, affected_layer, title, expected_impact, metrics, status")
+          .select("id, tenant_id, insight_type, affected_layer, title, expected_impact, metrics, status, risk_level")
           .eq("id", insightId)
           .single();
         if (insErr || !insight) return jsonError("Insight not found", 404);
