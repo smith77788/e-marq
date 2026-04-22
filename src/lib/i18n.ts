@@ -541,6 +541,7 @@ const dict = {
     "sb.promotions": "Промокоди",
     "sb.email": "Email",
     "sb.siteBuilder": "Свій сайт",
+    "sb.storeSettings": "Налаштування магазину",
 
     // Brand · Email page
     "be.title": "Email-маркетинг",
@@ -1265,6 +1266,7 @@ const dict = {
     "sb.promotions": "Promo codes",
     "sb.email": "Email",
     "sb.siteBuilder": "Your site",
+    "sb.storeSettings": "Store settings",
 
     // Brand · Email page
     "be.title": "Email marketing",
