@@ -238,6 +238,7 @@ export function AppSidebar({ isSuperAdmin, brandName, tenantSlug }: Props) {
   const navigate = useNavigate();
   const { t } = useT();
   const groups = isSuperAdmin ? ADMIN_NAV : OWNER_NAV;
+  const [handbookOpen, setHandbookOpen] = useState(false);
 
   /**
    * Smart hash navigation:
