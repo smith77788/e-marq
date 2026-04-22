@@ -318,7 +318,7 @@ function TopupDialog({
           Поповнити
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="w-[calc(100%-1.5rem)] max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Поповнення балансу</DialogTitle>
           <DialogDescription>Оберіть кількість AI-кредитів і спосіб оплати.</DialogDescription>
@@ -362,15 +362,18 @@ function TopupDialog({
           </div>
 
           <Tabs defaultValue="bank">
-            <TabsList className="w-full">
-              <TabsTrigger value="bank" className="flex-1 gap-1.5">
-                <Banknote className="h-3.5 w-3.5" /> Банківський переказ
+            <TabsList className="grid w-full grid-cols-3 gap-1 h-auto p-1">
+              <TabsTrigger value="bank" className="flex-col gap-1 py-2 text-[11px] sm:flex-row sm:text-xs sm:gap-1.5">
+                <Banknote className="h-3.5 w-3.5" />
+                <span className="leading-tight">Банк. переказ</span>
               </TabsTrigger>
-              <TabsTrigger value="manual" className="flex-1 gap-1.5">
-                <Sparkles className="h-3.5 w-3.5" /> Кредит-нота (адмін)
+              <TabsTrigger value="manual" className="flex-col gap-1 py-2 text-[11px] sm:flex-row sm:text-xs sm:gap-1.5">
+                <Sparkles className="h-3.5 w-3.5" />
+                <span className="leading-tight">Кредит-нота</span>
               </TabsTrigger>
-              <TabsTrigger value="online" className="flex-1 gap-1.5">
-                <CreditCard className="h-3.5 w-3.5" /> Через менеджера
+              <TabsTrigger value="online" className="flex-col gap-1 py-2 text-[11px] sm:flex-row sm:text-xs sm:gap-1.5">
+                <CreditCard className="h-3.5 w-3.5" />
+                <span className="leading-tight">Менеджер</span>
               </TabsTrigger>
             </TabsList>
 
@@ -457,10 +460,13 @@ function TopupDialog({
 
 function BankRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="flex items-center justify-between gap-2 border-b border-border/60 py-1.5 last:border-b-0">
-      <span className="text-muted-foreground">{label}</span>
-      <div className="flex min-w-0 items-center gap-1.5">
-        <span className={`truncate text-foreground ${mono ? "font-mono" : ""}`} title={value}>
+    <div className="flex flex-col gap-1 border-b border-border/60 py-2 last:border-b-0 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
+      <span className="shrink-0 text-muted-foreground">{label}</span>
+      <div className="flex min-w-0 items-start gap-1.5 sm:justify-end">
+        <span
+          className={`min-w-0 break-all text-foreground ${mono ? "font-mono text-[11px]" : ""}`}
+          title={value}
+        >
           {value}
         </span>
         <button

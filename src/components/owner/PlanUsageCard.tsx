@@ -4,7 +4,7 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { Crown, ExternalLink } from "lucide-react";
+import { Crown, ExternalLink, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,10 +12,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { UsageMeters, type PlanSummary } from "@/components/admin/UsageMeters";
 import { PlanBadge } from "@/components/admin/PlanBadge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTenantContext } from "@/hooks/useTenantContext";
+import { trackBilling } from "@/lib/billingTelemetry";
 
 export function PlanUsageCard({ tenantId }: { tenantId: string }) {
   const navigate = useNavigate();
-  const { data, isLoading } = useQuery({
+  const { loading: tenantLoading } = useTenantContext();
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["plan-summary", tenantId],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_tenant_plan_summary", {
@@ -92,8 +95,20 @@ export function PlanUsageCard({ tenantId }: { tenantId: string }) {
             size="sm"
             variant="outline"
             type="button"
-            onClick={() => void navigate({ to: "/brand/billing", search: { tenant: tenantId } })}
+            disabled={tenantLoading || !tenantId || !data || isError}
+            aria-busy={tenantLoading || isLoading}
+            onClick={() => {
+              trackBilling(tenantId, "billing.cta_click", { plan_key: data.plan.key });
+              void navigate({ to: "/brand/billing", search: { tenant: tenantId } }).catch((e) => {
+                trackBilling(tenantId, "billing.nav_failed", {
+                  error: e instanceof Error ? e.message : String(e),
+                });
+              });
+            }}
           >
+            {tenantLoading || isLoading ? (
+              <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+            ) : null}
             Оплата та баланс <ExternalLink className="ml-1 h-3 w-3" />
           </Button>
         </div>
