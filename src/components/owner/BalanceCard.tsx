@@ -460,10 +460,13 @@ function TopupDialog({
 
 function BankRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="flex items-center justify-between gap-2 border-b border-border/60 py-1.5 last:border-b-0">
-      <span className="text-muted-foreground">{label}</span>
-      <div className="flex min-w-0 items-center gap-1.5">
-        <span className={`truncate text-foreground ${mono ? "font-mono" : ""}`} title={value}>
+    <div className="flex flex-col gap-1 border-b border-border/60 py-2 last:border-b-0 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
+      <span className="shrink-0 text-muted-foreground">{label}</span>
+      <div className="flex min-w-0 items-start gap-1.5 sm:justify-end">
+        <span
+          className={`min-w-0 break-all text-foreground ${mono ? "font-mono text-[11px]" : ""}`}
+          title={value}
+        >
           {value}
         </span>
         <button
