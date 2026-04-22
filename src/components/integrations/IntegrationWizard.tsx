@@ -477,8 +477,13 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
                     </Label>
                     <div className="flex gap-2">
                       <Input readOnly value={webhookUrl} className="font-mono text-xs" />
-                      <Button size="icon" variant="outline" onClick={() => copy(webhookUrl)}>
-                        <Copy className="h-4 w-4" />
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => copy(webhookUrl)}
+                        aria-label="Копіювати Webhook URL"
+                      >
+                        <Copy className="h-4 w-4" aria-hidden="true" />
                       </Button>
                     </div>
                   </div>
@@ -496,8 +501,9 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
                         size="icon"
                         variant="outline"
                         onClick={() => copy(saveConn.data!.webhook_secret!)}
+                        aria-label="Копіювати секретний підпис"
                       >
-                        <Copy className="h-4 w-4" />
+                        <Copy className="h-4 w-4" aria-hidden="true" />
                       </Button>
                     </div>
                   </div>

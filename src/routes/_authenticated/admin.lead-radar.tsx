@@ -489,8 +489,14 @@ function ProspectRow({ prospect }: { prospect: Prospect }) {
             <Play className="mr-1 h-3.5 w-3.5" />
             Qualify
           </Button>
-          <Button size="sm" variant="ghost" disabled={busy} onClick={() => updateStatus("rejected")}>
-            ✕
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={busy}
+            onClick={() => updateStatus("rejected")}
+            aria-label="Відхилити лід"
+          >
+            <span aria-hidden="true">✕</span>
           </Button>
         </div>
       </div>
