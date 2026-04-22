@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { loadCollectionProducts } from "@/lib/storefront/loaders";
 import { ProductCard } from "@/components/storefront/ProductCard";
+import { useT, tStatic } from "@/lib/i18n";
 
 type SortOpt = "manual" | "price_asc" | "price_desc" | "name_asc";
 
@@ -36,12 +37,14 @@ export const Route = createFileRoute("/s/$slug/collections/$handle")({
   },
   notFoundComponent: () => (
     <div className="mx-auto max-w-4xl px-4 py-12 text-center">
-      <p className="text-sm text-muted-foreground">Категорію не знайдено.</p>
+      <p className="text-sm text-muted-foreground">{tStatic("sf.collection.notFound")}</p>
     </div>
   ),
   errorComponent: ({ error }) => (
     <div className="mx-auto max-w-4xl px-4 py-12 text-center">
-      <p className="text-sm text-destructive">Помилка: {error.message}</p>
+      <p className="text-sm text-destructive">
+        {tStatic("sf.collection.error")}: {error.message}
+      </p>
     </div>
   ),
   component: CollectionPage,
@@ -50,6 +53,7 @@ export const Route = createFileRoute("/s/$slug/collections/$handle")({
 function CollectionPage() {
   const { slug, handle } = Route.useParams();
   const initial = Route.useLoaderData();
+  const { t } = useT();
 
   const { data } = useQuery({
     queryKey: ["storefront-collection", slug, handle],
@@ -86,16 +90,18 @@ function CollectionPage() {
       </header>
 
       <div className="mb-6 flex items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground">{data.products.length} товарів</p>
+        <p className="text-sm text-muted-foreground">
+          {data.products.length} {t("sf.collection.countSuffix")}
+        </p>
         <Select value={sort} onValueChange={(v) => setSort(v as SortOpt)}>
           <SelectTrigger className="h-9 w-44">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="manual">Рекомендовано</SelectItem>
-            <SelectItem value="price_asc">Ціна ↑</SelectItem>
-            <SelectItem value="price_desc">Ціна ↓</SelectItem>
-            <SelectItem value="name_asc">За назвою</SelectItem>
+            <SelectItem value="manual">{t("sf.collection.sort.manual")}</SelectItem>
+            <SelectItem value="price_asc">{t("sf.collection.sort.priceAsc")}</SelectItem>
+            <SelectItem value="price_desc">{t("sf.collection.sort.priceDesc")}</SelectItem>
+            <SelectItem value="name_asc">{t("sf.collection.sort.nameAsc")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -103,7 +109,7 @@ function CollectionPage() {
       {sorted.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-sm text-muted-foreground">
-            У цій категорії немає товарів.
+            {t("sf.collection.empty")}
           </CardContent>
         </Card>
       ) : (
