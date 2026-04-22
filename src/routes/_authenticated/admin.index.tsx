@@ -133,14 +133,8 @@ function SectionHeader({
 
 function MissionControlContent() {
   const { t } = useT();
-  const sinceIso = useMemo(
-    () => new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    [],
-  );
-  const since24hIso = useMemo(
-    () => new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    [],
-  );
+  const sinceIso = useMemo(() => new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), []);
+  const since24hIso = useMemo(() => new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), []);
 
   // 🔥 CRITICAL: tenants + orders (renders top stats fast)
   const critical = useQuery({

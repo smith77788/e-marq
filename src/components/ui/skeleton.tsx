@@ -11,11 +11,7 @@ function Skeleton({
 }: React.HTMLAttributes<HTMLDivElement> & { pulse?: boolean }) {
   return (
     <div
-      className={cn(
-        "rounded-md",
-        pulse ? "animate-pulse bg-primary/10" : "shimmer",
-        className,
-      )}
+      className={cn("rounded-md", pulse ? "animate-pulse bg-primary/10" : "shimmer", className)}
       {...props}
     />
   );

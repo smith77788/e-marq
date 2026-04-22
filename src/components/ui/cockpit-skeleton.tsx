@@ -7,11 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
  * - Stat row + grid
  * - Stagger fade-in via parent .reveal-stagger
  */
-export function CockpitSkeleton({
-  variant = "owner",
-}: {
-  variant?: "owner" | "admin";
-}) {
+export function CockpitSkeleton({ variant = "owner" }: { variant?: "owner" | "admin" }) {
   return (
     <>
       <div className="top-progress" aria-hidden="true" />
