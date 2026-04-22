@@ -1,0 +1,1 @@
+UPDATE public.products SET is_active = false, updated_at = now() WHERE name = '__marq_health_check__';
