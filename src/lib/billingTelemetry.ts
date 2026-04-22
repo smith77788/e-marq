@@ -21,33 +21,60 @@ type BillingEvent =
 
 const SS_KEY = "marq.billingNavFailures";
 const ALERT_FLAG = "marq.billingNavFailureAlert";
+const SESSION_KEY = "marq.billingTelemetrySid";
 const WINDOW_MS = 60_000;
 const SPIKE_THRESHOLD = 3;
+
+function ensureBillingSessionId(): string {
+  if (typeof window === "undefined") return "ssr-noop-session";
+  try {
+    let sid = window.sessionStorage.getItem(SESSION_KEY);
+    if (!sid) {
+      sid =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `sid-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      window.sessionStorage.setItem(SESSION_KEY, sid);
+    }
+    return sid;
+  } catch {
+    return `sid-${Date.now()}`;
+  }
+}
 
 export function trackBilling(
   tenantId: string,
   kind: BillingEvent,
   payload: Record<string, unknown> = {},
 ) {
-  // 1) Пишемо подію (best-effort, без await — не блокуємо UI)
-  void supabase
-    .from("events")
-    .insert({
-      tenant_id: tenantId,
-      type: "content_viewed",
-      payload: {
-        ts: new Date().toISOString(),
-        kind,
-        path: typeof window !== "undefined" ? window.location.pathname : null,
-        ...payload,
-      },
-    })
-    .then(({ error }) => {
+  // 1) Пишемо подію (best-effort, без await — не блокуємо UI).
+  //    Заповнюємо user_id + session_id: RLS `events_insert_authenticated`
+  //    приймає АБО is_tenant_member, АБО (user_id = auth.uid() AND session_id).
+  //    Це покриває edge-case, коли super-admin дивиться чужий бренд.
+  void (async () => {
+    try {
+      const { data: sessionRes } = await supabase.auth.getSession();
+      const userId = sessionRes.session?.user.id ?? null;
+      const sessionId = ensureBillingSessionId();
+      const { error } = await supabase.from("events").insert({
+        tenant_id: tenantId,
+        type: "content_viewed",
+        user_id: userId,
+        session_id: sessionId,
+        payload: {
+          ts: new Date().toISOString(),
+          kind,
+          path: typeof window !== "undefined" ? window.location.pathname : null,
+          ...payload,
+        },
+      });
       if (error) {
-        // не показуємо користувачу — це фонова телеметрія
         console.warn("[billing-telemetry]", error.message);
       }
-    });
+    } catch (e) {
+      console.warn("[billing-telemetry]", e instanceof Error ? e.message : String(e));
+    }
+  })();
 
   // 2) Локальна сигналізація про спайк навігаційних збоїв
   if (kind === "billing.nav_failed") {
