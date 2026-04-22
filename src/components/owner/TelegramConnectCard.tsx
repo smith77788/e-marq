@@ -185,16 +185,8 @@ export function TelegramConnectCard({ tenantId, compact = false }: Props) {
               в кабінеті.
             </li>
           </ol>
-          <Button
-            asChild
-            className="w-full sm:w-auto"
-            onClick={() =>
-              toast.info("Відкриваю налаштування підключення Telegram", {
-                description: "Після збереження токена натисніть «Оновити» в цій картці.",
-              })
-            }
-          >
-            <a href="/integrations" target="_self" rel="noreferrer">
+          <Button asChild className="w-full sm:w-auto">
+            <a href="/brand/integrations">
               <Plug className="mr-1.5 h-4 w-4" />
               Підключити Telegram
               <ExternalLink className="ml-1.5 h-3.5 w-3.5 opacity-70" />
