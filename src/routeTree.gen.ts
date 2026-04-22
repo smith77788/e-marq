@@ -88,6 +88,15 @@ import { Route as HooksAgentsPriceOptimizerRouteImport } from './routes/hooks/ag
 import { Route as HooksAgentsPredictivePricingRouteImport } from './routes/hooks/agents.predictive-pricing'
 import { Route as HooksAgentsPaymentRetryRouteImport } from './routes/hooks/agents.payment-retry'
 import { Route as HooksAgentsOwnerPlaybookRouteImport } from './routes/hooks/agents.owner-playbook'
+import { Route as HooksAgentsOutreachTelegramHunterRouteImport } from './routes/hooks/agents.outreach-telegram-hunter'
+import { Route as HooksAgentsOutreachSelfHealRouteImport } from './routes/hooks/agents.outreach-self-heal'
+import { Route as HooksAgentsOutreachRoiCollectorRouteImport } from './routes/hooks/agents.outreach-roi-collector'
+import { Route as HooksAgentsOutreachRedditHunterRouteImport } from './routes/hooks/agents.outreach-reddit-hunter'
+import { Route as HooksAgentsOutreachQualityScorerRouteImport } from './routes/hooks/agents.outreach-quality-scorer'
+import { Route as HooksAgentsOutreachInstagramHunterRouteImport } from './routes/hooks/agents.outreach-instagram-hunter'
+import { Route as HooksAgentsOutreachGoogleHunterRouteImport } from './routes/hooks/agents.outreach-google-hunter'
+import { Route as HooksAgentsOutreachComposerRouteImport } from './routes/hooks/agents.outreach-composer'
+import { Route as HooksAgentsOutreachActionExecutorRouteImport } from './routes/hooks/agents.outreach-action-executor'
 import { Route as HooksAgentsOrderStatusNotifierRouteImport } from './routes/hooks/agents.order-status-notifier'
 import { Route as HooksAgentsOnboardingRouteImport } from './routes/hooks/agents.onboarding'
 import { Route as HooksAgentsNurtureRoiRouteImport } from './routes/hooks/agents.nurture-roi'
@@ -619,6 +628,60 @@ const HooksAgentsOwnerPlaybookRoute =
   HooksAgentsOwnerPlaybookRouteImport.update({
     id: '/hooks/agents/owner-playbook',
     path: '/hooks/agents/owner-playbook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsOutreachTelegramHunterRoute =
+  HooksAgentsOutreachTelegramHunterRouteImport.update({
+    id: '/hooks/agents/outreach-telegram-hunter',
+    path: '/hooks/agents/outreach-telegram-hunter',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsOutreachSelfHealRoute =
+  HooksAgentsOutreachSelfHealRouteImport.update({
+    id: '/hooks/agents/outreach-self-heal',
+    path: '/hooks/agents/outreach-self-heal',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsOutreachRoiCollectorRoute =
+  HooksAgentsOutreachRoiCollectorRouteImport.update({
+    id: '/hooks/agents/outreach-roi-collector',
+    path: '/hooks/agents/outreach-roi-collector',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsOutreachRedditHunterRoute =
+  HooksAgentsOutreachRedditHunterRouteImport.update({
+    id: '/hooks/agents/outreach-reddit-hunter',
+    path: '/hooks/agents/outreach-reddit-hunter',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsOutreachQualityScorerRoute =
+  HooksAgentsOutreachQualityScorerRouteImport.update({
+    id: '/hooks/agents/outreach-quality-scorer',
+    path: '/hooks/agents/outreach-quality-scorer',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsOutreachInstagramHunterRoute =
+  HooksAgentsOutreachInstagramHunterRouteImport.update({
+    id: '/hooks/agents/outreach-instagram-hunter',
+    path: '/hooks/agents/outreach-instagram-hunter',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsOutreachGoogleHunterRoute =
+  HooksAgentsOutreachGoogleHunterRouteImport.update({
+    id: '/hooks/agents/outreach-google-hunter',
+    path: '/hooks/agents/outreach-google-hunter',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsOutreachComposerRoute =
+  HooksAgentsOutreachComposerRouteImport.update({
+    id: '/hooks/agents/outreach-composer',
+    path: '/hooks/agents/outreach-composer',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsOutreachActionExecutorRoute =
+  HooksAgentsOutreachActionExecutorRouteImport.update({
+    id: '/hooks/agents/outreach-action-executor',
+    path: '/hooks/agents/outreach-action-executor',
     getParentRoute: () => rootRouteImport,
   } as any)
 const HooksAgentsOrderStatusNotifierRoute =
@@ -1351,6 +1414,15 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/nurture-roi': typeof HooksAgentsNurtureRoiRoute
   '/hooks/agents/onboarding': typeof HooksAgentsOnboardingRoute
   '/hooks/agents/order-status-notifier': typeof HooksAgentsOrderStatusNotifierRoute
+  '/hooks/agents/outreach-action-executor': typeof HooksAgentsOutreachActionExecutorRoute
+  '/hooks/agents/outreach-composer': typeof HooksAgentsOutreachComposerRoute
+  '/hooks/agents/outreach-google-hunter': typeof HooksAgentsOutreachGoogleHunterRoute
+  '/hooks/agents/outreach-instagram-hunter': typeof HooksAgentsOutreachInstagramHunterRoute
+  '/hooks/agents/outreach-quality-scorer': typeof HooksAgentsOutreachQualityScorerRoute
+  '/hooks/agents/outreach-reddit-hunter': typeof HooksAgentsOutreachRedditHunterRoute
+  '/hooks/agents/outreach-roi-collector': typeof HooksAgentsOutreachRoiCollectorRoute
+  '/hooks/agents/outreach-self-heal': typeof HooksAgentsOutreachSelfHealRoute
+  '/hooks/agents/outreach-telegram-hunter': typeof HooksAgentsOutreachTelegramHunterRoute
   '/hooks/agents/owner-playbook': typeof HooksAgentsOwnerPlaybookRoute
   '/hooks/agents/payment-retry': typeof HooksAgentsPaymentRetryRoute
   '/hooks/agents/predictive-pricing': typeof HooksAgentsPredictivePricingRoute
@@ -1540,6 +1612,15 @@ export interface FileRoutesByTo {
   '/hooks/agents/nurture-roi': typeof HooksAgentsNurtureRoiRoute
   '/hooks/agents/onboarding': typeof HooksAgentsOnboardingRoute
   '/hooks/agents/order-status-notifier': typeof HooksAgentsOrderStatusNotifierRoute
+  '/hooks/agents/outreach-action-executor': typeof HooksAgentsOutreachActionExecutorRoute
+  '/hooks/agents/outreach-composer': typeof HooksAgentsOutreachComposerRoute
+  '/hooks/agents/outreach-google-hunter': typeof HooksAgentsOutreachGoogleHunterRoute
+  '/hooks/agents/outreach-instagram-hunter': typeof HooksAgentsOutreachInstagramHunterRoute
+  '/hooks/agents/outreach-quality-scorer': typeof HooksAgentsOutreachQualityScorerRoute
+  '/hooks/agents/outreach-reddit-hunter': typeof HooksAgentsOutreachRedditHunterRoute
+  '/hooks/agents/outreach-roi-collector': typeof HooksAgentsOutreachRoiCollectorRoute
+  '/hooks/agents/outreach-self-heal': typeof HooksAgentsOutreachSelfHealRoute
+  '/hooks/agents/outreach-telegram-hunter': typeof HooksAgentsOutreachTelegramHunterRoute
   '/hooks/agents/owner-playbook': typeof HooksAgentsOwnerPlaybookRoute
   '/hooks/agents/payment-retry': typeof HooksAgentsPaymentRetryRoute
   '/hooks/agents/predictive-pricing': typeof HooksAgentsPredictivePricingRoute
@@ -1732,6 +1813,15 @@ export interface FileRoutesById {
   '/hooks/agents/nurture-roi': typeof HooksAgentsNurtureRoiRoute
   '/hooks/agents/onboarding': typeof HooksAgentsOnboardingRoute
   '/hooks/agents/order-status-notifier': typeof HooksAgentsOrderStatusNotifierRoute
+  '/hooks/agents/outreach-action-executor': typeof HooksAgentsOutreachActionExecutorRoute
+  '/hooks/agents/outreach-composer': typeof HooksAgentsOutreachComposerRoute
+  '/hooks/agents/outreach-google-hunter': typeof HooksAgentsOutreachGoogleHunterRoute
+  '/hooks/agents/outreach-instagram-hunter': typeof HooksAgentsOutreachInstagramHunterRoute
+  '/hooks/agents/outreach-quality-scorer': typeof HooksAgentsOutreachQualityScorerRoute
+  '/hooks/agents/outreach-reddit-hunter': typeof HooksAgentsOutreachRedditHunterRoute
+  '/hooks/agents/outreach-roi-collector': typeof HooksAgentsOutreachRoiCollectorRoute
+  '/hooks/agents/outreach-self-heal': typeof HooksAgentsOutreachSelfHealRoute
+  '/hooks/agents/outreach-telegram-hunter': typeof HooksAgentsOutreachTelegramHunterRoute
   '/hooks/agents/owner-playbook': typeof HooksAgentsOwnerPlaybookRoute
   '/hooks/agents/payment-retry': typeof HooksAgentsPaymentRetryRoute
   '/hooks/agents/predictive-pricing': typeof HooksAgentsPredictivePricingRoute
@@ -1924,6 +2014,15 @@ export interface FileRouteTypes {
     | '/hooks/agents/nurture-roi'
     | '/hooks/agents/onboarding'
     | '/hooks/agents/order-status-notifier'
+    | '/hooks/agents/outreach-action-executor'
+    | '/hooks/agents/outreach-composer'
+    | '/hooks/agents/outreach-google-hunter'
+    | '/hooks/agents/outreach-instagram-hunter'
+    | '/hooks/agents/outreach-quality-scorer'
+    | '/hooks/agents/outreach-reddit-hunter'
+    | '/hooks/agents/outreach-roi-collector'
+    | '/hooks/agents/outreach-self-heal'
+    | '/hooks/agents/outreach-telegram-hunter'
     | '/hooks/agents/owner-playbook'
     | '/hooks/agents/payment-retry'
     | '/hooks/agents/predictive-pricing'
@@ -2113,6 +2212,15 @@ export interface FileRouteTypes {
     | '/hooks/agents/nurture-roi'
     | '/hooks/agents/onboarding'
     | '/hooks/agents/order-status-notifier'
+    | '/hooks/agents/outreach-action-executor'
+    | '/hooks/agents/outreach-composer'
+    | '/hooks/agents/outreach-google-hunter'
+    | '/hooks/agents/outreach-instagram-hunter'
+    | '/hooks/agents/outreach-quality-scorer'
+    | '/hooks/agents/outreach-reddit-hunter'
+    | '/hooks/agents/outreach-roi-collector'
+    | '/hooks/agents/outreach-self-heal'
+    | '/hooks/agents/outreach-telegram-hunter'
     | '/hooks/agents/owner-playbook'
     | '/hooks/agents/payment-retry'
     | '/hooks/agents/predictive-pricing'
@@ -2304,6 +2412,15 @@ export interface FileRouteTypes {
     | '/hooks/agents/nurture-roi'
     | '/hooks/agents/onboarding'
     | '/hooks/agents/order-status-notifier'
+    | '/hooks/agents/outreach-action-executor'
+    | '/hooks/agents/outreach-composer'
+    | '/hooks/agents/outreach-google-hunter'
+    | '/hooks/agents/outreach-instagram-hunter'
+    | '/hooks/agents/outreach-quality-scorer'
+    | '/hooks/agents/outreach-reddit-hunter'
+    | '/hooks/agents/outreach-roi-collector'
+    | '/hooks/agents/outreach-self-heal'
+    | '/hooks/agents/outreach-telegram-hunter'
     | '/hooks/agents/owner-playbook'
     | '/hooks/agents/payment-retry'
     | '/hooks/agents/predictive-pricing'
@@ -2469,6 +2586,15 @@ export interface RootRouteChildren {
   HooksAgentsNurtureRoiRoute: typeof HooksAgentsNurtureRoiRoute
   HooksAgentsOnboardingRoute: typeof HooksAgentsOnboardingRoute
   HooksAgentsOrderStatusNotifierRoute: typeof HooksAgentsOrderStatusNotifierRoute
+  HooksAgentsOutreachActionExecutorRoute: typeof HooksAgentsOutreachActionExecutorRoute
+  HooksAgentsOutreachComposerRoute: typeof HooksAgentsOutreachComposerRoute
+  HooksAgentsOutreachGoogleHunterRoute: typeof HooksAgentsOutreachGoogleHunterRoute
+  HooksAgentsOutreachInstagramHunterRoute: typeof HooksAgentsOutreachInstagramHunterRoute
+  HooksAgentsOutreachQualityScorerRoute: typeof HooksAgentsOutreachQualityScorerRoute
+  HooksAgentsOutreachRedditHunterRoute: typeof HooksAgentsOutreachRedditHunterRoute
+  HooksAgentsOutreachRoiCollectorRoute: typeof HooksAgentsOutreachRoiCollectorRoute
+  HooksAgentsOutreachSelfHealRoute: typeof HooksAgentsOutreachSelfHealRoute
+  HooksAgentsOutreachTelegramHunterRoute: typeof HooksAgentsOutreachTelegramHunterRoute
   HooksAgentsOwnerPlaybookRoute: typeof HooksAgentsOwnerPlaybookRoute
   HooksAgentsPaymentRetryRoute: typeof HooksAgentsPaymentRetryRoute
   HooksAgentsPredictivePricingRoute: typeof HooksAgentsPredictivePricingRoute
@@ -3093,6 +3219,69 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/owner-playbook'
       fullPath: '/hooks/agents/owner-playbook'
       preLoaderRoute: typeof HooksAgentsOwnerPlaybookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/outreach-telegram-hunter': {
+      id: '/hooks/agents/outreach-telegram-hunter'
+      path: '/hooks/agents/outreach-telegram-hunter'
+      fullPath: '/hooks/agents/outreach-telegram-hunter'
+      preLoaderRoute: typeof HooksAgentsOutreachTelegramHunterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/outreach-self-heal': {
+      id: '/hooks/agents/outreach-self-heal'
+      path: '/hooks/agents/outreach-self-heal'
+      fullPath: '/hooks/agents/outreach-self-heal'
+      preLoaderRoute: typeof HooksAgentsOutreachSelfHealRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/outreach-roi-collector': {
+      id: '/hooks/agents/outreach-roi-collector'
+      path: '/hooks/agents/outreach-roi-collector'
+      fullPath: '/hooks/agents/outreach-roi-collector'
+      preLoaderRoute: typeof HooksAgentsOutreachRoiCollectorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/outreach-reddit-hunter': {
+      id: '/hooks/agents/outreach-reddit-hunter'
+      path: '/hooks/agents/outreach-reddit-hunter'
+      fullPath: '/hooks/agents/outreach-reddit-hunter'
+      preLoaderRoute: typeof HooksAgentsOutreachRedditHunterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/outreach-quality-scorer': {
+      id: '/hooks/agents/outreach-quality-scorer'
+      path: '/hooks/agents/outreach-quality-scorer'
+      fullPath: '/hooks/agents/outreach-quality-scorer'
+      preLoaderRoute: typeof HooksAgentsOutreachQualityScorerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/outreach-instagram-hunter': {
+      id: '/hooks/agents/outreach-instagram-hunter'
+      path: '/hooks/agents/outreach-instagram-hunter'
+      fullPath: '/hooks/agents/outreach-instagram-hunter'
+      preLoaderRoute: typeof HooksAgentsOutreachInstagramHunterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/outreach-google-hunter': {
+      id: '/hooks/agents/outreach-google-hunter'
+      path: '/hooks/agents/outreach-google-hunter'
+      fullPath: '/hooks/agents/outreach-google-hunter'
+      preLoaderRoute: typeof HooksAgentsOutreachGoogleHunterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/outreach-composer': {
+      id: '/hooks/agents/outreach-composer'
+      path: '/hooks/agents/outreach-composer'
+      fullPath: '/hooks/agents/outreach-composer'
+      preLoaderRoute: typeof HooksAgentsOutreachComposerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/outreach-action-executor': {
+      id: '/hooks/agents/outreach-action-executor'
+      path: '/hooks/agents/outreach-action-executor'
+      fullPath: '/hooks/agents/outreach-action-executor'
+      preLoaderRoute: typeof HooksAgentsOutreachActionExecutorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/order-status-notifier': {
@@ -4105,6 +4294,18 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsNurtureRoiRoute: HooksAgentsNurtureRoiRoute,
   HooksAgentsOnboardingRoute: HooksAgentsOnboardingRoute,
   HooksAgentsOrderStatusNotifierRoute: HooksAgentsOrderStatusNotifierRoute,
+  HooksAgentsOutreachActionExecutorRoute:
+    HooksAgentsOutreachActionExecutorRoute,
+  HooksAgentsOutreachComposerRoute: HooksAgentsOutreachComposerRoute,
+  HooksAgentsOutreachGoogleHunterRoute: HooksAgentsOutreachGoogleHunterRoute,
+  HooksAgentsOutreachInstagramHunterRoute:
+    HooksAgentsOutreachInstagramHunterRoute,
+  HooksAgentsOutreachQualityScorerRoute: HooksAgentsOutreachQualityScorerRoute,
+  HooksAgentsOutreachRedditHunterRoute: HooksAgentsOutreachRedditHunterRoute,
+  HooksAgentsOutreachRoiCollectorRoute: HooksAgentsOutreachRoiCollectorRoute,
+  HooksAgentsOutreachSelfHealRoute: HooksAgentsOutreachSelfHealRoute,
+  HooksAgentsOutreachTelegramHunterRoute:
+    HooksAgentsOutreachTelegramHunterRoute,
   HooksAgentsOwnerPlaybookRoute: HooksAgentsOwnerPlaybookRoute,
   HooksAgentsPaymentRetryRoute: HooksAgentsPaymentRetryRoute,
   HooksAgentsPredictivePricingRoute: HooksAgentsPredictivePricingRoute,
