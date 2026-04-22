@@ -399,6 +399,10 @@ function Content() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="hunter" className="mt-4">
+          <OutreachHunterSection />
+        </TabsContent>
       </Tabs>
     </div>
   );
