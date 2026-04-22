@@ -95,37 +95,38 @@ function AuthenticatedShell({
       <SidebarInset className="bg-background">
         <header
           role="banner"
-          className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+          className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-background/80 px-2 sm:px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60"
         >
-          <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
-          {/* LiveStatus pulse — visible from the smallest phones up. Super-admin
-              badge is ALWAYS visible (including mobile) so privileged status
-              is never accidentally hidden. */}
-          <div className="flex items-center gap-2">
+          <SidebarTrigger className="shrink-0 text-muted-foreground hover:text-foreground" />
+          <div className="hidden items-center gap-2 sm:flex">
             <LiveStatus />
           </div>
           {isSuperAdmin && (
             <span
-              className="shrink-0 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent"
+              className="shrink-0 rounded-full border border-accent/40 bg-accent/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent"
               title={t("hdr.superAdmin")}
             >
-              {t("hdr.superAdmin")}
+              <span className="hidden sm:inline">{t("hdr.superAdmin")}</span>
+              <span className="sm:hidden">★</span>
             </span>
           )}
-          <div className="ml-2 min-w-0 flex-1">
+          <div className="ml-1 hidden min-w-0 flex-1 md:block">
             <Breadcrumbs />
           </div>
-          <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+          <div className="ml-auto flex items-center gap-1 sm:gap-2">
             <GlobalSearch />
             <TenantSwitcher />
             <NotificationCenter />
-            <LanguageSwitcher />
+            <div className="hidden sm:block">
+              <LanguageSwitcher />
+            </div>
             <ThemeToggle />
             <span className="hidden max-w-[180px] truncate text-xs text-muted-foreground md:inline">
               {userEmail}
             </span>
-            <Button size="sm" variant="outline" onClick={onSignOut}>
-              {t("nav.signout")}
+            <Button size="sm" variant="outline" onClick={onSignOut} className="px-2 sm:px-3">
+              <span className="hidden sm:inline">{t("nav.signout")}</span>
+              <span className="sm:hidden" aria-label={t("nav.signout")}>↩</span>
             </Button>
           </div>
         </header>
