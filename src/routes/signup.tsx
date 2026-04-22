@@ -6,12 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { lovable } from "@/integrations/lovable";
 import { useT, tStatic } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
+import { NOINDEX_META } from "@/lib/seo";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
       { title: `${tStatic("auth.signupTitle")} — MARQ` },
       { name: "description", content: tStatic("auth.signupDesc") },
+      ...NOINDEX_META,
     ],
   }),
   component: SignupPage,
