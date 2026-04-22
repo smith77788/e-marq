@@ -135,16 +135,16 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
           });
 
           const viewCount = new Map<string, number>();
-          for (const r of viewsRes.data ?? []) {
+          for (const r of filteredViews) {
             if (r.product_id) viewCount.set(r.product_id, (viewCount.get(r.product_id) ?? 0) + 1);
           }
           const cartCount = new Map<string, number>();
-          for (const r of cartsRes.data ?? []) {
+          for (const r of filteredCarts) {
             if (r.product_id) cartCount.set(r.product_id, (cartCount.get(r.product_id) ?? 0) + 1);
           }
           const soldUnits = new Map<string, number>();
           const soldRevenue = new Map<string, number>();
-          for (const r of soldRes.data ?? []) {
+          for (const r of filteredSold) {
             if (!r.product_id) continue;
             soldUnits.set(r.product_id, (soldUnits.get(r.product_id) ?? 0) + (r.quantity ?? 0));
             soldRevenue.set(
