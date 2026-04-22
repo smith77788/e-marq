@@ -12,7 +12,8 @@ import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { CheckCircle2, Package, Search, Truck, X } from "lucide-react";
+import { CheckCircle2, Package, Search, ShoppingBag, Truck, X } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -268,10 +269,12 @@ function BrandOrdersPage() {
         </CardHeader>
         <CardContent className="p-0">
           {isEmpty ? (
-            <div className="px-6 py-12 text-center">
-              <p className="text-sm font-medium text-foreground">{t("bo.empty.title")}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{t("bo.empty.desc")}</p>
-            </div>
+            <EmptyState
+              variant="inline"
+              icon={ShoppingBag}
+              title={t("bo.empty.title")}
+              description={t("bo.empty.desc")}
+            />
           ) : (
             <div className="overflow-x-auto">
               <Table>
