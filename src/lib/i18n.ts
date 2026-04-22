@@ -1057,6 +1057,8 @@ const dict = {
     "gs.aiExported": "Скопійовано в буфер",
     "gs.aiCopy": "Копіювати відповідь",
     "gs.aiCopied": "Скопійовано",
+    "gs.aiShare": "🔗 Поділитися посиланням",
+    "gs.aiShareCopied": "Посилання скопійовано",
 
     // AI Ask Pins board (cockpit)
     "pins.title": "Закріплені AI-запитання",
@@ -2372,6 +2374,8 @@ const dict = {
     "gs.aiExported": "Copied to clipboard",
     "gs.aiCopy": "Copy answer",
     "gs.aiCopied": "Copied",
+    "gs.aiShare": "🔗 Copy share link",
+    "gs.aiShareCopied": "Link copied",
 
     // AI Ask Pins board (cockpit)
     "pins.title": "Pinned AI questions",

@@ -13,6 +13,7 @@ import {
   Copy,
   Download,
   History,
+  Link2,
   Loader2,
   Pin,
   Sparkles,
@@ -163,6 +164,22 @@ export function AiAskPanel({ tenantId, question, onNavigate, onPickQuestion }: P
             >
               <Download className="mr-2 h-4 w-4 text-info" />
               <span className="text-xs">{t("gs.aiExport")}</span>
+            </CommandItem>
+            <CommandItem
+              value={`ai-action-share::${trimmed}`}
+              onSelect={() => {
+                if (typeof window === "undefined") return;
+                const url = new URL(window.location.href);
+                url.searchParams.set("ask", trimmed);
+                const link = url.toString();
+                if (typeof navigator !== "undefined" && navigator.clipboard) {
+                  void navigator.clipboard.writeText(link);
+                  toast.success(t("gs.aiShareCopied"));
+                }
+              }}
+            >
+              <Link2 className="mr-2 h-4 w-4 text-info" />
+              <span className="text-xs">{t("gs.aiShare")}</span>
             </CommandItem>
             <CommandItem
               value={`ai-action-copy::${trimmed}`}
