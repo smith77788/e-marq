@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import { loadStorefrontShell } from "@/lib/storefront/loaders";
+import { loadStorefrontShell, type StorefrontShell } from "@/lib/storefront/loaders";
 import { ProductCard } from "./s.$slug.index";
 import { z } from "zod";
 
@@ -36,7 +36,7 @@ function SearchPage() {
   const { q } = Route.useSearch();
   const initial = Route.useLoaderData();
 
-  const { data } = useQuery({
+  const { data } = useQuery<StorefrontShell>({
     queryKey: ["storefront-shell", slug],
     queryFn: () => loadStorefrontShell(slug),
     initialData: initial,

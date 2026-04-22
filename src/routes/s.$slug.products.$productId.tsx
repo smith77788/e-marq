@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { loadProductDetail, type StorefrontVariant } from "@/lib/storefront/loaders";
+import { loadProductDetail, type ProductDetail, type StorefrontVariant } from "@/lib/storefront/loaders";
 import { useStorefrontCart, track } from "@/lib/storefront/cartContext";
 import { formatMoneyExact } from "@/lib/money";
 import { RestockSubscribe } from "@/components/storefront/RestockSubscribe";
@@ -55,7 +55,7 @@ function ProductDetailPage() {
   const { slug, productId } = Route.useParams();
   const initial = Route.useLoaderData();
 
-  const { data } = useQuery({
+  const { data } = useQuery<ProductDetail>({
     queryKey: ["storefront-product", slug, productId],
     queryFn: () => loadProductDetail(slug, productId),
     initialData: initial,
