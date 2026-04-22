@@ -14,6 +14,7 @@ import {
 } from "@/lib/storefront/loaders";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { canonicalUrl } from "@/lib/seo";
+import { storefrontIndexJsonLd } from "@/lib/storefront/jsonLd";
 
 export const Route = createFileRoute("/s/$slug/")({
   loader: async ({ params }) => {
@@ -23,9 +24,15 @@ export const Route = createFileRoute("/s/$slug/")({
     ]);
     return { shell, collections };
   },
-  head: ({ params }) => ({
+  head: ({ loaderData, params }) => ({
     links: [{ rel: "canonical", href: canonicalUrl(`/s/${params.slug}`) }],
     meta: [{ property: "og:url", content: canonicalUrl(`/s/${params.slug}`) }],
+    scripts: loaderData
+      ? storefrontIndexJsonLd(loaderData.shell, params.slug).map((entry) => ({
+          type: "application/ld+json",
+          children: JSON.stringify(entry),
+        }))
+      : [],
   }),
   errorComponent: ({ error }) => (
     <div className="mx-auto max-w-6xl px-4 py-12 text-center">
