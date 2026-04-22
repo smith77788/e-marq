@@ -491,8 +491,12 @@ function ProspectRow({ prospect }: { prospect: Prospect }) {
             <Badge variant="outline" className={STATUS_TONE[prospect.status] ?? "border-border"}>
               {STATUS_LABEL[prospect.status] ?? prospect.status}
             </Badge>
-            <Badge variant="secondary" className="font-mono text-[10px]">
-              fit {prospect.fit_score}
+            <Badge
+              variant="secondary"
+              className="font-mono text-[10px]"
+              title="Оцінка релевантності 0–100"
+            >
+              відповідність {prospect.fit_score}
             </Badge>
             {prospect.niche && (
               <Badge variant="outline" className="text-[10px]">
@@ -525,10 +529,10 @@ function ProspectRow({ prospect }: { prospect: Prospect }) {
             {prospect.email && <span>✉ {prospect.email}</span>}
           </div>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5 sm:flex-nowrap">
           <Button size="sm" variant="ghost" disabled={busy} onClick={reachOut}>
             <Sparkles className="mr-1 h-3.5 w-3.5" />
-            Outreach
+            Написати
           </Button>
           <Button
             size="sm"
@@ -537,7 +541,7 @@ function ProspectRow({ prospect }: { prospect: Prospect }) {
             onClick={() => updateStatus("qualified")}
           >
             <Play className="mr-1 h-3.5 w-3.5" />
-            Qualify
+            Відібрати
           </Button>
           <Button
             size="sm"
