@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/brand_/billing")({
 });
 
 function BrandBillingPage() {
-  const { tenant: urlTenant } = useSearch({ from: "/_authenticated/brand/billing" });
+  const { tenant: urlTenant } = useSearch({ from: "/_authenticated/brand_/billing" });
   const { current, currentTenantId, setCurrentTenantId, tenants, loading } = useTenantContext();
 
   // Sync URL → context
