@@ -7,7 +7,7 @@
  * dialog all in one) has been split: this layout owns the chrome and cart,
  * children own page bodies.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   createFileRoute,
   Link,
@@ -16,7 +16,7 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ShoppingCart, Search, Loader2, Plus, Minus, Trash2 } from "lucide-react";
+import { ShoppingCart, Search, Loader2, Plus, Minus, Trash2, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -27,12 +27,13 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
-import { loadStorefrontShell } from "@/lib/storefront/loaders";
+import { loadStorefrontShell, type StorefrontShell } from "@/lib/storefront/loaders";
 import {
   CartProvider,
   useStorefrontCart,
   track,
 } from "@/lib/storefront/cartContext";
+import { useWishlist } from "@/hooks/useWishlist";
 import { formatMoneyExact } from "@/lib/money";
 
 export const Route = createFileRoute("/s/$slug")({
