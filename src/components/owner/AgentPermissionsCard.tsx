@@ -9,10 +9,15 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Save, Shield, ShieldOff, Sparkles } from "lucide-react";
+import { Loader2, MapPin, Save, Shield, ShieldOff, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -28,6 +33,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { getAgentMeta } from "@/lib/acos/agentCatalog";
+import { RegionSelector } from "@/components/owner/RegionSelector";
+import {
+  parseGeoTargets,
+  summarizeGeo,
+  type GeoTargets,
+} from "@/lib/acos/geoTargets";
 
 export type AgentMode = "off" | "suggest" | "auto";
 export type AgentRisk = "low" | "medium" | "high";
@@ -42,6 +53,7 @@ type Row = {
   auto_apply_max_risk: AgentRisk;
   notify_on_apply: boolean;
   weekly_run_limit: number;
+  geo_targets: GeoTargets | null;
 };
 
 const DEFAULTS: Row = {
@@ -49,7 +61,23 @@ const DEFAULTS: Row = {
   auto_apply_max_risk: "medium",
   notify_on_apply: true,
   weekly_run_limit: 200,
+  geo_targets: null,
 };
+
+/** Agents that benefit from a region override. */
+const GEO_AWARE_AGENTS = new Set([
+  "price-optimizer",
+  "predictive-pricing",
+  "time-of-day-pricer",
+  "promo-portfolio",
+  "promo-fatigue",
+  "discount-elasticity",
+  "geo-demand",
+  "margin-optimizer",
+  "shipping-optimizer",
+  "seasonality-detector",
+  "inventory-forecast",
+]);
 
 export function AgentPermissionsCard({ tenantId, agentId }: Props) {
   const { t } = useT();
@@ -65,12 +93,20 @@ export function AgentPermissionsCard({ tenantId, agentId }: Props) {
     queryFn: async (): Promise<Row> => {
       const { data, error } = await supabase
         .from("agent_permissions")
-        .select("mode, auto_apply_max_risk, notify_on_apply, weekly_run_limit")
+        .select("mode, auto_apply_max_risk, notify_on_apply, weekly_run_limit, geo_targets")
         .eq("tenant_id", tenantId)
         .eq("agent_id", agentId)
         .maybeSingle();
       if (error) throw error;
-      return (data as Row | null) ?? DEFAULTS;
+      if (!data) return DEFAULTS;
+      const d = data as Record<string, unknown>;
+      return {
+        mode: (d.mode as AgentMode) ?? DEFAULTS.mode,
+        auto_apply_max_risk: (d.auto_apply_max_risk as AgentRisk) ?? DEFAULTS.auto_apply_max_risk,
+        notify_on_apply: (d.notify_on_apply as boolean) ?? DEFAULTS.notify_on_apply,
+        weekly_run_limit: (d.weekly_run_limit as number) ?? DEFAULTS.weekly_run_limit,
+        geo_targets: parseGeoTargets(d.geo_targets),
+      };
     },
   });
 
@@ -85,7 +121,8 @@ export function AgentPermissionsCard({ tenantId, agentId }: Props) {
       draft.mode !== data.mode ||
       draft.auto_apply_max_risk !== data.auto_apply_max_risk ||
       draft.notify_on_apply !== data.notify_on_apply ||
-      draft.weekly_run_limit !== data.weekly_run_limit
+      draft.weekly_run_limit !== data.weekly_run_limit ||
+      JSON.stringify(draft.geo_targets) !== JSON.stringify(data.geo_targets)
     );
   }, [draft, data]);
 
@@ -101,10 +138,11 @@ export function AgentPermissionsCard({ tenantId, agentId }: Props) {
         notify_on_apply: draft.notify_on_apply,
         weekly_run_limit: draft.weekly_run_limit,
         last_changed_by: userId,
+        geo_targets: (draft.geo_targets as unknown) ?? null,
       };
       const { error } = await supabase
         .from("agent_permissions")
-        .upsert(payload, { onConflict: "tenant_id,agent_id" });
+        .upsert(payload as never, { onConflict: "tenant_id,agent_id" });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -235,6 +273,36 @@ export function AgentPermissionsCard({ tenantId, agentId }: Props) {
             onValueChange={(v) => setDraft({ ...draft, weekly_run_limit: v[0] })}
           />
         </div>
+
+        {/* Geo region override (only for geo-aware agents) */}
+        {GEO_AWARE_AGENTS.has(agentId) && (
+          <Collapsible defaultOpen={!!draft.geo_targets}>
+            <div className="rounded-lg border border-border/60">
+              <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 p-3 text-left hover:bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <div>
+                    <div className="text-sm font-medium">Регіон агента</div>
+                    <div className="text-xs text-muted-foreground">
+                      {draft.geo_targets
+                        ? summarizeGeo(draft.geo_targets)
+                        : "Наслідується з налаштувань бренду"}
+                    </div>
+                  </div>
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="border-t border-border/60 p-3">
+                <RegionSelector
+                  value={draft.geo_targets}
+                  onChange={(g) => setDraft({ ...draft, geo_targets: g })}
+                  inheritHint="За замовчуванням агент використовує регіон з налаштувань бренду. Задайте власний, щоб перевизначити."
+                  onClear={() => setDraft({ ...draft, geo_targets: null })}
+                  compact
+                />
+              </CollapsibleContent>
+            </div>
+          </Collapsible>
+        )}
 
         <Button
           onClick={() => saveMut.mutate()}

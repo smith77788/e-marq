@@ -16,6 +16,7 @@ import {
   Globe,
   Image as ImageIcon,
   Loader2,
+  MapPin,
   Palette,
   Save,
   Settings,
@@ -33,6 +34,13 @@ import { Separator } from "@/components/ui/separator";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { supabase } from "@/integrations/supabase/client";
 import { DomainsManager } from "@/components/owner/DomainsManager";
+import { RegionSelector } from "@/components/owner/RegionSelector";
+import {
+  DEFAULT_GEO_TARGETS,
+  parseGeoTargets,
+  summarizeGeo,
+  type GeoTargets,
+} from "@/lib/acos/geoTargets";
 
 export const Route = createFileRoute("/_authenticated/brand/settings")({
   component: StoreSettingsPage,
@@ -46,6 +54,7 @@ type TenantConfigRow = {
   ui: Json | null;
   seo: Json | null;
   bot: Json | null;
+  geo_targets: Json | null;
 };
 
 type StoreForm = {
@@ -58,6 +67,7 @@ type StoreForm = {
   og_image_url: string;
   bot_welcome: string;
   bot_system: string;
+  geo_targets: GeoTargets;
 };
 
 const DEFAULTS: StoreForm = {
@@ -70,6 +80,7 @@ const DEFAULTS: StoreForm = {
   og_image_url: "",
   bot_welcome: "Привіт! Як можу допомогти з покупкою?",
   bot_system: "",
+  geo_targets: DEFAULT_GEO_TARGETS,
 };
 
 function pickStr(o: Json | null, k: string, fallback = ""): string {
@@ -90,7 +101,7 @@ function StoreSettingsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tenant_configs")
-        .select("tenant_id, brand_name, ui, seo, bot")
+        .select("tenant_id, brand_name, ui, seo, bot, geo_targets")
         .eq("tenant_id", tenantId!)
         .maybeSingle();
       if (error) throw error;
@@ -114,6 +125,7 @@ function StoreSettingsPage() {
       og_image_url: pickStr(r.seo, "og_image_url", ""),
       bot_welcome: pickStr(r.bot, "welcome_message", DEFAULTS.bot_welcome),
       bot_system: pickStr(r.bot, "system_prompt", ""),
+      geo_targets: parseGeoTargets(r.geo_targets) ?? DEFAULT_GEO_TARGETS,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cfgQuery.data?.tenant_id]);
@@ -142,6 +154,7 @@ function StoreSettingsPage() {
           welcome_message: form.bot_welcome.trim(),
           system_prompt: form.bot_system.trim(),
         } as Json,
+        geo_targets: form.geo_targets as unknown as Json,
       };
       const { error } = await supabase
         .from("tenant_configs")
@@ -217,6 +230,9 @@ function StoreSettingsPage() {
             </TabsTrigger>
             <TabsTrigger value="seo" className="gap-1.5">
               <Globe className="h-3.5 w-3.5" /> SEO
+            </TabsTrigger>
+            <TabsTrigger value="region" className="gap-1.5">
+              <MapPin className="h-3.5 w-3.5" /> Регіон
             </TabsTrigger>
             <TabsTrigger value="bot" className="gap-1.5">
               <Bot className="h-3.5 w-3.5" /> Бот-консультант
@@ -393,6 +409,33 @@ function StoreSettingsPage() {
                     />
                   )}
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* REGION */}
+          <TabsContent value="region" className="mt-4 space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-primary" /> Регіон бренду
+                </CardTitle>
+                <CardDescription>
+                  Країна та міста, з якими працюють агенти ціноутворення та акцій
+                  (price-optimizer, geo-demand, predictive-pricing, promo-portfolio тощо).
+                  Кожен агент може мати власний override у розділі «Агенти».
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+                  Поточний фокус: <span className="font-semibold text-foreground">
+                    {summarizeGeo(form.geo_targets)}
+                  </span>
+                </div>
+                <RegionSelector
+                  value={form.geo_targets}
+                  onChange={(g) => setForm((f) => ({ ...f, geo_targets: g }))}
+                />
               </CardContent>
             </Card>
           </TabsContent>
