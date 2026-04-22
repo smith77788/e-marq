@@ -122,7 +122,7 @@ function AdminOverviewPage() {
         <StatBlock label="Запусків ШІ за період" value={totals.runs.toLocaleString("uk-UA")} />
       </div>
 
-      <Card>
+      <Card id="stream" className="scroll-mt-24">
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
