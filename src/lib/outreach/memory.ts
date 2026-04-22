@@ -78,7 +78,7 @@ export async function recordPattern(u: PatternUpdate): Promise<void> {
           confidence: conf,
           last_observed_at: new Date().toISOString(),
           learned_rule: u.learned_rule.slice(0, 500),
-          evidence: { ...((existing.evidence as object) ?? {}), last: u.evidence ?? {} },
+          evidence: { ...((existing.evidence as Record<string, unknown>) ?? {}), last: u.evidence ?? {} } as never,
           is_active: conf >= 0.2,
         })
         .eq("id", existing.id);
