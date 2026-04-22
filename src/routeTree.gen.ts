@@ -147,6 +147,7 @@ import { Route as ApiEmailDomainVerifyRouteImport } from './routes/api/email.dom
 import { Route as ApiEmailDomainStatusRouteImport } from './routes/api/email.domain-status'
 import { Route as ApiEmailDomainSetupRouteImport } from './routes/api/email.domain-setup'
 import { Route as ApiEmailCampaignSendRouteImport } from './routes/api/email.campaign-send'
+import { Route as ApiDomainsVerifyRouteImport } from './routes/api/domains.verify'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedBrandSiteBuilderRouteImport } from './routes/_authenticated/brand.site-builder'
 import { Route as AuthenticatedBrandSettingsRouteImport } from './routes/_authenticated/brand.settings'
@@ -941,6 +942,11 @@ const ApiEmailCampaignSendRoute = ApiEmailCampaignSendRouteImport.update({
   path: '/api/email/campaign-send',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDomainsVerifyRoute = ApiDomainsVerifyRouteImport.update({
+  id: '/api/domains/verify',
+  path: '/api/domains/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedInviteTokenRoute =
   AuthenticatedInviteTokenRouteImport.update({
     id: '/invite/$token',
@@ -1208,6 +1214,7 @@ export interface FileRoutesByFullPath {
   '/brand/settings': typeof AuthenticatedBrandSettingsRoute
   '/brand/site-builder': typeof AuthenticatedBrandSiteBuilderRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
   '/api/email/domain-status': typeof ApiEmailDomainStatusRoute
@@ -1386,6 +1393,7 @@ export interface FileRoutesByTo {
   '/brand/settings': typeof AuthenticatedBrandSettingsRoute
   '/brand/site-builder': typeof AuthenticatedBrandSiteBuilderRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
   '/api/email/domain-status': typeof ApiEmailDomainStatusRoute
@@ -1567,6 +1575,7 @@ export interface FileRoutesById {
   '/_authenticated/brand/settings': typeof AuthenticatedBrandSettingsRoute
   '/_authenticated/brand/site-builder': typeof AuthenticatedBrandSiteBuilderRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
   '/api/email/domain-status': typeof ApiEmailDomainStatusRoute
@@ -1748,6 +1757,7 @@ export interface FileRouteTypes {
     | '/brand/settings'
     | '/brand/site-builder'
     | '/invite/$token'
+    | '/api/domains/verify'
     | '/api/email/campaign-send'
     | '/api/email/domain-setup'
     | '/api/email/domain-status'
@@ -1926,6 +1936,7 @@ export interface FileRouteTypes {
     | '/brand/settings'
     | '/brand/site-builder'
     | '/invite/$token'
+    | '/api/domains/verify'
     | '/api/email/campaign-send'
     | '/api/email/domain-setup'
     | '/api/email/domain-status'
@@ -2106,6 +2117,7 @@ export interface FileRouteTypes {
     | '/_authenticated/brand/settings'
     | '/_authenticated/brand/site-builder'
     | '/_authenticated/invite/$token'
+    | '/api/domains/verify'
     | '/api/email/campaign-send'
     | '/api/email/domain-setup'
     | '/api/email/domain-status'
@@ -2263,6 +2275,7 @@ export interface RootRouteChildren {
   HooksIngestRoute: typeof HooksIngestRoute
   MSlugRoute: typeof MSlugRoute
   SSlugRoute: typeof SSlugRouteWithChildren
+  ApiDomainsVerifyRoute: typeof ApiDomainsVerifyRoute
   ApiEmailCampaignSendRoute: typeof ApiEmailCampaignSendRoute
   ApiEmailDomainSetupRoute: typeof ApiEmailDomainSetupRoute
   ApiEmailDomainStatusRoute: typeof ApiEmailDomainStatusRoute
@@ -3365,6 +3378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiEmailCampaignSendRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/domains/verify': {
+      id: '/api/domains/verify'
+      path: '/api/domains/verify'
+      fullPath: '/api/domains/verify'
+      preLoaderRoute: typeof ApiDomainsVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/invite/$token': {
       id: '/_authenticated/invite/$token'
       path: '/invite/$token'
@@ -3806,6 +3826,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksIngestRoute: HooksIngestRoute,
   MSlugRoute: MSlugRoute,
   SSlugRoute: SSlugRouteWithChildren,
+  ApiDomainsVerifyRoute: ApiDomainsVerifyRoute,
   ApiEmailCampaignSendRoute: ApiEmailCampaignSendRoute,
   ApiEmailDomainSetupRoute: ApiEmailDomainSetupRoute,
   ApiEmailDomainStatusRoute: ApiEmailDomainStatusRoute,

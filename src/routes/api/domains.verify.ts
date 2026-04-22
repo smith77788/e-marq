@@ -150,8 +150,12 @@ export const Route = createFileRoute("/api/domains/verify")({
           // CNAME помилку трактуємо як необов'язкову — TXT головне
         }
 
-        const newStatus = verified ? "active" : issues.length > 0 ? "failed" : "pending";
-        const update: Record<string, unknown> = {
+        const newStatus: "active" | "failed" | "pending" = verified
+          ? "active"
+          : issues.length > 0
+            ? "failed"
+            : "pending";
+        const update: Database["public"]["Tables"]["tenant_domains"]["Update"] = {
           status: newStatus,
           last_checked_at: new Date().toISOString(),
           notes: issues.length ? issues.join(" | ") : null,
