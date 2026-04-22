@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { OutreachHunterSection } from "@/components/admin/OutreachHunterTabs";
 
 export const Route = createFileRoute("/_authenticated/admin/lead-radar")({
   component: LeadRadarPage,
