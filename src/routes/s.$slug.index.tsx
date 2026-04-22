@@ -154,7 +154,9 @@ export function ProductCard({
 }) {
   const { tenantId } = useStorefrontCart();
   const cart = useStorefrontCart();
+  const wishlist = useWishlist(tenantId);
   const inCart = cart.cart[product.id]?.quantity ?? 0;
+  const liked = wishlist.has(product.id);
   const [viewed, setViewed] = useState(false);
 
   useEffect(() => {
@@ -200,10 +202,28 @@ export function ProductCard({
             </Badge>
           )}
           {outOfStock && (
-            <Badge className="absolute right-2 top-2" variant="secondary">
+            <Badge className="absolute right-2 top-12" variant="secondary">
               Немає
             </Badge>
           )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              wishlist.toggle(product.id);
+            }}
+            aria-label={liked ? "Прибрати з обраного" : "Додати в обране"}
+            aria-pressed={liked}
+            className={cn(
+              "absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full border bg-background/80 backdrop-blur transition-colors",
+              liked
+                ? "border-destructive/40 text-destructive"
+                : "border-border text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Heart className={cn("h-4 w-4", liked && "fill-current")} />
+          </button>
         </div>
       </Link>
       <CardContent className="flex flex-1 flex-col gap-3 p-4">
