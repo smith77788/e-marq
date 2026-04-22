@@ -169,6 +169,14 @@ type: feature
 - Cooldown 60s блокує дабл-кліки (для прод rate-limit чекає інфраструктуру) ✅
 - i18n: усі нові тексти через `useT()` (UA + EN) ✅
 
+**Етап 11.8 — Richer overlay ✅**
+- Повний `src/index.css` (HSL tokens, dark/light, утиліти, a11y) з підставленими брендовими `--primary`/`--accent`/`--ring` ✅
+- `REMIX_GUIDE.md` — 10 кроків від remix до publish, із врахуванням custom_domain ✅
+- `seed.json` — машино-читний контент (hero / about / contacts / theme / categories) для one-shot вставки через Lovable chat ✅
+- ZIP-структура: `src/index.css`, `public/manifest.webmanifest`, `index.html`, `package.json`, `.env.example`, `assets/README.md` — drop-in у remix MFD ✅
+- file_count = 12, manifest.json оновлено ✅
+- TS чистий, smoke-test ZIP проходить, секретів немає ✅
+
 **Залежності з MFD-проекту:**
 - Шаблон витягуємо з `cross_project` API під час snapshot-етапу
 - За кожним relevant апдейтом MFD адмін MARQ запускає re-snapshot → версія в `site_templates.source_commit`
