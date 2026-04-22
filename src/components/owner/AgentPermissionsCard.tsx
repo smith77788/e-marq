@@ -53,6 +53,7 @@ type Row = {
   auto_apply_max_risk: AgentRisk;
   notify_on_apply: boolean;
   weekly_run_limit: number;
+  geo_targets: GeoTargets | null;
 };
 
 const DEFAULTS: Row = {
@@ -60,7 +61,23 @@ const DEFAULTS: Row = {
   auto_apply_max_risk: "medium",
   notify_on_apply: true,
   weekly_run_limit: 200,
+  geo_targets: null,
 };
+
+/** Agents that benefit from a region override. */
+const GEO_AWARE_AGENTS = new Set([
+  "price-optimizer",
+  "predictive-pricing",
+  "time-of-day-pricer",
+  "promo-portfolio",
+  "promo-fatigue",
+  "discount-elasticity",
+  "geo-demand",
+  "margin-optimizer",
+  "shipping-optimizer",
+  "seasonality-detector",
+  "inventory-forecast",
+]);
 
 export function AgentPermissionsCard({ tenantId, agentId }: Props) {
   const { t } = useT();
@@ -76,12 +93,20 @@ export function AgentPermissionsCard({ tenantId, agentId }: Props) {
     queryFn: async (): Promise<Row> => {
       const { data, error } = await supabase
         .from("agent_permissions")
-        .select("mode, auto_apply_max_risk, notify_on_apply, weekly_run_limit")
+        .select("mode, auto_apply_max_risk, notify_on_apply, weekly_run_limit, geo_targets")
         .eq("tenant_id", tenantId)
         .eq("agent_id", agentId)
         .maybeSingle();
       if (error) throw error;
-      return (data as Row | null) ?? DEFAULTS;
+      if (!data) return DEFAULTS;
+      const d = data as Record<string, unknown>;
+      return {
+        mode: (d.mode as AgentMode) ?? DEFAULTS.mode,
+        auto_apply_max_risk: (d.auto_apply_max_risk as AgentRisk) ?? DEFAULTS.auto_apply_max_risk,
+        notify_on_apply: (d.notify_on_apply as boolean) ?? DEFAULTS.notify_on_apply,
+        weekly_run_limit: (d.weekly_run_limit as number) ?? DEFAULTS.weekly_run_limit,
+        geo_targets: parseGeoTargets(d.geo_targets),
+      };
     },
   });
 
@@ -96,7 +121,8 @@ export function AgentPermissionsCard({ tenantId, agentId }: Props) {
       draft.mode !== data.mode ||
       draft.auto_apply_max_risk !== data.auto_apply_max_risk ||
       draft.notify_on_apply !== data.notify_on_apply ||
-      draft.weekly_run_limit !== data.weekly_run_limit
+      draft.weekly_run_limit !== data.weekly_run_limit ||
+      JSON.stringify(draft.geo_targets) !== JSON.stringify(data.geo_targets)
     );
   }, [draft, data]);
 
@@ -112,6 +138,7 @@ export function AgentPermissionsCard({ tenantId, agentId }: Props) {
         notify_on_apply: draft.notify_on_apply,
         weekly_run_limit: draft.weekly_run_limit,
         last_changed_by: userId,
+        geo_targets: draft.geo_targets as unknown as Record<string, unknown> | null,
       };
       const { error } = await supabase
         .from("agent_permissions")
