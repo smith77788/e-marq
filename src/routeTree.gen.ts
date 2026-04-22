@@ -29,6 +29,7 @@ import { Route as AuthenticatedBrandRouteImport } from './routes/_authenticated/
 import { Route as SSlugIndexRouteImport } from './routes/s.$slug.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as TrackSlugJsRouteImport } from './routes/track.$slug.js'
+import { Route as SSlugWishlistRouteImport } from './routes/s.$slug.wishlist'
 import { Route as SSlugSearchRouteImport } from './routes/s.$slug.search'
 import { Route as SSlugCheckoutRouteImport } from './routes/s.$slug.checkout'
 import { Route as HooksTelegramPollRouteImport } from './routes/hooks/telegram.poll'
@@ -287,6 +288,11 @@ const TrackSlugJsRoute = TrackSlugJsRouteImport.update({
   id: '/track/$slug/js',
   path: '/track/$slug/js',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SSlugWishlistRoute = SSlugWishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => SSlugRoute,
 } as any)
 const SSlugSearchRoute = SSlugSearchRouteImport.update({
   id: '/search',
@@ -1333,6 +1339,7 @@ export interface FileRoutesByFullPath {
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/s/$slug/checkout': typeof SSlugCheckoutRoute
   '/s/$slug/search': typeof SSlugSearchRoute
+  '/s/$slug/wishlist': typeof SSlugWishlistRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/s/$slug/': typeof SSlugIndexRoute
@@ -1512,6 +1519,7 @@ export interface FileRoutesByTo {
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/s/$slug/checkout': typeof SSlugCheckoutRoute
   '/s/$slug/search': typeof SSlugSearchRoute
+  '/s/$slug/wishlist': typeof SSlugWishlistRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/s/$slug': typeof SSlugIndexRoute
@@ -1694,6 +1702,7 @@ export interface FileRoutesById {
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
   '/s/$slug/checkout': typeof SSlugCheckoutRoute
   '/s/$slug/search': typeof SSlugSearchRoute
+  '/s/$slug/wishlist': typeof SSlugWishlistRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/s/$slug/': typeof SSlugIndexRoute
@@ -1876,6 +1885,7 @@ export interface FileRouteTypes {
     | '/hooks/telegram/poll'
     | '/s/$slug/checkout'
     | '/s/$slug/search'
+    | '/s/$slug/wishlist'
     | '/track/$slug/js'
     | '/admin/'
     | '/s/$slug/'
@@ -2055,6 +2065,7 @@ export interface FileRouteTypes {
     | '/hooks/telegram/poll'
     | '/s/$slug/checkout'
     | '/s/$slug/search'
+    | '/s/$slug/wishlist'
     | '/track/$slug/js'
     | '/admin'
     | '/s/$slug'
@@ -2236,6 +2247,7 @@ export interface FileRouteTypes {
     | '/hooks/telegram/poll'
     | '/s/$slug/checkout'
     | '/s/$slug/search'
+    | '/s/$slug/wishlist'
     | '/track/$slug/js'
     | '/_authenticated/admin/'
     | '/s/$slug/'
@@ -2551,6 +2563,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/track/$slug/js'
       preLoaderRoute: typeof TrackSlugJsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/s/$slug/wishlist': {
+      id: '/s/$slug/wishlist'
+      path: '/wishlist'
+      fullPath: '/s/$slug/wishlist'
+      preLoaderRoute: typeof SSlugWishlistRouteImport
+      parentRoute: typeof SSlugRoute
     }
     '/s/$slug/search': {
       id: '/s/$slug/search'
@@ -3796,6 +3815,7 @@ const HandbookRouteWithChildren = HandbookRoute._addFileChildren(
 interface SSlugRouteChildren {
   SSlugCheckoutRoute: typeof SSlugCheckoutRoute
   SSlugSearchRoute: typeof SSlugSearchRoute
+  SSlugWishlistRoute: typeof SSlugWishlistRoute
   SSlugIndexRoute: typeof SSlugIndexRoute
   SSlugCollectionsHandleRoute: typeof SSlugCollectionsHandleRoute
   SSlugOrdersOrderIdRoute: typeof SSlugOrdersOrderIdRoute
@@ -3805,6 +3825,7 @@ interface SSlugRouteChildren {
 const SSlugRouteChildren: SSlugRouteChildren = {
   SSlugCheckoutRoute: SSlugCheckoutRoute,
   SSlugSearchRoute: SSlugSearchRoute,
+  SSlugWishlistRoute: SSlugWishlistRoute,
   SSlugIndexRoute: SSlugIndexRoute,
   SSlugCollectionsHandleRoute: SSlugCollectionsHandleRoute,
   SSlugOrdersOrderIdRoute: SSlugOrdersOrderIdRoute,
