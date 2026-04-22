@@ -154,6 +154,7 @@ import { Route as ApiEmailDomainSetupRouteImport } from './routes/api/email.doma
 import { Route as ApiEmailCampaignSendRouteImport } from './routes/api/email.campaign-send'
 import { Route as ApiDomainsVerifyRouteImport } from './routes/api/domains.verify'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
+import { Route as AuthenticatedBrandBillingRouteImport } from './routes/_authenticated/brand_.billing'
 import { Route as AuthenticatedBrandSiteBuilderRouteImport } from './routes/_authenticated/brand.site-builder'
 import { Route as AuthenticatedBrandSettingsRouteImport } from './routes/_authenticated/brand.settings'
 import { Route as AuthenticatedBrandPromotionsRouteImport } from './routes/_authenticated/brand.promotions'
@@ -162,7 +163,6 @@ import { Route as AuthenticatedBrandOrdersRouteImport } from './routes/_authenti
 import { Route as AuthenticatedBrandIntegrationsRouteImport } from './routes/_authenticated/brand.integrations'
 import { Route as AuthenticatedBrandEmailRouteImport } from './routes/_authenticated/brand.email'
 import { Route as AuthenticatedBrandCatalogRouteImport } from './routes/_authenticated/brand.catalog'
-import { Route as AuthenticatedBrandBillingRouteImport } from './routes/_authenticated/brand.billing'
 import { Route as AuthenticatedAgentsLiveRouteImport } from './routes/_authenticated/agents.live'
 import { Route as AuthenticatedAgentsLibraryRouteImport } from './routes/_authenticated/agents.library'
 import { Route as AuthenticatedAgentsAgentIdRouteImport } from './routes/_authenticated/agents.$agentId'
@@ -987,6 +987,12 @@ const AuthenticatedInviteTokenRoute =
     path: '/invite/$token',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedBrandBillingRoute =
+  AuthenticatedBrandBillingRouteImport.update({
+    id: '/brand_/billing',
+    path: '/brand/billing',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedBrandSiteBuilderRoute =
   AuthenticatedBrandSiteBuilderRouteImport.update({
     id: '/site-builder',
@@ -1032,12 +1038,6 @@ const AuthenticatedBrandCatalogRoute =
   AuthenticatedBrandCatalogRouteImport.update({
     id: '/catalog',
     path: '/catalog',
-    getParentRoute: () => AuthenticatedBrandRoute,
-  } as any)
-const AuthenticatedBrandBillingRoute =
-  AuthenticatedBrandBillingRouteImport.update({
-    id: '/billing',
-    path: '/billing',
     getParentRoute: () => AuthenticatedBrandRoute,
   } as any)
 const AuthenticatedAgentsLiveRoute = AuthenticatedAgentsLiveRouteImport.update({
@@ -1269,7 +1269,6 @@ export interface FileRoutesByFullPath {
   '/agents/$agentId': typeof AuthenticatedAgentsAgentIdRoute
   '/agents/library': typeof AuthenticatedAgentsLibraryRoute
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
-  '/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/brand/catalog': typeof AuthenticatedBrandCatalogRoute
   '/brand/email': typeof AuthenticatedBrandEmailRoute
   '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
@@ -1278,6 +1277,7 @@ export interface FileRoutesByFullPath {
   '/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
   '/brand/settings': typeof AuthenticatedBrandSettingsRoute
   '/brand/site-builder': typeof AuthenticatedBrandSiteBuilderRoute
+  '/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
@@ -1457,7 +1457,6 @@ export interface FileRoutesByTo {
   '/agents/$agentId': typeof AuthenticatedAgentsAgentIdRoute
   '/agents/library': typeof AuthenticatedAgentsLibraryRoute
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
-  '/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/brand/catalog': typeof AuthenticatedBrandCatalogRoute
   '/brand/email': typeof AuthenticatedBrandEmailRoute
   '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
@@ -1466,6 +1465,7 @@ export interface FileRoutesByTo {
   '/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
   '/brand/settings': typeof AuthenticatedBrandSettingsRoute
   '/brand/site-builder': typeof AuthenticatedBrandSiteBuilderRoute
+  '/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
@@ -1648,7 +1648,6 @@ export interface FileRoutesById {
   '/_authenticated/agents/$agentId': typeof AuthenticatedAgentsAgentIdRoute
   '/_authenticated/agents/library': typeof AuthenticatedAgentsLibraryRoute
   '/_authenticated/agents/live': typeof AuthenticatedAgentsLiveRoute
-  '/_authenticated/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/_authenticated/brand/catalog': typeof AuthenticatedBrandCatalogRoute
   '/_authenticated/brand/email': typeof AuthenticatedBrandEmailRoute
   '/_authenticated/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
@@ -1657,6 +1656,7 @@ export interface FileRoutesById {
   '/_authenticated/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
   '/_authenticated/brand/settings': typeof AuthenticatedBrandSettingsRoute
   '/_authenticated/brand/site-builder': typeof AuthenticatedBrandSiteBuilderRoute
+  '/_authenticated/brand_/billing': typeof AuthenticatedBrandBillingRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
@@ -1839,7 +1839,6 @@ export interface FileRouteTypes {
     | '/agents/$agentId'
     | '/agents/library'
     | '/agents/live'
-    | '/brand/billing'
     | '/brand/catalog'
     | '/brand/email'
     | '/brand/integrations'
@@ -1848,6 +1847,7 @@ export interface FileRouteTypes {
     | '/brand/promotions'
     | '/brand/settings'
     | '/brand/site-builder'
+    | '/brand/billing'
     | '/invite/$token'
     | '/api/domains/verify'
     | '/api/email/campaign-send'
@@ -2027,7 +2027,6 @@ export interface FileRouteTypes {
     | '/agents/$agentId'
     | '/agents/library'
     | '/agents/live'
-    | '/brand/billing'
     | '/brand/catalog'
     | '/brand/email'
     | '/brand/integrations'
@@ -2036,6 +2035,7 @@ export interface FileRouteTypes {
     | '/brand/promotions'
     | '/brand/settings'
     | '/brand/site-builder'
+    | '/brand/billing'
     | '/invite/$token'
     | '/api/domains/verify'
     | '/api/email/campaign-send'
@@ -2217,7 +2217,6 @@ export interface FileRouteTypes {
     | '/_authenticated/agents/$agentId'
     | '/_authenticated/agents/library'
     | '/_authenticated/agents/live'
-    | '/_authenticated/brand/billing'
     | '/_authenticated/brand/catalog'
     | '/_authenticated/brand/email'
     | '/_authenticated/brand/integrations'
@@ -2226,6 +2225,7 @@ export interface FileRouteTypes {
     | '/_authenticated/brand/promotions'
     | '/_authenticated/brand/settings'
     | '/_authenticated/brand/site-builder'
+    | '/_authenticated/brand_/billing'
     | '/_authenticated/invite/$token'
     | '/api/domains/verify'
     | '/api/email/campaign-send'
@@ -3544,6 +3544,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInviteTokenRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/brand_/billing': {
+      id: '/_authenticated/brand_/billing'
+      path: '/brand/billing'
+      fullPath: '/brand/billing'
+      preLoaderRoute: typeof AuthenticatedBrandBillingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/brand/site-builder': {
       id: '/_authenticated/brand/site-builder'
       path: '/site-builder'
@@ -3598,13 +3605,6 @@ declare module '@tanstack/react-router' {
       path: '/catalog'
       fullPath: '/brand/catalog'
       preLoaderRoute: typeof AuthenticatedBrandCatalogRouteImport
-      parentRoute: typeof AuthenticatedBrandRoute
-    }
-    '/_authenticated/brand/billing': {
-      id: '/_authenticated/brand/billing'
-      path: '/billing'
-      fullPath: '/brand/billing'
-      preLoaderRoute: typeof AuthenticatedBrandBillingRouteImport
       parentRoute: typeof AuthenticatedBrandRoute
     }
     '/_authenticated/agents/live': {
@@ -3864,7 +3864,6 @@ const AuthenticatedBrandProductsRouteWithChildren =
   )
 
 interface AuthenticatedBrandRouteChildren {
-  AuthenticatedBrandBillingRoute: typeof AuthenticatedBrandBillingRoute
   AuthenticatedBrandCatalogRoute: typeof AuthenticatedBrandCatalogRoute
   AuthenticatedBrandEmailRoute: typeof AuthenticatedBrandEmailRoute
   AuthenticatedBrandIntegrationsRoute: typeof AuthenticatedBrandIntegrationsRoute
@@ -3876,7 +3875,6 @@ interface AuthenticatedBrandRouteChildren {
 }
 
 const AuthenticatedBrandRouteChildren: AuthenticatedBrandRouteChildren = {
-  AuthenticatedBrandBillingRoute: AuthenticatedBrandBillingRoute,
   AuthenticatedBrandCatalogRoute: AuthenticatedBrandCatalogRoute,
   AuthenticatedBrandEmailRoute: AuthenticatedBrandEmailRoute,
   AuthenticatedBrandIntegrationsRoute: AuthenticatedBrandIntegrationsRoute,
@@ -3937,6 +3935,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAgentsAgentIdRoute: typeof AuthenticatedAgentsAgentIdRoute
   AuthenticatedAgentsLibraryRoute: typeof AuthenticatedAgentsLibraryRoute
   AuthenticatedAgentsLiveRoute: typeof AuthenticatedAgentsLiveRoute
+  AuthenticatedBrandBillingRoute: typeof AuthenticatedBrandBillingRoute
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
@@ -3959,6 +3958,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAgentsAgentIdRoute: AuthenticatedAgentsAgentIdRoute,
   AuthenticatedAgentsLibraryRoute: AuthenticatedAgentsLibraryRoute,
   AuthenticatedAgentsLiveRoute: AuthenticatedAgentsLiveRoute,
+  AuthenticatedBrandBillingRoute: AuthenticatedBrandBillingRoute,
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
