@@ -303,3 +303,86 @@ type: feature
 5. `agents.outreach-user-engager` із risk-mode
 6. Compliance warning, logs viewer, kill-switch
 
+### Sprint 21 (planned) — Скарги на Telegram (reports на чат / канал / бот / профіль / повідомлення)
+**Мета:** дати власнику (вручну) і агентам (автоматично, з обережністю) можливість надсилати **офіційні скарги** в Telegram на спам/фрод/контрафакт, що шкодить бренду — без виходу з кабінету MARQ.
+
+**Сценарій використання:**
+- Outreach Hunter / Lead Radar знайшов канал, що паразитує на бренді (фейковий магазин «BASIC.FOOD», скам-бот, фішинг-група) → одна кнопка «Поскаржитись» → агент обирає категорію скарги, генерує текст обґрунтування, відправляє.
+- Кожна скарга логається з тенант-ідентифікатором, причиною, текстом, відповіддю Telegram, статусом.
+
+**Що скаржимо (Telegram entity types):**
+- **Channel** (`@channel`) — публічний канал
+- **Group / Supergroup** (`@chat`) — публічний чат
+- **Bot** (`@bot`) — автоматизований бот
+- **User profile** (`@username`) — особистий акаунт
+- **Message** — конкретне повідомлення (потрібен `chat_id` + `message_id`)
+
+**Категорії скарги (з офіційного Telegram API — `InputReportReason`):**
+- `inputReportReasonSpam` — спам
+- `inputReportReasonViolence` — насильство
+- `inputReportReasonPornography` — порнографія
+- `inputReportReasonChildAbuse` — насильство над дітьми
+- `inputReportReasonCopyright` — порушення авторських прав
+- `inputReportReasonGeoIrrelevant` — нерелевантна геолокація
+- `inputReportReasonFake` — фейковий акаунт / видавання себе за інший бренд
+- `inputReportReasonIllegalDrugs` — нелегальні наркотики
+- `inputReportReasonPersonalDetails` — розголошення персональних даних
+- `inputReportReasonOther` — інше (з обов'язковим текстом-описом)
+
+**Архітектурні обмеження (важливо!):**
+- **Bot API НЕ підтримує скарги.** Жоден `report*` метод недоступний через Telegram Bot API → **тільки MTProto (user-mode)**. Тобто скарги йдуть через ту ж саму external-runner інфраструктуру, що й Sprint 20 (gramjs).
+- Без активної user-session (Sprint 20) функціонал **disabled** — UI показує блокер «Підключіть особистий Telegram-акаунт у налаштуваннях».
+- Telegram rate-limits скарги жорстко (флуд-вейт + бан за зловживання) → жорсткий quota: **≤5 скарг/добу/тенант**, **≤1 скарга/хв**, **≤1 скарга на ту саму ціль/30 днів**.
+
+**DB:**
+- Нова таблиця `telegram_abuse_reports`:
+  - `id`, `tenant_id`, `actor` ('owner' | 'agent:<agent_id>'), `actor_user_id` (auth.users.id або null для агента)
+  - `target_kind` ('channel' | 'chat' | 'bot' | 'user' | 'message')
+  - `target_username` (text, nullable), `target_chat_id` (bigint, nullable), `target_message_id` (bigint, nullable)
+  - `reason_code` (enum 10 значень з InputReportReason)
+  - `reason_text` (text — згенерований агентом обґрунтовуючий опис)
+  - `status` ('queued' | 'sent' | 'failed' | 'rejected_quota' | 'rejected_duplicate')
+  - `telegram_response` jsonb, `error` text
+  - `requested_at`, `sent_at`
+  - INDEX(tenant_id, requested_at DESC), UNIQUE(tenant_id, target_username, target_chat_id, target_message_id, reason_code) WHERE sent_at > now() - interval '30 days'
+- RLS: тенант бачить тільки свої записи; запис створює тільки owner/admin або service-role (для агента)
+
+**UI (новий компонент `TelegramReportDialog.tsx`):**
+- Викликається з: Lead Radar prospect-row, Outreach Hunter post-row, та з контекстного меню в `OrderTelegramChat`
+- 3 кроки:
+  1. **Target** — auto-fill з контексту (channel/chat/bot/user/message), readonly preview
+  2. **Reason** — select з 10 категорій (i18n labels UA/EN), із підказкою-описом для кожної
+  3. **Generate text** — кнопка «Згенерувати обґрунтування» → Lovable AI Gateway (`google/gemini-2.5-flash-lite`, бо текст короткий) → готовий текст у textarea (editable)
+  4. **Submit** → `POST /api/telegram/report` → чергу runner-у
+- Показ quota: «Сьогодні: 2/5 скарг», «Остання скарга на цей канал: 12 днів тому»
+
+**Agent mode (`agents.telegram-report-watchdog`):**
+- Сканує `prospects` + `outreach_actions` із signals `is_brand_impersonation`, `is_scam`, `copyright_violation`
+- Для кандидатів **risk≤medium** → автоматично формує скаргу (reason=`inputReportReasonFake` або `inputReportReasonCopyright`)
+- Для **risk=high** → створює `pending_approval` запис, owner затверджує в UI
+- Виконується раз на добу, не швидше
+
+**Server flow:**
+- `src/routes/api/telegram.report.ts` (POST, auth required):
+  1. Validate Zod schema (target_kind + reason_code + reason_text 50-500 chars)
+  2. Quota check (5/добу, 1/30д на ту саму ціль)
+  3. Insert `telegram_abuse_reports` зі status='queued'
+  4. Trigger external runner (Sprint 20 інфра) → MTProto `messages.report` / `account.reportPeer` / `channels.reportSpam`
+  5. Runner оновлює status='sent'/'failed', telegram_response
+- Runner-side (Node host): `gramjs` `client.invoke(new Api.messages.Report({...}))`
+
+**Compliance & UX:**
+- Warning в Dialog: «Скарга — серйозна дія. Telegram перевіряє ручно. Зловживання → бан вашого акаунта.»
+- Логи доступні в `/admin/lead-radar` → таб «Скарги»
+- Owner може скасувати queued-скаргу (поки runner не виконав)
+- Agent-mode default = **OFF** (toggle в `outreach_settings.user_account.reports_enabled`)
+
+**Етапи (коли почнемо):**
+1. DB: міграція `telegram_abuse_reports` + RLS + UNIQUE constraint
+2. UI: `TelegramReportDialog` + інтеграція в Lead Radar / Outreach Hunter row-actions
+3. Server: `/api/telegram/report` (queue insert + quota)
+4. Runner-side: gramjs `messages.report` + status update
+5. Agent: `agents.telegram-report-watchdog` (auto reports на impersonation/copyright)
+6. Логи + history view в `/admin/lead-radar` таб «Скарги»
+7. i18n: 30+ нових ключів (10 reason labels × 2 мови + UI strings)
+
