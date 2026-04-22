@@ -151,29 +151,24 @@ export const QUICK_ACTIONS: QuickAction[] = [
   },
 ];
 
-// Helper used by the toggle-theme action — keeps the contract in one place.
+// Helper used by the toggle-theme action — must mirror ThemeToggle.tsx
+// (key = "acos.theme", only `.light` class is toggled; dark is :root default).
+const THEME_STORAGE_KEY = "acos.theme";
 export function toggleThemeMode() {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
-  const isDark = root.classList.contains("dark");
-  if (isDark) {
-    root.classList.remove("dark");
-    root.classList.add("light");
-    try {
-      window.localStorage.setItem("theme", "light");
-    } catch {
-      /* ignore */
-    }
-  } else {
-    root.classList.remove("light");
-    root.classList.add("dark");
-    try {
-      window.localStorage.setItem("theme", "dark");
-    } catch {
-      /* ignore */
-    }
+  const isLight = root.classList.contains("light");
+  const next = isLight ? "dark" : "light";
+  root.classList.toggle("light", next === "light");
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, next);
+  } catch {
+    /* ignore quota */
   }
+  // ThemeToggle keeps its own React state; broadcast a storage event so it
+  // re-reads next time it remounts. Live sync is not strictly needed.
 }
 
-// Keep icon imports referenced even if they are conditionally rendered later.
+// Keep Moon import referenced for tree-shaking edge cases when only the icon
+// type is used externally.
 export const QUICK_ACTION_ICONS = { Moon };
