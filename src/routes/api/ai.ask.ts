@@ -133,12 +133,14 @@ export const Route = createFileRoute("/api/ai/ask")({
           { label: "Замовлення", to: "/brand/orders" },
         ];
 
-        if (!lovableKey) {
+        // AI killswitch: якщо AI вимкнено (за замовчуванням), повертаємо детермінований fallback.
+        if (!isLovableAiEnabled()) {
           return new Response(
             JSON.stringify({ answer: fallbackAnswer, suggestions } satisfies AskResponse),
             { status: 200, headers: { "Content-Type": "application/json" } },
           );
         }
+        const lovableKey = process.env.LOVABLE_API_KEY!;
 
         const ctx = {
           brand: tenantRow.data?.name ?? "Your brand",
