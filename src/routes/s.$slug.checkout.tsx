@@ -14,9 +14,11 @@ import {
   CreditCard,
   Landmark,
   Loader2,
+  Smartphone,
   Sparkles,
   Tag,
   Trash2,
+  Wallet,
   X,
   Plus,
   Minus,
@@ -35,6 +37,7 @@ import { formatMoneyExact } from "@/lib/money";
 import { ShippingSelector } from "@/components/storefront/ShippingSelector";
 import type { NPSelection } from "@/lib/shipping/novaPoshta";
 import { sendOrderConfirmationEmail } from "@/lib/email/client";
+import { startGatewayPayment, type PaymentMethod } from "@/lib/payments/client";
 
 type DiscountResult =
   | { valid: true; promo_id: string; name: string; type: string; discount_cents: number }
@@ -92,20 +95,28 @@ function CheckoutPage() {
     staleTime: 30_000,
   });
 
-  const payments = shell.config.features?.payments ?? {
+  const payments = (shell.config.features?.payments ?? {
     manual_enabled: true,
-  };
+  }) as Record<string, unknown>;
 
   const manualEnabled = payments.manual_enabled !== false;
-  const stripeEnabled = payments.stripe_enabled === true;
-  const noMethods = !manualEnabled && !stripeEnabled;
-  const defaultMethod: "manual" | "stripe_card" = manualEnabled ? "manual" : "stripe_card";
+  const liqpayEnabled = payments.liqpay_enabled === true;
+  const wayforpayEnabled = payments.wayforpay_enabled === true;
+  const monobankEnabled = payments.monobank_enabled === true;
+  const availableMethods: PaymentMethod[] = [
+    ...(manualEnabled ? (["manual"] as const) : []),
+    ...(liqpayEnabled ? (["liqpay"] as const) : []),
+    ...(wayforpayEnabled ? (["wayforpay"] as const) : []),
+    ...(monobankEnabled ? (["monobank"] as const) : []),
+  ];
+  const noMethods = availableMethods.length === 0;
+  const defaultMethod: PaymentMethod = availableMethods[0] ?? "manual";
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [shipping, setShipping] = useState<NPSelection | null>(null);
-  const [method, setMethod] = useState<"manual" | "stripe_card">(defaultMethod);
+  const [method, setMethod] = useState<PaymentMethod>(defaultMethod);
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState<DiscountResult | null>(null);
   const [validatingPromo, setValidatingPromo] = useState(false);
@@ -292,8 +303,8 @@ function CheckoutPage() {
       toast.error("Забагато товарів у кошику");
       return;
     }
-    if (method === "stripe_card") {
-      toast.error("Картка з'явиться невдовзі — оберіть переказ.");
+    if (!availableMethods.includes(method)) {
+      toast.error("Оберіть доступний метод оплати");
       return;
     }
 
@@ -318,7 +329,7 @@ function CheckoutPage() {
         _customer_name: trimmedName,
         _customer_email: trimmedEmail,
         _items: items,
-        _payment_method: "manual",
+        _payment_method: method,
         _shipping: shippingPayload,
         _promo_code: discount?.valid ? promoCode.trim().toUpperCase() : null,
         _loyalty_redeem_points: redeemApplied?.points ?? null,
@@ -332,17 +343,25 @@ function CheckoutPage() {
           total_cents: finalTotalCents,
           items: items.length,
           currency: cart.currency,
-          payment_method: "manual",
+          payment_method: method,
           status: "pending",
           promo_code: discount?.valid ? promoCode.trim().toUpperCase() : null,
           discount_cents: discountCents,
         },
       });
 
-      toast.success("Замовлення створено!");
-      void sendOrderConfirmationEmail(orderId);
-      cart.clear();
-      navigate({ to: "/s/$slug/orders/$orderId", params: { slug, orderId } });
+      // Manual → одразу на сторінку замовлення; gateways → редірект на провайдера
+      if (method === "manual") {
+        toast.success("Замовлення створено!");
+        void sendOrderConfirmationEmail(orderId);
+        cart.clear();
+        navigate({ to: "/s/$slug/orders/$orderId", params: { slug, orderId } });
+      } else {
+        // Кошик очищаємо ПЕРЕД редіректом; email прийде з webhook'у після оплати
+        cart.clear();
+        toast.success("Перенаправляємо на оплату…");
+        await startGatewayPayment(method, orderId);
+      }
     } catch (e) {
       const raw = e instanceof Error ? e.message : "Невідома помилка";
       const friendly = raw.includes("invalid_email")
@@ -510,42 +529,45 @@ function CheckoutPage() {
               ) : (
                 <RadioGroup
                   value={method}
-                  onValueChange={(v) => setMethod(v as "manual" | "stripe_card")}
+                  onValueChange={(v) => setMethod(v as PaymentMethod)}
                   className="space-y-2"
                 >
                   {manualEnabled && (
-                    <label
-                      htmlFor="pm-manual"
-                      className="flex cursor-pointer items-start gap-3 rounded-md border p-3 hover:bg-accent/50"
-                    >
-                      <RadioGroupItem id="pm-manual" value="manual" className="mt-1" />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <Landmark className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm font-medium">Банківський переказ</span>
-                        </div>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Інструкції з'являться після оформлення.
-                        </p>
-                      </div>
-                    </label>
+                    <PaymentOption
+                      id="pm-manual"
+                      value="manual"
+                      icon={<Landmark className="h-4 w-4 text-muted-foreground" />}
+                      title="Банківський переказ"
+                      description="Інструкції з'являться після оформлення."
+                    />
                   )}
-                  {stripeEnabled && (
-                    <label
-                      htmlFor="pm-stripe"
-                      className="flex cursor-pointer items-start gap-3 rounded-md border p-3 opacity-60 hover:bg-accent/50"
-                    >
-                      <RadioGroupItem id="pm-stripe" value="stripe_card" className="mt-1" disabled />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <CreditCard className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm font-medium">Картка</span>
-                          <Badge variant="outline" className="text-[10px]">
-                            Скоро
-                          </Badge>
-                        </div>
-                      </div>
-                    </label>
+                  {liqpayEnabled && (
+                    <PaymentOption
+                      id="pm-liqpay"
+                      value="liqpay"
+                      icon={<CreditCard className="h-4 w-4 text-muted-foreground" />}
+                      title="LiqPay · картка"
+                      description="Visa / Mastercard, Apple Pay, Google Pay."
+                      badge="ПриватБанк"
+                    />
+                  )}
+                  {wayforpayEnabled && (
+                    <PaymentOption
+                      id="pm-wfp"
+                      value="wayforpay"
+                      icon={<Wallet className="h-4 w-4 text-muted-foreground" />}
+                      title="WayForPay · картка"
+                      description="Visa / Mastercard, Privat24."
+                    />
+                  )}
+                  {monobankEnabled && (
+                    <PaymentOption
+                      id="pm-mono"
+                      value="monobank"
+                      icon={<Smartphone className="h-4 w-4 text-muted-foreground" />}
+                      title="Monobank"
+                      description="Оплата з застосунку Monobank або карткою."
+                    />
                   )}
                 </RadioGroup>
               )}
@@ -688,7 +710,7 @@ function CheckoutPage() {
                 size="lg"
                 onClick={placeOrder}
                 disabled={
-                  submitting || !email.trim() || !shipping || noMethods || method === "stripe_card"
+                  submitting || !email.trim() || !shipping || noMethods
                 }
               >
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -702,5 +724,42 @@ function CheckoutPage() {
         </aside>
       </div>
     </main>
+  );
+}
+
+function PaymentOption({
+  id,
+  value,
+  icon,
+  title,
+  description,
+  badge,
+}: {
+  id: string;
+  value: PaymentMethod;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  badge?: string;
+}) {
+  return (
+    <label
+      htmlFor={id}
+      className="flex cursor-pointer items-start gap-3 rounded-md border p-3 hover:bg-accent/50"
+    >
+      <RadioGroupItem id={id} value={value} className="mt-1" />
+      <div className="flex-1">
+        <div className="flex items-center gap-2">
+          {icon}
+          <span className="text-sm font-medium">{title}</span>
+          {badge && (
+            <Badge variant="outline" className="text-[10px]">
+              {badge}
+            </Badge>
+          )}
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+      </div>
+    </label>
   );
 }

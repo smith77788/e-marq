@@ -43,11 +43,18 @@ type: feature
 - brand.products, brand.products.$productId (tabs), brand.orders, brand.catalog
 - AppSidebar нав, Tabs у brand.tsx
 
-### Sprint 4 — Email + Payments ✅ (email готовий)
+### Sprint 4 — Email + Payments ✅ (готово)
 - Resend gateway, templates, webhooks, suppression, unsubscribe ✅
 - EmailDomainCard, EmailCampaignsCard ✅
-- ⏳ Платежі: LiqPay, WayForPay, Monobank — НЕ зроблено
-- TenantConfigForm: розширити поля payments/shipping/email
+- TenantConfigForm: розширено payments секцію (manual + LiqPay + WayForPay + Monobank) ✅
+
+### Sprint 7 — UA Payment Gateways ✅ (готово)
+- DB: payment_intents, payment_callbacks_log, RPC create_payment_intent / mark_payment_failed / mark_order_paid_by_gateway ✅
+- Server libs: `liqpay.server.ts` (SHA1), `wayforpay.server.ts` (HMAC-MD5), `monobank.server.ts` (Invoice API) ✅
+- Public routes: `/api/public/payments/{liqpay,wayforpay,monobank}-{init,callback}` ✅
+- Admin UI: поля Public/Private/Token для всіх 3 шлюзів у TenantConfigForm ✅
+- Storefront UI: динамічний RadioGroup на checkout, redirect через `startGatewayPayment` ✅
+- Спільна типізація `PaymentMethod` (manual | liqpay | wayforpay | monobank) ✅
 
 ### Sprint 5 — Promotions + Loyalty ✅ (готово)
 - brand.promotions: повний CRUD промокодів (percent_off / fixed_off / free_shipping)
