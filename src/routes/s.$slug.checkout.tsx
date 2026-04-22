@@ -303,8 +303,8 @@ function CheckoutPage() {
       toast.error("Забагато товарів у кошику");
       return;
     }
-    if (method === "stripe_card") {
-      toast.error("Картка з'явиться невдовзі — оберіть переказ.");
+    if (!availableMethods.includes(method)) {
+      toast.error("Оберіть доступний метод оплати");
       return;
     }
 
@@ -329,7 +329,7 @@ function CheckoutPage() {
         _customer_name: trimmedName,
         _customer_email: trimmedEmail,
         _items: items,
-        _payment_method: "manual",
+        _payment_method: method,
         _shipping: shippingPayload,
         _promo_code: discount?.valid ? promoCode.trim().toUpperCase() : null,
         _loyalty_redeem_points: redeemApplied?.points ?? null,
@@ -343,17 +343,25 @@ function CheckoutPage() {
           total_cents: finalTotalCents,
           items: items.length,
           currency: cart.currency,
-          payment_method: "manual",
+          payment_method: method,
           status: "pending",
           promo_code: discount?.valid ? promoCode.trim().toUpperCase() : null,
           discount_cents: discountCents,
         },
       });
 
-      toast.success("Замовлення створено!");
-      void sendOrderConfirmationEmail(orderId);
-      cart.clear();
-      navigate({ to: "/s/$slug/orders/$orderId", params: { slug, orderId } });
+      // Manual → одразу на сторінку замовлення; gateways → редірект на провайдера
+      if (method === "manual") {
+        toast.success("Замовлення створено!");
+        void sendOrderConfirmationEmail(orderId);
+        cart.clear();
+        navigate({ to: "/s/$slug/orders/$orderId", params: { slug, orderId } });
+      } else {
+        // Кошик очищаємо ПЕРЕД редіректом; email прийде з webhook'у після оплати
+        cart.clear();
+        toast.success("Перенаправляємо на оплату…");
+        await startGatewayPayment(method, orderId);
+      }
     } catch (e) {
       const raw = e instanceof Error ? e.message : "Невідома помилка";
       const friendly = raw.includes("invalid_email")
