@@ -378,7 +378,7 @@ function BrandSiteBuilderPage() {
 
           <div className="sticky bottom-2 z-10 flex flex-wrap items-center justify-end gap-2 rounded-lg border border-border bg-background/95 p-3 shadow-sm backdrop-blur">
             {(dirty || isNew) && (
-              <Badge variant="outline" className="border-amber-500/40 text-amber-600 dark:text-amber-400">
+              <Badge variant="outline" className="border-warning/40 text-warning">
                 {t("sbu.action.save")}
               </Badge>
             )}
@@ -393,11 +393,11 @@ function BrandSiteBuilderPage() {
             <Button
               size="sm"
               onClick={handleGenerate}
-              disabled={!profileQuery.data}
+              disabled={!profileQuery.data || generateMut.isPending}
               className="bg-gradient-primary text-primary-foreground"
             >
               <Wand2 className="mr-2 h-4 w-4" />
-              {t("sbu.action.generate")}
+              {generateMut.isPending ? t("sbu.action.generating") : t("sbu.action.generate")}
             </Button>
           </div>
         </>
