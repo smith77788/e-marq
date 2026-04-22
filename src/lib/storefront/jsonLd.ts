@@ -68,7 +68,7 @@ export function productJsonLd(detail: ProductDetail, slug: string) {
     "@type": "Product",
     name: product.name,
     description: product.description ?? product.seo_description ?? product.name,
-    sku: product.sku ?? product.id,
+    sku: product.id,
     ...(imageUrls.length > 0 && { image: imageUrls }),
     url,
     offers,
