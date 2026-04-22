@@ -6,6 +6,7 @@ import { ExternalLink, Wand2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { SetupReadinessCard } from "@/components/owner/SetupReadinessCard";
+import { ListSkeleton } from "@/components/ui/list-skeleton";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
@@ -42,7 +43,7 @@ function DashboardPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-sm text-muted-foreground">Завантаження…</p>
+            <ListSkeleton rows={3} showAvatar={false} />
           ) : tenants.length > 0 ? (
             <ul className="divide-y divide-border">
               {tenants.map((t) => {

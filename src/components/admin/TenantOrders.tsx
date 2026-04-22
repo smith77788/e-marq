@@ -40,6 +40,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { supabase } from "@/integrations/supabase/client";
 
 type OrderRow = {
@@ -169,7 +170,7 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
       </CardHeader>
       <CardContent>
         {ordersQuery.isLoading ? (
-          <p className="text-sm text-muted-foreground">Завантаження…</p>
+          <TableSkeleton rows={5} columns={6} />
         ) : ordersQuery.data && ordersQuery.data.length > 0 ? (
           <div className="overflow-x-auto">
             <Table>

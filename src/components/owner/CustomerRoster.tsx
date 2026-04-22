@@ -3,6 +3,7 @@ import { Crown, Mail, MessageCircle, TrendingUp, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { DetailableElement } from "@/components/detail";
 import { fetchCustomerDetail } from "@/components/detail/builders";
@@ -76,7 +77,7 @@ export function CustomerRoster({ tenantId }: Props) {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Завантаження…</p>
+          <ListSkeleton rows={6} />
         ) : customers.length === 0 ? (
           <div className="rounded-md border border-dashed border-border bg-muted/20 p-6 text-center">
             <Users className="mx-auto h-8 w-8 text-muted-foreground/60" />
