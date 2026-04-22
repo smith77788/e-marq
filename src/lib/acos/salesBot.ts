@@ -51,8 +51,9 @@ async function aiReply(opts: {
   lastBought: string | null;
   lastInbound: string;
 }): Promise<string | null> {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) return null;
+  // AI killswitch: за замовчуванням вимкнено → sales bot не відповідає до явного opt-in.
+  if (!isLovableAiEnabled()) return null;
+  const apiKey = process.env.LOVABLE_API_KEY!;
 
   // Heuristic language detection from the latest customer message:
   // default = Ukrainian; switch only when text is clearly English or Russian.
