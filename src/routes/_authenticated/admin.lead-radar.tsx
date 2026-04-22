@@ -232,7 +232,7 @@ function Content() {
       </header>
 
       <Tabs defaultValue="prospects">
-        <TabsList>
+        <TabsList className="flex w-full flex-wrap">
           <TabsTrigger value="prospects" className="gap-1.5">
             <Target className="h-3.5 w-3.5" /> Кандидати
           </TabsTrigger>
@@ -241,6 +241,9 @@ function Content() {
           </TabsTrigger>
           <TabsTrigger value="magnets" className="gap-1.5">
             <Magnet className="h-3.5 w-3.5" /> Контент-магніти
+          </TabsTrigger>
+          <TabsTrigger value="hunter" className="gap-1.5">
+            <Sparkles className="h-3.5 w-3.5" /> Outreach Hunter
           </TabsTrigger>
         </TabsList>
 
