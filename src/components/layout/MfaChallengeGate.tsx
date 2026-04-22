@@ -98,7 +98,7 @@ export function MfaChallengeGate({ children }: { children: React.ReactNode }) {
             <InputOTP
               maxLength={6}
               value={code}
-              onChange={(v) => setCode(v.replace(/\D/g, ""))}
+              onChange={(v: string) => setCode(v.replace(/\D/g, ""))}
               autoFocus
             >
               <InputOTPGroup>

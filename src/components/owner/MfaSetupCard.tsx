@@ -248,7 +248,7 @@ export function MfaSetupCard() {
                 <InputOTP
                   maxLength={6}
                   value={enroll.code}
-                  onChange={(v) =>
+                  onChange={(v: string) =>
                     setEnroll((prev) =>
                       prev.phase === "enrolling" ? { ...prev, code: v.replace(/\D/g, "") } : prev,
                     )
