@@ -123,7 +123,13 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
         {isLoading ? (
-          <p className="text-xs text-muted-foreground">Завантаження…</p>
+          <div className="space-y-2" role="status" aria-busy="true" aria-label="Loading…">
+            <div className="h-12 animate-pulse rounded-md bg-primary/10" />
+            <div className="flex gap-2">
+              <div className="h-8 w-28 animate-pulse rounded-md bg-primary/10" />
+              <div className="h-8 w-20 animate-pulse rounded-md bg-primary/10" />
+            </div>
+          </div>
         ) : isBound ? (
           <>
             <div className="rounded-md border border-border bg-muted/20 p-3 text-xs">

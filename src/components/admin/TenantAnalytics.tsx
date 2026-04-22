@@ -12,6 +12,7 @@ import {
   YAxis,
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartSkeleton } from "@/components/ui/chart-skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { CHART, CHART_SCALE } from "@/lib/chartColors";
 
@@ -106,7 +107,7 @@ export function TenantAnalytics({ tenantId }: Props) {
         </CardHeader>
         <CardContent>
           {funnelQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">Завантаження…</p>
+            <ChartSkeleton variant="bars" />
           ) : funnelQuery.data && funnelQuery.data.some((d) => d.count > 0) ? (
             <div className="space-y-3">
               <div className="h-56 w-full">
@@ -168,7 +169,7 @@ export function TenantAnalytics({ tenantId }: Props) {
         </CardHeader>
         <CardContent>
           {revenueQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">Завантаження…</p>
+            <ChartSkeleton variant="line" />
           ) : revenueQuery.data && revenueQuery.data.length > 0 ? (
             <div className="h-56 w-full">
               <ResponsiveContainer width="100%" height="100%">

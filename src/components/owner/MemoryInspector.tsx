@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { supabase } from "@/integrations/supabase/client";
 
 type Props = { tenantId: string };
@@ -163,7 +164,7 @@ export function MemoryInspector({ tenantId }: Props) {
         </Tabs>
 
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Завантаження памʼяті…</p>
+          <ListSkeleton rows={5} showAvatar={false} />
         ) : filtered.length === 0 ? (
           <EmptyState
             variant="inline"

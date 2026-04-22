@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { UsageMeters, type PlanSummary } from "@/components/admin/UsageMeters";
 import { PlanBadge } from "@/components/admin/PlanBadge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function PlanUsageCard({ tenantId }: { tenantId: string }) {
   const navigate = useNavigate();
@@ -25,7 +26,24 @@ export function PlanUsageCard({ tenantId }: { tenantId: string }) {
     },
   });
 
-  if (isLoading) return <p className="text-xs text-muted-foreground">Завантаження тарифу…</p>;
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between gap-2">
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-7 w-32" />
+          </div>
+          <Skeleton className="mt-2 h-3 w-2/3" />
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-3 w-full" />
+          ))}
+        </CardContent>
+      </Card>
+    );
+  }
   if (!data) return null;
 
   // Anti-cheat banner: any metric >= 90%?
