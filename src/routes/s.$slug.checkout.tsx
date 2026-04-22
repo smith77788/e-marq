@@ -529,42 +529,45 @@ function CheckoutPage() {
               ) : (
                 <RadioGroup
                   value={method}
-                  onValueChange={(v) => setMethod(v as "manual" | "stripe_card")}
+                  onValueChange={(v) => setMethod(v as PaymentMethod)}
                   className="space-y-2"
                 >
                   {manualEnabled && (
-                    <label
-                      htmlFor="pm-manual"
-                      className="flex cursor-pointer items-start gap-3 rounded-md border p-3 hover:bg-accent/50"
-                    >
-                      <RadioGroupItem id="pm-manual" value="manual" className="mt-1" />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <Landmark className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm font-medium">Банківський переказ</span>
-                        </div>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Інструкції з'являться після оформлення.
-                        </p>
-                      </div>
-                    </label>
+                    <PaymentOption
+                      id="pm-manual"
+                      value="manual"
+                      icon={<Landmark className="h-4 w-4 text-muted-foreground" />}
+                      title="Банківський переказ"
+                      description="Інструкції з'являться після оформлення."
+                    />
                   )}
-                  {stripeEnabled && (
-                    <label
-                      htmlFor="pm-stripe"
-                      className="flex cursor-pointer items-start gap-3 rounded-md border p-3 opacity-60 hover:bg-accent/50"
-                    >
-                      <RadioGroupItem id="pm-stripe" value="stripe_card" className="mt-1" disabled />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <CreditCard className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm font-medium">Картка</span>
-                          <Badge variant="outline" className="text-[10px]">
-                            Скоро
-                          </Badge>
-                        </div>
-                      </div>
-                    </label>
+                  {liqpayEnabled && (
+                    <PaymentOption
+                      id="pm-liqpay"
+                      value="liqpay"
+                      icon={<CreditCard className="h-4 w-4 text-muted-foreground" />}
+                      title="LiqPay · картка"
+                      description="Visa / Mastercard, Apple Pay, Google Pay."
+                      badge="ПриватБанк"
+                    />
+                  )}
+                  {wayforpayEnabled && (
+                    <PaymentOption
+                      id="pm-wfp"
+                      value="wayforpay"
+                      icon={<Wallet className="h-4 w-4 text-muted-foreground" />}
+                      title="WayForPay · картка"
+                      description="Visa / Mastercard, Privat24."
+                    />
+                  )}
+                  {monobankEnabled && (
+                    <PaymentOption
+                      id="pm-mono"
+                      value="monobank"
+                      icon={<Smartphone className="h-4 w-4 text-muted-foreground" />}
+                      title="Monobank"
+                      description="Оплата з застосунку Monobank або карткою."
+                    />
                   )}
                 </RadioGroup>
               )}
