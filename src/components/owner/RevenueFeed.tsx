@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { formatMoney } from "@/lib/money";
@@ -243,7 +244,7 @@ export function RevenueFeed({ tenantId }: Props) {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Завантаження…</p>
+          <ListSkeleton rows={5} />
         ) : rows.length === 0 ? (
           <div className="rounded-md border border-dashed border-border bg-muted/20 p-6 text-center">
             <Bot className="mx-auto h-8 w-8 text-muted-foreground/60" />

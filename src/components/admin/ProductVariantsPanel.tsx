@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import {
   Table,
   TableBody,
@@ -297,7 +298,7 @@ export function ProductVariantsPanel({ tenantId, productId, hasVariants }: Props
         </div>
 
         {variantsQuery.isLoading ? (
-          <p className="text-sm text-muted-foreground">Завантаження…</p>
+          <TableSkeleton rows={3} columns={5} />
         ) : variants.length === 0 ? (
           <div className="rounded-md border border-dashed py-12 text-center">
             <p className="text-sm font-medium text-foreground">Ще немає варіантів</p>

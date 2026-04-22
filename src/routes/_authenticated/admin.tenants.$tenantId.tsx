@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Sparkles, Trash2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -314,7 +315,7 @@ function TenantDetailPage() {
   });
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Завантаження…</p>;
+    return <PageSkeleton blocks={4} />;
   }
 
   if (!isSuperAdmin) {

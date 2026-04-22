@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -81,7 +83,7 @@ function AdminTenantsPage() {
   });
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Завантаження…</p>;
+    return <PageSkeleton blocks={3} />;
   }
 
   if (!isSuperAdmin) {
@@ -174,7 +176,7 @@ function AdminTenantsPage() {
         </CardHeader>
         <CardContent>
           {tenantsQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">Завантаження…</p>
+            <TableSkeleton rows={5} columns={4} />
           ) : tenantsQuery.data && tenantsQuery.data.length > 0 ? (
             <div className="overflow-x-auto">
               <Table>

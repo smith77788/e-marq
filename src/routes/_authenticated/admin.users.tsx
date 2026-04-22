@@ -7,6 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Search, ShieldCheck, ShieldOff, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -143,7 +144,7 @@ function AdminUsersPage() {
         </CardHeader>
         <CardContent className="overflow-x-auto">
           {usersQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">Завантаження…</p>
+            <TableSkeleton rows={6} columns={6} />
           ) : (
             <Table>
               <TableHeader>

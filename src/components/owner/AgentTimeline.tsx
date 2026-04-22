@@ -11,6 +11,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
@@ -196,7 +197,7 @@ export function AgentTimeline({ tenantId }: Props) {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Завантаження…</p>
+          <ListSkeleton rows={6} />
         ) : items.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             Поки немає подій. Коли агенти запрацюють і знайдуть закономірності — тут зʼявиться

@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -81,7 +82,7 @@ function AdminOverviewPage() {
     };
   }, [overviewQuery.data]);
 
-  if (loading) return <p className="text-sm text-muted-foreground">Завантаження…</p>;
+  if (loading) return <PageSkeleton blocks={3} />;
   if (!isSuperAdmin) {
     return (
       <Card>

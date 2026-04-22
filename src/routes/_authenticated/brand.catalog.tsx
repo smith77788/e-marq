@@ -22,6 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
 import {
   Table,
   TableBody,
@@ -313,7 +314,7 @@ function BrandCollectionsPage() {
     });
   };
 
-  if (loading) return <p className="text-sm text-muted-foreground">Завантаження…</p>;
+  if (loading) return <PageSkeleton blocks={2} />;
 
   if (!tenantsQuery.data || tenantsQuery.data.length === 0) {
     return (
