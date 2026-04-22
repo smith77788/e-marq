@@ -41,28 +41,36 @@ export const Route = createFileRoute("/hooks/agents/time-of-day-pricer")({
 
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
+          const geo = await loadEffectiveGeoTargets(tenantId, AGENT_ID);
           const since = new Date(Date.now() - 30 * 86_400_000).toISOString();
-          const [{ data: views }, { data: paid }] = await Promise.all([
+          const [{ data: viewsRaw }, { data: paidRaw }] = await Promise.all([
             supabaseAdmin
               .from("events")
-              .select("created_at")
+              .select("created_at, payload")
               .eq("tenant_id", tenantId)
               .eq("type", "product_viewed")
               .gte("created_at", since)
               .limit(5000),
             supabaseAdmin
               .from("orders")
-              .select("created_at")
+              .select("created_at, metadata")
               .eq("tenant_id", tenantId)
               .eq("status", "paid")
               .gte("created_at", since)
               .limit(2000),
           ]);
 
+          const views = (viewsRaw ?? []).filter((v) =>
+            rowMatchesGeo({ metadata: (v.payload ?? null) as Record<string, unknown> | null }, geo),
+          );
+          const paid = (paidRaw ?? []).filter((o) =>
+            rowMatchesGeo({ metadata: o.metadata as Record<string, unknown> | null }, geo),
+          );
+
           const viewsByHour = new Array(24).fill(0);
           const ordersByHour = new Array(24).fill(0);
-          for (const v of views ?? []) viewsByHour[new Date(v.created_at).getUTCHours()]++;
-          for (const o of paid ?? []) ordersByHour[new Date(o.created_at).getUTCHours()]++;
+          for (const v of views) viewsByHour[new Date(v.created_at).getUTCHours()]++;
+          for (const o of paid) ordersByHour[new Date(o.created_at).getUTCHours()]++;
 
           const cr = viewsByHour.map((v, i) => (v > 0 ? ordersByHour[i] / v : 0));
           const avgCr = cr.reduce((s, x) => s + x, 0) / 24;
