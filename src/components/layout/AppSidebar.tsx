@@ -26,6 +26,7 @@ import {
   Tag,
   Users,
   UsersRound,
+  Wand2,
   Zap,
 } from "lucide-react";
 import {
@@ -67,6 +68,7 @@ const OWNER_NAV: { labelKey: TKey; items: NavItem[] }[] = [
       { labelKey: "sb.collections", to: "/brand/catalog", icon: Layers },
       { labelKey: "sb.promotions", to: "/brand/promotions", icon: Tag },
       { labelKey: "sb.email" as TKey, to: "/brand/email", icon: Mail },
+      { labelKey: "sb.siteBuilder" as TKey, to: "/brand/site-builder", icon: Wand2 },
     ],
   },
   {
