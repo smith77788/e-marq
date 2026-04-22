@@ -2473,6 +2473,129 @@ export type Database = {
           },
         ]
       }
+      payment_callbacks_log: {
+        Row: {
+          created_at: string
+          external_id: string | null
+          http_status: number
+          id: string
+          ip: string | null
+          order_id: string | null
+          parsed_payload: Json
+          provider: string
+          raw_body: string | null
+          signature_valid: boolean
+          tenant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          external_id?: string | null
+          http_status?: number
+          id?: string
+          ip?: string | null
+          order_id?: string | null
+          parsed_payload?: Json
+          provider: string
+          raw_body?: string | null
+          signature_valid?: boolean
+          tenant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          external_id?: string | null
+          http_status?: number
+          id?: string
+          ip?: string | null
+          order_id?: string | null
+          parsed_payload?: Json
+          provider?: string
+          raw_body?: string | null
+          signature_valid?: boolean
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_callbacks_log_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_callbacks_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_intents: {
+        Row: {
+          amount_cents: number
+          callback_payload: Json
+          completed_at: string | null
+          created_at: string
+          currency: string
+          error_message: string | null
+          external_id: string | null
+          id: string
+          order_id: string
+          provider: string
+          redirect_url: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          callback_payload?: Json
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          error_message?: string | null
+          external_id?: string | null
+          id?: string
+          order_id: string
+          provider: string
+          redirect_url?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          callback_payload?: Json
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          error_message?: string | null
+          external_id?: string | null
+          id?: string
+          order_id?: string
+          provider?: string
+          redirect_url?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_intents_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_intents_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plan_change_log: {
         Row: {
           actor_user_id: string | null
@@ -3945,6 +4068,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_payment_intent: {
+        Args: {
+          _amount_cents: number
+          _order_id: string
+          _provider: string
+          _redirect_url?: string
+        }
+        Returns: string
+      }
       create_tenant_invitation: {
         Args: { _email: string; _role?: string; _tenant_id: string }
         Returns: Json
@@ -4162,6 +4294,26 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      mark_order_paid_by_gateway: {
+        Args: {
+          _amount_cents: number
+          _external_id: string
+          _order_id: string
+          _payload?: Json
+          _provider: string
+        }
+        Returns: string
+      }
+      mark_payment_failed: {
+        Args: {
+          _error: string
+          _external_id: string
+          _order_id: string
+          _payload?: Json
+          _provider: string
+        }
+        Returns: undefined
       }
       notify_owner_telegram: {
         Args: { _kind: string; _source_id: string; _tenant_id: string }
