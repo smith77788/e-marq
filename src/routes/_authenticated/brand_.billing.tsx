@@ -24,7 +24,7 @@ const SUB_STATUS_LABEL: Record<string, string> = {
   cancelled: "скасовано",
 };
 
-export const Route = createFileRoute("/_authenticated/brand/billing")({
+export const Route = createFileRoute("/_authenticated/brand_/billing")({
   validateSearch: (s: Record<string, unknown>): Search => ({
     tenant: typeof s.tenant === "string" ? s.tenant : undefined,
   }),
