@@ -1931,6 +1931,178 @@ export type Database = {
           },
         ]
       }
+      lead_magnets: {
+        Row: {
+          body_md: string
+          created_at: string
+          cta_url: string
+          id: string
+          is_published: boolean
+          keywords: string[]
+          meta_description: string | null
+          signups_attributed: number
+          slug: string
+          title: string
+          topic: string | null
+          updated_at: string
+          views_count: number
+        }
+        Insert: {
+          body_md: string
+          created_at?: string
+          cta_url?: string
+          id?: string
+          is_published?: boolean
+          keywords?: string[]
+          meta_description?: string | null
+          signups_attributed?: number
+          slug: string
+          title: string
+          topic?: string | null
+          updated_at?: string
+          views_count?: number
+        }
+        Update: {
+          body_md?: string
+          created_at?: string
+          cta_url?: string
+          id?: string
+          is_published?: boolean
+          keywords?: string[]
+          meta_description?: string | null
+          signups_attributed?: number
+          slug?: string
+          title?: string
+          topic?: string | null
+          updated_at?: string
+          views_count?: number
+        }
+        Relationships: []
+      }
+      lead_outreach: {
+        Row: {
+          channel: string
+          created_at: string
+          id: string
+          intent: string
+          payload: Json
+          prospect_id: string
+          reply_at: string | null
+          response: string | null
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          id?: string
+          intent: string
+          payload?: Json
+          prospect_id: string
+          reply_at?: string | null
+          response?: string | null
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          id?: string
+          intent?: string
+          payload?: Json
+          prospect_id?: string
+          reply_at?: string | null
+          response?: string | null
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_outreach_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "lead_prospects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_prospects: {
+        Row: {
+          converted_tenant_id: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          estimated_size: string | null
+          fit_score: number
+          id: string
+          instagram_handle: string | null
+          last_contacted_at: string | null
+          name: string
+          niche: string | null
+          notes: string | null
+          rejected_reason: string | null
+          signals: Json
+          source: string
+          source_query: string | null
+          status: string
+          telegram_handle: string | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          converted_tenant_id?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          estimated_size?: string | null
+          fit_score?: number
+          id?: string
+          instagram_handle?: string | null
+          last_contacted_at?: string | null
+          name: string
+          niche?: string | null
+          notes?: string | null
+          rejected_reason?: string | null
+          signals?: Json
+          source: string
+          source_query?: string | null
+          status?: string
+          telegram_handle?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          converted_tenant_id?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          estimated_size?: string | null
+          fit_score?: number
+          id?: string
+          instagram_handle?: string | null
+          last_contacted_at?: string | null
+          name?: string
+          niche?: string | null
+          notes?: string | null
+          rejected_reason?: string | null
+          signals?: Json
+          source?: string
+          source_query?: string | null
+          status?: string
+          telegram_handle?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_prospects_converted_tenant_id_fkey"
+            columns: ["converted_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loyalty_accounts: {
         Row: {
           balance_points: number
@@ -3895,6 +4067,56 @@ export type Database = {
           },
         ]
       }
+      tenant_domains: {
+        Row: {
+          created_at: string
+          domain: string
+          id: string
+          is_primary: boolean
+          last_checked_at: string | null
+          notes: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+          verification_token: string
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          id?: string
+          is_primary?: boolean
+          last_checked_at?: string | null
+          notes?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          verification_token?: string
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          id?: string
+          is_primary?: boolean
+          last_checked_at?: string | null
+          notes?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          verification_token?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_domains_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_integrations: {
         Row: {
           config: Json
@@ -4177,6 +4399,8 @@ export type Database = {
           manager_note: string | null
           note: string | null
           payment_method: string
+          processed_at: string | null
+          processed_by: string | null
           requested_by: string | null
           status: string
           tenant_id: string
@@ -4194,6 +4418,8 @@ export type Database = {
           manager_note?: string | null
           note?: string | null
           payment_method?: string
+          processed_at?: string | null
+          processed_by?: string | null
           requested_by?: string | null
           status?: string
           tenant_id: string
@@ -4211,6 +4437,8 @@ export type Database = {
           manager_note?: string | null
           note?: string | null
           payment_method?: string
+          processed_at?: string | null
+          processed_by?: string | null
           requested_by?: string | null
           status?: string
           tenant_id?: string
@@ -4374,6 +4602,10 @@ export type Database = {
           tenant_count: number
           user_id: string
         }[]
+      }
+      admin_mark_topup_paid: {
+        Args: { _manager_note?: string; _request_id: string }
+        Returns: Json
       }
       admin_revoke_super_admin: {
         Args: { _target_user_id: string }
