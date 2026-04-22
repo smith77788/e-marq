@@ -53,16 +53,10 @@ export const Route = createRootRoute({
         name: "twitter:description",
         content: "Автономна команда AI-агентів, які зупиняють витік грошей у вашому магазині 24/7.",
       },
-      {
-        property: "og:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/d6531aeb-2016-4df0-a5b4-dd41ec4c07ca",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/d6531aeb-2016-4df0-a5b4-dd41ec4c07ca",
-      },
+      // NOTE: og:image / twitter:image intentionally NOT set at root level —
+      // TanStack Router merges head() from all matched routes, and a root
+      // og:image always wins over leaf-route images. Set og:image only at
+      // the leaf-route level (via buildSeo({ ogImage })).
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
