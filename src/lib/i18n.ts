@@ -1364,6 +1364,7 @@ const dict = {
     "sf.collection.sort.priceAsc": "Ціна ↑",
     "sf.collection.sort.priceDesc": "Ціна ↓",
     "sf.collection.sort.nameAsc": "За назвою",
+    "sf.breadcrumb.shop": "Магазин",
   },
   en: {
     "nav.brand": "My brand",
