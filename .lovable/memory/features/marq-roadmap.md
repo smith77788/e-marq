@@ -57,13 +57,14 @@ type: feature
 - place_storefront_order розширено _loyalty_redeem_points + _promo_code
 - Checkout: блок «Бали лояльності» (баланс, списання, projection earn)
 
-### Sprint 6 — New Agents ⏳
-- agents.email-abandoned-cart
-- agents.email-winback
-- agents.email-post-purchase
-- agents.order-status-notifier (DB trigger / realtime)
-- agents.restock-notifier
-- Додати в agents.cron-all.ts
+### Sprint 6 — New Agents ✅ (готово)
+- agents.email-abandoned-cart ✅
+- agents.email-winback (auto-generated WINBACK-XXXXXX promo) ✅
+- agents.email-post-purchase (review request +6–8d) ✅
+- agents.order-status-notifier (safety-net cron) ✅
+- agents.restock-notifier ✅
+- Storefront: блок "Повідомити, коли з'явиться" на сторінці товару (public RPC `subscribe_restock_notification`) ✅
+- Усі 5 агентів зареєстровані в agents.run-all.ts ✅
 
 ## Абсолютні заборони
 - НЕ редагувати існуючі міграції
