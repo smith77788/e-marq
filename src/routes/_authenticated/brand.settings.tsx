@@ -20,6 +20,7 @@ import {
   Save,
   Settings,
   Store,
+  Link as LinkIcon,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { supabase } from "@/integrations/supabase/client";
+import { DomainsManager } from "@/components/owner/DomainsManager";
 
 export const Route = createFileRoute("/_authenticated/brand/settings")({
   component: StoreSettingsPage,
@@ -219,6 +221,9 @@ function StoreSettingsPage() {
             </TabsTrigger>
             <TabsTrigger value="bot" className="gap-1.5">
               <Bot className="h-3.5 w-3.5" /> Бот-консультант
+            </TabsTrigger>
+            <TabsTrigger value="domain" className="gap-1.5">
+              <LinkIcon className="h-3.5 w-3.5" /> Домен
             </TabsTrigger>
           </TabsList>
 
