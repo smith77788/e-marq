@@ -390,19 +390,32 @@ export function AppSidebar({ isSuperAdmin, brandName, tenantSlug }: Props) {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sb.storefront")}>
-              <Link
-                to="/brand"
-                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
-              >
-                <ShoppingBag className="h-4 w-4 text-success" />
-                {!collapsed && <span>{t("sb.storefront")}</span>}
-              </Link>
+              {tenantSlug ? (
+                <Link
+                  to="/s/$slug"
+                  params={{ slug: tenantSlug }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
+                >
+                  <ShoppingBag className="h-4 w-4 text-success" />
+                  {!collapsed && <span>{t("sb.storefront")}</span>}
+                </Link>
+              ) : (
+                <Link
+                  to="/brand"
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
+                >
+                  <ShoppingBag className="h-4 w-4 text-success" />
+                  {!collapsed && <span>{t("sb.storefront")}</span>}
+                </Link>
+              )}
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sb.settings")}>
               <Link
-                to={isSuperAdmin ? "/admin" : "/brand/settings"}
+                to={isSuperAdmin ? "/admin/health" : "/brand/settings"}
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
               >
                 <Settings className="h-4 w-4 text-accent" />
