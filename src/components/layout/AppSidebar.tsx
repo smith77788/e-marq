@@ -90,8 +90,8 @@ const GROWTH: NavGroup = {
   labelKey: "sb.growth",
   tone: "text-accent/70",
   items: [
-    { labelKey: "sb.insights", to: "/brand", icon: Lightbulb, tone: "text-warning" },
-    { labelKey: "sb.customers", to: "/brand", icon: Users, tone: "text-info" },
+    { labelKey: "sb.insights", to: "/brand", hash: "insights", icon: Lightbulb, tone: "text-warning" },
+    { labelKey: "sb.customers", to: "/brand", hash: "customers", icon: Users, tone: "text-info" },
     { labelKey: "sb.agents", to: "/agents", icon: Bot, tone: "text-accent" },
   ],
 };
