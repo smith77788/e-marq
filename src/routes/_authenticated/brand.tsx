@@ -185,7 +185,12 @@ function BrandPage() {
         </div>
       </section>
 
-      <section id="channels" className="scroll-mt-24" aria-hidden />
+      <section id="channels" className="scroll-mt-24 space-y-4">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          {t("sb.channels")}
+        </h2>
+        <ChannelSetup tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
+      </section>
 
       <IntegrationGuide tenantSlug={current.tenant_slug} />
 
