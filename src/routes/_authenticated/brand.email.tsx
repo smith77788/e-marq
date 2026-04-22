@@ -59,9 +59,7 @@ function BrandEmailPage() {
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Mail className="h-4 w-4" />
           </span>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            {t("be.title")}
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("be.title")}</h1>
         </div>
         <p className="text-sm text-muted-foreground">{t("be.subtitle")}</p>
       </div>

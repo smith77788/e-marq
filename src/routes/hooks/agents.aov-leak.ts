@@ -62,11 +62,15 @@ export const Route = createFileRoute("/hooks/agents/aov-leak")({
           // Sessions that purchased
           const purchasedSessions = new Set<string>();
           for (const e of (events ?? []) as EventRow[]) {
-            if (e.type === "purchase_completed" && e.session_id) purchasedSessions.add(e.session_id);
+            if (e.type === "purchase_completed" && e.session_id)
+              purchasedSessions.add(e.session_id);
           }
 
           // Add-to-carts that never converted, group by product
-          const abandoned: Record<string, { sessions: Set<string>; carts: number; checkouts: number }> = {};
+          const abandoned: Record<
+            string,
+            { sessions: Set<string>; carts: number; checkouts: number }
+          > = {};
           for (const e of (events ?? []) as EventRow[]) {
             if (e.type === "add_to_cart" && e.product_id) {
               if (!e.session_id || !purchasedSessions.has(e.session_id)) {
@@ -87,8 +91,16 @@ export const Route = createFileRoute("/hooks/agents/aov-leak")({
 
           const productIds = Object.keys(abandoned);
           if (productIds.length === 0) {
-            await finishAgentRun(handle, 0, { events_scanned: events?.length ?? 0, leaky_products: 0 });
-            return jsonOk({ run_id: handle.runId, events_scanned: events?.length ?? 0, leaky_products: 0, insights_created: 0 });
+            await finishAgentRun(handle, 0, {
+              events_scanned: events?.length ?? 0,
+              leaky_products: 0,
+            });
+            return jsonOk({
+              run_id: handle.runId,
+              events_scanned: events?.length ?? 0,
+              leaky_products: 0,
+              insights_created: 0,
+            });
           }
 
           const { data: products } = await supabaseAdmin
@@ -96,9 +108,17 @@ export const Route = createFileRoute("/hooks/agents/aov-leak")({
             .select("id, name, sku, price_cents, stock")
             .eq("tenant_id", tenantId)
             .in("id", productIds);
-          const byId = new Map<string, { name: string; sku: string | null; price_cents: number; stock: number }>();
+          const byId = new Map<
+            string,
+            { name: string; sku: string | null; price_cents: number; stock: number }
+          >();
           for (const p of products ?? []) {
-            byId.set(p.id, { name: p.name, sku: p.sku, price_cents: p.price_cents, stock: p.stock });
+            byId.set(p.id, {
+              name: p.name,
+              sku: p.sku,
+              price_cents: p.price_cents,
+              stock: p.stock,
+            });
           }
 
           // Aggregate totals to compute funnel-wide leak
@@ -108,8 +128,13 @@ export const Route = createFileRoute("/hooks/agents/aov-leak")({
             totalCarts += abandoned[k].carts;
             totalCheckouts += abandoned[k].checkouts;
           }
-          const totalPurchasedCarts = (events ?? []).filter((e) => e.type === "purchase_completed").length;
-          const conversionRate = totalCarts + totalPurchasedCarts > 0 ? totalPurchasedCarts / (totalCarts + totalPurchasedCarts) : 0;
+          const totalPurchasedCarts = (events ?? []).filter(
+            (e) => e.type === "purchase_completed",
+          ).length;
+          const conversionRate =
+            totalCarts + totalPurchasedCarts > 0
+              ? totalPurchasedCarts / (totalCarts + totalPurchasedCarts)
+              : 0;
 
           const insights: AgentInsightInput[] = [];
           for (const pid of productIds) {
@@ -120,8 +145,12 @@ export const Route = createFileRoute("/hooks/agents/aov-leak")({
             const recoverableSessions = Math.round(a.sessions.size * 0.25);
             const recoverableRevCents = recoverableSessions * (p.price_cents ?? 0);
             if (a.sessions.size < 3) continue; // skip noise
-            const confidence = Math.min(0.9, 0.5 + Math.min(a.sessions.size / 50, 1) * 0.3 + Math.min(a.checkouts / 20, 1) * 0.1);
-            const risk = recoverableRevCents > 50000 ? "high" : recoverableRevCents > 10000 ? "medium" : "low";
+            const confidence = Math.min(
+              0.9,
+              0.5 + Math.min(a.sessions.size / 50, 1) * 0.3 + Math.min(a.checkouts / 20, 1) * 0.1,
+            );
+            const risk =
+              recoverableRevCents > 50000 ? "high" : recoverableRevCents > 10000 ? "medium" : "low";
             insights.push({
               tenant_id: tenantId,
               insight_type: "aov_leak",
@@ -168,7 +197,9 @@ export const Route = createFileRoute("/hooks/agents/aov-leak")({
           });
         } catch (e) {
           await failAgentRun(handle, e);
-          return jsonError("Agent failed", 500, { details: e instanceof Error ? e.message : String(e) });
+          return jsonError("Agent failed", 500, {
+            details: e instanceof Error ? e.message : String(e),
+          });
         }
       },
     },

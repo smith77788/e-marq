@@ -37,7 +37,9 @@ function AcceptInvitePage() {
       setTenantId(result?.tenant_id ?? null);
       setState("success");
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [token, user]);
 
   return (

@@ -66,10 +66,7 @@ export const Route = createFileRoute("/s/$slug/orders/$orderId")({
     const brand = loaderData?.brand ?? "Store";
     const orderShort = loaderData?.order.id.slice(0, 8) ?? "";
     return {
-      meta: [
-        { title: `Order #${orderShort} — ${brand}` },
-        { name: "robots", content: "noindex" },
-      ],
+      meta: [{ title: `Order #${orderShort} — ${brand}` }, { name: "robots", content: "noindex" }],
     };
   },
   notFoundComponent: () => (
@@ -227,7 +224,10 @@ function OrderStatusPage() {
 }
 
 function StatusBadge({ status }: { status: OrderRow["status"] }) {
-  const map: Record<OrderRow["status"], { label: string; variant: "default" | "outline" | "secondary" | "destructive" }> = {
+  const map: Record<
+    OrderRow["status"],
+    { label: string; variant: "default" | "outline" | "secondary" | "destructive" }
+  > = {
     pending: { label: "Awaiting payment", variant: "secondary" },
     paid: { label: "Paid", variant: "default" },
     fulfilled: { label: "Fulfilled", variant: "default" },
@@ -272,7 +272,9 @@ function ManualPaymentInstructions({
       {contact && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Mail className="h-3 w-3" />
-          <span>Questions? Contact: <span className="font-medium text-foreground">{contact}</span></span>
+          <span>
+            Questions? Contact: <span className="font-medium text-foreground">{contact}</span>
+          </span>
         </div>
       )}
       <p className="text-xs text-muted-foreground">

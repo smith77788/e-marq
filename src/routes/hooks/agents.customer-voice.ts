@@ -25,8 +25,31 @@ import { upsertBootstrapFacts } from "@/lib/acos/bootstrapFacts";
 
 const AGENT_ID = "customer_voice_miner";
 
-const POSITIVE = ["дякую", "супер", "класно", "круто", "чудово", "люблю", "thanks", "love", "great", "perfect", "amazing"];
-const NEGATIVE = ["погано", "повільно", "дорого", "зламано", "не приїхало", "slow", "broken", "bad", "expensive", "late"];
+const POSITIVE = [
+  "дякую",
+  "супер",
+  "класно",
+  "круто",
+  "чудово",
+  "люблю",
+  "thanks",
+  "love",
+  "great",
+  "perfect",
+  "amazing",
+];
+const NEGATIVE = [
+  "погано",
+  "повільно",
+  "дорого",
+  "зламано",
+  "не приїхало",
+  "slow",
+  "broken",
+  "bad",
+  "expensive",
+  "late",
+];
 const TOPICS = {
   speed: ["швидко", "швидкість", "доставка", "fast", "delivery", "shipping"],
   price: ["ціна", "дорого", "дешево", "price", "cost", "expensive", "cheap"],
@@ -38,7 +61,9 @@ export const Route = createFileRoute("/hooks/agents/customer-voice")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -112,7 +137,8 @@ export const Route = createFileRoute("/hooks/agents/customer-voice")({
             .slice(0, 10)
             .map(([phrase, count]) => ({ phrase, count }));
 
-          const sentiment = positive + negative === 0 ? 0 : (positive - negative) / (positive + negative);
+          const sentiment =
+            positive + negative === 0 ? 0 : (positive - negative) / (positive + negative);
           const avgRating = ratingCount > 0 ? ratingSum / ratingCount : null;
 
           await upsertBootstrapFacts([
@@ -130,7 +156,10 @@ export const Route = createFileRoute("/hooks/agents/customer-voice")({
                 negative_hits: negative,
               },
               confidence: allTexts.length >= 10 ? 0.85 : allTexts.length >= 3 ? 0.55 : 0.3,
-              evidence: { conversations: convRes.data?.length ?? 0, social_proof: proofRes.data?.length ?? 0 },
+              evidence: {
+                conversations: convRes.data?.length ?? 0,
+                social_proof: proofRes.data?.length ?? 0,
+              },
             },
           ]);
 

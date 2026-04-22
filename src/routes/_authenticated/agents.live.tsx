@@ -122,7 +122,10 @@ function AgentsLivePage() {
             },
             body: JSON.stringify({ tenant_id: tenantId }),
           });
-          const json = (await res.json().catch(() => ({}))) as { error?: string; insights_created?: number };
+          const json = (await res.json().catch(() => ({}))) as {
+            error?: string;
+            insights_created?: number;
+          };
           if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
           return json.insights_created ?? 0;
         }),
@@ -160,9 +163,7 @@ function AgentsLivePage() {
           <h1 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {t("ag.liveTitle")}
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            {t("ag.liveDesc")}
-          </p>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{t("ag.liveDesc")}</p>
         </div>
         <Button onClick={runAll} disabled={running || !tenantId} size="lg">
           {running ? (
@@ -179,7 +180,9 @@ function AgentsLivePage() {
 
       {loading ? (
         <Card>
-          <CardContent className="p-6 text-sm text-muted-foreground">{t("ag.liveLoading")}</CardContent>
+          <CardContent className="p-6 text-sm text-muted-foreground">
+            {t("ag.liveLoading")}
+          </CardContent>
         </Card>
       ) : !tenantId ? (
         <Card>

@@ -56,20 +56,12 @@ export function CrossTenantPulse({ points }: Props) {
             tickLine={false}
             axisLine={false}
           />
-          <YAxis
-            stroke={CHART.muted}
-            fontSize={11}
-            tickLine={false}
-            axisLine={false}
-            width={48}
-          />
+          <YAxis stroke={CHART.muted} fontSize={11} tickLine={false} axisLine={false} width={48} />
           <Tooltip
             contentStyle={CHART.tooltipStyle}
             cursor={{ fill: CHART.cursorFill }}
             formatter={(v: number, name) =>
-              name === "revenue"
-                ? [`${v.toLocaleString("uk-UA")} ₴`, "Виторг"]
-                : [v, "Замовлення"]
+              name === "revenue" ? [`${v.toLocaleString("uk-UA")} ₴`, "Виторг"] : [v, "Замовлення"]
             }
           />
           <Area

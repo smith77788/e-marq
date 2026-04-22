@@ -28,11 +28,7 @@ function DashboardPage() {
       </div>
 
       {current && (
-        <SetupReadinessCard
-          tenantId={current.tenant_id}
-          tenantSlug={current.tenant_slug}
-          compact
-        />
+        <SetupReadinessCard tenantId={current.tenant_id} tenantSlug={current.tenant_slug} compact />
       )}
 
       <Card>
@@ -59,10 +55,7 @@ function DashboardPage() {
                         ? "в архіві"
                         : t.status;
                 return (
-                  <li
-                    key={t.tenant_id}
-                    className="flex items-center justify-between gap-3 py-3"
-                  >
+                  <li key={t.tenant_id} className="flex items-center justify-between gap-3 py-3">
                     <Link
                       to="/brand"
                       search={{ tenant: t.tenant_id }}
@@ -79,7 +72,10 @@ function DashboardPage() {
                         {statusLabel}
                       </Badge>
                       <Button asChild size="sm" variant="ghost" className="h-7 px-2">
-                        <Link to="/brand/site-builder" onClick={() => setCurrentTenantId(t.tenant_id)}>
+                        <Link
+                          to="/brand/site-builder"
+                          onClick={() => setCurrentTenantId(t.tenant_id)}
+                        >
                           <Wand2 className="h-3.5 w-3.5 text-accent" />
                         </Link>
                       </Button>

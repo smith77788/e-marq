@@ -61,9 +61,16 @@ export type AbandonedCartCtx = CommonCtx & {
   currency: string;
 };
 
-export function renderAbandonedCart(ctx: AbandonedCartCtx): { subject: string; html: string; text: string } {
+export function renderAbandonedCart(ctx: AbandonedCartCtx): {
+  subject: string;
+  html: string;
+  text: string;
+} {
   const greeting = ctx.customerName ? `Привіт, ${escapeHtml(ctx.customerName)}!` : "Вітаємо!";
-  const productList = ctx.productNames.slice(0, 5).map((n) => `<li style="margin:4px 0;">${escapeHtml(n)}</li>`).join("");
+  const productList = ctx.productNames
+    .slice(0, 5)
+    .map((n) => `<li style="margin:4px 0;">${escapeHtml(n)}</li>`)
+    .join("");
   const totalLine = `${(ctx.cartValueCents / 100).toLocaleString("uk-UA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${escapeHtml(ctx.currency)}`;
 
   const inner = `
@@ -74,7 +81,14 @@ export function renderAbandonedCart(ctx: AbandonedCartCtx): { subject: string; h
 <p style="margin:14px 0 0 0;font-size:13px;color:#94a3b8;">Кошик зберігається 24 години.</p>`;
 
   const subject = `Ви залишили товари в кошику — ${ctx.brandName}`;
-  const html = shellMarketing(ctx.brandName, "Завершіть замовлення", inner, ctx.cartUrl, "Повернутися до кошика", ctx.unsubscribeUrl);
+  const html = shellMarketing(
+    ctx.brandName,
+    "Завершіть замовлення",
+    inner,
+    ctx.cartUrl,
+    "Повернутися до кошика",
+    ctx.unsubscribeUrl,
+  );
   const text = [
     greeting,
     "",
@@ -101,7 +115,10 @@ export type WinbackCtx = CommonCtx & {
 
 export function renderWinback(ctx: WinbackCtx): { subject: string; html: string; text: string } {
   const greeting = ctx.customerName ? `${escapeHtml(ctx.customerName)},` : "Вітаємо!";
-  const expDate = new Date(ctx.expiresAt).toLocaleDateString("uk-UA", { day: "2-digit", month: "long" });
+  const expDate = new Date(ctx.expiresAt).toLocaleDateString("uk-UA", {
+    day: "2-digit",
+    month: "long",
+  });
 
   const inner = `
 <p style="margin:0 0 12px 0;">${greeting}</p>
@@ -114,7 +131,14 @@ export function renderWinback(ctx: WinbackCtx): { subject: string; html: string;
 </div>`;
 
   const subject = `Ваша знижка ${ctx.discountPct}% чекає — ${ctx.brandName}`;
-  const html = shellMarketing(ctx.brandName, "Повертайтеся з подарунком", inner, ctx.storeUrl, "Перейти в магазин", ctx.unsubscribeUrl);
+  const html = shellMarketing(
+    ctx.brandName,
+    "Повертайтеся з подарунком",
+    inner,
+    ctx.storeUrl,
+    "Перейти в магазин",
+    ctx.unsubscribeUrl,
+  );
   const text = [
     greeting,
     "",
@@ -137,7 +161,11 @@ export type PostPurchaseCtx = CommonCtx & {
   reviewUrl: string;
 };
 
-export function renderPostPurchase(ctx: PostPurchaseCtx): { subject: string; html: string; text: string } {
+export function renderPostPurchase(ctx: PostPurchaseCtx): {
+  subject: string;
+  html: string;
+  text: string;
+} {
   const greeting = ctx.customerName ? `Привіт, ${escapeHtml(ctx.customerName)}!` : "Вітаємо!";
   const productLine = ctx.productNames.slice(0, 3).join(", ");
 
@@ -147,7 +175,14 @@ export function renderPostPurchase(ctx: PostPurchaseCtx): { subject: string; htm
 <p style="margin:0 0 12px 0;">Чи могли б ви приділити хвилину і поділитися враженнями про <strong>${escapeHtml(productLine)}</strong>? Ваш відгук допомагає іншим зробити правильний вибір.</p>`;
 
   const subject = `Як вам ваше замовлення? — ${ctx.brandName}`;
-  const html = shellMarketing(ctx.brandName, "Поділіться враженнями", inner, ctx.reviewUrl, "Залишити відгук", ctx.unsubscribeUrl);
+  const html = shellMarketing(
+    ctx.brandName,
+    "Поділіться враженнями",
+    inner,
+    ctx.reviewUrl,
+    "Залишити відгук",
+    ctx.unsubscribeUrl,
+  );
   const text = [
     greeting,
     "",
@@ -175,7 +210,14 @@ export function renderRestock(ctx: RestockCtx): { subject: string; html: string;
 <p style="margin:0 0 12px 0;font-size:14px;color:#64748b;">Ви підписалися на повідомлення про наявність цього товару. Поспішайте — кількість обмежена.</p>`;
 
   const subject = `${ctx.productName} знову в наявності — ${ctx.brandName}`;
-  const html = shellMarketing(ctx.brandName, "Товар знову в наявності", inner, ctx.productUrl, "Перейти до товару", ctx.unsubscribeUrl);
+  const html = shellMarketing(
+    ctx.brandName,
+    "Товар знову в наявності",
+    inner,
+    ctx.productUrl,
+    "Перейти до товару",
+    ctx.unsubscribeUrl,
+  );
   const text = [
     greeting,
     "",

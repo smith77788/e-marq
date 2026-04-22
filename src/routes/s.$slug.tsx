@@ -8,13 +8,7 @@
  * children own page bodies.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  createFileRoute,
-  Link,
-  notFound,
-  Outlet,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, Outlet, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ShoppingCart, Search, Loader2, Plus, Minus, Trash2, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,11 +22,7 @@ import {
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { loadStorefrontShell, type StorefrontShell } from "@/lib/storefront/loaders";
-import {
-  CartProvider,
-  useStorefrontCart,
-  track,
-} from "@/lib/storefront/cartContext";
+import { CartProvider, useStorefrontCart, track } from "@/lib/storefront/cartContext";
 import { useWishlist } from "@/hooks/useWishlist";
 import { formatMoneyExact } from "@/lib/money";
 
@@ -174,9 +164,7 @@ function StorefrontHeader({
     if (query.length < 2) return [];
     const out: SearchSuggestion[] = [];
     for (const p of products) {
-      const haystack = [p.name, p.description ?? "", ...(p.tags ?? [])]
-        .join(" ")
-        .toLowerCase();
+      const haystack = [p.name, p.description ?? "", ...(p.tags ?? [])].join(" ").toLowerCase();
       if (haystack.includes(query)) {
         out.push({
           id: p.id,
@@ -253,7 +241,15 @@ function StorefrontHeader({
                   className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-accent"
                 >
                   {s.image_url ? (
-                    <img src={s.image_url} alt="" loading="lazy" decoding="async" width={32} height={32} className="h-8 w-8 rounded object-cover" />
+                    <img
+                      src={s.image_url}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      width={32}
+                      height={32}
+                      className="h-8 w-8 rounded object-cover"
+                    />
                   ) : (
                     <div className="h-8 w-8 rounded bg-muted" />
                   )}
@@ -279,10 +275,10 @@ function StorefrontHeader({
           aria-label={`Обране (${wishlist.count})`}
           className="relative inline-flex h-9 shrink-0 items-center gap-1 rounded-md border border-input bg-background px-2 text-sm hover:bg-accent"
         >
-          <Heart className={wishlist.count > 0 ? "h-4 w-4 fill-destructive text-destructive" : "h-4 w-4"} />
-          {wishlist.count > 0 && (
-            <span className="tabular-nums">{wishlist.count}</span>
-          )}
+          <Heart
+            className={wishlist.count > 0 ? "h-4 w-4 fill-destructive text-destructive" : "h-4 w-4"}
+          />
+          {wishlist.count > 0 && <span className="tabular-nums">{wishlist.count}</span>}
         </Link>
         <Button
           size="sm"

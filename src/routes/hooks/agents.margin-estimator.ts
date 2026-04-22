@@ -19,7 +19,11 @@ import {
   startAgentRun,
   type AgentInsightInput,
 } from "@/lib/acos/agentRuntime";
-import { readBootstrapFact, upsertBootstrapFacts, type BootstrapFactInput } from "@/lib/acos/bootstrapFacts";
+import {
+  readBootstrapFact,
+  upsertBootstrapFacts,
+  type BootstrapFactInput,
+} from "@/lib/acos/bootstrapFacts";
 
 const AGENT_ID = "margin_estimator";
 
@@ -41,7 +45,9 @@ export const Route = createFileRoute("/hooks/agents/margin-estimator")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -56,7 +62,10 @@ export const Route = createFileRoute("/hooks/agents/margin-estimator")({
 
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
-          const profile = await readBootstrapFact<{ price_tier?: string }>(tenantId, "brand_profile");
+          const profile = await readBootstrapFact<{ price_tier?: string }>(
+            tenantId,
+            "brand_profile",
+          );
           const tier = profile?.price_tier ?? "mid";
           const fallbackMargin = TIER_DEFAULT_MARGIN[tier] ?? 0.4;
 
@@ -143,7 +152,11 @@ export const Route = createFileRoute("/hooks/agents/margin-estimator")({
               expected_impact: "Виключає ризик збиткових промо-акцій",
               confidence: 0.9,
               risk_level: "high",
-              metrics: { products: estimatedCount, fallback_margin_pct: fallbackMargin, action: "fill_cost_cents" },
+              metrics: {
+                products: estimatedCount,
+                fallback_margin_pct: fallbackMargin,
+                action: "fill_cost_cents",
+              },
               dedup_key: "margin_unknown_all",
             });
           }

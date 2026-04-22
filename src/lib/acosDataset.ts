@@ -39,25 +39,153 @@ type CatalogProduct = {
 
 const CATALOG: CatalogProduct[] = [
   // Apparel
-  { name: "Premium Hoodie", sku: "HOODIE-PREM-001", price_cents: 5900, stock: 50, category: "apparel", description: "Heavyweight cotton-blend hoodie.", image_url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600" },
-  { name: "Classic T-Shirt", sku: "TEE-CLASSIC-001", price_cents: 2400, stock: 200, category: "apparel", description: "Soft 100% cotton tee.", image_url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600" },
-  { name: "Zip Hoodie Lite", sku: "HOODIE-LITE-002", price_cents: 4900, stock: 60, category: "apparel", description: "Lightweight zip-up hoodie.", image_url: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600" },
-  { name: "Long Sleeve Tee", sku: "TEE-LS-002", price_cents: 2900, stock: 120, category: "apparel", description: "Soft long-sleeve cotton tee.", image_url: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600" },
+  {
+    name: "Premium Hoodie",
+    sku: "HOODIE-PREM-001",
+    price_cents: 5900,
+    stock: 50,
+    category: "apparel",
+    description: "Heavyweight cotton-blend hoodie.",
+    image_url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600",
+  },
+  {
+    name: "Classic T-Shirt",
+    sku: "TEE-CLASSIC-001",
+    price_cents: 2400,
+    stock: 200,
+    category: "apparel",
+    description: "Soft 100% cotton tee.",
+    image_url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600",
+  },
+  {
+    name: "Zip Hoodie Lite",
+    sku: "HOODIE-LITE-002",
+    price_cents: 4900,
+    stock: 60,
+    category: "apparel",
+    description: "Lightweight zip-up hoodie.",
+    image_url: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600",
+  },
+  {
+    name: "Long Sleeve Tee",
+    sku: "TEE-LS-002",
+    price_cents: 2900,
+    stock: 120,
+    category: "apparel",
+    description: "Soft long-sleeve cotton tee.",
+    image_url: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600",
+  },
   // Footwear (stockout risk on Sneakers Pro)
-  { name: "Sneakers Pro", sku: "SNEAK-PRO-001", price_cents: 12900, stock: 12, category: "footwear", description: "Performance running sneakers.", image_url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600" },
-  { name: "Sneakers Lite", sku: "SNEAK-LITE-002", price_cents: 8900, stock: 40, category: "footwear", description: "Everyday casual sneakers.", image_url: "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=600" },
-  { name: "Trail Boots", sku: "BOOT-TRAIL-001", price_cents: 15900, stock: 25, category: "footwear", description: "Waterproof trail boots.", image_url: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600" },
+  {
+    name: "Sneakers Pro",
+    sku: "SNEAK-PRO-001",
+    price_cents: 12900,
+    stock: 12,
+    category: "footwear",
+    description: "Performance running sneakers.",
+    image_url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600",
+  },
+  {
+    name: "Sneakers Lite",
+    sku: "SNEAK-LITE-002",
+    price_cents: 8900,
+    stock: 40,
+    category: "footwear",
+    description: "Everyday casual sneakers.",
+    image_url: "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=600",
+  },
+  {
+    name: "Trail Boots",
+    sku: "BOOT-TRAIL-001",
+    price_cents: 15900,
+    stock: 25,
+    category: "footwear",
+    description: "Waterproof trail boots.",
+    image_url: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600",
+  },
   // Accessories (Baseball Cap = stockout risk)
-  { name: "Baseball Cap", sku: "CAP-BB-001", price_cents: 1900, stock: 8, category: "accessories", description: "Adjustable embroidered cap.", image_url: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=600" },
-  { name: "Canvas Tote Bag", sku: "TOTE-CAN-001", price_cents: 1500, stock: 75, category: "accessories", description: "Durable canvas tote.", image_url: "https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600" },
-  { name: "Leather Wallet", sku: "WALLET-LTH-001", price_cents: 4500, stock: 40, category: "accessories", description: "Bifold wallet, RFID-protected.", image_url: "https://images.unsplash.com/photo-1627123424574-724758594e93?w=600" },
-  { name: "Beanie Knit", sku: "BEANIE-KNT-001", price_cents: 1800, stock: 90, category: "accessories", description: "Soft knit beanie.", image_url: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600" },
-  { name: "Crew Socks 3-Pack", sku: "SOCK-CREW-003", price_cents: 1200, stock: 200, category: "accessories", description: "Cushioned crew socks, pack of 3.", image_url: "https://images.unsplash.com/photo-1586350977771-2a1dba1c2b6c?w=600" },
+  {
+    name: "Baseball Cap",
+    sku: "CAP-BB-001",
+    price_cents: 1900,
+    stock: 8,
+    category: "accessories",
+    description: "Adjustable embroidered cap.",
+    image_url: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=600",
+  },
+  {
+    name: "Canvas Tote Bag",
+    sku: "TOTE-CAN-001",
+    price_cents: 1500,
+    stock: 75,
+    category: "accessories",
+    description: "Durable canvas tote.",
+    image_url: "https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600",
+  },
+  {
+    name: "Leather Wallet",
+    sku: "WALLET-LTH-001",
+    price_cents: 4500,
+    stock: 40,
+    category: "accessories",
+    description: "Bifold wallet, RFID-protected.",
+    image_url: "https://images.unsplash.com/photo-1627123424574-724758594e93?w=600",
+  },
+  {
+    name: "Beanie Knit",
+    sku: "BEANIE-KNT-001",
+    price_cents: 1800,
+    stock: 90,
+    category: "accessories",
+    description: "Soft knit beanie.",
+    image_url: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600",
+  },
+  {
+    name: "Crew Socks 3-Pack",
+    sku: "SOCK-CREW-003",
+    price_cents: 1200,
+    stock: 200,
+    category: "accessories",
+    description: "Cushioned crew socks, pack of 3.",
+    image_url: "https://images.unsplash.com/photo-1586350977771-2a1dba1c2b6c?w=600",
+  },
   // Audio
-  { name: "Wireless Earbuds", sku: "AUDIO-EB-001", price_cents: 8900, stock: 60, category: "audio", description: "Bluetooth 5.3 earbuds, ANC.", image_url: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600" },
-  { name: "Over-Ear Headphones", sku: "AUDIO-OE-002", price_cents: 16900, stock: 30, category: "audio", description: "Studio-grade over-ear headphones.", image_url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600" },
-  { name: "Portable Speaker", sku: "AUDIO-SPK-003", price_cents: 7900, stock: 45, category: "audio", description: "Waterproof portable speaker.", image_url: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=600" },
-  { name: "Water Bottle", sku: "BTL-H2O-001", price_cents: 1200, stock: 150, category: "accessories", description: "Insulated 750ml stainless bottle.", image_url: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600" },
+  {
+    name: "Wireless Earbuds",
+    sku: "AUDIO-EB-001",
+    price_cents: 8900,
+    stock: 60,
+    category: "audio",
+    description: "Bluetooth 5.3 earbuds, ANC.",
+    image_url: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600",
+  },
+  {
+    name: "Over-Ear Headphones",
+    sku: "AUDIO-OE-002",
+    price_cents: 16900,
+    stock: 30,
+    category: "audio",
+    description: "Studio-grade over-ear headphones.",
+    image_url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600",
+  },
+  {
+    name: "Portable Speaker",
+    sku: "AUDIO-SPK-003",
+    price_cents: 7900,
+    stock: 45,
+    category: "audio",
+    description: "Waterproof portable speaker.",
+    image_url: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=600",
+  },
+  {
+    name: "Water Bottle",
+    sku: "BTL-H2O-001",
+    price_cents: 1200,
+    stock: 150,
+    category: "accessories",
+    description: "Insulated 750ml stainless bottle.",
+    image_url: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600",
+  },
 ];
 
 // Affinity pairs — when one is bought, the other often goes in the cart
@@ -78,8 +206,43 @@ const SEARCH_TERMS_MISS = ["smart watch", "fitness tracker", "running shorts"];
 // People
 // ---------------------------------------------------------------------------
 
-const FIRST_NAMES = ["Anna", "Bob", "Carlos", "Diana", "Erik", "Fatima", "Gabriel", "Hana", "Ivan", "Julia", "Karim", "Lena", "Marco", "Nadia", "Oscar", "Petra", "Quinn", "Rosa", "Sami", "Tara"];
-const LAST_NAMES = ["Smith", "Johnson", "Garcia", "Müller", "Kowalski", "Rossi", "Chen", "Patel", "Silva", "Novak", "Andersen", "Dubois", "Yamada"];
+const FIRST_NAMES = [
+  "Anna",
+  "Bob",
+  "Carlos",
+  "Diana",
+  "Erik",
+  "Fatima",
+  "Gabriel",
+  "Hana",
+  "Ivan",
+  "Julia",
+  "Karim",
+  "Lena",
+  "Marco",
+  "Nadia",
+  "Oscar",
+  "Petra",
+  "Quinn",
+  "Rosa",
+  "Sami",
+  "Tara",
+];
+const LAST_NAMES = [
+  "Smith",
+  "Johnson",
+  "Garcia",
+  "Müller",
+  "Kowalski",
+  "Rossi",
+  "Chen",
+  "Patel",
+  "Silva",
+  "Novak",
+  "Andersen",
+  "Dubois",
+  "Yamada",
+];
 
 type Cohort = "new" | "one_time" | "returning" | "vip_active" | "vip_churning";
 
@@ -129,11 +292,11 @@ function isoDaysAgo(days: number, hourJitter = true): string {
 function generateCustomers(total: number): Customer[] {
   const list: Customer[] = [];
   const dist: { cohort: Cohort; weight: number }[] = [
-    { cohort: "new", weight: 0.30 },
+    { cohort: "new", weight: 0.3 },
     { cohort: "one_time", weight: 0.25 },
     { cohort: "returning", weight: 0.25 },
-    { cohort: "vip_active", weight: 0.10 },
-    { cohort: "vip_churning", weight: 0.10 },
+    { cohort: "vip_active", weight: 0.1 },
+    { cohort: "vip_churning", weight: 0.1 },
   ];
   for (let i = 0; i < total; i++) {
     const r = Math.random();
@@ -141,7 +304,10 @@ function generateCustomers(total: number): Customer[] {
     let cohort: Cohort = "new";
     for (const d of dist) {
       acc += d.weight;
-      if (r <= acc) { cohort = d.cohort; break; }
+      if (r <= acc) {
+        cohort = d.cohort;
+        break;
+      }
     }
     const first = pick(FIRST_NAMES);
     const last = pick(LAST_NAMES);
@@ -179,7 +345,9 @@ function trendFactor(daysAgo: number): number {
 export async function generateAcosProducts(
   tenantId: string,
   supabase: SB,
-): Promise<Map<string, { id: string; name: string; price_cents: number; sku: string; category: string }>> {
+): Promise<
+  Map<string, { id: string; name: string; price_cents: number; sku: string; category: string }>
+> {
   const rows = CATALOG.map((p) => ({
     tenant_id: tenantId,
     name: p.name,
@@ -191,13 +359,25 @@ export async function generateAcosProducts(
     image_url: p.image_url,
     is_active: true,
   }));
-  const { data, error } = await supabase.from("products").insert(rows).select("id, sku, name, price_cents");
+  const { data, error } = await supabase
+    .from("products")
+    .insert(rows)
+    .select("id, sku, name, price_cents");
   if (error) throw error;
 
-  const bySku = new Map<string, { id: string; name: string; price_cents: number; sku: string; category: string }>();
+  const bySku = new Map<
+    string,
+    { id: string; name: string; price_cents: number; sku: string; category: string }
+  >();
   for (const row of data ?? []) {
     const cat = CATALOG.find((c) => c.sku === row.sku)?.category ?? "accessories";
-    bySku.set(row.sku!, { id: row.id, name: row.name, price_cents: row.price_cents, sku: row.sku!, category: cat });
+    bySku.set(row.sku!, {
+      id: row.id,
+      name: row.name,
+      price_cents: row.price_cents,
+      sku: row.sku!,
+      category: cat,
+    });
   }
   return bySku;
 }
@@ -214,7 +394,10 @@ type OrderPlan = {
   items: { product: ProductMeta; qty: number }[];
 };
 
-function buildCart(productsBySku: Map<string, ProductMeta>, anchorSku?: string): { product: ProductMeta; qty: number }[] {
+function buildCart(
+  productsBySku: Map<string, ProductMeta>,
+  anchorSku?: string,
+): { product: ProductMeta; qty: number }[] {
   const skus = Array.from(productsBySku.keys());
   const anchor = anchorSku && productsBySku.has(anchorSku) ? anchorSku : pick(skus);
   const cart: { product: ProductMeta; qty: number }[] = [
@@ -261,7 +444,7 @@ function planOrdersForCustomer(c: Customer, productsBySku: Map<string, ProductMe
       const count = randInt(5, 8);
       // Recent activity within 60 days
       for (let i = 0; i < count; i++) {
-        const daysAgo = Math.round(((60 / count) * i) + randInt(1, 5));
+        const daysAgo = Math.round((60 / count) * i + randInt(1, 5));
         plans.push({ customer: c, daysAgo, items: buildCart(productsBySku) });
       }
       break;
@@ -289,7 +472,14 @@ export async function insertAcosOrders(
   customers: Customer[],
   productsBySku: Map<string, ProductMeta>,
   supabase: SB,
-): Promise<{ orderId: string; createdAt: string; customer: Customer; items: { product: ProductMeta; qty: number }[] }[]> {
+): Promise<
+  {
+    orderId: string;
+    createdAt: string;
+    customer: Customer;
+    items: { product: ProductMeta; qty: number }[];
+  }[]
+> {
   const allPlans: OrderPlan[] = [];
   for (const c of customers) {
     allPlans.push(...planOrdersForCustomer(c, productsBySku));
@@ -297,7 +487,9 @@ export async function insertAcosOrders(
 
   // Apply seasonality + trend to actual timestamp jitter
   const orderRows = allPlans.map((plan) => {
-    const baseDate = new Date(Date.now() - plan.daysAgo * 24 * 60 * 60 * 1000 - randInt(0, 86400) * 1000);
+    const baseDate = new Date(
+      Date.now() - plan.daysAgo * 24 * 60 * 60 * 1000 - randInt(0, 86400) * 1000,
+    );
     const total = plan.items.reduce((s, it) => s + it.product.price_cents * it.qty, 0);
     return {
       tenant_id: tenantId,
@@ -340,8 +532,17 @@ export async function insertAcosOrders(
     planByCustomerAndDay.set(`${p.customer.id}|${p.daysAgo}`, p);
   }
 
-  type OrderMeta = { synth_customer_id?: string; items?: { sku: string; qty: number }[]; cohort?: Cohort };
-  const result: { orderId: string; createdAt: string; customer: Customer; items: { product: ProductMeta; qty: number }[] }[] = [];
+  type OrderMeta = {
+    synth_customer_id?: string;
+    items?: { sku: string; qty: number }[];
+    cohort?: Cohort;
+  };
+  const result: {
+    orderId: string;
+    createdAt: string;
+    customer: Customer;
+    items: { product: ProductMeta; qty: number }[];
+  }[] = [];
 
   for (const order of inserted) {
     const meta = order.metadata as OrderMeta;
@@ -383,7 +584,12 @@ export async function insertAcosEvents(
   tenantId: string,
   customers: Customer[],
   productsBySku: Map<string, ProductMeta>,
-  ordersInserted: { orderId: string; createdAt: string; customer: Customer; items: { product: ProductMeta; qty: number }[] }[],
+  ordersInserted: {
+    orderId: string;
+    createdAt: string;
+    customer: Customer;
+    items: { product: ProductMeta; qty: number }[];
+  }[],
   supabase: SB,
 ): Promise<number> {
   const events: Database["public"]["Tables"]["events"]["Insert"][] = [];
@@ -391,11 +597,16 @@ export async function insertAcosEvents(
 
   // 1) Visit sessions for ALL customers — multiple sessions for active ones
   for (const c of customers) {
-    const sessionsCount = c.cohort === "new" ? randInt(1, 3)
-      : c.cohort === "vip_active" ? randInt(8, 14)
-      : c.cohort === "vip_churning" ? randInt(1, 2)
-      : c.cohort === "returning" ? randInt(3, 6)
-      : randInt(1, 3);
+    const sessionsCount =
+      c.cohort === "new"
+        ? randInt(1, 3)
+        : c.cohort === "vip_active"
+          ? randInt(8, 14)
+          : c.cohort === "vip_churning"
+            ? randInt(1, 2)
+            : c.cohort === "returning"
+              ? randInt(3, 6)
+              : randInt(1, 3);
 
     for (let s = 0; s < sessionsCount; s++) {
       const sessionId = uuid();
@@ -413,7 +624,7 @@ export async function insertAcosEvents(
       });
 
       // 30% chance of a search event during the session
-      if (Math.random() < 0.30 * factor) {
+      if (Math.random() < 0.3 * factor) {
         const isMiss = Math.random() < 0.18; // ~18% of searches are misses
         const term = isMiss ? pick(SEARCH_TERMS_MISS) : pick(SEARCH_TERMS_HIT);
         const searchTs = new Date(date.getTime() + randInt(5, 30) * 1000);
@@ -487,7 +698,12 @@ export async function insertAcosEvents(
         session_id: o.customer.sessionId,
         product_id: it.product.id,
         order_id: o.orderId,
-        payload: { ts: ts.toISOString(), sku: it.product.sku, qty: it.qty, cohort: o.customer.cohort },
+        payload: {
+          ts: ts.toISOString(),
+          sku: it.product.sku,
+          qty: it.qty,
+          cohort: o.customer.cohort,
+        },
         created_at: ts.toISOString(),
       });
     }
@@ -530,7 +746,11 @@ export async function generateAcosDataset(
   const events = await insertAcosEvents(tenantId, customers, productsBySku, orders, supabase);
 
   const cohorts: Record<Cohort, number> = {
-    new: 0, one_time: 0, returning: 0, vip_active: 0, vip_churning: 0,
+    new: 0,
+    one_time: 0,
+    returning: 0,
+    vip_active: 0,
+    vip_churning: 0,
   };
   for (const c of customers) cohorts[c.cohort]++;
 

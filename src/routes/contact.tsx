@@ -52,8 +52,12 @@ function ContactPage() {
           <Badge variant="outline" className="border-primary/30 bg-primary/5 text-primary">
             <Sparkles className="mr-1 h-3 w-3" /> {t("ct.badge")}
           </Badge>
-          <h1 className="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{t("ct.title")}</h1>
-          <p className="mx-auto mt-6 max-w-2xl text-base text-muted-foreground">{t("ct.subtitle")}</p>
+          <h1 className="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+            {t("ct.title")}
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-base text-muted-foreground">
+            {t("ct.subtitle")}
+          </p>
         </div>
       </section>
 
@@ -71,15 +75,35 @@ function ContactPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid gap-1.5">
                   <Label htmlFor="ct-name">{t("ct.name")}</Label>
-                  <Input id="ct-name" required value={name} onChange={(e) => setName(e.target.value)} placeholder={t("ct.namePh")} />
+                  <Input
+                    id="ct-name"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder={t("ct.namePh")}
+                  />
                 </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="ct-email">{t("ct.email")}</Label>
-                  <Input id="ct-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@brand.com" />
+                  <Input
+                    id="ct-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@brand.com"
+                  />
                 </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="ct-msg">{t("ct.message")}</Label>
-                  <Textarea id="ct-msg" rows={6} required value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t("ct.messagePh")} />
+                  <Textarea
+                    id="ct-msg"
+                    rows={6}
+                    required
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder={t("ct.messagePh")}
+                  />
                 </div>
                 <Button type="submit" disabled={submitting} className="w-full">
                   <Send className="mr-2 h-4 w-4" />
@@ -99,10 +123,16 @@ function ContactPage() {
                 <CardDescription>{t("ct.directDesc")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
-                <a href="mailto:hello@marq.app" className="block text-foreground hover:text-primary">
+                <a
+                  href="mailto:hello@marq.app"
+                  className="block text-foreground hover:text-primary"
+                >
                   hello@marq.app
                 </a>
-                <a href="mailto:support@marq.app" className="block text-foreground hover:text-primary">
+                <a
+                  href="mailto:support@marq.app"
+                  className="block text-foreground hover:text-primary"
+                >
                   support@marq.app
                 </a>
               </CardContent>

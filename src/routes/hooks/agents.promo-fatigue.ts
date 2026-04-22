@@ -43,7 +43,9 @@ export const Route = createFileRoute("/hooks/agents/promo-fatigue")({
         try {
           const { data: promos } = await supabaseAdmin
             .from("promotions")
-            .select("id, name, code, times_used, usage_limit, revenue_cents, cost_cents, starts_at, fatigue_score")
+            .select(
+              "id, name, code, times_used, usage_limit, revenue_cents, cost_cents, starts_at, fatigue_score",
+            )
             .eq("tenant_id", tenantId)
             .eq("is_active", true);
 
@@ -55,7 +57,10 @@ export const Route = createFileRoute("/hooks/agents/promo-fatigue")({
           const now = Date.now();
           const insights = [];
           for (const p of promos) {
-            const ageDays = Math.max(1, (now - new Date(p.starts_at).getTime()) / (24 * 3600 * 1000));
+            const ageDays = Math.max(
+              1,
+              (now - new Date(p.starts_at).getTime()) / (24 * 3600 * 1000),
+            );
             const utilization = p.usage_limit ? p.times_used / p.usage_limit : 0;
             const usagePerDay = p.times_used / ageDays;
             const expectedDaily = p.usage_limit ? p.usage_limit / 30 : 5; // assume 30d window

@@ -27,7 +27,9 @@ export const Route = createFileRoute("/hooks/agents/owner-playbook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -57,7 +59,10 @@ export const Route = createFileRoute("/hooks/agents/owner-playbook")({
           if (error) throw error;
           const open = data ?? [];
           if (open.length < 3) {
-            await finishAgentRun(handle, 0, { reason: "insufficient_open_insights", count: open.length });
+            await finishAgentRun(handle, 0, {
+              reason: "insufficient_open_insights",
+              count: open.length,
+            });
             return jsonOk({ run_id: handle.runId, insights_created: 0 });
           }
 

@@ -76,10 +76,7 @@ export const Route = createFileRoute("/api/public/email/unsubscribe")({
 
         const now = new Date().toISOString();
         await Promise.all([
-          supabaseAdmin
-            .from("customers")
-            .update({ consent_marketing: false })
-            .eq("id", c.id),
+          supabaseAdmin.from("customers").update({ consent_marketing: false }).eq("id", c.id),
           supabaseAdmin
             .from("email_suppressions")
             .insert({

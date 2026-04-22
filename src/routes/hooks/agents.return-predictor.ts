@@ -22,7 +22,9 @@ export const Route = createFileRoute("/hooks/agents/return-predictor")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -40,7 +42,9 @@ export const Route = createFileRoute("/hooks/agents/return-predictor")({
           const since = new Date(Date.now() - 60 * 86_400_000).toISOString();
           const { data: refundedItems } = await supabaseAdmin
             .from("order_items")
-            .select("product_id, product_name, quantity, unit_price_cents, orders!inner(status, created_at)")
+            .select(
+              "product_id, product_name, quantity, unit_price_cents, orders!inner(status, created_at)",
+            )
             .eq("tenant_id", tenantId)
             .gte("orders.created_at", since)
             .eq("orders.status", "refunded");
@@ -55,7 +59,11 @@ export const Route = createFileRoute("/hooks/agents/return-predictor")({
           const refundsByProduct = new Map<string, { name: string; qty: number; cents: number }>();
           for (const r of refundedItems ?? []) {
             if (!r.product_id) continue;
-            const e = refundsByProduct.get(r.product_id) ?? { name: r.product_name, qty: 0, cents: 0 };
+            const e = refundsByProduct.get(r.product_id) ?? {
+              name: r.product_name,
+              qty: 0,
+              cents: 0,
+            };
             e.qty += r.quantity;
             e.cents += r.quantity * r.unit_price_cents;
             refundsByProduct.set(r.product_id, e);
@@ -98,7 +106,9 @@ export const Route = createFileRoute("/hooks/agents/return-predictor")({
           return jsonOk({ insights_created: created });
         } catch (e) {
           await failAgentRun(handle, e);
-          return jsonError("Return predictor failed", 500, { details: e instanceof Error ? e.message : String(e) });
+          return jsonError("Return predictor failed", 500, {
+            details: e instanceof Error ? e.message : String(e),
+          });
         }
       },
     },

@@ -45,12 +45,15 @@ export function AgentHealthHeatmap({ tenantId }: Props) {
       const iso = new Date(Date.now() - i * 24 * 3600 * 1000).toISOString();
       dayKeys.push(dayKey(iso));
     }
-    const agents = new Map<string, {
-      total: number;
-      failed: number;
-      insights: number;
-      perDay: Map<string, { runs: number; failed: number; insights: number }>;
-    }>();
+    const agents = new Map<
+      string,
+      {
+        total: number;
+        failed: number;
+        insights: number;
+        perDay: Map<string, { runs: number; failed: number; insights: number }>;
+      }
+    >();
     for (const r of data ?? []) {
       const a = agents.get(r.agent_id) ?? { total: 0, failed: 0, insights: 0, perDay: new Map() };
       a.total++;
@@ -84,7 +87,9 @@ export function AgentHealthHeatmap({ tenantId }: Props) {
             Робота агентів · 14 днів
           </CardTitle>
         </CardHeader>
-        <CardContent><div className="h-48 animate-pulse rounded-md bg-muted/30" /></CardContent>
+        <CardContent>
+          <div className="h-48 animate-pulse rounded-md bg-muted/30" />
+        </CardContent>
       </Card>
     );
   }
@@ -95,16 +100,20 @@ export function AgentHealthHeatmap({ tenantId }: Props) {
         <CardTitle className="flex items-center gap-2 text-sm">
           <Cpu className="h-4 w-4 text-primary" />
           Робота агентів · 14 днів
-          <Badge variant="outline" className="ml-auto text-[10px]">{grid.rows.length} агентів</Badge>
+          <Badge variant="outline" className="ml-auto text-[10px]">
+            {grid.rows.length} агентів
+          </Badge>
         </CardTitle>
         <CardDescription className="text-xs">
-          Скільки разів кожен агент запускався щодня. Червона рамка = була хоча б одна помилка в той день.
+          Скільки разів кожен агент запускався щодня. Червона рамка = була хоча б одна помилка в той
+          день.
         </CardDescription>
       </CardHeader>
       <CardContent>
         {grid.rows.length === 0 ? (
           <div className="rounded-md border border-dashed border-border bg-muted/20 p-4 text-center text-xs text-muted-foreground">
-            За останні {DAYS} днів агенти ще не працювали. Запустіть вручну або зачекайте на наступний автоматичний цикл.
+            За останні {DAYS} днів агенти ще не працювали. Запустіть вручну або зачекайте на
+            наступний автоматичний цикл.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -126,7 +135,10 @@ export function AgentHealthHeatmap({ tenantId }: Props) {
                   const failureRate = r.total > 0 ? r.failed / r.total : 0;
                   return (
                     <tr key={r.agent_id} className="border-t border-border/40">
-                      <td className="pr-2 py-1 text-[10px] text-foreground sticky left-0 bg-card max-w-[140px] truncate" title={humanizeAgentId(r.agent_id)}>
+                      <td
+                        className="pr-2 py-1 text-[10px] text-foreground sticky left-0 bg-card max-w-[140px] truncate"
+                        title={humanizeAgentId(r.agent_id)}
+                      >
                         {humanizeAgentId(r.agent_id)}
                       </td>
                       {grid.dayKeys.map((dk) => {

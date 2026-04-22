@@ -58,21 +58,28 @@ export function AcosAgentRuns({ tenantId }: Props) {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Завантаження…</p>
         ) : runs.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Поки немає запусків. Натисніть «Запустити всіх агентів» вище, щоб запустити автоматику.</p>
+          <p className="text-sm text-muted-foreground">
+            Поки немає запусків. Натисніть «Запустити всіх агентів» вище, щоб запустити автоматику.
+          </p>
         ) : (
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {Object.keys(AGENT_LABEL).map((aid) => {
                 const r = latestByAgent.get(aid);
                 const statusUk = r
-                  ? r.status === "success" ? "успіх"
-                  : r.status === "running" ? "виконується"
-                  : r.status === "error" ? "помилка"
-                  : r.status
+                  ? r.status === "success"
+                    ? "успіх"
+                    : r.status === "running"
+                      ? "виконується"
+                      : r.status === "error"
+                        ? "помилка"
+                        : r.status
                   : "";
                 return (
                   <div key={aid} className="rounded-md border border-border bg-card p-2.5">
-                    <div className="text-[11px] font-medium text-foreground">{AGENT_LABEL[aid]}</div>
+                    <div className="text-[11px] font-medium text-foreground">
+                      {AGENT_LABEL[aid]}
+                    </div>
                     {r ? (
                       <>
                         <div className="mt-1 flex items-center gap-1">
@@ -88,11 +95,16 @@ export function AcosAgentRuns({ tenantId }: Props) {
                           </span>
                         </div>
                         <div className="text-[10px] text-muted-foreground">
-                          {formatDistanceToNow(new Date(r.started_at), { addSuffix: true, locale: uk })}
+                          {formatDistanceToNow(new Date(r.started_at), {
+                            addSuffix: true,
+                            locale: uk,
+                          })}
                         </div>
                       </>
                     ) : (
-                      <div className="mt-1 text-[10px] italic text-muted-foreground/70">ще не запускався</div>
+                      <div className="mt-1 text-[10px] italic text-muted-foreground/70">
+                        ще не запускався
+                      </div>
                     )}
                   </div>
                 );
@@ -102,17 +114,33 @@ export function AcosAgentRuns({ tenantId }: Props) {
             <div className="space-y-1.5">
               <div className="text-xs font-medium text-muted-foreground">Останні запуски</div>
               {runs.slice(0, 12).map((r) => {
-                const statusUk = r.status === "success" ? "успіх" : r.status === "running" ? "виконується" : r.status === "error" ? "помилка" : r.status;
+                const statusUk =
+                  r.status === "success"
+                    ? "успіх"
+                    : r.status === "running"
+                      ? "виконується"
+                      : r.status === "error"
+                        ? "помилка"
+                        : r.status;
                 return (
-                  <div key={r.id} className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/20 px-2.5 py-1.5 text-xs">
-                    <Badge variant="outline" className="text-[10px]">{humanizeAgentId(r.agent_id)}</Badge>
-                    <span className={`text-[10px] font-medium ${r.status === "success" ? "text-success" : r.status === "running" ? "text-primary" : "text-destructive"}`}>
+                  <div
+                    key={r.id}
+                    className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/20 px-2.5 py-1.5 text-xs"
+                  >
+                    <Badge variant="outline" className="text-[10px]">
+                      {humanizeAgentId(r.agent_id)}
+                    </Badge>
+                    <span
+                      className={`text-[10px] font-medium ${r.status === "success" ? "text-success" : r.status === "running" ? "text-primary" : "text-destructive"}`}
+                    >
                       {statusUk}
                     </span>
                     <span className="text-[10px] text-muted-foreground">
                       {r.insights_created} підказок
                     </span>
-                    {r.error && <span className="truncate text-[10px] text-destructive">{r.error}</span>}
+                    {r.error && (
+                      <span className="truncate text-[10px] text-destructive">{r.error}</span>
+                    )}
                     <span className="ml-auto text-[10px] text-muted-foreground">
                       {formatDistanceToNow(new Date(r.started_at), { addSuffix: true, locale: uk })}
                     </span>

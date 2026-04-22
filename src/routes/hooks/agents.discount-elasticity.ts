@@ -43,23 +43,37 @@ export const Route = createFileRoute("/hooks/agents/discount-elasticity")({
           const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString();
           const { data: promos } = await supabaseAdmin
             .from("promotions")
-            .select("id, name, value, promo_type, times_used, revenue_cents, cost_cents, starts_at, ends_at")
+            .select(
+              "id, name, value, promo_type, times_used, revenue_cents, cost_cents, starts_at, ends_at",
+            )
             .eq("tenant_id", tenantId)
             .gte("starts_at", ninetyDaysAgo)
             .gt("times_used", 0);
 
           if (!promos || promos.length < 3) {
-            await finishAgentRun(handle, 0, { reason: "insufficient_promo_history", count: promos?.length ?? 0 });
+            await finishAgentRun(handle, 0, {
+              reason: "insufficient_promo_history",
+              count: promos?.length ?? 0,
+            });
             return jsonOk({ insights_created: 0 });
           }
 
           // For each promo: compute revenue/cost ratio = ROI per discount depth
-          const buckets = new Map<number, { count: number; totalRevenue: number; totalCost: number; totalUses: number }>();
+          const buckets = new Map<
+            number,
+            { count: number; totalRevenue: number; totalCost: number; totalUses: number }
+          >();
           for (const p of promos) {
             // bucket by 5%: 5,10,15,20,25,30+
-            const depthPct = p.promo_type === "percent_off" ? Math.round(Number(p.value) / 5) * 5 : 10;
+            const depthPct =
+              p.promo_type === "percent_off" ? Math.round(Number(p.value) / 5) * 5 : 10;
             const bucket = Math.min(50, Math.max(5, depthPct));
-            const e = buckets.get(bucket) ?? { count: 0, totalRevenue: 0, totalCost: 0, totalUses: 0 };
+            const e = buckets.get(bucket) ?? {
+              count: 0,
+              totalRevenue: 0,
+              totalCost: 0,
+              totalUses: 0,
+            };
             e.count += 1;
             e.totalRevenue += p.revenue_cents;
             e.totalCost += p.cost_cents;

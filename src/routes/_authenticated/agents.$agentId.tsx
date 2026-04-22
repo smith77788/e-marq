@@ -82,8 +82,23 @@ export const Route = createFileRoute("/_authenticated/agents/$agentId")({
 });
 
 const ICON_MAP: Record<AgentMeta["icon"], typeof Bot> = {
-  Users, Boxes, ShoppingCart, Search, Tag, Mail, Bot, Brain, Sparkles, Shield,
-  Truck, Coins, Activity, Bell, BarChart3, Megaphone, Zap,
+  Users,
+  Boxes,
+  ShoppingCart,
+  Search,
+  Tag,
+  Mail,
+  Bot,
+  Brain,
+  Sparkles,
+  Shield,
+  Truck,
+  Coins,
+  Activity,
+  Bell,
+  BarChart3,
+  Megaphone,
+  Zap,
 };
 
 type RunRow = {
@@ -175,7 +190,10 @@ function AgentDetailPage() {
         headers: { "content-type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ tenant_id: tenantId }),
       });
-      const json = (await res.json().catch(() => ({}))) as { error?: string; insights_created?: number };
+      const json = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        insights_created?: number;
+      };
       if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
       toast.success(`${t("ag.cab.runOk")} (+${json.insights_created ?? 0})`);
     } catch (e) {
@@ -212,9 +230,13 @@ function AgentDetailPage() {
         </div>
         <Button onClick={runNow} disabled={running || !tenantId} size="lg">
           {running ? (
-            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("ag.cab.running")}</>
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("ag.cab.running")}
+            </>
           ) : (
-            <><PlayCircle className="mr-2 h-4 w-4" /> {t("ag.cab.runNow")}</>
+            <>
+              <PlayCircle className="mr-2 h-4 w-4" /> {t("ag.cab.runNow")}
+            </>
           )}
         </Button>
       </header>
@@ -228,7 +250,10 @@ function AgentDetailPage() {
           tone={stats.successRate != null && stats.successRate < 80 ? "warn" : "ok"}
         />
         <MetricTile label={t("ag.cab.insightsCreated")} value={stats.insights} />
-        <MetricTile label={t("ag.cab.actionsApplied")} value={actions.filter((a) => a.status === "applied").length} />
+        <MetricTile
+          label={t("ag.cab.actionsApplied")}
+          value={actions.filter((a) => a.status === "applied").length}
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
@@ -262,7 +287,9 @@ function AgentDetailPage() {
             <CardContent>
               {tenantLoading || runsLoading ? (
                 <div className="space-y-2">
-                  {[0, 1, 2].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
+                  {[0, 1, 2].map((i) => (
+                    <Skeleton key={i} className="h-10 w-full" />
+                  ))}
                 </div>
               ) : runs.length === 0 ? (
                 <p className="text-sm text-muted-foreground">—</p>
@@ -285,7 +312,10 @@ function AgentDetailPage() {
                         </span>
                         <span className="tabular-nums text-foreground">+{r.insights_created}</span>
                         {fail && r.error && (
-                          <span className="max-w-xs truncate text-xs text-destructive" title={r.error}>
+                          <span
+                            className="max-w-xs truncate text-xs text-destructive"
+                            title={r.error}
+                          >
                             {r.error}
                           </span>
                         )}
@@ -359,9 +389,7 @@ function MetricTile({
     <div
       className={cn(
         "rounded-lg border p-3",
-        tone === "warn"
-          ? "border-warning/30 bg-warning/5"
-          : "border-border/60 bg-card/50",
+        tone === "warn" ? "border-warning/30 bg-warning/5" : "border-border/60 bg-card/50",
       )}
     >
       <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>

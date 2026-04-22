@@ -31,7 +31,9 @@ export const Route = createFileRoute("/hooks/agents/bot-sequences")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -61,7 +63,13 @@ export const Route = createFileRoute("/hooks/agents/bot-sequences")({
           }
 
           // Per-customer aggregate
-          type Stat = { inbound: number; outbound: number; lastIn: number; lastOut: number; intents: Set<string> };
+          type Stat = {
+            inbound: number;
+            outbound: number;
+            lastIn: number;
+            lastOut: number;
+            intents: Set<string>;
+          };
           const byCust = new Map<string, Stat>();
           const intentTally = new Map<string, Set<string>>();
           for (const r of rows) {
@@ -101,10 +109,7 @@ export const Route = createFileRoute("/hooks/agents/bot-sequences")({
 
           const custIds = stuck.map((s) => s.custId);
           const { data: customers } = custIds.length
-            ? await supabaseAdmin
-                .from("customers")
-                .select("id, email, name")
-                .in("id", custIds)
+            ? await supabaseAdmin.from("customers").select("id, email, name").in("id", custIds)
             : { data: [] };
           const custMap = new Map((customers ?? []).map((c) => [c.id, c]));
 

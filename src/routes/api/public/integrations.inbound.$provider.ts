@@ -17,7 +17,10 @@ import { parsePriceToCents } from "@/lib/integrations/parser";
 
 const BodySchema = z.object({
   entity: z.enum(["products", "customers", "orders"]),
-  rows: z.array(z.record(z.string().min(1).max(255), z.unknown())).min(1).max(5000),
+  rows: z
+    .array(z.record(z.string().min(1).max(255), z.unknown()))
+    .min(1)
+    .max(5000),
   mapping: z.record(z.string().min(1).max(64), z.string().min(1).max(255)).optional(),
 });
 
@@ -108,7 +111,8 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
             })
             .select("id")
             .single();
-          if (jobErr || !job) return jsonResponse({ error: jobErr?.message ?? "job create failed" }, 500);
+          if (jobErr || !job)
+            return jsonResponse({ error: jobErr?.message ?? "job create failed" }, 500);
 
           let imported = 0;
           let failed = 0;
@@ -127,7 +131,10 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
             try {
               if (entity === "products") {
                 const name = get(row, "name");
-                if (!name) { skipped++; continue; }
+                if (!name) {
+                  skipped++;
+                  continue;
+                }
                 const { error } = await supabaseAdmin.from("products").insert({
                   tenant_id: tenantId,
                   name,
@@ -140,11 +147,16 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
                   is_active: true,
                   metadata: { import_source: provider, import_job_id: job.id },
                 });
-                if (error) { failed++; errors.push({ row: i + 1, message: error.message }); }
-                else imported++;
+                if (error) {
+                  failed++;
+                  errors.push({ row: i + 1, message: error.message });
+                } else imported++;
               } else if (entity === "customers") {
                 const name = get(row, "name");
-                if (!name) { skipped++; continue; }
+                if (!name) {
+                  skipped++;
+                  continue;
+                }
                 const { error } = await supabaseAdmin.from("customers").insert({
                   tenant_id: tenantId,
                   name,
@@ -156,24 +168,39 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
                     import_job_id: job.id,
                   },
                 });
-                if (error) { failed++; errors.push({ row: i + 1, message: error.message }); }
-                else imported++;
+                if (error) {
+                  failed++;
+                  errors.push({ row: i + 1, message: error.message });
+                } else imported++;
               } else if (entity === "orders") {
                 const customerName = get(row, "customer_name") || get(row, "name");
-                const total = parsePriceToCents(get(row, "total_cents") || get(row, "total") || get(row, "amount"));
-                if (!customerName || !total) { skipped++; continue; }
+                const total = parsePriceToCents(
+                  get(row, "total_cents") || get(row, "total") || get(row, "amount"),
+                );
+                if (!customerName || !total) {
+                  skipped++;
+                  continue;
+                }
                 const rawStatus = (get(row, "status") || "pending").toLowerCase();
                 type OS = "pending" | "paid" | "fulfilled" | "cancelled" | "refunded";
                 const map: Record<string, OS> = {
-                  pending: "pending", new: "pending", processing: "pending",
-                  paid: "paid", complete: "paid",
-                  shipped: "fulfilled", completed: "fulfilled", fulfilled: "fulfilled", delivered: "fulfilled",
-                  cancelled: "cancelled", canceled: "cancelled",
+                  pending: "pending",
+                  new: "pending",
+                  processing: "pending",
+                  paid: "paid",
+                  complete: "paid",
+                  shipped: "fulfilled",
+                  completed: "fulfilled",
+                  fulfilled: "fulfilled",
+                  delivered: "fulfilled",
+                  cancelled: "cancelled",
+                  canceled: "cancelled",
                   refunded: "refunded",
                 };
                 const finalStatus: OS = map[rawStatus] ?? "pending";
                 const rawPm = get(row, "payment_method").toLowerCase();
-                const paymentMethod = rawPm === "stripe" || rawPm === "stripe_card" ? "stripe_card" : "manual";
+                const paymentMethod =
+                  rawPm === "stripe" || rawPm === "stripe_card" ? "stripe_card" : "manual";
                 const { error } = await supabaseAdmin.from("orders").insert({
                   tenant_id: tenantId,
                   customer_name: customerName,
@@ -189,8 +216,10 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
                     import_job_id: job.id,
                   },
                 });
-                if (error) { failed++; errors.push({ row: i + 1, message: error.message }); }
-                else imported++;
+                if (error) {
+                  failed++;
+                  errors.push({ row: i + 1, message: error.message });
+                } else imported++;
               }
             } catch (e) {
               failed++;
@@ -228,10 +257,7 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
             errors: errors.slice(0, 10),
           });
         } catch (e) {
-          return jsonResponse(
-            { error: e instanceof Error ? e.message : "internal error" },
-            500,
-          );
+          return jsonResponse({ error: e instanceof Error ? e.message : "internal error" }, 500);
         }
       },
     },

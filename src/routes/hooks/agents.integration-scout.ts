@@ -30,7 +30,9 @@ export const Route = createFileRoute("/hooks/agents/integration-scout")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -127,7 +129,11 @@ export const Route = createFileRoute("/hooks/agents/integration-scout")({
                 connected: Array.from(have),
                 inactive: integrations.filter((i) => !i.is_active).map((i) => i.provider),
                 recommendations,
-                signals: { orders_30d: ordersMonthly, products_active: productCount, customers_email: emailCustomers },
+                signals: {
+                  orders_30d: ordersMonthly,
+                  products_active: productCount,
+                  customers_email: emailCustomers,
+                },
               },
               confidence: 0.9,
             },

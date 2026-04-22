@@ -85,7 +85,10 @@ export const Route = createFileRoute("/hooks/agents/content-velocity")({
             .from("content_performance")
             .select("page_id, views")
             .eq("tenant_id", tenantId)
-            .gte("measured_on", new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString().slice(0, 10));
+            .gte(
+              "measured_on",
+              new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString().slice(0, 10),
+            );
 
           const viewsByPage = new Map<string, number>();
           for (const p of perf ?? []) {
@@ -126,7 +129,8 @@ export const Route = createFileRoute("/hooks/agents/content-velocity")({
           const created = await insertInsightsDedup(insights);
           await finishAgentRun(handle, created, {
             published_30d: last30,
-            stale_top: insights.filter((i) => i.insight_type === "content_stale_topperformer").length,
+            stale_top: insights.filter((i) => i.insight_type === "content_stale_topperformer")
+              .length,
           });
           return jsonOk({ insights_created: created });
         } catch (err) {

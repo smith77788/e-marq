@@ -34,8 +34,14 @@ type Customer = {
 
 const STAGE_VARIANT: Record<string, { label: string; cls: string }> = {
   vip: { label: "VIP", cls: "bg-primary/15 text-primary border-primary/30" },
-  active: { label: "активний", cls: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
-  at_risk: { label: "ризик піти", cls: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" },
+  active: {
+    label: "активний",
+    cls: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+  },
+  at_risk: {
+    label: "ризик піти",
+    cls: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
+  },
   new: { label: "новий", cls: "bg-muted text-muted-foreground border-border" },
 };
 
@@ -50,14 +56,20 @@ function daysSince(iso: string | null) {
 export function TopCustomers({ tenantId }: Props) {
   const [busy, setBusy] = useState<string | null>(null);
 
-  const { data: customers, isLoading, refetch } = useQuery({
+  const {
+    data: customers,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["top-customers", tenantId],
     enabled: !!tenantId,
     refetchInterval: 60_000,
     queryFn: async () => {
       const { data } = await supabase
         .from("customers")
-        .select("id, name, email, total_orders, total_spent_cents, last_order_at, predicted_next_order_at, lifecycle_stage, consent_marketing, telegram_chat_id")
+        .select(
+          "id, name, email, total_orders, total_spent_cents, last_order_at, predicted_next_order_at, lifecycle_stage, consent_marketing, telegram_chat_id",
+        )
         .eq("tenant_id", tenantId)
         .order("total_spent_cents", { ascending: false })
         .limit(10);
@@ -68,7 +80,9 @@ export function TopCustomers({ tenantId }: Props) {
   async function sendWinback(customer: Customer) {
     setBusy(customer.id);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       const res = await fetch("/hooks/engines/winback-one", {
         method: "POST",
         headers: {
@@ -138,11 +152,17 @@ export function TopCustomers({ tenantId }: Props) {
                   <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-2">
                     <div className="flex min-w-0 flex-1 items-center gap-3">
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-foreground">{c.name ?? c.email ?? "Анонім"}</p>
+                        <p className="truncate text-sm font-medium text-foreground">
+                          {c.name ?? c.email ?? "Анонім"}
+                        </p>
                         <p className="truncate text-[11px] text-muted-foreground">
                           {c.total_orders} замовлень · {fmtUsd(c.total_spent_cents)}
                           {since !== null && (
-                            <span className={overdue ? "ml-1 text-amber-600 dark:text-amber-400" : "ml-1"}>
+                            <span
+                              className={
+                                overdue ? "ml-1 text-amber-600 dark:text-amber-400" : "ml-1"
+                              }
+                            >
                               · {since} дн. тому{overdue ? " (час нагадати)" : ""}
                             </span>
                           )}
@@ -150,16 +170,30 @@ export function TopCustomers({ tenantId }: Props) {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={`text-[10px] ${stage.cls}`}>{stage.label}</Badge>
+                      <Badge variant="outline" className={`text-[10px] ${stage.cls}`}>
+                        {stage.label}
+                      </Badge>
                       <Button
                         size="sm"
                         variant={overdue ? "default" : "outline"}
                         disabled={!canMessage || busy === c.id}
                         onClick={() => sendWinback(c)}
                         className="h-7 gap-1 text-xs"
-                        title={!canMessage ? (c.consent_marketing ? "Немає каналу для звʼязку" : "Клієнт відмовився від розсилок") : "Надіслати персональне нагадування від ШІ"}
+                        title={
+                          !canMessage
+                            ? c.consent_marketing
+                              ? "Немає каналу для звʼязку"
+                              : "Клієнт відмовився від розсилок"
+                            : "Надіслати персональне нагадування від ШІ"
+                        }
                       >
-                        {busy === c.id ? <Loader2 className="h-3 w-3 animate-spin" /> : !canMessage ? <AlertCircle className="h-3 w-3" /> : <Send className="h-3 w-3" />}
+                        {busy === c.id ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : !canMessage ? (
+                          <AlertCircle className="h-3 w-3" />
+                        ) : (
+                          <Send className="h-3 w-3" />
+                        )}
                         Повернути
                       </Button>
                     </div>

@@ -23,7 +23,10 @@ export const Route = createFileRoute("/hooks/agents/tick")({
             const dispatch = await dispatchTenantOutbound(t.id, 50);
             summary.push({ tenant_id: t.id, sales, dispatch });
           } catch (err) {
-            summary.push({ tenant_id: t.id, error: err instanceof Error ? err.message : String(err) });
+            summary.push({
+              tenant_id: t.id,
+              error: err instanceof Error ? err.message : String(err),
+            });
           }
         }
         return new Response(JSON.stringify({ ok: true, tenants: summary.length, summary }), {

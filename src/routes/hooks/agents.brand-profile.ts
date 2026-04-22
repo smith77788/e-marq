@@ -37,7 +37,9 @@ export const Route = createFileRoute("/hooks/agents/brand-profile")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -53,7 +55,11 @@ export const Route = createFileRoute("/hooks/agents/brand-profile")({
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
           const [tenantRes, cfgRes, productsRes, contentRes] = await Promise.all([
-            supabaseAdmin.from("tenants").select("name, slug, created_at").eq("id", tenantId).maybeSingle(),
+            supabaseAdmin
+              .from("tenants")
+              .select("name, slug, created_at")
+              .eq("id", tenantId)
+              .maybeSingle(),
             supabaseAdmin
               .from("tenant_configs")
               .select("brand_name, seo, ui, features, bot")
@@ -111,7 +117,12 @@ export const Route = createFileRoute("/hooks/agents/brand-profile")({
           // Voice/tone з content_pages: рахуємо середню довжину речень як проксі
           const totalWords = content.reduce((s, c) => s + (c.body_md?.split(/\s+/).length ?? 0), 0);
           const avgWordsPerPost = content.length > 0 ? Math.round(totalWords / content.length) : 0;
-          const tone = avgWordsPerPost > 400 ? "editorial" : avgWordsPerPost > 150 ? "conversational" : "minimal";
+          const tone =
+            avgWordsPerPost > 400
+              ? "editorial"
+              : avgWordsPerPost > 150
+                ? "conversational"
+                : "minimal";
 
           const profile = {
             brand_name: brandName,

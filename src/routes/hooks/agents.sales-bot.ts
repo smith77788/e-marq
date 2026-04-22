@@ -21,7 +21,9 @@ export const Route = createFileRoute("/hooks/agents/sales-bot")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -42,7 +44,9 @@ export const Route = createFileRoute("/hooks/agents/sales-bot")({
           return jsonOk({ ...result, dispatch });
         } catch (err) {
           await failAgentRun(handle, err);
-          return jsonError("Sales bot failed", 500, { details: err instanceof Error ? err.message : String(err) });
+          return jsonError("Sales bot failed", 500, {
+            details: err instanceof Error ? err.message : String(err),
+          });
         }
       },
     },

@@ -42,9 +42,8 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-dry-run")({
         if (!integ?.credentials_encrypted) return jsonError("DN Trade not configured", 404);
         if (!integ.is_active) return jsonError("Integration disabled", 409);
 
-        const kinds = (body.kinds && body.kinds.length > 0
-          ? body.kinds
-          : ["products", "customers", "orders"]
+        const kinds = (
+          body.kinds && body.kinds.length > 0 ? body.kinds : ["products", "customers", "orders"]
         ).filter((k): k is "products" | "customers" | "orders" =>
           ["products", "customers", "orders"].includes(k),
         );

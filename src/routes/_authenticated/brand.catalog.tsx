@@ -19,13 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -144,9 +138,7 @@ function BrandCollectionsPage() {
           counts[r.collection_id] = (counts[r.collection_id] ?? 0) + 1;
         }
       }
-      return (data ?? []).map(
-        (c): CollectionRow => ({ ...c, product_count: counts[c.id] ?? 0 }),
-      );
+      return (data ?? []).map((c): CollectionRow => ({ ...c, product_count: counts[c.id] ?? 0 }));
     },
   });
 
@@ -342,9 +334,7 @@ function BrandCollectionsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            {t("bc.title")}
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("bc.title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("bc.subtitle")}</p>
         </div>
         <Button size="sm" onClick={() => setCreating(true)}>
@@ -367,53 +357,51 @@ function BrandCollectionsPage() {
           ) : (
             <div className="overflow-x-auto">
               <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("bc.col.name")}</TableHead>
-                  <TableHead className="hidden md:table-cell">{t("bc.col.handle")}</TableHead>
-                  <TableHead className="text-right">{t("bc.col.products")}</TableHead>
-                  <TableHead>{t("bc.col.status")}</TableHead>
-                  <TableHead className="w-[100px] text-right">{t("bc.col.actions")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {collections.map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell className="font-medium">{c.name}</TableCell>
-                    <TableCell className="hidden font-mono text-xs text-muted-foreground md:table-cell">
-                      {c.handle}
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {c.product_count}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={c.is_active ? "default" : "outline"}>
-                        {c.is_active ? "Активна" : "Прихована"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8"
-                        onClick={() => setEditing(c)}
-                        aria-label="Edit"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => setDeleting(c)}
-                        aria-label="Delete"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </TableCell>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("bc.col.name")}</TableHead>
+                    <TableHead className="hidden md:table-cell">{t("bc.col.handle")}</TableHead>
+                    <TableHead className="text-right">{t("bc.col.products")}</TableHead>
+                    <TableHead>{t("bc.col.status")}</TableHead>
+                    <TableHead className="w-[100px] text-right">{t("bc.col.actions")}</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
+                </TableHeader>
+                <TableBody>
+                  {collections.map((c) => (
+                    <TableRow key={c.id}>
+                      <TableCell className="font-medium">{c.name}</TableCell>
+                      <TableCell className="hidden font-mono text-xs text-muted-foreground md:table-cell">
+                        {c.handle}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums">{c.product_count}</TableCell>
+                      <TableCell>
+                        <Badge variant={c.is_active ? "default" : "outline"}>
+                          {c.is_active ? "Активна" : "Прихована"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          onClick={() => setEditing(c)}
+                          aria-label="Edit"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => setDeleting(c)}
+                          aria-label="Delete"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
               </Table>
             </div>
           )}

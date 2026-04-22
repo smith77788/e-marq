@@ -24,7 +24,10 @@ async function isAuthorized(token: string): Promise<boolean> {
   const userId = data?.claims?.sub;
   if (!userId) return false;
   const { data: roles } = await supabaseAdmin
-    .from("user_roles").select("role").eq("user_id", userId).eq("role", "super_admin");
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "super_admin");
   return (roles ?? []).length > 0;
 }
 
@@ -32,10 +35,15 @@ export const Route = createFileRoute("/hooks/engines/winback-all")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         if (!(await isAuthorized(token))) return jsonError("Unauthorized", 401);
 
-        const { data: tenants, error } = await supabaseAdmin.from("tenants").select("id, slug").eq("status", "active");
+        const { data: tenants, error } = await supabaseAdmin
+          .from("tenants")
+          .select("id, slug")
+          .eq("status", "active");
         if (error) return jsonError("Failed to load tenants", 500, { details: error.message });
 
         const outcomes: Array<Record<string, unknown>> = [];
@@ -45,7 +53,11 @@ export const Route = createFileRoute("/hooks/engines/winback-all")({
             const dispatch = await dispatchTenantOutbound(t.id, 100);
             outcomes.push({ tenant_id: t.id, slug: t.slug, ...result, ...dispatch });
           } catch (err) {
-            outcomes.push({ tenant_id: t.id, slug: t.slug, error: err instanceof Error ? err.message : String(err) });
+            outcomes.push({
+              tenant_id: t.id,
+              slug: t.slug,
+              error: err instanceof Error ? err.message : String(err),
+            });
           }
         }
         return jsonOk({ tenants_processed: outcomes.length, outcomes });

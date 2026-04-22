@@ -1,7 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { uk } from "date-fns/locale";
-import { Activity, Brain, CheckCircle2, MessageCircle, Sparkles, AlertTriangle, RotateCcw } from "lucide-react";
+import {
+  Activity,
+  Brain,
+  CheckCircle2,
+  MessageCircle,
+  Sparkles,
+  AlertTriangle,
+  RotateCcw,
+} from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -76,10 +84,34 @@ export function AgentTimeline({ tenantId }: Props) {
 
       const out: TimelineItem[] = [];
 
-      const RISK_LABEL: Record<string, string> = { high: "високий", medium: "середній", low: "низький" };
-      const STATUS_LABEL: Record<string, string> = { new: "нова", applied: "застосовано", dismissed: "відхилена", sent: "надіслано", failed: "помилка", queued: "у черзі", success: "успіх", running: "виконується", error: "помилка" };
-      const TRIGGER_LABEL: Record<string, string> = { reorder: "повторне замовлення", winback: "повернення клієнта", abandoned_cart: "покинутий кошик", promo: "промо", sales_reply: "відповідь продавця" };
-      const CHANNEL_LABEL: Record<string, string> = { telegram: "Telegram", email: "email", sms: "SMS" };
+      const RISK_LABEL: Record<string, string> = {
+        high: "високий",
+        medium: "середній",
+        low: "низький",
+      };
+      const STATUS_LABEL: Record<string, string> = {
+        new: "нова",
+        applied: "застосовано",
+        dismissed: "відхилена",
+        sent: "надіслано",
+        failed: "помилка",
+        queued: "у черзі",
+        success: "успіх",
+        running: "виконується",
+        error: "помилка",
+      };
+      const TRIGGER_LABEL: Record<string, string> = {
+        reorder: "повторне замовлення",
+        winback: "повернення клієнта",
+        abandoned_cart: "покинутий кошик",
+        promo: "промо",
+        sales_reply: "відповідь продавця",
+      };
+      const CHANNEL_LABEL: Record<string, string> = {
+        telegram: "Telegram",
+        email: "email",
+        sms: "SMS",
+      };
 
       for (const r of insightsRes.data ?? []) {
         out.push({
@@ -89,7 +121,12 @@ export function AgentTimeline({ tenantId }: Props) {
           title: r.title,
           detail: `${r.insight_type.replace(/_/g, " ")} · ${STATUS_LABEL[r.status] ?? r.status}`,
           badge: RISK_LABEL[r.risk_level] ?? r.risk_level,
-          badgeVariant: r.risk_level === "high" ? "destructive" : r.risk_level === "medium" ? "default" : "secondary",
+          badgeVariant:
+            r.risk_level === "high"
+              ? "destructive"
+              : r.risk_level === "medium"
+                ? "default"
+                : "secondary",
         });
       }
 
@@ -99,7 +136,10 @@ export function AgentTimeline({ tenantId }: Props) {
         let detail = r.expected_impact ?? r.action_type.replace(/_/g, " ");
         if (typeof result.queued_messages === "number") {
           detail = `Поставлено в чергу ${result.queued_messages} нагадувань для VIP`;
-        } else if (typeof result.old_price_cents === "number" && typeof result.new_price_cents === "number") {
+        } else if (
+          typeof result.old_price_cents === "number" &&
+          typeof result.new_price_cents === "number"
+        ) {
           detail = `Ціна ${(result.old_price_cents / 100).toFixed(2)} ₴ → ${(result.new_price_cents / 100).toFixed(2)} ₴`;
         }
         out.push({
@@ -122,7 +162,8 @@ export function AgentTimeline({ tenantId }: Props) {
           title: `${TRIGGER_LABEL[r.trigger_kind] ?? r.trigger_kind.replace(/_/g, " ")} → ${CHANNEL_LABEL[r.channel] ?? r.channel}`,
           detail: r.body.slice(0, 110) + (r.body.length > 110 ? "…" : ""),
           badge: STATUS_LABEL[r.status] ?? r.status,
-          badgeVariant: r.status === "sent" ? "default" : r.status === "failed" ? "destructive" : "secondary",
+          badgeVariant:
+            r.status === "sent" ? "default" : r.status === "failed" ? "destructive" : "secondary",
         });
       }
 
@@ -158,15 +199,18 @@ export function AgentTimeline({ tenantId }: Props) {
           <p className="text-sm text-muted-foreground">Завантаження…</p>
         ) : items.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            Поки немає подій. Коли агенти запрацюють і знайдуть закономірності — тут зʼявиться стрічка наживо.
+            Поки немає подій. Коли агенти запрацюють і знайдуть закономірності — тут зʼявиться
+            стрічка наживо.
           </p>
         ) : (
           <ScrollArea className="h-[420px] pr-3">
             <ol className="relative space-y-4 border-l border-border pl-5">
               {items.map((item) => {
-                const Icon = item.kind === "insight" && ICON_BY_TYPE[(item.detail.split(" · ")[0] || "").replace(/ /g, "_")]
-                  ? ICON_BY_TYPE[(item.detail.split(" · ")[0] || "").replace(/ /g, "_")]
-                  : ICON_BY_KIND[item.kind];
+                const Icon =
+                  item.kind === "insight" &&
+                  ICON_BY_TYPE[(item.detail.split(" · ")[0] || "").replace(/ /g, "_")]
+                    ? ICON_BY_TYPE[(item.detail.split(" · ")[0] || "").replace(/ /g, "_")]
+                    : ICON_BY_KIND[item.kind];
                 return (
                   <li key={item.id} className="relative">
                     <span className="absolute -left-[27px] flex h-5 w-5 items-center justify-center rounded-full border border-border bg-background">
@@ -174,17 +218,36 @@ export function AgentTimeline({ tenantId }: Props) {
                     </span>
                     <DetailableElement
                       elementId={item.id}
-                      resourceType={item.kind === "outbound" ? "outbound" : item.kind === "insight" ? "insight" : item.kind === "action" ? "agent" : "agent"}
+                      resourceType={
+                        item.kind === "outbound"
+                          ? "outbound"
+                          : item.kind === "insight"
+                            ? "insight"
+                            : item.kind === "action"
+                              ? "agent"
+                              : "agent"
+                      }
                       drawerTitle={item.title}
                       drawerSize="sm"
-                      payload={buildTimelinePayload({ kind: item.kind, title: item.title, detail: item.detail, ts: item.ts, badge: item.badge })}
+                      payload={buildTimelinePayload({
+                        kind: item.kind,
+                        title: item.title,
+                        detail: item.detail,
+                        ts: item.ts,
+                        badge: item.badge,
+                      })}
                       ariaLabel={`Деталі події ${item.title}`}
                     >
                       <div>
                         <div className="flex flex-wrap items-start justify-between gap-2">
-                          <p className="text-sm font-medium text-foreground leading-snug">{item.title}</p>
+                          <p className="text-sm font-medium text-foreground leading-snug">
+                            {item.title}
+                          </p>
                           {item.badge && (
-                            <Badge variant={item.badgeVariant ?? "secondary"} className="text-[10px]">
+                            <Badge
+                              variant={item.badgeVariant ?? "secondary"}
+                              className="text-[10px]"
+                            >
                               {item.badge}
                             </Badge>
                           )}

@@ -34,7 +34,9 @@ export const Route = createFileRoute("/hooks/agents/onboarding")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -63,14 +65,43 @@ export const Route = createFileRoute("/hooks/agents/onboarding")({
             cfgRes,
           ] = await Promise.all([
             supabaseAdmin.from("tenants").select("name, slug").eq("id", tenantId).maybeSingle(),
-            supabaseAdmin.from("products").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("is_active", true),
-            supabaseAdmin.from("orders").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
-            supabaseAdmin.from("orders").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("status", "paid"),
-            supabaseAdmin.from("customers").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
-            supabaseAdmin.from("customers").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).not("email", "is", null),
-            supabaseAdmin.from("events").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).gte("created_at", sevenDaysAgo),
-            supabaseAdmin.from("telegram_chat_routing").select("chat_id", { count: "exact", head: true }).eq("tenant_id", tenantId),
-            supabaseAdmin.from("tenant_configs").select("features, bot").eq("tenant_id", tenantId).maybeSingle(),
+            supabaseAdmin
+              .from("products")
+              .select("id", { count: "exact", head: true })
+              .eq("tenant_id", tenantId)
+              .eq("is_active", true),
+            supabaseAdmin
+              .from("orders")
+              .select("id", { count: "exact", head: true })
+              .eq("tenant_id", tenantId),
+            supabaseAdmin
+              .from("orders")
+              .select("id", { count: "exact", head: true })
+              .eq("tenant_id", tenantId)
+              .eq("status", "paid"),
+            supabaseAdmin
+              .from("customers")
+              .select("id", { count: "exact", head: true })
+              .eq("tenant_id", tenantId),
+            supabaseAdmin
+              .from("customers")
+              .select("id", { count: "exact", head: true })
+              .eq("tenant_id", tenantId)
+              .not("email", "is", null),
+            supabaseAdmin
+              .from("events")
+              .select("id", { count: "exact", head: true })
+              .eq("tenant_id", tenantId)
+              .gte("created_at", sevenDaysAgo),
+            supabaseAdmin
+              .from("telegram_chat_routing")
+              .select("chat_id", { count: "exact", head: true })
+              .eq("tenant_id", tenantId),
+            supabaseAdmin
+              .from("tenant_configs")
+              .select("features, bot")
+              .eq("tenant_id", tenantId)
+              .maybeSingle(),
           ]);
 
           const productCount = productsRes.count ?? 0;
@@ -144,7 +175,12 @@ export const Route = createFileRoute("/hooks/agents/onboarding")({
               expected_impact: "Enable Stripe to convert pending → paid automatically",
               confidence: 0.85,
               risk_level: "high",
-              metrics: { pending: ordersAll, paid: ordersPaid, stripe_on: stripeOn, action: "enable_stripe" },
+              metrics: {
+                pending: ordersAll,
+                paid: ordersPaid,
+                stripe_on: stripeOn,
+                action: "enable_stripe",
+              },
               dedup_key: "pending_only",
             });
           }
@@ -160,7 +196,11 @@ export const Route = createFileRoute("/hooks/agents/onboarding")({
               expected_impact: "Activates 24/7 sales-bot, reorder reminders & winback DMs",
               confidence: 1,
               risk_level: "high",
-              metrics: { slug, deep_link: `https://t.me/Oauther_bot?start=${slug}`, action: "connect_telegram" },
+              metrics: {
+                slug,
+                deep_link: `https://t.me/Oauther_bot?start=${slug}`,
+                action: "connect_telegram",
+              },
               dedup_key: "no_telegram",
             });
           }

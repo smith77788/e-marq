@@ -17,7 +17,9 @@ export function PlanUsageCard({ tenantId }: { tenantId: string }) {
   const { data, isLoading } = useQuery({
     queryKey: ["plan-summary", tenantId],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_tenant_plan_summary", { _tenant_id: tenantId });
+      const { data, error } = await supabase.rpc("get_tenant_plan_summary", {
+        _tenant_id: tenantId,
+      });
       if (error) throw error;
       return data as PlanSummary | null;
     },
@@ -29,14 +31,22 @@ export function PlanUsageCard({ tenantId }: { tenantId: string }) {
   // Anti-cheat banner: any metric >= 90%?
   const overLimit = Object.entries(data.limits).some(([k, limit]) => {
     if (limit === null || limit === undefined) return false;
-    const metricKey = k.replace(/^max_/, "").replace(/_per_month$/, "_count").replace(/^/, "");
+    const metricKey = k
+      .replace(/^max_/, "")
+      .replace(/_per_month$/, "_count")
+      .replace(/^/, "");
     const usageKey =
-      k === "max_products" ? "products_count"
-      : k === "max_orders_per_month" ? "orders_count"
-      : k === "max_customers" ? "customers_count"
-      : k === "max_ai_runs_per_month" ? "ai_runs_count"
-      : k === "max_outbound_messages_per_month" ? "outbound_messages_count"
-      : metricKey;
+      k === "max_products"
+        ? "products_count"
+        : k === "max_orders_per_month"
+          ? "orders_count"
+          : k === "max_customers"
+            ? "customers_count"
+            : k === "max_ai_runs_per_month"
+              ? "ai_runs_count"
+              : k === "max_outbound_messages_per_month"
+                ? "outbound_messages_count"
+                : metricKey;
     return Number(data.usage[usageKey] ?? 0) >= Number(limit);
   });
 
@@ -48,13 +58,17 @@ export function PlanUsageCard({ tenantId }: { tenantId: string }) {
             <Crown className="h-4 w-4 text-warning" />
             Ваш тариф
             <PlanBadge planKey={data.plan.key} planName={data.plan.name} />
-            <Badge variant="outline">{
-              data.subscription.status === "active" ? "активна"
-              : data.subscription.status === "trial" ? "пробний період"
-              : data.subscription.status === "past_due" ? "не оплачено"
-              : data.subscription.status === "canceled" ? "скасовано"
-              : data.subscription.status
-            }</Badge>
+            <Badge variant="outline">
+              {data.subscription.status === "active"
+                ? "активна"
+                : data.subscription.status === "trial"
+                  ? "пробний період"
+                  : data.subscription.status === "past_due"
+                    ? "не оплачено"
+                    : data.subscription.status === "canceled"
+                      ? "скасовано"
+                      : data.subscription.status}
+            </Badge>
           </CardTitle>
           <Button
             size="sm"
@@ -74,7 +88,8 @@ export function PlanUsageCard({ tenantId }: { tenantId: string }) {
         <UsageMeters summary={data} compact />
         {overLimit && (
           <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-2 text-xs text-destructive">
-            ⚠ Ви досягли ліміту тарифу. Нові записи цього типу будуть заблоковані. Звʼяжіться з підтримкою, щоб підвищити тариф.
+            ⚠ Ви досягли ліміту тарифу. Нові записи цього типу будуть заблоковані. Звʼяжіться з
+            підтримкою, щоб підвищити тариф.
           </div>
         )}
       </CardContent>

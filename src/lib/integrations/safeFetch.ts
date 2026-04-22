@@ -85,7 +85,13 @@ export async function safeFetch(rawUrl: string, opts: SafeFetchOptions = {}): Pr
     // Якщо сервер повертає редирект — перевіряємо локацію і обмежуємо до 3
     let current = res;
     let hops = 0;
-    while ((current.status === 301 || current.status === 302 || current.status === 307 || current.status === 308) && hops < 3) {
+    while (
+      (current.status === 301 ||
+        current.status === 302 ||
+        current.status === 307 ||
+        current.status === 308) &&
+      hops < 3
+    ) {
       const loc = current.headers.get("location");
       if (!loc) break;
       const next = new URL(loc, url);

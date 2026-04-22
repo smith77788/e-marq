@@ -11,14 +11,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  AlertCircle,
-  ArrowLeft,
-  CheckCircle2,
-  Clock,
-  Search,
-  XCircle,
-} from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle2, Clock, Search, XCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -88,7 +81,9 @@ function IntegrationsHubPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("import_jobs")
-        .select("id, source_provider, entity_kind, status, rows_total, rows_imported, rows_failed, created_at, finished_at")
+        .select(
+          "id, source_provider, entity_kind, status, rows_total, rows_imported, rows_failed, created_at, finished_at",
+        )
         .eq("tenant_id", currentTenantId!)
         .order("created_at", { ascending: false })
         .limit(15);
@@ -106,7 +101,9 @@ function IntegrationsHubPage() {
     if (!currentTenantId) return;
     setSyncing(provider);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       const token = session?.access_token;
       if (!token) throw new Error("Сесія не знайдена");
       const res = await fetch(`/api/integrations/sync/${provider}`, {
@@ -166,7 +163,8 @@ function IntegrationsHubPage() {
           <CardHeader>
             <CardTitle>Спочатку оберіть бренд</CardTitle>
             <CardDescription>
-              Інтеграції налаштовуються для конкретного бренду. Поверніться на головну і виберіть бренд.
+              Інтеграції налаштовуються для конкретного бренду. Поверніться на головну і виберіть
+              бренд.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -257,7 +255,11 @@ function IntegrationsHubPage() {
                     onSelect={setActive}
                     onSync={(i) => {
                       setSyncTarget(i);
-                      setSyncEntity(i.imports.includes("orders") ? "orders" : (i.imports[0] as "products" | "customers" | "orders") ?? "products");
+                      setSyncEntity(
+                        i.imports.includes("orders")
+                          ? "orders"
+                          : ((i.imports[0] as "products" | "customers" | "orders") ?? "products"),
+                      );
                     }}
                   />
                 );
@@ -299,17 +301,14 @@ function IntegrationsHubPage() {
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     {statusIcon}
-                    <span className="truncate font-medium">
-                      {integ?.name ?? j.source_provider}
-                    </span>
+                    <span className="truncate font-medium">{integ?.name ?? j.source_provider}</span>
                     <Badge variant="outline" className="text-[10px]">
                       {j.entity_kind}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground whitespace-nowrap">
                     <span>
-                      <strong className="text-success">{j.rows_imported}</strong> /{" "}
-                      {j.rows_total}
+                      <strong className="text-success">{j.rows_imported}</strong> / {j.rows_total}
                     </span>
                     {j.rows_failed > 0 && (
                       <span className="text-destructive">помилок: {j.rows_failed}</span>

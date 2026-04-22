@@ -159,7 +159,10 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
               affected_layer: "pricing",
               title: `${p.name}: ${direction === "raise" ? "підняти" : "знизити"} ціну до ${formatCents(best.price)}`,
               description: `Еластичність ${elasticity.toFixed(2)}, оптимальна ціна за історичним revenue.`,
-              expected_impact: upliftMonthly > 0 ? `~${formatCents(upliftMonthly)} додаткового виторгу/міс.` : "Стабілізація виторгу при поточному попиті.",
+              expected_impact:
+                upliftMonthly > 0
+                  ? `~${formatCents(upliftMonthly)} додаткового виторгу/міс.`
+                  : "Стабілізація виторгу при поточному попиті.",
               confidence,
               risk_level: Math.abs(diffPct) > 0.15 ? ("medium" as const) : ("low" as const),
               metrics: {

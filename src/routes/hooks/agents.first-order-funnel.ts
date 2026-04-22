@@ -87,7 +87,13 @@ export const Route = createFileRoute("/hooks/agents/first-order-funnel")({
           }
 
           // Per-step counters scoped to first sessions
-          const steps = ["session_start", "product_viewed", "add_to_cart", "checkout_started", "purchase_completed"];
+          const steps = [
+            "session_start",
+            "product_viewed",
+            "add_to_cart",
+            "checkout_started",
+            "purchase_completed",
+          ];
           const counters: Record<string, Set<string>> = Object.fromEntries(
             steps.map((s) => [s, new Set<string>()]),
           );
@@ -111,7 +117,13 @@ export const Route = createFileRoute("/hooks/agents/first-order-funnel")({
             if (prev === 0) continue;
             const drop = 1 - cur / prev;
             if (drop > worst.drop) {
-              worst = { from: funnel[i - 1].step, to: funnel[i].step, drop, fromCount: prev, toCount: cur };
+              worst = {
+                from: funnel[i - 1].step,
+                to: funnel[i].step,
+                drop,
+                fromCount: prev,
+                toCount: cur,
+              };
             }
           }
 

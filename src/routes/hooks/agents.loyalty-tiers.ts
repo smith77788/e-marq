@@ -45,13 +45,14 @@ export const Route = createFileRoute("/hooks/agents/loyalty-tiers")({
             .gt("total_spent_cents", 0);
 
           if (!customers || customers.length < 20) {
-            await finishAgentRun(handle, 0, { reason: "insufficient_data", n: customers?.length ?? 0 });
+            await finishAgentRun(handle, 0, {
+              reason: "insufficient_data",
+              n: customers?.length ?? 0,
+            });
             return jsonOk({ insights_created: 0 });
           }
 
-          const spent = customers
-            .map((c) => c.total_spent_cents ?? 0)
-            .sort((a, b) => a - b);
+          const spent = customers.map((c) => c.total_spent_cents ?? 0).sort((a, b) => a - b);
           const n = spent.length;
 
           // Percentile thresholds (ascending): bronze=below p50, silver=p50..p80, gold=p80..p95, platinum=p95+

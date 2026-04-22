@@ -41,7 +41,12 @@ function clientIp(req: Request): string {
   );
 }
 
-async function callNP(apiKey: string, model: string, method: string, props: Record<string, unknown>) {
+async function callNP(
+  apiKey: string,
+  model: string,
+  method: string,
+  props: Record<string, unknown>,
+) {
   const res = await fetch(NP_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -157,7 +162,10 @@ export const Route = createFileRoute("/api/public/shipping/np")({
           });
         } catch (e) {
           return new Response(
-            JSON.stringify({ error: "np_error", message: e instanceof Error ? e.message : "unknown" }),
+            JSON.stringify({
+              error: "np_error",
+              message: e instanceof Error ? e.message : "unknown",
+            }),
             { status: 502, headers: { "Content-Type": "application/json" } },
           );
         }

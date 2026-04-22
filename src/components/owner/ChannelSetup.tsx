@@ -45,8 +45,8 @@ export function ChannelSetup({ tenantId, tenantSlug }: Props) {
           Telegram канал
         </CardTitle>
         <CardDescription>
-          Ваші клієнти спілкуються з вашим брендом через спільного безпечного бота Lovable.
-          Не треба створювати власного бота — просто поширюйте посилання.
+          Ваші клієнти спілкуються з вашим брендом через спільного безпечного бота Lovable. Не треба
+          створювати власного бота — просто поширюйте посилання.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -57,7 +57,8 @@ export function ChannelSetup({ tenantId, tenantSlug }: Props) {
             {typeof connectedCount === "number" && (
               <>
                 {" "}
-                <Users className="inline h-3.5 w-3.5" /> Підключено клієнтів: <strong>{connectedCount}</strong>
+                <Users className="inline h-3.5 w-3.5" /> Підключено клієнтів:{" "}
+                <strong>{connectedCount}</strong>
               </>
             )}
           </span>
@@ -78,22 +79,29 @@ export function ChannelSetup({ tenantId, tenantSlug }: Props) {
               <Copy className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
             <Button size="sm" variant="outline" asChild>
-              <a href={deepLink} target="_blank" rel="noreferrer" aria-label="Відкрити посилання у новій вкладці">
+              <a
+                href={deepLink}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Відкрити посилання у новій вкладці"
+              >
                 <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
               </a>
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Коли клієнт натискає це посилання та натискає <code>START</code> у боті —
-            він автоматично прив&apos;язується до вашого магазину. Усі майбутні нагадування,
-            відповіді на питання та чек-аут-лінки приходять до нього.
+            Коли клієнт натискає це посилання та натискає <code>START</code> у боті — він
+            автоматично прив&apos;язується до вашого магазину. Усі майбутні нагадування, відповіді
+            на питання та чек-аут-лінки приходять до нього.
           </p>
         </div>
 
         <div className="rounded-md border border-border/50 bg-muted/30 p-3 text-xs text-muted-foreground space-y-1">
           <div className="font-medium text-foreground">Як це виглядає для клієнта:</div>
           <ol className="list-decimal pl-4 space-y-1">
-            <li>Клік на посилання → відкривається бот <code>@{SHARED_BOT_USERNAME}</code></li>
+            <li>
+              Клік на посилання → відкривається бот <code>@{SHARED_BOT_USERNAME}</code>
+            </li>
             <li>Кнопка «START» → бот вітає від імені вашого бренду</li>
             <li>Можна писати запитання — sales-bot відповідає за хвилину</li>
             <li>Бот сам пропонує повторні замовлення, нагадує покинутий кошик</li>

@@ -14,13 +14,7 @@ import {
   ShieldAlert,
   TriangleAlert,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -45,15 +39,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { downloadHealthCsv, type HealthLogRow } from "@/lib/dntrade/healthCsv";
 
-export const Route = createFileRoute(
-  "/_authenticated/admin/dntrade-health/$tenantId",
-)({
+export const Route = createFileRoute("/_authenticated/admin/dntrade-health/$tenantId")({
   component: TenantDrillDownPage,
 });
 
 const STATUS_TONE: Record<string, { label: string; className: string }> = {
   healthy: { label: "Працює", className: "bg-success/15 text-success border-success/30" },
-  degraded: { label: "З попередженнями", className: "bg-warning/15 text-warning border-warning/30" },
+  degraded: {
+    label: "З попередженнями",
+    className: "bg-warning/15 text-warning border-warning/30",
+  },
   unhealthy: {
     label: "Не працює",
     className: "bg-destructive/15 text-destructive border-destructive/30",
@@ -217,9 +212,7 @@ function Drill({ tenantId }: { tenantId: string }) {
         <Button
           variant="outline"
           size="sm"
-          onClick={() =>
-            downloadHealthCsv(logs, `dntrade-health-${tenantLabel}-30d.csv`)
-          }
+          onClick={() => downloadHealthCsv(logs, `dntrade-health-${tenantLabel}-30d.csv`)}
           disabled={logs.length === 0}
         >
           <Download className="mr-1 h-3.5 w-3.5" /> Завантажити CSV
@@ -246,9 +239,7 @@ function Drill({ tenantId }: { tenantId: string }) {
             <CardDescription className="flex items-center gap-1.5 text-xs text-success">
               <CheckCircle2 className="h-3.5 w-3.5" /> Час безперебійної роботи · 30 днів
             </CardDescription>
-            <CardTitle className="text-3xl font-bold text-success">
-              {stats.uptimePct}%
-            </CardTitle>
+            <CardTitle className="text-3xl font-bold text-success">{stats.uptimePct}%</CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
             {stats.healthy} з {stats.total} перевірок успішні
@@ -259,9 +250,7 @@ function Drill({ tenantId }: { tenantId: string }) {
             <CardDescription className="flex items-center gap-1.5 text-xs text-warning">
               <TriangleAlert className="h-3.5 w-3.5" /> З попередженнями
             </CardDescription>
-            <CardTitle className="text-3xl font-bold text-warning">
-              {stats.degraded}
-            </CardTitle>
+            <CardTitle className="text-3xl font-bold text-warning">{stats.degraded}</CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">перевірок</CardContent>
         </Card>
@@ -270,9 +259,7 @@ function Drill({ tenantId }: { tenantId: string }) {
             <CardDescription className="flex items-center gap-1.5 text-xs text-destructive">
               <ShieldAlert className="h-3.5 w-3.5" /> Не працює
             </CardDescription>
-            <CardTitle className="text-3xl font-bold text-destructive">
-              {stats.unhealthy}
-            </CardTitle>
+            <CardTitle className="text-3xl font-bold text-destructive">{stats.unhealthy}</CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">перевірок</CardContent>
         </Card>
@@ -311,9 +298,30 @@ function Drill({ tenantId }: { tenantId: string }) {
                   fontSize: 12,
                 }}
               />
-              <Area type="monotone" dataKey="healthy" stackId="1" stroke="var(--success, var(--primary))" fill="url(#dHealthy)" name="Працює" />
-              <Area type="monotone" dataKey="degraded" stackId="1" stroke="var(--warning, var(--primary))" fill="url(#dDegraded)" name="Попередження" />
-              <Area type="monotone" dataKey="unhealthy" stackId="1" stroke="var(--destructive)" fill="url(#dUnhealthy)" name="Не працює" />
+              <Area
+                type="monotone"
+                dataKey="healthy"
+                stackId="1"
+                stroke="var(--success, var(--primary))"
+                fill="url(#dHealthy)"
+                name="Працює"
+              />
+              <Area
+                type="monotone"
+                dataKey="degraded"
+                stackId="1"
+                stroke="var(--warning, var(--primary))"
+                fill="url(#dDegraded)"
+                name="Попередження"
+              />
+              <Area
+                type="monotone"
+                dataKey="unhealthy"
+                stackId="1"
+                stroke="var(--destructive)"
+                fill="url(#dUnhealthy)"
+                name="Не працює"
+              />
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>
@@ -386,9 +394,7 @@ function Drill({ tenantId }: { tenantId: string }) {
       <Card className="border-border/60 bg-card/60 backdrop-blur">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Помилки синхронізації за 30 днів</CardTitle>
-          <CardDescription className="text-xs">
-            До 50 останніх записів
-          </CardDescription>
+          <CardDescription className="text-xs">До 50 останніх записів</CardDescription>
         </CardHeader>
         <CardContent>
           {(data.data?.syncErrors ?? []).length === 0 ? (
@@ -407,9 +413,7 @@ function Drill({ tenantId }: { tenantId: string }) {
                           {e.kind}
                         </Badge>
                         {e.external_id && (
-                          <code className="text-[10px] text-muted-foreground">
-                            {e.external_id}
-                          </code>
+                          <code className="text-[10px] text-muted-foreground">{e.external_id}</code>
                         )}
                       </div>
                       <p className="mt-0.5 text-xs text-foreground">{e.message}</p>

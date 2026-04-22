@@ -59,7 +59,9 @@ export const Route = createFileRoute("/hooks/agents/customer-segments-auto")({
         try {
           const { data: customers } = await supabaseAdmin
             .from("customers")
-            .select("id, total_orders, total_spent_cents, avg_order_cents, last_order_at, first_order_at")
+            .select(
+              "id, total_orders, total_spent_cents, avg_order_cents, last_order_at, first_order_at",
+            )
             .eq("tenant_id", tenantId);
 
           if (!customers?.length) {

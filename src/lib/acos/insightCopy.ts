@@ -92,7 +92,8 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       ua: {
         headline: `${count} клієнтів готові піти`,
         why: "Вони купували регулярно, але вже давно не повертаються. За 30 днів зазвичай переходять у dormant і не повертаються.",
-        what_to_do: "Надіслати персональний winback з нагадуванням і знижкою 10% (один клік нижче).",
+        what_to_do:
+          "Надіслати персональний winback з нагадуванням і знижкою 10% (один клік нижче).",
       },
       en: {
         headline: `${count} customers about to churn`,
@@ -144,12 +145,14 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       ua: {
         headline: `Бот відповідає холодно — ${reply.toFixed(0)}% відгуків`,
         why: "Покупці пишуть боту, але мало хто відповідає назад. Або тон шаблонів сухий, або бот пропускає важливі питання.",
-        what_to_do: "Переписати найгірші шаблони людською мовою (1 клік — згенеруємо нову версію через ШІ).",
+        what_to_do:
+          "Переписати найгірші шаблони людською мовою (1 клік — згенеруємо нову версію через ШІ).",
       },
       en: {
         headline: `Bot feels cold — only ${reply.toFixed(0)}% reply rate`,
         why: "People message the bot but few reply back. Templates likely sound robotic or miss key questions.",
-        what_to_do: "Rewrite the worst templates in a human tone (1 click — we'll regenerate via AI).",
+        what_to_do:
+          "Rewrite the worst templates in a human tone (1 click — we'll regenerate via AI).",
       },
     };
   },
@@ -159,7 +162,8 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       ua: {
         headline: `Бот дає ${conv.toFixed(1)}% конверсії — це сильний результат`,
         why: "Шаблони працюють. Можна збільшити частоту або розширити сегменти, на які він пише.",
-        what_to_do: "Розширити segmentation: додати ще один сегмент клієнтів до тих самих сценаріїв.",
+        what_to_do:
+          "Розширити segmentation: додати ще один сегмент клієнтів до тих самих сценаріїв.",
       },
       en: {
         headline: `Bot is converting at ${conv.toFixed(1)}% — strong`,
@@ -342,12 +346,14 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
     ua: {
       headline: "🎉 Перший платний продаж — пора масштабуватися",
       why: "Перша угода закрилась. Кожна наступна робить агентів розумнішими — після ~5 замовлень почнуть з'являтися реальні pattern-insights.",
-      what_to_do: "Увімкни Telegram-бот, abandoned-cart і reorder-reminders — це працює саме на твоїх даних.",
+      what_to_do:
+        "Увімкни Telegram-бот, abandoned-cart і reorder-reminders — це працює саме на твоїх даних.",
     },
     en: {
       headline: "🎉 First paid order — time to scale",
       why: "Your first sale closed. Each new order makes agents smarter — after ~5 orders real pattern insights start appearing.",
-      what_to_do: "Turn on Telegram bot, abandoned-cart and reorder-reminders — they compound on your real data.",
+      what_to_do:
+        "Turn on Telegram bot, abandoned-cart and reorder-reminders — they compound on your real data.",
     },
   }),
 
@@ -646,12 +652,18 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       ua: {
         headline: `${name}: ${dir} ціну ${cents(cur)} → ${cents(sug)}`,
         why: `Еластичність попиту ${elast.toFixed(2)}. Ця ціна максимізує revenue на 60-денному вікні.`,
-        what_to_do: uplift > 0 ? `Застосувати — очікуваний uplift ${cents(uplift)}/міс.` : `Застосувати — стабілізує виторг при поточному попиті.`,
+        what_to_do:
+          uplift > 0
+            ? `Застосувати — очікуваний uplift ${cents(uplift)}/міс.`
+            : `Застосувати — стабілізує виторг при поточному попиті.`,
       },
       en: {
         headline: `${name}: ${dirEn} price ${cents(cur)} → ${cents(sug)}`,
         why: `Demand elasticity ${elast.toFixed(2)}. This price maximizes revenue over the 60-day window.`,
-        what_to_do: uplift > 0 ? `Apply — expected uplift ${cents(uplift)}/mo.` : `Apply — stabilizes revenue at current demand.`,
+        what_to_do:
+          uplift > 0
+            ? `Apply — expected uplift ${cents(uplift)}/mo.`
+            : `Apply — stabilizes revenue at current demand.`,
       },
     };
   },
@@ -890,7 +902,8 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
           reason === "low_ctr"
             ? `${impr} показів у Google за місяць, але клікають мало. Title/description не цікавлять — прокручують далі.`
             : `Опубліковано без seo_title/description — Google генерує власну версію, часто гіршу.`,
-        what_to_do: "Apply → ШІ перепише title (≤60 chars) + description (≤155) під реальний намір.",
+        what_to_do:
+          "Apply → ШІ перепише title (≤60 chars) + description (≤155) під реальний намір.",
       },
       en: {
         headline:
@@ -913,7 +926,8 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       ua: {
         headline: `Темп контенту просів: ${last30} постів за місяць`,
         why: `За 90 днів — лише ${last90} публікацій. Алгоритм Google "забуває" сайти без свіжого контенту, рейтинги падають.`,
-        what_to_do: "Запланувати ≥4 публікації/місяць (1/тиж). Apply створить контент-план з ідеями.",
+        what_to_do:
+          "Запланувати ≥4 публікації/місяць (1/тиж). Apply створить контент-план з ідеями.",
       },
       en: {
         headline: `Content velocity dropped: ${last30} posts in 30d`,
@@ -982,12 +996,14 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       ua: {
         headline: `"${q}": ${clicks}/${total} кліків, 0 покупок`,
         why: `Високий інтерес — клікають у пів випадків. Але сторінка не закриває намір (ціна, опис, фото, наявність).`,
-        what_to_do: "Apply → ШІ перевірить landing і запропонує що поміняти, або редирект на правильний продукт.",
+        what_to_do:
+          "Apply → ШІ перевірить landing і запропонує що поміняти, або редирект на правильний продукт.",
       },
       en: {
         headline: `"${q}": ${clicks}/${total} clicks, 0 purchases`,
         why: `Strong intent — clicked half the time. But the landing doesn't close the intent (price, description, photo, stock).`,
-        what_to_do: "Apply → AI audits the page and suggests what to change, or redirects to the right product.",
+        what_to_do:
+          "Apply → AI audits the page and suggests what to change, or redirects to the right product.",
       },
     };
   },
@@ -1005,7 +1021,8 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       en: {
         headline: `"${q}": ${zero}/${total} searches return nothing`,
         why: "Hot demand with nothing to show. Each one is a lost sale.",
-        what_to_do: "Add a matching product OR build a SEO landing with alternative recommendations.",
+        what_to_do:
+          "Add a matching product OR build a SEO landing with alternative recommendations.",
       },
     };
   },
@@ -1126,7 +1143,8 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       ua: {
         headline: `⚠️ Замовлення на ${cents(total)}: підозра на fraud (${(score * 100).toFixed(0)}%)`,
         why: `Триггери: ${sigs.join(", ")}. Це не блокує, але вимагає ручного огляду — ризик chargeback.`,
-        what_to_do: "Перевірте замовлення вручну до виконання. Якщо ОК — позначте reviewed=approved.",
+        what_to_do:
+          "Перевірте замовлення вручну до виконання. Якщо ОК — позначте reviewed=approved.",
       },
       en: {
         headline: `⚠️ Order ${cents(total)}: fraud suspicion (${(score * 100).toFixed(0)}%)`,
@@ -1265,12 +1283,18 @@ const BUILDERS: Record<string, (m: M) => LocalizedCopy> = {
       ua: {
         headline: `${agent}: bias ${bias.toFixed(0)}% у прогнозах`,
         why: `Модель ${bias > 0 ? "недооцінює" : "переоцінює"} реальний ефект цінових змін.`,
-        what_to_do: bias > 0 ? "Можна сміливіше коригувати ціни." : "Зменши aggressiveness, додай довший A/B.",
+        what_to_do:
+          bias > 0
+            ? "Можна сміливіше коригувати ціни."
+            : "Зменши aggressiveness, додай довший A/B.",
       },
       en: {
         headline: `${agent}: ${bias.toFixed(0)}% bias in predictions`,
         why: `Model ${bias > 0 ? "underestimates" : "overestimates"} real price-change impact.`,
-        what_to_do: bias > 0 ? "You can adjust prices more boldly." : "Reduce aggressiveness, run longer A/B.",
+        what_to_do:
+          bias > 0
+            ? "You can adjust prices more boldly."
+            : "Reduce aggressiveness, run longer A/B.",
       },
     };
   },

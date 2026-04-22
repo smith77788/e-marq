@@ -4,7 +4,13 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import {
-  Activity, ArrowUpRight, BadgeDollarSign, Bot, ShoppingBag, Sparkles, Users,
+  Activity,
+  ArrowUpRight,
+  BadgeDollarSign,
+  Bot,
+  ShoppingBag,
+  Sparkles,
+  Users,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +29,11 @@ type Outbound = {
   converted_at: string | null;
 };
 type Order = { total_cents: number; paid_at: string | null };
-type Customer = { lifecycle_stage: string; last_order_at: string | null; predicted_next_order_at: string | null };
+type Customer = {
+  lifecycle_stage: string;
+  last_order_at: string | null;
+  predicted_next_order_at: string | null;
+};
 
 const TRIGGER_LABEL: Record<string, string> = {
   reorder: "Повторне замовлення",
@@ -77,7 +87,9 @@ export function KpiDashboard({ tenantId }: Props) {
     return (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="animate-pulse"><CardContent className="h-24" /></Card>
+          <Card key={i} className="animate-pulse">
+            <CardContent className="h-24" />
+          </Card>
         ))}
       </div>
     );
@@ -85,8 +97,12 @@ export function KpiDashboard({ tenantId }: Props) {
 
   const now = Date.now();
 
-  const revenueWin = data.orders.filter((o) => within(o.paid_at, sinceMs)).reduce((s, o) => s + o.total_cents, 0);
-  const revenueCmp = data.orders.filter((o) => within(o.paid_at, compareSinceMs)).reduce((s, o) => s + o.total_cents, 0);
+  const revenueWin = data.orders
+    .filter((o) => within(o.paid_at, sinceMs))
+    .reduce((s, o) => s + o.total_cents, 0);
+  const revenueCmp = data.orders
+    .filter((o) => within(o.paid_at, compareSinceMs))
+    .reduce((s, o) => s + o.total_cents, 0);
   const ordersWin = data.orders.filter((o) => within(o.paid_at, sinceMs)).length;
   const ordersCmp = data.orders.filter((o) => within(o.paid_at, compareSinceMs)).length;
   const aovWin = ordersWin > 0 ? revenueWin / ordersWin : 0;
@@ -115,13 +131,17 @@ export function KpiDashboard({ tenantId }: Props) {
     .sort((a, b) => b[1].revenue - a[1].revenue);
 
   const totalCustomers = data.customers.length;
-  const activeCustomers = data.customers.filter((c) => c.lifecycle_stage === "active" || c.lifecycle_stage === "vip").length;
+  const activeCustomers = data.customers.filter(
+    (c) => c.lifecycle_stage === "active" || c.lifecycle_stage === "vip",
+  ).length;
   const overdue = data.customers.filter(
     (c) => c.predicted_next_order_at && new Date(c.predicted_next_order_at).getTime() < now,
   ).length;
 
   const sentWin = data.outbound.filter((m) => m.sent_at && within(m.sent_at, sinceMs)).length;
-  const convWin = data.outbound.filter((m) => m.converted_at && within(m.converted_at, sinceMs)).length;
+  const convWin = data.outbound.filter(
+    (m) => m.converted_at && within(m.converted_at, sinceMs),
+  ).length;
   const convRate = sentWin > 0 ? ((convWin / sentWin) * 100).toFixed(1) : "0.0";
 
   const winLabel = `${days}д`;
@@ -163,13 +183,25 @@ export function KpiDashboard({ tenantId }: Props) {
   const revenueDetail: DetailPayload = {
     title: `Виторг за ${winLabel}`,
     subtitle: `${formatMoney(revenueWin)} · ${ordersWin} замовлень`,
-    status: { label: revenueWin > revenueCmp * 4 ? "Зростає" : "Стабільно", tone: revenueWin >= revenueCmp * 4 ? "success" : "default" },
+    status: {
+      label: revenueWin > revenueCmp * 4 ? "Зростає" : "Стабільно",
+      tone: revenueWin >= revenueCmp * 4 ? "success" : "default",
+    },
     metrics: [
       { label: "Виторг", value: formatMoney(revenueWin), tone: "primary" },
       { label: "Замовлень", value: ordersWin.toLocaleString("uk-UA") },
       { label: "Середній чек", value: formatMoney(aovWin) },
-      { label: `Попередні ${cmpLabel}`, value: formatMoney(revenueCmp), hint: `${ordersCmp} замовлень` },
-      { label: "Доля ШІ", value: `${aiShareWin}%`, hint: formatMoney(aiRevWin), tone: aiShareWin > 0 ? "success" : "default" },
+      {
+        label: `Попередні ${cmpLabel}`,
+        value: formatMoney(revenueCmp),
+        hint: `${ordersCmp} замовлень`,
+      },
+      {
+        label: "Доля ШІ",
+        value: `${aiShareWin}%`,
+        hint: formatMoney(aiRevWin),
+        tone: aiShareWin > 0 ? "success" : "default",
+      },
       { label: "Конверсія розсилок", value: `${convRate}%`, hint: `${convWin}/${sentWin}` },
     ],
     timeseries: dayBuckets.map((b) => ({ t: fmtDay(b.day), v: Math.round(b.revenue / 100) })),
@@ -178,7 +210,7 @@ export function KpiDashboard({ tenantId }: Props) {
         ? "За обраний період не зафіксовано оплачених замовлень. Перевірте трекінг або інтеграцію оплат."
         : `За ${winLabel} магазин отримав ${formatMoney(revenueWin)} виторгу з ${ordersWin} замовлень. ШІ-агенти атрибутували ${formatMoney(aiRevWin)} (${aiShareWin}%).`,
     metadata: {
-      "Період": `${days} днів`,
+      Період: `${days} днів`,
       "Підвікно для порівняння": `${compareDays} днів`,
       "Замовлень / день (середнє)": (ordersWin / Math.max(1, days)).toFixed(2),
     },
@@ -187,19 +219,27 @@ export function KpiDashboard({ tenantId }: Props) {
   const aiRevenueDetail: DetailPayload = {
     title: `Виторг від ШІ-агентів за ${winLabel}`,
     subtitle: `${formatMoney(aiRevWin)} · ${aiShareWin}% від загального`,
-    status: { label: convWin > 0 ? "Активно" : "Очікує", tone: convWin > 0 ? "success" : "default" },
+    status: {
+      label: convWin > 0 ? "Активно" : "Очікує",
+      tone: convWin > 0 ? "success" : "default",
+    },
     metrics: [
       { label: "Зароблено ШІ", value: formatMoney(aiRevWin), tone: "primary" },
       { label: "Доля від виторгу", value: `${aiShareWin}%` },
       { label: "Куплено після розсилки", value: convWin.toLocaleString("uk-UA") },
       { label: "Надіслано", value: sentWin.toLocaleString("uk-UA") },
-      { label: "Конверсія", value: `${convRate}%`, tone: Number(convRate) > 5 ? "success" : "default" },
+      {
+        label: "Конверсія",
+        value: `${convRate}%`,
+        tone: Number(convRate) > 5 ? "success" : "default",
+      },
       { label: `Попередні ${cmpLabel}`, value: formatMoney(aiRevCmp) },
     ],
     timeseries: dayBuckets.map((b) => ({ t: fmtDay(b.day), v: Math.round(b.aiRevenue / 100) })),
-    description: triggerRows.length === 0
-      ? "Поки що ШІ-агенти не згенерували атрибутованого виторгу. Перевірте, чи активовано рушії розсилок."
-      : `Найкращий тригер: ${TRIGGER_LABEL[triggerRows[0][0]] ?? triggerRows[0][0]} — ${formatMoney(triggerRows[0][1].revenue)}.`,
+    description:
+      triggerRows.length === 0
+        ? "Поки що ШІ-агенти не згенерували атрибутованого виторгу. Перевірте, чи активовано рушії розсилок."
+        : `Найкращий тригер: ${TRIGGER_LABEL[triggerRows[0][0]] ?? triggerRows[0][0]} — ${formatMoney(triggerRows[0][1].revenue)}.`,
     related_items: triggerRows.slice(0, 6).map(([kind, v]) => ({
       id: kind,
       resourceType: "metric",
@@ -229,14 +269,37 @@ export function KpiDashboard({ tenantId }: Props) {
   const customersDetail: DetailPayload = {
     title: "Клієнтська база",
     subtitle: `${totalCustomers.toLocaleString("uk-UA")} покупців`,
-    status: overdue > 0 ? { label: `${overdue} прострочених`, tone: "warning" } : { label: "Без термінових", tone: "success" },
+    status:
+      overdue > 0
+        ? { label: `${overdue} прострочених`, tone: "warning" }
+        : { label: "Без термінових", tone: "success" },
     metrics: [
       { label: "Усього", value: totalCustomers.toLocaleString("uk-UA") },
       { label: "Активні / VIP", value: activeCustomers.toLocaleString("uk-UA"), tone: "success" },
-      { label: "Прострочені", value: overdue.toLocaleString("uk-UA"), tone: overdue > 0 ? "warning" : "default" },
-      { label: "Сплячі", value: data.customers.filter((c) => c.lifecycle_stage === "dormant").length.toLocaleString("uk-UA") },
-      { label: "Нові", value: data.customers.filter((c) => c.lifecycle_stage === "new").length.toLocaleString("uk-UA") },
-      { label: "Ризик відтоку", value: data.customers.filter((c) => c.lifecycle_stage === "at_risk").length.toLocaleString("uk-UA"), tone: "destructive" },
+      {
+        label: "Прострочені",
+        value: overdue.toLocaleString("uk-UA"),
+        tone: overdue > 0 ? "warning" : "default",
+      },
+      {
+        label: "Сплячі",
+        value: data.customers
+          .filter((c) => c.lifecycle_stage === "dormant")
+          .length.toLocaleString("uk-UA"),
+      },
+      {
+        label: "Нові",
+        value: data.customers
+          .filter((c) => c.lifecycle_stage === "new")
+          .length.toLocaleString("uk-UA"),
+      },
+      {
+        label: "Ризик відтоку",
+        value: data.customers
+          .filter((c) => c.lifecycle_stage === "at_risk")
+          .length.toLocaleString("uk-UA"),
+        tone: "destructive",
+      },
     ],
     description:
       overdue > 0
@@ -317,7 +380,9 @@ export function KpiDashboard({ tenantId }: Props) {
             Що заробили агенти (останні {winLabel})
           </CardTitle>
           <CardDescription className="text-xs">
-            Атрибуція по тригеру. Загальна конверсія: <span className="font-semibold text-foreground">{convRate}%</span> ({convWin} з {sentWin} надісланих).
+            Атрибуція по тригеру. Загальна конверсія:{" "}
+            <span className="font-semibold text-foreground">{convRate}%</span> ({convWin} з{" "}
+            {sentWin} надісланих).
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -333,15 +398,22 @@ export function KpiDashboard({ tenantId }: Props) {
                 const triggerDetail: DetailPayload = {
                   title: TRIGGER_LABEL[kind] ?? kind,
                   subtitle: `${formatMoney(v.revenue)} за ${winLabel}`,
-                  status: { label: v.converted > 0 ? "Працює" : "Без конверсій", tone: v.converted > 0 ? "success" : "warning" },
+                  status: {
+                    label: v.converted > 0 ? "Працює" : "Без конверсій",
+                    tone: v.converted > 0 ? "success" : "warning",
+                  },
                   metrics: [
                     { label: "Виторг", value: formatMoney(v.revenue), tone: "primary" },
                     { label: "Надіслано", value: v.sent.toLocaleString("uk-UA") },
-                    { label: "Куплено", value: v.converted.toLocaleString("uk-UA"), tone: "success" },
+                    {
+                      label: "Куплено",
+                      value: v.converted.toLocaleString("uk-UA"),
+                      tone: "success",
+                    },
                     { label: "Конверсія", value: `${rate}%` },
                   ],
                   description: `Тригер «${TRIGGER_LABEL[kind] ?? kind}» згенерував ${formatMoney(v.revenue)} з ${v.sent} надісланих повідомлень.`,
-                  metadata: { "Ключ тригера": kind, "Період": `${days} днів` },
+                  metadata: { "Ключ тригера": kind, Період: `${days} днів` },
                 };
                 return (
                   <DetailableElement
@@ -355,8 +427,12 @@ export function KpiDashboard({ tenantId }: Props) {
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-2">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px]">{TRIGGER_LABEL[kind] ?? kind}</Badge>
-                        <span className="text-xs text-muted-foreground">{v.sent} надіслано · {v.converted} куплено · {rate}%</span>
+                        <Badge variant="outline" className="text-[10px]">
+                          {TRIGGER_LABEL[kind] ?? kind}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {v.sent} надіслано · {v.converted} куплено · {rate}%
+                        </span>
                       </div>
                       <div className="flex items-center gap-1 text-sm font-semibold text-primary">
                         <ArrowUpRight className="h-3.5 w-3.5" />
@@ -375,7 +451,11 @@ export function KpiDashboard({ tenantId }: Props) {
 }
 
 function KpiCard({
-  icon: Icon, label, value, sub, accent,
+  icon: Icon,
+  label,
+  value,
+  sub,
+  accent,
 }: {
   icon: typeof BadgeDollarSign;
   label: string;
@@ -388,8 +468,12 @@ function KpiCard({
     <Card className={accentCls}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-          <Icon className={`h-4 w-4 ${accent === "primary" ? "text-primary" : "text-muted-foreground"}`} />
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {label}
+          </p>
+          <Icon
+            className={`h-4 w-4 ${accent === "primary" ? "text-primary" : "text-muted-foreground"}`}
+          />
         </div>
         <p className="mt-1.5 text-2xl font-bold tracking-tight text-foreground">{value}</p>
         {sub && <p className="mt-1 text-[11px] text-muted-foreground">{sub}</p>}

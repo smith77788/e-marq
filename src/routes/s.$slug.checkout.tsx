@@ -69,10 +69,7 @@ type LoyaltyState = {
 export const Route = createFileRoute("/s/$slug/checkout")({
   loader: ({ params }) => loadStorefrontShell(params.slug),
   head: () => ({
-    meta: [
-      { title: "Оформлення замовлення" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Оформлення замовлення" }, { name: "robots", content: "noindex" }],
   }),
   errorComponent: ({ error }) => (
     <div className="mx-auto max-w-2xl px-4 py-12 text-center">
@@ -594,13 +591,17 @@ function CheckoutPage() {
                 {discount?.valid && (
                   <div className="flex justify-between text-primary">
                     <span>Промокод</span>
-                    <span className="tabular-nums">−{formatMoneyExact(discount.discount_cents)}</span>
+                    <span className="tabular-nums">
+                      −{formatMoneyExact(discount.discount_cents)}
+                    </span>
                   </div>
                 )}
                 {redeemApplied && (
                   <div className="flex justify-between text-primary">
                     <span>Бали лояльності ({redeemApplied.points})</span>
-                    <span className="tabular-nums">−{formatMoneyExact(redeemApplied.discountCents)}</span>
+                    <span className="tabular-nums">
+                      −{formatMoneyExact(redeemApplied.discountCents)}
+                    </span>
                   </div>
                 )}
               </div>
@@ -641,7 +642,10 @@ function CheckoutPage() {
                         Бали лояльності
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        Баланс: <span className="font-semibold text-foreground tabular-nums">{loyalty.balance}</span>
+                        Баланс:{" "}
+                        <span className="font-semibold text-foreground tabular-nums">
+                          {loyalty.balance}
+                        </span>
                       </span>
                     </div>
 
@@ -680,7 +684,11 @@ function CheckoutPage() {
                             onClick={applyLoyalty}
                             disabled={!redeemPoints || loyaltyChecking || submitting}
                           >
-                            {loyaltyChecking ? <Loader2 className="h-3 w-3 animate-spin" /> : "Списати"}
+                            {loyaltyChecking ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              "Списати"
+                            )}
                           </Button>
                         </div>
                       )
@@ -693,7 +701,9 @@ function CheckoutPage() {
                     {projectedEarnPoints > 0 && (
                       <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                         <Sparkles className="h-3 w-3 text-primary" />
-                        Ви отримаєте <strong className="text-foreground">{projectedEarnPoints}</strong> балів за це замовлення
+                        Ви отримаєте{" "}
+                        <strong className="text-foreground">{projectedEarnPoints}</strong> балів за
+                        це замовлення
                       </p>
                     )}
                   </div>
@@ -713,9 +723,7 @@ function CheckoutPage() {
                 className="w-full"
                 size="lg"
                 onClick={placeOrder}
-                disabled={
-                  submitting || !email.trim() || !shipping || noMethods
-                }
+                disabled={submitting || !email.trim() || !shipping || noMethods}
               >
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Оформити замовлення

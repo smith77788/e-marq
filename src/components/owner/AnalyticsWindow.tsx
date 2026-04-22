@@ -17,7 +17,13 @@ type Ctx = {
 
 const AnalyticsWindowCtx = createContext<Ctx | null>(null);
 
-export function AnalyticsWindowProvider({ children, initial = 30 }: { children: ReactNode; initial?: AnalyticsWindowDays }) {
+export function AnalyticsWindowProvider({
+  children,
+  initial = 30,
+}: {
+  children: ReactNode;
+  initial?: AnalyticsWindowDays;
+}) {
   const [days, setDays] = useState<AnalyticsWindowDays>(initial);
   const value = useMemo<Ctx>(() => {
     const sinceMs = Date.now() - days * 24 * 3600 * 1000;

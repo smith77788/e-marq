@@ -175,9 +175,7 @@ function Content() {
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <p className="p-6 text-center text-sm text-muted-foreground">
-              Заявок не знайдено.
-            </p>
+            <p className="p-6 text-center text-sm text-muted-foreground">Заявок не знайдено.</p>
           ) : (
             <div className="divide-y divide-border">
               {filtered.map((r) => (
@@ -204,17 +202,13 @@ function RequestRow({ row }: { row: Row }) {
           <Badge variant="secondary" className="font-mono text-[10px]">
             /{row.tenant?.slug ?? "—"}
           </Badge>
-          <p className="text-sm font-semibold text-foreground">
-            {row.tenant?.name ?? "Бренд"}
-          </p>
+          <p className="text-sm font-semibold text-foreground">{row.tenant?.name ?? "Бренд"}</p>
           <span className="text-xs text-muted-foreground">
             · {new Date(row.created_at).toLocaleString("uk-UA")}
           </span>
         </div>
         <p className="text-sm text-foreground">
-          <span className="font-mono font-semibold">
-            {row.credits.toLocaleString("uk-UA")}
-          </span>{" "}
+          <span className="font-mono font-semibold">{row.credits.toLocaleString("uk-UA")}</span>{" "}
           AI-кредитів · {(row.amount_cents / 100).toFixed(0)} {row.currency} ·{" "}
           <span className="text-muted-foreground">{row.payment_method}</span>
         </p>
@@ -225,15 +219,11 @@ function RequestRow({ row }: { row: Row }) {
           </p>
         )}
         {row.manager_note && (
-          <p className="text-xs italic text-muted-foreground">
-            Менеджер: {row.manager_note}
-          </p>
+          <p className="text-xs italic text-muted-foreground">Менеджер: {row.manager_note}</p>
         )}
       </div>
       <div className="flex items-center gap-2">
-        {row.status !== "paid" && row.status !== "cancelled" && (
-          <ProcessDialog row={row} />
-        )}
+        {row.status !== "paid" && row.status !== "cancelled" && <ProcessDialog row={row} />}
       </div>
     </div>
   );
@@ -243,7 +233,6 @@ function ProcessDialog({ row }: { row: Row }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState<string>(row.manager_note ?? "");
-
 
   const updateStatus = useMutation({
     mutationFn: async (next: Status) => {
@@ -322,10 +311,7 @@ function ProcessDialog({ row }: { row: Row }) {
             <XCircle className="mr-1.5 h-4 w-4" />
             Скасувати
           </Button>
-          <Button
-            disabled={updateStatus.isPending}
-            onClick={() => updateStatus.mutate("paid")}
-          >
+          <Button disabled={updateStatus.isPending} onClick={() => updateStatus.mutate("paid")}>
             {updateStatus.isPending ? (
               <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
             ) : (

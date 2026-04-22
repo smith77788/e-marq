@@ -19,24 +19,13 @@ import {
   ShoppingBag,
   Sparkles,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useT, type TKey } from "@/lib/i18n";
 
-type AutomationKey =
-  | "abandoned_cart"
-  | "winback"
-  | "post_purchase"
-  | "order_status"
-  | "restock";
+type AutomationKey = "abandoned_cart" | "winback" | "post_purchase" | "order_status" | "restock";
 
 type AutomationDef = {
   key: AutomationKey;
@@ -121,9 +110,7 @@ export function EmailAutomationsCard({ tenantId }: { tenantId: string }) {
   const toggleMutation = useMutation({
     mutationFn: async (next: { key: AutomationKey; value: boolean }) => {
       const features = (configQuery.data ?? {}) as FeaturesShape;
-      const current = (features.email_automations ?? {}) as Partial<
-        Record<AutomationKey, boolean>
-      >;
+      const current = (features.email_automations ?? {}) as Partial<Record<AutomationKey, boolean>>;
       const updatedFeatures: FeaturesShape = {
         ...features,
         email_automations: { ...current, [next.key]: next.value },
@@ -162,8 +149,7 @@ export function EmailAutomationsCard({ tenantId }: { tenantId: string }) {
           AUTOMATIONS.map((a) => {
             const Icon = a.icon;
             const enabled = automations[a.key];
-            const pending =
-              toggleMutation.isPending && toggleMutation.variables?.key === a.key;
+            const pending = toggleMutation.isPending && toggleMutation.variables?.key === a.key;
             return (
               <div
                 key={a.key}
@@ -173,17 +159,13 @@ export function EmailAutomationsCard({ tenantId }: { tenantId: string }) {
                   <span
                     className={
                       "mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md " +
-                      (enabled
-                        ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground")
+                      (enabled ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")
                     }
                   >
                     <Icon className="h-4 w-4" />
                   </span>
                   <div className="min-w-0 space-y-0.5">
-                    <p className="text-sm font-medium text-foreground">
-                      {t(a.titleKey)}
-                    </p>
+                    <p className="text-sm font-medium text-foreground">{t(a.titleKey)}</p>
                     <p className="text-xs text-muted-foreground">{t(a.descKey)}</p>
                   </div>
                 </div>
@@ -194,9 +176,7 @@ export function EmailAutomationsCard({ tenantId }: { tenantId: string }) {
                   <Switch
                     checked={enabled}
                     disabled={pending}
-                    onCheckedChange={(value) =>
-                      toggleMutation.mutate({ key: a.key, value })
-                    }
+                    onCheckedChange={(value) => toggleMutation.mutate({ key: a.key, value })}
                     aria-label={t(a.titleKey)}
                   />
                 </div>

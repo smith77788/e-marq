@@ -243,7 +243,13 @@ function HandbookPage() {
             subtitle={t("hb.owner.lead")}
           >
             <Card className="overflow-hidden border-border/60 bg-card/40">
-              <img src={approvalImg} alt="" loading="lazy" decoding="async" className="h-48 w-full object-cover" />
+              <img
+                src={approvalImg}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="h-48 w-full object-cover"
+              />
             </Card>
             <div className="grid gap-4 md:grid-cols-2">
               {ownerFeatures.map((f, i) => (
@@ -331,7 +337,13 @@ function HandbookPage() {
             subtitle={t("hb.int.lead")}
           >
             <Card className="overflow-hidden border-border/60 bg-card/40">
-              <img src={integrationsImg} alt="" loading="lazy" decoding="async" className="h-44 w-full object-cover" />
+              <img
+                src={integrationsImg}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="h-44 w-full object-cover"
+              />
             </Card>
             <HandbookConnectors />
             <p className="rounded-md border border-dashed border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
@@ -348,7 +360,13 @@ function HandbookPage() {
             subtitle={t("hb.price.lead")}
           >
             <Card className="overflow-hidden border-border/60 bg-card/40">
-              <img src={pricingImg} alt="" loading="lazy" decoding="async" className="h-40 w-full object-cover" />
+              <img
+                src={pricingImg}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="h-40 w-full object-cover"
+              />
             </Card>
             <div className="grid gap-4 md:grid-cols-3">
               {[
@@ -375,7 +393,10 @@ function HandbookPage() {
                   </CardHeader>
                   <CardContent className="flex-1 space-y-2">
                     {m.tiers.map((tk) => (
-                      <div key={tk} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <div
+                        key={tk}
+                        className="flex items-start gap-2 text-sm text-muted-foreground"
+                      >
                         <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                         <span>{t(tk as never)}</span>
                       </div>

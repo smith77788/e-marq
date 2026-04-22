@@ -20,13 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -112,7 +106,9 @@ export function EmailDomainCard({ tenantId }: { tenantId: string }) {
   const statusQuery = useQuery({
     queryKey: ["email-domain-status", tenantId],
     queryFn: async (): Promise<DomainStatus> => {
-      const r = await authedFetch(`/api/email/domain-status?tenant=${encodeURIComponent(tenantId)}`);
+      const r = await authedFetch(
+        `/api/email/domain-status?tenant=${encodeURIComponent(tenantId)}`,
+      );
       const j = (await r.json()) as DomainStatus & { error?: string };
       if (!r.ok) throw new Error(j.error ?? `HTTP ${r.status}`);
       return j;
@@ -188,8 +184,9 @@ export function EmailDomainCard({ tenantId }: { tenantId: string }) {
               Власний домен для листів
             </CardTitle>
             <CardDescription className="text-xs">
-              Налаштуйте відправлення з домену вашого магазину (наприклад, <code className="font-mono">no-reply@your-brand.com</code>).
-              Без цього листи приходять з <code className="font-mono">onboarding@resend.dev</code>.
+              Налаштуйте відправлення з домену вашого магазину (наприклад,{" "}
+              <code className="font-mono">no-reply@your-brand.com</code>). Без цього листи приходять
+              з <code className="font-mono">onboarding@resend.dev</code>.
             </CardDescription>
           </div>
           {status && statusBadge(status.resend_status)}
@@ -286,9 +283,7 @@ export function EmailDomainCard({ tenantId }: { tenantId: string }) {
                           <Copy className="h-3 w-3" />
                         </Button>
                       </div>
-                      {rec.ttl && (
-                        <div className="text-muted-foreground">TTL: {rec.ttl}</div>
-                      )}
+                      {rec.ttl && <div className="text-muted-foreground">TTL: {rec.ttl}</div>}
                     </div>
                   ))}
                 </div>
@@ -300,7 +295,9 @@ export function EmailDomainCard({ tenantId }: { tenantId: string }) {
               onClick={() => verifyMutation.mutate()}
               disabled={verifyMutation.isPending}
             >
-              <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${verifyMutation.isPending ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`mr-1.5 h-3.5 w-3.5 ${verifyMutation.isPending ? "animate-spin" : ""}`}
+              />
               {verifyMutation.isPending ? "Перевіряю..." : "Перевірити"}
             </Button>
           </>
@@ -360,7 +357,8 @@ export function EmailDomainCard({ tenantId }: { tenantId: string }) {
               {setupMutation.isPending ? "Додаю..." : "Підключити домен"}
             </Button>
             <p className="text-xs text-muted-foreground">
-              Після додавання отримаєте SPF / DKIM / DMARC записи для DNS вашого провайдера. Поки не верифіковано — листи йдуть з резервної адреси.
+              Після додавання отримаєте SPF / DKIM / DMARC записи для DNS вашого провайдера. Поки не
+              верифіковано — листи йдуть з резервної адреси.
             </p>
           </form>
         )}

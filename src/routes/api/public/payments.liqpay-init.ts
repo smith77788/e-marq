@@ -106,8 +106,10 @@ export const Route = createFileRoute("/api/public/payments/liqpay-init")({
         const serverUrl = `${baseUrl}/api/public/payments/liqpay-callback`;
 
         const amountUah = order.total_cents / 100;
-        const description =
-          `${cfg?.brand_name || "Замовлення"} · #${order.id.slice(0, 8)}`.slice(0, 200);
+        const description = `${cfg?.brand_name || "Замовлення"} · #${order.id.slice(0, 8)}`.slice(
+          0,
+          200,
+        );
 
         const out = buildLiqPayCheckout({
           publicKey: gw.liqpay_public_key,

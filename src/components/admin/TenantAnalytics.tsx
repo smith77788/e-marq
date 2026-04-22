@@ -95,8 +95,7 @@ export function TenantAnalytics({ tenantId }: Props) {
     },
   });
 
-  const totalRevenue =
-    revenueQuery.data?.reduce((sum, d) => sum + d.revenue, 0) ?? 0;
+  const totalRevenue = revenueQuery.data?.reduce((sum, d) => sum + d.revenue, 0) ?? 0;
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
@@ -136,10 +135,7 @@ export function TenantAnalytics({ tenantId }: Props) {
                     />
                     <Bar dataKey="count" radius={[0, 6, 6, 0]} animationDuration={600}>
                       {funnelQuery.data.map((_, i) => (
-                        <Cell
-                          key={i}
-                          fill={CHART_SCALE[Math.min(i, CHART_SCALE.length - 1)]}
-                        />
+                        <Cell key={i} fill={CHART_SCALE[Math.min(i, CHART_SCALE.length - 1)]} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -166,7 +162,8 @@ export function TenantAnalytics({ tenantId }: Props) {
         <CardHeader>
           <CardTitle>Виторг (30 днів)</CardTitle>
           <CardDescription>
-            {totalRevenue.toLocaleString("uk-UA", { maximumFractionDigits: 2 })} ₴ загалом з оплачених замовлень.
+            {totalRevenue.toLocaleString("uk-UA", { maximumFractionDigits: 2 })} ₴ загалом з
+            оплачених замовлень.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -180,12 +177,7 @@ export function TenantAnalytics({ tenantId }: Props) {
                   margin={{ left: 8, right: 16, top: 4, bottom: 4 }}
                 >
                   <CartesianGrid strokeDasharray={CHART.gridDash} stroke={CHART.gridStroke} />
-                  <XAxis
-                    dataKey="date"
-                    stroke={CHART.muted}
-                    fontSize={11}
-                    interval={4}
-                  />
+                  <XAxis dataKey="date" stroke={CHART.muted} fontSize={11} interval={4} />
                   <YAxis
                     stroke={CHART.muted}
                     fontSize={11}
@@ -208,7 +200,9 @@ export function TenantAnalytics({ tenantId }: Props) {
               </ResponsiveContainer>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">За останні 30 днів оплачених замовлень немає.</p>
+            <p className="text-sm text-muted-foreground">
+              За останні 30 днів оплачених замовлень немає.
+            </p>
           )}
         </CardContent>
       </Card>

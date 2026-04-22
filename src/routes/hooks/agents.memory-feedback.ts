@@ -16,11 +16,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import {
-  authorizeAgentRequest,
-  jsonError,
-  jsonOk,
-} from "@/lib/acos/agentRuntime";
+import { authorizeAgentRequest, jsonError, jsonOk } from "@/lib/acos/agentRuntime";
 
 type ActionRow = {
   id: string;
@@ -54,7 +50,9 @@ export const Route = createFileRoute("/hooks/agents/memory-feedback")({
         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
         const { data: actions, error } = await supabaseAdmin
           .from("ai_actions")
-          .select("id, tenant_id, agent_id, action_type, applied_at, parameters, source_insight_id, measured_at")
+          .select(
+            "id, tenant_id, agent_id, action_type, applied_at, parameters, source_insight_id, measured_at",
+          )
           .eq("tenant_id", tenantId)
           .eq("status", "applied")
           .is("measured_at", null)
@@ -102,10 +100,27 @@ export const Route = createFileRoute("/hooks/agents/memory-feedback")({
         }
 
         // Aggregate updates by pattern
-        const grouped = new Map<string, { agent: string; category: string; success: number; failure: number; total_impact: number; count: number }>();
+        const grouped = new Map<
+          string,
+          {
+            agent: string;
+            category: string;
+            success: number;
+            failure: number;
+            total_impact: number;
+            count: number;
+          }
+        >();
         for (const u of memoryUpdates) {
           const k = `${u.agent}::${u.category}::${u.pattern_key}`;
-          const cur = grouped.get(k) ?? { agent: u.agent, category: u.category, success: 0, failure: 0, total_impact: 0, count: 0 };
+          const cur = grouped.get(k) ?? {
+            agent: u.agent,
+            category: u.category,
+            success: 0,
+            failure: 0,
+            total_impact: 0,
+            count: 0,
+          };
           if (u.success) cur.success++;
           else cur.failure++;
           cur.total_impact += u.impact_cents;
@@ -129,9 +144,16 @@ export const Route = createFileRoute("/hooks/agents/memory-feedback")({
           const newFail = (existing?.failure_count ?? 0) + g.failure;
           const total = newSucc + newFail;
           const confidence = total > 0 ? Number((newSucc / total).toFixed(3)) : 0.5;
-          const newAvg = total > 0
-            ? Number(((((existing?.avg_impact ?? 0) * (total - g.count)) + g.total_impact / Math.max(g.count, 1) * g.count) / total).toFixed(2))
-            : 0;
+          const newAvg =
+            total > 0
+              ? Number(
+                  (
+                    ((existing?.avg_impact ?? 0) * (total - g.count) +
+                      (g.total_impact / Math.max(g.count, 1)) * g.count) /
+                    total
+                  ).toFixed(2),
+                )
+              : 0;
 
           if (existing?.id) {
             await supabaseAdmin
@@ -175,7 +197,8 @@ export const Route = createFileRoute("/hooks/agents/memory-feedback")({
 
 function deriveRule(category: string, confidence: number, succ: number, fail: number) {
   const pct = (confidence * 100).toFixed(0);
-  if (confidence >= 0.7) return `${category}: high success rate ${pct}% over ${succ + fail} trials — boost similar insights.`;
+  if (confidence >= 0.7)
+    return `${category}: high success rate ${pct}% over ${succ + fail} trials — boost similar insights.`;
   if (confidence >= 0.4) return `${category}: mixed performance ${pct}% — keep observing.`;
   return `${category}: low success rate ${pct}% — deprioritize this pattern.`;
 }
@@ -232,13 +255,19 @@ async function evaluateAction(a: ActionRow): Promise<EvalResult | null> {
       .eq("orders.tenant_id", a.tenant_id)
       .limit(50);
     const items = (data ?? []) as Array<{ quantity: number; unit_price_cents: number }>;
-    const recoveredRev = items.reduce((s, i) => s + (i.quantity ?? 0) * (i.unit_price_cents ?? 0), 0);
+    const recoveredRev = items.reduce(
+      (s, i) => s + (i.quantity ?? 0) * (i.unit_price_cents ?? 0),
+      0,
+    );
     const success = items.length >= 2;
     return {
       success,
       impact_cents: recoveredRev,
       pattern_key: `product:${productId}`,
-      detail: { recovered_units: items.reduce((s, i) => s + (i.quantity ?? 0), 0), recovered_revenue_cents: recoveredRev },
+      detail: {
+        recovered_units: items.reduce((s, i) => s + (i.quantity ?? 0), 0),
+        recovered_revenue_cents: recoveredRev,
+      },
     };
   }
 

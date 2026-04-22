@@ -36,12 +36,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useT, tStatic } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
@@ -196,7 +191,8 @@ function HealthMonitorContent() {
         dntrade = { status: "warn", ageHours: null, configured: true };
       } else {
         const ageHours = (now - new Date(dnInt.last_sync_at).getTime()) / (1000 * 60 * 60);
-        const failedSync = dnInt.last_sync_status === "failed" || dnInt.last_sync_status === "error";
+        const failedSync =
+          dnInt.last_sync_status === "failed" || dnInt.last_sync_status === "error";
         dntrade = {
           configured: true,
           ageHours,
@@ -206,8 +202,12 @@ function HealthMonitorContent() {
 
       // Email
       const tEmail = emailBy.get(tenant.id) ?? [];
-      const delivered = tEmail.filter((e) => e.status === "delivered" || e.status === "sent").length;
-      const bounced = tEmail.filter((e) => e.status === "bounced" || e.status === "complained").length;
+      const delivered = tEmail.filter(
+        (e) => e.status === "delivered" || e.status === "sent",
+      ).length;
+      const bounced = tEmail.filter(
+        (e) => e.status === "bounced" || e.status === "complained",
+      ).length;
       const totalEmail = tEmail.length;
       const bounceRate = totalEmail > 0 ? bounced / totalEmail : 0;
       const email: TenantHealth["email"] = {
@@ -215,13 +215,7 @@ function HealthMonitorContent() {
         bounced,
         total: totalEmail,
         status:
-          totalEmail === 0
-            ? "idle"
-            : bounceRate > 0.1
-              ? "fail"
-              : bounceRate > 0.03
-                ? "warn"
-                : "ok",
+          totalEmail === 0 ? "idle" : bounceRate > 0.1 ? "fail" : bounceRate > 0.03 ? "warn" : "ok",
       };
 
       // Balance
@@ -243,13 +237,20 @@ function HealthMonitorContent() {
         status: pending > 10 ? "warn" : tOrd.length === 0 ? "idle" : "ok",
       };
 
-      const overall = worst(agents.status, dntrade.status, email.status, balance.status, orders.status);
+      const overall = worst(
+        agents.status,
+        dntrade.status,
+        email.status,
+        balance.status,
+        orders.status,
+      );
       return { tenant, overall, agents, dntrade, email, balance, orders };
     });
   }, [query.data]);
 
   const filtered = useMemo(
-    () => (showOnlyUnhealthy ? rows.filter((r) => r.overall === "warn" || r.overall === "fail") : rows),
+    () =>
+      showOnlyUnhealthy ? rows.filter((r) => r.overall === "warn" || r.overall === "fail") : rows,
     [rows, showOnlyUnhealthy],
   );
 
@@ -272,7 +273,10 @@ function HealthMonitorContent() {
       <div className="space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <Badge variant="outline" className="border-destructive/30 bg-destructive/5 text-destructive">
+            <Badge
+              variant="outline"
+              className="border-destructive/30 bg-destructive/5 text-destructive"
+            >
               <HeartPulse className="mr-1 h-3 w-3" /> {t("hm.title")}
             </Badge>
             <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">

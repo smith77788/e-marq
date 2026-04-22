@@ -10,11 +10,7 @@
  * Якщо init повернув помилку — кидаємо Error із машинно-читаним кодом.
  */
 
-export type PaymentMethod =
-  | "manual"
-  | "liqpay"
-  | "wayforpay"
-  | "monobank";
+export type PaymentMethod = "manual" | "liqpay" | "wayforpay" | "monobank";
 
 type InitResponse =
   | {

@@ -306,7 +306,9 @@ function MissionControlContent() {
           <Building2 className="h-5 w-5 text-primary" />
           <div className="flex-1">
             <p className="text-sm font-semibold text-foreground">Усі магазини</p>
-            <p className="text-xs text-muted-foreground">Створити, налаштувати, переглянути деталі</p>
+            <p className="text-xs text-muted-foreground">
+              Створити, налаштувати, переглянути деталі
+            </p>
           </div>
         </Link>
         <Link
@@ -326,7 +328,9 @@ function MissionControlContent() {
           <ShoppingBag className="h-5 w-5 text-success" />
           <div className="flex-1">
             <p className="text-sm font-semibold text-foreground">Кабінет власника</p>
-            <p className="text-xs text-muted-foreground">Подивитись, як це бачить власник магазину</p>
+            <p className="text-xs text-muted-foreground">
+              Подивитись, як це бачить власник магазину
+            </p>
           </div>
         </Link>
       </div>

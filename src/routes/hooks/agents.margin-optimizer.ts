@@ -74,7 +74,10 @@ export const Route = createFileRoute("/hooks/agents/margin-optimizer")({
           const volumeByProduct = new Map<string, number>();
           for (const it of items ?? []) {
             if (!it.product_id) continue;
-            volumeByProduct.set(it.product_id, (volumeByProduct.get(it.product_id) ?? 0) + it.quantity);
+            volumeByProduct.set(
+              it.product_id,
+              (volumeByProduct.get(it.product_id) ?? 0) + it.quantity,
+            );
           }
 
           // Step 3: find candidates — high volume + low margin (<25%)

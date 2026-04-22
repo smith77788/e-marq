@@ -8,7 +8,17 @@
 import { useEffect, useState, type ReactElement } from "react";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, ArrowLeft, ArrowRight, Check, Copy, Loader2, Mail, RefreshCw, Sparkles } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Copy,
+  Loader2,
+  Mail,
+  RefreshCw,
+  Sparkles,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -49,7 +59,10 @@ function OnboardingPage() {
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
     staleTime: 30_000,
     queryFn: async () => {
-      const { data, error } = await supabase.from("tenants").select("id, name, slug").order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("tenants")
+        .select("id, name, slug")
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
@@ -62,7 +75,11 @@ function OnboardingPage() {
 
   useEffect(() => {
     if (!search.tenant && tenants && tenants[0]) {
-      navigate({ to: "/onboarding", search: { tenant: tenants[0].id, slug: tenants[0].slug }, replace: true });
+      navigate({
+        to: "/onboarding",
+        search: { tenant: tenants[0].id, slug: tenants[0].slug },
+        replace: true,
+      });
     }
   }, [search.tenant, tenants, navigate]);
 
@@ -84,15 +101,30 @@ function OnboardingPage() {
       if (!tenantId) return null;
       const [tn, prod, cust, cfg, tg, inv] = await Promise.all([
         supabase.from("tenants").select("name").eq("id", tenantId).maybeSingle(),
-        supabase.from("products").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("is_active", true),
-        supabase.from("customers").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
+        supabase
+          .from("products")
+          .select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId)
+          .eq("is_active", true),
+        supabase
+          .from("customers")
+          .select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId),
         supabase.from("tenant_configs").select("features").eq("tenant_id", tenantId).maybeSingle(),
-        supabase.from("telegram_chat_routing").select("chat_id", { count: "exact", head: true }).eq("tenant_id", tenantId),
-        supabase.from("tenant_invitations").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
+        supabase
+          .from("telegram_chat_routing")
+          .select("chat_id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId),
+        supabase
+          .from("tenant_invitations")
+          .select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId),
       ]);
       // Якщо хоч один із запитів повернув помилку — кидаємо, щоб React Query
       // зробив retry, а UI показав чесний "Помилка" замість фейкового "0/7".
-      const firstErr = [tn.error, prod.error, cust.error, cfg.error, tg.error, inv.error].find(Boolean);
+      const firstErr = [tn.error, prod.error, cust.error, cfg.error, tg.error, inv.error].find(
+        Boolean,
+      );
       if (firstErr) throw firstErr;
       const features = (cfg.data?.features ?? {}) as Record<string, unknown>;
       return {
@@ -110,12 +142,20 @@ function OnboardingPage() {
 
   // 1. Поки auth відновлюється — show skeleton, не редіректимо і не показуємо "пусто"
   if (!authReady) {
-    return <OnboardingSkeleton label={lang === "ua" ? "Відновлюємо ваш сеанс…" : "Restoring your session…"} />;
+    return (
+      <OnboardingSkeleton
+        label={lang === "ua" ? "Відновлюємо ваш сеанс…" : "Restoring your session…"}
+      />
+    );
   }
 
   // 2. Поки tenants ще вантажаться — show skeleton
   if (tenantsQuery.isLoading) {
-    return <OnboardingSkeleton label={lang === "ua" ? "Завантажуємо ваші бренди…" : "Loading your brands…"} />;
+    return (
+      <OnboardingSkeleton
+        label={lang === "ua" ? "Завантажуємо ваші бренди…" : "Loading your brands…"}
+      />
+    );
   }
 
   // 3. Помилка завантаження tenants — даємо Retry
@@ -155,17 +195,47 @@ function OnboardingPage() {
 
   const stepDone = (i: number): boolean => {
     if (!status) return false;
-    return [status.s1, status.s2, status.s3, status.s4, status.s5, status.s6, status.s7][i] ?? false;
+    return (
+      [status.s1, status.s2, status.s3, status.s4, status.s5, status.s6, status.s7][i] ?? false
+    );
   };
 
   const steps: Array<{ titleKey: TKey; descKey: TKey; render: () => ReactElement }> = [
-    { titleKey: "onb.s1.title", descKey: "onb.s1.desc", render: () => <Step1Brand tenantId={tenantId} qc={qc} /> },
-    { titleKey: "onb.s2.title", descKey: "onb.s2.desc", render: () => <Step2Channel tenantId={tenantId} qc={qc} /> },
-    { titleKey: "onb.s3.title", descKey: "onb.s3.desc", render: () => <Step3Product tenantId={tenantId} qc={qc} /> },
-    { titleKey: "onb.s4.title", descKey: "onb.s4.desc", render: () => <Step4Customers tenantId={tenantId} qc={qc} /> },
-    { titleKey: "onb.s5.title", descKey: "onb.s5.desc", render: () => <Step5Tracking tenantSlug={tenantSlug} /> },
-    { titleKey: "onb.s6.title", descKey: "onb.s6.desc", render: () => <Step6Payment tenantId={tenantId} qc={qc} /> },
-    { titleKey: "onb.s7.title", descKey: "onb.s7.desc", render: () => <Step7Team tenantId={tenantId} tenantSlug={tenantSlug} /> },
+    {
+      titleKey: "onb.s1.title",
+      descKey: "onb.s1.desc",
+      render: () => <Step1Brand tenantId={tenantId} qc={qc} />,
+    },
+    {
+      titleKey: "onb.s2.title",
+      descKey: "onb.s2.desc",
+      render: () => <Step2Channel tenantId={tenantId} qc={qc} />,
+    },
+    {
+      titleKey: "onb.s3.title",
+      descKey: "onb.s3.desc",
+      render: () => <Step3Product tenantId={tenantId} qc={qc} />,
+    },
+    {
+      titleKey: "onb.s4.title",
+      descKey: "onb.s4.desc",
+      render: () => <Step4Customers tenantId={tenantId} qc={qc} />,
+    },
+    {
+      titleKey: "onb.s5.title",
+      descKey: "onb.s5.desc",
+      render: () => <Step5Tracking tenantSlug={tenantSlug} />,
+    },
+    {
+      titleKey: "onb.s6.title",
+      descKey: "onb.s6.desc",
+      render: () => <Step6Payment tenantId={tenantId} qc={qc} />,
+    },
+    {
+      titleKey: "onb.s7.title",
+      descKey: "onb.s7.desc",
+      render: () => <Step7Team tenantId={tenantId} tenantSlug={tenantSlug} />,
+    },
   ];
 
   const doneCount = steps.filter((_, i) => stepDone(i)).length;
@@ -221,7 +291,9 @@ function OnboardingPage() {
               onClick={() => statusQuery.refetch()}
               disabled={statusQuery.isFetching}
             >
-              <RefreshCw className={`mr-1 h-3 w-3 ${statusQuery.isFetching ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`mr-1 h-3 w-3 ${statusQuery.isFetching ? "animate-spin" : ""}`}
+              />
               {lang === "ua" ? "Спробувати ще" : "Retry"}
             </Button>
           </div>
@@ -283,7 +355,11 @@ function OnboardingPage() {
       </Card>
 
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0}>
+        <Button
+          variant="ghost"
+          onClick={() => setStep((s) => Math.max(0, s - 1))}
+          disabled={step === 0}
+        >
           <ArrowLeft className="mr-1 h-4 w-4" />
           {t("onb.back")}
         </Button>
@@ -321,7 +397,11 @@ function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
   const { data: tenant } = useQuery({
     queryKey: ["tenant", tenantId],
     queryFn: async () => {
-      const { data } = await supabase.from("tenants").select("name, slug").eq("id", tenantId).maybeSingle();
+      const { data } = await supabase
+        .from("tenants")
+        .select("name, slug")
+        .eq("id", tenantId)
+        .maybeSingle();
       return data;
     },
   });
@@ -346,7 +426,11 @@ function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
   return (
     <div className="space-y-3">
       <Label>{t("onb.s1.title")}</Label>
-      <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("onb.s1.placeholder")} />
+      <Input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder={t("onb.s1.placeholder")}
+      />
       <Button size="sm" onClick={() => save.mutate()} disabled={save.isPending || !name}>
         {save.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
         {t("common.save")}
@@ -359,7 +443,11 @@ function Step2Channel({ tenantId, qc: _qc }: { tenantId: string; qc: QC }) {
   const { data: tenant } = useQuery({
     queryKey: ["tenant-slug", tenantId],
     queryFn: async () => {
-      const { data } = await supabase.from("tenants").select("slug").eq("id", tenantId).maybeSingle();
+      const { data } = await supabase
+        .from("tenants")
+        .select("slug")
+        .eq("id", tenantId)
+        .maybeSingle();
       return data;
     },
   });
@@ -372,8 +460,8 @@ function Step2Channel({ tenantId, qc: _qc }: { tenantId: string; qc: QC }) {
         ✅ Telegram-бот <strong>@Oauther_bot</strong> вже працює. Не треба створювати власного.
       </div>
       <p className="text-xs text-muted-foreground">
-        Поширюйте посилання нижче — клієнти натискають його, бот вітає від імені вашого бренду
-        і автоматично прив&apos;язується до вашого магазину.
+        Поширюйте посилання нижче — клієнти натискають його, бот вітає від імені вашого бренду і
+        автоматично прив&apos;язується до вашого магазину.
       </p>
       <div className="flex gap-2">
         <Input readOnly value={deepLink} className="font-mono text-xs" />
@@ -409,7 +497,8 @@ function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
     mutationFn: async () => {
       const priceCents = Math.round(Number(price) * 100);
       const stockNum = Math.max(0, parseInt(stock || "0", 10));
-      if (!name || !Number.isFinite(priceCents) || priceCents <= 0) throw new Error("Заповніть назву та ціну");
+      if (!name || !Number.isFinite(priceCents) || priceCents <= 0)
+        throw new Error("Заповніть назву та ціну");
       const { error } = await supabase.from("products").insert({
         tenant_id: tenantId,
         name,
@@ -431,7 +520,11 @@ function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   return (
     <div className="space-y-3">
-      <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("onb.s3.namePh")} />
+      <Input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder={t("onb.s3.namePh")}
+      />
       <div className="grid grid-cols-2 gap-3">
         <Input
           value={price}
@@ -494,7 +587,11 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
         className="min-h-32 w-full rounded-md border border-border bg-background p-3 font-mono text-xs"
       />
       <div className="flex gap-2">
-        <Button size="sm" onClick={() => importCsv.mutate()} disabled={importCsv.isPending || !csv.trim()}>
+        <Button
+          size="sm"
+          onClick={() => importCsv.mutate()}
+          disabled={importCsv.isPending || !csv.trim()}
+        >
           {importCsv.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
           {t("onb.s4.csv")}
         </Button>
@@ -517,16 +614,28 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
   const { data: cfg } = useQuery({
     queryKey: ["tenant-config", tenantId],
     queryFn: async () => {
-      const { data } = await supabase.from("tenant_configs").select("features").eq("tenant_id", tenantId).maybeSingle();
+      const { data } = await supabase
+        .from("tenant_configs")
+        .select("features")
+        .eq("tenant_id", tenantId)
+        .maybeSingle();
       return data;
     },
   });
-  const current = ((cfg?.features ?? {}) as Record<string, unknown>).payment_method as string | undefined;
+  const current = ((cfg?.features ?? {}) as Record<string, unknown>).payment_method as
+    | string
+    | undefined;
 
   const setMethod = useMutation({
     mutationFn: async (method: "manual" | "stripe") => {
-      const features = { ...((cfg?.features ?? {}) as Record<string, unknown>), payment_method: method };
-      const { error } = await supabase.from("tenant_configs").update({ features: features as never }).eq("tenant_id", tenantId);
+      const features = {
+        ...((cfg?.features ?? {}) as Record<string, unknown>),
+        payment_method: method,
+      };
+      const { error } = await supabase
+        .from("tenant_configs")
+        .update({ features: features as never })
+        .eq("tenant_id", tenantId);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -548,7 +657,9 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
             current === m ? "border-primary bg-primary/5" : "border-border hover:bg-muted/30"
           }`}
         >
-          <div className="font-medium">{m === "manual" ? t("onb.s6.manual") : t("onb.s6.stripe")}</div>
+          <div className="font-medium">
+            {m === "manual" ? t("onb.s6.manual") : t("onb.s6.stripe")}
+          </div>
         </button>
       ))}
     </div>
@@ -563,7 +674,11 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
   const { data: brand } = useQuery({
     queryKey: ["tenant-name", tenantId],
     queryFn: async () => {
-      const { data } = await supabase.from("tenants").select("name").eq("id", tenantId).maybeSingle();
+      const { data } = await supabase
+        .from("tenants")
+        .select("name")
+        .eq("id", tenantId)
+        .maybeSingle();
       return data?.name ?? "";
     },
   });
@@ -585,12 +700,12 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
 
   const buildMailto = (recipientEmail: string, url: string) => {
     const brandName = brand || tenantSlug;
-    const subject = lang === "ua"
-      ? `Запрошення до команди «${brandName}»`
-      : `You're invited to «${brandName}»`;
-    const body = lang === "ua"
-      ? `Привіт!\n\nЗапрошую тебе долучитися до команди бренду «${brandName}» в Oauther.\n\nПосилання для приєднання (дійсне 14 днів):\n${url}\n\nПросто відкрий його у браузері й увійди — доступ надасться автоматично.`
-      : `Hi!\n\nYou're invited to join the «${brandName}» brand team on Oauther.\n\nUse this link to accept (valid for 14 days):\n${url}\n\nJust open it in a browser and sign in — access will be granted automatically.`;
+    const subject =
+      lang === "ua" ? `Запрошення до команди «${brandName}»` : `You're invited to «${brandName}»`;
+    const body =
+      lang === "ua"
+        ? `Привіт!\n\nЗапрошую тебе долучитися до команди бренду «${brandName}» в Oauther.\n\nПосилання для приєднання (дійсне 14 днів):\n${url}\n\nПросто відкрий його у браузері й увійди — доступ надасться автоматично.`
+        : `Hi!\n\nYou're invited to join the «${brandName}» brand team on Oauther.\n\nUse this link to accept (valid for 14 days):\n${url}\n\nJust open it in a browser and sign in — access will be granted automatically.`;
     return `mailto:${encodeURIComponent(recipientEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
@@ -598,7 +713,9 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
     mutationFn: async () => {
       const trimmed = email.trim().toLowerCase();
       if (!/\S+@\S+\.\S+/.test(trimmed)) {
-        throw new Error(lang === "ua" ? "Перевірте email — здається, він некоректний." : "Email looks invalid.");
+        throw new Error(
+          lang === "ua" ? "Перевірте email — здається, він некоректний." : "Email looks invalid.",
+        );
       }
       const { data, error } = await supabase.rpc("create_tenant_invitation", {
         _tenant_id: tenantId,
@@ -622,7 +739,9 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
         );
       } catch {
         toast.success(
-          lang === "ua" ? `Запрошення для ${res.email} створено.` : `Invite for ${res.email} created.`,
+          lang === "ua"
+            ? `Запрошення для ${res.email} створено.`
+            : `Invite for ${res.email} created.`,
         );
       }
     },
@@ -682,13 +801,19 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
                 className="flex flex-col gap-1.5 rounded-md border border-border bg-muted/20 px-2 py-2"
               >
                 <div className="flex items-center gap-2">
-                  <Check className={`h-3.5 w-3.5 ${isPending ? "text-success" : "text-muted-foreground"}`} />
+                  <Check
+                    className={`h-3.5 w-3.5 ${isPending ? "text-success" : "text-muted-foreground"}`}
+                  />
                   <span className="font-medium">{inv.email}</span>
                   <span className="ml-auto text-xs text-muted-foreground">
                     {inv.status === "pending"
-                      ? lang === "ua" ? "Очікує" : "Pending"
+                      ? lang === "ua"
+                        ? "Очікує"
+                        : "Pending"
                       : inv.status === "accepted"
-                        ? lang === "ua" ? "Прийнято ✓" : "Accepted ✓"
+                        ? lang === "ua"
+                          ? "Прийнято ✓"
+                          : "Accepted ✓"
                         : inv.status}
                   </span>
                 </div>
@@ -702,9 +827,9 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
                         variant="outline"
                         className="h-7 px-2"
                         onClick={() => {
-                          navigator.clipboard.writeText(url).then(() =>
-                            toast.success(lang === "ua" ? "Скопійовано." : "Copied."),
-                          );
+                          navigator.clipboard
+                            .writeText(url)
+                            .then(() => toast.success(lang === "ua" ? "Скопійовано." : "Copied."));
                         }}
                         title={lang === "ua" ? "Скопіювати посилання" : "Copy link"}
                       >
@@ -716,7 +841,13 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
                         variant="ghost"
                         className="h-7 px-2 text-destructive hover:text-destructive"
                         onClick={() => {
-                          if (confirm(lang === "ua" ? "Скасувати це запрошення?" : "Revoke this invitation?")) {
+                          if (
+                            confirm(
+                              lang === "ua"
+                                ? "Скасувати це запрошення?"
+                                : "Revoke this invitation?",
+                            )
+                          ) {
                             revoke.mutate(inv.id);
                           }
                         }}
@@ -846,4 +977,3 @@ function OnboardingError({
     </Card>
   );
 }
-

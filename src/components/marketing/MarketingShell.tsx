@@ -21,22 +21,46 @@ export function MarketingHeader() {
           MARQ
         </Link>
         <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">
-          <Link to="/how-it-works" className="hover:text-foreground transition-colors" activeProps={{ className: "text-foreground font-medium" }}>
+          <Link
+            to="/how-it-works"
+            className="hover:text-foreground transition-colors"
+            activeProps={{ className: "text-foreground font-medium" }}
+          >
             {t("site.nav.how")}
           </Link>
-          <Link to="/agents" className="hover:text-foreground transition-colors" activeProps={{ className: "text-foreground font-medium" }}>
+          <Link
+            to="/agents"
+            className="hover:text-foreground transition-colors"
+            activeProps={{ className: "text-foreground font-medium" }}
+          >
             {t("site.nav.agents")}
           </Link>
-          <Link to="/pricing" className="hover:text-foreground transition-colors" activeProps={{ className: "text-foreground font-medium" }}>
+          <Link
+            to="/pricing"
+            className="hover:text-foreground transition-colors"
+            activeProps={{ className: "text-foreground font-medium" }}
+          >
             {t("site.nav.pricing")}
           </Link>
-          <Link to="/about" className="hover:text-foreground transition-colors" activeProps={{ className: "text-foreground font-medium" }}>
+          <Link
+            to="/about"
+            className="hover:text-foreground transition-colors"
+            activeProps={{ className: "text-foreground font-medium" }}
+          >
             {t("site.nav.about")}
           </Link>
-          <Link to="/handbook" className="hover:text-foreground transition-colors" activeProps={{ className: "text-foreground font-medium" }}>
+          <Link
+            to="/handbook"
+            className="hover:text-foreground transition-colors"
+            activeProps={{ className: "text-foreground font-medium" }}
+          >
             {t("site.nav.handbook")}
           </Link>
-          <Link to="/contact" className="hover:text-foreground transition-colors" activeProps={{ className: "text-foreground font-medium" }}>
+          <Link
+            to="/contact"
+            className="hover:text-foreground transition-colors"
+            activeProps={{ className: "text-foreground font-medium" }}
+          >
             {t("site.nav.contact")}
           </Link>
         </nav>
@@ -64,9 +88,7 @@ export function MarketingFooter() {
             <Sparkles className="h-4 w-4 text-primary" />
             MARQ
           </Link>
-          <p className="mt-3 text-xs text-muted-foreground max-w-xs">
-            {t("home.footer.tag")}
-          </p>
+          <p className="mt-3 text-xs text-muted-foreground max-w-xs">{t("home.footer.tag")}</p>
         </div>
 
         <div>
@@ -74,10 +96,26 @@ export function MarketingFooter() {
             {t("site.foot.product")}
           </p>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/how-it-works" className="hover:text-foreground">{t("site.nav.how")}</Link></li>
-            <li><Link to="/agents" className="hover:text-foreground">{t("site.nav.agents")}</Link></li>
-            <li><Link to="/pricing" className="hover:text-foreground">{t("site.nav.pricing")}</Link></li>
-            <li><Link to="/handbook" className="hover:text-foreground">{t("site.nav.handbook")}</Link></li>
+            <li>
+              <Link to="/how-it-works" className="hover:text-foreground">
+                {t("site.nav.how")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/agents" className="hover:text-foreground">
+                {t("site.nav.agents")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/pricing" className="hover:text-foreground">
+                {t("site.nav.pricing")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/handbook" className="hover:text-foreground">
+                {t("site.nav.handbook")}
+              </Link>
+            </li>
           </ul>
         </div>
 
@@ -86,8 +124,16 @@ export function MarketingFooter() {
             {t("site.foot.company")}
           </p>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/about" className="hover:text-foreground">{t("site.nav.about")}</Link></li>
-            <li><Link to="/contact" className="hover:text-foreground">{t("site.nav.contact")}</Link></li>
+            <li>
+              <Link to="/about" className="hover:text-foreground">
+                {t("site.nav.about")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/contact" className="hover:text-foreground">
+                {t("site.nav.contact")}
+              </Link>
+            </li>
           </ul>
         </div>
 
@@ -96,8 +142,16 @@ export function MarketingFooter() {
             {t("site.foot.account")}
           </p>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/login" className="hover:text-foreground">{t("site.nav.signin")}</Link></li>
-            <li><Link to="/signup" className="hover:text-foreground">{t("site.nav.signup")}</Link></li>
+            <li>
+              <Link to="/login" className="hover:text-foreground">
+                {t("site.nav.signin")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/signup" className="hover:text-foreground">
+                {t("site.nav.signup")}
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

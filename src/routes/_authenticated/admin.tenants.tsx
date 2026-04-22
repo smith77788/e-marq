@@ -170,9 +170,7 @@ function AdminTenantsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Усі бренди</CardTitle>
-          <CardDescription>
-            Усього: {tenantsQuery.data?.length ?? 0}
-          </CardDescription>
+          <CardDescription>Усього: {tenantsQuery.data?.length ?? 0}</CardDescription>
         </CardHeader>
         <CardContent>
           {tenantsQuery.isLoading ? (
@@ -215,7 +213,9 @@ function AdminTenantsPage() {
               </Table>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">Поки що брендів немає. Створіть перший вище.</p>
+            <p className="text-sm text-muted-foreground">
+              Поки що брендів немає. Створіть перший вище.
+            </p>
           )}
         </CardContent>
       </Card>

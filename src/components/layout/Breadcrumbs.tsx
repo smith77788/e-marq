@@ -76,17 +76,12 @@ export function Breadcrumbs() {
           {c.to ? (
             <a
               href={c.to}
-              className={cn(
-                "truncate transition-colors hover:text-foreground",
-                "max-w-[160px]",
-              )}
+              className={cn("truncate transition-colors hover:text-foreground", "max-w-[160px]")}
             >
               {c.label}
             </a>
           ) : (
-            <span className="truncate font-medium text-foreground max-w-[200px]">
-              {c.label}
-            </span>
+            <span className="truncate font-medium text-foreground max-w-[200px]">{c.label}</span>
           )}
         </span>
       ))}

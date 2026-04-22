@@ -128,7 +128,9 @@ async function request<T>(
 }
 
 /** Verify ApiKey is valid by hitting a cheap endpoint. */
-export async function verifyApiKey(apiKey: string): Promise<{ ok: true } | { ok: false; status: number; message: string }> {
+export async function verifyApiKey(
+  apiKey: string,
+): Promise<{ ok: true } | { ok: false; status: number; message: string }> {
   try {
     await request<unknown>(apiKey, "GET", "/products/stores");
     return { ok: true };

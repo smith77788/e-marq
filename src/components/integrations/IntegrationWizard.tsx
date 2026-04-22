@@ -47,12 +47,15 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
-import { CANONICAL_FIELDS, autoMap, parseFile, type EntityKind, type ParseResult } from "@/lib/integrations/parser";
-import { runImport, type ImportResult } from "@/lib/integrations/importer";
 import {
-  METHOD_LABELS,
-  type IntegrationDef,
-} from "@/lib/integrations/catalog";
+  CANONICAL_FIELDS,
+  autoMap,
+  parseFile,
+  type EntityKind,
+  type ParseResult,
+} from "@/lib/integrations/parser";
+import { runImport, type ImportResult } from "@/lib/integrations/importer";
+import { METHOD_LABELS, type IntegrationDef } from "@/lib/integrations/catalog";
 import { MSG } from "@/lib/glossary";
 
 type IntegrationInsert = Database["public"]["Tables"]["tenant_integrations"]["Insert"];
@@ -84,14 +87,11 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
   const [result, setResult] = useState<ImportResult | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
 
-  if (!integration) return null;
-
-  const Icon = integration.icon;
-  const isFileBased = integration.method === "csv" || integration.method === "sheets";
-  const isApiKey = integration.method === "apiKey";
-  const isWebhook = integration.method === "webhook";
-  const isRest = integration.method === "rest";
-  const isComingSoon = integration.status === "comingSoon";
+  const isFileBased = integration?.method === "csv" || integration?.method === "sheets";
+  const isApiKey = integration?.method === "apiKey";
+  const isWebhook = integration?.method === "webhook";
+  const isRest = integration?.method === "rest";
+  const isComingSoon = integration?.status === "comingSoon";
 
   function reset() {
     setStep(1);
@@ -154,6 +154,9 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
     onError: (e: Error) => toast.error(MSG.errSave, { description: e.message }),
   });
 
+  if (!integration) return null;
+  const Icon = integration.icon;
+
   async function runImportNow() {
     if (!parsedFile || !integration) return;
     const providerId = integration.id;
@@ -191,9 +194,7 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
   }
 
   const canSaveConn =
-    (isApiKey && apiKey.trim().length > 0) ||
-    (isRest && restUrl.trim().length > 0) ||
-    isWebhook;
+    (isApiKey && apiKey.trim().length > 0) || (isRest && restUrl.trim().length > 0) || isWebhook;
 
   return (
     <Dialog open={!!integration} onOpenChange={(o) => !o && (onClose(), reset())}>
@@ -233,7 +234,10 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
                 </Label>
                 <ol className="space-y-2">
                   {integration.instructions.map((line, i) => (
-                    <li key={i} className="flex gap-3 rounded-md border border-border/40 bg-card/40 p-3 text-sm">
+                    <li
+                      key={i}
+                      className="flex gap-3 rounded-md border border-border/40 bg-card/40 p-3 text-sm"
+                    >
                       <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                         {i + 1}
                       </span>
@@ -260,7 +264,10 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
                     <Label className="text-xs uppercase tracking-wider text-muted-foreground">
                       Тип даних у файлі
                     </Label>
-                    <Select value={entityKind} onValueChange={(v) => setEntityKind(v as EntityKind)}>
+                    <Select
+                      value={entityKind}
+                      onValueChange={(v) => setEntityKind(v as EntityKind)}
+                    >
                       <SelectTrigger className="mx-auto mt-1 max-w-xs">
                         <SelectValue />
                       </SelectTrigger>
@@ -361,8 +368,8 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
                   <CheckCircle2 className="h-4 w-4 text-success" />
                   <AlertDescription className="space-y-2">
                     <div>
-                      Натисніть «Створити підключення» — і отримаєте унікальний URL та секретний підпис,
-                      які треба вставити у Zapier / Make / іншу систему.
+                      Натисніть «Створити підключення» — і отримаєте унікальний URL та секретний
+                      підпис, які треба вставити у Zapier / Make / іншу систему.
                     </div>
                   </AlertDescription>
                 </Alert>

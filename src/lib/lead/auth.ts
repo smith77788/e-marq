@@ -9,9 +9,7 @@ import type { Database } from "@/integrations/supabase/types";
 export async function authorizeLeadAgent(
   request: Request,
 ): Promise<{ kind: "cron" | "super" } | { error: string; status: number }> {
-  const token = (request.headers.get("authorization") ?? "")
-    .replace(/^Bearer\s+/i, "")
-    .trim();
+  const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
   if (!token) return { error: "Missing bearer token", status: 401 };
   if (token === process.env.SUPABASE_PUBLISHABLE_KEY) return { kind: "cron" };
 

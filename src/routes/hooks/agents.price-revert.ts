@@ -126,7 +126,9 @@ export const Route = createFileRoute("/hooks/agents/price-revert")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -170,7 +172,9 @@ export const Route = createFileRoute("/hooks/agents/price-revert")({
           // actions.apply, щоб ціна реально відкотилася без участі власника.
           let autoApplied = 0;
           if (created > 0) {
-            const dedupKeys = candidates.map((c) => `revert::${(c.metrics as { source_action_id?: string }).source_action_id}`);
+            const dedupKeys = candidates.map(
+              (c) => `revert::${(c.metrics as { source_action_id?: string }).source_action_id}`,
+            );
             const { data: freshInsights } = await supabaseAdmin
               .from("ai_insights")
               .select("id, metrics")
@@ -212,7 +216,9 @@ export const Route = createFileRoute("/hooks/agents/price-revert")({
           });
         } catch (err) {
           await failAgentRun(handle, err);
-          return jsonError("Price revert agent failed", 500, { details: err instanceof Error ? err.message : String(err) });
+          return jsonError("Price revert agent failed", 500, {
+            details: err instanceof Error ? err.message : String(err),
+          });
         }
       },
     },

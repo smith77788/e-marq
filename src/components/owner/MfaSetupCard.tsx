@@ -231,11 +231,7 @@ export function MfaSetupCard() {
               <p className="text-sm font-semibold text-foreground">{t("mfa.scanTitle")}</p>
               <p className="text-xs text-muted-foreground">{t("mfa.scanDesc")}</p>
               <div className="flex flex-col items-center gap-3 rounded-lg border bg-muted/20 p-4 sm:flex-row sm:items-start">
-                <img
-                  src={enroll.qr}
-                  alt="TOTP QR"
-                  className="h-40 w-40 rounded bg-white p-2"
-                />
+                <img src={enroll.qr} alt="TOTP QR" className="h-40 w-40 rounded bg-white p-2" />
                 <div className="flex-1 space-y-1 text-center sm:text-left">
                   <p className="text-xs text-muted-foreground">{t("mfa.manualKey")}</p>
                   <code className="block break-all rounded bg-background px-2 py-1.5 font-mono text-xs text-foreground">

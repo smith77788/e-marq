@@ -31,7 +31,10 @@ async function isAuthorized(token: string): Promise<{ ok: boolean; userId?: stri
   const userId = data?.claims?.sub;
   if (!userId) return { ok: false };
   const { data: roles } = await supabaseAdmin
-    .from("user_roles").select("role").eq("user_id", userId).eq("role", "super_admin");
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "super_admin");
   return { ok: (roles ?? []).length > 0, userId };
 }
 
@@ -46,18 +49,58 @@ const SAMPLE_PRODUCTS = [
   { name: "Subscription Bag — Monthly", price_cents: 105000, stock: 999, sku: "SUB-M" },
 ];
 
-const FIRST_NAMES = ["Anna", "Maria", "Olena", "Petro", "Ivan", "Yuri", "Sofia", "Kateryna", "Andriy", "Oksana", "Vitalii", "Nataliya", "Roman", "Yulia", "Bohdan", "Lesia", "Mykhailo", "Tetiana", "Serhii", "Daria"];
-const LAST_NAMES = ["Shevchenko", "Kovalenko", "Boyko", "Tkachenko", "Bondar", "Melnyk", "Kravchuk", "Marchenko", "Ostapenko", "Lysenko"];
+const FIRST_NAMES = [
+  "Anna",
+  "Maria",
+  "Olena",
+  "Petro",
+  "Ivan",
+  "Yuri",
+  "Sofia",
+  "Kateryna",
+  "Andriy",
+  "Oksana",
+  "Vitalii",
+  "Nataliya",
+  "Roman",
+  "Yulia",
+  "Bohdan",
+  "Lesia",
+  "Mykhailo",
+  "Tetiana",
+  "Serhii",
+  "Daria",
+];
+const LAST_NAMES = [
+  "Shevchenko",
+  "Kovalenko",
+  "Boyko",
+  "Tkachenko",
+  "Bondar",
+  "Melnyk",
+  "Kravchuk",
+  "Marchenko",
+  "Ostapenko",
+  "Lysenko",
+];
 
-function rand<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
-function randInt(min: number, max: number): number { return Math.floor(Math.random() * (max - min + 1)) + min; }
-function daysAgo(d: number): Date { return new Date(Date.now() - d * 24 * 3600 * 1000); }
+function rand<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+function randInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function daysAgo(d: number): Date {
+  return new Date(Date.now() - d * 24 * 3600 * 1000);
+}
 
 export const Route = createFileRoute("/hooks/demo/seed")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         const auth = await isAuthorized(token);
         if (!auth.ok) return jsonError("Forbidden — super_admin only", 403);
 
@@ -67,27 +110,43 @@ export const Route = createFileRoute("/hooks/demo/seed")({
           const body = (await request.json()) as { tenant_id?: string; force?: boolean };
           tenantId = body.tenant_id ?? null;
           force = body.force ?? false;
-        } catch { return jsonError("Invalid JSON", 400); }
+        } catch {
+          return jsonError("Invalid JSON", 400);
+        }
         if (!tenantId) return jsonError("tenant_id required", 400);
 
         const log: string[] = [];
 
         // 1. Seed products if empty
-        const { data: existing } = await supabaseAdmin.from("products").select("id, name").eq("tenant_id", tenantId);
+        const { data: existing } = await supabaseAdmin
+          .from("products")
+          .select("id, name")
+          .eq("tenant_id", tenantId);
         let productIds: { id: string; name: string; price_cents: number }[];
         if ((existing ?? []).length === 0 || force) {
           if (force && existing && existing.length > 0) {
             log.push(`Skipping product re-seed (force=true ignored — would orphan orders).`);
             productIds = existing.map((e) => ({ id: e.id, name: e.name, price_cents: 1500 }));
           } else {
-            const rows = SAMPLE_PRODUCTS.map((p) => ({ tenant_id: tenantId!, ...p, currency: "UAH", is_active: true }));
-            const { data: inserted, error } = await supabaseAdmin.from("products").insert(rows).select("id, name, price_cents");
+            const rows = SAMPLE_PRODUCTS.map((p) => ({
+              tenant_id: tenantId!,
+              ...p,
+              currency: "UAH",
+              is_active: true,
+            }));
+            const { data: inserted, error } = await supabaseAdmin
+              .from("products")
+              .insert(rows)
+              .select("id, name, price_cents");
             if (error) return jsonError("Failed to seed products", 500, { details: error.message });
             productIds = inserted ?? [];
             log.push(`Seeded ${productIds.length} products.`);
           }
         } else {
-          const { data: full } = await supabaseAdmin.from("products").select("id, name, price_cents").eq("tenant_id", tenantId);
+          const { data: full } = await supabaseAdmin
+            .from("products")
+            .select("id, name, price_cents")
+            .eq("tenant_id", tenantId);
           productIds = full ?? [];
           log.push(`Re-using ${productIds.length} existing products.`);
         }
@@ -95,7 +154,13 @@ export const Route = createFileRoute("/hooks/demo/seed")({
 
         // 2. Generate customer cohort
         const COHORT_SIZE = 25;
-        const customers: Array<{ email: string; name: string; phaseDay: number; cycleDays: number; orderCount: number }> = [];
+        const customers: Array<{
+          email: string;
+          name: string;
+          phaseDay: number;
+          cycleDays: number;
+          orderCount: number;
+        }> = [];
         for (let i = 0; i < COHORT_SIZE; i++) {
           const fn = rand(FIRST_NAMES);
           const ln = rand(LAST_NAMES);
@@ -119,36 +184,78 @@ export const Route = createFileRoute("/hooks/demo/seed")({
 
             const item1 = rand(productIds);
             const item2 = Math.random() > 0.5 ? rand(productIds) : null;
-            const items = [item1, item2].filter(Boolean) as { id: string; name: string; price_cents: number }[];
+            const items = [item1, item2].filter(Boolean) as {
+              id: string;
+              name: string;
+              price_cents: number;
+            }[];
             const total = items.reduce((s, p) => s + p.price_cents, 0);
 
-            const { data: order, error: oErr } = await supabaseAdmin.from("orders").insert({
-              tenant_id: tenantId,
-              customer_email: c.email,
-              customer_name: c.name,
-              status: "paid",
-              total_cents: total,
-              currency: "UAH",
-              payment_method: "manual",
-              created_at: orderTs.toISOString(),
-              paid_at: orderTs.toISOString(),
-            }).select("id").single();
+            const { data: order, error: oErr } = await supabaseAdmin
+              .from("orders")
+              .insert({
+                tenant_id: tenantId,
+                customer_email: c.email,
+                customer_name: c.name,
+                status: "paid",
+                total_cents: total,
+                currency: "UAH",
+                payment_method: "manual",
+                created_at: orderTs.toISOString(),
+                paid_at: orderTs.toISOString(),
+              })
+              .select("id")
+              .single();
             if (oErr || !order) continue;
 
             await supabaseAdmin.from("order_items").insert(
               items.map((p) => ({
-                tenant_id: tenantId!, order_id: order.id, product_id: p.id, product_name: p.name,
-                quantity: 1, unit_price_cents: p.price_cents, created_at: orderTs.toISOString(),
+                tenant_id: tenantId!,
+                order_id: order.id,
+                product_id: p.id,
+                product_name: p.name,
+                quantity: 1,
+                unit_price_cents: p.price_cents,
+                created_at: orderTs.toISOString(),
               })),
             );
             ordersCreated++;
 
             // Funnel events around the order
             await supabaseAdmin.from("events").insert([
-              { tenant_id: tenantId, type: "product_viewed", product_id: item1.id, payload: { email: c.email } as never, created_at: new Date(orderTs.getTime() - 3600 * 1000).toISOString() },
-              { tenant_id: tenantId, type: "add_to_cart", product_id: item1.id, payload: { email: c.email } as never, created_at: new Date(orderTs.getTime() - 1800 * 1000).toISOString() },
-              { tenant_id: tenantId, type: "checkout_started", payload: { email: c.email, cart_value_cents: total, product_names: items.map((p) => p.name) } as never, session_id: `sess_${order.id}`, created_at: new Date(orderTs.getTime() - 600 * 1000).toISOString() },
-              { tenant_id: tenantId, type: "purchase_completed", order_id: order.id, payload: { email: c.email } as never, session_id: `sess_${order.id}`, created_at: orderTs.toISOString() },
+              {
+                tenant_id: tenantId,
+                type: "product_viewed",
+                product_id: item1.id,
+                payload: { email: c.email } as never,
+                created_at: new Date(orderTs.getTime() - 3600 * 1000).toISOString(),
+              },
+              {
+                tenant_id: tenantId,
+                type: "add_to_cart",
+                product_id: item1.id,
+                payload: { email: c.email } as never,
+                created_at: new Date(orderTs.getTime() - 1800 * 1000).toISOString(),
+              },
+              {
+                tenant_id: tenantId,
+                type: "checkout_started",
+                payload: {
+                  email: c.email,
+                  cart_value_cents: total,
+                  product_names: items.map((p) => p.name),
+                } as never,
+                session_id: `sess_${order.id}`,
+                created_at: new Date(orderTs.getTime() - 600 * 1000).toISOString(),
+              },
+              {
+                tenant_id: tenantId,
+                type: "purchase_completed",
+                order_id: order.id,
+                payload: { email: c.email } as never,
+                session_id: `sess_${order.id}`,
+                created_at: orderTs.toISOString(),
+              },
             ]);
             eventsCreated += 4;
           }
@@ -159,7 +266,9 @@ export const Route = createFileRoute("/hooks/demo/seed")({
         for (let i = 0; i < 80; i++) {
           const p = rand(productIds);
           await supabaseAdmin.from("events").insert({
-            tenant_id: tenantId, type: "product_viewed", product_id: p.id,
+            tenant_id: tenantId,
+            type: "product_viewed",
+            product_id: p.id,
             payload: { source: "demo_traffic" } as never,
             created_at: daysAgo(randInt(0, 29)).toISOString(),
           });
@@ -170,15 +279,26 @@ export const Route = createFileRoute("/hooks/demo/seed")({
           const c = rand(customers);
           const p = rand(productIds);
           await supabaseAdmin.from("events").insert({
-            tenant_id: tenantId, type: "checkout_started",
-            payload: { email: c.email, cart_value_cents: p.price_cents, product_names: [p.name] } as never,
+            tenant_id: tenantId,
+            type: "checkout_started",
+            payload: {
+              email: c.email,
+              cart_value_cents: p.price_cents,
+              product_names: [p.name],
+            } as never,
             session_id: `abandon_${i}_${Date.now()}`,
             created_at: new Date(Date.now() - randInt(2, 12) * 3600 * 1000).toISOString(),
           });
         }
         log.push(`Created 4 abandoned cart sessions.`);
 
-        return jsonOk({ ok: true, log, products: productIds.length, customers: customers.length, orders: ordersCreated });
+        return jsonOk({
+          ok: true,
+          log,
+          products: productIds.length,
+          customers: customers.length,
+          orders: ordersCreated,
+        });
       },
     },
   },

@@ -40,7 +40,9 @@ export const Route = createFileRoute("/hooks/agents/learning-loop-monitor")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -132,9 +134,7 @@ export const Route = createFileRoute("/hooks/agents/learning-loop-monitor")({
           const cutoff = Date.now() - 60 * 86_400_000;
           const stale = memories.filter(
             (m) =>
-              m.is_active &&
-              m.confidence < 0.6 &&
-              new Date(m.last_observed_at).getTime() < cutoff,
+              m.is_active && m.confidence < 0.6 && new Date(m.last_observed_at).getTime() < cutoff,
           );
           if (stale.length >= 5) {
             insights.push({

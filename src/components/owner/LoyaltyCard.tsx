@@ -20,13 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -48,7 +42,9 @@ export function LoyaltyCard({ tenantId }: { tenantId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("loyalty_programs")
-        .select("id, tenant_id, name, points_per_100_uah, uah_per_point, min_redeem_points, is_active")
+        .select(
+          "id, tenant_id, name, points_per_100_uah, uah_per_point, min_redeem_points, is_active",
+        )
         .eq("tenant_id", tenantId)
         .maybeSingle();
       if (error) throw error;
@@ -134,7 +130,8 @@ export function LoyaltyCard({ tenantId }: { tenantId: string }) {
               Програма лояльності
             </CardTitle>
             <CardDescription className="text-xs">
-              Бали за кожне замовлення → знижка на наступне. Тіри: Бронза → Срібло (500 балів) → Золото (2000) → Платина (5000).
+              Бали за кожне замовлення → знижка на наступне. Тіри: Бронза → Срібло (500 балів) →
+              Золото (2000) → Платина (5000).
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -168,7 +165,9 @@ export function LoyaltyCard({ tenantId }: { tenantId: string }) {
         {/* Form */}
         <div className="grid gap-3 md:grid-cols-2">
           <div>
-            <Label htmlFor="loyalty-name" className="text-xs">Назва</Label>
+            <Label htmlFor="loyalty-name" className="text-xs">
+              Назва
+            </Label>
             <Input
               id="loyalty-name"
               value={name}
@@ -177,7 +176,9 @@ export function LoyaltyCard({ tenantId }: { tenantId: string }) {
             />
           </div>
           <div>
-            <Label htmlFor="loyalty-rate" className="text-xs">Балів за 100 грн</Label>
+            <Label htmlFor="loyalty-rate" className="text-xs">
+              Балів за 100 грн
+            </Label>
             <Input
               id="loyalty-rate"
               type="number"
@@ -188,7 +189,9 @@ export function LoyaltyCard({ tenantId }: { tenantId: string }) {
             />
           </div>
           <div>
-            <Label htmlFor="loyalty-value" className="text-xs">Вартість 1 балу (грн)</Label>
+            <Label htmlFor="loyalty-value" className="text-xs">
+              Вартість 1 балу (грн)
+            </Label>
             <Input
               id="loyalty-value"
               type="number"
@@ -200,7 +203,9 @@ export function LoyaltyCard({ tenantId }: { tenantId: string }) {
             />
           </div>
           <div>
-            <Label htmlFor="loyalty-min" className="text-xs">Мін. балів для списання</Label>
+            <Label htmlFor="loyalty-min" className="text-xs">
+              Мін. балів для списання
+            </Label>
             <Input
               id="loyalty-min"
               type="number"
@@ -214,7 +219,8 @@ export function LoyaltyCard({ tenantId }: { tenantId: string }) {
 
         <div className="rounded-md border border-dashed border-muted-foreground/30 bg-muted/30 p-3 text-xs text-muted-foreground">
           <p>
-            <strong className="text-foreground">Приклад:</strong> при покупці на 500 грн клієнт отримає{" "}
+            <strong className="text-foreground">Приклад:</strong> при покупці на 500 грн клієнт
+            отримає{" "}
             <span className="font-mono text-foreground">
               {Math.floor((parseInt(pointsPer100) || 1) * 5)} балів
             </span>

@@ -38,7 +38,9 @@ export const Route = createFileRoute("/hooks/agents/elasticity-meta-loop")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -65,7 +67,10 @@ export const Route = createFileRoute("/hooks/agents/elasticity-meta-loop")({
           if (error) throw error;
           const rows = (data ?? []) as Row[];
           if (rows.length < 10) {
-            await finishAgentRun(handle, 0, { rows: rows.length, reason: "insufficient_decisions" });
+            await finishAgentRun(handle, 0, {
+              rows: rows.length,
+              reason: "insufficient_decisions",
+            });
             return jsonOk({ run_id: handle.runId, rows: rows.length, insights_created: 0 });
           }
 

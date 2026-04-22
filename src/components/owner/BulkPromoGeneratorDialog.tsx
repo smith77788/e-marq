@@ -235,14 +235,17 @@ export function BulkPromoGeneratorDialog({ tenantId, open, onOpenChange }: Props
                 id="bulk-prefix"
                 value={prefix}
                 onChange={(e) =>
-                  setPrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, "").slice(0, 12))
+                  setPrefix(
+                    e.target.value
+                      .toUpperCase()
+                      .replace(/[^A-Z0-9_-]/g, "")
+                      .slice(0, 12),
+                  )
                 }
                 className="font-mono uppercase"
                 placeholder="SALE-"
               />
-              <p className="text-[11px] text-muted-foreground">
-                {t("bpr.bulk.prefixHint")}
-              </p>
+              <p className="text-[11px] text-muted-foreground">{t("bpr.bulk.prefixHint")}</p>
             </div>
           </div>
 
@@ -349,11 +352,7 @@ export function BulkPromoGeneratorDialog({ tenantId, open, onOpenChange }: Props
           >
             {t("common.cancel")}
           </Button>
-          <Button
-            type="button"
-            disabled={!canSubmit}
-            onClick={() => generate.mutate()}
-          >
+          <Button type="button" disabled={!canSubmit} onClick={() => generate.mutate()}>
             {generate.isPending ? (
               <>
                 <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />

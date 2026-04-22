@@ -121,9 +121,13 @@ function AdminPlansPage() {
   if (!isSuperAdmin) {
     return (
       <Card>
-        <CardHeader><CardTitle>Доступ заборонено</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Доступ заборонено</CardTitle>
+        </CardHeader>
         <CardContent>
-          <Link to="/dashboard" className="text-primary hover:underline">← На головну</Link>
+          <Link to="/dashboard" className="text-primary hover:underline">
+            ← На головну
+          </Link>
         </CardContent>
       </Card>
     );
@@ -169,7 +173,13 @@ function AdminPlansPage() {
 }
 
 function PlanCard({
-  plan, isEditing, onEdit, onCancel, onSave, onDelete, saving,
+  plan,
+  isEditing,
+  onEdit,
+  onCancel,
+  onSave,
+  onDelete,
+  saving,
 }: {
   plan: Plan;
   isEditing: boolean;
@@ -202,13 +212,19 @@ function PlanCard({
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               {plan.name}
-              <Badge variant="outline" className="font-mono text-[10px]">{plan.key}</Badge>
+              <Badge variant="outline" className="font-mono text-[10px]">
+                {plan.key}
+              </Badge>
               {!plan.is_active && <Badge variant="outline">вимкнено</Badge>}
               {!plan.is_public && <Badge variant="outline">прихований</Badge>}
             </CardTitle>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">{Math.round(plan.price_cents_monthly / 100).toLocaleString("uk-UA")} ₴/міс</span>
-              <Button size="sm" variant="outline" onClick={onEdit}>Редагувати</Button>
+              <span className="text-sm font-medium">
+                {Math.round(plan.price_cents_monthly / 100).toLocaleString("uk-UA")} ₴/міс
+              </span>
+              <Button size="sm" variant="outline" onClick={onEdit}>
+                Редагувати
+              </Button>
               <Button size="sm" variant="ghost" onClick={onDelete}>
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
@@ -218,16 +234,31 @@ function PlanCard({
         </CardHeader>
         <CardContent>
           <div className="grid gap-2 text-xs sm:grid-cols-3">
-            <div>Товарів: <strong>{plan.max_products ?? "∞"}</strong></div>
-            <div>Замовлень/міс: <strong>{plan.max_orders_per_month ?? "∞"}</strong></div>
-            <div>Клієнтів: <strong>{plan.max_customers ?? "∞"}</strong></div>
-            <div>Запусків ШІ/міс: <strong>{plan.max_ai_runs_per_month ?? "∞"}</strong></div>
-            <div>Кредитів ШІ: <strong>{plan.max_ai_credits_monthly_grant.toLocaleString("uk-UA")}</strong></div>
-            <div>Учасників команди: <strong>{plan.max_team_members ?? "∞"}</strong></div>
+            <div>
+              Товарів: <strong>{plan.max_products ?? "∞"}</strong>
+            </div>
+            <div>
+              Замовлень/міс: <strong>{plan.max_orders_per_month ?? "∞"}</strong>
+            </div>
+            <div>
+              Клієнтів: <strong>{plan.max_customers ?? "∞"}</strong>
+            </div>
+            <div>
+              Запусків ШІ/міс: <strong>{plan.max_ai_runs_per_month ?? "∞"}</strong>
+            </div>
+            <div>
+              Кредитів ШІ:{" "}
+              <strong>{plan.max_ai_credits_monthly_grant.toLocaleString("uk-UA")}</strong>
+            </div>
+            <div>
+              Учасників команди: <strong>{plan.max_team_members ?? "∞"}</strong>
+            </div>
           </div>
           <div className="mt-3 flex flex-wrap gap-1">
             {plan.features_enabled.map((f) => (
-              <Badge key={f} variant="outline" className="text-[10px]">{f}</Badge>
+              <Badge key={f} variant="outline" className="text-[10px]">
+                {f}
+              </Badge>
             ))}
           </div>
         </CardContent>
@@ -244,39 +275,66 @@ function PlanCard({
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1">
             <Label>Технічний ключ</Label>
-            <Input value={draft.key} onChange={(e) => setDraft({ ...draft, key: e.target.value })} />
+            <Input
+              value={draft.key}
+              onChange={(e) => setDraft({ ...draft, key: e.target.value })}
+            />
           </div>
           <div className="space-y-1">
             <Label>Назва тарифу</Label>
-            <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+            <Input
+              value={draft.name}
+              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+            />
           </div>
         </div>
         <div className="space-y-1">
           <Label>Опис</Label>
-          <Textarea value={draft.description ?? ""} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
+          <Textarea
+            value={draft.description ?? ""}
+            onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+          />
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="space-y-1">
             <Label>Ціна за місяць (копійки)</Label>
-            <Input type="number" value={draft.price_cents_monthly} onChange={(e) => setDraft({ ...draft, price_cents_monthly: Number(e.target.value) })} />
+            <Input
+              type="number"
+              value={draft.price_cents_monthly}
+              onChange={(e) => setDraft({ ...draft, price_cents_monthly: Number(e.target.value) })}
+            />
           </div>
           <div className="space-y-1">
             <Label>Ціна за рік (копійки)</Label>
-            <Input type="number" value={draft.price_cents_yearly} onChange={(e) => setDraft({ ...draft, price_cents_yearly: Number(e.target.value) })} />
+            <Input
+              type="number"
+              value={draft.price_cents_yearly}
+              onChange={(e) => setDraft({ ...draft, price_cents_yearly: Number(e.target.value) })}
+            />
           </div>
           <div className="space-y-1">
             <Label>Порядок у списку</Label>
-            <Input type="number" value={draft.sort_order} onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) })} />
+            <Input
+              type="number"
+              value={draft.sort_order}
+              onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) })}
+            />
           </div>
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
           <div className="flex items-center justify-between rounded-md border border-border p-2">
             <Label>Видно на сторінці цін</Label>
-            <Switch checked={draft.is_public} onCheckedChange={(v) => setDraft({ ...draft, is_public: v })} />
+            <Switch
+              checked={draft.is_public}
+              onCheckedChange={(v) => setDraft({ ...draft, is_public: v })}
+            />
           </div>
           <div className="flex items-center justify-between rounded-md border border-border p-2">
             <Label>Тариф увімкнений</Label>
-            <Switch checked={draft.is_active} onCheckedChange={(v) => setDraft({ ...draft, is_active: v })} />
+            <Switch
+              checked={draft.is_active}
+              onCheckedChange={(v) => setDraft({ ...draft, is_active: v })}
+            />
           </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
@@ -293,7 +351,15 @@ function PlanCard({
           <Label>Можливості (через кому)</Label>
           <Input
             value={draft.features_enabled.join(", ")}
-            onChange={(e) => setDraft({ ...draft, features_enabled: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
+            onChange={(e) =>
+              setDraft({
+                ...draft,
+                features_enabled: e.target.value
+                  .split(",")
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+              })
+            }
             placeholder="bot, analytics, attribution"
           />
         </div>
@@ -301,11 +367,21 @@ function PlanCard({
           <Label>Дозволені ШІ-помічники (через кому, порожнє = усі)</Label>
           <Input
             value={draft.agents_allowed.join(", ")}
-            onChange={(e) => setDraft({ ...draft, agents_allowed: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
+            onChange={(e) =>
+              setDraft({
+                ...draft,
+                agents_allowed: e.target.value
+                  .split(",")
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+              })
+            }
           />
         </div>
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={onCancel}>Скасувати</Button>
+          <Button variant="ghost" onClick={onCancel}>
+            Скасувати
+          </Button>
           <Button onClick={() => onSave(draft)} disabled={saving}>
             <Save className="mr-1.5 h-4 w-4" />
             Зберегти

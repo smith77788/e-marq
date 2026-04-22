@@ -29,7 +29,9 @@ export const Route = createFileRoute("/hooks/agents/channel-discovery")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -112,9 +114,11 @@ export const Route = createFileRoute("/hooks/agents/channel-discovery")({
               last_sync_status: i.last_sync_status,
             })),
           };
-          const readyCount = [channels.storefront.ready, channels.telegram.ready, channels.email.ready].filter(
-            Boolean,
-          ).length;
+          const readyCount = [
+            channels.storefront.ready,
+            channels.telegram.ready,
+            channels.email.ready,
+          ].filter(Boolean).length;
 
           await upsertBootstrapFacts([
             {

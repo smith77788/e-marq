@@ -21,7 +21,13 @@ import {
 
 const AGENT_ID = "funnel-healer";
 
-const STEPS = ["session_start", "product_viewed", "add_to_cart", "checkout_started", "purchase_completed"] as const;
+const STEPS = [
+  "session_start",
+  "product_viewed",
+  "add_to_cart",
+  "checkout_started",
+  "purchase_completed",
+] as const;
 type Step = (typeof STEPS)[number];
 
 const BENCHMARKS: Record<string, number> = {
@@ -54,7 +60,9 @@ export const Route = createFileRoute("/hooks/agents/funnel-healer")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };

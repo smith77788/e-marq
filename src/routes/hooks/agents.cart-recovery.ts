@@ -91,7 +91,10 @@ export const Route = createFileRoute("/hooks/agents/cart-recovery")({
 
           // Step 3: filter to "abandoned" — latest cart event >60 min ago AND no purchase
           const cutoff = Date.now() - 60 * 60 * 1000;
-          const abandoned: { sessionId: string; data: typeof sessions extends Map<string, infer V> ? V : never }[] = [];
+          const abandoned: {
+            sessionId: string;
+            data: typeof sessions extends Map<string, infer V> ? V : never;
+          }[] = [];
           for (const [sid, data] of sessions) {
             if (purchasedSet.has(sid)) continue;
             if (new Date(data.latest).getTime() > cutoff) continue;
@@ -107,9 +110,7 @@ export const Route = createFileRoute("/hooks/agents/cart-recovery")({
                 .eq("tenant_id", tenantId)
                 .in("user_id", userIds)
             : { data: [] };
-          const userToCustomer = new Map(
-            (matchedCustomers ?? []).map((c) => [c.user_id, c]),
-          );
+          const userToCustomer = new Map((matchedCustomers ?? []).map((c) => [c.user_id, c]));
 
           // Step 5: dedupe — check existing cart_recovery_attempts last 7d
           const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
@@ -118,7 +119,10 @@ export const Route = createFileRoute("/hooks/agents/cart-recovery")({
             .select("session_id")
             .eq("tenant_id", tenantId)
             .gte("created_at", sevenDaysAgo)
-            .in("session_id", abandoned.map((a) => a.sessionId));
+            .in(
+              "session_id",
+              abandoned.map((a) => a.sessionId),
+            );
           const attemptedSet = new Set((existingAttempts ?? []).map((a) => a.session_id));
 
           const newAttempts = abandoned.filter((a) => !attemptedSet.has(a.sessionId));
@@ -138,7 +142,9 @@ export const Route = createFileRoute("/hooks/agents/cart-recovery")({
             };
           });
           if (attemptRows.length) {
-            const { error } = await supabaseAdmin.from("cart_recovery_attempts").insert(attemptRows);
+            const { error } = await supabaseAdmin
+              .from("cart_recovery_attempts")
+              .insert(attemptRows);
             if (error) throw error;
           }
 

@@ -78,8 +78,7 @@ export const Route = createFileRoute("/hooks/agents/anomaly-detector")({
           const todayPaid = (todayOrdersRes.data ?? []).filter((o) => o.status === "paid");
           const basePaid = (baseOrdersRes.data ?? []).filter((o) => o.status === "paid");
           const todayRevenue = todayPaid.reduce((s, o) => s + o.total_cents, 0);
-          const baseRevenuePerDay =
-            basePaid.reduce((s, o) => s + o.total_cents, 0) / 7;
+          const baseRevenuePerDay = basePaid.reduce((s, o) => s + o.total_cents, 0) / 7;
           const todayOrderCount = todayPaid.length;
           const baseOrderCountPerDay = basePaid.length / 7;
 
@@ -87,9 +86,8 @@ export const Route = createFileRoute("/hooks/agents/anomaly-detector")({
             (todayEventsRes.data ?? []).filter((e) => e.session_id).map((e) => e.session_id),
           ).size;
           const baseSessionsPerDay =
-            new Set(
-              (baseEventsRes.data ?? []).filter((e) => e.session_id).map((e) => e.session_id),
-            ).size / 7;
+            new Set((baseEventsRes.data ?? []).filter((e) => e.session_id).map((e) => e.session_id))
+              .size / 7;
 
           const insights = [];
 
@@ -157,7 +155,10 @@ export const Route = createFileRoute("/hooks/agents/anomaly-detector")({
                 affected_layer: "traffic",
                 title: `Трафік ${direction === "down" ? "впав" : "виріс"} на ${Math.abs(delta * 100).toFixed(0)}%`,
                 description: `${todaySessions} сесій сьогодні vs ${baseSessionsPerDay.toFixed(0)} в середньому.`,
-                expected_impact: direction === "down" ? "Перевір SEO/ads/email кампанії." : "Скейли перевірені канали.",
+                expected_impact:
+                  direction === "down"
+                    ? "Перевір SEO/ads/email кампанії."
+                    : "Скейли перевірені канали.",
                 confidence: 0.7,
                 risk_level: direction === "down" ? "medium" : "low",
                 metrics: {

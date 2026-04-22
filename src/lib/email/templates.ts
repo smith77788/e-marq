@@ -16,15 +16,15 @@ export type OrderEmailItem = {
 
 export type OrderEmailContext = {
   brandName: string;
-  storeUrl: string;       // https://app.example/s/<slug>
-  orderUrl: string;       // публічне посилання на сторінку замовлення
+  storeUrl: string; // https://app.example/s/<slug>
+  orderUrl: string; // публічне посилання на сторінку замовлення
   orderShortId: string;
   customerName: string | null;
   customerEmail: string;
   totalCents: number;
-  currency: string;       // "UAH"
+  currency: string; // "UAH"
   items: OrderEmailItem[];
-  paymentMethod: string;  // "manual" | "stripe_card" | ...
+  paymentMethod: string; // "manual" | "stripe_card" | ...
   paymentInstructions?: string | null;
   shippingSummary?: string | null;
 };
@@ -71,7 +71,13 @@ const PAYMENT_LABEL: Record<string, string> = {
   stripe_card: "Картка (Stripe)",
 };
 
-function shell(brand: string, headline: string, inner: string, ctaUrl: string, ctaLabel: string): string {
+function shell(
+  brand: string,
+  headline: string,
+  inner: string,
+  ctaUrl: string,
+  ctaLabel: string,
+): string {
   return `<!DOCTYPE html>
 <html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${escapeHtml(headline)}</title></head>
@@ -101,14 +107,16 @@ ${inner}
 }
 
 function itemsTable(items: OrderEmailItem[], totalCents: number, currency: string): string {
-  const rows = items.map((it) => {
-    const line = it.unit_price_cents * it.quantity;
-    return `<tr>
+  const rows = items
+    .map((it) => {
+      const line = it.unit_price_cents * it.quantity;
+      return `<tr>
 <td style="padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:14px;color:#0f172a;">${escapeHtml(it.name)}</td>
 <td style="padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px;color:#64748b;text-align:right;white-space:nowrap;">× ${it.quantity}</td>
 <td style="padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:14px;color:#0f172a;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;">${formatMoney(line, currency)}</td>
 </tr>`;
-  }).join("");
+    })
+    .join("");
 
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;border-collapse:collapse;">
 ${rows}
@@ -119,8 +127,14 @@ ${rows}
 </tr></table>`;
 }
 
-export function renderOrderConfirmation(ctx: OrderEmailContext): { subject: string; html: string; text: string } {
-  const greeting = ctx.customerName ? `Привіт, ${escapeHtml(ctx.customerName)}!` : "Дякуємо за замовлення!";
+export function renderOrderConfirmation(ctx: OrderEmailContext): {
+  subject: string;
+  html: string;
+  text: string;
+} {
+  const greeting = ctx.customerName
+    ? `Привіт, ${escapeHtml(ctx.customerName)}!`
+    : "Дякуємо за замовлення!";
   const payLabel = PAYMENT_LABEL[ctx.paymentMethod] ?? ctx.paymentMethod;
 
   const inner = `
@@ -135,12 +149,21 @@ ${ctx.paymentInstructions ? `<div style="margin-top:18px;padding:14px 16px;backg
 <p style="margin:18px 0 0 0;font-size:14px;color:#334155;">Ми звʼяжемось з вами, щойно статус оновиться.</p>`;
 
   const subject = `Замовлення #${ctx.orderShortId} прийнято — ${ctx.brandName}`;
-  const html = shell(ctx.brandName, "Замовлення прийнято", inner, ctx.orderUrl, "Переглянути замовлення");
+  const html = shell(
+    ctx.brandName,
+    "Замовлення прийнято",
+    inner,
+    ctx.orderUrl,
+    "Переглянути замовлення",
+  );
   const text = [
     greeting,
     "",
     `Замовлення #${ctx.orderShortId}`,
-    ...ctx.items.map((i) => `• ${i.name} × ${i.quantity} — ${formatMoney(i.unit_price_cents * i.quantity, ctx.currency)}`),
+    ...ctx.items.map(
+      (i) =>
+        `• ${i.name} × ${i.quantity} — ${formatMoney(i.unit_price_cents * i.quantity, ctx.currency)}`,
+    ),
     "",
     `Разом: ${formatMoney(ctx.totalCents, ctx.currency)}`,
     `Оплата: ${payLabel}`,
@@ -148,12 +171,18 @@ ${ctx.paymentInstructions ? `<div style="margin-top:18px;padding:14px 16px;backg
     ctx.paymentInstructions ? `\n${ctx.paymentInstructions}` : "",
     "",
     `Переглянути: ${ctx.orderUrl}`,
-  ].filter(Boolean).join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   return { subject, html, text };
 }
 
-export function renderOrderStatusUpdate(ctx: OrderStatusEmailContext): { subject: string; html: string; text: string } {
+export function renderOrderStatusUpdate(ctx: OrderStatusEmailContext): {
+  subject: string;
+  html: string;
+  text: string;
+} {
   const headline = STATUS_HEADLINE[ctx.newStatus];
   const statusLabel = STATUS_LABEL[ctx.newStatus];
 
@@ -189,7 +218,10 @@ ${itemsTable(ctx.items, ctx.totalCents, ctx.currency)}`;
     intro.replace(/<[^>]+>/g, ""),
     `Статус: ${statusLabel}`,
     "",
-    ...ctx.items.map((i) => `• ${i.name} × ${i.quantity} — ${formatMoney(i.unit_price_cents * i.quantity, ctx.currency)}`),
+    ...ctx.items.map(
+      (i) =>
+        `• ${i.name} × ${i.quantity} — ${formatMoney(i.unit_price_cents * i.quantity, ctx.currency)}`,
+    ),
     `Разом: ${formatMoney(ctx.totalCents, ctx.currency)}`,
     "",
     `Переглянути: ${ctx.orderUrl}`,

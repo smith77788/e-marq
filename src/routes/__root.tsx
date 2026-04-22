@@ -35,16 +35,34 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "MARQ — Merchant Autonomous Revenue Quorum" },
-      { name: "description", content: "MARQ — автономна команда AI-агентів, які зупиняють витік грошей у вашому магазині 24/7." },
+      {
+        name: "description",
+        content:
+          "MARQ — автономна команда AI-агентів, які зупиняють витік грошей у вашому магазині 24/7.",
+      },
       { name: "author", content: "MARQ" },
       { property: "og:title", content: "MARQ — Merchant Autonomous Revenue Quorum" },
-      { property: "og:description", content: "Автономна команда AI-агентів, які зупиняють витік грошей у вашому магазині 24/7." },
+      {
+        property: "og:description",
+        content: "Автономна команда AI-агентів, які зупиняють витік грошей у вашому магазині 24/7.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "MARQ — Merchant Autonomous Revenue Quorum" },
-      { name: "twitter:description", content: "Автономна команда AI-агентів, які зупиняють витік грошей у вашому магазині 24/7." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/d6531aeb-2016-4df0-a5b4-dd41ec4c07ca" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/d6531aeb-2016-4df0-a5b4-dd41ec4c07ca" },
+      {
+        name: "twitter:description",
+        content: "Автономна команда AI-агентів, які зупиняють витік грошей у вашому магазині 24/7.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/d6531aeb-2016-4df0-a5b4-dd41ec4c07ca",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/d6531aeb-2016-4df0-a5b4-dd41ec4c07ca",
+      },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
@@ -68,9 +86,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
-  }));
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
+      }),
+  );
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

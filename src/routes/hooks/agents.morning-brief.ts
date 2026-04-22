@@ -57,7 +57,10 @@ export const Route = createFileRoute("/hooks/agents/morning-brief")({
             .eq("digest_date", digestDate)
             .maybeSingle();
           if (existing) {
-            await finishAgentRun(handle, 0, { reason: "already_generated", digest_date: digestDate });
+            await finishAgentRun(handle, 0, {
+              reason: "already_generated",
+              digest_date: digestDate,
+            });
             return jsonOk({ insights_created: 0, reason: "already_generated" });
           }
 

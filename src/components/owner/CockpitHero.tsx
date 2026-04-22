@@ -5,7 +5,15 @@
  */
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Activity, ArrowDownRight, ArrowUpRight, BadgeDollarSign, Bot, Sparkles, Users } from "lucide-react";
+import {
+  Activity,
+  ArrowDownRight,
+  ArrowUpRight,
+  BadgeDollarSign,
+  Bot,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +24,11 @@ import { formatMoney, formatMoneyCompact } from "@/lib/money";
 type Props = { tenantId: string };
 
 type Order = { total_cents: number; paid_at: string | null; created_at: string };
-type Outbound = { actual_revenue_cents: number | null; converted_at: string | null; sent_at: string | null };
+type Outbound = {
+  actual_revenue_cents: number | null;
+  converted_at: string | null;
+  sent_at: string | null;
+};
 
 function fmtUah(cents: number) {
   if (cents >= 1_000_000) return formatMoneyCompact(cents);
@@ -47,10 +59,7 @@ export function CockpitHero({ tenantId }: Props) {
           .select("actual_revenue_cents, converted_at, sent_at")
           .eq("tenant_id", tenantId)
           .gte("created_at", since30),
-        supabase
-          .from("customers")
-          .select("id, lifecycle_stage")
-          .eq("tenant_id", tenantId),
+        supabase.from("customers").select("id, lifecycle_stage").eq("tenant_id", tenantId),
         supabase
           .from("acos_agent_runs")
           .select("status, started_at")
@@ -106,13 +115,20 @@ export function CockpitHero({ tenantId }: Props) {
       if (b) b.runs++;
     }
     const series = Array.from(buckets.values());
-    const revDelta = revPrev7 > 0 ? Math.round(((rev7 - revPrev7) / revPrev7) * 100) : rev7 > 0 ? 100 : 0;
+    const revDelta =
+      revPrev7 > 0 ? Math.round(((rev7 - revPrev7) / revPrev7) * 100) : rev7 > 0 ? 100 : 0;
     const aiShare = rev30 > 0 ? Math.round((ai30 / rev30) * 100) : 0;
-    const sent7 = data.outbound.filter((m) => m.sent_at && new Date(m.sent_at).getTime() >= now - 7 * day).length;
-    const conv7 = data.outbound.filter((m) => m.converted_at && new Date(m.converted_at).getTime() >= now - 7 * day).length;
+    const sent7 = data.outbound.filter(
+      (m) => m.sent_at && new Date(m.sent_at).getTime() >= now - 7 * day,
+    ).length;
+    const conv7 = data.outbound.filter(
+      (m) => m.converted_at && new Date(m.converted_at).getTime() >= now - 7 * day,
+    ).length;
     const convRate = sent7 > 0 ? ((conv7 / sent7) * 100).toFixed(1) : "0.0";
     const totalCustomers = data.customers.length;
-    const activeCustomers = data.customers.filter((c) => c.lifecycle_stage === "active" || c.lifecycle_stage === "vip").length;
+    const activeCustomers = data.customers.filter(
+      (c) => c.lifecycle_stage === "active" || c.lifecycle_stage === "vip",
+    ).length;
     const successRuns = data.runs.filter((r) => r.status === "success").length;
     const totalRuns = data.runs.length;
     const agentHealth = totalRuns > 0 ? Math.round((successRuns / totalRuns) * 100) : 100;
@@ -138,7 +154,9 @@ export function CockpitHero({ tenantId }: Props) {
     return (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="animate-pulse"><CardContent className="h-32" /></Card>
+          <Card key={i} className="animate-pulse">
+            <CardContent className="h-32" />
+          </Card>
         ))}
       </div>
     );
@@ -182,7 +200,13 @@ export function CockpitHero({ tenantId }: Props) {
         sub={`${computed.activeCustomers} ${t("hero.active")} ${computed.agentHealth}%`}
         series={computed.series}
         seriesKey="runs"
-        tone={computed.agentHealth >= 90 ? "success" : computed.agentHealth >= 70 ? "warning" : "destructive"}
+        tone={
+          computed.agentHealth >= 90
+            ? "success"
+            : computed.agentHealth >= 70
+              ? "warning"
+              : "destructive"
+        }
       />
     </div>
   );
@@ -200,29 +224,93 @@ type HeroCardProps = {
   badge?: string;
 };
 
-const TONE: Record<HeroCardProps["tone"], { ring: string; glow: string; gradId: string; stroke: string; fill: string; iconCls: string }> = {
-  default:    { ring: "border-border",                 glow: "",                                                                              gradId: "spark-default",  stroke: "var(--muted-foreground)", fill: "var(--muted-foreground)", iconCls: "text-muted-foreground" },
-  primary:    { ring: "border-primary/40",             glow: "shadow-[0_0_30px_-12px_color-mix(in_oklab,var(--primary)_40%,transparent)]",   gradId: "spark-primary",  stroke: "var(--primary)",          fill: "var(--primary)",          iconCls: "text-primary" },
-  accent:     { ring: "border-accent/40",              glow: "shadow-[0_0_30px_-12px_color-mix(in_oklab,var(--accent)_40%,transparent)]",    gradId: "spark-accent",   stroke: "var(--accent)",           fill: "var(--accent)",           iconCls: "text-accent" },
-  success:    { ring: "border-success/40",             glow: "shadow-[0_0_30px_-12px_color-mix(in_oklab,var(--success,var(--primary))_40%,transparent)]", gradId: "spark-success",  stroke: "var(--success,var(--primary))", fill: "var(--success,var(--primary))", iconCls: "text-success" },
-  warning:    { ring: "border-warning/40",             glow: "",                                                                              gradId: "spark-warning",  stroke: "var(--warning,var(--primary))", fill: "var(--warning,var(--primary))", iconCls: "text-warning-foreground" },
-  destructive:{ ring: "border-destructive/40",         glow: "shadow-[0_0_30px_-12px_color-mix(in_oklab,var(--destructive)_40%,transparent)]", gradId: "spark-destructive", stroke: "var(--destructive)", fill: "var(--destructive)",      iconCls: "text-destructive" },
+const TONE: Record<
+  HeroCardProps["tone"],
+  { ring: string; glow: string; gradId: string; stroke: string; fill: string; iconCls: string }
+> = {
+  default: {
+    ring: "border-border",
+    glow: "",
+    gradId: "spark-default",
+    stroke: "var(--muted-foreground)",
+    fill: "var(--muted-foreground)",
+    iconCls: "text-muted-foreground",
+  },
+  primary: {
+    ring: "border-primary/40",
+    glow: "shadow-[0_0_30px_-12px_color-mix(in_oklab,var(--primary)_40%,transparent)]",
+    gradId: "spark-primary",
+    stroke: "var(--primary)",
+    fill: "var(--primary)",
+    iconCls: "text-primary",
+  },
+  accent: {
+    ring: "border-accent/40",
+    glow: "shadow-[0_0_30px_-12px_color-mix(in_oklab,var(--accent)_40%,transparent)]",
+    gradId: "spark-accent",
+    stroke: "var(--accent)",
+    fill: "var(--accent)",
+    iconCls: "text-accent",
+  },
+  success: {
+    ring: "border-success/40",
+    glow: "shadow-[0_0_30px_-12px_color-mix(in_oklab,var(--success,var(--primary))_40%,transparent)]",
+    gradId: "spark-success",
+    stroke: "var(--success,var(--primary))",
+    fill: "var(--success,var(--primary))",
+    iconCls: "text-success",
+  },
+  warning: {
+    ring: "border-warning/40",
+    glow: "",
+    gradId: "spark-warning",
+    stroke: "var(--warning,var(--primary))",
+    fill: "var(--warning,var(--primary))",
+    iconCls: "text-warning-foreground",
+  },
+  destructive: {
+    ring: "border-destructive/40",
+    glow: "shadow-[0_0_30px_-12px_color-mix(in_oklab,var(--destructive)_40%,transparent)]",
+    gradId: "spark-destructive",
+    stroke: "var(--destructive)",
+    fill: "var(--destructive)",
+    iconCls: "text-destructive",
+  },
 };
 
-function HeroCard({ icon: Icon, label, value, sub, delta, series, seriesKey, tone, badge }: HeroCardProps) {
+function HeroCard({
+  icon: Icon,
+  label,
+  value,
+  sub,
+  delta,
+  series,
+  seriesKey,
+  tone,
+  badge,
+}: HeroCardProps) {
   const t = TONE[tone];
   return (
     <Card className={`relative overflow-hidden ${t.ring} ${t.glow}`}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
-          <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+          <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            {label}
+          </p>
           <Icon className={`h-4 w-4 ${t.iconCls}`} />
         </div>
         <div className="mt-2 flex items-end justify-between gap-2">
           <p className="text-2xl font-bold tracking-tight text-foreground">{value}</p>
           {typeof delta === "number" && (
-            <Badge variant="outline" className={`text-[10px] ${delta >= 0 ? "text-success border-success/40" : "text-destructive border-destructive/40"}`}>
-              {delta >= 0 ? <ArrowUpRight className="mr-0.5 h-3 w-3" /> : <ArrowDownRight className="mr-0.5 h-3 w-3" />}
+            <Badge
+              variant="outline"
+              className={`text-[10px] ${delta >= 0 ? "text-success border-success/40" : "text-destructive border-destructive/40"}`}
+            >
+              {delta >= 0 ? (
+                <ArrowUpRight className="mr-0.5 h-3 w-3" />
+              ) : (
+                <ArrowDownRight className="mr-0.5 h-3 w-3" />
+              )}
               {Math.abs(delta)}%
             </Badge>
           )}

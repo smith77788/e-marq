@@ -22,7 +22,10 @@ export const Route = createFileRoute("/track/$slug/js")({
       GET: async ({ params, request }) => {
         const slug = params.slug;
         const { data: tenant } = await supabaseAdmin
-          .from("tenants").select("id, slug, status").eq("slug", slug).maybeSingle();
+          .from("tenants")
+          .select("id, slug, status")
+          .eq("slug", slug)
+          .maybeSingle();
         if (!tenant || tenant.status !== "active") {
           return new Response("// ACOS: unknown or inactive tenant\n", {
             status: 404,

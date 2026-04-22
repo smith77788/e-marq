@@ -22,7 +22,9 @@ export const Route = createFileRoute("/hooks/agents/lifecycle-trigger-tuner")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -40,7 +42,9 @@ export const Route = createFileRoute("/hooks/agents/lifecycle-trigger-tuner")({
           const since = new Date(Date.now() - 30 * 86_400_000).toISOString();
           const { data: messages } = await supabaseAdmin
             .from("outbound_messages")
-            .select("trigger_kind, status, actual_revenue_cents, expected_impact_cents, converted_at")
+            .select(
+              "trigger_kind, status, actual_revenue_cents, expected_impact_cents, converted_at",
+            )
             .eq("tenant_id", tenantId)
             .gte("created_at", since)
             .limit(2000);
@@ -48,7 +52,8 @@ export const Route = createFileRoute("/hooks/agents/lifecycle-trigger-tuner")({
           const byTrigger = new Map<string, { sent: number; converted: number; revenue: number }>();
           for (const m of messages ?? []) {
             const e = byTrigger.get(m.trigger_kind) ?? { sent: 0, converted: 0, revenue: 0 };
-            if (m.status === "sent" || m.status === "delivered" || m.status === "converted") e.sent++;
+            if (m.status === "sent" || m.status === "delivered" || m.status === "converted")
+              e.sent++;
             if (m.converted_at) {
               e.converted++;
               e.revenue += m.actual_revenue_cents ?? 0;
@@ -99,7 +104,9 @@ export const Route = createFileRoute("/hooks/agents/lifecycle-trigger-tuner")({
           return jsonOk({ insights_created: created });
         } catch (e) {
           await failAgentRun(handle, e);
-          return jsonError("Lifecycle trigger tuner failed", 500, { details: e instanceof Error ? e.message : String(e) });
+          return jsonError("Lifecycle trigger tuner failed", 500, {
+            details: e instanceof Error ? e.message : String(e),
+          });
         }
       },
     },

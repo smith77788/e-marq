@@ -57,8 +57,12 @@ function AboutPage() {
       <section className="border-y border-border bg-muted/30">
         <div className="mx-auto max-w-6xl px-4 py-16">
           <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary">{t("ab.valuesEyebrow")}</p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{t("ab.valuesTitle")}</h2>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+              {t("ab.valuesEyebrow")}
+            </p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              {t("ab.valuesTitle")}
+            </h2>
           </div>
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2">
@@ -81,11 +85,15 @@ function AboutPage() {
       </section>
 
       <section className="mx-auto max-w-3xl px-4 py-16 text-center">
-        <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("ab.ctaTitle")}</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          {t("ab.ctaTitle")}
+        </h2>
         <p className="mt-4 text-base text-muted-foreground">{t("ab.ctaBody")}</p>
         <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
           <Button asChild size="lg">
-            <Link to="/signup">{t("ab.ctaPrimary")} <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            <Link to="/signup">
+              {t("ab.ctaPrimary")} <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
           <Button asChild size="lg" variant="outline">
             <Link to="/contact">{t("ab.ctaSecondary")}</Link>

@@ -34,7 +34,13 @@ function Pricing() {
       price: t("pr.growthPrice"),
       cadence: t("pr.growthCadence"),
       desc: t("pr.growthDesc"),
-      features: [t("pr.growthF1"), t("pr.growthF2"), t("pr.growthF3"), t("pr.growthF4"), t("pr.growthF5")],
+      features: [
+        t("pr.growthF1"),
+        t("pr.growthF2"),
+        t("pr.growthF3"),
+        t("pr.growthF4"),
+        t("pr.growthF5"),
+      ],
       cta: t("pr.growthCta"),
       highlight: true,
     },
@@ -69,10 +75,17 @@ function Pricing() {
       <section className="mx-auto max-w-6xl px-4 py-16">
         <div className="grid gap-6 md:grid-cols-3">
           {plans.map((p) => (
-            <Card key={p.name} className={p.highlight ? "border-primary bg-primary/5 shadow-lg" : "border-border bg-card/60"}>
+            <Card
+              key={p.name}
+              className={
+                p.highlight ? "border-primary bg-primary/5 shadow-lg" : "border-border bg-card/60"
+              }
+            >
               <CardHeader>
                 {p.highlight && (
-                  <Badge className="mb-2 w-fit" variant="default">{t("pr.popular")}</Badge>
+                  <Badge className="mb-2 w-fit" variant="default">
+                    {t("pr.popular")}
+                  </Badge>
                 )}
                 <CardTitle className="text-xl">{p.name}</CardTitle>
                 <div className="mt-2 flex items-baseline gap-1">

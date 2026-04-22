@@ -46,7 +46,9 @@ export function AcosActionsLog({ tenantId }: Props) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ai_actions")
-        .select("id, agent_id, action_type, status, applied_at, measured_at, expected_impact, actual_result, target_entity, parameters, created_at")
+        .select(
+          "id, agent_id, action_type, status, applied_at, measured_at, expected_impact, actual_result, target_entity, parameters, created_at",
+        )
         .eq("tenant_id", tenantId)
         .order("created_at", { ascending: false })
         .limit(50);
@@ -64,7 +66,10 @@ export function AcosActionsLog({ tenantId }: Props) {
       return r?.success === true;
     }).length,
     revenue: actions.reduce((s, a) => {
-      const r = a.actual_result as { impact_cents?: number; recovered_revenue_cents?: number } | null;
+      const r = a.actual_result as {
+        impact_cents?: number;
+        recovered_revenue_cents?: number;
+      } | null;
       return s + (r?.impact_cents ?? r?.recovered_revenue_cents ?? 0);
     }, 0),
   };
@@ -79,7 +84,8 @@ export function AcosActionsLog({ tenantId }: Props) {
               Журнал виконаних дій
             </CardTitle>
             <CardDescription>
-              Дії, які система вже виконала, та їхній реальний результат. Оновлюється кожні 30 секунд.
+              Дії, які система вже виконала, та їхній реальний результат. Оновлюється кожні 30
+              секунд.
             </CardDescription>
           </div>
           <div className="flex flex-wrap gap-2 text-xs">
@@ -105,19 +111,32 @@ export function AcosActionsLog({ tenantId }: Props) {
           <ScrollArea className="max-h-[420px] pr-3">
             <div className="space-y-1.5">
               {actions.map((a) => {
-                const r = a.actual_result as { success?: boolean; impact_cents?: number; recovered_revenue_cents?: number; recovered_orders?: number } | null;
+                const r = a.actual_result as {
+                  success?: boolean;
+                  impact_cents?: number;
+                  recovered_revenue_cents?: number;
+                  recovered_orders?: number;
+                } | null;
                 const succeeded = r?.success === true;
                 const impactCents = r?.impact_cents ?? r?.recovered_revenue_cents ?? 0;
                 return (
-                  <div key={a.id} className="rounded-md border border-border bg-muted/20 px-2.5 py-2 text-xs">
+                  <div
+                    key={a.id}
+                    className="rounded-md border border-border bg-muted/20 px-2.5 py-2 text-xs"
+                  >
                     <div className="flex flex-wrap items-center gap-1.5">
                       <Badge variant="outline" className="text-[10px]">
                         {ACTION_LABEL[a.action_type] ?? a.action_type}
                       </Badge>
-                      <Badge variant="secondary" className="text-[10px]">{STATUS_LABEL[a.status] ?? a.status}</Badge>
+                      <Badge variant="secondary" className="text-[10px]">
+                        {STATUS_LABEL[a.status] ?? a.status}
+                      </Badge>
                       {a.measured_at ? (
                         succeeded ? (
-                          <Badge className="border-success/30 bg-success/10 text-success" variant="outline">
+                          <Badge
+                            className="border-success/30 bg-success/10 text-success"
+                            variant="outline"
+                          >
                             <CheckCircle2 className="mr-1 h-2.5 w-2.5" /> спрацювало
                           </Badge>
                         ) : (
@@ -126,21 +145,32 @@ export function AcosActionsLog({ tenantId }: Props) {
                           </Badge>
                         )
                       ) : (
-                        <Badge variant="outline" className="text-[10px]">вимірюємо…</Badge>
+                        <Badge variant="outline" className="text-[10px]">
+                          вимірюємо…
+                        </Badge>
                       )}
                       <span className="ml-auto text-[10px] text-muted-foreground">
                         {a.applied_at
-                          ? formatDistanceToNow(new Date(a.applied_at), { addSuffix: true, locale: uk })
-                          : formatDistanceToNow(new Date(a.created_at), { addSuffix: true, locale: uk })}
+                          ? formatDistanceToNow(new Date(a.applied_at), {
+                              addSuffix: true,
+                              locale: uk,
+                            })
+                          : formatDistanceToNow(new Date(a.created_at), {
+                              addSuffix: true,
+                              locale: uk,
+                            })}
                       </span>
                     </div>
                     {a.expected_impact && (
-                      <p className="mt-1 text-[11px] text-muted-foreground">очікували: {a.expected_impact}</p>
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        очікували: {a.expected_impact}
+                      </p>
                     )}
                     {a.measured_at && (
                       <p className="mt-0.5 text-[11px] font-medium text-foreground">
                         фактично: {(impactCents / 100).toFixed(2)} ₴
-                        {typeof r?.recovered_orders === "number" && ` · ${r.recovered_orders} замовлень`}
+                        {typeof r?.recovered_orders === "number" &&
+                          ` · ${r.recovered_orders} замовлень`}
                       </p>
                     )}
                   </div>

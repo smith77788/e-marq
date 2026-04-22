@@ -14,13 +14,7 @@ import { ExternalLink, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -129,8 +123,7 @@ function BrandProductsPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
-  const invalidate = () =>
-    qc.invalidateQueries({ queryKey: ["brand-products", tenantId] });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["brand-products", tenantId] });
 
   const createMutation = useMutation({
     mutationFn: async (values: ProductFormValues) => {
@@ -183,10 +176,7 @@ function BrandProductsPage() {
   const archiveMutation = useMutation({
     mutationFn: async (id: string) => {
       // Soft archive — keeps order history intact.
-      const { error } = await supabase
-        .from("products")
-        .update({ is_active: false })
-        .eq("id", id);
+      const { error } = await supabase.from("products").update({ is_active: false }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -205,10 +195,7 @@ function BrandProductsPage() {
       if (filter === "draft" && p.is_active) return false;
       if (filter === "oos" && p.stock > 0) return false;
       if (!q) return true;
-      return (
-        p.name.toLowerCase().includes(q) ||
-        (p.sku ?? "").toLowerCase().includes(q)
-      );
+      return p.name.toLowerCase().includes(q) || (p.sku ?? "").toLowerCase().includes(q);
     });
   }, [productsQuery.data, search, filter]);
 
@@ -269,10 +256,18 @@ function BrandProductsPage() {
             </div>
             <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
               <TabsList className="h-9">
-                <TabsTrigger value="all" className="text-xs">{t("bp.tab.all")}</TabsTrigger>
-                <TabsTrigger value="active" className="text-xs">{t("bp.tab.active")}</TabsTrigger>
-                <TabsTrigger value="draft" className="text-xs">{t("bp.tab.draft")}</TabsTrigger>
-                <TabsTrigger value="oos" className="text-xs">{t("bp.tab.oos")}</TabsTrigger>
+                <TabsTrigger value="all" className="text-xs">
+                  {t("bp.tab.all")}
+                </TabsTrigger>
+                <TabsTrigger value="active" className="text-xs">
+                  {t("bp.tab.active")}
+                </TabsTrigger>
+                <TabsTrigger value="draft" className="text-xs">
+                  {t("bp.tab.draft")}
+                </TabsTrigger>
+                <TabsTrigger value="oos" className="text-xs">
+                  {t("bp.tab.oos")}
+                </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -410,9 +405,7 @@ function BrandProductsPage() {
                   image_url: editing.image_url ?? "",
                   is_active: editing.is_active,
                 }}
-                onSubmit={(values) =>
-                  updateMutation.mutate({ id: editing.id, values })
-                }
+                onSubmit={(values) => updateMutation.mutate({ id: editing.id, values })}
                 onCancel={() => setEditing(null)}
                 isPending={updateMutation.isPending}
               />

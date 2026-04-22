@@ -22,7 +22,9 @@ export const Route = createFileRoute("/hooks/agents/time-of-day-pricer")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -76,7 +78,7 @@ export const Route = createFileRoute("/hooks/agents/time-of-day-pricer")({
               tenant_id: tenantId,
               insight_type: "happy_hour_opportunity",
               affected_layer: "pricing",
-              title: `⏰ "Happy hour" вікно: ${lowHours.map(h => `${h}:00`).join(", ")} UTC`,
+              title: `⏰ "Happy hour" вікно: ${lowHours.map((h) => `${h}:00`).join(", ")} UTC`,
               description: `У ці години CR удвічі нижчий за середній (${(avgCr * 100).toFixed(2)}%). Трафік є — конверсії немає.`,
               expected_impact: `Time-limited 10% знижка може підняти CR до середнього → +${(avgCr * 0.5 * lowHours.length * 50).toFixed(0)} замовлень/міс`,
               confidence: 0.65,
@@ -93,11 +95,16 @@ export const Route = createFileRoute("/hooks/agents/time-of-day-pricer")({
           }
 
           const created = await insertInsightsDedup(insights);
-          await finishAgentRun(handle, created, { avg_cr: avgCr, low_hours_count: lowHours.length });
+          await finishAgentRun(handle, created, {
+            avg_cr: avgCr,
+            low_hours_count: lowHours.length,
+          });
           return jsonOk({ insights_created: created });
         } catch (e) {
           await failAgentRun(handle, e);
-          return jsonError("Time-of-day pricer failed", 500, { details: e instanceof Error ? e.message : String(e) });
+          return jsonError("Time-of-day pricer failed", 500, {
+            details: e instanceof Error ? e.message : String(e),
+          });
         }
       },
     },

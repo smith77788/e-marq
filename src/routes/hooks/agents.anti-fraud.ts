@@ -41,7 +41,9 @@ export const Route = createFileRoute("/hooks/agents/anti-fraud")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -62,7 +64,9 @@ export const Route = createFileRoute("/hooks/agents/anti-fraud")({
           const [recentRes, baselineRes, existingRes] = await Promise.all([
             supabaseAdmin
               .from("orders")
-              .select("id, customer_email, customer_name, total_cents, metadata, created_at, status")
+              .select(
+                "id, customer_email, customer_name, total_cents, metadata, created_at, status",
+              )
               .eq("tenant_id", tenantId)
               .gte("created_at", since)
               .eq("status", "paid"),
@@ -180,7 +184,8 @@ export const Route = createFileRoute("/hooks/agents/anti-fraud")({
                 affected_layer: "ops",
                 title: `⚠️ Order ${o.id.slice(0, 8)}: підозра на fraud (score ${score.toFixed(2)})`,
                 description: `${signals.length} red flags: ${signals.map((s) => s.kind).join(", ")}.`,
-                expected_impact: "Перегляньте замовлення вручну до виконання — можливий chargeback.",
+                expected_impact:
+                  "Перегляньте замовлення вручну до виконання — можливий chargeback.",
                 confidence: Math.min(1, 0.5 + score / 2),
                 risk_level: "high",
                 metrics: {

@@ -75,7 +75,10 @@ export const Route = createFileRoute("/hooks/agents/search-gap")({
             const missRate = total > 0 ? t.misses / total : 0;
             if (t.misses < 3) continue; // skip noise
             if (missRate < 0.5) continue; // mostly hits — not a gap
-            const confidence = Math.min(0.9, 0.5 + Math.min(t.misses / 30, 1) * 0.3 + missRate * 0.1);
+            const confidence = Math.min(
+              0.9,
+              0.5 + Math.min(t.misses / 30, 1) * 0.3 + missRate * 0.1,
+            );
             const risk = t.misses > 20 ? "high" : t.misses > 8 ? "medium" : "low";
             insights.push({
               tenant_id: tenantId,
@@ -117,7 +120,9 @@ export const Route = createFileRoute("/hooks/agents/search-gap")({
           });
         } catch (e) {
           await failAgentRun(handle, e);
-          return jsonError("Agent failed", 500, { details: e instanceof Error ? e.message : String(e) });
+          return jsonError("Agent failed", 500, {
+            details: e instanceof Error ? e.message : String(e),
+          });
         }
       },
     },

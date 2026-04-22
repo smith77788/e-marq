@@ -28,7 +28,9 @@ export const Route = createFileRoute("/hooks/engines/dispatch")({
           const result = await dispatchTenantOutbound(tenantId, 100);
           return jsonOk(result);
         } catch (err) {
-          return jsonError("Dispatch failed", 500, { details: err instanceof Error ? err.message : String(err) });
+          return jsonError("Dispatch failed", 500, {
+            details: err instanceof Error ? err.message : String(err),
+          });
         }
       },
     },

@@ -147,7 +147,9 @@ async function renderInsight(tenantId: string, insightId: string): Promise<Rende
 async function renderAction(tenantId: string, actionId: string): Promise<RenderResult> {
   const { data } = await supabaseAdmin
     .from("ai_actions")
-    .select("id, agent_id, action_type, expected_impact, target_entity, target_id, status, parameters")
+    .select(
+      "id, agent_id, action_type, expected_impact, target_entity, target_id, status, parameters",
+    )
     .eq("id", actionId)
     .maybeSingle();
   if (!data || data.status !== "pending") return null;
@@ -255,7 +257,9 @@ async function tgSendCard(
   return { ok: true, message_id: json.result.message_id };
 }
 
-async function processRow(row: OutboxRow): Promise<{ status: "sent" | "skipped" | "failed"; error?: string }> {
+async function processRow(
+  row: OutboxRow,
+): Promise<{ status: "sent" | "skipped" | "failed"; error?: string }> {
   if (!row.chat_id) {
     // refresh chat from tenant_configs in case it was set after enqueue
     const { data: cfg } = await supabaseAdmin
@@ -388,10 +392,16 @@ export const Route = createFileRoute("/hooks/telegram/notify-owner")({
         });
       },
       GET: async () =>
-        new Response(JSON.stringify({ ok: true, hint: "POST tenant_id+kind+source_id, or empty body to drain pending" }), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        }),
+        new Response(
+          JSON.stringify({
+            ok: true,
+            hint: "POST tenant_id+kind+source_id, or empty body to drain pending",
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          },
+        ),
     },
   },
 });

@@ -23,7 +23,9 @@ export function Sparkline({ data, height = 64, className }: Props) {
     return [x, y] as const;
   });
 
-  const path = points.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const path = points
+    .map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`)
+    .join(" ");
   const areaPath = `${path} L${width},${height} L0,${height} Z`;
 
   return (
@@ -43,7 +45,14 @@ export function Sparkline({ data, height = 64, className }: Props) {
         </linearGradient>
       </defs>
       <path d={areaPath} fill="url(#sparkFill)" />
-      <path d={path} fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d={path}
+        fill="none"
+        stroke="var(--color-primary)"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

@@ -22,7 +22,9 @@ export const Route = createFileRoute("/hooks/agents/vip-concierge")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -39,7 +41,9 @@ export const Route = createFileRoute("/hooks/agents/vip-concierge")({
         try {
           const { data: vips } = await supabaseAdmin
             .from("customers")
-            .select("id, name, email, total_spent_cents, total_orders, last_order_at, avg_cycle_days")
+            .select(
+              "id, name, email, total_spent_cents, total_orders, last_order_at, avg_cycle_days",
+            )
             .eq("tenant_id", tenantId)
             .eq("lifecycle_stage", "vip")
             .order("total_spent_cents", { ascending: false })
@@ -60,7 +64,7 @@ export const Route = createFileRoute("/hooks/agents/vip-concierge")({
               affected_layer: "customer",
               title: `💎 VIP мовчить: ${v.name ?? v.email ?? "клієнт"} (${daysSince.toFixed(0)} дн.)`,
               description: `LTV ${(v.total_spent_cents / 100).toFixed(0)} ₴, ${v.total_orders} замовлень. Звичайний цикл ${expected.toFixed(0)} дн.`,
-              expected_impact: `Персональне повідомлення з ексклюзивом може повернути ~${((v.total_spent_cents / v.total_orders) / 100).toFixed(0)} ₴`,
+              expected_impact: `Персональне повідомлення з ексклюзивом може повернути ~${(v.total_spent_cents / v.total_orders / 100).toFixed(0)} ₴`,
               confidence: 0.8,
               risk_level: daysSince > expected * 3 ? "high" : "medium",
               metrics: {
@@ -81,7 +85,9 @@ export const Route = createFileRoute("/hooks/agents/vip-concierge")({
           return jsonOk({ insights_created: created });
         } catch (e) {
           await failAgentRun(handle, e);
-          return jsonError("VIP concierge failed", 500, { details: e instanceof Error ? e.message : String(e) });
+          return jsonError("VIP concierge failed", 500, {
+            details: e instanceof Error ? e.message : String(e),
+          });
         }
       },
     },

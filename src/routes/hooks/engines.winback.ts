@@ -43,17 +43,24 @@ async function aiOffer(opts: {
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
       model: MODEL,
-      messages: [{ role: "system", content: sys }, { role: "user", content: user }],
+      messages: [
+        { role: "system", content: sys },
+        { role: "user", content: user },
+      ],
       temperature: 0.6,
     }),
   });
   if (!res.ok) return null;
-  const json = (await res.json().catch(() => ({}))) as { choices?: { message?: { content?: string } }[] };
+  const json = (await res.json().catch(() => ({}))) as {
+    choices?: { message?: { content?: string } }[];
+  };
   const out = json.choices?.[0]?.message?.content?.trim();
   return out && out.length > 0 ? out : null;
 }
 
-export async function runWinbackForTenant(tenantId: string): Promise<{ queued: number; skipped: number }> {
+export async function runWinbackForTenant(
+  tenantId: string,
+): Promise<{ queued: number; skipped: number }> {
   const cadence = await getCadenceMultiplier(tenantId, "winback");
   const inactiveDays = 60;
   const cooldownDays = 30 * cadence;
@@ -80,10 +87,14 @@ export async function runWinbackForTenant(tenantId: string): Promise<{ queued: n
     .maybeSingle();
   const brandName = cfg?.brand_name ?? "the brand";
 
-  let queued = 0, skipped = 0;
+  let queued = 0,
+    skipped = 0;
   for (const c of candidates ?? []) {
     const channel = await pickChannelForCustomer(c.id);
-    if (!channel) { skipped++; continue; }
+    if (!channel) {
+      skipped++;
+      continue;
+    }
 
     // Find favorite product (most-bought)
     const { data: items } = await supabaseAdmin
@@ -94,11 +105,14 @@ export async function runWinbackForTenant(tenantId: string): Promise<{ queued: n
       .eq("orders.status", "paid")
       .limit(50);
     const tally: Record<string, number> = {};
-    for (const it of items ?? []) tally[it.product_name] = (tally[it.product_name] ?? 0) + (it.quantity ?? 1);
+    for (const it of items ?? [])
+      tally[it.product_name] = (tally[it.product_name] ?? 0) + (it.quantity ?? 1);
     const favorite = Object.entries(tally).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 
     const firstName = (c.name ?? "").split(" ")[0] || "there";
-    const daysSince = c.last_order_at ? Math.floor((Date.now() - new Date(c.last_order_at).getTime()) / (24 * 3600 * 1000)) : inactiveDays;
+    const daysSince = c.last_order_at
+      ? Math.floor((Date.now() - new Date(c.last_order_at).getTime()) / (24 * 3600 * 1000))
+      : inactiveDays;
 
     const aiBody = await aiOffer({
       brandName,
@@ -107,10 +121,16 @@ export async function runWinbackForTenant(tenantId: string): Promise<{ queued: n
       favoriteProduct: favorite,
       totalSpent: c.total_spent_cents,
     });
-    const body = aiBody ?? `Hey ${firstName}, it's been a while! ${favorite ? `Your ${favorite} must be running low — ` : ""}can I sort you out with something nice this week?`;
+    const body =
+      aiBody ??
+      `Hey ${firstName}, it's been a while! ${favorite ? `Your ${favorite} must be running low — ` : ""}can I sort you out with something nice this week?`;
 
     // Expected impact = average historical AOV
-    const { data: stats } = await supabaseAdmin.from("customers").select("total_orders, avg_order_cents").eq("id", c.id).maybeSingle();
+    const { data: stats } = await supabaseAdmin
+      .from("customers")
+      .select("total_orders, avg_order_cents")
+      .eq("id", c.id)
+      .maybeSingle();
     const expected = stats?.avg_order_cents ?? null;
 
     const { error: insErr } = await supabaseAdmin.from("outbound_messages").insert({
@@ -126,7 +146,10 @@ export async function runWinbackForTenant(tenantId: string): Promise<{ queued: n
     });
     if (!insErr) {
       queued++;
-      await supabaseAdmin.from("customers").update({ last_contacted_at: new Date().toISOString() }).eq("id", c.id);
+      await supabaseAdmin
+        .from("customers")
+        .update({ last_contacted_at: new Date().toISOString() })
+        .eq("id", c.id);
     } else {
       skipped++;
     }
@@ -134,12 +157,13 @@ export async function runWinbackForTenant(tenantId: string): Promise<{ queued: n
   return { queued, skipped };
 }
 
-
 export const Route = createFileRoute("/hooks/engines/winback")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -156,11 +180,18 @@ export const Route = createFileRoute("/hooks/engines/winback")({
         try {
           const { queued, skipped } = await runWinbackForTenant(tenantId);
           const dispatch = await dispatchTenantOutbound(tenantId, 100);
-          await finishAgentRun(handle, queued, { queued, skipped, sent: dispatch.sent, failed: dispatch.failed });
+          await finishAgentRun(handle, queued, {
+            queued,
+            skipped,
+            sent: dispatch.sent,
+            failed: dispatch.failed,
+          });
           return jsonOk({ queued, skipped, sent: dispatch.sent, failed: dispatch.failed });
         } catch (err) {
           await failAgentRun(handle, err);
-          return jsonError("Winback engine failed", 500, { details: err instanceof Error ? err.message : String(err) });
+          return jsonError("Winback engine failed", 500, {
+            details: err instanceof Error ? err.message : String(err),
+          });
         }
       },
     },

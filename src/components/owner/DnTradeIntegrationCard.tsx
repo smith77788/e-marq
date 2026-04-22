@@ -26,13 +26,7 @@ import {
   TriangleAlert,
   Webhook,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -131,9 +125,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
     enabled: !!integ.data,
     refetchInterval: 60_000,
     queryFn: async () => {
-      const res = await fetch(
-        `/hooks/integrations/dntrade-webhook-health?tenant=${tenantId}`,
-      );
+      const res = await fetch(`/hooks/integrations/dntrade-webhook-health?tenant=${tenantId}`);
       const json = (await res.json()) as {
         status: "healthy" | "degraded" | "unhealthy" | "missing" | "error";
         ready: boolean;
@@ -342,12 +334,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
               placeholder="вставте ключ доступу"
               className="font-mono text-xs"
             />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowKey((s) => !s)}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={() => setShowKey((s) => !s)}>
               {showKey ? "Сховати" : "Показати"}
             </Button>
           </div>
@@ -415,8 +402,12 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
               <div className="text-xs text-muted-foreground">
                 Остання синхронізація:{" "}
                 {data?.last_sync_at
-                  ? formatDistanceToNow(new Date(data.last_sync_at), { addSuffix: true, locale: uk })
-                  : "ще не було"} · стан:{" "}
+                  ? formatDistanceToNow(new Date(data.last_sync_at), {
+                      addSuffix: true,
+                      locale: uk,
+                    })
+                  : "ще не було"}{" "}
+                · стан:{" "}
                 <span
                   className={
                     lastStatus === "success"
@@ -452,7 +443,8 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
                 <div className="space-y-2 rounded-md border border-primary/30 bg-primary/5 p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs font-semibold text-primary">
-                      <TestTube className="h-3 w-3" /> Результат пробного запуску (нічого не записано)
+                      <TestTube className="h-3 w-3" /> Результат пробного запуску (нічого не
+                      записано)
                     </div>
                     <Button
                       type="button"
@@ -465,18 +457,9 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
                     </Button>
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-xs">
-                    <Stat
-                      label="Товари (знайдено)"
-                      value={dryRunResult.products.fetched}
-                    />
-                    <Stat
-                      label="Клієнти (знайдено)"
-                      value={dryRunResult.customers.fetched}
-                    />
-                    <Stat
-                      label="Замовлення (знайдено)"
-                      value={dryRunResult.orders.fetched}
-                    />
+                    <Stat label="Товари (знайдено)" value={dryRunResult.products.fetched} />
+                    <Stat label="Клієнти (знайдено)" value={dryRunResult.customers.fetched} />
+                    <Stat label="Замовлення (знайдено)" value={dryRunResult.orders.fetched} />
                   </div>
                   {dryRunResult.mapping_errors.length > 0 && (
                     <div className="text-xs text-destructive">
@@ -492,7 +475,10 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
                           orders: "Замовлення",
                         };
                         return (
-                          <details key={k} className="rounded border border-border/60 bg-card/40 p-2">
+                          <details
+                            key={k}
+                            className="rounded border border-border/60 bg-card/40 p-2"
+                          >
                             <summary className="cursor-pointer text-xs font-medium">
                               {labels[k]} ({dryRunResult.samples?.[k].length ?? 0})
                             </summary>
@@ -563,15 +549,11 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
               {data?.webhook_secret && webhookUrl ? (
                 <>
                   <p className="text-[11px] text-muted-foreground">
-                    Скопіюйте посилання і вставте в DN Trade як адресу для подій. Коли DN Trade
-                    щось змінює — ми одразу підтягуємо ці зміни.
+                    Скопіюйте посилання і вставте в DN Trade як адресу для подій. Коли DN Trade щось
+                    змінює — ми одразу підтягуємо ці зміни.
                   </p>
                   <div className="flex gap-2">
-                    <Input
-                      value={webhookUrl}
-                      readOnly
-                      className="font-mono text-[10px]"
-                    />
+                    <Input value={webhookUrl} readOnly className="font-mono text-[10px]" />
                     <Button
                       type="button"
                       size="sm"
@@ -600,8 +582,8 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
               ) : (
                 <>
                   <p className="text-[11px] text-muted-foreground">
-                    Ще не налаштовано. Створіть ключ — і отримаєте посилання, яке треба вставити
-                    в DN Trade.
+                    Ще не налаштовано. Створіть ключ — і отримаєте посилання, яке треба вставити в
+                    DN Trade.
                   </p>
                   <Button
                     type="button"

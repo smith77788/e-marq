@@ -102,13 +102,7 @@ function copy(text: string, label: string) {
   );
 }
 
-export function BalanceCard({
-  tenantId,
-  tenantSlug,
-}: {
-  tenantId: string;
-  tenantSlug: string;
-}) {
+export function BalanceCard({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: string }) {
   const qc = useQueryClient();
 
   const balanceQuery = useQuery({
@@ -131,9 +125,7 @@ export function BalanceCard({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("balance_ledger")
-        .select(
-          "id, kind, direction, amount, balance_after, reason, reference_kind, created_at",
-        )
+        .select("id, kind, direction, amount, balance_after, reason, reference_kind, created_at")
         .eq("tenant_id", tenantId)
         .order("created_at", { ascending: false })
         .limit(20);
@@ -279,9 +271,7 @@ function Stat({
         {icon}
         {label}
       </div>
-      <p className="mt-1 font-mono text-xl font-semibold tabular-nums text-foreground">
-        {value}
-      </p>
+      <p className="mt-1 font-mono text-xl font-semibold tabular-nums text-foreground">{value}</p>
       {hint && <p className="mt-1 text-[10px] text-muted-foreground">{hint}</p>}
     </div>
   );
@@ -331,9 +321,7 @@ function TopupDialog({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Поповнення балансу</DialogTitle>
-          <DialogDescription>
-            Оберіть кількість AI-кредитів і спосіб оплати.
-          </DialogDescription>
+          <DialogDescription>Оберіть кількість AI-кредитів і спосіб оплати.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -364,9 +352,7 @@ function TopupDialog({
                 min={100}
                 step={100}
                 value={credits}
-                onChange={(e) =>
-                  setCredits(Math.max(100, Number(e.target.value) || 0))
-                }
+                onChange={(e) => setCredits(Math.max(100, Number(e.target.value) || 0))}
                 className="font-mono"
               />
               <Badge variant="outline" className="whitespace-nowrap">
@@ -393,15 +379,12 @@ function TopupDialog({
                 <BankRow label="Отримувач" value={BANK_DETAILS.beneficiary} />
                 <BankRow label="ЄДРПОУ" value={BANK_DETAILS.edrpou} mono />
                 <BankRow label="IBAN" value={BANK_DETAILS.iban} mono />
-                <BankRow
-                  label="Призначення"
-                  value={BANK_DETAILS.purpose(tenantSlug, credits)}
-                />
+                <BankRow label="Призначення" value={BANK_DETAILS.purpose(tenantSlug, credits)} />
                 <BankRow label="Сума" value={`${uah} ₴`} mono />
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Після зарахування коштів на наш рахунок ми вручну активуємо ваші кредити
-                протягом 1 робочого дня. Ви отримаєте лист на e-mail.
+                Після зарахування коштів на наш рахунок ми вручну активуємо ваші кредити протягом 1
+                робочого дня. Ви отримаєте лист на e-mail.
               </p>
             </TabsContent>
 
@@ -410,9 +393,9 @@ function TopupDialog({
                 <p className="flex items-start gap-2">
                   <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />
                   <span>
-                    Доступно лише адміністраторам бренду. Зараховує кредити одразу
-                    без оплати — використовуйте, якщо у вас з MARQ окрема домовленість
-                    (інвойс, бартер, грантовий кредит).
+                    Доступно лише адміністраторам бренду. Зараховує кредити одразу без оплати —
+                    використовуйте, якщо у вас з MARQ окрема домовленість (інвойс, бартер, грантовий
+                    кредит).
                   </span>
                 </p>
               </div>
@@ -461,8 +444,8 @@ function TopupDialog({
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-xs text-xs">
-                Працює лише для власників/адміністраторів бренду. Для звичайної оплати
-                використайте банківський переказ.
+                Працює лише для власників/адміністраторів бренду. Для звичайної оплати використайте
+                банківський переказ.
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -472,23 +455,12 @@ function TopupDialog({
   );
 }
 
-function BankRow({
-  label,
-  value,
-  mono,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-}) {
+function BankRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-2 border-b border-border/60 py-1.5 last:border-b-0">
       <span className="text-muted-foreground">{label}</span>
       <div className="flex min-w-0 items-center gap-1.5">
-        <span
-          className={`truncate text-foreground ${mono ? "font-mono" : ""}`}
-          title={value}
-        >
+        <span className={`truncate text-foreground ${mono ? "font-mono" : ""}`} title={value}>
           {value}
         </span>
         <button
@@ -556,9 +528,8 @@ function ManagerRequestPanel({
         <p className="flex items-start gap-2">
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-info" />
           <span>
-            Залиште заявку — менеджер MARQ перетелефонує протягом 1 робочого дня,
-            погодить спосіб оплати (карта, СБП, крипто, інвойс) і одразу зарахує
-            кредити після надходження коштів.
+            Залиште заявку — менеджер MARQ перетелефонує протягом 1 робочого дня, погодить спосіб
+            оплати (карта, СБП, крипто, інвойс) і одразу зарахує кредити після надходження коштів.
           </span>
         </p>
       </div>
@@ -692,11 +663,7 @@ export function TopupRequestsList({ tenantId }: { tenantId: string }) {
 
   if (q.isLoading) return <p className="text-xs text-muted-foreground">Завантажую заявки…</p>;
   if (!q.data || q.data.length === 0) {
-    return (
-      <p className="text-xs text-muted-foreground">
-        Поки що немає заявок на онлайн-оплату.
-      </p>
-    );
+    return <p className="text-xs text-muted-foreground">Поки що немає заявок на онлайн-оплату.</p>;
   }
 
   return (
@@ -704,7 +671,10 @@ export function TopupRequestsList({ tenantId }: { tenantId: string }) {
       {q.data.map((r) => {
         const meta = STATUS_META[r.status];
         return (
-          <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 px-3 py-2 text-xs">
+          <div
+            key={r.id}
+            className="flex flex-wrap items-center justify-between gap-3 px-3 py-2 text-xs"
+          >
             <div className="flex min-w-0 items-center gap-2">
               <Badge variant="outline" className={meta.tone}>
                 <meta.Icon className="mr-1 h-3 w-3" />
@@ -712,7 +682,8 @@ export function TopupRequestsList({ tenantId }: { tenantId: string }) {
               </Badge>
               <div className="min-w-0">
                 <p className="truncate text-foreground">
-                  {r.credits.toLocaleString("uk-UA")} кредитів · {(r.amount_cents / 100).toFixed(0)} {r.currency}
+                  {r.credits.toLocaleString("uk-UA")} кредитів · {(r.amount_cents / 100).toFixed(0)}{" "}
+                  {r.currency}
                 </p>
                 <p className="text-muted-foreground">
                   {new Date(r.created_at).toLocaleString("uk-UA")} · {r.payment_method}

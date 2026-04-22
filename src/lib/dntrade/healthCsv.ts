@@ -47,9 +47,7 @@ export function buildHealthCsv(rows: HealthLogRow[]): string {
         r.http_status,
         r.ready ? "true" : "false",
         r.last_sync_status ?? "",
-        r.last_sync_age_seconds == null
-          ? ""
-          : (r.last_sync_age_seconds / 3600).toFixed(2),
+        r.last_sync_age_seconds == null ? "" : (r.last_sync_age_seconds / 3600).toFixed(2),
         (r.blockers ?? []).join(" | "),
         (r.warnings ?? []).join(" | "),
       ]

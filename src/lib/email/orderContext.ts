@@ -13,18 +13,14 @@ export type LoadOrderResult =
 
 function buildOrderUrl(slug: string, orderId: string): string {
   const base =
-    process.env.PUBLIC_APP_URL ||
-    process.env.VITE_PUBLIC_APP_URL ||
-    "https://e-marq.lovable.app";
+    process.env.PUBLIC_APP_URL || process.env.VITE_PUBLIC_APP_URL || "https://e-marq.lovable.app";
   const trimmed = base.replace(/\/+$/, "");
   return `${trimmed}/s/${encodeURIComponent(slug)}/orders/${orderId}`;
 }
 
 function buildStoreUrl(slug: string): string {
   const base =
-    process.env.PUBLIC_APP_URL ||
-    process.env.VITE_PUBLIC_APP_URL ||
-    "https://e-marq.lovable.app";
+    process.env.PUBLIC_APP_URL || process.env.VITE_PUBLIC_APP_URL || "https://e-marq.lovable.app";
   const trimmed = base.replace(/\/+$/, "");
   return `${trimmed}/s/${encodeURIComponent(slug)}`;
 }
@@ -33,11 +29,12 @@ function summarizeShipping(shipping: unknown): string | null {
   if (!shipping || typeof shipping !== "object") return null;
   const s = shipping as Record<string, unknown>;
   const city = typeof s.city_name === "string" ? s.city_name : null;
-  const wh = typeof s.warehouse_description === "string"
-    ? s.warehouse_description
-    : typeof s.warehouse_number === "string"
-    ? `Відділення №${s.warehouse_number}`
-    : null;
+  const wh =
+    typeof s.warehouse_description === "string"
+      ? s.warehouse_description
+      : typeof s.warehouse_number === "string"
+        ? `Відділення №${s.warehouse_number}`
+        : null;
   if (!city && !wh) return null;
   return [city, wh].filter(Boolean).join(", ");
 }
@@ -53,24 +50,26 @@ export async function loadOrderEmailContext(orderId: string): Promise<LoadOrderR
 
   if (oErr) return { ok: false, status: 500, error: `DB error: ${oErr.message}` };
   if (!order) return { ok: false, status: 404, error: "Order not found" };
-  if (!order.customer_email) return { ok: false, status: 400, error: "Order has no customer email" };
+  if (!order.customer_email)
+    return { ok: false, status: 400, error: "Order has no customer email" };
 
-  const [{ data: items, error: iErr }, { data: tenant, error: tErr }, { data: cfg }] = await Promise.all([
-    supabaseAdmin
-      .from("order_items")
-      .select("product_name, quantity, unit_price_cents")
-      .eq("order_id", orderId),
-    supabaseAdmin
-      .from("tenants")
-      .select("id, slug, name")
-      .eq("id", order.tenant_id)
-      .maybeSingle(),
-    supabaseAdmin
-      .from("tenant_configs")
-      .select("brand_name, features")
-      .eq("tenant_id", order.tenant_id)
-      .maybeSingle(),
-  ]);
+  const [{ data: items, error: iErr }, { data: tenant, error: tErr }, { data: cfg }] =
+    await Promise.all([
+      supabaseAdmin
+        .from("order_items")
+        .select("product_name, quantity, unit_price_cents")
+        .eq("order_id", orderId),
+      supabaseAdmin
+        .from("tenants")
+        .select("id, slug, name")
+        .eq("id", order.tenant_id)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("tenant_configs")
+        .select("brand_name, features")
+        .eq("tenant_id", order.tenant_id)
+        .maybeSingle(),
+    ]);
 
   if (iErr) return { ok: false, status: 500, error: `DB error (items): ${iErr.message}` };
   if (tErr || !tenant) return { ok: false, status: 404, error: "Tenant not found" };
@@ -93,7 +92,8 @@ export async function loadOrderEmailContext(orderId: string): Promise<LoadOrderR
       unit_price_cents: it.unit_price_cents,
     })),
     paymentMethod: order.payment_method,
-    paymentInstructions: order.payment_method === "manual" ? payments.manual_instructions ?? null : null,
+    paymentInstructions:
+      order.payment_method === "manual" ? (payments.manual_instructions ?? null) : null,
     shippingSummary: summarizeShipping(order.shipping_address),
   };
 

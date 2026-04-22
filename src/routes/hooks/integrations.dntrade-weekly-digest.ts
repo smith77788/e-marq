@@ -29,10 +29,7 @@ type TenantRow = { id: string; name: string };
 const sb = supabaseAdmin as unknown as {
   from: (t: string) => {
     select: (cols: string) => {
-      gte: (
-        c: string,
-        v: string,
-      ) => Promise<{ data: LogRow[] | null; error: unknown }>;
+      gte: (c: string, v: string) => Promise<{ data: LogRow[] | null; error: unknown }>;
     };
   };
 };
@@ -41,9 +38,7 @@ function topN(map: Map<string, number>, n: number): Array<[string, number]> {
   return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, n);
 }
 
-export const Route = createFileRoute(
-  "/hooks/integrations/dntrade-weekly-digest",
-)({
+export const Route = createFileRoute("/hooks/integrations/dntrade-weekly-digest")({
   server: {
     handlers: {
       POST: async ({ request }) => {
@@ -54,9 +49,7 @@ export const Route = createFileRoute(
           return jsonError("Unauthorized", 401);
         }
 
-        const since = new Date(
-          Date.now() - 7 * 24 * 60 * 60 * 1000,
-        ).toISOString();
+        const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
         const logsRes = await sb
           .from("dntrade_health_log")
@@ -77,22 +70,19 @@ export const Route = createFileRoute(
         const warnings = new Map<string, number>();
 
         for (const l of logs) {
-          const cur =
-            perTenant.get(l.tenant_id) ?? {
-              total: 0,
-              healthy: 0,
-              degraded: 0,
-              bad: 0,
-            };
+          const cur = perTenant.get(l.tenant_id) ?? {
+            total: 0,
+            healthy: 0,
+            degraded: 0,
+            bad: 0,
+          };
           cur.total += 1;
           if (l.status === "healthy") cur.healthy += 1;
           else if (l.status === "degraded") cur.degraded += 1;
           else cur.bad += 1;
           perTenant.set(l.tenant_id, cur);
-          for (const b of l.blockers ?? [])
-            blockers.set(b, (blockers.get(b) ?? 0) + 1);
-          for (const w of l.warnings ?? [])
-            warnings.set(w, (warnings.get(w) ?? 0) + 1);
+          for (const b of l.blockers ?? []) blockers.set(b, (blockers.get(b) ?? 0) + 1);
+          for (const w of l.warnings ?? []) warnings.set(w, (warnings.get(w) ?? 0) + 1);
         }
 
         const tenantIds = [...perTenant.keys()];
@@ -137,15 +127,11 @@ export const Route = createFileRoute(
           );
         }
         if (topBlockers.length) {
-          bodyLines.push(
-            "Топ блокерів: " +
-              topBlockers.map(([r, c]) => `${r} (×${c})`).join("; "),
-          );
+          bodyLines.push("Топ блокерів: " + topBlockers.map(([r, c]) => `${r} (×${c})`).join("; "));
         }
         if (topWarnings.length) {
           bodyLines.push(
-            "Топ попереджень: " +
-              topWarnings.map(([r, c]) => `${r} (×${c})`).join("; "),
+            "Топ попереджень: " + topWarnings.map(([r, c]) => `${r} (×${c})`).join("; "),
           );
         }
 

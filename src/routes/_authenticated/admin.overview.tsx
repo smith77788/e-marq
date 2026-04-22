@@ -61,10 +61,11 @@ function AdminOverviewPage() {
     const rows = overviewQuery.data ?? [];
     if (!search) return rows;
     const q = search.toLowerCase();
-    return rows.filter((r) =>
-      r.tenant_name.toLowerCase().includes(q)
-      || r.tenant_slug.toLowerCase().includes(q)
-      || r.plan_key.includes(q),
+    return rows.filter(
+      (r) =>
+        r.tenant_name.toLowerCase().includes(q) ||
+        r.tenant_slug.toLowerCase().includes(q) ||
+        r.plan_key.includes(q),
     );
   }, [overviewQuery.data, search]);
 
@@ -72,7 +73,9 @@ function AdminOverviewPage() {
     const rows = overviewQuery.data ?? [];
     return {
       tenants: rows.length,
-      suspended: rows.filter((r) => r.subscription_status === "suspended" || r.subscription_status === "cancelled").length,
+      suspended: rows.filter(
+        (r) => r.subscription_status === "suspended" || r.subscription_status === "cancelled",
+      ).length,
       orders: rows.reduce((sum, r) => sum + Number(r.orders_this_period ?? 0), 0),
       runs: rows.reduce((sum, r) => sum + Number(r.ai_runs_this_period ?? 0), 0),
     };
@@ -82,7 +85,9 @@ function AdminOverviewPage() {
   if (!isSuperAdmin) {
     return (
       <Card>
-        <CardHeader><CardTitle>Доступ заборонено</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Доступ заборонено</CardTitle>
+        </CardHeader>
       </Card>
     );
   }
@@ -100,13 +105,18 @@ function AdminOverviewPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Огляд по всіх брендах</h1>
         <p className="text-sm text-muted-foreground">
-          Тарифи, баланси, навантаження і стан усіх брендів. Оновлюється автоматично кожні 30 секунд.
+          Тарифи, баланси, навантаження і стан усіх брендів. Оновлюється автоматично кожні 30
+          секунд.
         </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-4">
         <StatBlock label="Брендів" value={totals.tenants} />
-        <StatBlock label="Призупинено / скасовано" value={totals.suspended} accent={totals.suspended > 0 ? "danger" : undefined} />
+        <StatBlock
+          label="Призупинено / скасовано"
+          value={totals.suspended}
+          accent={totals.suspended > 0 ? "danger" : undefined}
+        />
         <StatBlock label="Замовлень за період" value={totals.orders.toLocaleString("uk-UA")} />
         <StatBlock label="Запусків ШІ за період" value={totals.runs.toLocaleString("uk-UA")} />
       </div>
@@ -116,11 +126,18 @@ function AdminOverviewPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <CardTitle>Усі бренди</CardTitle>
-              <CardDescription>{filtered.length} з {overviewQuery.data?.length ?? 0}</CardDescription>
+              <CardDescription>
+                {filtered.length} з {overviewQuery.data?.length ?? 0}
+              </CardDescription>
             </div>
             <div className="relative max-w-xs flex-1">
               <Search className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Пошук…" className="h-8 pl-7 text-xs" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Пошук…"
+                className="h-8 pl-7 text-xs"
+              />
             </div>
           </div>
         </CardHeader>
@@ -148,16 +165,30 @@ function AdminOverviewPage() {
                     >
                       {r.tenant_name}
                     </Link>
-                    <div className="font-mono text-[10px] text-muted-foreground">/{r.tenant_slug}</div>
+                    <div className="font-mono text-[10px] text-muted-foreground">
+                      /{r.tenant_slug}
+                    </div>
                   </TableCell>
-                  <TableCell><PlanBadge planKey={r.plan_key} planName={r.plan_name} /></TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="text-[10px]">{SUB_LABEL[r.subscription_status] ?? r.subscription_status}</Badge>
+                    <PlanBadge planKey={r.plan_key} planName={r.plan_name} />
                   </TableCell>
-                  <TableCell className="text-right font-mono text-xs">{Number(r.ai_runs_this_period).toLocaleString()}</TableCell>
-                  <TableCell className="text-right font-mono text-xs">{Number(r.orders_this_period).toLocaleString()}</TableCell>
-                  <TableCell className="text-right font-mono text-xs">{Number(r.products_count).toLocaleString()}</TableCell>
-                  <TableCell className="text-right font-mono text-xs">{Number(r.customers_count).toLocaleString()}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="text-[10px]">
+                      {SUB_LABEL[r.subscription_status] ?? r.subscription_status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-xs">
+                    {Number(r.ai_runs_this_period).toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-xs">
+                    {Number(r.orders_this_period).toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-xs">
+                    {Number(r.products_count).toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-xs">
+                    {Number(r.customers_count).toLocaleString()}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -168,16 +199,28 @@ function AdminOverviewPage() {
   );
 }
 
-function StatBlock({ label, value, accent }: { label: string; value: number | string; accent?: "warning" | "danger" }) {
+function StatBlock({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: number | string;
+  accent?: "warning" | "danger";
+}) {
   return (
     <Card>
       <CardContent className="pt-4">
         <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-        <p className={`mt-1 text-2xl font-bold tabular-nums ${
-          accent === "warning" ? "text-warning"
-          : accent === "danger" ? "text-destructive"
-          : "text-foreground"
-        }`}>
+        <p
+          className={`mt-1 text-2xl font-bold tabular-nums ${
+            accent === "warning"
+              ? "text-warning"
+              : accent === "danger"
+                ? "text-destructive"
+                : "text-foreground"
+          }`}
+        >
           {value}
         </p>
       </CardContent>

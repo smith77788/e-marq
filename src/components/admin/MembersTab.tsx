@@ -119,7 +119,9 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
 
   const copyInviteLink = (token: string) => {
     const url = `${window.location.origin}/invite/${token}`;
-    navigator.clipboard.writeText(url).then(() => toast.success("Посилання-запрошення скопійовано"));
+    navigator.clipboard
+      .writeText(url)
+      .then(() => toast.success("Посилання-запрошення скопійовано"));
   };
 
   const ROLE_LABEL: Record<Role, string> = {
@@ -133,18 +135,27 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
       <Card>
         <CardHeader>
           <CardTitle>Запросити людину в команду</CardTitle>
-          <CardDescription>Вона отримає особисте посилання, щоб приєднатися до бренду.</CardDescription>
+          <CardDescription>
+            Вона отримає особисте посилання, щоб приєднатися до бренду.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap items-end gap-2">
             <div className="flex-1 min-w-[200px] space-y-2">
               <Label>Email</Label>
-              <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="colleague@example.com" type="email" />
+              <Input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="colleague@example.com"
+                type="email"
+              />
             </div>
             <div className="space-y-2">
               <Label>Роль</Label>
               <Select value={role} onValueChange={(v) => setRole(v as Role)}>
-                <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="member">Учасник</SelectItem>
                   <SelectItem value="admin">Адміністратор</SelectItem>
@@ -172,15 +183,21 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
           <CardContent>
             <ul className="space-y-2">
               {invitesQuery.data.map((inv) => (
-                <li key={inv.id} className="flex items-center justify-between gap-2 rounded-md border border-border bg-muted/20 p-2">
+                <li
+                  key={inv.id}
+                  className="flex items-center justify-between gap-2 rounded-md border border-border bg-muted/20 p-2"
+                >
                   <div className="flex flex-col text-sm">
                     <span className="font-medium">{inv.email}</span>
                     <span className="text-[10px] text-muted-foreground">
-                      роль: {ROLE_LABEL[inv.role as Role] ?? inv.role} · діє до {new Date(inv.expires_at).toLocaleDateString("uk-UA")}
+                      роль: {ROLE_LABEL[inv.role as Role] ?? inv.role} · діє до{" "}
+                      {new Date(inv.expires_at).toLocaleDateString("uk-UA")}
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button size="sm" variant="ghost" onClick={() => copyInviteLink(inv.token)}>Копіювати посилання</Button>
+                    <Button size="sm" variant="ghost" onClick={() => copyInviteLink(inv.token)}>
+                      Копіювати посилання
+                    </Button>
                     <Button
                       size="sm"
                       variant="ghost"
@@ -205,15 +222,29 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
           {membersQuery.data && membersQuery.data.length > 0 ? (
             <ul className="space-y-2">
               {membersQuery.data.map((m) => (
-                <li key={m.user_id} className="flex items-center justify-between gap-2 rounded-md border border-border bg-card p-2">
+                <li
+                  key={m.user_id}
+                  className="flex items-center justify-between gap-2 rounded-md border border-border bg-card p-2"
+                >
                   <div className="flex items-center gap-2">
-                    {m.role === "owner" ? <Crown className="h-4 w-4 text-warning" /> : <User className="h-4 w-4 text-muted-foreground" />}
+                    {m.role === "owner" ? (
+                      <Crown className="h-4 w-4 text-warning" />
+                    ) : (
+                      <User className="h-4 w-4 text-muted-foreground" />
+                    )}
                     <span className="font-mono text-xs">{m.user_id}</span>
                     <Badge variant="outline">{ROLE_LABEL[m.role as Role] ?? m.role}</Badge>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Select value={m.role} onValueChange={(v) => updateRole.mutate({ userId: m.user_id, newRole: v as Role })}>
-                      <SelectTrigger className="h-7 w-36 text-xs"><SelectValue /></SelectTrigger>
+                    <Select
+                      value={m.role}
+                      onValueChange={(v) =>
+                        updateRole.mutate({ userId: m.user_id, newRole: v as Role })
+                      }
+                    >
+                      <SelectTrigger className="h-7 w-36 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="member">Учасник</SelectItem>
                         <SelectItem value="admin">Адміністратор</SelectItem>

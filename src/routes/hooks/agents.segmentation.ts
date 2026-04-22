@@ -38,7 +38,9 @@ export const Route = createFileRoute("/hooks/agents/segmentation")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -78,7 +80,8 @@ export const Route = createFileRoute("/hooks/agents/segmentation")({
             newcomer: { count: 0, revenue: 0 },
           };
 
-          const updates: Array<{ id: string; segment: string; metadata: Record<string, unknown> }> = [];
+          const updates: Array<{ id: string; segment: string; metadata: Record<string, unknown> }> =
+            [];
           for (const c of customers) {
             const lastDays = c.last_order_at
               ? (now - new Date(c.last_order_at).getTime()) / 86_400_000
@@ -96,7 +99,11 @@ export const Route = createFileRoute("/hooks/agents/segmentation")({
               updates.push({
                 id: c.id,
                 segment: seg,
-                metadata: { ...(c.metadata ?? {}), segment: seg, segment_updated_at: new Date().toISOString() },
+                metadata: {
+                  ...(c.metadata ?? {}),
+                  segment: seg,
+                  segment_updated_at: new Date().toISOString(),
+                },
               });
             }
           }
@@ -155,7 +162,9 @@ export const Route = createFileRoute("/hooks/agents/segmentation")({
           });
         } catch (e) {
           await failAgentRun(handle, e);
-          return jsonError("Agent failed", 500, { details: e instanceof Error ? e.message : String(e) });
+          return jsonError("Agent failed", 500, {
+            details: e instanceof Error ? e.message : String(e),
+          });
         }
       },
     },

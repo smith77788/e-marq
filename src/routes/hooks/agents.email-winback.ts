@@ -40,7 +40,11 @@ const MAX_DAYS_DORMANT = 180;
 const BATCH_LIMIT = 50;
 
 function appBase(): string {
-  return (process.env.PUBLIC_APP_URL || process.env.VITE_PUBLIC_APP_URL || "https://e-marq.lovable.app").replace(/\/+$/, "");
+  return (
+    process.env.PUBLIC_APP_URL ||
+    process.env.VITE_PUBLIC_APP_URL ||
+    "https://e-marq.lovable.app"
+  ).replace(/\/+$/, "");
 }
 
 function generatePromoCode(): string {
@@ -54,7 +58,9 @@ export const Route = createFileRoute("/hooks/agents/email-winback")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -80,7 +86,11 @@ export const Route = createFileRoute("/hooks/agents/email-winback")({
 
           const [{ data: tenant }, { data: cfg }] = await Promise.all([
             supabaseAdmin.from("tenants").select("slug, name").eq("id", tenantId).maybeSingle(),
-            supabaseAdmin.from("tenant_configs").select("brand_name").eq("tenant_id", tenantId).maybeSingle(),
+            supabaseAdmin
+              .from("tenant_configs")
+              .select("brand_name")
+              .eq("tenant_id", tenantId)
+              .maybeSingle(),
           ]);
           if (!tenant) {
             await finishAgentRun(handle, 0, { reason: "no_tenant" });
@@ -91,7 +101,9 @@ export const Route = createFileRoute("/hooks/agents/email-winback")({
 
           const { data: candidates } = await supabaseAdmin
             .from("customers")
-            .select("id, email, name, last_order_at, consent_marketing, unsubscribe_token, lifecycle_stage")
+            .select(
+              "id, email, name, last_order_at, consent_marketing, unsubscribe_token, lifecycle_stage",
+            )
             .eq("tenant_id", tenantId)
             .eq("consent_marketing", true)
             .in("lifecycle_stage", ["at_risk", "dormant"])
@@ -133,8 +145,14 @@ export const Route = createFileRoute("/hooks/agents/email-winback")({
           let skipped = 0;
           for (const c of candidates) {
             const email = c.email!.toLowerCase();
-            if (recentAnySet.has(email) || recentWbSet.has(email)) { skipped++; continue; }
-            if (!c.last_order_at) { skipped++; continue; }
+            if (recentAnySet.has(email) || recentWbSet.has(email)) {
+              skipped++;
+              continue;
+            }
+            if (!c.last_order_at) {
+              skipped++;
+              continue;
+            }
             const daysSince = Math.floor((now - new Date(c.last_order_at).getTime()) / dayMs);
 
             // Створюємо унікальний промокод (повторюємо до 5 разів якщо collision)
@@ -165,7 +183,10 @@ export const Route = createFileRoute("/hooks/agents/email-winback")({
                 promoId = inserted.id;
               }
             }
-            if (!promoId) { skipped++; continue; }
+            if (!promoId) {
+              skipped++;
+              continue;
+            }
 
             const unsubUrl = `${appBase()}/api/public/email/unsubscribe?t=${encodeURIComponent(c.unsubscribe_token)}`;
             const { subject, html, text } = renderWinback({
@@ -214,7 +235,9 @@ export const Route = createFileRoute("/hooks/agents/email-winback")({
           return jsonOk({ insights_created: 0, sent, skipped, considered: candidates.length });
         } catch (err) {
           await failAgentRun(handle, err);
-          return jsonError("Email winback failed", 500, { details: err instanceof Error ? err.message : String(err) });
+          return jsonError("Email winback failed", 500, {
+            details: err instanceof Error ? err.message : String(err),
+          });
         }
       },
     },

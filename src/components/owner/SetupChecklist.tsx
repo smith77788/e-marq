@@ -33,16 +33,32 @@ export function SetupChecklist({ tenantId, tenantSlug }: Props) {
       const [tenantRes, configRes, productsRes, customersRes, eventsRes, membersRes, routingRes] =
         await Promise.all([
           supabase.from("tenants").select("id, name").eq("id", tenantId).maybeSingle(),
-          supabase.from("tenant_configs").select("bot, features").eq("tenant_id", tenantId).maybeSingle(),
-          supabase.from("products").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).limit(1),
-          supabase.from("customers").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).limit(1),
+          supabase
+            .from("tenant_configs")
+            .select("bot, features")
+            .eq("tenant_id", tenantId)
+            .maybeSingle(),
+          supabase
+            .from("products")
+            .select("id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId)
+            .limit(1),
+          supabase
+            .from("customers")
+            .select("id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId)
+            .limit(1),
           supabase
             .from("events")
             .select("id", { count: "exact", head: true })
             .eq("tenant_id", tenantId)
             .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
             .limit(1),
-          supabase.from("tenant_memberships").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).limit(1),
+          supabase
+            .from("tenant_memberships")
+            .select("id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId)
+            .limit(1),
           supabase
             .from("telegram_chat_routing")
             .select("chat_id", { count: "exact", head: true })
@@ -123,7 +139,9 @@ export function SetupChecklist({ tenantId, tenantSlug }: Props) {
                 ) : (
                   <Circle className="h-4 w-4 shrink-0 text-muted-foreground/40" />
                 )}
-                <span className={ok ? "text-foreground" : "text-muted-foreground"}>{t(it.labelKey)}</span>
+                <span className={ok ? "text-foreground" : "text-muted-foreground"}>
+                  {t(it.labelKey)}
+                </span>
               </li>
             );
           })}

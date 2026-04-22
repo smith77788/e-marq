@@ -118,7 +118,5 @@ export function humanizeAgentId(id: string): string {
   if (!id) return "Агент";
   if (AGENT_HUMAN_LABELS[id]) return AGENT_HUMAN_LABELS[id];
   // Fallback: snake/kebab → "Words"
-  return id
-    .replace(/[_-]+/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return id.replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }

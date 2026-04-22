@@ -76,11 +76,7 @@ export function DetailControllerProvider({ children }: { children: React.ReactNo
 
       // Rehydrate from URL if this is the targeted element.
       const fromUrl = readUrlKey();
-      if (
-        fromUrl &&
-        fromUrl.resourceType === resourceType &&
-        fromUrl.elementId === elementId
-      ) {
+      if (fromUrl && fromUrl.resourceType === resourceType && fromUrl.elementId === elementId) {
         // Defer to next tick so multiple wrappers mounting in same frame don't fight.
         queueMicrotask(() => {
           setState((prev) => {

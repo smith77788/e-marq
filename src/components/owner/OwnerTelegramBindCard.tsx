@@ -83,7 +83,12 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
     setTimeout(() => refetch(), 4000);
   };
 
-  const STATUS_LABEL: Record<string, string> = { sent: "надіслано", failed: "помилка", queued: "у черзі", pending: "очікує" };
+  const STATUS_LABEL: Record<string, string> = {
+    sent: "надіслано",
+    failed: "помилка",
+    queued: "у черзі",
+    pending: "очікує",
+  };
   const KIND_LABEL: Record<string, string> = {
     insight: "підказка",
     test_ping: "тестове",
@@ -104,7 +109,9 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
           )}
           Сповіщення в Telegram для власника
           {isBound ? (
-            <Badge variant="outline" className="border-success/40 text-success">підключено</Badge>
+            <Badge variant="outline" className="border-success/40 text-success">
+              підключено
+            </Badge>
           ) : (
             <Badge variant="outline">не підключено</Badge>
           )}
@@ -149,7 +156,9 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
                       key={i}
                       className="flex items-center justify-between rounded border border-border/50 px-2 py-1 text-xs"
                     >
-                      <span className="text-muted-foreground">{KIND_LABEL[r.source_kind] ?? r.source_kind}</span>
+                      <span className="text-muted-foreground">
+                        {KIND_LABEL[r.source_kind] ?? r.source_kind}
+                      </span>
                       <Badge
                         variant="outline"
                         className={
@@ -186,8 +195,7 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
               <li>Бот відповість, і ваш чат автоматично прив'яжеться тут.</li>
             </ol>
             <Button size="sm" variant="outline" onClick={() => refetch()}>
-              <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
-              Я надіслав команду — перевірте зараз
+              <RefreshCw className="mr-1.5 h-3.5 w-3.5" />Я надіслав команду — перевірте зараз
             </Button>
           </>
         )}

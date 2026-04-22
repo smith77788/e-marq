@@ -38,7 +38,9 @@ export const Route = createFileRoute("/hooks/agents/bot-quality")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -66,7 +68,8 @@ export const Route = createFileRoute("/hooks/agents/bot-quality")({
           const rows = (convs ?? []) as ConvRow[];
           // Outbound messages from sales bot
           const outbound = rows.filter(
-            (r) => r.direction === "outbound" && r.metadata?.source === "sales_bot" && r.customer_id,
+            (r) =>
+              r.direction === "outbound" && r.metadata?.source === "sales_bot" && r.customer_id,
           );
           // Inbound by customer
           const inboundByCustomer = new Map<string, number[]>();
@@ -118,7 +121,8 @@ export const Route = createFileRoute("/hooks/agents/bot-quality")({
           }
 
           const replyRate = outbound.length > 0 ? replied / outbound.length : 0;
-          const conversionRate = customersContacted.size > 0 ? conversions / customersContacted.size : 0;
+          const conversionRate =
+            customersContacted.size > 0 ? conversions / customersContacted.size : 0;
 
           const insights: AgentInsightInput[] = [];
           if (outbound.length >= 20 && replyRate < 0.15) {
@@ -180,7 +184,9 @@ export const Route = createFileRoute("/hooks/agents/bot-quality")({
           });
         } catch (e) {
           await failAgentRun(handle, e);
-          return jsonError("Agent failed", 500, { details: e instanceof Error ? e.message : String(e) });
+          return jsonError("Agent failed", 500, {
+            details: e instanceof Error ? e.message : String(e),
+          });
         }
       },
     },

@@ -42,8 +42,7 @@ export function EmptyState({
   const isCompact = variant === "compact";
   const wrapperClass = cn(
     "flex flex-col items-center justify-center gap-3 text-center",
-    variant === "card" &&
-      "rounded-lg border border-dashed border-border bg-muted/20 px-6 py-10",
+    variant === "card" && "rounded-lg border border-dashed border-border bg-muted/20 px-6 py-10",
     variant === "inline" && "px-4 py-8",
     isCompact && "px-3 py-6",
     className,
@@ -61,12 +60,7 @@ export function EmptyState({
         <Icon className={isCompact ? "h-4 w-4" : "h-5 w-5"} />
       </div>
       <div className="space-y-1">
-        <p
-          className={cn(
-            "font-medium text-foreground",
-            isCompact ? "text-sm" : "text-base",
-          )}
-        >
+        <p className={cn("font-medium text-foreground", isCompact ? "text-sm" : "text-base")}>
           {title}
         </p>
         {description ? (

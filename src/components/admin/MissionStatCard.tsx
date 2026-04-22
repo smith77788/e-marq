@@ -52,9 +52,7 @@ export function MissionStatCard({
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             {label}
           </p>
-          <p className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
-            {value}
-          </p>
+          <p className="text-2xl font-bold tracking-tight text-foreground tabular-nums">{value}</p>
           {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
         </div>
         <div
@@ -78,9 +76,7 @@ export function MissionStatCard({
           >
             {trend.value >= 0 ? "▲" : "▼"} {Math.abs(trend.value).toFixed(1)}%
           </span>
-          {trend.label && (
-            <span className="text-muted-foreground">{trend.label}</span>
-          )}
+          {trend.label && <span className="text-muted-foreground">{trend.label}</span>}
         </div>
       )}
     </div>

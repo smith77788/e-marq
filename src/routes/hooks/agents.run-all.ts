@@ -3,11 +3,7 @@
  * Body: { tenant_id }
  */
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  authorizeAgentRequest,
-  jsonError,
-  jsonOk,
-} from "@/lib/acos/agentRuntime";
+import { authorizeAgentRequest, jsonError, jsonOk } from "@/lib/acos/agentRuntime";
 
 const AGENTS = [
   // Original ACOS agents
@@ -136,7 +132,9 @@ export const Route = createFileRoute("/hooks/agents/run-all")({
         );
 
         const summary = results.map((r, i) =>
-          r.status === "fulfilled" ? r.value : { agent: AGENTS[i], ok: false, error: String(r.reason) },
+          r.status === "fulfilled"
+            ? r.value
+            : { agent: AGENTS[i], ok: false, error: String(r.reason) },
         );
         const totalCreated = summary.reduce((s, r) => {
           const v = (r as Record<string, unknown>).insights_created;

@@ -20,13 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -137,8 +131,7 @@ export function ProductVariantsPanel({ tenantId, productId, hasVariants }: Props
   });
 
   const variants = variantsQuery.data ?? [];
-  const invalidate = () =>
-    qc.invalidateQueries({ queryKey: ["product-variants", productId] });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["product-variants", productId] });
 
   const toggleHasVariants = useMutation({
     mutationFn: async (next: boolean) => {
@@ -197,12 +190,10 @@ export function ProductVariantsPanel({ tenantId, productId, hasVariants }: Props
     const priceNum = Number(form.price);
     const compareNum = form.compareAt ? Number(form.compareAt) : null;
     const stockNum = Number(form.stock);
-    if (!Number.isFinite(priceNum) || priceNum < 0)
-      throw new Error("Ціна має бути числом ≥ 0");
+    if (!Number.isFinite(priceNum) || priceNum < 0) throw new Error("Ціна має бути числом ≥ 0");
     if (compareNum != null && (!Number.isFinite(compareNum) || compareNum < 0))
       throw new Error("Ціна до знижки має бути числом ≥ 0");
-    if (!Number.isInteger(stockNum) || stockNum < 0)
-      throw new Error("Залишок має бути цілим ≥ 0");
+    if (!Number.isInteger(stockNum) || stockNum < 0) throw new Error("Залишок має бути цілим ≥ 0");
     return {
       sku: form.sku.trim() || null,
       option_1_name: form.o1n.trim() || null,
@@ -258,10 +249,7 @@ export function ProductVariantsPanel({ tenantId, productId, hasVariants }: Props
 
   const deleteMutation = useMutation({
     mutationFn: async (v: Variant) => {
-      const { error } = await supabase
-        .from("product_variants")
-        .delete()
-        .eq("id", v.id);
+      const { error } = await supabase.from("product_variants").delete().eq("id", v.id);
       if (error) throw error;
       // Auto-disable has_variants when none remain.
       if (variants.length === 1) await toggleHasVariants.mutateAsync(false);

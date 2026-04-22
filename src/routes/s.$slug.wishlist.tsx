@@ -74,8 +74,8 @@ function WishlistPage() {
           <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
             <Heart className="h-10 w-10 text-muted-foreground" />
             <p className="max-w-sm text-sm text-muted-foreground">
-              Натисніть ❤ на картці товару, щоб зберегти його сюди — список збережеться
-              на цьому пристрої навіть після закриття вкладки.
+              Натисніть ❤ на картці товару, щоб зберегти його сюди — список збережеться на цьому
+              пристрої навіть після закриття вкладки.
             </p>
             <Button asChild>
               <Link to="/s/$slug" params={{ slug }}>

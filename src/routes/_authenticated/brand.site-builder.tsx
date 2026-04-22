@@ -369,10 +369,7 @@ function BrandSiteBuilderPage() {
             </TabsContent>
 
             <TabsContent value="builds" className="mt-4">
-              <BuildsTab
-                builds={buildsQuery.data ?? []}
-                isLoading={buildsQuery.isLoading}
-              />
+              <BuildsTab builds={buildsQuery.data ?? []} isLoading={buildsQuery.isLoading} />
             </TabsContent>
           </Tabs>
 
@@ -461,8 +458,7 @@ type FieldProps = {
 
 function ProfileTab({ draft, setDraft }: FieldProps) {
   const { t } = useT();
-  const set = (k: keyof ProfileDraft, v: string) =>
-    setDraft({ ...draft, [k]: v });
+  const set = (k: keyof ProfileDraft, v: string) => setDraft({ ...draft, [k]: v });
 
   return (
     <Card>
@@ -558,8 +554,7 @@ function ProfileTab({ draft, setDraft }: FieldProps) {
 
 function ThemeTab({ draft, setDraft }: FieldProps) {
   const { t } = useT();
-  const set = (k: keyof ProfileDraft, v: string) =>
-    setDraft({ ...draft, [k]: v });
+  const set = (k: keyof ProfileDraft, v: string) => setDraft({ ...draft, [k]: v });
   return (
     <Card>
       <CardHeader>
@@ -608,7 +603,8 @@ function ThemeTab({ draft, setDraft }: FieldProps) {
               {draft.tagline || "Your tagline"}
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              {draft.description || "Описання бренду — як вас має сприйняти клієнт у перші 3 секунди."}
+              {draft.description ||
+                "Описання бренду — як вас має сприйняти клієнт у перші 3 секунди."}
             </p>
             <button
               type="button"
@@ -626,8 +622,7 @@ function ThemeTab({ draft, setDraft }: FieldProps) {
 
 function ContentTab({ draft, setDraft }: FieldProps) {
   const { t } = useT();
-  const set = (k: keyof ProfileDraft, v: string) =>
-    setDraft({ ...draft, [k]: v });
+  const set = (k: keyof ProfileDraft, v: string) => setDraft({ ...draft, [k]: v });
   return (
     <Card>
       <CardHeader>

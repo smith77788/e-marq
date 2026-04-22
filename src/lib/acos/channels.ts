@@ -25,7 +25,9 @@ type TenantBotConfig = {
   email?: { from?: string; reply_to?: string };
 };
 
-async function getTenantBot(tenantId: string): Promise<{ bot: TenantBotConfig; brandName: string }> {
+async function getTenantBot(
+  tenantId: string,
+): Promise<{ bot: TenantBotConfig; brandName: string }> {
   const { data } = await supabaseAdmin
     .from("tenant_configs")
     .select("bot, brand_name")
@@ -89,7 +91,10 @@ async function sendTelegramOutbound(
 }
 
 function bodyToHtml(body: string): string {
-  return body.split("\n").map((l) => l).join("<br>");
+  return body
+    .split("\n")
+    .map((l) => l)
+    .join("<br>");
 }
 
 async function sendEmail(
@@ -110,8 +115,13 @@ async function sendEmail(
   const to = customer?.email;
   if (!to) return { ok: false, error: "Customer has no email" };
 
-  const firstLine = row.body.split("\n")[0]?.replace(/<[^>]+>/g, "").trim() ?? "";
-  const subject = firstLine.length > 4 && firstLine.length < 80 ? firstLine : `A note from ${brandName}`;
+  const firstLine =
+    row.body
+      .split("\n")[0]
+      ?.replace(/<[^>]+>/g, "")
+      .trim() ?? "";
+  const subject =
+    firstLine.length > 4 && firstLine.length < 80 ? firstLine : `A note from ${brandName}`;
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -124,8 +134,13 @@ async function sendEmail(
       reply_to: replyTo,
     }),
   });
-  const json = (await res.json().catch(() => ({}))) as { id?: string; message?: string; name?: string };
-  if (!res.ok || !json.id) return { ok: false, error: json.message ?? json.name ?? `HTTP ${res.status}` };
+  const json = (await res.json().catch(() => ({}))) as {
+    id?: string;
+    message?: string;
+    name?: string;
+  };
+  if (!res.ok || !json.id)
+    return { ok: false, error: json.message ?? json.name ?? `HTTP ${res.status}` };
   return { ok: true, channel_message_id: json.id };
 }
 
@@ -168,7 +183,10 @@ export async function dispatchTenantOutbound(
         payload: { outbound_id: r.id, channel: r.channel } as never,
       });
       if (r.customer_id) {
-        await supabaseAdmin.from("customers").update({ last_contacted_at: now }).eq("id", r.customer_id);
+        await supabaseAdmin
+          .from("customers")
+          .update({ last_contacted_at: now })
+          .eq("id", r.customer_id);
       }
       sent++;
     } else {
@@ -183,7 +201,9 @@ export async function dispatchTenantOutbound(
 }
 
 /** Pick best channel for a customer. Telegram first (free + interactive), email fallback. */
-export async function pickChannelForCustomer(customerId: string): Promise<"telegram" | "email" | null> {
+export async function pickChannelForCustomer(
+  customerId: string,
+): Promise<"telegram" | "email" | null> {
   const { data } = await supabaseAdmin
     .from("customers")
     .select("telegram_chat_id, email, consent_marketing")

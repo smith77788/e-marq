@@ -72,7 +72,8 @@ export function OwnerPlanSwitcher({
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (plansQuery.isLoading) return <p className="text-xs text-muted-foreground">Завантажую тарифи…</p>;
+  if (plansQuery.isLoading)
+    return <p className="text-xs text-muted-foreground">Завантажую тарифи…</p>;
   const plans = plansQuery.data ?? [];
 
   return (
@@ -83,7 +84,8 @@ export function OwnerPlanSwitcher({
           Обрати тариф
         </CardTitle>
         <CardDescription>
-          Перемикайся між публічними тарифами в один клік. Нові щомісячні AI-кредити нараховуються одразу.
+          Перемикайся між публічними тарифами в один клік. Нові щомісячні AI-кредити нараховуються
+          одразу.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -120,7 +122,9 @@ export function OwnerPlanSwitcher({
                   <p className="mt-1 text-xs text-muted-foreground">{p.description}</p>
                 )}
                 <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
-                  <li>✦ {p.max_ai_credits_monthly_grant.toLocaleString("uk-UA")} AI-кредитів/міс</li>
+                  <li>
+                    ✦ {p.max_ai_credits_monthly_grant.toLocaleString("uk-UA")} AI-кредитів/міс
+                  </li>
                   <li>✦ {p.max_products ?? "Без ліміту"} товарів</li>
                   <li>✦ {p.max_orders_per_month ?? "Без ліміту"} замовлень/міс</li>
                 </ul>
@@ -131,7 +135,11 @@ export function OwnerPlanSwitcher({
                   disabled={isCurrent || change.isPending}
                   onClick={() => change.mutate(p.key)}
                 >
-                  {isCurrent ? "Уже активний" : change.isPending ? "Оновлюю…" : "Перейти на цей тариф"}
+                  {isCurrent
+                    ? "Уже активний"
+                    : change.isPending
+                      ? "Оновлюю…"
+                      : "Перейти на цей тариф"}
                 </Button>
               </div>
             );

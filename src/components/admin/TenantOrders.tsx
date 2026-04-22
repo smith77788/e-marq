@@ -363,9 +363,7 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
               }
               disabled={markPaidMutation.isPending}
             >
-              {markPaidMutation.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
+              {markPaidMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Так, оплачено
             </Button>
           </DialogFooter>
@@ -381,8 +379,8 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Скасувати це замовлення?</AlertDialogTitle>
             <AlertDialogDescription>
-              Замовлення №{cancelingOrder?.id.slice(0, 8)}. Якщо воно було оплачене — залишок товару повернеться.
-              Скасувати дію через інтерфейс пізніше не вийде.
+              Замовлення №{cancelingOrder?.id.slice(0, 8)}. Якщо воно було оплачене — залишок товару
+              повернеться. Скасувати дію через інтерфейс пізніше не вийде.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

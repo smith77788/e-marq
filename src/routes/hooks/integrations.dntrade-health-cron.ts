@@ -52,8 +52,7 @@ function evaluateHealth(integ: IntegRow): HealthResult {
   const blockers: string[] = [];
   if (!checks.is_active) blockers.push("Інтеграція вимкнена.");
   if (!checks.api_key_configured) blockers.push("Не задано API key.");
-  if (!checks.webhook_secret_configured)
-    blockers.push("Не згенеровано webhook_secret.");
+  if (!checks.webhook_secret_configured) blockers.push("Не згенеровано webhook_secret.");
 
   const ready = blockers.length === 0;
 
@@ -62,9 +61,7 @@ function evaluateHealth(integ: IntegRow): HealthResult {
   if (integ.last_sync_at) {
     lastSyncAgeMs = Date.now() - new Date(integ.last_sync_at).getTime();
     if (lastSyncAgeMs > STALE_SYNC_MS) {
-      warnings.push(
-        `Остання синхронізація > ${Math.round(lastSyncAgeMs / 3600000)} год тому.`,
-      );
+      warnings.push(`Остання синхронізація > ${Math.round(lastSyncAgeMs / 3600000)} год тому.`);
     }
   } else {
     warnings.push("Жодної синхронізації ще не було.");
@@ -86,15 +83,11 @@ function evaluateHealth(integ: IntegRow): HealthResult {
     blockers,
     warnings,
     last_sync_status: integ.last_sync_status,
-    last_sync_age_seconds:
-      lastSyncAgeMs == null ? null : Math.round(lastSyncAgeMs / 1000),
+    last_sync_age_seconds: lastSyncAgeMs == null ? null : Math.round(lastSyncAgeMs / 1000),
   };
 }
 
-async function hasRecentAlert(
-  tenantId: string,
-  kind: string,
-): Promise<boolean> {
+async function hasRecentAlert(tenantId: string, kind: string): Promise<boolean> {
   const since = new Date(Date.now() - ALERT_DEDUP_MS).toISOString();
   const { data } = await supabaseAdmin
     .from("owner_notifications")
@@ -112,24 +105,28 @@ const sb = supabaseAdmin as unknown as {
   from: (t: string) => {
     insert: (row: Record<string, unknown>) => Promise<{ error: unknown }>;
     select: (cols: string) => {
-      eq: (c: string, v: unknown) => {
-        eq: (c: string, v: unknown) => {
-          gte: (c: string, v: unknown) => {
+      eq: (
+        c: string,
+        v: unknown,
+      ) => {
+        eq: (
+          c: string,
+          v: unknown,
+        ) => {
+          gte: (
+            c: string,
+            v: unknown,
+          ) => {
             limit: (n: number) => Promise<{ data: unknown[] | null; error: unknown }>;
           };
         };
       };
     };
   };
-  rpc: (
-    name: string,
-    args: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: unknown }>;
+  rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
 };
 
-export const Route = createFileRoute(
-  "/hooks/integrations/dntrade-health-cron",
-)({
+export const Route = createFileRoute("/hooks/integrations/dntrade-health-cron")({
   server: {
     handlers: {
       POST: async ({ request }) => {
@@ -191,16 +188,12 @@ export const Route = createFileRoute(
 
           // 3a. Тривалий unhealthy.
           if (h.status === "unhealthy" || h.status === "missing") {
-            const { data: streakData } = await sb.rpc(
-              "dntrade_unhealthy_streak_minutes",
-              { _tenant_id: integ.tenant_id },
-            );
+            const { data: streakData } = await sb.rpc("dntrade_unhealthy_streak_minutes", {
+              _tenant_id: integ.tenant_id,
+            });
             const streak = Number(streakData ?? 0);
             if (streak >= ALERT_UNHEALTHY_MIN) {
-              const recent = await hasRecentAlert(
-                integ.tenant_id,
-                "dntrade_unhealthy",
-              );
+              const recent = await hasRecentAlert(integ.tenant_id, "dntrade_unhealthy");
               if (!recent) {
                 await supabaseAdmin.from("owner_notifications").insert({
                   tenant_id: integ.tenant_id,
@@ -223,19 +216,13 @@ export const Route = createFileRoute(
 
           // 3b. Повторювані partial-синки.
           if (!alerted) {
-            const { data: partialData } = await sb.rpc(
-              "dntrade_partial_count_recent",
-              {
-                _tenant_id: integ.tenant_id,
-                _hours: ALERT_PARTIAL_WINDOW_HOURS,
-              },
-            );
+            const { data: partialData } = await sb.rpc("dntrade_partial_count_recent", {
+              _tenant_id: integ.tenant_id,
+              _hours: ALERT_PARTIAL_WINDOW_HOURS,
+            });
             const partialCount = Number(partialData ?? 0);
             if (partialCount >= ALERT_PARTIAL_THRESHOLD) {
-              const recent = await hasRecentAlert(
-                integ.tenant_id,
-                "dntrade_partial_repeat",
-              );
+              const recent = await hasRecentAlert(integ.tenant_id, "dntrade_partial_repeat");
               if (!recent) {
                 await supabaseAdmin.from("owner_notifications").insert({
                   tenant_id: integ.tenant_id,
