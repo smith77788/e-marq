@@ -22,6 +22,7 @@ import { SetupChecklist } from "@/components/owner/SetupChecklist";
 import { SetupReadinessCard } from "@/components/owner/SetupReadinessCard";
 import { AnalyticsWindowProvider, AnalyticsWindowToggle } from "@/components/owner/AnalyticsWindow";
 import { CockpitHero } from "@/components/owner/CockpitHero";
+import { AskPinsBoard } from "@/components/owner/AskPinsBoard";
 import { FunnelChart } from "@/components/owner/FunnelChart";
 import { CohortRetention } from "@/components/owner/CohortRetention";
 import { AgentHealthHeatmap } from "@/components/owner/AgentHealthHeatmap";
@@ -133,6 +134,8 @@ function BrandPage() {
       <DnTradeIntegrationCard tenantId={current.tenant_id} />
 
       <CockpitHero tenantId={current.tenant_id} />
+
+      <AskPinsBoard />
 
       <AnalyticsWindowProvider initial={30}>
         <div className="flex items-center justify-between">
