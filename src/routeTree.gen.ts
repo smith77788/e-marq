@@ -164,6 +164,8 @@ import { Route as AuthenticatedBrandEmailRouteImport } from './routes/_authentic
 import { Route as AuthenticatedBrandCatalogRouteImport } from './routes/_authenticated/brand.catalog'
 import { Route as AuthenticatedBrandBillingRouteImport } from './routes/_authenticated/brand.billing'
 import { Route as AuthenticatedAgentsLiveRouteImport } from './routes/_authenticated/agents.live'
+import { Route as AuthenticatedAgentsLibraryRouteImport } from './routes/_authenticated/agents.library'
+import { Route as AuthenticatedAgentsAgentIdRouteImport } from './routes/_authenticated/agents.$agentId'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminTopupRequestsRouteImport } from './routes/_authenticated/admin.topup-requests'
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin.tenants'
@@ -1042,6 +1044,18 @@ const AuthenticatedAgentsLiveRoute = AuthenticatedAgentsLiveRouteImport.update({
   path: '/agents/live',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAgentsLibraryRoute =
+  AuthenticatedAgentsLibraryRouteImport.update({
+    id: '/agents/library',
+    path: '/agents/library',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAgentsAgentIdRoute =
+  AuthenticatedAgentsAgentIdRouteImport.update({
+    id: '/agents/$agentId',
+    path: '/agents/$agentId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   id: '/admin/users',
   path: '/admin/users',
@@ -1244,6 +1258,8 @@ export interface FileRoutesByFullPath {
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/admin/topup-requests': typeof AuthenticatedAdminTopupRequestsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/agents/$agentId': typeof AuthenticatedAgentsAgentIdRoute
+  '/agents/library': typeof AuthenticatedAgentsLibraryRoute
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/brand/catalog': typeof AuthenticatedBrandCatalogRoute
@@ -1429,6 +1445,8 @@ export interface FileRoutesByTo {
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/admin/topup-requests': typeof AuthenticatedAdminTopupRequestsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/agents/$agentId': typeof AuthenticatedAgentsAgentIdRoute
+  '/agents/library': typeof AuthenticatedAgentsLibraryRoute
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/brand/catalog': typeof AuthenticatedBrandCatalogRoute
@@ -1617,6 +1635,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/_authenticated/admin/topup-requests': typeof AuthenticatedAdminTopupRequestsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/agents/$agentId': typeof AuthenticatedAgentsAgentIdRoute
+  '/_authenticated/agents/library': typeof AuthenticatedAgentsLibraryRoute
   '/_authenticated/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/_authenticated/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/_authenticated/brand/catalog': typeof AuthenticatedBrandCatalogRoute
@@ -1805,6 +1825,8 @@ export interface FileRouteTypes {
     | '/admin/tenants'
     | '/admin/topup-requests'
     | '/admin/users'
+    | '/agents/$agentId'
+    | '/agents/library'
     | '/agents/live'
     | '/brand/billing'
     | '/brand/catalog'
@@ -1990,6 +2012,8 @@ export interface FileRouteTypes {
     | '/admin/tenants'
     | '/admin/topup-requests'
     | '/admin/users'
+    | '/agents/$agentId'
+    | '/agents/library'
     | '/agents/live'
     | '/brand/billing'
     | '/brand/catalog'
@@ -2177,6 +2201,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tenants'
     | '/_authenticated/admin/topup-requests'
     | '/_authenticated/admin/users'
+    | '/_authenticated/agents/$agentId'
+    | '/_authenticated/agents/library'
     | '/_authenticated/agents/live'
     | '/_authenticated/brand/billing'
     | '/_authenticated/brand/catalog'
@@ -3575,6 +3601,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgentsLiveRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/agents/library': {
+      id: '/_authenticated/agents/library'
+      path: '/agents/library'
+      fullPath: '/agents/library'
+      preLoaderRoute: typeof AuthenticatedAgentsLibraryRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/agents/$agentId': {
+      id: '/_authenticated/agents/$agentId'
+      path: '/agents/$agentId'
+      fullPath: '/agents/$agentId'
+      preLoaderRoute: typeof AuthenticatedAgentsAgentIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/users': {
       id: '/_authenticated/admin/users'
       path: '/admin/users'
@@ -3873,6 +3913,8 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminTenantsRoute: typeof AuthenticatedAdminTenantsRouteWithChildren
   AuthenticatedAdminTopupRequestsRoute: typeof AuthenticatedAdminTopupRequestsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
+  AuthenticatedAgentsAgentIdRoute: typeof AuthenticatedAgentsAgentIdRoute
+  AuthenticatedAgentsLibraryRoute: typeof AuthenticatedAgentsLibraryRoute
   AuthenticatedAgentsLiveRoute: typeof AuthenticatedAgentsLiveRoute
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -3892,6 +3934,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminTenantsRoute: AuthenticatedAdminTenantsRouteWithChildren,
   AuthenticatedAdminTopupRequestsRoute: AuthenticatedAdminTopupRequestsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
+  AuthenticatedAgentsAgentIdRoute: AuthenticatedAgentsAgentIdRoute,
+  AuthenticatedAgentsLibraryRoute: AuthenticatedAgentsLibraryRoute,
   AuthenticatedAgentsLiveRoute: AuthenticatedAgentsLiveRoute,
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
