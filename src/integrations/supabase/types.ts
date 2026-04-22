@@ -211,6 +211,53 @@ export type Database = {
           },
         ]
       }
+      agent_permissions: {
+        Row: {
+          agent_id: string
+          auto_apply_max_risk: Database["public"]["Enums"]["agent_risk_level"]
+          created_at: string
+          id: string
+          last_changed_by: string | null
+          mode: Database["public"]["Enums"]["agent_mode"]
+          notify_on_apply: boolean
+          tenant_id: string
+          updated_at: string
+          weekly_run_limit: number
+        }
+        Insert: {
+          agent_id: string
+          auto_apply_max_risk?: Database["public"]["Enums"]["agent_risk_level"]
+          created_at?: string
+          id?: string
+          last_changed_by?: string | null
+          mode?: Database["public"]["Enums"]["agent_mode"]
+          notify_on_apply?: boolean
+          tenant_id: string
+          updated_at?: string
+          weekly_run_limit?: number
+        }
+        Update: {
+          agent_id?: string
+          auto_apply_max_risk?: Database["public"]["Enums"]["agent_risk_level"]
+          created_at?: string
+          id?: string
+          last_changed_by?: string | null
+          mode?: Database["public"]["Enums"]["agent_mode"]
+          notify_on_apply?: boolean
+          tenant_id?: string
+          updated_at?: string
+          weekly_run_limit?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_permissions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_actions: {
         Row: {
           action_type: string
@@ -4611,6 +4658,14 @@ export type Database = {
         Args: { _target_user_id: string }
         Returns: undefined
       }
+      can_auto_apply_action: {
+        Args: {
+          _agent_id: string
+          _risk: Database["public"]["Enums"]["agent_risk_level"]
+          _tenant_id: string
+        }
+        Returns: boolean
+      }
       cancel_order: {
         Args: { _order_id: string }
         Returns: {
@@ -4706,6 +4761,15 @@ export type Database = {
       dntrade_unhealthy_streak_minutes: {
         Args: { _tenant_id: string }
         Returns: number
+      }
+      get_agent_permission: {
+        Args: { _agent_id: string; _tenant_id: string }
+        Returns: {
+          auto_apply_max_risk: Database["public"]["Enums"]["agent_risk_level"]
+          mode: Database["public"]["Enums"]["agent_mode"]
+          notify_on_apply: boolean
+          weekly_run_limit: number
+        }[]
       }
       get_all_tenants_overview: {
         Args: never
@@ -5046,6 +5110,8 @@ export type Database = {
       }
     }
     Enums: {
+      agent_mode: "off" | "suggest" | "auto"
+      agent_risk_level: "low" | "medium" | "high"
       app_role: "super_admin"
       event_type:
         | "product_viewed"
@@ -5235,6 +5301,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      agent_mode: ["off", "suggest", "auto"],
+      agent_risk_level: ["low", "medium", "high"],
       app_role: ["super_admin"],
       event_type: [
         "product_viewed",
