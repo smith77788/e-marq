@@ -227,9 +227,10 @@ const ADMIN_NAV: NavGroup[] = [ADMIN_SYSTEM, ADMIN_AGENTS, COCKPIT, SHOP, GROWTH
 type Props = {
   isSuperAdmin: boolean;
   brandName?: string | null;
+  tenantSlug?: string | null;
 };
 
-export function AppSidebar({ isSuperAdmin, brandName }: Props) {
+export function AppSidebar({ isSuperAdmin, brandName, tenantSlug }: Props) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
