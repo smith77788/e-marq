@@ -27,8 +27,10 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTenantContext } from "@/hooks/useTenantContext";
 import { OutreachHunterSection } from "@/components/admin/OutreachHunterTabs";
 import { MagnetPreviewDialog } from "@/components/admin/MagnetPreviewDialog";
+import { TelegramConnectCard } from "@/components/owner/TelegramConnectCard";
 import { friendlyAgentSummary, friendlyAgentError, agentLabel } from "@/lib/outreach/agentSummary";
 
 export const Route = createFileRoute("/_authenticated/admin/lead-radar")({

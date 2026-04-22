@@ -154,6 +154,7 @@ import { Route as HooksAgentsAntiFraudRouteImport } from './routes/hooks/agents.
 import { Route as HooksAgentsAnomalyDetectorRouteImport } from './routes/hooks/agents.anomaly-detector'
 import { Route as HooksAgentsActionWatchdogRouteImport } from './routes/hooks/agents.action-watchdog'
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
+import { Route as ApiTelegramStatusRouteImport } from './routes/api/telegram.status'
 import { Route as ApiSiteBuilderBuildRouteImport } from './routes/api/site-builder.build'
 import { Route as ApiEmailOrderStatusRouteImport } from './routes/api/email.order-status'
 import { Route as ApiEmailOrderConfirmationRouteImport } from './routes/api/email.order-confirmation'
@@ -1004,6 +1005,11 @@ const HooksActionsApplyRoute = HooksActionsApplyRouteImport.update({
   path: '/hooks/actions/apply',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTelegramStatusRoute = ApiTelegramStatusRouteImport.update({
+  id: '/api/telegram/status',
+  path: '/api/telegram/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSiteBuilderBuildRoute = ApiSiteBuilderBuildRouteImport.update({
   id: '/api/site-builder/build',
   path: '/api/site-builder/build',
@@ -1357,6 +1363,7 @@ export interface FileRoutesByFullPath {
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
   '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
+  '/api/telegram/status': typeof ApiTelegramStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
@@ -1555,6 +1562,7 @@ export interface FileRoutesByTo {
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
   '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
+  '/api/telegram/status': typeof ApiTelegramStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
@@ -1756,6 +1764,7 @@ export interface FileRoutesById {
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
   '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
+  '/api/telegram/status': typeof ApiTelegramStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
   '/hooks/agents/anomaly-detector': typeof HooksAgentsAnomalyDetectorRoute
@@ -1957,6 +1966,7 @@ export interface FileRouteTypes {
     | '/api/email/order-confirmation'
     | '/api/email/order-status'
     | '/api/site-builder/build'
+    | '/api/telegram/status'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
     | '/hooks/agents/anomaly-detector'
@@ -2155,6 +2165,7 @@ export interface FileRouteTypes {
     | '/api/email/order-confirmation'
     | '/api/email/order-status'
     | '/api/site-builder/build'
+    | '/api/telegram/status'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
     | '/hooks/agents/anomaly-detector'
@@ -2355,6 +2366,7 @@ export interface FileRouteTypes {
     | '/api/email/order-confirmation'
     | '/api/email/order-status'
     | '/api/site-builder/build'
+    | '/api/telegram/status'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
     | '/hooks/agents/anomaly-detector'
@@ -2529,6 +2541,7 @@ export interface RootRouteChildren {
   ApiEmailOrderConfirmationRoute: typeof ApiEmailOrderConfirmationRoute
   ApiEmailOrderStatusRoute: typeof ApiEmailOrderStatusRoute
   ApiSiteBuilderBuildRoute: typeof ApiSiteBuilderBuildRoute
+  ApiTelegramStatusRoute: typeof ApiTelegramStatusRoute
   HooksActionsApplyRoute: typeof HooksActionsApplyRoute
   HooksAgentsActionWatchdogRoute: typeof HooksAgentsActionWatchdogRoute
   HooksAgentsAnomalyDetectorRoute: typeof HooksAgentsAnomalyDetectorRoute
@@ -3683,6 +3696,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksActionsApplyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/telegram/status': {
+      id: '/api/telegram/status'
+      path: '/api/telegram/status'
+      fullPath: '/api/telegram/status'
+      preLoaderRoute: typeof ApiTelegramStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/site-builder/build': {
       id: '/api/site-builder/build'
       path: '/api/site-builder/build'
@@ -4236,6 +4256,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiEmailOrderConfirmationRoute: ApiEmailOrderConfirmationRoute,
   ApiEmailOrderStatusRoute: ApiEmailOrderStatusRoute,
   ApiSiteBuilderBuildRoute: ApiSiteBuilderBuildRoute,
+  ApiTelegramStatusRoute: ApiTelegramStatusRoute,
   HooksActionsApplyRoute: HooksActionsApplyRoute,
   HooksAgentsActionWatchdogRoute: HooksAgentsActionWatchdogRoute,
   HooksAgentsAnomalyDetectorRoute: HooksAgentsAnomalyDetectorRoute,
