@@ -75,9 +75,23 @@ function AuthenticatedShell({
 
   return (
     <SidebarProvider defaultOpen>
+      {/*
+        Skip-to-content link — visually hidden until focused via Tab. Lets
+        keyboard / screen-reader users jump straight to <main> without tabbing
+        through the entire sidebar + header.
+      */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring"
+      >
+        {t("a11y.skipToContent")}
+      </a>
       <AppSidebar isSuperAdmin={isSuperAdmin} brandName={current?.tenant_name} />
       <SidebarInset className="bg-background">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header
+          role="banner"
+          className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+        >
           <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
           <div className="hidden items-center gap-2 sm:flex">
             <LiveStatus />
@@ -104,7 +118,12 @@ function AuthenticatedShell({
             </Button>
           </div>
         </header>
-        <main className="min-h-[calc(100vh-3.5rem)] px-4 py-6 sm:px-6 sm:py-8">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          aria-label={t("a11y.mainContent")}
+          className="min-h-[calc(100vh-3.5rem)] px-4 py-6 sm:px-6 sm:py-8 focus:outline-none"
+        >
           <div className="mx-auto max-w-7xl">
             <Outlet />
           </div>
