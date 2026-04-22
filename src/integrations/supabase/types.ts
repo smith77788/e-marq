@@ -216,6 +216,7 @@ export type Database = {
           agent_id: string
           auto_apply_max_risk: Database["public"]["Enums"]["agent_risk_level"]
           created_at: string
+          geo_targets: Json | null
           id: string
           last_changed_by: string | null
           mode: Database["public"]["Enums"]["agent_mode"]
@@ -228,6 +229,7 @@ export type Database = {
           agent_id: string
           auto_apply_max_risk?: Database["public"]["Enums"]["agent_risk_level"]
           created_at?: string
+          geo_targets?: Json | null
           id?: string
           last_changed_by?: string | null
           mode?: Database["public"]["Enums"]["agent_mode"]
@@ -240,6 +242,7 @@ export type Database = {
           agent_id?: string
           auto_apply_max_risk?: Database["public"]["Enums"]["agent_risk_level"]
           created_at?: string
+          geo_targets?: Json | null
           id?: string
           last_changed_by?: string | null
           mode?: Database["public"]["Enums"]["agent_mode"]
@@ -4076,6 +4079,7 @@ export type Database = {
           brand_name: string
           created_at: string
           features: Json
+          geo_targets: Json
           owner_telegram_chat_id: string | null
           seo: Json
           tenant_id: string
@@ -4087,6 +4091,7 @@ export type Database = {
           brand_name: string
           created_at?: string
           features?: Json
+          geo_targets?: Json
           owner_telegram_chat_id?: string | null
           seo?: Json
           tenant_id: string
@@ -4098,6 +4103,7 @@ export type Database = {
           brand_name?: string
           created_at?: string
           features?: Json
+          geo_targets?: Json
           owner_telegram_chat_id?: string | null
           seo?: Json
           tenant_id?: string
