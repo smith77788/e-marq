@@ -86,7 +86,11 @@ function AuthenticatedShell({
       >
         {t("a11y.skipToContent")}
       </a>
-      <AppSidebar isSuperAdmin={isSuperAdmin} brandName={current?.tenant_name} />
+      <AppSidebar
+        isSuperAdmin={isSuperAdmin}
+        brandName={current?.tenant_name}
+        tenantSlug={current?.tenant_slug ?? null}
+      />
       <SidebarInset className="bg-background">
         <header
           role="banner"
