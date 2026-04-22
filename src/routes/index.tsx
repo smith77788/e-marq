@@ -18,13 +18,15 @@ import { useT, tStatic } from "@/lib/i18n";
 import { MarketingHeader, MarketingFooter } from "@/components/marketing/MarketingShell";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: tStatic("home.title") },
-      { name: "description", content: tStatic("home.metaDesc") },
-      { property: "og:title", content: tStatic("home.title") },
-      { property: "og:description", content: tStatic("home.metaDesc") },
-    ],
+  head: () => {
+    const seo = buildSeo({
+      title: tStatic("home.title"),
+      description: tStatic("home.metaDesc"),
+      path: "/",
+    });
+    return {
+      meta: seo.meta,
+      links: seo.links,
     scripts: [
       {
         type: "application/ld+json",
