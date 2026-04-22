@@ -190,6 +190,11 @@ export function NotificationCenter() {
     return unreadCount > 99 ? "99+" : String(unreadCount);
   }, [unreadCount]);
 
+  const triggerLabel =
+    unreadCount > 0
+      ? `${t("notif.title")} — ${unreadCount} ${t("notif.tabUnread").toLowerCase()}`
+      : t("notif.title");
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -197,17 +202,32 @@ export function NotificationCenter() {
           size="icon"
           variant="ghost"
           className="relative h-9 w-9"
-          aria-label={t("notif.title")}
+          aria-label={triggerLabel}
+          aria-haspopup="dialog"
+          aria-expanded={open}
         >
-          <Bell className="h-4 w-4" />
+          <Bell className="h-4 w-4" aria-hidden="true" />
           {badge && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground">
+            <span
+              aria-hidden="true"
+              className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground"
+            >
               {badge}
             </span>
           )}
+          {/* Polite live region — screen readers announce when unread count changes */}
+          <span aria-live="polite" aria-atomic="true" className="sr-only">
+            {unreadCount > 0
+              ? `${unreadCount} ${t("notif.tabUnread").toLowerCase()}`
+              : t("notif.empty")}
+          </span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[360px] p-0 sm:w-[400px]">
+      <PopoverContent
+        align="end"
+        className="w-[360px] p-0 sm:w-[400px]"
+        aria-label={t("notif.title")}
+      >
         <div className="flex items-center justify-between border-b px-3 py-2">
           <div className="flex items-center gap-2">
             <Bell className="h-4 w-4 text-muted-foreground" />
@@ -256,7 +276,7 @@ export function NotificationCenter() {
               <p>{filter === "unread" ? t("notif.emptyUnread") : t("notif.empty")}</p>
             </div>
           ) : (
-            <ul className="divide-y">
+            <ul className="divide-y" role="list" aria-label={t("notif.title")}>
               {notifs.map((n) => {
                 const item = (
                   <div
