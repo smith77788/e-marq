@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EmptyState } from "@/components/ui/empty-state";
 import { supabase } from "@/integrations/supabase/client";
 
 type Props = { tenantId: string };
@@ -153,9 +154,12 @@ export function MemoryInspector({ tenantId }: Props) {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Завантаження памʼяті…</p>
         ) : filtered.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Поки немає правил. Агенти мають попрацювати кілька циклів, щоб навчитися.
-          </p>
+          <EmptyState
+            variant="inline"
+            icon={Brain}
+            title="Поки немає правил"
+            description="Агенти мають попрацювати кілька циклів, щоб помітити паттерни і навчитися — повертайтесь пізніше."
+          />
         ) : (
           <ul className="space-y-2">
             {filtered.map((m) => {

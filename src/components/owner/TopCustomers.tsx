@@ -7,10 +7,11 @@
  */
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Crown, Send, AlertCircle, Loader2 } from "lucide-react";
+import { Crown, Send, AlertCircle, Loader2, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { DetailableElement } from "@/components/detail";
@@ -108,9 +109,12 @@ export function TopCustomers({ tenantId }: Props) {
             ))}
           </div>
         ) : !customers || customers.length === 0 ? (
-          <div className="rounded-md border border-dashed border-border bg-muted/20 p-4 text-center text-xs text-muted-foreground">
-            Поки немає клієнтів. Завантажте демо-дані або зачекайте на перші замовлення.
-          </div>
+          <EmptyState
+            variant="inline"
+            icon={Users}
+            title="Поки немає клієнтів"
+            description="Завантажте демо-дані або зачекайте на перші замовлення — список оновиться автоматично."
+          />
         ) : (
           <div className="space-y-1.5">
             {customers.map((c) => {
