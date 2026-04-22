@@ -279,7 +279,7 @@ export function NotificationCenter() {
                         <p className="line-clamp-2 text-xs text-muted-foreground">{n.body}</p>
                       )}
                       <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
-                        {formatRelative(n.created_at, locale)}
+                        {formatRelative(n.created_at, lang)}
                       </p>
                     </div>
                     {!n.is_read && (
@@ -291,8 +291,8 @@ export function NotificationCenter() {
                 return (
                   <li key={n.id}>
                     {n.link ? (
-                      <Link
-                        to={n.link}
+                      <a
+                        href={n.link}
                         className="block"
                         onClick={() => {
                           setOpen(false);
@@ -300,7 +300,7 @@ export function NotificationCenter() {
                         }}
                       >
                         {item}
-                      </Link>
+                      </a>
                     ) : (
                       <button
                         type="button"
