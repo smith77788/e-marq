@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_authenticated/brand/billing")({
 
 function BrandBillingPage() {
   const { tenant: urlTenant } = useSearch({ from: "/_authenticated/brand/billing" });
-  const { current, currentTenantId, setCurrentTenantId } = useTenantContext();
+  const { current, currentTenantId, setCurrentTenantId, tenants, loading } = useTenantContext();
 
   // Sync URL → context
   useEffect(() => {
@@ -54,7 +54,38 @@ function BrandBillingPage() {
     },
   });
 
-  if (!tenantId) {
+  // Якщо tenant context ще завантажується, показуємо skeleton — НЕ редіректимо
+  if (loading || (!tenantId && tenants.length === 0 && !loading === false)) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Завантаження…</CardTitle>
+          <CardDescription>Підбираємо ваш бренд</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  // Реально немає брендів у користувача
+  if (!tenantId && tenants.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Бренд не обрано</CardTitle>
+          <CardDescription>У вас ще немає підключених брендів.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Link to="/brand" className="text-primary hover:underline">
+            ← Назад на головну
+          </Link>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Tenant є у списку, але currentTenantId ще не встановлено — беремо перший
+  const effectiveTenantId = tenantId ?? tenants[0]?.tenant_id;
+  if (!effectiveTenantId) {
     return (
       <Card>
         <CardHeader>
