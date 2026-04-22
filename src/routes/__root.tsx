@@ -1,7 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/useAuth";
 import { DetailControllerProvider, DetailDrawer } from "@/components/detail";
 
@@ -77,7 +77,7 @@ function RootComponent() {
         <DetailControllerProvider>
           <Outlet />
           <DetailDrawer />
-          <Toaster richColors position="top-right" />
+          <Toaster richColors position="top-right" theme="system" />
         </DetailControllerProvider>
       </AuthProvider>
     </QueryClientProvider>
