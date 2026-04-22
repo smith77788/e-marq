@@ -153,7 +153,7 @@ export const Route = createFileRoute("/api/ai/ask")({
           })),
           products_top: (productsRes.data ?? []).map((p) => ({
             name: p.name,
-            stock: p.stock_qty,
+            stock: p.stock,
           })),
           agents: (healthRes.data ?? []).map((h) => ({
             id: h.agent_id,
