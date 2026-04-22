@@ -4726,6 +4726,271 @@ export type Database = {
         }
         Relationships: []
       }
+      tg_user_action_log: {
+        Row: {
+          action_id: string | null
+          action_type: string
+          agent_id: string | null
+          created_at: string
+          duration_ms: number | null
+          id: string
+          origin: string | null
+          result: Json
+          status: string
+          target: Json
+          tenant_id: string
+        }
+        Insert: {
+          action_id?: string | null
+          action_type: string
+          agent_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          origin?: string | null
+          result?: Json
+          status: string
+          target?: Json
+          tenant_id: string
+        }
+        Update: {
+          action_id?: string | null
+          action_type?: string
+          agent_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          origin?: string | null
+          result?: Json
+          status?: string
+          target?: Json
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tg_user_action_log_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "tg_user_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tg_user_action_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tg_user_actions: {
+        Row: {
+          action_type: string
+          agent_id: string | null
+          attempts: number
+          created_at: string
+          executed_at: string | null
+          id: string
+          last_error: string | null
+          max_attempts: number
+          origin: string
+          payload: Json
+          requested_by: string | null
+          result: Json
+          scheduled_for: string
+          session_id: string | null
+          status: string
+          target: Json
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          agent_id?: string | null
+          attempts?: number
+          created_at?: string
+          executed_at?: string | null
+          id?: string
+          last_error?: string | null
+          max_attempts?: number
+          origin?: string
+          payload?: Json
+          requested_by?: string | null
+          result?: Json
+          scheduled_for?: string
+          session_id?: string | null
+          status?: string
+          target?: Json
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          agent_id?: string | null
+          attempts?: number
+          created_at?: string
+          executed_at?: string | null
+          id?: string
+          last_error?: string | null
+          max_attempts?: number
+          origin?: string
+          payload?: Json
+          requested_by?: string | null
+          result?: Json
+          scheduled_for?: string
+          session_id?: string | null
+          status?: string
+          target?: Json
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tg_user_actions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "tg_user_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tg_user_actions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tg_user_quotas: {
+        Row: {
+          agent_autonomy_enabled: boolean
+          agent_max_per_day: number
+          auto_pause_after_errors: number
+          created_at: string
+          delay_max_seconds: number
+          delay_min_seconds: number
+          max_comment_per_day: number
+          max_comment_per_hour: number
+          max_dm_per_day: number
+          max_dm_per_hour: number
+          max_join_per_day: number
+          max_reaction_per_day: number
+          max_reaction_per_hour: number
+          paused_reason: string | null
+          paused_until: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          agent_autonomy_enabled?: boolean
+          agent_max_per_day?: number
+          auto_pause_after_errors?: number
+          created_at?: string
+          delay_max_seconds?: number
+          delay_min_seconds?: number
+          max_comment_per_day?: number
+          max_comment_per_hour?: number
+          max_dm_per_day?: number
+          max_dm_per_hour?: number
+          max_join_per_day?: number
+          max_reaction_per_day?: number
+          max_reaction_per_hour?: number
+          paused_reason?: string | null
+          paused_until?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          agent_autonomy_enabled?: boolean
+          agent_max_per_day?: number
+          auto_pause_after_errors?: number
+          created_at?: string
+          delay_max_seconds?: number
+          delay_min_seconds?: number
+          max_comment_per_day?: number
+          max_comment_per_hour?: number
+          max_dm_per_day?: number
+          max_dm_per_hour?: number
+          max_join_per_day?: number
+          max_reaction_per_day?: number
+          max_reaction_per_hour?: number
+          paused_reason?: string | null
+          paused_until?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tg_user_quotas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tg_user_sessions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          dc_id: number | null
+          encrypted_session: string | null
+          first_name: string | null
+          id: string
+          last_error: string | null
+          last_used_at: string | null
+          login_state: Json
+          phone: string
+          status: string
+          tenant_id: string
+          updated_at: string
+          user_id_tg: number | null
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          dc_id?: number | null
+          encrypted_session?: string | null
+          first_name?: string | null
+          id?: string
+          last_error?: string | null
+          last_used_at?: string | null
+          login_state?: Json
+          phone: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          user_id_tg?: number | null
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          dc_id?: number | null
+          encrypted_session?: string | null
+          first_name?: string | null
+          id?: string
+          last_error?: string | null
+          last_used_at?: string | null
+          login_state?: Json
+          phone?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id_tg?: number | null
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tg_user_sessions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       topup_requests: {
         Row: {
           amount_cents: number
@@ -5368,6 +5633,14 @@ export type Database = {
           _variant_id: string
         }
         Returns: Json
+      }
+      tg_user_count_actions: {
+        Args: {
+          _action_type: string
+          _tenant_id: string
+          _window_minutes: number
+        }
+        Returns: number
       }
       touch_tenant_api_key: { Args: { _key_id: string }; Returns: undefined }
       validate_discount_code: {
