@@ -1042,6 +1042,12 @@ const dict = {
     "gs.groupInsights": "Інсайти",
     "gs.groupRecent": "Нещодавні",
     "gs.groupActions": "Швидкі дії",
+    "gs.aiHeading": "AI-асистент бренду",
+    "gs.aiHint": "Запитайте, наприклад: «Як виторг тижня?»",
+    "gs.aiThinking": "Аналізую дані бренду…",
+    "gs.aiSuggestions": "Куди далі",
+    "gs.aiNoTenant": "Спершу оберіть бренд у перемикачі",
+    "gs.aiTriggerHint": "Почніть з ? щоб запитати AI по даних бренду",
 
     // Notification center
     "notif.title": "Сповіщення",
@@ -2332,6 +2338,12 @@ const dict = {
     "gs.groupInsights": "Insights",
     "gs.groupRecent": "Recent",
     "gs.groupActions": "Quick actions",
+    "gs.aiHeading": "Brand AI assistant",
+    "gs.aiHint": "Ask, e.g. \"How is this week's revenue?\"",
+    "gs.aiThinking": "Analyzing brand data…",
+    "gs.aiSuggestions": "Where to next",
+    "gs.aiNoTenant": "Pick a brand in the switcher first",
+    "gs.aiTriggerHint": "Start with ? to ask AI about your brand data",
 
     // Notification center
     "notif.title": "Notifications",
