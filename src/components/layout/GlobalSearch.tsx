@@ -26,7 +26,6 @@ import {
   Search,
   ShoppingCart,
   Users,
-  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -327,8 +326,52 @@ export function GlobalSearch() {
             <CommandEmpty>{t("gs.noResults")}</CommandEmpty>
           )}
 
+          {recent.length > 0 && (
+            <CommandGroup heading={t("gs.groupRecent")}>
+              {recent.map((r) => (
+                <CommandItem
+                  key={`recent::${r.path}`}
+                  value={`recent::${r.label}::${r.path}`}
+                  onSelect={() => go(r.path)}
+                >
+                  <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span className="flex-1 truncate">{r.label}</span>
+                  <span className="ml-2 truncate text-[10px] text-muted-foreground">
+                    {r.path}
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+
+          {quickActions.length > 0 && (
+            <>
+              {recent.length > 0 && <CommandSeparator />}
+              <CommandGroup heading={t("gs.groupActions")}>
+                {quickActions.map((a) => {
+                  const Icon = a.icon;
+                  return (
+                    <CommandItem
+                      key={a.id}
+                      value={`action::${a.label}::${(a.keywords ?? []).join(" ")}`}
+                      onSelect={() => runQuickAction(a)}
+                    >
+                      <Icon className="mr-2 h-4 w-4 text-primary" />
+                      <span className="flex-1 truncate">{a.label}</span>
+                      <span className="ml-2 truncate text-[10px] text-muted-foreground">
+                        {a.hint}
+                      </span>
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            </>
+          )}
+
           {pages.length > 0 && (
-            <CommandGroup heading={t("gs.groupPages")}>
+            <>
+              {(recent.length > 0 || quickActions.length > 0) && <CommandSeparator />}
+              <CommandGroup heading={t("gs.groupPages")}>
               {pages.map((p) => {
                 const Icon = p.icon;
                 return (
@@ -346,6 +389,7 @@ export function GlobalSearch() {
                 );
               })}
             </CommandGroup>
+            </>
           )}
 
           {showResults && results && results.products.length > 0 && (
