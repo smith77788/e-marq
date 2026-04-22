@@ -684,6 +684,7 @@ function BuildsTab({ builds, isLoading }: { builds: SiteBuild[]; isLoading: bool
 
 function BuildRow({ build }: { build: SiteBuild }) {
   const { t } = useT();
+  const [busy, setBusy] = useState(false);
   const statusKey: TKey = `sbu.builds.status.${build.status}` as TKey;
   const statusVariant =
     build.status === "ready"
@@ -691,6 +692,33 @@ function BuildRow({ build }: { build: SiteBuild }) {
       : build.status === "failed"
         ? "border-destructive/40 text-destructive"
         : "border-muted-foreground/30 text-muted-foreground";
+
+  const handleDownload = async () => {
+    setBusy(true);
+    try {
+      const session = await supabase.auth.getSession();
+      const accessToken = session.data.session?.access_token;
+      if (!accessToken) throw new Error("Not authenticated");
+      const res = await fetch(`/api/site-builder/download/${build.id}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const payload = (await res.json().catch(() => ({}))) as {
+        download_url?: string;
+        error?: string;
+      };
+      if (!res.ok || !payload.download_url) {
+        throw new Error(payload.error ?? `HTTP ${res.status}`);
+      }
+      window.location.href = payload.download_url;
+    } catch (err) {
+      toast.error(t("sbu.action.buildErr"), {
+        description: err instanceof Error ? err.message : String(err),
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <li className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
       <div className="flex items-center gap-2">
@@ -707,10 +735,8 @@ function BuildRow({ build }: { build: SiteBuild }) {
         )}
       </div>
       {build.status === "ready" && build.archive_path ? (
-        <Button asChild variant="outline" size="sm">
-          <Link to="/brand/site-builder" disabled aria-disabled>
-            {t("sbu.builds.download")}
-          </Link>
+        <Button variant="outline" size="sm" onClick={handleDownload} disabled={busy}>
+          {busy ? "…" : t("sbu.builds.download")}
         </Button>
       ) : build.error ? (
         <span className="max-w-md truncate text-xs text-destructive" title={build.error}>
