@@ -131,17 +131,23 @@ function ProductDetailPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-6">
-      <nav className="mb-4 flex items-center gap-1 text-xs text-muted-foreground">
-        <Link
-          to="/s/$slug"
-          params={{ slug }}
-          className="inline-flex items-center hover:text-foreground"
-        >
-          <ChevronLeft className="h-3 w-3" />
-          Магазин
-        </Link>
-        <span>/</span>
-        <span className="line-clamp-1 text-foreground">{product.name}</span>
+      <nav aria-label="Breadcrumb" className="mb-4">
+        <ol className="flex items-center gap-1 text-xs text-muted-foreground">
+          <li className="inline-flex items-center">
+            <Link
+              to="/s/$slug"
+              params={{ slug }}
+              className="inline-flex items-center hover:text-foreground"
+            >
+              <ChevronLeft className="h-3 w-3" aria-hidden="true" />
+              {tStatic("sf.breadcrumb.shop")}
+            </Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li className="line-clamp-1 text-foreground" aria-current="page">
+            {product.name}
+          </li>
+        </ol>
       </nav>
 
       <div className="grid gap-8 md:grid-cols-2">
