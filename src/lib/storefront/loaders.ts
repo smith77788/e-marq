@@ -135,7 +135,21 @@ export async function loadStorefrontShell(slug: string): Promise<StorefrontShell
   let products: StorefrontProduct[] = [];
   const v2 = await supabase.rpc("get_storefront_products_v2", { _slug: slug });
   if (!v2.error && v2.data) {
-    products = (v2.data ?? []).map((p) => ({
+    products = ((v2.data ?? []) as Array<Record<string, unknown>>).map((row) => {
+      const p = row as {
+        id: string;
+        name: string;
+        description?: string | null;
+        price_cents: number;
+        compare_at_price_cents?: number | null;
+        currency: string;
+        image_url?: string | null;
+        stock?: number;
+        has_variants?: boolean;
+        tags?: string[];
+        url_handle?: string | null;
+      };
+      return ({
       id: p.id,
       name: p.name,
       description: p.description ?? null,
