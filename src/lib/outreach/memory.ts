@@ -93,9 +93,9 @@ export async function recordPattern(u: PatternUpdate): Promise<void> {
         failure_count: u.outcome === "failure" ? 1 : 0,
         avg_impact: newImpact,
         confidence: 0.05,
-        evidence: { first: u.evidence ?? {} },
+        evidence: { first: u.evidence ?? {} } as never,
         is_active: false,
-      });
+      } as never);
     }
   } catch (e) {
     console.warn("[outreach-memory] record failed:", String((e as Error)?.message ?? e));
