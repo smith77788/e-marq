@@ -210,7 +210,13 @@ const ADMIN_AGENTS: NavGroup = {
   items: [
     { labelKey: "sb.liveRuns", to: "/agents/live", icon: Activity, tone: "text-success" },
     { labelKey: "sb.agentLibrary", to: "/agents/library", icon: Cpu, tone: "text-accent" },
-    { labelKey: "sb.insightStream", to: "/admin/overview", icon: Radio, tone: "text-warning" },
+    {
+      labelKey: "sb.insightStream",
+      to: "/admin/overview",
+      hash: "stream",
+      icon: Radio,
+      tone: "text-warning",
+    },
   ],
 };
 
@@ -221,9 +227,10 @@ const ADMIN_NAV: NavGroup[] = [ADMIN_SYSTEM, ADMIN_AGENTS, COCKPIT, SHOP, GROWTH
 type Props = {
   isSuperAdmin: boolean;
   brandName?: string | null;
+  tenantSlug?: string | null;
 };
 
-export function AppSidebar({ isSuperAdmin, brandName }: Props) {
+export function AppSidebar({ isSuperAdmin, brandName, tenantSlug }: Props) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
@@ -242,17 +249,28 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
       e.preventDefault();
       const scrollTo = () => {
         const el = document.getElementById(hash);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-        else window.scrollTo({ top: 0, behavior: "smooth" });
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          return true;
+        }
+        return false;
+      };
+      // Poll up to ~2s for the section to mount (handles lazy-loaded data).
+      const pollScroll = () => {
+        let attempts = 0;
+        const tick = () => {
+          if (scrollTo() || attempts++ > 40) return;
+          setTimeout(tick, 50);
+        };
+        tick();
       };
       if (location.pathname === to || location.pathname.startsWith(to + "/")) {
-        scrollTo();
+        pollScroll();
         history.replaceState(null, "", `${to}#${hash}`);
         return;
       }
-      void navigate({ to, hash }).then(() => {
-        // wait one frame for the new route to mount its sections
-        requestAnimationFrame(() => requestAnimationFrame(scrollTo));
+      void Promise.resolve(navigate({ to, hash })).then(() => {
+        requestAnimationFrame(() => requestAnimationFrame(pollScroll));
       });
     },
     [location.pathname, navigate],
@@ -372,19 +390,32 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sb.storefront")}>
-              <Link
-                to="/brand"
-                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
-              >
-                <ShoppingBag className="h-4 w-4 text-success" />
-                {!collapsed && <span>{t("sb.storefront")}</span>}
-              </Link>
+              {tenantSlug ? (
+                <Link
+                  to="/s/$slug"
+                  params={{ slug: tenantSlug }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
+                >
+                  <ShoppingBag className="h-4 w-4 text-success" />
+                  {!collapsed && <span>{t("sb.storefront")}</span>}
+                </Link>
+              ) : (
+                <Link
+                  to="/brand"
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
+                >
+                  <ShoppingBag className="h-4 w-4 text-success" />
+                  {!collapsed && <span>{t("sb.storefront")}</span>}
+                </Link>
+              )}
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sb.settings")}>
               <Link
-                to={isSuperAdmin ? "/admin" : "/brand/settings"}
+                to={isSuperAdmin ? "/admin/health" : "/brand/settings"}
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
               >
                 <Settings className="h-4 w-4 text-accent" />
