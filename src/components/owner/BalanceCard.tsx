@@ -362,15 +362,18 @@ function TopupDialog({
           </div>
 
           <Tabs defaultValue="bank">
-            <TabsList className="w-full">
-              <TabsTrigger value="bank" className="flex-1 gap-1.5">
-                <Banknote className="h-3.5 w-3.5" /> Банківський переказ
+            <TabsList className="grid w-full grid-cols-3 gap-1 h-auto p-1">
+              <TabsTrigger value="bank" className="flex-col gap-1 py-2 text-[11px] sm:flex-row sm:text-xs sm:gap-1.5">
+                <Banknote className="h-3.5 w-3.5" />
+                <span className="leading-tight">Банк. переказ</span>
               </TabsTrigger>
-              <TabsTrigger value="manual" className="flex-1 gap-1.5">
-                <Sparkles className="h-3.5 w-3.5" /> Кредит-нота (адмін)
+              <TabsTrigger value="manual" className="flex-col gap-1 py-2 text-[11px] sm:flex-row sm:text-xs sm:gap-1.5">
+                <Sparkles className="h-3.5 w-3.5" />
+                <span className="leading-tight">Кредит-нота</span>
               </TabsTrigger>
-              <TabsTrigger value="online" className="flex-1 gap-1.5">
-                <CreditCard className="h-3.5 w-3.5" /> Через менеджера
+              <TabsTrigger value="online" className="flex-col gap-1 py-2 text-[11px] sm:flex-row sm:text-xs sm:gap-1.5">
+                <CreditCard className="h-3.5 w-3.5" />
+                <span className="leading-tight">Менеджер</span>
               </TabsTrigger>
             </TabsList>
 
