@@ -12,6 +12,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ExternalLink, Package, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -274,7 +275,9 @@ function BrandProductsPage() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          {isEmpty ? (
+          {productsQuery.isLoading ? (
+            <TableSkeleton rows={6} columns={7} />
+          ) : isEmpty ? (
             <EmptyState
               variant="inline"
               icon={Package}

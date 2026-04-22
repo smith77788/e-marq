@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { Layers, Pencil, Plus, Sparkles, Tag, Trash2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -326,7 +327,9 @@ function BrandPromotionsPage() {
 
       <Card>
         <CardContent className="p-0">
-          {isEmpty ? (
+          {promosQuery.isLoading ? (
+            <TableSkeleton rows={5} columns={7} />
+          ) : isEmpty ? (
             <EmptyState
               variant="inline"
               icon={Tag}

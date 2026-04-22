@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { CheckCircle2, Package, Search, ShoppingBag, Truck, X } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -268,7 +269,9 @@ function BrandOrdersPage() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          {isEmpty ? (
+          {ordersQuery.isLoading ? (
+            <TableSkeleton rows={6} columns={6} />
+          ) : isEmpty ? (
             <EmptyState
               variant="inline"
               icon={ShoppingBag}
