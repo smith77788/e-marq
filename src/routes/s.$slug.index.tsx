@@ -21,6 +21,7 @@ import { useStorefrontCart, track } from "@/lib/storefront/cartContext";
 import { useWishlist } from "@/hooks/useWishlist";
 import { formatMoneyExact } from "@/lib/money";
 import { cn } from "@/lib/utils";
+import { ProductCard } from "@/components/storefront/ProductCard";
 
 export const Route = createFileRoute("/s/$slug/")({
   loader: async ({ params }) => {
