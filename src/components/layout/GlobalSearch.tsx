@@ -339,7 +339,7 @@ export function GlobalSearch() {
             <CommandEmpty>{t("gs.noResults")}</CommandEmpty>
           )}
 
-          {recent.length > 0 && (
+          {!isAiMode && recent.length > 0 && (
             <CommandGroup heading={t("gs.groupRecent")}>
               {recent.map((r) => (
                 <CommandItem
@@ -357,7 +357,7 @@ export function GlobalSearch() {
             </CommandGroup>
           )}
 
-          {quickActions.length > 0 && (
+          {!isAiMode && quickActions.length > 0 && (
             <>
               {recent.length > 0 && <CommandSeparator />}
               <CommandGroup heading={t("gs.groupActions")}>
@@ -381,7 +381,7 @@ export function GlobalSearch() {
             </>
           )}
 
-          {pages.length > 0 && (
+          {!isAiMode && pages.length > 0 && (
             <>
               {(recent.length > 0 || quickActions.length > 0) && <CommandSeparator />}
               <CommandGroup heading={t("gs.groupPages")}>
@@ -405,7 +405,7 @@ export function GlobalSearch() {
             </>
           )}
 
-          {showResults && results && results.products.length > 0 && (
+          {!isAiMode && showResults && results && results.products.length > 0 && (
             <>
               <CommandSeparator />
               <CommandGroup heading={t("gs.groupProducts")}>
@@ -428,7 +428,7 @@ export function GlobalSearch() {
             </>
           )}
 
-          {showResults && results && results.orders.length > 0 && (
+          {!isAiMode && showResults && results && results.orders.length > 0 && (
             <>
               <CommandSeparator />
               <CommandGroup heading={t("gs.groupOrders")}>
@@ -451,7 +451,7 @@ export function GlobalSearch() {
             </>
           )}
 
-          {showResults && results && results.customers.length > 0 && (
+          {!isAiMode && showResults && results && results.customers.length > 0 && (
             <>
               <CommandSeparator />
               <CommandGroup heading={t("gs.groupCustomers")}>
@@ -474,7 +474,7 @@ export function GlobalSearch() {
             </>
           )}
 
-          {showResults && results && results.insights.length > 0 && (
+          {!isAiMode && showResults && results && results.insights.length > 0 && (
             <>
               <CommandSeparator />
               <CommandGroup heading={t("gs.groupInsights")}>
@@ -495,8 +495,11 @@ export function GlobalSearch() {
             </>
           )}
 
-          {!showResults && (
-            <div className="px-3 py-2 text-[11px] text-muted-foreground">{t("gs.tipMinChars")}</div>
+          {!isAiMode && !showResults && (
+            <div className="px-3 py-2 text-[11px] text-muted-foreground">
+              {t("gs.tipMinChars")}
+              <span className="mt-1 block text-primary/80">{t("gs.aiTriggerHint")}</span>
+            </div>
           )}
         </CommandList>
       </CommandDialog>
