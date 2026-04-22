@@ -45,6 +45,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
 import { formatMoneyExact } from "@/lib/money";
 import { sendOrderStatusEmail } from "@/lib/email/client";
+import { OrderTelegramChat } from "@/components/owner/OrderTelegramChat";
 
 type OrderStatus = "pending" | "paid" | "fulfilled" | "cancelled" | "refunded";
 
