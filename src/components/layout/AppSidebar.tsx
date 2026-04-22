@@ -68,8 +68,8 @@ const COCKPIT: NavGroup = {
   labelKey: "sb.cockpit",
   tone: "text-primary/70",
   items: [
-    { labelKey: "sb.overview", to: "/brand", icon: LayoutDashboard, tone: "text-primary" },
-    { labelKey: "sb.revenue", to: "/dashboard", icon: Gauge, tone: "text-success" },
+    { labelKey: "sb.overview", to: "/brand", icon: LayoutDashboard, exact: true, tone: "text-primary" },
+    { labelKey: "sb.revenue", to: "/dashboard", icon: Gauge, exact: true, tone: "text-success" },
   ],
 };
 
