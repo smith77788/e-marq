@@ -5,7 +5,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Trash2, Mail, Crown, User } from "lucide-react";
+import { Trash2, Mail, Crown, User, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -153,8 +153,12 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
               </Select>
             </div>
             <Button onClick={() => invite.mutate()} disabled={invite.isPending || !email}>
-              <Mail className="mr-1.5 h-4 w-4" />
-              Запросити
+              {invite.isPending ? (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <Mail className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              )}
+              {invite.isPending ? "Запрошую…" : "Запросити"}
             </Button>
           </div>
         </CardContent>

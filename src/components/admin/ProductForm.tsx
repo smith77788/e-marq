@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -187,6 +188,7 @@ export function ProductForm({
           Скасувати
         </Button>
         <Button type="submit" disabled={isPending}>
+          {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
           {isPending ? "Зберігаю…" : submitLabel}
         </Button>
       </div>
