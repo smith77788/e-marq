@@ -320,14 +320,22 @@ export function GlobalSearch() {
           onValueChange={setQuery}
         />
         <CommandList>
-          {isFetching && showResults && (
+          {isAiMode && (
+            <AiAskPanel
+              tenantId={currentTenantId}
+              question={aiQuestion}
+              onNavigate={(to) => go(to)}
+            />
+          )}
+
+          {!isAiMode && isFetching && showResults && (
             <div className="flex items-center justify-center py-3 text-xs text-muted-foreground">
               <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
               {t("gs.searching")}
             </div>
           )}
 
-          {showResults && !isFetching && !hasAnyResult && pages.length === 0 && (
+          {!isAiMode && showResults && !isFetching && !hasAnyResult && pages.length === 0 && (
             <CommandEmpty>{t("gs.noResults")}</CommandEmpty>
           )}
 
