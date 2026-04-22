@@ -261,3 +261,38 @@ type: feature
 - Інтегровано в Lead Radar (`/admin/lead-radar`) — картка під header
 - Якщо connector ще не підключено → інструкція @BotFather + кнопка «Підключити Telegram»
 - Усе залишається в межах кабінету: відповіді надсилаються через `sendTelegramText` без переходу в зовнішні панелі
+
+## Backlog
+
+### Sprint 20 (planned) — Керування від імені особистого Telegram-акаунта (не бота)
+**Мета:** дати власнику можливість виконувати дії в Lead Radar / Outreach Hunter не від імені бренд-бота, а від його власного особистого Telegram-профілю — як вручну з кабінету, так і автоматизовано агентами на їх розсуд.
+
+**Що має вміти агент від імені користувача:**
+- Залишати коментарі під постами в публічних каналах і чатах (де є ком'юніті)
+- Писати в особисті повідомлення цільовим користувачам / адмінам каналів
+- Ставити позитивні / негативні реакції (👍 ❤️ 🔥 / 👎 💩) на повідомлення в каналах
+- Підписуватися/відписуватися на канали в межах outreach-плану
+- Читати канали з telegram_channels (вже частково є через RSS, але user-account дає повний доступ без bot-обмежень)
+
+**Архітектурні рішення (фіксуємо для майбутньої реалізації):**
+- **MTProto клієнт, не Bot API.** Bot API не дає коментувати, ставити реакції чи писати незнайомим. Потрібен user-mode (gramjs / telethon-style). Через Worker SSR прямо неможливо (нема довгих TCP-сесій) — тому окремий runner поза Worker (Node host або self-hosted runner з cron pull-job).
+- **Авторизація:** UI кабінету веде через Login flow (phone → 2FA code → password). Зберігаємо StringSession **зашифровано** в `tenant_secrets.telegram_user_session` (новий стовпчик або JSONB у `tenant_configs.bot.telegram_user`). Шифрування — Supabase Vault або власний AES-GCM з MARQ_WEBHOOK_SECRET-похідним ключем.
+- **Per-tenant ізоляція:** одна сесія на тенанта. Owner може в будь-який момент Logout (revoke + clear session).
+- **Quota & safety:** rate-limit (≤30 коментарів/добу, ≤10 DM/добу, ≤50 реакцій/добу) — Telegram банить за спам. Toggle в `outreach_settings.user_account.{commenting_enabled,dm_enabled,reactions_enabled}`. Default = OFF.
+- **Risk levels** для агентського вибору (re-use `agent_permissions.auto_apply_max_risk`):
+  - `low` = реакція 👍 на пост, де lead вже згадав бренд
+  - `medium` = коментар у відкритому чаті
+  - `high` = DM незнайомому → завжди manual approve
+- **UI:** новий `TelegramUserAccountCard.tsx` поряд із `TelegramConnectCard` (бот) — окремі сутності, не плутати. Власник бачить «коли востаннє діяв», «що зробив агент», лог у `outreach_actions` із `actor='user_account'`.
+- **Manual mode:** на кожному prospect-row кнопки «Коментар (від мене)», «DM (від мене)», «👍/👎» — відкривають Sheet з preview тексту, ESC=cancel, Enter=send.
+- **Agent mode:** новий agent `agents.outreach-user-engager` — періодично сканує prospects зі статусом `new` + intent_score > 0.5, обирає action за risk-mode, виконує через runner, пише результат у `outreach_actions`.
+- **Compliance:** показуємо warning при підключенні («ваш особистий аккаунт — Telegram може забанити за спам, MARQ не несе відповідальності»). Logs зберігаються 90д для аудиту.
+
+**Етапи (коли почнемо):**
+1. DB: `tenant_configs.bot.telegram_user` JSONB (session_encrypted, phone, last_login_at, quotas), міграція + RLS
+2. External runner repo / Inngest function для MTProto (gramjs)
+3. UI Login flow (phone code + 2FA) → encrypted session save
+4. Manual actions UI (3 кнопки на prospect)
+5. `agents.outreach-user-engager` із risk-mode
+6. Compliance warning, logs viewer, kill-switch
+
