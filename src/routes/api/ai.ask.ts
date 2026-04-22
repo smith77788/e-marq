@@ -84,44 +84,73 @@ export const Route = createFileRoute("/api/ai/ask")({
         if (!membership && !roleRow) return jsonError("Forbidden", 403);
 
         // Збираємо короткий контекст по тенанту — паралельно.
-        const sinceIso = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-        const [tenantRow, insightsRes, ordersRes, productsRes, healthRes] = await Promise.all([
-          supabaseAdmin
-            .from("tenants")
-            .select("name, slug")
-            .eq("id", tenantId)
-            .maybeSingle(),
-          supabaseAdmin
-            .from("ai_insights")
-            .select("title, insight_type, risk_level, expected_impact, status, created_at")
-            .eq("tenant_id", tenantId)
-            .order("created_at", { ascending: false })
-            .limit(8),
-          supabaseAdmin
-            .from("orders")
-            .select("total_cents, status, created_at")
-            .eq("tenant_id", tenantId)
-            .gte("created_at", sinceIso)
-            .order("created_at", { ascending: false })
-            .limit(200),
-          supabaseAdmin
-            .from("products")
-            .select("name, stock, price_cents")
-            .eq("tenant_id", tenantId)
-            .order("created_at", { ascending: false })
-            .limit(20),
-          supabaseAdmin
-            .from("agent_health")
-            .select("agent_id, health_score, runs_total, runs_failed, measured_on")
-            .eq("tenant_id", tenantId)
-            .order("measured_on", { ascending: false })
-            .limit(10),
-        ]);
+        const now = Date.now();
+        const since30Iso = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
+        const since7Iso = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
+        const [tenantRow, insightsRes, ordersRes, productsRes, healthRes, orderItemsRes] =
+          await Promise.all([
+            supabaseAdmin
+              .from("tenants")
+              .select("name, slug")
+              .eq("id", tenantId)
+              .maybeSingle(),
+            supabaseAdmin
+              .from("ai_insights")
+              .select(
+                "title, insight_type, risk_level, expected_impact, status, created_at, confidence",
+              )
+              .eq("tenant_id", tenantId)
+              .order("created_at", { ascending: false })
+              .limit(12),
+            supabaseAdmin
+              .from("orders")
+              .select("id, total_cents, status, created_at")
+              .eq("tenant_id", tenantId)
+              .gte("created_at", since30Iso)
+              .order("created_at", { ascending: false })
+              .limit(300),
+            supabaseAdmin
+              .from("products")
+              .select("id, name, stock, price_cents")
+              .eq("tenant_id", tenantId)
+              .order("created_at", { ascending: false })
+              .limit(50),
+            supabaseAdmin
+              .from("agent_health")
+              .select("agent_id, health_score, runs_total, runs_failed, measured_on")
+              .eq("tenant_id", tenantId)
+              .order("measured_on", { ascending: false })
+              .limit(20),
+            supabaseAdmin
+              .from("order_items")
+              .select("product_id, quantity, created_at")
+              .eq("tenant_id", tenantId)
+              .gte("created_at", since30Iso)
+              .limit(2000),
+          ]);
 
         const orders = ordersRes.data ?? [];
         const revenue30 = orders.reduce((s, o) => s + (o.total_cents ?? 0), 0);
         const orderCount30 = orders.length;
         const aov = orderCount30 > 0 ? Math.round(revenue30 / orderCount30) : 0;
+
+        // 7-day window
+        const orders7 = orders.filter((o) => o.created_at >= since7Iso);
+        const revenue7 = orders7.reduce((s, o) => s + (o.total_cents ?? 0), 0);
+
+        // Topові товари за продажами (sold30)
+        const soldByProduct = new Map<string, number>();
+        for (const item of orderItemsRes.data ?? []) {
+          const pid = item.product_id;
+          if (!pid) continue;
+          soldByProduct.set(pid, (soldByProduct.get(pid) ?? 0) + (item.quantity ?? 0));
+        }
+        const productsWithSold = (productsRes.data ?? []).map((p) => ({
+          name: p.name,
+          stock: p.stock,
+          price_cents: p.price_cents,
+          sold30: soldByProduct.get(p.id) ?? 0,
+        }));
 
         // Детермінований intent-based answer (без AI-кредитів).
         const intent = answerIntent(question, {
@@ -129,18 +158,18 @@ export const Route = createFileRoute("/api/ai/ask")({
           revenue30_cents: revenue30,
           orders30: orderCount30,
           aov_cents: aov,
+          revenue7_cents: revenue7,
+          orders7: orders7.length,
           insights: (insightsRes.data ?? []).map((i) => ({
             title: i.title,
             type: i.insight_type,
             risk: i.risk_level,
             status: i.status,
             expected_impact: i.expected_impact,
+            confidence: i.confidence,
+            created_at: i.created_at,
           })),
-          products: (productsRes.data ?? []).map((p) => ({
-            name: p.name,
-            stock: p.stock,
-            price_cents: p.price_cents,
-          })),
+          products: productsWithSold,
           agents: (healthRes.data ?? []).map((h) => ({
             id: h.agent_id,
             score: h.health_score,
