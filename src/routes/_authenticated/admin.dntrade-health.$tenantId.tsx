@@ -142,7 +142,7 @@ function Drill({ tenantId }: { tenantId: string }) {
     },
   });
 
-  const logs = data.data?.logs ?? [];
+  const logs = useMemo(() => data.data?.logs ?? [], [data.data?.logs]);
 
   // Тренд по днях.
   const dailyTrend = useMemo(() => {
