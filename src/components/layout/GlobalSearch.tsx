@@ -325,6 +325,7 @@ export function GlobalSearch() {
               tenantId={currentTenantId}
               question={aiQuestion}
               onNavigate={(to) => go(to)}
+              onPickQuestion={(q) => setQuery(q ? `? ${q}` : "? ")}
             />
           )}
 
