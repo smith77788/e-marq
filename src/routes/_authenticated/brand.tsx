@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Bot, Settings, Wand2 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CockpitSkeleton } from "@/components/ui/cockpit-skeleton";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
@@ -48,7 +49,6 @@ function BrandPage() {
   // Sync ?tenant=… in URL with the global tenant context (in either direction).
   useEffect(() => {
     if (loading) return;
-    // 1) URL has tenant → activate it in context
     if (tenantSearchId && tenantSearchId !== currentTenantId) {
       const found = tenants.find((tt) => tt.tenant_id === tenantSearchId);
       if (found) {
@@ -56,7 +56,6 @@ function BrandPage() {
         return;
       }
     }
-    // 2) URL has no tenant but context does → push to URL (replace)
     if (!tenantSearchId && currentTenantId) {
       void navigate({
         to: "/brand",
@@ -66,13 +65,14 @@ function BrandPage() {
     }
   }, [tenantSearchId, currentTenantId, tenants, loading, navigate, setCurrentTenantId]);
 
+  // Modern shimmer skeleton — instead of plain "Завантаження…" text
   if (authLoading || loading) {
-    return <p className="text-sm text-muted-foreground">{t("common.loading")}</p>;
+    return <CockpitSkeleton variant="owner" />;
   }
 
   if (!tenants || tenants.length === 0) {
     return (
-      <Card>
+      <Card className="fade-in-soft">
         <CardHeader>
           <CardTitle>{t("brand.noBrandTitle")}</CardTitle>
           <CardDescription>{t("brand.noBrandDesc")}</CardDescription>
@@ -82,11 +82,11 @@ function BrandPage() {
   }
 
   if (!current) {
-    return <p className="text-sm text-muted-foreground">{t("brand.loadingBrand")}</p>;
+    return <CockpitSkeleton variant="owner" />;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="reveal-stagger space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">

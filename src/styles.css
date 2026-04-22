@@ -272,4 +272,74 @@
     80%  { transform: scale(1.6); opacity: 0; }
     100% { transform: scale(1.6); opacity: 0; }
   }
+
+  /* ─── Cockpit shimmer + reveal animations ───────────────────────────── */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+    background:
+      linear-gradient(
+        90deg,
+        oklch(1 0 0 / 0%) 0%,
+        oklch(1 0 0 / 6%) 50%,
+        oklch(1 0 0 / 0%) 100%
+      ),
+      var(--muted);
+    background-size: 200% 100%, 100% 100%;
+    animation: shimmer-slide 1.6s linear infinite;
+  }
+  @keyframes shimmer-slide {
+    0%   { background-position: -150% 0, 0 0; }
+    100% { background-position:  150% 0, 0 0; }
+  }
+
+  /* Stagger fade-up reveal — applied to .reveal-stagger > * children */
+  .reveal-stagger > * {
+    animation: reveal-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .reveal-stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .reveal-stagger > *:nth-child(2) { animation-delay: 60ms; }
+  .reveal-stagger > *:nth-child(3) { animation-delay: 120ms; }
+  .reveal-stagger > *:nth-child(4) { animation-delay: 180ms; }
+  .reveal-stagger > *:nth-child(5) { animation-delay: 240ms; }
+  .reveal-stagger > *:nth-child(6) { animation-delay: 300ms; }
+  .reveal-stagger > *:nth-child(7) { animation-delay: 360ms; }
+  .reveal-stagger > *:nth-child(n+8) { animation-delay: 420ms; }
+  @keyframes reveal-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Soft fade-in (no transform) for content swaps */
+  .fade-in-soft {
+    animation: fade-in-soft 0.35s ease-out both;
+  }
+  @keyframes fade-in-soft {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* Top-of-page progress bar (perceived speed) */
+  .top-progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    z-index: 100;
+    background: linear-gradient(90deg, transparent, var(--primary), var(--accent), transparent);
+    background-size: 200% 100%;
+    animation: top-progress-slide 1.1s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes top-progress-slide {
+    0%   { background-position: -100% 0; }
+    100% { background-position:  200% 0; }
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .shimmer, .reveal-stagger > *, .fade-in-soft, .top-progress {
+      animation: none !important;
+    }
+    .reveal-stagger > * { opacity: 1; transform: none; }
+  }
 }
