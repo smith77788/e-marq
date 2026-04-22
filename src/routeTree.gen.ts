@@ -145,6 +145,7 @@ import { Route as ApiEmailDomainSetupRouteImport } from './routes/api/email.doma
 import { Route as ApiEmailCampaignSendRouteImport } from './routes/api/email.campaign-send'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedBrandSiteBuilderRouteImport } from './routes/_authenticated/brand.site-builder'
+import { Route as AuthenticatedBrandSettingsRouteImport } from './routes/_authenticated/brand.settings'
 import { Route as AuthenticatedBrandPromotionsRouteImport } from './routes/_authenticated/brand.promotions'
 import { Route as AuthenticatedBrandProductsRouteImport } from './routes/_authenticated/brand.products'
 import { Route as AuthenticatedBrandOrdersRouteImport } from './routes/_authenticated/brand.orders'
@@ -923,6 +924,12 @@ const AuthenticatedBrandSiteBuilderRoute =
     path: '/site-builder',
     getParentRoute: () => AuthenticatedBrandRoute,
   } as any)
+const AuthenticatedBrandSettingsRoute =
+  AuthenticatedBrandSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedBrandRoute,
+  } as any)
 const AuthenticatedBrandPromotionsRoute =
   AuthenticatedBrandPromotionsRouteImport.update({
     id: '/promotions',
@@ -1154,6 +1161,7 @@ export interface FileRoutesByFullPath {
   '/brand/orders': typeof AuthenticatedBrandOrdersRoute
   '/brand/products': typeof AuthenticatedBrandProductsRouteWithChildren
   '/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
+  '/brand/settings': typeof AuthenticatedBrandSettingsRoute
   '/brand/site-builder': typeof AuthenticatedBrandSiteBuilderRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
@@ -1325,6 +1333,7 @@ export interface FileRoutesByTo {
   '/brand/orders': typeof AuthenticatedBrandOrdersRoute
   '/brand/products': typeof AuthenticatedBrandProductsRouteWithChildren
   '/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
+  '/brand/settings': typeof AuthenticatedBrandSettingsRoute
   '/brand/site-builder': typeof AuthenticatedBrandSiteBuilderRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
@@ -1499,6 +1508,7 @@ export interface FileRoutesById {
   '/_authenticated/brand/orders': typeof AuthenticatedBrandOrdersRoute
   '/_authenticated/brand/products': typeof AuthenticatedBrandProductsRouteWithChildren
   '/_authenticated/brand/promotions': typeof AuthenticatedBrandPromotionsRoute
+  '/_authenticated/brand/settings': typeof AuthenticatedBrandSettingsRoute
   '/_authenticated/brand/site-builder': typeof AuthenticatedBrandSiteBuilderRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
@@ -1673,6 +1683,7 @@ export interface FileRouteTypes {
     | '/brand/orders'
     | '/brand/products'
     | '/brand/promotions'
+    | '/brand/settings'
     | '/brand/site-builder'
     | '/invite/$token'
     | '/api/email/campaign-send'
@@ -1844,6 +1855,7 @@ export interface FileRouteTypes {
     | '/brand/orders'
     | '/brand/products'
     | '/brand/promotions'
+    | '/brand/settings'
     | '/brand/site-builder'
     | '/invite/$token'
     | '/api/email/campaign-send'
@@ -2017,6 +2029,7 @@ export interface FileRouteTypes {
     | '/_authenticated/brand/orders'
     | '/_authenticated/brand/products'
     | '/_authenticated/brand/promotions'
+    | '/_authenticated/brand/settings'
     | '/_authenticated/brand/site-builder'
     | '/_authenticated/invite/$token'
     | '/api/email/campaign-send'
@@ -3257,6 +3270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBrandSiteBuilderRouteImport
       parentRoute: typeof AuthenticatedBrandRoute
     }
+    '/_authenticated/brand/settings': {
+      id: '/_authenticated/brand/settings'
+      path: '/settings'
+      fullPath: '/brand/settings'
+      preLoaderRoute: typeof AuthenticatedBrandSettingsRouteImport
+      parentRoute: typeof AuthenticatedBrandRoute
+    }
     '/_authenticated/brand/promotions': {
       id: '/_authenticated/brand/promotions'
       path: '/promotions'
@@ -3528,6 +3548,7 @@ interface AuthenticatedBrandRouteChildren {
   AuthenticatedBrandOrdersRoute: typeof AuthenticatedBrandOrdersRoute
   AuthenticatedBrandProductsRoute: typeof AuthenticatedBrandProductsRouteWithChildren
   AuthenticatedBrandPromotionsRoute: typeof AuthenticatedBrandPromotionsRoute
+  AuthenticatedBrandSettingsRoute: typeof AuthenticatedBrandSettingsRoute
   AuthenticatedBrandSiteBuilderRoute: typeof AuthenticatedBrandSiteBuilderRoute
 }
 
@@ -3539,6 +3560,7 @@ const AuthenticatedBrandRouteChildren: AuthenticatedBrandRouteChildren = {
   AuthenticatedBrandOrdersRoute: AuthenticatedBrandOrdersRoute,
   AuthenticatedBrandProductsRoute: AuthenticatedBrandProductsRouteWithChildren,
   AuthenticatedBrandPromotionsRoute: AuthenticatedBrandPromotionsRoute,
+  AuthenticatedBrandSettingsRoute: AuthenticatedBrandSettingsRoute,
   AuthenticatedBrandSiteBuilderRoute: AuthenticatedBrandSiteBuilderRoute,
 }
 

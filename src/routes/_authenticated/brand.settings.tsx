@@ -122,28 +122,28 @@ function StoreSettingsPage() {
       // зберігаємо ui/seo/bot, не перезаписуючи інші ключі
       const merged = {
         tenant_id: tenantId,
-        brand_name: form.brand_name.trim() || null,
+        brand_name: (form.brand_name.trim() || current?.tenant_name) ?? "Brand",
         ui: {
           ...((cfgQuery.data?.ui as Json) ?? {}),
           primary_color: form.primary_color,
           accent_color: form.accent_color,
           logo_url: form.logo_url.trim(),
-        },
+        } as Json,
         seo: {
           ...((cfgQuery.data?.seo as Json) ?? {}),
           title: form.seo_title.trim(),
           description: form.seo_description.trim(),
           og_image_url: form.og_image_url.trim(),
-        },
+        } as Json,
         bot: {
           ...((cfgQuery.data?.bot as Json) ?? {}),
           welcome_message: form.bot_welcome.trim(),
           system_prompt: form.bot_system.trim(),
-        },
+        } as Json,
       };
       const { error } = await supabase
         .from("tenant_configs")
-        .upsert(merged, { onConflict: "tenant_id" });
+        .upsert([merged], { onConflict: "tenant_id" });
       if (error) throw error;
     },
     onSuccess: () => {
