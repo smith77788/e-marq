@@ -1,4 +1,5 @@
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { useCallback } from "react";
 import {
   Activity,
   BookOpen,
@@ -161,8 +162,36 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useT();
   const groups = isSuperAdmin ? ADMIN_NAV : OWNER_NAV;
+
+  /**
+   * Smart hash navigation:
+   * - If we're already on the target route, smooth-scroll to the anchor.
+   * - Otherwise, navigate via TanStack router (no full reload) and after
+   *   the route mounts scroll to the anchor.
+   */
+  const handleHashNav = useCallback(
+    (e: React.MouseEvent, to: string, hash: string) => {
+      e.preventDefault();
+      const scrollTo = () => {
+        const el = document.getElementById(hash);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        else window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+      if (location.pathname === to || location.pathname.startsWith(to + "/")) {
+        scrollTo();
+        history.replaceState(null, "", `${to}#${hash}`);
+        return;
+      }
+      void navigate({ to, hash }).then(() => {
+        // wait one frame for the new route to mount its sections
+        requestAnimationFrame(() => requestAnimationFrame(scrollTo));
+      });
+    },
+    [location.pathname, navigate],
+  );
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -207,39 +236,54 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => {
-                  const isActive = item.exact
-                    ? location.pathname === item.to
-                    : location.pathname.startsWith(item.to);
+                  const isActive = item.hash
+                    ? location.pathname === item.to && location.hash === `#${item.hash}`
+                    : item.exact
+                      ? location.pathname === item.to
+                      : location.pathname === item.to ||
+                        location.pathname.startsWith(item.to + "/");
                   const label = t(item.labelKey);
-                  const href = item.hash ? `${item.to}#${item.hash}` : item.to;
+                  const key = `${group.labelKey}-${item.labelKey}-${item.to}-${item.hash ?? ""}`;
+                  const iconClasses = cn(
+                    "h-4 w-4 shrink-0 transition-colors",
+                    isActive
+                      ? "text-primary"
+                      : cn(
+                          item.tone ?? "text-muted-foreground",
+                          "opacity-80 group-hover/nav:opacity-100",
+                        ),
+                  );
+                  const linkClasses = cn(
+                    "group/nav relative flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-all",
+                    isActive
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-glow"
+                      : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+                  );
+                  const inner = (
+                    <>
+                      {isActive && (
+                        <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary" />
+                      )}
+                      <item.icon className={iconClasses} />
+                      {!collapsed && <span className="truncate">{label}</span>}
+                    </>
+                  );
                   return (
-                    <SidebarMenuItem key={`${group.labelKey}-${item.labelKey}-${href}`}>
+                    <SidebarMenuItem key={key}>
                       <SidebarMenuButton asChild tooltip={label}>
-                        <a
-                          href={href}
-                          className={cn(
-                            "group/nav relative flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-all",
-                            isActive
-                              ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-glow"
-                              : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
-                          )}
-                        >
-                          {isActive && (
-                            <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary" />
-                          )}
-                          <item.icon
-                            className={cn(
-                              "h-4 w-4 shrink-0 transition-colors",
-                              isActive
-                                ? "text-primary"
-                                : cn(
-                                    item.tone ?? "text-muted-foreground",
-                                    "opacity-80 group-hover/nav:opacity-100",
-                                  ),
-                            )}
-                          />
-                          {!collapsed && <span className="truncate">{label}</span>}
-                        </a>
+                        {item.hash ? (
+                          <a
+                            href={`${item.to}#${item.hash}`}
+                            onClick={(e) => handleHashNav(e, item.to, item.hash!)}
+                            className={linkClasses}
+                          >
+                            {inner}
+                          </a>
+                        ) : (
+                          <Link to={item.to} className={linkClasses}>
+                            {inner}
+                          </Link>
+                        )}
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
