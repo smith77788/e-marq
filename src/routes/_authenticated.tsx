@@ -98,10 +98,10 @@ function AuthenticatedShell({
           className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60"
         >
           <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
-          {/* LiveStatus pulse — hidden only on the very narrowest phones to save space.
-              Super-admin badge is ALWAYS visible (including mobile) so privileged
-              status is never accidentally hidden. */}
-          <div className="hidden items-center gap-2 xs:flex sm:flex">
+          {/* LiveStatus pulse — visible from the smallest phones up. Super-admin
+              badge is ALWAYS visible (including mobile) so privileged status
+              is never accidentally hidden. */}
+          <div className="flex items-center gap-2">
             <LiveStatus />
           </div>
           {isSuperAdmin && (
