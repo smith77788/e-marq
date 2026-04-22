@@ -149,7 +149,7 @@ export const Route = createFileRoute("/api/site-builder/build")({
               manifest: {
                 template_key: ctx.template.key,
                 brand_name: ctx.profile.brand_name,
-                file_count: 9,
+                file_count: 12,
               },
             })
             .eq("id", buildId);
