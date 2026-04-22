@@ -543,53 +543,55 @@ function TenantDetailPage() {
               {productsQuery.isLoading ? (
                 <p className="text-sm text-muted-foreground">Завантажуємо…</p>
               ) : productsQuery.data && productsQuery.data.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Назва</TableHead>
-                      <TableHead>Артикул</TableHead>
-                      <TableHead className="text-right">Ціна</TableHead>
-                      <TableHead className="text-right">Залишок</TableHead>
-                      <TableHead>Активний</TableHead>
-                      <TableHead className="text-right">Дії</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {productsQuery.data.map((p) => (
-                      <TableRow key={p.id}>
-                        <TableCell className="font-medium">{p.name}</TableCell>
-                        <TableCell className="text-muted-foreground">{p.sku ?? "—"}</TableCell>
-                        <TableCell className="text-right">
-                          {(p.price_cents / 100).toFixed(2)} {p.currency}
-                        </TableCell>
-                        <TableCell className="text-right">{p.stock}</TableCell>
-                        <TableCell>
-                          <Switch
-                            checked={p.is_active}
-                            disabled={toggleMutation.isPending}
-                            onCheckedChange={(checked) =>
-                              toggleMutation.mutate({ id: p.id, is_active: checked })
-                            }
-                          />
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button size="sm" variant="outline" onClick={() => setEditing(p)}>
-                              Редагувати
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => setDeleting(p)}
-                            >
-                              Видалити
-                            </Button>
-                          </div>
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Назва</TableHead>
+                        <TableHead>Артикул</TableHead>
+                        <TableHead className="text-right">Ціна</TableHead>
+                        <TableHead className="text-right">Залишок</TableHead>
+                        <TableHead>Активний</TableHead>
+                        <TableHead className="text-right">Дії</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {productsQuery.data.map((p) => (
+                        <TableRow key={p.id}>
+                          <TableCell className="font-medium">{p.name}</TableCell>
+                          <TableCell className="text-muted-foreground">{p.sku ?? "—"}</TableCell>
+                          <TableCell className="text-right">
+                            {(p.price_cents / 100).toFixed(2)} {p.currency}
+                          </TableCell>
+                          <TableCell className="text-right">{p.stock}</TableCell>
+                          <TableCell>
+                            <Switch
+                              checked={p.is_active}
+                              disabled={toggleMutation.isPending}
+                              onCheckedChange={(checked) =>
+                                toggleMutation.mutate({ id: p.id, is_active: checked })
+                              }
+                            />
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button size="sm" variant="outline" onClick={() => setEditing(p)}>
+                                Редагувати
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => setDeleting(p)}
+                              >
+                                Видалити
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               ) : (
                 <p className="text-sm text-muted-foreground">Поки що товарів немає.</p>
               )}

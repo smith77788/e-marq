@@ -548,6 +548,7 @@ function DnTradeHealthContent() {
               Health-снапшотів за 24 год ще немає. Cron запускається щогодини на :30.
             </p>
           ) : (
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -614,6 +615,7 @@ function DnTradeHealthContent() {
                 ))}
               </TableBody>
             </Table>
+            </div>
           )}
         </CardContent>
       </Card>
