@@ -92,11 +92,11 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
             return jsonOk({ insights_created: 0, reason: "no_products" });
           }
 
-          // Pull aggregates in parallel — events/orders carry metadata for geo filter
+          // Pull aggregates in parallel — events.payload / orders.metadata carry geo
           const [viewsRes, cartsRes, soldRes] = await Promise.all([
             supabaseAdmin
               .from("events")
-              .select("product_id, metadata")
+              .select("product_id, payload")
               .eq("tenant_id", tenantId)
               .eq("type", "product_viewed")
               .gte("created_at", since)
@@ -104,7 +104,7 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
               .limit(50_000),
             supabaseAdmin
               .from("events")
-              .select("product_id, metadata")
+              .select("product_id, payload")
               .eq("tenant_id", tenantId)
               .eq("type", "add_to_cart")
               .gte("created_at", since)
@@ -123,10 +123,10 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
           ]);
 
           const filteredViews = (viewsRes.data ?? []).filter((r) =>
-            rowMatchesGeo({ metadata: r.metadata as Record<string, unknown> | null }, geo),
+            rowMatchesGeo({ metadata: (r.payload ?? null) as Record<string, unknown> | null }, geo),
           );
           const filteredCarts = (cartsRes.data ?? []).filter((r) =>
-            rowMatchesGeo({ metadata: r.metadata as Record<string, unknown> | null }, geo),
+            rowMatchesGeo({ metadata: (r.payload ?? null) as Record<string, unknown> | null }, geo),
           );
           const filteredSold = (soldRes.data ?? []).filter((r) => {
             const ord = (r as unknown as { orders?: { metadata?: Record<string, unknown> | null } })
