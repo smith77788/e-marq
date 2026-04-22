@@ -132,10 +132,13 @@ function useDebounced<T>(value: T, ms: number): T {
 export function GlobalSearch() {
   const { t } = useT();
   const { user, isSuperAdmin } = useAuth();
+  const { currentTenantId } = useTenantContext();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const debounced = useDebounced(query.trim(), 220);
+  const isAiMode = query.trimStart().startsWith("?") || query.trimStart().startsWith(">");
+  const aiQuestion = isAiMode ? query.trimStart().replace(/^[?>]+\s*/, "") : "";
 
   // ⌘K / Ctrl+K shortcut
   useEffect(() => {
