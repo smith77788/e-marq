@@ -261,10 +261,51 @@ function BrandSiteBuilderPage() {
     },
   });
 
+  const generateMut = useMutation({
+    mutationFn: async () => {
+      if (!tenantId || !template) throw new Error("missing tenant/template");
+      const session = await supabase.auth.getSession();
+      const accessToken = session.data.session?.access_token;
+      if (!accessToken) throw new Error("Not authenticated");
+      const res = await fetch("/api/site-builder/build", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ tenant_id: tenantId, template_id: template.id }),
+      });
+      const payload = (await res.json().catch(() => ({}))) as {
+        download_url?: string;
+        error?: string;
+      };
+      if (!res.ok) {
+        if (res.status === 429) throw new Error(t("sbu.action.cooldown"));
+        throw new Error(payload.error ?? `HTTP ${res.status}`);
+      }
+      return payload as { download_url: string };
+    },
+    onSuccess: (data) => {
+      toast.success(t("sbu.action.buildOk"));
+      qc.invalidateQueries({ queryKey: ["site-builds", tenantId] });
+      if (data.download_url && typeof window !== "undefined") {
+        window.location.href = data.download_url;
+      }
+    },
+    onError: (e: unknown) => {
+      toast.error(t("sbu.action.buildErr"), {
+        description: e instanceof Error ? e.message : String(e),
+      });
+    },
+  });
+
   const handleGenerate = () => {
-    // Етап 11.5 ще не реалізовано — поки інформативний тост.
     void user;
-    toast.info(t("sbu.action.notReady"));
+    if (!profileQuery.data) {
+      toast.info(t("sbu.action.notReady"));
+      return;
+    }
+    generateMut.mutate();
   };
 
   if (loading) {
