@@ -48,7 +48,9 @@ export function TelegramConnectCard({ tenantId, compact = false }: Props) {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       const j = (await r.json().catch(() => ({}))) as Status & { error?: string };
-      if (!r.ok && r.status !== 200) {
+      // Сервер повертає 200 навіть коли бот не підключено (з полями error/hint).
+      // Тільки 4xx/5xx означає справжню проблему — лише тоді кидаємо.
+      if (!r.ok) {
         throw new Error(j.error ?? `HTTP ${r.status}`);
       }
       return j;
