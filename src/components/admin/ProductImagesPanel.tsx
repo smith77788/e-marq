@@ -319,7 +319,7 @@ export function ProductImagesPanel({ tenantId, productId, productName }: Props) 
                   key={img.id}
                   className="group relative aspect-square overflow-hidden rounded-md border bg-muted"
                 >
-                  <img src={img.url} alt={img.alt ?? ""} className="h-full w-full object-cover" />
+                  <img src={img.url} alt={img.alt ?? ""} loading="lazy" decoding="async" className="h-full w-full object-cover" />
                   {img.is_primary && (
                     <Badge className="absolute left-1.5 top-1.5 bg-primary text-primary-foreground">
                       <Star className="mr-1 h-3 w-3" /> Головне

@@ -253,7 +253,7 @@ function StorefrontHeader({
                   className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-accent"
                 >
                   {s.image_url ? (
-                    <img src={s.image_url} alt="" className="h-8 w-8 rounded object-cover" />
+                    <img src={s.image_url} alt="" loading="lazy" decoding="async" width={32} height={32} className="h-8 w-8 rounded object-cover" />
                   ) : (
                     <div className="h-8 w-8 rounded bg-muted" />
                   )}
@@ -331,6 +331,10 @@ function CartSheet() {
                     <img
                       src={product.image_url}
                       alt={product.name}
+                      loading="lazy"
+                      decoding="async"
+                      width={64}
+                      height={64}
                       className="h-16 w-16 rounded object-cover"
                     />
                   ) : (

@@ -261,6 +261,10 @@ function StoreSettingsPage() {
                       <img
                         src={form.logo_url}
                         alt="logo preview"
+                        loading="lazy"
+                        decoding="async"
+                        width={40}
+                        height={40}
                         className="h-10 w-10 rounded-md border border-border object-contain bg-card"
                         onError={(e) => {
                           (e.currentTarget as HTMLImageElement).style.display = "none";
@@ -387,6 +391,8 @@ function StoreSettingsPage() {
                     <img
                       src={form.og_image_url}
                       alt="OG preview"
+                      loading="lazy"
+                      decoding="async"
                       className="mt-2 max-h-40 rounded-md border border-border bg-card object-cover"
                       onError={(e) => {
                         (e.currentTarget as HTMLImageElement).style.display = "none";

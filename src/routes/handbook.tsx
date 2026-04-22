@@ -144,6 +144,8 @@ function HandbookPage() {
             src={heroImg}
             alt=""
             aria-hidden
+            decoding="async"
+            fetchPriority="high"
             className="h-full w-full object-cover opacity-25"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
@@ -241,7 +243,7 @@ function HandbookPage() {
             subtitle={t("hb.owner.lead")}
           >
             <Card className="overflow-hidden border-border/60 bg-card/40">
-              <img src={approvalImg} alt="" className="h-48 w-full object-cover" />
+              <img src={approvalImg} alt="" loading="lazy" decoding="async" className="h-48 w-full object-cover" />
             </Card>
             <div className="grid gap-4 md:grid-cols-2">
               {ownerFeatures.map((f, i) => (
@@ -329,7 +331,7 @@ function HandbookPage() {
             subtitle={t("hb.int.lead")}
           >
             <Card className="overflow-hidden border-border/60 bg-card/40">
-              <img src={integrationsImg} alt="" className="h-44 w-full object-cover" />
+              <img src={integrationsImg} alt="" loading="lazy" decoding="async" className="h-44 w-full object-cover" />
             </Card>
             <HandbookConnectors />
             <p className="rounded-md border border-dashed border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
@@ -346,7 +348,7 @@ function HandbookPage() {
             subtitle={t("hb.price.lead")}
           >
             <Card className="overflow-hidden border-border/60 bg-card/40">
-              <img src={pricingImg} alt="" className="h-40 w-full object-cover" />
+              <img src={pricingImg} alt="" loading="lazy" decoding="async" className="h-40 w-full object-cover" />
             </Card>
             <div className="grid gap-4 md:grid-cols-3">
               {[
