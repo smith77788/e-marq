@@ -483,6 +483,19 @@ function BrandOrdersPage() {
                   </section>
                 </>
               )}
+
+              <Separator className="my-6" />
+              <section>
+                <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Telegram-чат з клієнтом
+                </h4>
+                <OrderTelegramChat
+                  orderId={opened.id}
+                  tenantId={opened.tenant_id}
+                  customerEmail={opened.customer_email}
+                  customerUserId={opened.customer_user_id}
+                />
+              </section>
             </>
           )}
         </SheetContent>
