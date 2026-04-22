@@ -63,18 +63,17 @@ export function parseGeoTargets(raw: unknown): GeoTargets | null {
     ? r.country.toUpperCase().slice(0, 2)
     : null;
   if (!country) return null;
-  const cities: GeoCity[] = Array.isArray(r.cities)
-    ? r.cities
-        .map((c) => {
-          if (!c || typeof c !== "object") return null;
-          const cc = c as Record<string, unknown>;
-          const name = typeof cc.name === "string" ? cc.name.trim() : "";
-          if (!name) return null;
-          const ref = typeof cc.ref === "string" ? cc.ref : undefined;
-          return { ref, name } satisfies GeoCity;
-        })
-        .filter((x): x is GeoCity => x !== null)
-    : [];
+  const cities: GeoCity[] = [];
+  if (Array.isArray(r.cities)) {
+    for (const c of r.cities) {
+      if (!c || typeof c !== "object") continue;
+      const cc = c as Record<string, unknown>;
+      const name = typeof cc.name === "string" ? cc.name.trim() : "";
+      if (!name) continue;
+      const ref = typeof cc.ref === "string" ? cc.ref : undefined;
+      cities.push({ ref, name });
+    }
+  }
   const whole_country = r.whole_country === true || cities.length === 0;
   return { country, cities, whole_country };
 }
