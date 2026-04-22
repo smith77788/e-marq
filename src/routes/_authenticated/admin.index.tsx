@@ -391,11 +391,7 @@ function MissionControlContent() {
 
       {/* SECTION 5 — швидкі дії */}
       <section className="space-y-4">
-        <SectionHeader
-          eyebrow="05 · швидкий доступ"
-          title="Куди йти далі"
-          icon={Sparkles}
-        />
+        <SectionHeader eyebrow="05 · швидкий доступ" title="Куди йти далі" icon={Sparkles} />
         <div className="grid gap-3 sm:grid-cols-3">
           <QuickLink
             to="/admin/tenants"

@@ -29,10 +29,7 @@ export function TableSkeleton({ rows = 5, columns = 5, className }: TableSkeleto
           {Array.from({ length: columns }).map((_, c) => (
             <Skeleton
               key={c}
-              className={cn(
-                "h-4",
-                c === 0 ? "w-[28%]" : c === columns - 1 ? "w-[10%]" : "w-[16%]",
-              )}
+              className={cn("h-4", c === 0 ? "w-[28%]" : c === columns - 1 ? "w-[10%]" : "w-[16%]")}
             />
           ))}
         </div>

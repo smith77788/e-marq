@@ -16,12 +16,12 @@
  */
 
 export type GeoCity = {
-  ref?: string;   // Nova Poshta DeliveryCity ref (UA only)
-  name: string;   // human-readable, used as filter key
+  ref?: string; // Nova Poshta DeliveryCity ref (UA only)
+  name: string; // human-readable, used as filter key
 };
 
 export type GeoTargets = {
-  country: string;        // ISO-3166-1 alpha-2 (e.g. "UA")
+  country: string; // ISO-3166-1 alpha-2 (e.g. "UA")
   cities: GeoCity[];
   whole_country: boolean;
 };
@@ -59,9 +59,10 @@ export function countryLabel(code: string, lang: "uk" | "en" = "uk"): string {
 export function parseGeoTargets(raw: unknown): GeoTargets | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
-  const country = typeof r.country === "string" && r.country.length >= 2
-    ? r.country.toUpperCase().slice(0, 2)
-    : null;
+  const country =
+    typeof r.country === "string" && r.country.length >= 2
+      ? r.country.toUpperCase().slice(0, 2)
+      : null;
   if (!country) return null;
   const cities: GeoCity[] = [];
   if (Array.isArray(r.cities)) {
@@ -79,15 +80,8 @@ export function parseGeoTargets(raw: unknown): GeoTargets | null {
 }
 
 /** Resolve effective targets (agent override > brand > default). */
-export function resolveGeoTargets(
-  agentOverride: unknown,
-  brandDefault: unknown,
-): GeoTargets {
-  return (
-    parseGeoTargets(agentOverride) ??
-    parseGeoTargets(brandDefault) ??
-    DEFAULT_GEO_TARGETS
-  );
+export function resolveGeoTargets(agentOverride: unknown, brandDefault: unknown): GeoTargets {
+  return parseGeoTargets(agentOverride) ?? parseGeoTargets(brandDefault) ?? DEFAULT_GEO_TARGETS;
 }
 
 /** Predicate to filter a row by its metadata.country/city against geo targets. */

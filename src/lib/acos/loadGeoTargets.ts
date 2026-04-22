@@ -5,11 +5,7 @@
  * Використовується в hooks/agents/* — імпорт supabaseAdmin ОК тут.
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import {
-  DEFAULT_GEO_TARGETS,
-  resolveGeoTargets,
-  type GeoTargets,
-} from "@/lib/acos/geoTargets";
+import { DEFAULT_GEO_TARGETS, resolveGeoTargets, type GeoTargets } from "@/lib/acos/geoTargets";
 
 export async function loadEffectiveGeoTargets(
   tenantId: string,

@@ -26,10 +26,7 @@ export function PageSkeleton({ blocks = 3, className }: PageSkeletonProps) {
       </div>
       <div className="space-y-4">
         {Array.from({ length: blocks }).map((_, i) => (
-          <div
-            key={i}
-            className="space-y-3 rounded-lg border border-border/60 bg-card/40 p-5"
-          >
+          <div key={i} className="space-y-3 rounded-lg border border-border/60 bg-card/40 p-5">
             <Skeleton className="h-5 w-1/3" />
             <Skeleton className="h-3 w-2/3" />
             <Skeleton className="h-3 w-1/2" />
