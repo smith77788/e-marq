@@ -73,12 +73,16 @@ export const Route = createFileRoute("/api/site-builder/build")({
           return jsonError(400, err instanceof Error ? err.message : "Invalid body");
         }
 
-        // 3. Verify membership (defence-in-depth).
-        const { data: isMember, error: memErr } = await userClient.rpc("is_tenant_member", {
-          _tenant_id: body.tenant_id,
-        });
-        if (memErr) return jsonError(500, memErr.message);
-        if (!isMember) return jsonError(403, "Not a member of this tenant");
+        // 3. Verify membership OR super-admin (defence-in-depth).
+        const [memRes, adminRes] = await Promise.all([
+          userClient.rpc("is_tenant_member", { _tenant_id: body.tenant_id }),
+          userClient.rpc("is_super_admin"),
+        ]);
+        if (memRes.error && adminRes.error) {
+          return jsonError(500, memRes.error.message);
+        }
+        const allowed = !!memRes.data || !!adminRes.data;
+        if (!allowed) return jsonError(403, "Not a member of this tenant");
 
         // 4. Cooldown — block accidental double-clicks / abuse.
         const sinceIso = new Date(Date.now() - MIN_INTERVAL_MS).toISOString();
