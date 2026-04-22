@@ -157,6 +157,28 @@ export function GlobalSearch() {
     if (!open) setQuery("");
   }, [open]);
 
+  // Deep-link: відкрити палетту з готовим AI-запитом через URL `?ask=...`.
+  // Використовується share-кнопкою (AiAskPanel → copy link). Зчитуємо один раз
+  // на mount + слухаємо popstate для назад/вперед навігації.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const consumeAskParam = () => {
+      const url = new URL(window.location.href);
+      const ask = url.searchParams.get("ask");
+      if (!ask) return;
+      const decoded = ask.trim();
+      if (decoded.length < 1) return;
+      setQuery(`? ${decoded}`);
+      setOpen(true);
+      // Clean URL без перезавантаження.
+      url.searchParams.delete("ask");
+      window.history.replaceState({}, "", url.toString());
+    };
+    consumeAskParam();
+    window.addEventListener("popstate", consumeAskParam);
+    return () => window.removeEventListener("popstate", consumeAskParam);
+  }, []);
+
   const { data: tenantIds = [] } = useQuery({
     queryKey: ["gs-tenants", user?.id],
     enabled: !!user,
