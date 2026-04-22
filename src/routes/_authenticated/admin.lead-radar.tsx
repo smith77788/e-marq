@@ -263,6 +263,8 @@ function Content() {
         </div>
       </header>
 
+      {telegramTenantId && <TelegramConnectCard tenantId={telegramTenantId} />}
+
       <Tabs defaultValue="prospects">
         <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-muted/40 p-1">
           <TabsTrigger value="prospects" className="gap-1.5 text-xs">
