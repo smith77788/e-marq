@@ -1,12 +1,19 @@
+/**
+ * Mission Control — головний дашборд super-admin.
+ * Структуровано в логічні секції з eyebrow-заголовками для чіткої ієрархії.
+ */
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
+  AlertTriangle,
   Bot,
   Building2,
+  CheckCircle2,
   Cpu,
   DollarSign,
   Lightbulb,
+  ShieldCheck,
   ShoppingBag,
   Sparkles,
   Users,
@@ -15,6 +22,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
@@ -44,12 +52,91 @@ function MissionControlPage() {
     );
   }
 
-  if (!isSuperAdmin) {
-    return <Navigate to="/brand" />;
-  }
-
+  if (!isSuperAdmin) return <Navigate to="/brand" />;
   return <MissionControlContent />;
 }
+
+/* -------------------------------------------------------------------------- */
+/*  Header section                                                            */
+/* -------------------------------------------------------------------------- */
+
+function MissionHeader({ t }: { t: (k: string) => string }) {
+  return (
+    <header className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-card/60 to-accent/5 p-6 shadow-elegant backdrop-blur">
+      <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-accent/10 blur-3xl" />
+      <div className="relative flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
+              <ShieldCheck className="h-4 w-4 text-primary-foreground" />
+              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-success ring-2 ring-card animate-pulse" />
+            </span>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-primary">
+              {t("mc.title")}
+            </p>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Командний центр
+          </h1>
+          <p className="max-w-xl text-sm text-muted-foreground">{t("mc.subtitle")}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin/users">
+              <Users className="mr-1.5 h-4 w-4" /> Користувачі
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin/tenants">
+              <Building2 className="mr-1.5 h-4 w-4" /> {t("sb.allTenants")}
+            </Link>
+          </Button>
+          <Button asChild size="sm" className="shadow-glow">
+            <Link to="/admin/commands">
+              <Zap className="mr-1.5 h-4 w-4" /> Команди
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Section header                                                            */
+/* -------------------------------------------------------------------------- */
+
+function SectionHeader({
+  eyebrow,
+  title,
+  hint,
+  icon: Icon,
+}: {
+  eyebrow: string;
+  title: string;
+  hint?: string;
+  icon?: typeof Activity;
+}) {
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-2 border-l-2 border-primary/40 pl-3">
+      <div>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-primary/80">
+          {eyebrow}
+        </p>
+        <h2 className="flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
+          {Icon && <Icon className="h-4 w-4 text-primary" />}
+          {title}
+        </h2>
+      </div>
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Main content                                                              */
+/* -------------------------------------------------------------------------- */
 
 function MissionControlContent() {
   const { t } = useT();
@@ -94,7 +181,7 @@ function MissionControlContent() {
   if (overview.isLoading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-32 w-full" />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-28" />
@@ -118,9 +205,9 @@ function MissionControlContent() {
   const failedRuns = data.runs.filter((r) => r.status === "failed").length;
   const successRuns = data.runs.filter((r) => r.status === "ok").length;
   const pendingActions = data.actions.filter((a) => a.status === "pending").length;
+  const activeTenants = data.tenants.filter((t) => t.status === "active").length;
 
   // Build leaderboard
-  const tenantMap = new Map(data.tenants.map((t) => [t.id, t]));
   const leaderRows: TenantLeaderRow[] = data.tenants
     .map((t) => {
       const tenantOrders = data.orders.filter((o) => o.tenant_id === t.id && o.status === "paid");
@@ -173,167 +260,252 @@ function MissionControlContent() {
       .values(),
   );
 
+  // Health badges for top header
+  const fleetHealthy = failedRuns === 0;
+  const insightsLoad = pendingInsights + pendingActions;
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-            {t("mc.title")}
-          </p>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            {t("mc.title")}
-          </h1>
-          <p className="text-sm text-muted-foreground">{t("mc.subtitle")}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button asChild variant="outline" size="sm">
-            <Link to="/admin/users">
-              <Users className="mr-1.5 h-4 w-4" /> Користувачі
-            </Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link to="/admin/tenants">
-              <Building2 className="mr-1.5 h-4 w-4" /> {t("sb.allTenants")}
-            </Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link to="/admin/commands">
-              <Zap className="mr-1.5 h-4 w-4" /> Команди
-            </Link>
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-8">
+      {/* HERO */}
+      <MissionHeader t={t} />
 
-      {/* KPI row */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <MissionStatCard
-          label={t("mc.activeTenants")}
-          value={data.tenants.length}
-          hint={`${data.tenants.filter((t) => t.status === "active").length} ${t("hero.active").split(" ·")[0]}`}
-          icon={Building2}
-          tone="primary"
-        />
-        <MissionStatCard
-          label={t("mc.gmv30")}
-          value={`${(totalRevenue / 100).toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`}
-          hint={`${paidOrders} ${t("sb.revenue").toLowerCase()}`}
-          icon={DollarSign}
-          tone="success"
-        />
-        <MissionStatCard
-          label={t("mc.insights24h")}
-          value={pendingInsights}
-          hint={`${highRiskInsights} ⚠`}
-          icon={Lightbulb}
-          tone={highRiskInsights > 5 ? "warning" : "info"}
-        />
-        <MissionStatCard
-          label={t("mc.runs24h")}
-          value={data.runs.length}
-          hint={`${successRuns} ✓ · ${failedRuns} ✗`}
+      {/* SECTION 1 — пульс системи */}
+      <section className="space-y-4">
+        <SectionHeader
+          eyebrow="01 · стан системи"
+          title="Пульс мережі за 30 днів"
+          hint="Оновлення кожну хвилину"
           icon={Activity}
-          tone={failedRuns > successRuns / 4 ? "destructive" : "primary"}
         />
-      </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <MissionStatCard
+            label={t("mc.activeTenants")}
+            value={data.tenants.length}
+            hint={`${activeTenants} активних`}
+            icon={Building2}
+            tone="primary"
+          />
+          <MissionStatCard
+            label={t("mc.gmv30")}
+            value={`${(totalRevenue / 100).toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`}
+            hint={`${paidOrders} оплачено`}
+            icon={DollarSign}
+            tone="success"
+          />
+          <MissionStatCard
+            label="Клієнтська база"
+            value={data.customers.length.toLocaleString("uk-UA")}
+            hint="усі бренди"
+            icon={Users}
+            tone="info"
+          />
+          <MissionStatCard
+            label="Запуски ШІ · 24h"
+            value={data.runs.length}
+            hint={`${successRuns} ✓ · ${failedRuns} ✗`}
+            icon={Cpu}
+            tone={failedRuns > successRuns / 4 ? "destructive" : "primary"}
+          />
+        </div>
+      </section>
 
-      {/* Secondary KPI row */}
-      <div className="grid gap-3 sm:grid-cols-3">
-        <MissionStatCard
-          label={t("mc.totalCustomers")}
-          value={data.customers.length.toLocaleString()}
-          icon={Users}
-          tone="info"
+      {/* SECTION 2 — увага потрібна */}
+      <section className="space-y-4">
+        <SectionHeader
+          eyebrow="02 · потребує уваги"
+          title="Інсайти, дії та ризики"
+          icon={AlertTriangle}
         />
-        <MissionStatCard
-          label={t("mc.pendingActions")}
-          value={pendingActions}
-          icon={Zap}
-          tone="warning"
-        />
-        <MissionStatCard
-          label={t("mc.insights24h")}
-          value={data.insights.length.toLocaleString()}
+        <div className="grid gap-3 sm:grid-cols-3">
+          <AttentionCard
+            label="Інсайти на черзі"
+            value={pendingInsights}
+            highlight={highRiskInsights}
+            highlightLabel="високого ризику"
+            icon={Lightbulb}
+            tone={highRiskInsights > 5 ? "warning" : "info"}
+            href="/admin/overview#stream"
+          />
+          <AttentionCard
+            label="Дії очікують apply"
+            value={pendingActions}
+            icon={Zap}
+            tone={pendingActions > 10 ? "warning" : "primary"}
+            href="/admin/commands"
+          />
+          <AttentionCard
+            label="Здоров'я агентів"
+            value={fleetHealthy ? "OK" : `${failedRuns} fail`}
+            icon={fleetHealthy ? CheckCircle2 : AlertTriangle}
+            tone={fleetHealthy ? "success" : "destructive"}
+            href="/admin/health"
+          />
+        </div>
+      </section>
+
+      {/* SECTION 3 — пульс по часу + лідери */}
+      <section className="space-y-4">
+        <SectionHeader
+          eyebrow="03 · аналітика"
+          title="Cross-tenant pulse"
+          hint={`${insightsLoad} відкритих сигналів`}
           icon={Sparkles}
-          tone="primary"
         />
-      </div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <Card className="border-border/60 bg-card/60 backdrop-blur lg:col-span-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">{t("mc.crossTenantPulse")}</CardTitle>
+              <CardDescription className="text-xs">Виторг по днях, усі бренди</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CrossTenantPulse points={points} />
+            </CardContent>
+          </Card>
 
-      {/* Pulse + Leaderboard */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2 border-border/60 bg-card/60 backdrop-blur">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">{t("mc.crossTenantPulse")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CrossTenantPulse points={points} />
-          </CardContent>
-        </Card>
+          <Card className="border-border/60 bg-card/60 backdrop-blur">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">{t("mc.leaderboard")}</CardTitle>
+              <CardDescription className="text-xs">ТОП-10 за виторгом 30д</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TenantLeaderboard rows={leaderRows} />
+            </CardContent>
+          </Card>
+        </div>
+      </section>
 
+      {/* SECTION 4 — здоров'я агентів */}
+      <section className="space-y-4">
+        <SectionHeader
+          eyebrow="04 · флот агентів"
+          title="Здоров'я та активність · 24 години"
+          hint={`${healthRows.length} агентів запускалися`}
+          icon={Cpu}
+        />
         <Card className="border-border/60 bg-card/60 backdrop-blur">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">{t("mc.leaderboard")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TenantLeaderboard rows={leaderRows} />
+          <CardContent className="pt-6">
+            <SystemHealthGrid rows={healthRows} />
           </CardContent>
         </Card>
-      </div>
+      </section>
 
-      {/* Agent health */}
-      <Card className="border-border/60 bg-card/60 backdrop-blur">
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-base">{t("mc.systemHealth")} · 24h</CardTitle>
+      {/* SECTION 5 — швидкі дії */}
+      <section className="space-y-4">
+        <SectionHeader
+          eyebrow="05 · швидкий доступ"
+          title="Куди йти далі"
+          icon={Sparkles}
+        />
+        <div className="grid gap-3 sm:grid-cols-3">
+          <QuickLink
+            to="/admin/tenants"
+            icon={Building2}
+            tone="primary"
+            title="Усі магазини"
+            desc="Створити, налаштувати, переглянути деталі"
+          />
+          <QuickLink
+            to="/agents"
+            icon={Bot}
+            tone="accent"
+            title="Бібліотека агентів"
+            desc="Запуски наживо · діагностика по кожному"
+          />
+          <QuickLink
+            to="/brand"
+            icon={ShoppingBag}
+            tone="success"
+            title="Кабінет власника"
+            desc="Подивитись, як це бачить власник магазину"
+          />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Small helpers                                                             */
+/* -------------------------------------------------------------------------- */
+
+function AttentionCard({
+  label,
+  value,
+  highlight,
+  highlightLabel,
+  icon: Icon,
+  tone,
+  href,
+}: {
+  label: string;
+  value: number | string;
+  highlight?: number;
+  highlightLabel?: string;
+  icon: typeof Lightbulb;
+  tone: "primary" | "success" | "warning" | "destructive" | "info";
+  href: string;
+}) {
+  const toneClass = {
+    primary: "text-primary border-primary/40",
+    success: "text-success border-success/40",
+    warning: "text-warning border-warning/40",
+    destructive: "text-destructive border-destructive/40",
+    info: "text-info border-info/40",
+  }[tone];
+  return (
+    <Link to={href}>
+      <Card
+        className={`group border-l-4 ${toneClass.split(" ")[1]} bg-card/60 backdrop-blur transition-all hover:shadow-glow hover:-translate-y-0.5`}
+      >
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 space-y-1">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                {label}
+              </p>
+              <p className="text-2xl font-bold tabular-nums text-foreground">{value}</p>
+              {highlight !== undefined && highlight > 0 && (
+                <Badge variant="outline" className="mt-1 text-[10px]">
+                  {highlight} {highlightLabel}
+                </Badge>
+              )}
             </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Cpu className="h-4 w-4 text-primary" />
-              <span>{healthRows.length}</span>
-            </div>
+            <Icon className={`h-5 w-5 ${toneClass.split(" ")[0]} opacity-80`} />
           </div>
-        </CardHeader>
-        <CardContent>
-          <SystemHealthGrid rows={healthRows} />
         </CardContent>
       </Card>
+    </Link>
+  );
+}
 
-      {/* Quick links */}
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Link
-          to="/admin/tenants"
-          className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card/40 p-4 transition-all hover:border-primary/40 hover:bg-card/70 hover:shadow-glow"
-        >
-          <Building2 className="h-5 w-5 text-primary" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-foreground">Усі магазини</p>
-            <p className="text-xs text-muted-foreground">
-              Створити, налаштувати, переглянути деталі
-            </p>
-          </div>
-        </Link>
-        <Link
-          to="/agents"
-          className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card/40 p-4 transition-all hover:border-accent/40 hover:bg-card/70 hover:shadow-glow"
-        >
-          <Bot className="h-5 w-5 text-accent" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-foreground">Бібліотека агентів</p>
-            <p className="text-xs text-muted-foreground">Запуски наживо · діагностика по кожному</p>
-          </div>
-        </Link>
-        <Link
-          to="/brand"
-          className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card/40 p-4 transition-all hover:border-success/40 hover:bg-card/70 hover:shadow-glow"
-        >
-          <ShoppingBag className="h-5 w-5 text-success" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-foreground">Кабінет власника</p>
-            <p className="text-xs text-muted-foreground">
-              Подивитись, як це бачить власник магазину
-            </p>
-          </div>
-        </Link>
+function QuickLink({
+  to,
+  icon: Icon,
+  tone,
+  title,
+  desc,
+}: {
+  to: string;
+  icon: typeof Building2;
+  tone: "primary" | "accent" | "success";
+  title: string;
+  desc: string;
+}) {
+  const toneClass = {
+    primary: "text-primary hover:border-primary/40",
+    accent: "text-accent hover:border-accent/40",
+    success: "text-success hover:border-success/40",
+  }[tone];
+  return (
+    <Link
+      to={to}
+      className={`group flex items-center gap-3 rounded-xl border border-border/60 bg-card/40 p-4 transition-all hover:bg-card/70 hover:shadow-glow ${toneClass}`}
+    >
+      <Icon className="h-5 w-5" />
+      <div className="flex-1">
+        <p className="text-sm font-semibold text-foreground">{title}</p>
+        <p className="text-xs text-muted-foreground">{desc}</p>
       </div>
-    </div>
+    </Link>
   );
 }
