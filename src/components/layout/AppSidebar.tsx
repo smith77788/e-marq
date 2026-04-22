@@ -242,17 +242,28 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
       e.preventDefault();
       const scrollTo = () => {
         const el = document.getElementById(hash);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-        else window.scrollTo({ top: 0, behavior: "smooth" });
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          return true;
+        }
+        return false;
+      };
+      // Poll up to ~2s for the section to mount (handles lazy-loaded data).
+      const pollScroll = () => {
+        let attempts = 0;
+        const tick = () => {
+          if (scrollTo() || attempts++ > 40) return;
+          setTimeout(tick, 50);
+        };
+        tick();
       };
       if (location.pathname === to || location.pathname.startsWith(to + "/")) {
-        scrollTo();
+        pollScroll();
         history.replaceState(null, "", `${to}#${hash}`);
         return;
       }
-      void navigate({ to, hash }).then(() => {
-        // wait one frame for the new route to mount its sections
-        requestAnimationFrame(() => requestAnimationFrame(scrollTo));
+      void Promise.resolve(navigate({ to, hash })).then(() => {
+        requestAnimationFrame(() => requestAnimationFrame(pollScroll));
       });
     },
     [location.pathname, navigate],
