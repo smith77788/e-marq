@@ -14,7 +14,7 @@
  * звернень з клієнта. Профіль зберігаємо upsert-ом, RLS гарантує що чужі
  * тенанти не пройдуть.
  */
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ExternalLink, Sparkles, Wand2 } from "lucide-react";
@@ -261,10 +261,51 @@ function BrandSiteBuilderPage() {
     },
   });
 
+  const generateMut = useMutation({
+    mutationFn: async () => {
+      if (!tenantId || !template) throw new Error("missing tenant/template");
+      const session = await supabase.auth.getSession();
+      const accessToken = session.data.session?.access_token;
+      if (!accessToken) throw new Error("Not authenticated");
+      const res = await fetch("/api/site-builder/build", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ tenant_id: tenantId, template_id: template.id }),
+      });
+      const payload = (await res.json().catch(() => ({}))) as {
+        download_url?: string;
+        error?: string;
+      };
+      if (!res.ok) {
+        if (res.status === 429) throw new Error(t("sbu.action.cooldown"));
+        throw new Error(payload.error ?? `HTTP ${res.status}`);
+      }
+      return payload as { download_url: string };
+    },
+    onSuccess: (data) => {
+      toast.success(t("sbu.action.buildOk"));
+      qc.invalidateQueries({ queryKey: ["site-builds", tenantId] });
+      if (data.download_url && typeof window !== "undefined") {
+        window.location.href = data.download_url;
+      }
+    },
+    onError: (e: unknown) => {
+      toast.error(t("sbu.action.buildErr"), {
+        description: e instanceof Error ? e.message : String(e),
+      });
+    },
+  });
+
   const handleGenerate = () => {
-    // Етап 11.5 ще не реалізовано — поки інформативний тост.
     void user;
-    toast.info(t("sbu.action.notReady"));
+    if (!profileQuery.data) {
+      toast.info(t("sbu.action.notReady"));
+      return;
+    }
+    generateMut.mutate();
   };
 
   if (loading) {
@@ -337,7 +378,7 @@ function BrandSiteBuilderPage() {
 
           <div className="sticky bottom-2 z-10 flex flex-wrap items-center justify-end gap-2 rounded-lg border border-border bg-background/95 p-3 shadow-sm backdrop-blur">
             {(dirty || isNew) && (
-              <Badge variant="outline" className="border-amber-500/40 text-amber-600 dark:text-amber-400">
+              <Badge variant="outline" className="border-warning/40 text-warning">
                 {t("sbu.action.save")}
               </Badge>
             )}
@@ -352,11 +393,11 @@ function BrandSiteBuilderPage() {
             <Button
               size="sm"
               onClick={handleGenerate}
-              disabled={!profileQuery.data}
+              disabled={!profileQuery.data || generateMut.isPending}
               className="bg-gradient-primary text-primary-foreground"
             >
               <Wand2 className="mr-2 h-4 w-4" />
-              {t("sbu.action.generate")}
+              {generateMut.isPending ? t("sbu.action.generating") : t("sbu.action.generate")}
             </Button>
           </div>
         </>
@@ -643,6 +684,7 @@ function BuildsTab({ builds, isLoading }: { builds: SiteBuild[]; isLoading: bool
 
 function BuildRow({ build }: { build: SiteBuild }) {
   const { t } = useT();
+  const [busy, setBusy] = useState(false);
   const statusKey: TKey = `sbu.builds.status.${build.status}` as TKey;
   const statusVariant =
     build.status === "ready"
@@ -650,6 +692,33 @@ function BuildRow({ build }: { build: SiteBuild }) {
       : build.status === "failed"
         ? "border-destructive/40 text-destructive"
         : "border-muted-foreground/30 text-muted-foreground";
+
+  const handleDownload = async () => {
+    setBusy(true);
+    try {
+      const session = await supabase.auth.getSession();
+      const accessToken = session.data.session?.access_token;
+      if (!accessToken) throw new Error("Not authenticated");
+      const res = await fetch(`/api/site-builder/download/${build.id}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const payload = (await res.json().catch(() => ({}))) as {
+        download_url?: string;
+        error?: string;
+      };
+      if (!res.ok || !payload.download_url) {
+        throw new Error(payload.error ?? `HTTP ${res.status}`);
+      }
+      window.location.href = payload.download_url;
+    } catch (err) {
+      toast.error(t("sbu.action.buildErr"), {
+        description: err instanceof Error ? err.message : String(err),
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <li className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
       <div className="flex items-center gap-2">
@@ -666,10 +735,8 @@ function BuildRow({ build }: { build: SiteBuild }) {
         )}
       </div>
       {build.status === "ready" && build.archive_path ? (
-        <Button asChild variant="outline" size="sm">
-          <Link to="/brand/site-builder" disabled aria-disabled>
-            {t("sbu.builds.download")}
-          </Link>
+        <Button variant="outline" size="sm" onClick={handleDownload} disabled={busy}>
+          {busy ? "…" : t("sbu.builds.download")}
         </Button>
       ) : build.error ? (
         <span className="max-w-md truncate text-xs text-destructive" title={build.error}>
