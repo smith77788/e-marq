@@ -244,6 +244,9 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
           await finishAgentRun(handle, inserted, {
             products_evaluated: products.length,
             candidates: insights.length,
+            geo: summarizeGeo(geo, "en"),
+            views_in_scope: filteredViews.length,
+            sold_in_scope: filteredSold.length,
           });
           return jsonOk({ insights_created: inserted, candidates: insights.length });
         } catch (e) {
