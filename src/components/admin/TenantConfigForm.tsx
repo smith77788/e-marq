@@ -459,6 +459,147 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
             </div>
           </>
         )}
+
+        <Separator />
+
+        {/* LiqPay */}
+        <div className="space-y-3 rounded-md border border-border p-3">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-foreground">LiqPay (ПриватБанк)</p>
+              <p className="text-xs text-muted-foreground">
+                Картки Visa/Mastercard, Apple Pay, Google Pay. Ключі — у кабінеті LiqPay → API.
+              </p>
+            </div>
+            <Switch
+              checked={values.payments.liqpay_enabled}
+              onCheckedChange={(v) => update("payments", { liqpay_enabled: v })}
+            />
+          </div>
+          {values.payments.liqpay_enabled && (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-1.5">
+                <Label htmlFor="liqpay_public_key">Public key</Label>
+                <Input
+                  id="liqpay_public_key"
+                  value={values.payments.liqpay_public_key}
+                  onChange={(e) =>
+                    update("payments", { liqpay_public_key: e.target.value.trim() })
+                  }
+                  placeholder="i00000000000"
+                  autoComplete="off"
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="liqpay_private_key">Private key</Label>
+                <Input
+                  id="liqpay_private_key"
+                  type="password"
+                  value={values.payments.liqpay_private_key}
+                  onChange={(e) =>
+                    update("payments", { liqpay_private_key: e.target.value.trim() })
+                  }
+                  placeholder="••••••••"
+                  autoComplete="off"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Зберігається зашифровано та використовується лише на сервері.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* WayForPay */}
+        <div className="space-y-3 rounded-md border border-border p-3">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-foreground">WayForPay</p>
+              <p className="text-xs text-muted-foreground">
+                Українські картки, Privat24, Apple/Google Pay. Дані — у кабінеті WayForPay → Налаштування.
+              </p>
+            </div>
+            <Switch
+              checked={values.payments.wayforpay_enabled}
+              onCheckedChange={(v) => update("payments", { wayforpay_enabled: v })}
+            />
+          </div>
+          {values.payments.wayforpay_enabled && (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-1.5">
+                <Label htmlFor="wfp_merchant_account">Merchant account</Label>
+                <Input
+                  id="wfp_merchant_account"
+                  value={values.payments.wayforpay_merchant_account}
+                  onChange={(e) =>
+                    update("payments", { wayforpay_merchant_account: e.target.value.trim() })
+                  }
+                  placeholder="test_merch_n1"
+                  autoComplete="off"
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="wfp_secret">Secret key</Label>
+                <Input
+                  id="wfp_secret"
+                  type="password"
+                  value={values.payments.wayforpay_secret_key}
+                  onChange={(e) =>
+                    update("payments", { wayforpay_secret_key: e.target.value.trim() })
+                  }
+                  placeholder="••••••••"
+                  autoComplete="off"
+                />
+              </div>
+              <div className="grid gap-1.5 sm:col-span-2">
+                <Label htmlFor="wfp_domain">Merchant domain</Label>
+                <Input
+                  id="wfp_domain"
+                  value={values.payments.wayforpay_merchant_domain}
+                  onChange={(e) =>
+                    update("payments", { wayforpay_merchant_domain: e.target.value.trim() })
+                  }
+                  placeholder="shop.приклад.ua"
+                  autoComplete="off"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Домен має точно збігатись з тим, що ви ввели в кабінеті WayForPay.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Monobank */}
+        <div className="space-y-3 rounded-md border border-border p-3">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-foreground">Monobank Acquiring</p>
+              <p className="text-xs text-muted-foreground">
+                Прийом оплат через Monobank. Токен — у кабінеті Monobank Acquiring → API.
+              </p>
+            </div>
+            <Switch
+              checked={values.payments.monobank_enabled}
+              onCheckedChange={(v) => update("payments", { monobank_enabled: v })}
+            />
+          </div>
+          {values.payments.monobank_enabled && (
+            <div className="grid gap-1.5">
+              <Label htmlFor="mono_token">X-Token</Label>
+              <Input
+                id="mono_token"
+                type="password"
+                value={values.payments.monobank_token}
+                onChange={(e) =>
+                  update("payments", { monobank_token: e.target.value.trim() })
+                }
+                placeholder="••••••••"
+                autoComplete="off"
+              />
+            </div>
+          )}
+        </div>
       </section>
 
       <div className="flex justify-end">
