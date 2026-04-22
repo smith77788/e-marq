@@ -74,15 +74,15 @@ export function Breadcrumbs() {
         <span key={`${c.label}-${i}`} className="flex min-w-0 items-center gap-1">
           <ChevronRight className="h-3 w-3 text-muted-foreground/60" />
           {c.to ? (
-            <Link
-              to={c.to as string}
+            <a
+              href={c.to}
               className={cn(
                 "truncate transition-colors hover:text-foreground",
                 "max-w-[160px]",
               )}
             >
               {c.label}
-            </Link>
+            </a>
           ) : (
             <span className="truncate font-medium text-foreground max-w-[200px]">
               {c.label}
