@@ -4,6 +4,7 @@ import { uk } from "date-fns/locale";
 import { Activity, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { humanizeAgentId, AGENT_HUMAN_LABELS } from "@/lib/acos/agentLabels";
 

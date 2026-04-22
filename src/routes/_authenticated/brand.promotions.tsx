@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
 import {
   Table,
   TableBody,
