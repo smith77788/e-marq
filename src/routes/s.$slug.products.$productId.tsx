@@ -37,7 +37,7 @@ export const Route = createFileRoute("/s/$slug/products/$productId")({
       links: [
         {
           rel: "canonical",
-          href: `/s/${params.slug}/products/${params.productId}`,
+          href: canonicalUrl(`/s/${params.slug}/products/${params.productId}`),
         },
       ],
     };
