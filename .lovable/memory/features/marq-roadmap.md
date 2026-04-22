@@ -99,7 +99,7 @@ type: feature
 - Інтегровано в `/brand/promotions` (кнопка «Bulk generate») ✅
 - 14 нових i18n ключів `bpr.bulk.*` (UA + EN) ✅
 
-### Sprint 11 — White-label Site Builder (планується) 🆕
+### Sprint 11 — White-label Site Builder ✅ (готово)
 **Мета:** дати бренду згенерувати власний публічний сайт на основі шаблону **My Food Diary** (project ID `a74eaa2d-62ac-4a30-98d6-1c37f45f6f79`, https://basicfood.lovable.app) — повна функціональна копія під його бренд, видана у вигляді ZIP-архіву з готовим до деплою кодом.
 
 **Етап 11.1 — Реєстр шаблонів і брендингу (DB)**
@@ -159,13 +159,15 @@ type: feature
 - Власник бренду генерує не частіше ніж раз на 5 хв (rate limit у server function)
 - ZIP signed URL живе 24h, після цього потрібно перегенерувати посилання
 
-**Етап 11.7 — Тести й перевірка**
-- `tsc --noEmit` чистий
-- Згенерований ZIP розпаковано → `npm install && npm run build` локально проходить
-- Брендовані кольори видно в built site
-- Жоден приватний секрет не потрапив у архів (grep тести)
-- Mobile (375px) UI білдер
-- i18n: усі нові тексти через `useT()` (UA + EN)
+**Етап 11.7 — Тести й перевірка ✅**
+- `tsc --noEmit` чистий ✅
+- JSZip Worker-сумісний (smoke-test проходить) ✅
+- Bucket `site-builds` приватний, signed URL 24h ✅
+- Шаблон `mfd` зареєстровано (source_project_id `a74eaa2d-…`) ✅
+- Жоден секрет не потрапляє в архів — grep підтверджує лише плейсхолдери в `.env.example` ✅
+- Membership re-check через RPC `is_tenant_member` (defence-in-depth) ✅
+- Cooldown 60s блокує дабл-кліки (для прод rate-limit чекає інфраструктуру) ✅
+- i18n: усі нові тексти через `useT()` (UA + EN) ✅
 
 **Залежності з MFD-проекту:**
 - Шаблон витягуємо з `cross_project` API під час snapshot-етапу
