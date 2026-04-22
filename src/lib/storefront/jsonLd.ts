@@ -123,3 +123,21 @@ export function storefrontIndexJsonLd(shell: StorefrontShell, slug: string) {
     },
   ];
 }
+
+/**
+ * BreadcrumbList — caller passes ordered crumbs ({ name, path }).
+ * `path` is the storefront-relative URL (e.g. `/s/acme/collections/hats`);
+ * we resolve it through `canonicalUrl()` so absolute URLs end up in the JSON.
+ */
+export function breadcrumbJsonLd(crumbs: Array<{ name: string; path: string }>) {
+  return {
+    "@context": SCHEMA,
+    "@type": "BreadcrumbList",
+    itemListElement: crumbs.map((c, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: c.name,
+      item: canonicalUrl(c.path),
+    })),
+  };
+}
