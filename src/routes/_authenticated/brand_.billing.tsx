@@ -58,15 +58,41 @@ function BrandBillingPage() {
     },
   });
 
-  // Поки tenant context завантажується — показуємо skeleton, НЕ редіректимо
+  // Телеметрія: page_view один раз на mount, bounce якщо вийшли <2с
+  const mountedAtRef = useRef<number>(0);
+  const viewLoggedRef = useRef(false);
+  useEffect(() => {
+    if (!effectiveTenantId || viewLoggedRef.current) return;
+    viewLoggedRef.current = true;
+    mountedAtRef.current = Date.now();
+    trackBilling(effectiveTenantId, "billing.page_view");
+    return () => {
+      const dwell = Date.now() - mountedAtRef.current;
+      if (dwell < 2000) {
+        trackBilling(effectiveTenantId, "billing.page_bounce", { dwell_ms: dwell });
+      }
+    };
+  }, [effectiveTenantId]);
+
+  // Якщо запит даних плану звалився — фіксуємо як nav_failed (інколи це таймаут RPC)
+  useEffect(() => {
+    if (effectiveTenantId && summaryQuery.isError) {
+      trackBilling(effectiveTenantId, "billing.nav_failed", {
+        error: summaryQuery.error instanceof Error ? summaryQuery.error.message : "unknown",
+        stage: "plan_summary",
+      });
+    }
+  }, [effectiveTenantId, summaryQuery.isError, summaryQuery.error]);
+
+  // Поки tenant context завантажується — показуємо shimmer skeleton, НЕ редіректимо
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Завантаження…</CardTitle>
-          <CardDescription>Підбираємо ваш бренд</CardDescription>
-        </CardHeader>
-      </Card>
+      <div className="space-y-4">
+        <Skeleton className="h-7 w-48" />
+        <Skeleton className="h-4 w-72" />
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
     );
   }
 
