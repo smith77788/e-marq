@@ -209,11 +209,12 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
                     ? location.pathname === item.to
                     : location.pathname.startsWith(item.to);
                   const label = t(item.labelKey);
+                  const href = item.hash ? `${item.to}#${item.hash}` : item.to;
                   return (
-                    <SidebarMenuItem key={`${group.labelKey}-${item.labelKey}-${item.to}`}>
+                    <SidebarMenuItem key={`${group.labelKey}-${item.labelKey}-${href}`}>
                       <SidebarMenuButton asChild tooltip={label}>
-                        <Link
-                          to={item.to}
+                        <a
+                          href={href}
                           className={cn(
                             "group/nav relative flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-all",
                             isActive
@@ -236,7 +237,7 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
                             )}
                           />
                           {!collapsed && <span className="truncate">{label}</span>}
-                        </Link>
+                        </a>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
