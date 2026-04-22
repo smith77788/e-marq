@@ -280,8 +280,17 @@ function BrandOrdersPage() {
                 {filtered.map((o) => (
                   <TableRow
                     key={o.id}
-                    className="cursor-pointer"
+                    className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     onClick={() => setOpened(o)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Відкрити замовлення #${o.id.slice(0, 8)}`}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setOpened(o);
+                      }
+                    }}
                   >
                     <TableCell className="font-mono text-xs">
                       #{o.id.slice(0, 8)}
