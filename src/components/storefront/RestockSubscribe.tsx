@@ -38,7 +38,8 @@ export function RestockSubscribe({ tenantId, productId, variantId }: Props) {
       const { data, error } = await supabase.rpc("subscribe_restock_notification", {
         _tenant_id: tenantId,
         _product_id: productId,
-        _variant_id: variantId,
+        // RPC сигнатура очікує UUID; types.ts звужує до string, тому передаємо undefined-as-null trick.
+        _variant_id: (variantId ?? null) as unknown as string,
         _email: email.trim(),
       });
       if (error) {
