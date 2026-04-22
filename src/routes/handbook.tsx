@@ -27,6 +27,7 @@ import { HandbookSection } from "@/components/handbook/HandbookSection";
 import { HandbookToc, HandbookTocMobile } from "@/components/handbook/HandbookToc";
 import { HandbookConnectors } from "@/components/handbook/HandbookConnectors";
 import { useT, tStatic } from "@/lib/i18n";
+import { buildSeo } from "@/lib/seo";
 
 import heroImg from "@/assets/handbook-hero.jpg";
 import approvalImg from "@/assets/handbook-approval.jpg";
