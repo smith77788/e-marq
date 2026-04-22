@@ -72,10 +72,10 @@ type IntegrationRow = {
   tenant_id: string;
   provider: string;
   last_sync_at: string | null;
-  last_status: string | null;
+  last_sync_status: string | null;
 };
 type EmailSendRow = { tenant_id: string; status: string };
-type BalanceRow = { tenant_id: string; balance_amount: number; currency: string | null };
+type BalanceRow = { tenant_id: string; money_balance_cents: number; currency: string | null };
 type OrderRow = { tenant_id: string; status: string };
 
 type TenantHealth = {
@@ -131,14 +131,14 @@ function HealthMonitorContent() {
           .limit(20000),
         supabase
           .from("tenant_integrations")
-          .select("tenant_id, provider, last_sync_at, last_status")
+          .select("tenant_id, provider, last_sync_at, last_sync_status")
           .eq("provider", "dntrade"),
         supabase
           .from("email_sends")
           .select("tenant_id, status")
           .gte("created_at", since7d)
           .limit(20000),
-        supabase.from("tenant_balances").select("tenant_id, balance_amount, currency"),
+        supabase.from("tenant_balances").select("tenant_id, money_balance_cents, currency"),
         supabase
           .from("orders")
           .select("tenant_id, status")
@@ -196,7 +196,7 @@ function HealthMonitorContent() {
         dntrade = { status: "warn", ageHours: null, configured: true };
       } else {
         const ageHours = (now - new Date(dnInt.last_sync_at).getTime()) / (1000 * 60 * 60);
-        const failedSync = dnInt.last_status === "failed" || dnInt.last_status === "error";
+        const failedSync = dnInt.last_sync_status === "failed" || dnInt.last_sync_status === "error";
         dntrade = {
           configured: true,
           ageHours,
@@ -226,7 +226,7 @@ function HealthMonitorContent() {
 
       // Balance
       const bal = (balBy.get(tenant.id) ?? [])[0];
-      const amountCents = bal?.balance_amount ?? 0;
+      const amountCents = bal?.money_balance_cents ?? 0;
       const balance: TenantHealth["balance"] = {
         amountCents,
         currency: bal?.currency ?? "UAH",
@@ -437,7 +437,7 @@ function HealthRow({ row }: { row: TenantHealth }) {
           status={row.balance.status}
           tip={t("hm.tipBalance").replace(
             "{balance}",
-            formatMoney(row.balance.amountCents, row.balance.currency),
+            `${formatMoney(row.balance.amountCents)} ${row.balance.currency}`,
           )}
         />
       </TableCell>
