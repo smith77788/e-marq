@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTenantContext, type MyTenant } from "@/hooks/useTenantContext";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 type AdminTenant = {
   id: string;
@@ -95,19 +96,31 @@ export function TenantSwitcher() {
     void navigate({ to: "/brand", search: { tenant: id } });
   };
 
+  const noneSelected = !current;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
           size="sm"
-          className="h-8 max-w-[240px] justify-between gap-2 transition-colors hover:border-primary/40"
+          className={cn(
+            "h-8 max-w-[260px] justify-between gap-2 transition-colors",
+            "border-primary/30 hover:border-primary/60 hover:bg-primary/5",
+            noneSelected && "border-warning/60 text-warning shadow-glow",
+          )}
+          aria-label="Перемкнути бренд"
         >
           <span className="flex items-center gap-1.5 truncate">
             <Building2 className="h-3.5 w-3.5 text-primary" />
             <span className="truncate font-medium">
               {current?.tenant_name ?? "Оберіть бренд"}
             </span>
+            {current?.tenant_slug && (
+              <span className="hidden truncate font-mono text-[10px] text-muted-foreground sm:inline">
+                /{current.tenant_slug}
+              </span>
+            )}
           </span>
           <ChevronsUpDown className="h-3 w-3 text-muted-foreground" />
         </Button>
