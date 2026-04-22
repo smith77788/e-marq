@@ -135,6 +135,8 @@ function BrandPage() {
 
       <CockpitHero tenantId={current.tenant_id} />
 
+      <AskPinsBoard />
+
       <AnalyticsWindowProvider initial={30}>
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
