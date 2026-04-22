@@ -1,6 +1,6 @@
 ---
 name: MARQ V2 Source-of-Truth Prompt
-description: Постійне джерело істини для розробки MARQ. Повний 1729-рядковий V2-промпт лежить у .lovable/MARQ_PROMPT_V2.md. Описує DB foundation, storefront, brand admin, email engine, shipping, payments, нові ACOS-агенти, sidebar, storage. Sprints 1-9 закриті (див. marq-roadmap). Залишкові гепи: bulk-генератор промокодів, формальний multi-step Campaigns Wizard, можливі дрібні поліровки brand.products tabs.
+description: Постійне джерело істини для розробки MARQ. Повний 1729-рядковий V2-промпт лежить у .lovable/MARQ_PROMPT_V2.md. Описує DB foundation, storefront, brand admin, email engine, shipping, payments, нові ACOS-агенти, sidebar, storage. Sprints 1-9 закриті. Обидва залишкові гепи (bulk promo generator, multi-step Campaigns Wizard) тепер імплементовані. V2 повністю покрита.
 type: feature
 ---
 
@@ -18,22 +18,26 @@ type: feature
 - self-verification checklist
 - абсолютні заборони
 
-## Поточний статус (станом на 2026-04-22)
+## Поточний статус (станом на 2026-04-22, після пакету покращень)
 
-Sprints 1-9 виконані (див. `mem://features/marq-roadmap`). Перевірений аудит проти V2-промпту:
+Sprints 1-9 виконані. **Обидва залишкові гепи закриті**:
 
-✅ Готово
-- catalog v2 (product_variants, product_images, collections, RPCs)
-- storefront layout / index / product / collection / search / checkout
-- brand.products(+productId tabs), brand.orders, brand.catalog, brand.promotions, brand.email (3 таби)
-- email engine: Resend gateway, 5 шаблонів, webhook, suppression, unsubscribe, EmailDomainCard, EmailCampaignsCard (single-screen wizard), EmailAutomationsCard
-- payments: LiqPay/WayForPay/Monobank server libs + init/callback routes + UI у TenantConfigForm + checkout RadioGroup
-- shipping: NP-cities/NP-warehouses proxy + ShippingSelector
-- 5 нових email-агентів (abandoned-cart/winback/post-purchase/order-status-notifier/restock-notifier) + автоматизаційні toggle
+✅ Bulk-генератор промокодів — `src/components/owner/BulkPromoGeneratorDialog.tsx`
+   - Дет-preview формату, batch INSERT з ретраєм проти колізій
+   - CSV-завантаження client-side, повний i18n (UA+EN, ~16 ключів `bpr.bulk.*`)
+   - Підключений у `brand.promotions.tsx` (кнопка `bpr.bulk.button`)
 
-❌ Лишилися гепи з V2:
-- Bulk-генератор промокодів + CSV (V2 рядок 1180-1183)
-- Формальний multi-step Campaigns Wizard (Step 1→2→3→4) — поточний EmailCampaignsCard покриває логіку, але один екран
+✅ Multi-step Campaigns Wizard — `src/components/owner/EmailCampaignWizard.tsx`
+   - Підключений у `brand.email.tsx` Tab "Кампанії" поряд з EmailCampaignsCard
+
+## Останні системні покращення (поза V2)
+
+✅ Detail Drawer (universal) — `DetailController` + `DetailableElement` + `useDetailData`
+✅ Owner Plan Switcher — `src/components/owner/OwnerPlanSwitcher.tsx`
+✅ MFA TOTP enrollment + AAL2 challenge gate — `MfaSetupCard` + `MfaChallengeGate`
+✅ Notification Center — bell icon з realtime + DB trigger `tg_mirror_insight_to_notifications`
+✅ Global Search ⌘K — `src/components/layout/GlobalSearch.tsx` (pages, products, orders, customers, insights)
+✅ Improved InsightToasts — filter по risk_level (high/critical), failed agent runs, action buttons
 
 ## Як використовувати
 
