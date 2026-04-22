@@ -1051,6 +1051,22 @@ const dict = {
     "gs.aiHistory": "Нещодавні запити",
     "gs.aiStarters": "Спробуйте запитати",
     "gs.aiClearHistory": "Очистити історію",
+    "gs.aiPin": "📌 Закріпити на дашборді",
+    "gs.aiPinned": "✓ Закріплено",
+    "gs.aiExport": "⤓ Експорт у текст",
+    "gs.aiExported": "Скопійовано в буфер",
+    "gs.aiCopy": "Копіювати відповідь",
+    "gs.aiCopied": "Скопійовано",
+
+    // AI Ask Pins board (cockpit)
+    "pins.title": "Закріплені AI-запитання",
+    "pins.empty": "Ще немає закріплених запитань",
+    "pins.emptyHint": "Натисніть ⌘K, введіть «?», знайдіть відповідь і натисніть 📌",
+    "pins.refresh": "Оновити",
+    "pins.refreshAll": "Оновити всі",
+    "pins.refreshing": "оновлюється…",
+    "pins.loading": "Завантаження…",
+    "pins.remove": "Видалити",
 
     // Notification center
     "notif.title": "Сповіщення",
@@ -2350,6 +2366,22 @@ const dict = {
     "gs.aiHistory": "Recent questions",
     "gs.aiStarters": "Try asking",
     "gs.aiClearHistory": "Clear history",
+    "gs.aiPin": "📌 Pin to dashboard",
+    "gs.aiPinned": "✓ Pinned",
+    "gs.aiExport": "⤓ Export as text",
+    "gs.aiExported": "Copied to clipboard",
+    "gs.aiCopy": "Copy answer",
+    "gs.aiCopied": "Copied",
+
+    // AI Ask Pins board (cockpit)
+    "pins.title": "Pinned AI questions",
+    "pins.empty": "No pinned questions yet",
+    "pins.emptyHint": "Press ⌘K, type \"?\", find an answer and click 📌",
+    "pins.refresh": "Refresh",
+    "pins.refreshAll": "Refresh all",
+    "pins.refreshing": "refreshing…",
+    "pins.loading": "Loading…",
+    "pins.remove": "Remove",
 
     // Notification center
     "notif.title": "Notifications",
