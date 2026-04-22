@@ -248,6 +248,15 @@ export function BalanceCard({
             <p className="text-xs text-muted-foreground">Операцій ще не було.</p>
           )}
         </div>
+
+        <Separator />
+
+        <div>
+          <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <Send className="h-3.5 w-3.5" /> Заявки на онлайн-оплату
+          </div>
+          <TopupRequestsList tenantId={tenantId} />
+        </div>
       </CardContent>
     </Card>
   );
