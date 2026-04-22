@@ -48,7 +48,9 @@ export function TelegramConnectCard({ tenantId, compact = false }: Props) {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       const j = (await r.json().catch(() => ({}))) as Status & { error?: string };
-      if (!r.ok && r.status !== 200) {
+      // Сервер повертає 200 навіть коли бот не підключено (з полями error/hint).
+      // Тільки 4xx/5xx означає справжню проблему — лише тоді кидаємо.
+      if (!r.ok) {
         throw new Error(j.error ?? `HTTP ${r.status}`);
       }
       return j;
@@ -185,20 +187,23 @@ export function TelegramConnectCard({ tenantId, compact = false }: Props) {
               в кабінеті.
             </li>
           </ol>
-          <Button asChild className="w-full sm:w-auto">
-            <a href="/brand/integrations">
-              <Plug className="mr-1.5 h-4 w-4" />
-              Підключити Telegram
-              <ExternalLink className="ml-1.5 h-3.5 w-3.5 opacity-70" />
-            </a>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => qc.invalidateQueries({ queryKey: ["telegram-status", tenantId] })}
-          >
-            Оновити стан
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Button asChild className="w-full sm:w-auto">
+              <a href="/brand/integrations">
+                <Plug className="mr-1.5 h-4 w-4" />
+                Підключити Telegram
+                <ExternalLink className="ml-1.5 h-3.5 w-3.5 opacity-70" />
+              </a>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full sm:w-auto"
+              onClick={() => qc.invalidateQueries({ queryKey: ["telegram-status", tenantId] })}
+            >
+              Оновити стан
+            </Button>
+          </div>
         </>
       )}
     </div>

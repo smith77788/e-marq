@@ -268,6 +268,11 @@ type: feature
 - TS `tsc --noEmit` 0 errors, ESLint 0 errors на нових файлах
 - Переконались що TelegramConnectCard коректно ховається/розгортається на 394px (Switch + checkbox у колонку, кнопка full-width)
 
+### Sprint 22 — TelegramConnectCard hardening + повна перевірка ✅
+- **Bug fix у `TelegramConnectCard`**: вираз `if (!r.ok && r.status !== 200)` був надлишковим (`!r.ok` вже виключає 2xx). Замінено на чисте `if (!r.ok)`. Поведінка раніше була правильна випадково — тепер код самодокументований і не залежить від збігу.
+- **Mobile (394px)**: у disconnected-стані «Підключити Telegram» + «Оновити стан» обгорнуто в `flex flex-col gap-2 sm:flex-row`. Тепер обидві кнопки full-width на mobile, не наїжджають одна на одну. Перевірено на 394×665 viewport.
+- **Project-wide hygiene**: `prettier --write src/**` повторно (новий `types.ts` після підключення Telegram-схеми втратив форматування — повернули). `tsc --noEmit` 0 errors, ESLint 0 errors (15 fast-refresh warnings — shadcn/router, не критично).
+- **Чекап інтеграції**: `/api/telegram/status` GET повертає 200 з `error/hint` коли connector не підключено — клієнт коректно показує блок «Не підключено» без throw. POST правильно мерджить existing channels (не перетирає reddit/google/blog).
 
 ## Backlog
 
