@@ -4,7 +4,7 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { Crown, ExternalLink } from "lucide-react";
+import { Crown, ExternalLink, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { UsageMeters, type PlanSummary } from "@/components/admin/UsageMeters";
 import { PlanBadge } from "@/components/admin/PlanBadge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTenantContext } from "@/hooks/useTenantContext";
+import { trackBilling } from "@/lib/billingTelemetry";
 
 export function PlanUsageCard({ tenantId }: { tenantId: string }) {
   const navigate = useNavigate();
