@@ -153,6 +153,7 @@ import { Route as ApiEmailDomainStatusRouteImport } from './routes/api/email.dom
 import { Route as ApiEmailDomainSetupRouteImport } from './routes/api/email.domain-setup'
 import { Route as ApiEmailCampaignSendRouteImport } from './routes/api/email.campaign-send'
 import { Route as ApiDomainsVerifyRouteImport } from './routes/api/domains.verify'
+import { Route as ApiAiAskRouteImport } from './routes/api/ai.ask'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedBrandBillingRouteImport } from './routes/_authenticated/brand_.billing'
 import { Route as AuthenticatedBrandSiteBuilderRouteImport } from './routes/_authenticated/brand.site-builder'
@@ -981,6 +982,11 @@ const ApiDomainsVerifyRoute = ApiDomainsVerifyRouteImport.update({
   path: '/api/domains/verify',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAiAskRoute = ApiAiAskRouteImport.update({
+  id: '/api/ai/ask',
+  path: '/api/ai/ask',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedInviteTokenRoute =
   AuthenticatedInviteTokenRouteImport.update({
     id: '/invite/$token',
@@ -1279,6 +1285,7 @@ export interface FileRoutesByFullPath {
   '/brand/site-builder': typeof AuthenticatedBrandSiteBuilderRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/api/ai/ask': typeof ApiAiAskRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
@@ -1467,6 +1474,7 @@ export interface FileRoutesByTo {
   '/brand/site-builder': typeof AuthenticatedBrandSiteBuilderRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/api/ai/ask': typeof ApiAiAskRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
@@ -1658,6 +1666,7 @@ export interface FileRoutesById {
   '/_authenticated/brand/site-builder': typeof AuthenticatedBrandSiteBuilderRoute
   '/_authenticated/brand_/billing': typeof AuthenticatedBrandBillingRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/api/ai/ask': typeof ApiAiAskRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
@@ -1849,6 +1858,7 @@ export interface FileRouteTypes {
     | '/brand/site-builder'
     | '/brand/billing'
     | '/invite/$token'
+    | '/api/ai/ask'
     | '/api/domains/verify'
     | '/api/email/campaign-send'
     | '/api/email/domain-setup'
@@ -2037,6 +2047,7 @@ export interface FileRouteTypes {
     | '/brand/site-builder'
     | '/brand/billing'
     | '/invite/$token'
+    | '/api/ai/ask'
     | '/api/domains/verify'
     | '/api/email/campaign-send'
     | '/api/email/domain-setup'
@@ -2227,6 +2238,7 @@ export interface FileRouteTypes {
     | '/_authenticated/brand/site-builder'
     | '/_authenticated/brand_/billing'
     | '/_authenticated/invite/$token'
+    | '/api/ai/ask'
     | '/api/domains/verify'
     | '/api/email/campaign-send'
     | '/api/email/domain-setup'
@@ -2391,6 +2403,7 @@ export interface RootRouteChildren {
   HooksIngestRoute: typeof HooksIngestRoute
   MSlugRoute: typeof MSlugRoute
   SSlugRoute: typeof SSlugRouteWithChildren
+  ApiAiAskRoute: typeof ApiAiAskRoute
   ApiDomainsVerifyRoute: typeof ApiDomainsVerifyRoute
   ApiEmailCampaignSendRoute: typeof ApiEmailCampaignSendRoute
   ApiEmailDomainSetupRoute: typeof ApiEmailDomainSetupRoute
@@ -3537,6 +3550,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDomainsVerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ai/ask': {
+      id: '/api/ai/ask'
+      path: '/api/ai/ask'
+      fullPath: '/api/ai/ask'
+      preLoaderRoute: typeof ApiAiAskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/invite/$token': {
       id: '/_authenticated/invite/$token'
       path: '/invite/$token'
@@ -4018,6 +4038,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksIngestRoute: HooksIngestRoute,
   MSlugRoute: MSlugRoute,
   SSlugRoute: SSlugRouteWithChildren,
+  ApiAiAskRoute: ApiAiAskRoute,
   ApiDomainsVerifyRoute: ApiDomainsVerifyRoute,
   ApiEmailCampaignSendRoute: ApiEmailCampaignSendRoute,
   ApiEmailDomainSetupRoute: ApiEmailDomainSetupRoute,
