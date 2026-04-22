@@ -375,7 +375,7 @@ function TopupDialog({
                 <Sparkles className="h-3.5 w-3.5" /> Кредит-нота (адмін)
               </TabsTrigger>
               <TabsTrigger value="online" className="flex-1 gap-1.5">
-                <CreditCard className="h-3.5 w-3.5" /> Онлайн
+                <CreditCard className="h-3.5 w-3.5" /> Через менеджера
               </TabsTrigger>
             </TabsList>
 
