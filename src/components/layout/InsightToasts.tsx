@@ -179,7 +179,7 @@ export function InsightToasts() {
             ),
             duration: 9000,
             action: {
-              label: "Деталі",
+              label: t("toast.detailsLabel"),
               onClick: () => {
                 window.location.href = "/brand";
               },
