@@ -141,7 +141,7 @@ function AdminUsersPage() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="overflow-auto">
+        <CardContent className="overflow-x-auto">
           {usersQuery.isLoading ? (
             <p className="text-sm text-muted-foreground">Завантаження…</p>
           ) : (
