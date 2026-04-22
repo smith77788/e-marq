@@ -912,6 +912,19 @@ const dict = {
     "hm.failCount": "{n} критичних",
     "hm.lastChecked": "Оновлено {time}",
 
+    // Global search (⌘K)
+    "gs.openLabel": "Відкрити пошук",
+    "gs.placeholder": "Швидкий пошук…",
+    "gs.inputPlaceholder": "Шукати сторінки, товари, замовлення, клієнтів, інсайти…",
+    "gs.searching": "Пошук…",
+    "gs.noResults": "Нічого не знайдено",
+    "gs.tipMinChars": "Введіть щонайменше 2 символи для пошуку по даних",
+    "gs.groupPages": "Сторінки",
+    "gs.groupProducts": "Товари",
+    "gs.groupOrders": "Замовлення",
+    "gs.groupCustomers": "Клієнти",
+    "gs.groupInsights": "Інсайти",
+
     // Notification center
     "notif.title": "Сповіщення",
     "notif.markAll": "Прочитати все",
@@ -2036,6 +2049,19 @@ const dict = {
     "hm.warnCount": "{n} need attention",
     "hm.failCount": "{n} critical",
     "hm.lastChecked": "Updated {time}",
+
+    // Global search (⌘K)
+    "gs.openLabel": "Open search",
+    "gs.placeholder": "Quick search…",
+    "gs.inputPlaceholder": "Search pages, products, orders, customers, insights…",
+    "gs.searching": "Searching…",
+    "gs.noResults": "No results",
+    "gs.tipMinChars": "Type at least 2 characters to search data",
+    "gs.groupPages": "Pages",
+    "gs.groupProducts": "Products",
+    "gs.groupOrders": "Orders",
+    "gs.groupCustomers": "Customers",
+    "gs.groupInsights": "Insights",
 
     // Notification center
     "notif.title": "Notifications",

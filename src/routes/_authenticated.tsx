@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { LiveStatus } from "@/components/layout/LiveStatus";
 import { InsightToasts } from "@/components/layout/InsightToasts";
 import { NotificationCenter } from "@/components/layout/NotificationCenter";
+import { GlobalSearch } from "@/components/layout/GlobalSearch";
 import { TenantSwitcher } from "@/components/layout/TenantSwitcher";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { MfaChallengeGate } from "@/components/layout/MfaChallengeGate";
@@ -90,6 +91,7 @@ function AuthenticatedShell({
             <Breadcrumbs />
           </div>
           <div className="ml-auto flex items-center gap-2">
+            <GlobalSearch />
             <TenantSwitcher />
             <NotificationCenter />
             <LanguageSwitcher />
