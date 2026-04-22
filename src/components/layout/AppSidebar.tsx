@@ -310,7 +310,7 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sb.storefront")}>
               <Link
-                to="/dashboard"
+                to="/brand"
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
               >
                 <ShoppingBag className="h-4 w-4 text-success" />
@@ -321,7 +321,7 @@ export function AppSidebar({ isSuperAdmin, brandName }: Props) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={t("sb.settings")}>
               <Link
-                to="/onboarding"
+                to={isSuperAdmin ? "/admin" : "/brand/settings"}
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
               >
                 <Settings className="h-4 w-4 text-accent" />
