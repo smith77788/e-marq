@@ -70,15 +70,31 @@ export function InsightToasts() {
         { event: "INSERT", schema: "public", table: "ai_insights" },
         (payload) => {
           if (!initializedRef.current) return;
-          const row = payload.new as { id: string; tenant_id: string; title: string; risk_level?: string };
+          const row = payload.new as {
+            id: string;
+            tenant_id: string;
+            title: string;
+            risk_level?: string;
+          };
           if (!tenantIds.includes(row.tenant_id)) return;
           if (seenInsightsRef.current.has(row.id)) return;
           seenInsightsRef.current.add(row.id);
+          const risk = (row.risk_level ?? "low").toLowerCase();
+          // Toast лише для high/critical — інакше шум.
+          if (risk !== "high" && risk !== "critical") return;
           const brand = tenantNameById.get(row.tenant_id) ?? "";
-          toast(t("toast.newInsight"), {
+          const title = risk === "critical" ? t("toast.criticalInsight") : t("toast.highInsight");
+          const fn = risk === "critical" ? toast.error : toast.warning;
+          fn(title, {
             description: `${brand ? brand + " · " : ""}${row.title}`,
-            icon: <Lightbulb className="h-4 w-4 text-primary" />,
-            duration: 6000,
+            icon: <Lightbulb className="h-4 w-4" />,
+            duration: 8000,
+            action: {
+              label: t("toast.openLabel"),
+              onClick: () => {
+                window.location.href = "/brand#insights";
+              },
+            },
           });
         },
       )
@@ -97,12 +113,31 @@ export function InsightToasts() {
             agent_id: string;
             status: string;
             insights_created?: number;
+            error?: string | null;
           };
-          if (row.status !== "success") return;
           if (!tenantIds.includes(row.tenant_id)) return;
           if (seenRunsRef.current.has(row.id)) return;
+
+          if (row.status === "failed") {
+            seenRunsRef.current.add(row.id);
+            const brand = tenantNameById.get(row.tenant_id) ?? "";
+            toast.error(t("toast.agentFailed"), {
+              description: `${brand ? brand + " · " : ""}${row.agent_id}${row.error ? " — " + row.error.slice(0, 120) : ""}`,
+              icon: <Bot className="h-4 w-4 text-destructive" />,
+              duration: 9000,
+              action: {
+                label: t("toast.openLabel"),
+                onClick: () => {
+                  window.location.href = "/agents/live";
+                },
+              },
+            });
+            return;
+          }
+
+          if (row.status !== "success") return;
           seenRunsRef.current.add(row.id);
-          if (!row.insights_created || row.insights_created === 0) return; // тихо пропускаємо порожні запуски
+          if (!row.insights_created || row.insights_created === 0) return;
           const brand = tenantNameById.get(row.tenant_id) ?? "";
           toast.success(t("toast.agentCompleted"), {
             description: `${brand ? brand + " · " : ""}${row.agent_id} → +${row.insights_created}`,
