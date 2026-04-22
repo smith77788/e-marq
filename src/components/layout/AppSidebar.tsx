@@ -142,7 +142,7 @@ const ADMIN_AGENTS: NavGroup = {
   items: [
     { labelKey: "sb.liveRuns", to: "/agents/live", icon: Activity, tone: "text-success" },
     { labelKey: "sb.agentLibrary", to: "/agents", icon: Cpu, exact: true, tone: "text-accent" },
-    { labelKey: "sb.insightStream", to: "/admin", icon: Radio, tone: "text-warning" },
+    { labelKey: "sb.insightStream", to: "/admin/overview", icon: Radio, tone: "text-warning" },
   ],
 };
 
