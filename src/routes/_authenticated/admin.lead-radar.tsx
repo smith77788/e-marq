@@ -103,6 +103,7 @@ function Content() {
   const qc = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [previewSlug, setPreviewSlug] = useState<string | null>(null);
 
   const prospects = useQuery({
     queryKey: ["lead-prospects", statusFilter],
