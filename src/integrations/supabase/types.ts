@@ -3754,6 +3754,62 @@ export type Database = {
           },
         ]
       }
+      tenant_api_keys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          revoked_at: string | null
+          scopes: string[]
+          tenant_id: string
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name: string
+          revoked_at?: string | null
+          scopes?: string[]
+          tenant_id: string
+          tier?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          revoked_at?: string | null
+          scopes?: string[]
+          tenant_id?: string
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_api_keys_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_balances: {
         Row: {
           ai_credits_balance: number
@@ -4629,6 +4685,7 @@ export type Database = {
         }
         Returns: Json
       }
+      touch_tenant_api_key: { Args: { _key_id: string }; Returns: undefined }
       validate_discount_code: {
         Args: {
           _code: string
@@ -4650,6 +4707,15 @@ export type Database = {
       validate_promo_code: {
         Args: { _code: string; _tenant_id: string }
         Returns: Json
+      }
+      validate_tenant_api_key: {
+        Args: { _hash: string; _prefix: string }
+        Returns: {
+          key_id: string
+          scopes: string[]
+          tenant_id: string
+          tier: string
+        }[]
       }
     }
     Enums: {

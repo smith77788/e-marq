@@ -33,6 +33,8 @@ import {
   fullIndexCss,
   brandRemixGuide,
   seedJson,
+  marqClientTs,
+  agentsReadme,
 } from "./templates";
 
 export type BuiltArchive = {
@@ -48,9 +50,11 @@ export async function buildBrandArchive(ctx: SafeBrandContext): Promise<BuiltArc
   zip.file("README.md", brandReadme(ctx));
   zip.file("REMIX_GUIDE.md", brandRemixGuide(ctx));
   zip.file("BRAND.md", brandMarkdown(ctx));
+  zip.file("MARQ_AGENTS.md", agentsReadme(ctx));
 
   // Drop-in files for the remixed MFD project.
   zip.file("src/index.css", fullIndexCss(ctx));
+  zip.file("src/lib/marq-client.ts", marqClientTs(ctx));
   zip.file("index.html", indexHtml(ctx));
   zip.file("public/manifest.webmanifest", manifestWebmanifest(ctx));
   zip.file("package.json", packageJson(ctx));
@@ -79,11 +83,20 @@ export async function buildBrandArchive(ctx: SafeBrandContext): Promise<BuiltArc
           primary: ctx.profile.primary_color,
           accent: ctx.profile.accent_color,
         },
+        marq_engine: {
+          api_base: "https://e-marq.lovable.app",
+          tenant_id: ctx.tenant.id,
+          agents_count: 86,
+          sdk_path: "src/lib/marq-client.ts",
+          docs: "MARQ_AGENTS.md",
+        },
         files: [
           "README.md",
           "REMIX_GUIDE.md",
           "BRAND.md",
+          "MARQ_AGENTS.md",
           "src/index.css",
+          "src/lib/marq-client.ts",
           "index.html",
           "public/manifest.webmanifest",
           "package.json",
