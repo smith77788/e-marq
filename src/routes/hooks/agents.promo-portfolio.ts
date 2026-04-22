@@ -17,6 +17,10 @@ import {
   jsonOk,
   startAgentRun,
 } from "@/lib/acos/agentRuntime";
+import { loadEffectiveGeoTargets } from "@/lib/acos/loadGeoTargets";
+import { summarizeGeo } from "@/lib/acos/geoTargets";
+
+const AGENT_ID = "promo-portfolio";
 
 export const Route = createFileRoute("/hooks/agents/promo-portfolio")({
   server: {
