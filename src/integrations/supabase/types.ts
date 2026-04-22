@@ -4233,6 +4233,15 @@ export type Database = {
         Args: { _chat_id: string; _tenant_id: string }
         Returns: undefined
       }
+      subscribe_restock_notification: {
+        Args: {
+          _email: string
+          _product_id: string
+          _tenant_id: string
+          _variant_id: string
+        }
+        Returns: Json
+      }
       validate_discount_code: {
         Args: {
           _code: string
