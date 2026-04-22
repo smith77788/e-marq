@@ -1,7 +1,24 @@
 import { cn } from "@/lib/utils";
 
-function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("animate-pulse rounded-md bg-primary/10", className)} {...props} />;
+/**
+ * Modern shimmer skeleton.
+ * Default uses subtle shimmer overlay; pass `pulse` to fall back to old pulse style.
+ */
+function Skeleton({
+  className,
+  pulse = false,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & { pulse?: boolean }) {
+  return (
+    <div
+      className={cn(
+        "rounded-md",
+        pulse ? "animate-pulse bg-primary/10" : "shimmer",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 export { Skeleton };
