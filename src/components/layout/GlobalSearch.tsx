@@ -171,7 +171,7 @@ export function GlobalSearch() {
     staleTime: 60_000,
   });
 
-  const enabled = open && debounced.length >= 2 && tenantIds.length > 0;
+  const enabled = open && !isAiMode && debounced.length >= 2 && tenantIds.length > 0;
 
   const { data: results, isFetching } = useQuery({
     queryKey: ["gs-results", debounced, tenantIds.join(",")],
