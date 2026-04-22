@@ -39,7 +39,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { useT, tStatic, useLang, type TKey } from "@/lib/i18n";
+import { useT, tStatic, type TKey } from "@/lib/i18n";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { supabase } from "@/integrations/supabase/client";
 import { getAgentMeta, type AgentMeta } from "@/lib/acos/agentCatalog";
@@ -108,8 +108,7 @@ function AgentDetailPage() {
   const meta = getAgentMeta(agentId);
   if (!meta) throw notFound();
 
-  const { t } = useT();
-  const { lang } = useLang();
+  const { t, lang } = useT();
   const { current, loading: tenantLoading } = useTenantContext();
   const tenantId = current?.tenant_id ?? null;
   const [running, setRunning] = useState(false);
