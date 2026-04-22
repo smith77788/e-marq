@@ -85,7 +85,7 @@ export const Route = createFileRoute("/api/public/marq/events")({
           product_id: body.product_id ?? null,
           order_id: body.order_id ?? null,
           user_id: body.user_id ?? null,
-          payload: body.payload ?? {},
+          payload: (body.payload ?? {}) as never,
         });
         if (error) return jsonResponse({ error: error.message }, { status: 500 });
 
