@@ -251,6 +251,8 @@ function HandbookPage() {
                 alt=""
                 loading="lazy"
                 decoding="async"
+                width={1920}
+                height={1080}
                 className="h-48 w-full object-cover"
               />
             </Card>
