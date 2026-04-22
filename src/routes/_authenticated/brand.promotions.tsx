@@ -11,7 +11,7 @@ import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Layers, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,6 +62,7 @@ import { useT } from "@/lib/i18n";
 import { formatMoneyExact } from "@/lib/money";
 
 import { LoyaltyCard } from "@/components/owner/LoyaltyCard";
+import { BulkPromoGeneratorDialog } from "@/components/owner/BulkPromoGeneratorDialog";
 
 type PromoType = "percent_off" | "fixed_off" | "free_shipping";
 
@@ -159,6 +160,7 @@ function BrandPromotionsPage() {
   const [editing, setEditing] = useState<PromoRow | null>(null);
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<PromoRow | null>(null);
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   // Form state
   const [code, setCode] = useState("");
@@ -313,13 +315,29 @@ function BrandPromotionsPage() {
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("bpr.subtitle")}</p>
         </div>
-        <Button size="sm" onClick={() => setCreating(true)}>
-          <Plus className="mr-1.5 h-3.5 w-3.5" />
-          {t("bpr.new")}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setBulkOpen(true)}
+          >
+            <Layers className="mr-1.5 h-3.5 w-3.5" />
+            {t("bpr.bulk.button")}
+          </Button>
+          <Button size="sm" onClick={() => setCreating(true)}>
+            <Plus className="mr-1.5 h-3.5 w-3.5" />
+            {t("bpr.new")}
+          </Button>
+        </div>
       </div>
 
       <LoyaltyCard tenantId={tenantId!} />
+
+      <BulkPromoGeneratorDialog
+        tenantId={tenantId!}
+        open={bulkOpen}
+        onOpenChange={setBulkOpen}
+      />
 
       <Card>
         <CardContent className="p-0">
