@@ -66,6 +66,22 @@ export const Route = createFileRoute("/hooks/agents/cron-all")({
           }),
         );
 
+        // Платформенні (multi-tenant) агенти-генератори лідів — запускаємо
+        // ОДИН раз на цикл, незалежно від тенантів. Вони працюють з
+        // public.lead_prospects/lead_outreach/lead_magnets.
+        const PLATFORM_LEAD_AGENTS = ["web-prospector", "social-engager", "content-magnet"];
+        const platformResults = await Promise.allSettled(
+          PLATFORM_LEAD_AGENTS.map(async (a) => {
+            const res = await fetch(`${origin}/hooks/agents/${a}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${cronToken}` },
+              body: JSON.stringify({}),
+            });
+            const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+            return { agent: a, ok: res.ok, ...body };
+          }),
+        );
+
         const summary = results.map((r, i) =>
           r.status === "fulfilled"
             ? r.value
@@ -76,12 +92,19 @@ export const Route = createFileRoute("/hooks/agents/cron-all")({
           return s + (typeof v === "number" ? v : 0);
         }, 0);
 
+        const platformSummary = platformResults.map((r, i) =>
+          r.status === "fulfilled"
+            ? r.value
+            : { agent: PLATFORM_LEAD_AGENTS[i], ok: false, error: String(r.reason) },
+        );
+
         return jsonOk({
           tenants_processed: tenants?.length ?? 0,
           total_insights_created: totalCreated,
           duration_ms: Date.now() - started,
           triggered_by: authed,
           results: summary,
+          platform_lead_agents: platformSummary,
         });
       },
     },

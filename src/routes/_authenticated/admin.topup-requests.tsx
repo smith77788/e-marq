@@ -244,12 +244,13 @@ function ProcessDialog({ row }: { row: Row }) {
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState<string>(row.manager_note ?? "");
 
+
   const updateStatus = useMutation({
     mutationFn: async (next: Status) => {
       if (next === "paid") {
         const { error } = await supabase.rpc("admin_mark_topup_paid", {
           _request_id: row.id,
-          _manager_note: note.trim() || null,
+          _manager_note: note.trim() || undefined,
         });
         if (error) throw error;
         return;
