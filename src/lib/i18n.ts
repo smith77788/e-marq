@@ -1331,6 +1331,10 @@ const dict = {
     "agc.dataGapAuditor.when": "Щотижня.",
     "agc.dataGapAuditor.impact": "Підказує які поля треба заповнити.",
     "sbu.required": "Обов'язкове поле",
+    "err.boundary.title": "Щось пішло не так",
+    "err.boundary.desc": "Сталася непередбачена помилка. Спробуйте ще раз.",
+    "err.boundary.retry": "Спробувати знову",
+    "err.boundary.home": "На головну",
   },
   en: {
     "nav.brand": "My brand",
@@ -2569,6 +2573,10 @@ const dict = {
     "agc.dataGapAuditor.when": "Weekly.",
     "agc.dataGapAuditor.impact": "Hints which fields to fill.",
     "sbu.required": "Required field",
+    "err.boundary.title": "Something went wrong",
+    "err.boundary.desc": "An unexpected error occurred. Please try again.",
+    "err.boundary.retry": "Try again",
+    "err.boundary.home": "Go home",
   },
 } satisfies Record<Lang, Record<string, string>>;
 
