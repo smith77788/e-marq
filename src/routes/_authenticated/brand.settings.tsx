@@ -413,6 +413,33 @@ function StoreSettingsPage() {
             </Card>
           </TabsContent>
 
+          {/* REGION */}
+          <TabsContent value="region" className="mt-4 space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-primary" /> Регіон бренду
+                </CardTitle>
+                <CardDescription>
+                  Країна та міста, з якими працюють агенти ціноутворення та акцій
+                  (price-optimizer, geo-demand, predictive-pricing, promo-portfolio тощо).
+                  Кожен агент може мати власний override у розділі «Агенти».
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+                  Поточний фокус: <span className="font-semibold text-foreground">
+                    {summarizeGeo(form.geo_targets)}
+                  </span>
+                </div>
+                <RegionSelector
+                  value={form.geo_targets}
+                  onChange={(g) => setForm((f) => ({ ...f, geo_targets: g }))}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* BOT */}
           <TabsContent value="bot" className="mt-4 space-y-4">
             <Card>
