@@ -8,9 +8,9 @@
  * Stateless per call — engine is responsible for scheduling.
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { LOVABLE_AI_URL, DEFAULT_AI_MODEL, isLovableAiEnabled } from "@/lib/acos/aiKillswitch";
 
-const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-2.5-flash";
+const MODEL = DEFAULT_AI_MODEL;
 
 type InboundRow = {
   id: string;
@@ -51,8 +51,9 @@ async function aiReply(opts: {
   lastBought: string | null;
   lastInbound: string;
 }): Promise<string | null> {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) return null;
+  // AI killswitch: за замовчуванням вимкнено → sales bot не відповідає до явного opt-in.
+  if (!isLovableAiEnabled()) return null;
+  const apiKey = process.env.LOVABLE_API_KEY!;
 
   // Heuristic language detection from the latest customer message:
   // default = Ukrainian; switch only when text is clearly English or Russian.

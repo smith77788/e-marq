@@ -24,8 +24,9 @@ import { dispatchTenantOutbound, pickChannelForCustomer } from "@/lib/acos/chann
 import { getCadenceMultiplier } from "@/lib/acos/policyTuning";
 
 const AGENT_ID = "winback_engine";
-const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-2.5-flash";
+import { LOVABLE_AI_URL, DEFAULT_AI_MODEL, isLovableAiEnabled } from "@/lib/acos/aiKillswitch";
+
+const MODEL = DEFAULT_AI_MODEL;
 
 async function aiOffer(opts: {
   brandName: string;
@@ -34,8 +35,10 @@ async function aiOffer(opts: {
   favoriteProduct: string | null;
   totalSpent: number;
 }): Promise<string | null> {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) return null;
+  // AI killswitch: за замовчуванням AI-копірайт вимкнено → caller використає
+  // детермінований шаблон. Жодних кредитів не списується.
+  if (!isLovableAiEnabled()) return null;
+  const apiKey = process.env.LOVABLE_API_KEY!;
   const sys = `You write SHORT winback messages for D2C brand "${opts.brandName}". Tone: warm, friendly, never desperate. 1-2 short sentences max. Never say "discount" — say "something on me" or "small treat". Never claim to be AI.`;
   const user = `Customer "${opts.firstName}" hasn't ordered in ${opts.daysSince} days. Lifetime value: $${(opts.totalSpent / 100).toFixed(0)}.${opts.favoriteProduct ? ` Favorite: ${opts.favoriteProduct}.` : ""} Write a personal nudge that mentions the product if known. End with a soft question.`;
   const res = await fetch(LOVABLE_AI_URL, {

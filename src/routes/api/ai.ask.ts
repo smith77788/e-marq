@@ -21,9 +21,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
+import { LOVABLE_AI_URL, DEFAULT_AI_MODEL, isLovableAiEnabled } from "@/lib/acos/aiKillswitch";
 
-const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-2.5-flash";
+const MODEL = DEFAULT_AI_MODEL;
 const MAX_QUESTION_LEN = 500;
 
 function jsonError(message: string, status = 400) {
@@ -44,7 +44,6 @@ export const Route = createFileRoute("/api/ai/ask")({
       POST: async ({ request }) => {
         const url = process.env.SUPABASE_URL;
         const anon = process.env.SUPABASE_PUBLISHABLE_KEY;
-        const lovableKey = process.env.LOVABLE_API_KEY;
         if (!url || !anon) return jsonError("Server not configured", 500);
 
         const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
@@ -133,12 +132,14 @@ export const Route = createFileRoute("/api/ai/ask")({
           { label: "Замовлення", to: "/brand/orders" },
         ];
 
-        if (!lovableKey) {
+        // AI killswitch: якщо AI вимкнено (за замовчуванням), повертаємо детермінований fallback.
+        if (!isLovableAiEnabled()) {
           return new Response(
             JSON.stringify({ answer: fallbackAnswer, suggestions } satisfies AskResponse),
             { status: 200, headers: { "Content-Type": "application/json" } },
           );
         }
+        const lovableKey = process.env.LOVABLE_API_KEY!;
 
         const ctx = {
           brand: tenantRow.data?.name ?? "Your brand",

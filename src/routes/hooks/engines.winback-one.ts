@@ -12,8 +12,9 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { authorizeAgentRequest, jsonError, jsonOk } from "@/lib/acos/agentRuntime";
 import { dispatchTenantOutbound, pickChannelForCustomer } from "@/lib/acos/channels";
 
-const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-2.5-flash";
+import { LOVABLE_AI_URL, DEFAULT_AI_MODEL, isLovableAiEnabled } from "@/lib/acos/aiKillswitch";
+
+const MODEL = DEFAULT_AI_MODEL;
 
 async function aiOffer(opts: {
   brandName: string;
@@ -22,13 +23,14 @@ async function aiOffer(opts: {
   favoriteProduct: string | null;
   totalSpent: number;
 }): Promise<string> {
-  const apiKey = process.env.LOVABLE_API_KEY;
   const fallback = `Hey ${opts.firstName} — it's been a while! ${
     opts.favoriteProduct
       ? `Want me to set aside a ${opts.favoriteProduct} for you?`
       : "Anything you'd like me to put on hold for you?"
   }`;
-  if (!apiKey) return fallback;
+  // AI killswitch: за замовчуванням вимкнено → одразу детермінований шаблон.
+  if (!isLovableAiEnabled()) return fallback;
+  const apiKey = process.env.LOVABLE_API_KEY!;
   const sys = `You write SHORT winback messages for D2C brand "${opts.brandName}". Tone: warm, friendly, never desperate. 1-2 short sentences. Never mention "discount". Never claim to be AI.`;
   const user = `Customer "${opts.firstName}" hasn't ordered in ${opts.daysSince} days. Lifetime: $${(opts.totalSpent / 100).toFixed(0)}.${opts.favoriteProduct ? ` Favorite: ${opts.favoriteProduct}.` : ""} Write a personal nudge.`;
   try {
