@@ -14,7 +14,7 @@
  * звернень з клієнта. Профіль зберігаємо upsert-ом, RLS гарантує що чужі
  * тенанти не пройдуть.
  */
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ExternalLink, Sparkles, Wand2 } from "lucide-react";
