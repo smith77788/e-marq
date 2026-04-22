@@ -73,6 +73,15 @@ type: feature
 - Storefront: блок "Повідомити, коли з'явиться" на сторінці товару (public RPC `subscribe_restock_notification`) ✅
 - Усі 5 агентів зареєстровані в agents.run-all.ts ✅
 
+### Sprint 8 — Email UX consolidation ✅ (готово)
+- Окрема сторінка `/brand/email` з 3 табами: Кампанії / Автоматизації / Налаштування ✅
+- Новий `EmailAutomationsCard` — 5 toggle для email-сценаріїв; стан у `tenant_configs.features.email_automations.{key}` ✅
+- `EmailCampaignsCard` перенесено з `/brand/promotions` → `/brand/email#campaigns` ✅
+- `EmailDomainCard` перенесено з `/brand/integrations` → `/brand/email#settings` ✅
+- Sidebar → новий пункт «Email» (sb.email) у групі «Магазин» ✅
+- i18n: 18 нових ключів (UA + EN) для табів і автоматизацій ✅
+- TODO (Sprint 9): агенти `email-*` мають читати `features.email_automations.{key}` і поважати OFF
+
 ## Абсолютні заборони
 - НЕ редагувати існуючі міграції
 - НЕ міняти agentRuntime.ts

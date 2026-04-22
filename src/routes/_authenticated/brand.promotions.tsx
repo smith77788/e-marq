@@ -60,7 +60,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
 import { formatMoneyExact } from "@/lib/money";
-import { EmailCampaignsCard } from "@/components/owner/EmailCampaignsCard";
+
 import { LoyaltyCard } from "@/components/owner/LoyaltyCard";
 
 type PromoType = "percent_off" | "fixed_off" | "free_shipping";
@@ -318,8 +318,6 @@ function BrandPromotionsPage() {
           {t("bpr.new")}
         </Button>
       </div>
-
-      <EmailCampaignsCard tenantId={tenantId!} />
 
       <LoyaltyCard tenantId={tenantId!} />
 
