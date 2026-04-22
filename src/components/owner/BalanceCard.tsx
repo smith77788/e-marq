@@ -318,7 +318,7 @@ function TopupDialog({
           Поповнити
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="w-[calc(100%-1.5rem)] max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Поповнення балансу</DialogTitle>
           <DialogDescription>Оберіть кількість AI-кредитів і спосіб оплати.</DialogDescription>
