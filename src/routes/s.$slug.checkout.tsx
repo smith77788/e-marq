@@ -439,8 +439,9 @@ function CheckoutPage() {
                       variant="outline"
                       className="h-7 w-7"
                       onClick={() => cart.updateQty(product.id, -1)}
+                      aria-label="Зменшити кількість"
                     >
-                      <Minus className="h-3 w-3" />
+                      <Minus className="h-3 w-3" aria-hidden="true" />
                     </Button>
                     <span className="w-6 text-center text-sm tabular-nums">{quantity}</span>
                     <Button
@@ -448,16 +449,18 @@ function CheckoutPage() {
                       variant="outline"
                       className="h-7 w-7"
                       onClick={() => cart.updateQty(product.id, 1)}
+                      aria-label="Збільшити кількість"
                     >
-                      <Plus className="h-3 w-3" />
+                      <Plus className="h-3 w-3" aria-hidden="true" />
                     </Button>
                     <Button
                       size="icon"
                       variant="ghost"
                       className="h-7 w-7 text-muted-foreground hover:text-destructive"
                       onClick={() => cart.removeLine(product.id)}
+                      aria-label="Видалити з кошика"
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash2 className="h-3 w-3" aria-hidden="true" />
                     </Button>
                   </div>
                 </div>

@@ -196,11 +196,13 @@ export function TenantOrders({ tenantId }: { tenantId: string }) {
                             variant="ghost"
                             className="h-7 w-7"
                             onClick={() => setExpandedId(expanded ? null : o.id)}
+                            aria-label={expanded ? "Згорнути" : "Розгорнути"}
+                            aria-expanded={expanded}
                           >
                             {expanded ? (
-                              <ChevronUp className="h-4 w-4" />
+                              <ChevronUp className="h-4 w-4" aria-hidden="true" />
                             ) : (
-                              <ChevronDown className="h-4 w-4" />
+                              <ChevronDown className="h-4 w-4" aria-hidden="true" />
                             )}
                           </Button>
                         </TableCell>

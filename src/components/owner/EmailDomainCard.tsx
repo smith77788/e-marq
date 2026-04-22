@@ -267,8 +267,9 @@ export function EmailDomainCard({ tenantId }: { tenantId: string }) {
                           variant="ghost"
                           className="h-7 w-7"
                           onClick={() => copyValue(rec.name)}
+                          aria-label="Копіювати DNS-ім'я"
                         >
-                          <Copy className="h-3 w-3" />
+                          <Copy className="h-3 w-3" aria-hidden="true" />
                         </Button>
                       </div>
                       <div className="grid grid-cols-[80px_1fr_auto] items-start gap-2">
@@ -279,8 +280,9 @@ export function EmailDomainCard({ tenantId }: { tenantId: string }) {
                           variant="ghost"
                           className="h-7 w-7"
                           onClick={() => copyValue(rec.value)}
+                          aria-label="Копіювати DNS-значення"
                         >
-                          <Copy className="h-3 w-3" />
+                          <Copy className="h-3 w-3" aria-hidden="true" />
                         </Button>
                       </div>
                       {rec.ttl && <div className="text-muted-foreground">TTL: {rec.ttl}</div>}

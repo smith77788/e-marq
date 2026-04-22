@@ -308,8 +308,9 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
                         variant="ghost"
                         className="h-7 w-7"
                         onClick={() => copy(d.verification_token, "Токен")}
+                        aria-label="Копіювати TXT-токен"
                       >
-                        <Copy className="h-3.5 w-3.5" />
+                        <Copy className="h-3.5 w-3.5" aria-hidden="true" />
                       </Button>
                     </div>
                   </div>
