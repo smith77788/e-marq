@@ -33,23 +33,37 @@ interface RedditPost {
 
 async function fetchSubreddit(sub: string, limit = 25): Promise<RedditPost[]> {
   const headersBrowser = {
-    "User-Agent":
-      "Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
     "Accept-Language": "uk-UA,uk;q=0.9,en;q=0.8",
   };
   const attempts = [
-    { url: `https://www.reddit.com/r/${encodeURIComponent(sub)}/new/.rss?limit=${limit}`, parser: "rss" as const },
-    { url: `https://old.reddit.com/r/${encodeURIComponent(sub)}/new.json?limit=${limit}&raw_json=1`, parser: "json" as const },
-    { url: `https://www.reddit.com/r/${encodeURIComponent(sub)}/new.json?limit=${limit}&raw_json=1`, parser: "json" as const },
+    {
+      url: `https://www.reddit.com/r/${encodeURIComponent(sub)}/new/.rss?limit=${limit}`,
+      parser: "rss" as const,
+    },
+    {
+      url: `https://old.reddit.com/r/${encodeURIComponent(sub)}/new.json?limit=${limit}&raw_json=1`,
+      parser: "json" as const,
+    },
+    {
+      url: `https://www.reddit.com/r/${encodeURIComponent(sub)}/new.json?limit=${limit}&raw_json=1`,
+      parser: "json" as const,
+    },
   ];
   for (const a of attempts) {
     try {
       const res = await fetch(a.url, {
-        headers: { ...headersBrowser, Accept: a.parser === "rss" ? "application/rss+xml,application/xml" : "application/json", "User-Agent": REDDIT_USER_AGENT },
+        headers: {
+          ...headersBrowser,
+          Accept: a.parser === "rss" ? "application/rss+xml,application/xml" : "application/json",
+          "User-Agent": REDDIT_USER_AGENT,
+        },
       });
       if (!res.ok) continue;
       if (a.parser === "json") {
-        const json = (await res.json().catch(() => null)) as { data?: { children?: Array<{ data?: Record<string, unknown> }> } } | null;
+        const json = (await res.json().catch(() => null)) as {
+          data?: { children?: Array<{ data?: Record<string, unknown> }> };
+        } | null;
         const children = json?.data?.children ?? [];
         if (!Array.isArray(children) || children.length === 0) continue;
         return children
@@ -72,23 +86,53 @@ async function fetchSubreddit(sub: string, limit = 25): Promise<RedditPost[]> {
       const entries = xml.match(/<entry>[\s\S]*?<\/entry>/g) ?? [];
       const out: RedditPost[] = [];
       for (const e of entries) {
-        const id = (e.match(/<id>(?:tag:reddit\.com,2008:)?(?:\/r\/[^/]+\/comments\/)?([^<]+)<\/id>/)?.[1] ?? "").split("_").pop() ?? "";
+        const id =
+          (
+            e.match(
+              /<id>(?:tag:reddit\.com,2008:)?(?:\/r\/[^/]+\/comments\/)?([^<]+)<\/id>/,
+            )?.[1] ?? ""
+          )
+            .split("_")
+            .pop() ?? "";
         const link = e.match(/<link[^>]*href="([^"]+)"/)?.[1] ?? "";
         const title = (e.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? "")
-          .replace(/<!\[CDATA\[|\]\]>/g, "").trim();
+          .replace(/<!\[CDATA\[|\]\]>/g, "")
+          .trim();
         const author = e.match(/<name>\/u\/([^<]+)<\/name>/)?.[1] ?? "anon";
-        const contentRaw = (e.match(/<content[^>]*>([\s\S]*?)<\/content>/)?.[1] ?? "")
-          .replace(/<!\[CDATA\[|\]\]>/g, "");
+        const contentRaw = (e.match(/<content[^>]*>([\s\S]*?)<\/content>/)?.[1] ?? "").replace(
+          /<!\[CDATA\[|\]\]>/g,
+          "",
+        );
         const content = contentRaw
-          .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").replace(/&quot;/g, '"')
-          .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+          .replace(/&lt;/g, "<")
+          .replace(/&gt;/g, ">")
+          .replace(/&amp;/g, "&")
+          .replace(/&quot;/g, '"')
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
         const updated = e.match(/<updated>([^<]+)<\/updated>/)?.[1];
-        const created_utc = updated ? Math.floor(new Date(updated).getTime() / 1000) : Math.floor(Date.now() / 1000);
+        const created_utc = updated
+          ? Math.floor(new Date(updated).getTime() / 1000)
+          : Math.floor(Date.now() / 1000);
         if (!id || !link) continue;
-        out.push({ id, permalink: link, url: link, title, selftext: content, author, subreddit: sub, created_utc, num_comments: 0, ups: 0 });
+        out.push({
+          id,
+          permalink: link,
+          url: link,
+          title,
+          selftext: content,
+          author,
+          subreddit: sub,
+          created_utc,
+          num_comments: 0,
+          ups: 0,
+        });
       }
       if (out.length) return out;
-    } catch { /* try next */ }
+    } catch {
+      /* try next */
+    }
   }
   return [];
 }
@@ -100,11 +144,20 @@ async function runForTenant(tenantId: string): Promise<{
   skipped?: string;
 }> {
   const settings = await getSettings(tenantId);
-  if (!settings.active_channels.reddit) return { ok: true, stats: {}, errors: [], skipped: "channel_disabled" };
+  if (!settings.active_channels.reddit)
+    return { ok: true, stats: {}, errors: [], skipped: "channel_disabled" };
   const subreddits = settings.reddit_subreddits ?? [];
   if (subreddits.length === 0) return { ok: true, stats: {}, errors: [], skipped: "no_subreddits" };
 
-  const stats = { scanned: 0, candidates: 0, inserted: 0, blocked: 0, lowIntent: 0, langSkip: 0, dup: 0 };
+  const stats = {
+    scanned: 0,
+    candidates: 0,
+    inserted: 0,
+    blocked: 0,
+    lowIntent: 0,
+    langSkip: 0,
+    dup: 0,
+  };
   const errors: string[] = [];
   const channel: OutreachChannel = "reddit";
 
@@ -115,12 +168,21 @@ async function runForTenant(tenantId: string): Promise<{
       for (const p of posts) {
         const text = `${p.title}\n\n${p.selftext}`.trim();
         if (!text) continue;
-        if (isBlocked(text, settings.blocked_keywords)) { stats.blocked++; continue; }
+        if (isBlocked(text, settings.blocked_keywords)) {
+          stats.blocked++;
+          continue;
+        }
         const lang = detectLanguage(text);
         const isUaSub = /^(ukrain|lviv|kyiv|kiev|odesa|kharkiv)/i.test(sub);
-        if (lang !== "uk" && !(isUaSub && lang === "en")) { stats.langSkip++; continue; }
+        if (lang !== "uk" && !(isUaSub && lang === "en")) {
+          stats.langSkip++;
+          continue;
+        }
         const { score, matched } = scoreIntent(text, settings.intent_keywords);
-        if (score < 0.25) { stats.lowIntent++; continue; }
+        if (score < 0.25) {
+          stats.lowIntent++;
+          continue;
+        }
         stats.candidates++;
         const fp = await fingerprint("reddit", p.permalink, text);
         const { error: insertErr } = await supabaseAdmin.from("outreach_leads").insert({
@@ -138,7 +200,12 @@ async function runForTenant(tenantId: string): Promise<{
           topic_tags: [`r/${sub}`],
           matched_keywords: matched,
           fingerprint: fp,
-          raw_payload: { sub, ups: p.ups, num_comments: p.num_comments, created_utc: p.created_utc } as never,
+          raw_payload: {
+            sub,
+            ups: p.ups,
+            num_comments: p.num_comments,
+            created_utc: p.created_utc,
+          } as never,
           discovered_at: new Date(p.created_utc ? p.created_utc * 1000 : Date.now()).toISOString(),
         } as never);
         if (insertErr) {
@@ -159,7 +226,10 @@ export const Route = createFileRoute("/hooks/agents/outreach-reddit-hunter")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const body = (await request.clone().json().catch(() => ({}))) as { tenant_id?: string };
+        const body = (await request
+          .clone()
+          .json()
+          .catch(() => ({}))) as { tenant_id?: string };
         const auth = await authorizeOutreach(request, body.tenant_id ?? null);
         if ("error" in auth) return jsonError(auth.error, auth.status);
         const tenants = await resolveTargetTenants(auth, body.tenant_id ?? null);

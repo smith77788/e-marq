@@ -16,7 +16,12 @@ import {
 const DEFAULT_HASHTAGS = ["українськийбренд", "крафтukraine", "shopua", "купитиукраїна"];
 const RSS_BASE = process.env.INSTAGRAM_RSS_URL ?? "";
 
-interface IgPost { url: string; caption: string; hashtag: string; posted_at?: string }
+interface IgPost {
+  url: string;
+  caption: string;
+  hashtag: string;
+  posted_at?: string;
+}
 
 function parseRss(xml: string, hashtag: string): IgPost[] {
   const out: IgPost[] = [];
@@ -25,9 +30,15 @@ function parseRss(xml: string, hashtag: string): IgPost[] {
   while ((m = itemRx.exec(xml)) && out.length < 15) {
     const block = m[1];
     const link = (block.match(/<link>([\s\S]*?)<\/link>/) ?? [, ""])[1].trim();
-    const title = (block.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/) ?? [, ""])[1].trim();
-    const desc = (block.match(/<description>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/description>/) ?? [, ""])[1]
-      .replace(/<[^>]+>/g, " ").trim();
+    const title = (block.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/) ?? [
+      ,
+      "",
+    ])[1].trim();
+    const desc = (block.match(
+      /<description>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/description>/,
+    ) ?? [, ""])[1]
+      .replace(/<[^>]+>/g, " ")
+      .trim();
     const pub = (block.match(/<pubDate>([\s\S]*?)<\/pubDate>/) ?? [, ""])[1].trim();
     const caption = [title, desc].filter(Boolean).join(" — ").slice(0, 1500);
     if (!link || !caption) continue;
@@ -45,7 +56,9 @@ async function fetchHashtag(tag: string): Promise<IgPost[]> {
     });
     if (!res.ok) return [];
     return parseRss(await res.text(), tag);
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
 
 async function runForTenant(tenantId: string) {
@@ -99,7 +112,9 @@ async function runForTenant(tenantId: string) {
         } as never);
         if (insErr) {
           if (insErr.code !== "23505") errors.push(`${tag}: ${insErr.message}`);
-        } else { stats.created++; }
+        } else {
+          stats.created++;
+        }
       }
       await new Promise((r) => setTimeout(r, 700 + Math.random() * 800));
     } catch (e) {
@@ -113,7 +128,10 @@ export const Route = createFileRoute("/hooks/agents/outreach-instagram-hunter")(
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const body = (await request.clone().json().catch(() => ({}))) as { tenant_id?: string };
+        const body = (await request
+          .clone()
+          .json()
+          .catch(() => ({}))) as { tenant_id?: string };
         const auth = await authorizeOutreach(request, body.tenant_id ?? null);
         if ("error" in auth) return jsonError(auth.error, auth.status);
         const tenants = await resolveTargetTenants(auth, body.tenant_id ?? null);

@@ -22,7 +22,11 @@ const DEFAULT_QUERIES = [
   "хочу спробувати український бренд",
 ];
 
-interface SearchResult { url: string; title: string; snippet: string }
+interface SearchResult {
+  url: string;
+  title: string;
+  snippet: string;
+}
 
 async function ddgSearch(query: string): Promise<SearchResult[]> {
   const endpoints = ["https://lite.duckduckgo.com/lite/", "https://html.duckduckgo.com/html/"];
@@ -42,10 +46,16 @@ async function ddgSearch(query: string): Promise<SearchResult[]> {
       });
       if (!res.ok) continue;
       const html = await res.text();
-      const stripTags = (s: string) => s.replace(/<[^>]+>/g, "").replace(/&[a-z]+;/gi, " ").trim();
+      const stripTags = (s: string) =>
+        s
+          .replace(/<[^>]+>/g, "")
+          .replace(/&[a-z]+;/gi, " ")
+          .trim();
       const out: SearchResult[] = [];
-      const rxFull = /<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
-      const rxLite = /<a[^>]*class=['"]result-link['"][^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<td[^>]*class=['"]result-snippet['"][^>]*>([\s\S]*?)<\/td>/g;
+      const rxFull =
+        /<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
+      const rxLite =
+        /<a[^>]*class=['"]result-link['"][^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<td[^>]*class=['"]result-snippet['"][^>]*>([\s\S]*?)<\/td>/g;
       const rx = ep.includes("/lite/") ? rxLite : rxFull;
       let m: RegExpExecArray | null;
       while ((m = rx.exec(html)) && out.length < 15) {
@@ -55,11 +65,15 @@ async function ddgSearch(query: string): Promise<SearchResult[]> {
           const u = new URL(url);
           const real = u.searchParams.get("uddg");
           if (real) url = decodeURIComponent(real);
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
         out.push({ url, title: stripTags(m[2]), snippet: stripTags(m[3]) });
       }
       if (out.length) return out;
-    } catch { /* next ep */ }
+    } catch {
+      /* next ep */
+    }
   }
   return [];
 }
@@ -84,11 +98,20 @@ async function runForTenant(tenantId: string) {
       for (const r of results) {
         stats.seen++;
         const text = `${r.title}\n${r.snippet}`;
-        if (isBlocked(text, settings.blocked_keywords)) { stats.blocked++; continue; }
+        if (isBlocked(text, settings.blocked_keywords)) {
+          stats.blocked++;
+          continue;
+        }
         const lang = detectLanguage(text);
-        if (lang !== "uk" && lang !== "ru") { stats.lang_skip++; continue; }
+        if (lang !== "uk" && lang !== "ru") {
+          stats.lang_skip++;
+          continue;
+        }
         const intent = scoreIntent(text, settings.intent_keywords);
-        if (intent.score < 0.15) { stats.intent_skip++; continue; }
+        if (intent.score < 0.15) {
+          stats.intent_skip++;
+          continue;
+        }
         const channel = classifyChannel(r.url);
         const fp = await fingerprint(channel, r.url, r.snippet);
         const { error: insErr } = await supabaseAdmin.from("outreach_leads").insert({
@@ -109,7 +132,9 @@ async function runForTenant(tenantId: string) {
         if (insErr) {
           if (insErr.code === "23505") stats.dup++;
           else errors.push(`${q}: ${insErr.message}`);
-        } else { stats.created++; }
+        } else {
+          stats.created++;
+        }
       }
       await new Promise((r) => setTimeout(r, 600 + Math.random() * 800));
     } catch (e) {
@@ -123,7 +148,10 @@ export const Route = createFileRoute("/hooks/agents/outreach-google-hunter")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const body = (await request.clone().json().catch(() => ({}))) as { tenant_id?: string };
+        const body = (await request
+          .clone()
+          .json()
+          .catch(() => ({}))) as { tenant_id?: string };
         const auth = await authorizeOutreach(request, body.tenant_id ?? null);
         if ("error" in auth) return jsonError(auth.error, auth.status);
         const tenants = await resolveTargetTenants(auth, body.tenant_id ?? null);

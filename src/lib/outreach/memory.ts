@@ -78,7 +78,10 @@ export async function recordPattern(u: PatternUpdate): Promise<void> {
           confidence: conf,
           last_observed_at: new Date().toISOString(),
           learned_rule: u.learned_rule.slice(0, 500),
-          evidence: { ...((existing.evidence as Record<string, unknown>) ?? {}), last: u.evidence ?? {} } as never,
+          evidence: {
+            ...((existing.evidence as Record<string, unknown>) ?? {}),
+            last: u.evidence ?? {},
+          } as never,
           is_active: conf >= 0.2,
         })
         .eq("id", existing.id);
@@ -113,7 +116,9 @@ export async function getChannelHints(tenantId: string, channel: string): Promis
   try {
     const { data } = await supabaseAdmin
       .from("ai_memory")
-      .select("pattern_key, learned_rule, success_count, failure_count, avg_impact, confidence, is_active")
+      .select(
+        "pattern_key, learned_rule, success_count, failure_count, avg_impact, confidence, is_active",
+      )
       .eq("tenant_id", tenantId)
       .eq("agent", AGENT)
       .ilike("pattern_key", `outreach:${channel}:%`)
@@ -150,7 +155,9 @@ export async function getChannelHints(tenantId: string, channel: string): Promis
     const toneRow = scored
       .filter((r) => r.pattern_key.includes(":tone:") && r.is_active)
       .sort((a, b) => b.rank - a.rank)[0];
-    const prefer_length = lengthRow ? (lengthRow.pattern_key.split(":").pop() as LengthBucket) : undefined;
+    const prefer_length = lengthRow
+      ? (lengthRow.pattern_key.split(":").pop() as LengthBucket)
+      : undefined;
     const prefer_tone = toneRow
       ? (toneRow.pattern_key.split(":").pop() as "question" | "statement")
       : undefined;

@@ -4,7 +4,13 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink, Sparkles, Loader2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -57,10 +63,7 @@ export function MagnetPreviewDialog({ slug, open, onOpenChange }: Props) {
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col gap-0 p-0">
         <DialogHeader className="space-y-2 border-b border-border bg-gradient-to-br from-primary/10 via-background to-background p-5">
           {m?.topic && (
-            <Badge
-              variant="outline"
-              className="w-fit border-primary/30 bg-primary/5 text-primary"
-            >
+            <Badge variant="outline" className="w-fit border-primary/30 bg-primary/5 text-primary">
               <Sparkles className="mr-1 h-3 w-3" />
               {m.topic}
             </Badge>

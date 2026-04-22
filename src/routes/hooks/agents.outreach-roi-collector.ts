@@ -24,7 +24,9 @@ async function runForTenant(tenantId: string) {
       .from("events")
       .select("type, payload")
       .eq("tenant_id", tenantId)
-      .or(`payload->>utm_campaign.eq.${a.utm_campaign},payload->>url.ilike.%utm_campaign=${a.utm_campaign}%`)
+      .or(
+        `payload->>utm_campaign.eq.${a.utm_campaign},payload->>url.ilike.%utm_campaign=${a.utm_campaign}%`,
+      )
       .limit(5000);
 
     let visits = 0;
@@ -49,7 +51,9 @@ async function runForTenant(tenantId: string) {
         try {
           const meta = (o as unknown as { metadata?: Record<string, unknown> }).metadata;
           return meta && (meta as Record<string, unknown>).outreach_promo_code === a.promo_code;
-        } catch { return false; }
+        } catch {
+          return false;
+        }
       });
       orders_count = matching.length;
       revenue = matching.reduce((s, o) => s + (Number(o.total_cents) || 0), 0) / 100;
@@ -59,23 +63,26 @@ async function runForTenant(tenantId: string) {
     const conversion_rate = ctr;
     const roi_per_action = revenue;
 
-    await supabaseAdmin.from("outreach_metrics").upsert({
-      tenant_id: tenantId,
-      action_id: a.id,
-      lead_id: a.lead_id,
-      channel: a.channel,
-      utm_campaign: a.utm_campaign,
-      impressions: 0,
-      clicks: visits,
-      visits,
-      add_to_cart,
-      orders_count,
-      revenue,
-      ctr,
-      conversion_rate,
-      roi_per_action,
-      computed_at: new Date().toISOString(),
-    } as never, { onConflict: "action_id" });
+    await supabaseAdmin.from("outreach_metrics").upsert(
+      {
+        tenant_id: tenantId,
+        action_id: a.id,
+        lead_id: a.lead_id,
+        channel: a.channel,
+        utm_campaign: a.utm_campaign,
+        impressions: 0,
+        clicks: visits,
+        visits,
+        add_to_cart,
+        orders_count,
+        revenue,
+        ctr,
+        conversion_rate,
+        roi_per_action,
+        computed_at: new Date().toISOString(),
+      } as never,
+      { onConflict: "action_id" },
+    );
     stats.metrics_upserted++;
   }
   return stats;
@@ -85,7 +92,10 @@ export const Route = createFileRoute("/hooks/agents/outreach-roi-collector")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const body = (await request.clone().json().catch(() => ({}))) as { tenant_id?: string };
+        const body = (await request
+          .clone()
+          .json()
+          .catch(() => ({}))) as { tenant_id?: string };
         const auth = await authorizeOutreach(request, body.tenant_id ?? null);
         if ("error" in auth) return jsonError(auth.error, auth.status);
         const tenants = await resolveTargetTenants(auth, body.tenant_id ?? null);

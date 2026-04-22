@@ -641,7 +641,12 @@ function ActionRow({ action }: { action: OutreachAction }) {
       )}
 
       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-        <a href={action.landing_url} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+        <a
+          href={action.landing_url}
+          target="_blank"
+          rel="noreferrer"
+          className="text-primary hover:underline"
+        >
           лендинг
         </a>
         <span>UTM: {action.utm_campaign}</span>
@@ -672,7 +677,12 @@ function ActionRow({ action }: { action: OutreachAction }) {
       <div className="flex flex-wrap items-center gap-1.5">
         {action.status === "pending_review" && (
           <>
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => setStatus("approved")}>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={busy}
+              onClick={() => setStatus("approved")}
+            >
               <Check className="mr-1 h-3.5 w-3.5" /> Підтвердити
             </Button>
             <Button size="sm" variant="ghost" disabled={busy} onClick={() => setStatus("rejected")}>

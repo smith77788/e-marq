@@ -89,11 +89,7 @@ export const Route = createFileRoute("/api/ai/ask")({
         const since7Iso = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
         const [tenantRow, insightsRes, ordersRes, productsRes, healthRes, orderItemsRes] =
           await Promise.all([
-            supabaseAdmin
-              .from("tenants")
-              .select("name, slug")
-              .eq("id", tenantId)
-              .maybeSingle(),
+            supabaseAdmin.from("tenants").select("name, slug").eq("id", tenantId).maybeSingle(),
             supabaseAdmin
               .from("ai_insights")
               .select(
@@ -251,10 +247,10 @@ export const Route = createFileRoute("/api/ai/ask")({
             choices?: Array<{ message?: { content?: string } }>;
           };
           const answer = json.choices?.[0]?.message?.content?.trim() ?? fallbackAnswer;
-          return new Response(
-            JSON.stringify({ answer, suggestions } satisfies AskResponse),
-            { status: 200, headers: { "Content-Type": "application/json" } },
-          );
+          return new Response(JSON.stringify({ answer, suggestions } satisfies AskResponse), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
         } catch {
           return new Response(
             JSON.stringify({ answer: fallbackAnswer, suggestions } satisfies AskResponse),

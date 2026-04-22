@@ -17,7 +17,12 @@ import {
 
 const DEFAULT_CHANNELS = ["dog_ua", "kotyaty", "ua_business", "kyivshop_ua"];
 
-interface TgPost { url: string; text: string; date: string | null; channel: string }
+interface TgPost {
+  url: string;
+  text: string;
+  date: string | null;
+  channel: string;
+}
 
 interface TelegramSignal {
   sourceUrl: string;
@@ -36,7 +41,8 @@ interface TelegramSignal {
 
 function boostTelegramIntent(text: string, baseScore: number): number {
   let score = baseScore;
-  if (/(порадьте|порекомендуйте|де купити|доставка|ціна|вартість|питаю|підкажіть)/i.test(text)) score += 0.18;
+  if (/(порадьте|порекомендуйте|де купити|доставка|ціна|вартість|питаю|підкажіть)/i.test(text))
+    score += 0.18;
   if (/(якісн|натурал|крафт|ручної роботи|нов(е|инк|инка))/i.test(text)) score += 0.12;
   if (text.length > 120) score += 0.05;
   return Math.max(0, Math.min(1, +score.toFixed(3)));
@@ -46,7 +52,8 @@ async function fetchChannel(channel: string, maxPosts: number): Promise<TgPost[]
   const url = `https://t.me/s/${channel}`;
   const res = await fetch(url, {
     headers: {
-      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
       "Accept-Language": "uk-UA,uk;q=0.9,en;q=0.8",
     },
   });
@@ -83,7 +90,12 @@ async function fetchChannel(channel: string, maxPosts: number): Promise<TgPost[]
   return posts;
 }
 
-async function collectPublic(settings: OutreachSettings, channels: string[], maxPosts: number, minScore: number) {
+async function collectPublic(
+  settings: OutreachSettings,
+  channels: string[],
+  maxPosts: number,
+  minScore: number,
+) {
   const signals: TelegramSignal[] = [];
   const errors: string[] = [];
   let seen = 0;
@@ -121,7 +133,12 @@ async function collectPublic(settings: OutreachSettings, channels: string[], max
   return { signals, errors, seen };
 }
 
-async function collectInternal(tenantId: string, settings: OutreachSettings, lookbackDays: number, minScore: number) {
+async function collectInternal(
+  tenantId: string,
+  settings: OutreachSettings,
+  lookbackDays: number,
+  minScore: number,
+) {
   const since = new Date(Date.now() - lookbackDays * 24 * 3600 * 1000).toISOString();
   // У MARQ telegram-сповіщення зберігаються в conversations (channel='telegram', direction='in').
   const { data, error } = await supabaseAdmin
@@ -175,8 +192,13 @@ async function runForTenant(tenantId: string) {
   const settings = await getSettings(tenantId);
   if (!settings.active_channels.telegram) return { skipped: "telegram_inactive" };
 
-  const configured = settings.telegram_channels?.length ? settings.telegram_channels : DEFAULT_CHANNELS;
-  const channels = configured.slice(0, Math.max(1, Number(settings.telegram_max_channels_per_run ?? 10)));
+  const configured = settings.telegram_channels?.length
+    ? settings.telegram_channels
+    : DEFAULT_CHANNELS;
+  const channels = configured.slice(
+    0,
+    Math.max(1, Number(settings.telegram_max_channels_per_run ?? 10)),
+  );
   const minScore = Math.max(0.05, Number(settings.telegram_min_intent_score ?? 0.22));
   const maxPosts = Math.max(5, Number(settings.telegram_max_posts_per_channel ?? 35));
   const lookbackDays = Math.max(1, Number(settings.telegram_internal_lookback_days ?? 21));
@@ -214,7 +236,10 @@ async function runForTenant(tenantId: string) {
       .eq("tenant_id", tenantId)
       .eq("fingerprint", fp)
       .maybeSingle();
-    if (existing) { stats.duplicates++; continue; }
+    if (existing) {
+      stats.duplicates++;
+      continue;
+    }
     const { error: insErr } = await supabaseAdmin.from("outreach_leads").insert({
       tenant_id: tenantId,
       channel: "telegram",
@@ -247,7 +272,10 @@ export const Route = createFileRoute("/hooks/agents/outreach-telegram-hunter")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const body = (await request.clone().json().catch(() => ({}))) as { tenant_id?: string };
+        const body = (await request
+          .clone()
+          .json()
+          .catch(() => ({}))) as { tenant_id?: string };
         const auth = await authorizeOutreach(request, body.tenant_id ?? null);
         if ("error" in auth) return jsonError(auth.error, auth.status);
         const tenants = await resolveTargetTenants(auth, body.tenant_id ?? null);

@@ -9,8 +9,7 @@ const SKIP_REASONS: Record<string, string> = {
   channel_disabled: "Канал вимкнено в налаштуваннях outreach.",
   channels_inactive: "Жоден канал outreach не активований.",
   no_subreddits: "У налаштуваннях немає сабреддітів для пошуку.",
-  no_rss_bridge:
-    "Не налаштовано міст для Instagram (потрібен ключ INSTAGRAM_RSS_URL у секретах).",
+  no_rss_bridge: "Не налаштовано міст для Instagram (потрібен ключ INSTAGRAM_RSS_URL у секретах).",
   no_keywords: "У налаштуваннях немає ключових слів.",
   no_active_channels: "Жоден канал не активований.",
 };
@@ -125,7 +124,7 @@ export function friendlyAgentSummary(agent: string, raw: unknown): string {
     totalCreated +=
       (stats.created ?? 0) + (stats.inserted ?? 0) + (s.created ?? 0) + (s.scheduled ?? 0);
     totalSeen += (stats.seen ?? 0) + (stats.scanned ?? 0) + (s.examined ?? 0);
-    totalErrors += (s.errors?.length ?? 0);
+    totalErrors += s.errors?.length ?? 0;
   }
 
   const activeTenants = totalTenants - Array.from(skipReasons.values()).reduce((a, b) => a + b, 0);

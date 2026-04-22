@@ -189,11 +189,8 @@ export function answerIntent(
       };
     }
     const top = ranked[0];
-    const topRisk =
-      top.risk === "high" || top.risk === "critical" ? " ⚠️ високий ризик" : "";
-    const second = ranked[1]
-      ? ` Наступний за пріоритетом: «${ranked[1].title}».`
-      : "";
+    const topRisk = top.risk === "high" || top.risk === "critical" ? " ⚠️ високий ризик" : "";
+    const second = ranked[1] ? ` Наступний за пріоритетом: «${ranked[1].title}».` : "";
     return {
       intent: "insights",
       answer: `Активних інсайтів: ${pending.length} (з них ${high.length} високого ризику). Найважливіший: «${top.title}»${topRisk}.${top.expected_impact ? ` Очікуваний ефект: ${top.expected_impact}.` : ""}${second}`,
@@ -213,16 +210,18 @@ export function answerIntent(
     const totalRuns = ctx.agents.reduce((s, a) => s + a.total, 0);
     const totalFails = ctx.agents.reduce((s, a) => s + a.failed, 0);
     const avgScore =
-      Math.round(
-        (ctx.agents.reduce((s, a) => s + a.score, 0) / ctx.agents.length) * 10,
-      ) / 10;
+      Math.round((ctx.agents.reduce((s, a) => s + a.score, 0) / ctx.agents.length) * 10) / 10;
     const worst = [...ctx.agents].sort((a, b) => a.score - b.score)[0];
     const worstLine = worst
       ? ` Найслабший — ${worst.id} (score ${worst.score}, ${worst.failed}/${worst.total} fail).`
       : "";
     const failRate = totalRuns > 0 ? totalFails / totalRuns : 0;
     const verdict =
-      avgScore >= 80 ? "Стан здоровий ✅" : avgScore >= 60 ? "Стан задовільний." : "Потрібна увага ⚠️";
+      avgScore >= 80
+        ? "Стан здоровий ✅"
+        : avgScore >= 60
+          ? "Стан задовільний."
+          : "Потрібна увага ⚠️";
     return {
       intent: winner.name,
       answer: `Агенти: ${ctx.agents.length} активних, середній health ${avgScore}/100. Запусків: ${totalRuns}, помилок: ${totalFails} (${fmtPct(failRate)}).${worstLine} ${verdict}`,
@@ -241,7 +240,10 @@ export function answerIntent(
         suggestions: [SUG.products],
       };
     }
-    const oosNames = oos.slice(0, 3).map((p) => p.name).join(", ");
+    const oosNames = oos
+      .slice(0, 3)
+      .map((p) => p.name)
+      .join(", ");
     return {
       intent: "stock",
       answer: `Out-of-stock: ${oos.length}${oosNames ? ` (${oosNames}${oos.length > 3 ? "…" : ""})` : ""}. Низький залишок (≤5): ${low.length}. Запусти restock-нотифікації або переоцінку популярних SKU.`,

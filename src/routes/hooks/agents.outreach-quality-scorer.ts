@@ -7,16 +7,31 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { jsonError, jsonOk } from "@/lib/acos/agentRuntime";
 import { authorizeOutreach, resolveTargetTenants } from "@/lib/outreach/auth";
 import {
-  recordPattern, patternKey, bucketLength, bucketTone, ruleForPattern,
+  recordPattern,
+  patternKey,
+  bucketLength,
+  bucketTone,
+  ruleForPattern,
 } from "@/lib/outreach/memory";
 
 function hostOf(url: string | null): string | null {
   if (!url) return null;
-  try { return new URL(url).host.replace(/^www\./, ""); } catch { return null; }
+  try {
+    return new URL(url).host.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
 }
 
 async function runForTenant(tenantId: string) {
-  const stats = { scanned: 0, success: 0, failure: 0, deferred: 0, patterns_recorded: 0, errors: 0 };
+  const stats = {
+    scanned: 0,
+    success: 0,
+    failure: 0,
+    deferred: 0,
+    patterns_recorded: 0,
+    errors: 0,
+  };
   const minAge = new Date(Date.now() - 24 * 3600_000).toISOString();
   const maxAge = new Date(Date.now() - 14 * 24 * 3600_000).toISOString();
 
@@ -31,7 +46,12 @@ async function runForTenant(tenantId: string) {
   if (error) throw new Error(error.message);
 
   const ids = (actions ?? []).map((a) => a.id);
-  type MetricRow = { action_id: string; clicks: number | null; orders_count: number | null; revenue: number | null };
+  type MetricRow = {
+    action_id: string;
+    clicks: number | null;
+    orders_count: number | null;
+    revenue: number | null;
+  };
   let metrics: Record<string, MetricRow> = {};
   if (ids.length) {
     const { data: m } = await supabaseAdmin
@@ -52,9 +72,13 @@ async function runForTenant(tenantId: string) {
     let outcome: "success" | "failure" | null = null;
     if (orders >= 1 || clicks >= 3) outcome = "success";
     else if (clicks === 0 && ageH >= 72) outcome = "failure";
-    else { stats.deferred++; continue; }
+    else {
+      stats.deferred++;
+      continue;
+    }
 
-    if (outcome === "success") stats.success++; else stats.failure++;
+    if (outcome === "success") stats.success++;
+    else stats.failure++;
     const lengthBucket = bucketLength(a.draft_text);
     const toneBucket = bucketTone(a.draft_text);
     const sourceHost = hostOf(a.posted_url);
@@ -66,24 +90,32 @@ async function runForTenant(tenantId: string) {
         pattern_key: patternKey(a.channel, "length", lengthBucket),
         category: "channel-tactics",
         learned_rule: ruleForPattern(a.channel, "length", lengthBucket, outcome),
-        outcome, impact: revenue, evidence,
+        outcome,
+        impact: revenue,
+        evidence,
       }),
       recordPattern({
         tenant_id: tenantId,
         pattern_key: patternKey(a.channel, "tone", toneBucket),
         category: "channel-tactics",
         learned_rule: ruleForPattern(a.channel, "tone", toneBucket, outcome),
-        outcome, impact: revenue, evidence,
+        outcome,
+        impact: revenue,
+        evidence,
       }),
     ];
     if (sourceHost) {
-      updates.push(recordPattern({
-        tenant_id: tenantId,
-        pattern_key: patternKey(a.channel, "source", sourceHost),
-        category: "source-quality",
-        learned_rule: ruleForPattern(a.channel, "source", sourceHost, outcome),
-        outcome, impact: revenue, evidence,
-      }));
+      updates.push(
+        recordPattern({
+          tenant_id: tenantId,
+          pattern_key: patternKey(a.channel, "source", sourceHost),
+          category: "source-quality",
+          learned_rule: ruleForPattern(a.channel, "source", sourceHost, outcome),
+          outcome,
+          impact: revenue,
+          evidence,
+        }),
+      );
     }
     try {
       await Promise.all(updates);
@@ -99,7 +131,10 @@ export const Route = createFileRoute("/hooks/agents/outreach-quality-scorer")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const body = (await request.clone().json().catch(() => ({}))) as { tenant_id?: string };
+        const body = (await request
+          .clone()
+          .json()
+          .catch(() => ({}))) as { tenant_id?: string };
         const auth = await authorizeOutreach(request, body.tenant_id ?? null);
         if ("error" in auth) return jsonError(auth.error, auth.status);
         const tenants = await resolveTargetTenants(auth, body.tenant_id ?? null);
