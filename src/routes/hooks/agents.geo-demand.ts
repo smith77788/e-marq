@@ -72,8 +72,8 @@ export const Route = createFileRoute("/hooks/agents/geo-demand")({
             return jsonOk({ insights_created: 0 });
           }
 
-          const totalOrders = orders?.length ?? 1;
-          const totalCents = (orders ?? []).reduce((s, o) => s + o.total_cents, 0);
+          const totalOrders = orders.length || 1;
+          const totalCents = orders.reduce((s, o) => s + o.total_cents, 0);
           const insights: AgentInsightInput[] = [];
 
           for (const [region, b] of byRegion) {
@@ -105,7 +105,11 @@ export const Route = createFileRoute("/hooks/agents/geo-demand")({
           }
 
           const created = await insertInsightsDedup(insights);
-          await finishAgentRun(handle, created, { regions: byRegion.size });
+          await finishAgentRun(handle, created, {
+            regions: byRegion.size,
+            geo: summarizeGeo(geo, "en"),
+            orders_in_scope: orders.length,
+          });
           return jsonOk({ insights_created: created });
         } catch (e) {
           await failAgentRun(handle, e);
