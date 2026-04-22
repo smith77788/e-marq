@@ -123,17 +123,35 @@ export const Route = createFileRoute("/api/ai/ask")({
         const orderCount30 = orders.length;
         const aov = orderCount30 > 0 ? Math.round(revenue30 / orderCount30) : 0;
 
-        const fallbackAnswer =
-          `Останні 30 днів: ${orderCount30} замовлень, виторг ${(revenue30 / 100).toFixed(2)}, AOV ${(aov / 100).toFixed(2)}. ` +
-          `Активних інсайтів: ${insightsRes.data?.filter((i) => i.status === "pending").length ?? 0}.`;
+        // Детермінований intent-based answer (без AI-кредитів).
+        const intent = answerIntent(question, {
+          brand: tenantRow.data?.name ?? "Your brand",
+          revenue30_cents: revenue30,
+          orders30: orderCount30,
+          aov_cents: aov,
+          insights: (insightsRes.data ?? []).map((i) => ({
+            title: i.title,
+            type: i.insight_type,
+            risk: i.risk_level,
+            status: i.status,
+            expected_impact: i.expected_impact,
+          })),
+          products: (productsRes.data ?? []).map((p) => ({
+            name: p.name,
+            stock: p.stock,
+            price_cents: p.price_cents,
+          })),
+          agents: (healthRes.data ?? []).map((h) => ({
+            id: h.agent_id,
+            score: h.health_score,
+            failed: h.runs_failed,
+            total: h.runs_total,
+          })),
+        });
+        const fallbackAnswer = intent.answer;
+        const suggestions: AskResponse["suggestions"] = intent.suggestions;
 
-        const suggestions: AskResponse["suggestions"] = [
-          { label: "Відкрити інсайти", to: "/brand#insights" },
-          { label: "Запуски агентів", to: "/agents/live" },
-          { label: "Замовлення", to: "/brand/orders" },
-        ];
-
-        // AI killswitch: якщо AI вимкнено (за замовчуванням), повертаємо детермінований fallback.
+        // AI killswitch: якщо AI вимкнено (за замовчуванням), повертаємо детермінований intent-answer.
         if (!isLovableAiEnabled()) {
           return new Response(
             JSON.stringify({ answer: fallbackAnswer, suggestions } satisfies AskResponse),
