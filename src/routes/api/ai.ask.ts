@@ -106,7 +106,7 @@ export const Route = createFileRoute("/api/ai/ask")({
             .limit(200),
           supabaseAdmin
             .from("products")
-            .select("name, stock_qty, price_cents")
+            .select("name, stock, price_cents")
             .eq("tenant_id", tenantId)
             .order("created_at", { ascending: false })
             .limit(20),
