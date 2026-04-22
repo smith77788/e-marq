@@ -49,6 +49,11 @@ type AgentResponse = {
   tenants?: number;
   summary?: Record<string, TenantSummary | unknown>;
   created?: number;
+  scanned?: number;
+  seeded?: number;
+  per_brand?: Record<string, number>;
+  per_tenant?: Record<string, { queries?: number; hits?: number }>;
+  note?: string;
   [key: string]: unknown;
 };
 
@@ -65,12 +70,33 @@ export function friendlyAgentSummary(agent: string, raw: unknown): string {
   }
   const data = raw as AgentResponse;
 
-  // Top-level created (наприклад, web-prospector / content-magnet)
+  // Top-level created (web-prospector / social-engager / content-magnet)
   if (typeof data.created === "number" && !data.summary) {
+    const parts: string[] = [];
     if (data.created === 0) {
-      return "Нічого нового не знайдено цього разу. Спробуйте пізніше або змініть запити.";
+      parts.push(
+        data.note ??
+          "Нічого нового не знайдено цього разу. Спробуйте пізніше або змініть тематику бренду.",
+      );
+    } else {
+      parts.push(
+        `Створено ${data.created} ${pluralUk(data.created, "запис", "записи", "записів")}.`,
+      );
     }
-    return `Створено ${data.created} ${pluralUk(data.created, "запис", "записи", "записів")}.`;
+    if (typeof data.tenants === "number" && data.tenants > 0) {
+      parts.push(
+        `Опрацьовано ${data.tenants} ${pluralUk(data.tenants, "бренд", "бренди", "брендів")}.`,
+      );
+    }
+    if (data.per_brand && Object.keys(data.per_brand).length > 0) {
+      const top = Object.entries(data.per_brand)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([brand, n]) => `${brand} — ${n}`)
+        .join(", ");
+      parts.push(`Розподіл: ${top}.`);
+    }
+    return parts.join(" ");
   }
 
   const summary = (data.summary ?? {}) as Record<string, TenantSummary>;
