@@ -45,7 +45,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { IntegrationCard } from "@/components/integrations/IntegrationCard";
 import { IntegrationWizard } from "@/components/integrations/IntegrationWizard";
-import { EmailDomainCard } from "@/components/owner/EmailDomainCard";
+
 import {
   CATEGORIES,
   INTEGRATIONS,
