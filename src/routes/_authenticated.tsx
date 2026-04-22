@@ -126,7 +126,9 @@ function AuthenticatedShell({
             </span>
             <Button size="sm" variant="outline" onClick={onSignOut} className="px-2 sm:px-3">
               <span className="hidden sm:inline">{t("nav.signout")}</span>
-              <span className="sm:hidden" aria-label={t("nav.signout")}>↩</span>
+              <span className="sm:hidden" aria-label={t("nav.signout")}>
+                ↩
+              </span>
             </Button>
           </div>
         </header>
