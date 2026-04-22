@@ -8,7 +8,7 @@
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Globe } from "lucide-react";
+import { Globe, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -141,6 +141,7 @@ export function ProductSeoPanel({
 
         <div className="flex justify-end">
           <Button onClick={() => save.mutate()} disabled={save.isPending}>
+            {save.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
             {save.isPending ? "Зберігаю…" : "Зберегти SEO"}
           </Button>
         </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -604,6 +605,7 @@ export function TenantConfigForm({ initialValues, onSubmit, isPending }: Props) 
 
       <div className="flex justify-end">
         <Button type="submit" disabled={isPending}>
+          {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
           {isPending ? MSG.saving : "Зберегти зміни"}
         </Button>
       </div>
