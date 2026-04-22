@@ -256,6 +256,14 @@ function ProductDetailPage() {
             )}
           </Button>
 
+          {outOfStock && (
+            <RestockSubscribe
+              tenantId={cart.tenantId}
+              productId={product.id}
+              variantId={selectedVariant?.id ?? null}
+            />
+          )}
+
           {product.description && (
             <Card>
               <CardContent className="prose prose-sm max-w-none whitespace-pre-wrap py-4 text-sm text-foreground">
