@@ -623,6 +623,22 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
           </Button>
 
           <div className="flex gap-2">
+            {step === 1 && (isApiKey || isRest) && (
+              <Button
+                variant="outline"
+                disabled={!canSaveConn || verifying}
+                onClick={verifyCredentials}
+                className="gap-1"
+                title="Зробити пробний виклик до зовнішнього API без збереження"
+              >
+                {verifying ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="h-4 w-4" />
+                )}
+                Перевірити
+              </Button>
+            )}
             {step === 1 && (isApiKey || isRest || isWebhook) && (
               <Button
                 disabled={!canSaveConn || saveConn.isPending}
