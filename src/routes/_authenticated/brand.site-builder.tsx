@@ -227,16 +227,23 @@ function BrandSiteBuilderPage() {
 
   // 4) Local draft
   const [draft, setDraft] = useState<ProfileDraft | null>(null);
+  const [niche, setNiche] = useState<NicheDraft>(EMPTY_NICHE);
   useEffect(() => {
     if (profileQuery.data) {
       setDraft(profileToDraft(profileQuery.data));
+      const np = (profileQuery.data as unknown as { niche_profile?: Partial<NicheDraft> })
+        .niche_profile;
+      if (np && typeof np === "object") {
+        setNiche({ ...EMPTY_NICHE, ...np });
+      }
     } else if (profileQuery.isFetched && activeTenant) {
       setDraft(emptyDraft(activeTenant.tenant_name));
     }
   }, [profileQuery.data, profileQuery.isFetched, activeTenant]);
 
   const saveMut = useMutation({
-    mutationFn: async (next: ProfileDraft) => {
+    mutationFn: async (args: { next: ProfileDraft; nicheNext: NicheDraft }) => {
+      const { next, nicheNext } = args;
       if (!tenantId || !template) throw new Error("missing tenant/template");
       if (!next.brand_name.trim()) throw new Error(t("sbu.required"));
       const payload = {
@@ -260,6 +267,7 @@ function BrandSiteBuilderPage() {
         address: next.address.trim() || null,
         hero_copy: next.hero_copy.trim() || null,
         about_copy: next.about_copy.trim() || null,
+        niche_profile: nicheNext as unknown as Record<string, unknown>,
       };
       const { error } = await supabase
         .from("site_brand_profiles")
