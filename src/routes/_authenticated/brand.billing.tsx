@@ -26,7 +26,7 @@ const SUB_STATUS_LABEL: Record<string, string> = {
   cancelled: "скасовано",
 };
 
-export const Route = createFileRoute("/_authenticated/brand_/billing")({
+export const Route = createFileRoute("/_authenticated/brand/billing")({
   validateSearch: (s: Record<string, unknown>): Search => ({
     tenant: typeof s.tenant === "string" ? s.tenant : undefined,
   }),
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/_authenticated/brand_/billing")({
 });
 
 function BrandBillingPage() {
-  const { tenant: urlTenant } = useSearch({ from: "/_authenticated/brand_/billing" });
+  const { tenant: urlTenant } = useSearch({ from: "/_authenticated/brand/billing" });
   const { current, currentTenantId, setCurrentTenantId, tenants, loading } = useTenantContext();
 
   // Sync URL → context
