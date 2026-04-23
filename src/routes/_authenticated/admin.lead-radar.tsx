@@ -32,6 +32,7 @@ import { OutreachHunterSection } from "@/components/admin/OutreachHunterTabs";
 import { MagnetPreviewDialog } from "@/components/admin/MagnetPreviewDialog";
 import { TelegramConnectCard } from "@/components/owner/TelegramConnectCard";
 import { TelegramUserConnectCard } from "@/components/owner/TelegramUserConnectCard";
+import { TelegramUserDmDialog } from "@/components/owner/TelegramUserDmDialog";
 import { friendlyAgentSummary, friendlyAgentError, agentLabel } from "@/lib/outreach/agentSummary";
 
 export const Route = createFileRoute("/_authenticated/admin/lead-radar")({
@@ -332,7 +333,7 @@ function Content() {
               <CardContent className="p-0">
                 <div className="divide-y divide-border">
                   {filteredProspects.map((p) => (
-                    <ProspectRow key={p.id} prospect={p} />
+                    <ProspectRow key={p.id} prospect={p} tenantId={telegramTenantId} />
                   ))}
                 </div>
               </CardContent>
@@ -453,7 +454,7 @@ function Content() {
   );
 }
 
-function ProspectRow({ prospect }: { prospect: Prospect }) {
+function ProspectRow({ prospect, tenantId }: { prospect: Prospect; tenantId: string | null }) {
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
 
@@ -548,6 +549,19 @@ function ProspectRow({ prospect }: { prospect: Prospect }) {
             <Sparkles className="mr-1 h-3.5 w-3.5" />
             Написати
           </Button>
+          <TelegramUserDmDialog
+            tenantId={tenantId}
+            prospectId={prospect.id}
+            prospectName={prospect.name}
+            defaultPeer={
+              typeof prospect.signals?.telegram_handle === "string"
+                ? String(prospect.signals.telegram_handle)
+                : prospect.instagram_handle
+                  ? `@${prospect.instagram_handle.replace(/^@/, "")}`
+                  : ""
+            }
+            defaultText={`Привіт! Знайшов ваш бренд "${prospect.name}" — у MARQ є кілька ідей, що можуть зекономити вам години роботи. Цікаво коротко обмінятись?`}
+          />
           <Button
             size="sm"
             variant="outline"

@@ -193,6 +193,7 @@ import { Route as SSlugCollectionsHandleRouteImport } from './routes/s.$slug.col
 import { Route as ApiTelegramUserStatusRouteImport } from './routes/api/telegram.user.status'
 import { Route as ApiTelegramUserSignInRouteImport } from './routes/api/telegram.user.sign-in'
 import { Route as ApiTelegramUserSendCodeRouteImport } from './routes/api/telegram.user.send-code'
+import { Route as ApiTelegramUserQueueActionRouteImport } from './routes/api/telegram.user.queue-action'
 import { Route as ApiSiteBuilderDownloadBuildIdRouteImport } from './routes/api/site-builder.download.$buildId'
 import { Route as ApiPublicShippingNpRouteImport } from './routes/api/public/shipping.np'
 import { Route as ApiPublicPaymentsWayforpayInitRouteImport } from './routes/api/public/payments.wayforpay-init'
@@ -1224,6 +1225,12 @@ const ApiTelegramUserSendCodeRoute = ApiTelegramUserSendCodeRouteImport.update({
   path: '/api/telegram/user/send-code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTelegramUserQueueActionRoute =
+  ApiTelegramUserQueueActionRouteImport.update({
+    id: '/api/telegram/user/queue-action',
+    path: '/api/telegram/user/queue-action',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiSiteBuilderDownloadBuildIdRoute =
   ApiSiteBuilderDownloadBuildIdRouteImport.update({
     id: '/api/site-builder/download/$buildId',
@@ -1532,6 +1539,7 @@ export interface FileRoutesByFullPath {
   '/api/public/payments/wayforpay-init': typeof ApiPublicPaymentsWayforpayInitRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/api/site-builder/download/$buildId': typeof ApiSiteBuilderDownloadBuildIdRoute
+  '/api/telegram/user/queue-action': typeof ApiTelegramUserQueueActionRoute
   '/api/telegram/user/send-code': typeof ApiTelegramUserSendCodeRoute
   '/api/telegram/user/sign-in': typeof ApiTelegramUserSignInRoute
   '/api/telegram/user/status': typeof ApiTelegramUserStatusRoute
@@ -1735,6 +1743,7 @@ export interface FileRoutesByTo {
   '/api/public/payments/wayforpay-init': typeof ApiPublicPaymentsWayforpayInitRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/api/site-builder/download/$buildId': typeof ApiSiteBuilderDownloadBuildIdRoute
+  '/api/telegram/user/queue-action': typeof ApiTelegramUserQueueActionRoute
   '/api/telegram/user/send-code': typeof ApiTelegramUserSendCodeRoute
   '/api/telegram/user/sign-in': typeof ApiTelegramUserSignInRoute
   '/api/telegram/user/status': typeof ApiTelegramUserStatusRoute
@@ -1941,6 +1950,7 @@ export interface FileRoutesById {
   '/api/public/payments/wayforpay-init': typeof ApiPublicPaymentsWayforpayInitRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/api/site-builder/download/$buildId': typeof ApiSiteBuilderDownloadBuildIdRoute
+  '/api/telegram/user/queue-action': typeof ApiTelegramUserQueueActionRoute
   '/api/telegram/user/send-code': typeof ApiTelegramUserSendCodeRoute
   '/api/telegram/user/sign-in': typeof ApiTelegramUserSignInRoute
   '/api/telegram/user/status': typeof ApiTelegramUserStatusRoute
@@ -2147,6 +2157,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/wayforpay-init'
     | '/api/public/shipping/np'
     | '/api/site-builder/download/$buildId'
+    | '/api/telegram/user/queue-action'
     | '/api/telegram/user/send-code'
     | '/api/telegram/user/sign-in'
     | '/api/telegram/user/status'
@@ -2350,6 +2361,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/wayforpay-init'
     | '/api/public/shipping/np'
     | '/api/site-builder/download/$buildId'
+    | '/api/telegram/user/queue-action'
     | '/api/telegram/user/send-code'
     | '/api/telegram/user/sign-in'
     | '/api/telegram/user/status'
@@ -2555,6 +2567,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/wayforpay-init'
     | '/api/public/shipping/np'
     | '/api/site-builder/download/$buildId'
+    | '/api/telegram/user/queue-action'
     | '/api/telegram/user/send-code'
     | '/api/telegram/user/sign-in'
     | '/api/telegram/user/status'
@@ -2726,6 +2739,7 @@ export interface RootRouteChildren {
   ApiPublicPaymentsWayforpayInitRoute: typeof ApiPublicPaymentsWayforpayInitRoute
   ApiPublicShippingNpRoute: typeof ApiPublicShippingNpRoute
   ApiSiteBuilderDownloadBuildIdRoute: typeof ApiSiteBuilderDownloadBuildIdRoute
+  ApiTelegramUserQueueActionRoute: typeof ApiTelegramUserQueueActionRoute
   ApiTelegramUserSendCodeRoute: typeof ApiTelegramUserSendCodeRoute
   ApiTelegramUserSignInRoute: typeof ApiTelegramUserSignInRoute
   ApiTelegramUserStatusRoute: typeof ApiTelegramUserStatusRoute
@@ -4022,6 +4036,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTelegramUserSendCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/telegram/user/queue-action': {
+      id: '/api/telegram/user/queue-action'
+      path: '/api/telegram/user/queue-action'
+      fullPath: '/api/telegram/user/queue-action'
+      preLoaderRoute: typeof ApiTelegramUserQueueActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/site-builder/download/$buildId': {
       id: '/api/site-builder/download/$buildId'
       path: '/api/site-builder/download/$buildId'
@@ -4482,6 +4503,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicPaymentsWayforpayInitRoute: ApiPublicPaymentsWayforpayInitRoute,
   ApiPublicShippingNpRoute: ApiPublicShippingNpRoute,
   ApiSiteBuilderDownloadBuildIdRoute: ApiSiteBuilderDownloadBuildIdRoute,
+  ApiTelegramUserQueueActionRoute: ApiTelegramUserQueueActionRoute,
   ApiTelegramUserSendCodeRoute: ApiTelegramUserSendCodeRoute,
   ApiTelegramUserSignInRoute: ApiTelegramUserSignInRoute,
   ApiTelegramUserStatusRoute: ApiTelegramUserStatusRoute,
