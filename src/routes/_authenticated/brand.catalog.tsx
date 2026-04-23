@@ -50,6 +50,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTenantContext } from "@/hooks/useTenantContext";
 import { useT } from "@/lib/i18n";
 
 type CollectionRow = {
@@ -89,21 +90,27 @@ function slugify(s: string): string {
 function BrandCollectionsPage() {
   const { tenant: tenantId } = useSearch({ from: "/_authenticated/brand/catalog" });
   const { user, loading } = useAuth();
+  const { tenants } = useTenantContext();
   const { t } = useT();
   const navigate = useNavigate();
   const qc = useQueryClient();
 
   const tenantsQuery = useQuery({
-    queryKey: ["my-tenants", user?.id],
+    queryKey: ["my-tenants-rpc", user?.id],
     enabled: !!user,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tenants")
-        .select("id, name, slug, status")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data ?? [];
-    },
+    initialData: tenants.map((tenant) => ({
+      id: tenant.tenant_id,
+      name: tenant.tenant_name,
+      slug: tenant.tenant_slug,
+      status: tenant.status,
+    })),
+    queryFn: async () =>
+      tenants.map((tenant) => ({
+        id: tenant.tenant_id,
+        name: tenant.tenant_name,
+        slug: tenant.tenant_slug,
+        status: tenant.status,
+      })),
   });
 
   if (!loading && tenantsQuery.data && tenantsQuery.data.length > 0 && !tenantId) {
