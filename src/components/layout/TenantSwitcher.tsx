@@ -197,7 +197,22 @@ export function TenantSwitcher() {
               </span>
             </div>
             <div className="flex items-center gap-1">
-              {t.isAdminOnly ? (
+              {t.verificationStatus === "pending" ? (
+                <Badge
+                  variant="outline"
+                  className="border-warning/40 text-warning text-[10px]"
+                >
+                  <Clock className="mr-1 h-2.5 w-2.5" /> очікує
+                </Badge>
+              ) : t.verificationStatus === "suspended" && t.rejectionReason ? (
+                <Badge
+                  variant="outline"
+                  className="border-destructive/40 text-destructive text-[10px]"
+                  title={t.rejectionReason}
+                >
+                  відхилено
+                </Badge>
+              ) : t.isAdminOnly ? (
                 <Badge
                   variant="outline"
                   className="border-destructive/40 text-destructive text-[10px]"
