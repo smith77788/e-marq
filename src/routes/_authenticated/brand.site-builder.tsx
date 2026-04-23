@@ -32,6 +32,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { useT, type TKey } from "@/lib/i18n";
+import { NicheWizard, EMPTY_NICHE, type NicheDraft } from "@/components/owner/NicheWizard";
 
 export const Route = createFileRoute("/_authenticated/brand/site-builder")({
   validateSearch: (s: Record<string, unknown>): { tenant?: string } => ({
