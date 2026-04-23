@@ -32,6 +32,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { useT, type TKey } from "@/lib/i18n";
+import { NicheWizard, EMPTY_NICHE, type NicheDraft } from "@/components/owner/NicheWizard";
 
 export const Route = createFileRoute("/_authenticated/brand/site-builder")({
   validateSearch: (s: Record<string, unknown>): { tenant?: string } => ({
@@ -226,16 +227,23 @@ function BrandSiteBuilderPage() {
 
   // 4) Local draft
   const [draft, setDraft] = useState<ProfileDraft | null>(null);
+  const [niche, setNiche] = useState<NicheDraft>(EMPTY_NICHE);
   useEffect(() => {
     if (profileQuery.data) {
       setDraft(profileToDraft(profileQuery.data));
+      const np = (profileQuery.data as unknown as { niche_profile?: Partial<NicheDraft> })
+        .niche_profile;
+      if (np && typeof np === "object") {
+        setNiche({ ...EMPTY_NICHE, ...np });
+      }
     } else if (profileQuery.isFetched && activeTenant) {
       setDraft(emptyDraft(activeTenant.tenant_name));
     }
   }, [profileQuery.data, profileQuery.isFetched, activeTenant]);
 
   const saveMut = useMutation({
-    mutationFn: async (next: ProfileDraft) => {
+    mutationFn: async (args: { next: ProfileDraft; nicheNext: NicheDraft }) => {
+      const { next, nicheNext } = args;
       if (!tenantId || !template) throw new Error("missing tenant/template");
       if (!next.brand_name.trim()) throw new Error(t("sbu.required"));
       const payload = {
@@ -259,10 +267,12 @@ function BrandSiteBuilderPage() {
         address: next.address.trim() || null,
         hero_copy: next.hero_copy.trim() || null,
         about_copy: next.about_copy.trim() || null,
+        niche_profile: nicheNext as unknown as Record<string, unknown>,
       };
       const { error } = await supabase
         .from("site_brand_profiles")
-        .upsert(payload, { onConflict: "tenant_id,template_id" });
+        // niche_profile column may not be in generated types yet — cast safely.
+        .upsert(payload as never, { onConflict: "tenant_id,template_id" });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -326,7 +336,7 @@ function BrandSiteBuilderPage() {
     const needsSave = !savedDraft || JSON.stringify(savedDraft) !== JSON.stringify(draft);
     if (needsSave) {
       try {
-        await saveMut.mutateAsync(draft);
+        await saveMut.mutateAsync({ next: draft, nicheNext: niche });
       } catch {
         return; // toast уже показано всередині saveMut.onError
       }
@@ -375,8 +385,9 @@ function BrandSiteBuilderPage() {
       ) : (
         <>
           <Tabs value={tab} onValueChange={setTab}>
-            <TabsList className="grid w-full max-w-2xl grid-cols-4">
+            <TabsList className="grid w-full max-w-3xl grid-cols-5">
               <TabsTrigger value="profile">{t("sbu.tab.profile")}</TabsTrigger>
+              <TabsTrigger value="niche">{t("sbu.tab.niche")}</TabsTrigger>
               <TabsTrigger value="theme">{t("sbu.tab.theme")}</TabsTrigger>
               <TabsTrigger value="content">{t("sbu.tab.content")}</TabsTrigger>
               <TabsTrigger value="builds">{t("sbu.tab.builds")}</TabsTrigger>
@@ -384,6 +395,10 @@ function BrandSiteBuilderPage() {
 
             <TabsContent value="profile" className="mt-4">
               <ProfileTab draft={draft!} setDraft={setDraft} />
+            </TabsContent>
+
+            <TabsContent value="niche" className="mt-4">
+              <NicheWizard draft={niche} setDraft={setNiche} />
             </TabsContent>
 
             <TabsContent value="theme" className="mt-4">
@@ -409,7 +424,7 @@ function BrandSiteBuilderPage() {
               variant="outline"
               size="sm"
               disabled={saveMut.isPending || !draft?.brand_name.trim()}
-              onClick={() => draft && saveMut.mutate(draft)}
+              onClick={() => draft && saveMut.mutate({ next: draft, nicheNext: niche })}
             >
               {saveMut.isPending ? "…" : t("sbu.action.save")}
             </Button>
