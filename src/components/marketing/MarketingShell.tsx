@@ -75,14 +75,49 @@ export function MarketingHeader() {
             {t("site.nav.contact")}
           </Link>
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <LanguageSwitcher />
-          <Button asChild size="sm" variant="ghost">
+          <Button asChild size="sm" variant="ghost" className="hidden sm:inline-flex">
             <Link to="/login">{t("site.nav.signin")}</Link>
           </Button>
-          <Button asChild size="sm">
+          <Button asChild size="sm" className="hidden sm:inline-flex">
             <Link to="/signup">{t("site.nav.signup")}</Link>
           </Button>
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button size="sm" variant="ghost" className="md:hidden" aria-label="Open menu">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72">
+              <SheetHeader>
+                <SheetTitle className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" /> MARQ
+                </SheetTitle>
+              </SheetHeader>
+              <nav className="mt-6 flex flex-col gap-1 text-sm">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setOpen(false)}
+                    className="rounded-md px-3 py-2 text-foreground hover:bg-muted transition-colors"
+                    activeProps={{ className: "bg-muted font-medium" }}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+              <div className="mt-6 grid gap-2">
+                <Button asChild variant="outline" onClick={() => setOpen(false)}>
+                  <Link to="/login">{t("site.nav.signin")}</Link>
+                </Button>
+                <Button asChild onClick={() => setOpen(false)}>
+                  <Link to="/signup">{t("site.nav.signup")}</Link>
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>
