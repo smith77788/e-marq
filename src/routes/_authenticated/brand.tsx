@@ -325,5 +325,6 @@ function BrandCockpitInner({
         </CardHeader>
       </Card>
     </div>
+    </>
   );
 }
