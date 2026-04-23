@@ -142,6 +142,8 @@ export function UserTenantsManager({ userId }: { userId: string }) {
             adjustMoney.mutate({ tenantId: t.tenant_id, deltaCents })
           }
           busy={changePlan.isPending || adjustCredits.isPending || adjustMoney.isPending}
+          canChangePlan={canChangePlan}
+          canManageUsers={canManageUsers}
         />
       ))}
     </div>
@@ -155,6 +157,8 @@ function TenantBlock({
   onAdjustCredits,
   onAdjustMoney,
   busy,
+  canChangePlan,
+  canManageUsers,
 }: {
   tenant: TenantRow;
   plans: { key: string; name: string; price_cents_monthly: number }[];
@@ -162,6 +166,8 @@ function TenantBlock({
   onAdjustCredits: (delta: number) => void;
   onAdjustMoney: (deltaCents: number) => void;
   busy: boolean;
+  canChangePlan: boolean;
+  canManageUsers: boolean;
 }) {
   const [creditsDelta, setCreditsDelta] = useState("100");
   const [moneyDelta, setMoneyDelta] = useState("100");
