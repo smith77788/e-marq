@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Pause, Play, PowerOff, Sparkles, LogIn, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenantContext } from "@/hooks/useTenantContext";
+import { useAdminCapabilities } from "@/hooks/useAdminCapabilities";
 import {
   Dialog,
   DialogContent,
@@ -56,6 +57,9 @@ export function TenantQuickActionsDialog({
   const qc = useQueryClient();
   const navigate = useNavigate();
   const { setCurrentTenantId } = useTenantContext();
+  const { has } = useAdminCapabilities();
+  const canChangeStatus = has("change_status");
+  const canChangePlan = has("change_plans");
   const [planKey, setPlanKey] = useState<string>("");
 
   const plansQuery = useQuery({
