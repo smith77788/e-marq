@@ -8,7 +8,11 @@ import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { Search, Building2, ExternalLink } from "lucide-react";
+import { Search, Building2, ExternalLink, Zap } from "lucide-react";
+import {
+  TenantQuickActionsDialog,
+  type QuickActionsTenant,
+} from "@/components/admin/TenantQuickActionsDialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
@@ -88,6 +92,7 @@ function AdminTenantsPage() {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
+  const [quickTarget, setQuickTarget] = useState<QuickActionsTenant | null>(null);
 
   const overviewQuery = useQuery({
     queryKey: ["all-tenants-overview"],
@@ -310,15 +315,34 @@ function AdminTenantsPage() {
                         </Select>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button asChild size="sm" variant="ghost">
-                          <Link
-                            to="/admin/tenants/$tenantId"
-                            params={{ tenantId: t.tenant_id }}
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              setQuickTarget({
+                                tenant_id: t.tenant_id,
+                                tenant_name: t.tenant_name,
+                                tenant_slug: t.tenant_slug,
+                                status: t.status,
+                                plan_key: t.plan_key,
+                                plan_name: t.plan_name,
+                              })
+                            }
                           >
-                            Деталі
-                            <ExternalLink className="ml-1 h-3 w-3" />
-                          </Link>
-                        </Button>
+                            <Zap className="mr-1 h-3 w-3" />
+                            Дії
+                          </Button>
+                          <Button asChild size="sm" variant="ghost">
+                            <Link
+                              to="/admin/tenants/$tenantId"
+                              params={{ tenantId: t.tenant_id }}
+                            >
+                              Деталі
+                              <ExternalLink className="ml-1 h-3 w-3" />
+                            </Link>
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -334,6 +358,12 @@ function AdminTenantsPage() {
           )}
         </CardContent>
       </Card>
+
+      <TenantQuickActionsDialog
+        tenant={quickTarget}
+        open={!!quickTarget}
+        onOpenChange={(v) => !v && setQuickTarget(null)}
+      />
     </div>
   );
 }
