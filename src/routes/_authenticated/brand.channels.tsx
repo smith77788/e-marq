@@ -76,7 +76,7 @@ function ChannelsPage() {
       </div>
 
       <ChannelSetup tenantId={tenantId} tenantSlug={tenantSlug} />
-      <OwnerTelegramBindCard />
+      <OwnerTelegramBindCard tenantId={tenantId} tenantSlug={tenantSlug} />
       <IntegrationGuide tenantSlug={tenantSlug} />
     </div>
   );
