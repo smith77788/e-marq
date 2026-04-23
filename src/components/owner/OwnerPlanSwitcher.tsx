@@ -21,10 +21,11 @@ type Plan = {
   description: string | null;
   price_cents_monthly: number;
   currency: string;
-  max_ai_credits_monthly_grant: number;
   max_products: number | null;
   max_orders_per_month: number | null;
+  max_team_members: number | null;
   features_enabled: string[];
+  agents_allowed: string[];
 };
 
 export function OwnerPlanSwitcher({
@@ -43,7 +44,7 @@ export function OwnerPlanSwitcher({
       const { data, error } = await supabase
         .from("plans")
         .select(
-          "id, key, name, description, price_cents_monthly, currency, max_ai_credits_monthly_grant, max_products, max_orders_per_month, features_enabled",
+          "id, key, name, description, price_cents_monthly, currency, max_products, max_orders_per_month, max_team_members, features_enabled, agents_allowed",
         )
         .eq("is_active", true)
         .eq("is_public", true)
@@ -84,8 +85,8 @@ export function OwnerPlanSwitcher({
           Обрати тариф
         </CardTitle>
         <CardDescription>
-          Перемикайся між публічними тарифами в один клік. Нові щомісячні AI-кредити нараховуються
-          одразу.
+          Усі агенти працюють за підпискою — без квот і списань кредитів. Дорожчий тариф відкриває
+          більше агентів і вищі ліміти каталогу.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -95,7 +96,7 @@ export function OwnerPlanSwitcher({
             id="plan-reason"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="Наприклад: треба більше AI-кредитів"
+            placeholder="Наприклад: потрібен ціновий оптимізатор та SEO"
           />
         </div>
 
@@ -123,10 +124,14 @@ export function OwnerPlanSwitcher({
                 )}
                 <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
                   <li>
-                    ✦ {p.max_ai_credits_monthly_grant.toLocaleString("uk-UA")} AI-кредитів/міс
+                    ✦{" "}
+                    {p.agents_allowed.length === 0
+                      ? "Усі 58 ШІ-агентів"
+                      : `${p.agents_allowed.length} ШІ-агентів`}
                   </li>
                   <li>✦ {p.max_products ?? "Без ліміту"} товарів</li>
                   <li>✦ {p.max_orders_per_month ?? "Без ліміту"} замовлень/міс</li>
+                  <li>✦ {p.max_team_members ?? "Без ліміту"} учасників команди</li>
                 </ul>
                 <Button
                   size="sm"
