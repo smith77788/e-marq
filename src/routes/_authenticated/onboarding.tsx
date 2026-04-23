@@ -30,7 +30,7 @@ import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 import { IntegrationGuide } from "@/components/owner/IntegrationGuide";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useT, type TKey } from "@/lib/i18n";
+import { useT, type TKey, type Lang } from "@/lib/i18n";
 
 type Search = { tenant?: string; slug?: string };
 
