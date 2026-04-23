@@ -162,7 +162,8 @@ export function PlanBillingTab({ tenantId }: { tenantId: string }) {
         <CardHeader>
           <CardTitle>Змінити тариф</CardTitle>
           <CardDescription>
-            При переході нараховуються нові щомісячні AI-кредити, статус — «активний».
+            Дорожчий тариф відкриває більше ШІ-агентів та вищі ліміти каталогу. Усі агенти працюють
+            за підпискою — без квот і списань кредитів.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
