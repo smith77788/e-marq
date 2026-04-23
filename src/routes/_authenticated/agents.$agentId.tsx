@@ -134,10 +134,6 @@ function AgentDetailPage() {
   const showPaywall = !isSuperAdmin && !!tenantId && !gate.loading && !gate.hasAccess;
   const [running, setRunning] = useState(false);
 
-  if (showPaywall && tenantId) {
-    return <AgentsPaywall tenantId={tenantId} status={gate.status} />;
-  }
-
   const fourteenDaysAgo = useMemo(
     () => new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
     [],
