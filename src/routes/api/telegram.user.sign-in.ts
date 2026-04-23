@@ -1,7 +1,5 @@
 /**
- * POST /api/telegram/user/sign-in
- *   body: { tenant_id, code, password? }
- *   Завершує вхід (опційно з 2FA password). Зберігає encrypted session.
+ * POST /api/telegram/user/sign-in  body: { tenant_id, code, password? }
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
@@ -27,19 +25,20 @@ export const Route = createFileRoute("/api/telegram/user/sign-in")({
         if (!/^\d{4,7}$/.test(code)) return jsonResponse({ error: "invalid_code" }, 400);
         if (!(await canManageTenant(auth.userId, tenantId)))
           return jsonResponse({ error: "forbidden" }, 403);
-        if (!isBridgeConfigured())
-          return jsonResponse({ error: "bridge_not_configured" }, 503);
+        if (!isBridgeConfigured()) return jsonResponse({ error: "bridge_not_configured" }, 503);
 
         const { data: existing } = await supabaseAdmin
           .from("tg_user_sessions")
-          .select("phone,phone_code_hash,status")
+          .select("phone,login_state,status")
           .eq("tenant_id", tenantId)
           .maybeSingle();
         const phone = (existing as { phone?: string } | null)?.phone ?? "";
-        const hash =
-          (existing as { phone_code_hash?: string } | null)?.phone_code_hash ?? "";
-        if (!phone || !hash)
-          return jsonResponse({ error: "no_pending_code" }, 400);
+        const loginState =
+          ((existing as { login_state?: Record<string, unknown> } | null)?.login_state ?? {}) as {
+            phone_code_hash?: string;
+          };
+        const hash = loginState.phone_code_hash ?? "";
+        if (!phone || !hash) return jsonResponse({ error: "no_pending_code" }, 400);
 
         const r = await signIn({
           tenant_id: tenantId,
@@ -66,15 +65,13 @@ export const Route = createFileRoute("/api/telegram/user/sign-in")({
           .from("tg_user_sessions")
           .update({
             status: "active",
-            session_enc: r.session_enc,
-            user_id: r.user_id,
+            encrypted_session: r.session_enc,
+            user_id_tg: r.user_id,
             username: r.username,
             first_name: r.first_name,
-            last_name: r.last_name,
             dc_id: r.dc_id,
-            phone_code_hash: null,
+            login_state: {} as never,
             last_used_at: new Date().toISOString(),
-            updated_by: auth.userId,
             updated_at: new Date().toISOString(),
           } as never)
           .eq("tenant_id", tenantId);

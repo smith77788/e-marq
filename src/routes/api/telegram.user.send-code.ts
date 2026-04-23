@@ -1,7 +1,5 @@
 /**
- * POST /api/telegram/user/send-code
- *   body: { tenant_id, phone }
- *   Запитує SMS/Telegram-код через MTProto-бридж та зберігає phone_code_hash.
+ * POST /api/telegram/user/send-code  body: { tenant_id, phone }
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
@@ -52,9 +50,14 @@ export const Route = createFileRoute("/api/telegram/user/send-code")({
           {
             tenant_id: tenantId,
             phone,
-            phone_code_hash: r.phone_code_hash,
             status: "code_sent",
-            updated_by: auth.userId,
+            login_state: {
+              phone_code_hash: r.phone_code_hash,
+              next_type: r.next_type ?? null,
+              timeout_seconds: r.timeout_seconds ?? null,
+              sent_at: new Date().toISOString(),
+            } as never,
+            created_by: auth.userId,
             updated_at: new Date().toISOString(),
           } as never,
           { onConflict: "tenant_id" },

@@ -1,9 +1,6 @@
 /**
  * GET  /api/telegram/user/status?tenant=<id>
- *   Стан персонального TG-акаунту: чи увійшли, чи готовий бридж, ім'я/username.
- *
  * POST /api/telegram/user/status  body: { tenant_id, action: "logout" }
- *   Завершує сесію (бридж + локальний запис).
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
@@ -14,10 +11,10 @@ type SessionRow = {
   id: string;
   status: string;
   phone: string | null;
-  user_id: number | null;
+  user_id_tg: number | null;
   username: string | null;
   first_name: string | null;
-  session_enc: string | null;
+  encrypted_session: string | null;
   dc_id: number | null;
   last_used_at: string | null;
 };
@@ -26,7 +23,7 @@ async function readSession(tenantId: string): Promise<SessionRow | null> {
   const { data } = await supabaseAdmin
     .from("tg_user_sessions")
     .select(
-      "id,status,phone,user_id,username,first_name,session_enc,dc_id,last_used_at",
+      "id,status,phone,user_id_tg,username,first_name,encrypted_session,dc_id,last_used_at",
     )
     .eq("tenant_id", tenantId)
     .maybeSingle();
@@ -50,8 +47,8 @@ export const Route = createFileRoute("/api/telegram/user/status")({
         const status = session?.status ?? "none";
 
         let alive: boolean | null = null;
-        if (bridge_ready && status === "active" && session?.session_enc) {
-          const r = await whoAmI({ tenant_id: tenantId, session_enc: session.session_enc });
+        if (bridge_ready && status === "active" && session?.encrypted_session) {
+          const r = await whoAmI({ tenant_id: tenantId, session_enc: session.encrypted_session });
           alive = r.ok;
           if (!r.ok && r.code === "session_expired") {
             await supabaseAdmin
@@ -66,7 +63,7 @@ export const Route = createFileRoute("/api/telegram/user/status")({
           status,
           alive,
           phone: session?.phone ?? null,
-          user_id: session?.user_id ?? null,
+          user_id: session?.user_id_tg ?? null,
           username: session?.username ?? null,
           first_name: session?.first_name ?? null,
           dc_id: session?.dc_id ?? null,
@@ -91,15 +88,15 @@ export const Route = createFileRoute("/api/telegram/user/status")({
         if (body.action !== "logout") return jsonResponse({ error: "invalid_action" }, 400);
 
         const session = await readSession(tenantId);
-        if (session?.session_enc && isBridgeConfigured()) {
-          await logOut({ tenant_id: tenantId, session_enc: session.session_enc });
+        if (session?.encrypted_session && isBridgeConfigured()) {
+          await logOut({ tenant_id: tenantId, session_enc: session.encrypted_session });
         }
         await supabaseAdmin
           .from("tg_user_sessions")
           .update({
             status: "logged_out",
-            session_enc: null,
-            phone_code_hash: null,
+            encrypted_session: null,
+            login_state: {} as never,
           } as never)
           .eq("tenant_id", tenantId);
         return jsonResponse({ ok: true });
