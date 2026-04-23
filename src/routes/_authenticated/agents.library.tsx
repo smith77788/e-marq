@@ -168,6 +168,10 @@ function AgentLibraryPage() {
     return map;
   }, []);
 
+  if (showPaywall && tenantId) {
+    return <AgentsPaywall tenantId={tenantId} status={gate.status} />;
+  }
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
       <header>

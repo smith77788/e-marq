@@ -9,6 +9,9 @@ import { AcosAgentRuns } from "@/components/admin/AcosAgentRuns";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { useT, tStatic } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
+import { useAuth } from "@/hooks/useAuth";
+import { AgentsPaywall } from "@/components/owner/AgentsPaywall";
 
 export const Route = createFileRoute("/_authenticated/agents/live")({
   head: () => ({
