@@ -42,6 +42,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { supabase } from "@/integrations/supabase/client";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { friendlyAgentSummary, friendlyAgentError, agentLabel } from "@/lib/outreach/agentSummary";
+import { OutreachSettingsTab } from "@/components/admin/OutreachSettingsTab";
 
 // ───────── Типи ─────────
 type OutreachLead = {
@@ -1142,6 +1143,9 @@ export function OutreachHunterSection() {
           <TabsTrigger value="metrics" className="gap-1.5">
             <CheckCircle2 className="h-3.5 w-3.5" /> ROI
           </TabsTrigger>
+          <TabsTrigger value="settings" className="gap-1.5">
+            <Filter className="h-3.5 w-3.5" /> Налаштування
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="leads" className="mt-4">
           <OutreachLeadsTab />
@@ -1151,6 +1155,9 @@ export function OutreachHunterSection() {
         </TabsContent>
         <TabsContent value="metrics" className="mt-4">
           <OutreachMetricsTab />
+        </TabsContent>
+        <TabsContent value="settings" className="mt-4">
+          <OutreachSettingsTab />
         </TabsContent>
       </Tabs>
     </div>
