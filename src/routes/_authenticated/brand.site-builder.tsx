@@ -306,11 +306,22 @@ function BrandSiteBuilderPage() {
     },
   });
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     void user;
-    if (!profileQuery.data) {
+    if (!draft || !draft.brand_name.trim()) {
       toast.info(t("sbu.action.notReady"));
+      setTab("profile");
       return;
+    }
+    // Якщо профілю ще нема або поточний draft відрізняється — зберігаємо.
+    const savedDraft = profileQuery.data ? profileToDraft(profileQuery.data) : null;
+    const needsSave = !savedDraft || JSON.stringify(savedDraft) !== JSON.stringify(draft);
+    if (needsSave) {
+      try {
+        await saveMut.mutateAsync(draft);
+      } catch {
+        return; // toast уже показано всередині saveMut.onError
+      }
     }
     generateMut.mutate();
   };
@@ -397,11 +408,15 @@ function BrandSiteBuilderPage() {
             <Button
               size="sm"
               onClick={handleGenerate}
-              disabled={!profileQuery.data || generateMut.isPending}
+              disabled={
+                !draft?.brand_name.trim() || generateMut.isPending || saveMut.isPending
+              }
               className="bg-gradient-primary text-primary-foreground"
             >
               <Wand2 className="mr-2 h-4 w-4" />
-              {generateMut.isPending ? t("sbu.action.generating") : t("sbu.action.generate")}
+              {generateMut.isPending || saveMut.isPending
+                ? t("sbu.action.generating")
+                : t("sbu.action.generate")}
             </Button>
           </div>
         </>
