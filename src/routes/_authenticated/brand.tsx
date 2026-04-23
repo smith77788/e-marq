@@ -99,7 +99,94 @@ function BrandPage() {
     return <CockpitSkeleton variant="owner" />;
   }
 
+  return <BrandCockpit currentTenantId={current.tenant_id} currentTenantName={current.tenant_name} currentTenantSlug={current.tenant_slug} />;
+}
+
+function BrandCockpit({
+  currentTenantId,
+  currentTenantName,
+  currentTenantSlug,
+}: {
+  currentTenantId: string;
+  currentTenantName: string;
+  currentTenantSlug: string;
+}) {
+  const { t } = useT();
+
+  const verification = useQuery({
+    queryKey: ["tenant-verification", currentTenantId],
+    refetchInterval: 30_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tenants")
+        .select("status, rejection_reason")
+        .eq("id", currentTenantId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const isPending = verification.data?.status === "pending";
+  const isRejected =
+    verification.data?.status === "suspended" && !!verification.data?.rejection_reason;
+
   return (
+    <div className="reveal-stagger space-y-6">
+      {isPending && (
+        <Card className="border-warning/50 bg-warning/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Clock className="h-4 w-4 text-warning" />
+              Бренд очікує верифікації
+            </CardTitle>
+            <CardDescription>
+              Ми вже сповістили супер-адміна. Як тільки заявку підтвердять — ви отримаєте повний
+              доступ до автоматизації, агентів та виплат. Поки що можна налаштувати каталог,
+              канали, інтеграції.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+      {isRejected && (
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ShieldAlert className="h-4 w-4 text-destructive" />
+              Заявку відхилено
+            </CardTitle>
+            <CardDescription>
+              <strong className="text-foreground">Причина:</strong>{" "}
+              {verification.data?.rejection_reason}. Зв&apos;яжіться з підтримкою або створіть
+              новий бренд із оновленими даними.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+      <BrandCockpitInner
+        currentTenantId={currentTenantId}
+        currentTenantName={currentTenantName}
+        currentTenantSlug={currentTenantSlug}
+        t={t}
+      />
+    </div>
+  );
+}
+
+function BrandCockpitInner({
+  currentTenantId,
+  currentTenantName,
+  currentTenantSlug,
+  t,
+}: {
+  currentTenantId: string;
+  currentTenantName: string;
+  currentTenantSlug: string;
+  t: ReturnType<typeof useT>["t"];
+}) {
+  const current = { tenant_id: currentTenantId, tenant_name: currentTenantName, tenant_slug: currentTenantSlug };
+  return (
+    <>
     <div className="reveal-stagger space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
