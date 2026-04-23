@@ -705,6 +705,7 @@ const dict = {
     "sb.email": "Email",
     "sb.siteBuilder": "Свій сайт",
     "sb.storeSettings": "Налаштування магазину",
+    "sb.team": "Команда",
 
     // Brand · Email page
     "be.title": "Email-маркетинг",
@@ -2023,6 +2024,7 @@ const dict = {
     "sb.email": "Email",
     "sb.siteBuilder": "Your site",
     "sb.storeSettings": "Store settings",
+    "sb.team": "Team",
 
     // Brand · Email page
     "be.title": "Email marketing",
