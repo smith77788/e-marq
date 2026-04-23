@@ -438,7 +438,7 @@ function BrandCollectionsPage() {
         <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
           <SheetHeader>
             <SheetTitle>{editing ? t("bc.edit.title") : t("bc.create.title")}</SheetTitle>
-            <SheetDescription>{current.name}</SheetDescription>
+            <SheetDescription>{currentItem?.name}</SheetDescription>
           </SheetHeader>
 
           <form
