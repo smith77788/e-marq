@@ -91,7 +91,6 @@ function AuthenticatedShell({
         isSuperAdmin={isSuperAdmin}
         brandName={current?.tenant_name}
         tenantSlug={current?.tenant_slug ?? null}
-        currentTenantId={current?.tenant_id ?? null}
       />
       <SidebarInset className="bg-background">
         <header
