@@ -86,6 +86,8 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
+  const [verifying, setVerifying] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   const isFileBased = integration?.method === "csv" || integration?.method === "sheets";
   const isApiKey = integration?.method === "apiKey";
@@ -102,6 +104,56 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
     setMapping({});
     setResult(null);
     setParseError(null);
+    setVerifyResult(null);
+  }
+
+  async function verifyCredentials() {
+    if (!integration) return;
+    const config: Record<string, unknown> = {};
+    if (domain) config.domain = domain;
+    if (restUrl) config.url = restUrl;
+    setVerifying(true);
+    setVerifyResult(null);
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) throw new Error("Сесія не знайдена. Перезавантажте сторінку.");
+      // Підбираємо найбільш безпечний entityKind для тестового pull:
+      // - Bitrix24 не вміє products → беремо customers;
+      // - Stripe не вміє products → customers;
+      // - решта — products.
+      const entity =
+        integration.id === "bitrix24" || integration.id === "stripe" ? "customers" : "products";
+      const res = await fetch(`/api/integrations/verify/${integration.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          tenantId,
+          credentials: apiKey || undefined,
+          config,
+          entityKind: entity,
+        }),
+      });
+      const json = (await res.json()) as { ok: boolean; error?: string; sample?: number };
+      if (json.ok) {
+        setVerifyResult({
+          ok: true,
+          message: `З'єднання працює. Отримано пробних записів: ${json.sample ?? 0}.`,
+        });
+        toast.success("Підключення робоче");
+      } else {
+        setVerifyResult({ ok: false, message: json.error ?? "Невідома помилка" });
+        toast.error("Підключення не пройшло перевірку", { description: json.error });
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setVerifyResult({ ok: false, message: msg });
+      toast.error("Помилка перевірки", { description: msg });
+    } finally {
+      setVerifying(false);
+    }
   }
 
   async function handleFile(file: File) {
