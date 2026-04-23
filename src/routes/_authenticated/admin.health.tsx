@@ -218,6 +218,16 @@ function HealthMonitorContent() {
           totalEmail === 0 ? "idle" : bounceRate > 0.1 ? "fail" : bounceRate > 0.03 ? "warn" : "ok",
       };
 
+      // Orders
+      const tOrd = ordBy.get(tenant.id) ?? [];
+      const paid = tOrd.filter((o) => o.status === "paid").length;
+      const pending = tOrd.filter((o) => o.status === "pending").length;
+      const orders: TenantHealth["orders"] = {
+        paid,
+        pending,
+        status: pending > 10 ? "warn" : tOrd.length === 0 ? "idle" : "ok",
+      };
+
       // Balance — for a brand-new tenant (no balance row OR row with 0 funds
       // and no agent activity yet) we show "idle" instead of "fail" to avoid
       // scaring owners during onboarding. We only flag fail when the tenant
@@ -234,16 +244,6 @@ function HealthMonitorContent() {
         amountCents,
         currency: bal?.currency ?? "UAH",
         status: balanceStatus,
-      };
-
-      // Orders
-      const tOrd = ordBy.get(tenant.id) ?? [];
-      const paid = tOrd.filter((o) => o.status === "paid").length;
-      const pending = tOrd.filter((o) => o.status === "pending").length;
-      const orders: TenantHealth["orders"] = {
-        paid,
-        pending,
-        status: pending > 10 ? "warn" : tOrd.length === 0 ? "idle" : "ok",
       };
 
       const overall = worst(
