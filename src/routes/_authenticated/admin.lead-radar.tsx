@@ -32,6 +32,7 @@ import { OutreachHunterSection } from "@/components/admin/OutreachHunterTabs";
 import { MagnetPreviewDialog } from "@/components/admin/MagnetPreviewDialog";
 import { TelegramConnectCard } from "@/components/owner/TelegramConnectCard";
 import { TelegramUserConnectCard } from "@/components/owner/TelegramUserConnectCard";
+import { TelegramUserDmDialog } from "@/components/owner/TelegramUserDmDialog";
 import { friendlyAgentSummary, friendlyAgentError, agentLabel } from "@/lib/outreach/agentSummary";
 
 export const Route = createFileRoute("/_authenticated/admin/lead-radar")({
