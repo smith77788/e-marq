@@ -183,9 +183,9 @@ function AdminTenantsPage() {
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Створити бренд</CardTitle>
+      <PendingTenantsCard />
+
+
           <CardDescription>
             Власником стаєте ви. Базові налаштування створюються автоматично.
           </CardDescription>
