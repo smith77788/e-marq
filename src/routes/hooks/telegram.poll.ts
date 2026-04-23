@@ -239,12 +239,12 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
       await sendTelegramText(chatId, `Не вдалося привʼязати: ${rpcErr.message}`);
       return;
     }
-    await sendTelegramText(
+    await sendOwnerMessage(
       chatId,
-      `🔔 Тепер ви отримуєте сповіщення власника для <b>${tenant.name}</b>. Інсайти та дії агентів, що чекають підтвердження, прийдуть сюди з кнопками «Застосувати» / «Сховати».`,
+      `🔔 Тепер ви отримуєте сповіщення власника для <b>${tenant.name}</b>. Інсайти та дії агентів, що чекають підтвердження, прийдуть сюди з кнопками «Застосувати» / «Сховати».\n\nНатискайте кнопки нижче або надсилайте /menu щоб відкрити кокпіт у Telegram.`,
+      true,
     );
     return;
-  }
 
   // ---- /start <slug> binds chat → tenant (customer flow) ----
   const startMatch = text.match(/^\/start\s+([a-z0-9_-]+)/i);
