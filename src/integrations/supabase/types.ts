@@ -5204,9 +5204,41 @@ export type Database = {
         Args: { _delta_cents: number; _reason?: string; _tenant_id: string }
         Returns: number
       }
+      admin_get_tenant_owner: {
+        Args: { _tenant_id: string }
+        Returns: {
+          member_count: number
+          owner_email: string
+          owner_id: string
+        }[]
+      }
       admin_grant_super_admin: {
         Args: { _target_user_id: string }
         Returns: undefined
+      }
+      admin_list_tenant_invites: {
+        Args: { _tenant_id: string }
+        Returns: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by_email: string
+          role: string
+          status: string
+          token: string
+        }[]
+      }
+      admin_list_tenant_members: {
+        Args: { _tenant_id: string }
+        Returns: {
+          email: string
+          is_owner: boolean
+          joined_at: string
+          last_sign_in_at: string
+          role: string
+          user_id: string
+        }[]
       }
       admin_list_user_tenants: {
         Args: { _target_user_id: string }
@@ -5242,6 +5274,24 @@ export type Database = {
       admin_revoke_super_admin: {
         Args: { _target_user_id: string }
         Returns: undefined
+      }
+      admin_set_tenant_status: {
+        Args: { _status: string; _tenant_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          name: string
+          owner_user_id: string
+          slug: string
+          status: Database["public"]["Enums"]["tenant_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tenants"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       can_auto_apply_action: {
         Args: {
