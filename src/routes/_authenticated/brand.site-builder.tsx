@@ -271,7 +271,8 @@ function BrandSiteBuilderPage() {
       };
       const { error } = await supabase
         .from("site_brand_profiles")
-        .upsert(payload, { onConflict: "tenant_id,template_id" });
+        // niche_profile column may not be in generated types yet — cast safely.
+        .upsert(payload as never, { onConflict: "tenant_id,template_id" });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -335,7 +336,7 @@ function BrandSiteBuilderPage() {
     const needsSave = !savedDraft || JSON.stringify(savedDraft) !== JSON.stringify(draft);
     if (needsSave) {
       try {
-        await saveMut.mutateAsync(draft);
+        await saveMut.mutateAsync({ next: draft, nicheNext: niche });
       } catch {
         return; // toast уже показано всередині saveMut.onError
       }
@@ -384,8 +385,9 @@ function BrandSiteBuilderPage() {
       ) : (
         <>
           <Tabs value={tab} onValueChange={setTab}>
-            <TabsList className="grid w-full max-w-2xl grid-cols-4">
+            <TabsList className="grid w-full max-w-3xl grid-cols-5">
               <TabsTrigger value="profile">{t("sbu.tab.profile")}</TabsTrigger>
+              <TabsTrigger value="niche">{t("sbu.tab.niche")}</TabsTrigger>
               <TabsTrigger value="theme">{t("sbu.tab.theme")}</TabsTrigger>
               <TabsTrigger value="content">{t("sbu.tab.content")}</TabsTrigger>
               <TabsTrigger value="builds">{t("sbu.tab.builds")}</TabsTrigger>
@@ -393,6 +395,10 @@ function BrandSiteBuilderPage() {
 
             <TabsContent value="profile" className="mt-4">
               <ProfileTab draft={draft!} setDraft={setDraft} />
+            </TabsContent>
+
+            <TabsContent value="niche" className="mt-4">
+              <NicheWizard draft={niche} setDraft={setNiche} />
             </TabsContent>
 
             <TabsContent value="theme" className="mt-4">
@@ -418,7 +424,7 @@ function BrandSiteBuilderPage() {
               variant="outline"
               size="sm"
               disabled={saveMut.isPending || !draft?.brand_name.trim()}
-              onClick={() => draft && saveMut.mutate(draft)}
+              onClick={() => draft && saveMut.mutate({ next: draft, nicheNext: niche })}
             >
               {saveMut.isPending ? "…" : t("sbu.action.save")}
             </Button>
