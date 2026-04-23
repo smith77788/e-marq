@@ -8,7 +8,7 @@
  */
 import { useMemo } from "react";
 import { Building2, Check, ChevronsUpDown, Plus, ShieldCheck } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   DropdownMenu,
