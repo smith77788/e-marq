@@ -12,6 +12,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendTelegramText } from "@/lib/acos/channels";
+import { handleOwnerCommand, sendOwnerMessage } from "@/lib/telegram/ownerMenu";
 import type { Tables } from "@/integrations/supabase/types";
 
 const TG_GATEWAY = "https://connector-gateway.lovable.dev/telegram";
@@ -238,9 +239,10 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
       await sendTelegramText(chatId, `Не вдалося привʼязати: ${rpcErr.message}`);
       return;
     }
-    await sendTelegramText(
+    await sendOwnerMessage(
       chatId,
-      `🔔 Тепер ви отримуєте сповіщення власника для <b>${tenant.name}</b>. Інсайти та дії агентів, що чекають підтвердження, прийдуть сюди з кнопками «Застосувати» / «Сховати».`,
+      `🔔 Тепер ви отримуєте сповіщення власника для <b>${tenant.name}</b>. Інсайти та дії агентів, що чекають підтвердження, прийдуть сюди з кнопками «Застосувати» / «Сховати».\n\nНатискайте кнопки нижче або надсилайте /menu щоб відкрити кокпіт у Telegram.`,
+      true,
     );
     return;
   }
@@ -277,6 +279,17 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
       chatId,
       `👋 Вітаємо в <b>${brand}</b>! Запитайте, що завгодно — покажу товари, допоможу замовити або повідомлю про новинки.`,
     );
+  }
+
+  // ---- Owner commands (if this chat is bound as owner of a tenant) ----
+  const { data: ownerCfg } = await supabaseAdmin
+    .from("tenant_configs")
+    .select("tenant_id")
+    .eq("owner_telegram_chat_id", chatId)
+    .maybeSingle();
+  if (ownerCfg?.tenant_id) {
+    const handled = await handleOwnerCommand(ownerCfg.tenant_id, chatId, text, appOrigin);
+    if (handled) return;
   }
 
   // ---- Plain /start (no slug) ----

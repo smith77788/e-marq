@@ -34,11 +34,10 @@ function AuthenticatedLayout() {
   }, [loading, user, navigate]);
 
   if (loading || !user) {
+    // Static, no animation — keeps the boot screen calm and predictable.
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <span className="pulse-dot" /> {t("hdr.booting")}
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-background" aria-hidden>
+        <span className="sr-only">{t("hdr.booting")}</span>
       </div>
     );
   }

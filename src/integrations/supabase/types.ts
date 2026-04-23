@@ -5299,6 +5299,24 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_my_tenant: {
+        Args: { _name: string; _slug: string }
+        Returns: {
+          created_at: string
+          id: string
+          name: string
+          owner_user_id: string
+          slug: string
+          status: Database["public"]["Enums"]["tenant_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tenants"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       create_payment_intent: {
         Args: {
           _amount_cents: number

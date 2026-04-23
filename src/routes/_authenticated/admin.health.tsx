@@ -218,15 +218,6 @@ function HealthMonitorContent() {
           totalEmail === 0 ? "idle" : bounceRate > 0.1 ? "fail" : bounceRate > 0.03 ? "warn" : "ok",
       };
 
-      // Balance
-      const bal = (balBy.get(tenant.id) ?? [])[0];
-      const amountCents = bal?.money_balance_cents ?? 0;
-      const balance: TenantHealth["balance"] = {
-        amountCents,
-        currency: bal?.currency ?? "UAH",
-        status: !bal ? "idle" : amountCents <= 0 ? "fail" : amountCents < 50000 ? "warn" : "ok",
-      };
-
       // Orders
       const tOrd = ordBy.get(tenant.id) ?? [];
       const paid = tOrd.filter((o) => o.status === "paid").length;
@@ -235,6 +226,24 @@ function HealthMonitorContent() {
         paid,
         pending,
         status: pending > 10 ? "warn" : tOrd.length === 0 ? "idle" : "ok",
+      };
+
+      // Balance — for a brand-new tenant (no balance row OR row with 0 funds
+      // and no agent activity yet) we show "idle" instead of "fail" to avoid
+      // scaring owners during onboarding. We only flag fail when the tenant
+      // is actively running agents but balance ran out.
+      const bal = (balBy.get(tenant.id) ?? [])[0];
+      const amountCents = bal?.money_balance_cents ?? 0;
+      const tenantHasActivity = total > 0 || tEmail.length > 0 || tOrd.length > 0;
+      let balanceStatus: Status;
+      if (!bal) balanceStatus = "idle";
+      else if (amountCents <= 0) balanceStatus = tenantHasActivity ? "fail" : "idle";
+      else if (amountCents < 50000) balanceStatus = "warn";
+      else balanceStatus = "ok";
+      const balance: TenantHealth["balance"] = {
+        amountCents,
+        currency: bal?.currency ?? "UAH",
+        status: balanceStatus,
       };
 
       const overall = worst(
