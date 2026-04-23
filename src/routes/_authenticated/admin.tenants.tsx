@@ -358,6 +358,12 @@ function AdminTenantsPage() {
           )}
         </CardContent>
       </Card>
+
+      <TenantQuickActionsDialog
+        tenant={quickTarget}
+        open={!!quickTarget}
+        onOpenChange={(v) => !v && setQuickTarget(null)}
+      />
     </div>
   );
 }
