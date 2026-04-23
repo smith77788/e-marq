@@ -254,7 +254,12 @@ function IntegrationsHubPage() {
                     isConnected={connected}
                     canSync={canSync}
                     syncing={syncing === integration.id}
-                    onSelect={setActive}
+                    onSelect={(i) => {
+                      // Якщо вже підключено — відкриваємо панель керування,
+                      // інакше — wizard підключення.
+                      if (connectedSet.has(i.id)) setManage(i);
+                      else setActive(i);
+                    }}
                     onSync={(i) => {
                       setSyncTarget(i);
                       setSyncEntity(
@@ -328,6 +333,12 @@ function IntegrationsHubPage() {
         integration={active}
         tenantId={currentTenantId}
         onClose={() => setActive(null)}
+      />
+
+      <IntegrationManageDialog
+        integration={manage}
+        tenantId={currentTenantId}
+        onClose={() => setManage(null)}
       />
 
       <Dialog open={!!syncTarget} onOpenChange={(o) => !o && setSyncTarget(null)}>
