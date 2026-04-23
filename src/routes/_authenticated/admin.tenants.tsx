@@ -87,6 +87,8 @@ function slugify(input: string) {
 
 function AdminTenantsPage() {
   const { isSuperAdmin, loading, user } = useAuth();
+  const { has } = useAdminCapabilities();
+  const canChangeStatus = has("change_status");
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
 
