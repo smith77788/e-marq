@@ -281,6 +281,17 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
     );
   }
 
+  // ---- Owner commands (if this chat is bound as owner of a tenant) ----
+  const { data: ownerCfg } = await supabaseAdmin
+    .from("tenant_configs")
+    .select("tenant_id")
+    .eq("owner_telegram_chat_id", chatId)
+    .maybeSingle();
+  if (ownerCfg?.tenant_id) {
+    const handled = await handleOwnerCommand(ownerCfg.tenant_id, chatId, text, appOrigin);
+    if (handled) return;
+  }
+
   // ---- Plain /start (no slug) ----
   if (text === "/start") {
     await sendTelegramText(
