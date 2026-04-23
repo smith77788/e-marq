@@ -75,6 +75,7 @@ function DashboardPage() {
                       <Button asChild size="sm" variant="ghost" className="h-7 px-2">
                         <Link
                           to="/brand/site-builder"
+                          search={{ tenant: t.tenant_id }}
                           onClick={() => setCurrentTenantId(t.tenant_id)}
                         >
                           <Wand2 className="h-3.5 w-3.5 text-accent" />

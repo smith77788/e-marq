@@ -49,8 +49,9 @@ export const Route = createFileRoute("/api/site-builder/build")({
         const token = authHeader.slice("Bearer ".length).trim();
         if (!token) return jsonError(401, "Empty bearer token");
 
-        const SUPABASE_URL = process.env.SUPABASE_URL;
-        const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
+        const SUPABASE_URL = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
+        const SUPABASE_PUBLISHABLE_KEY =
+          process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
         if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
           return jsonError(500, "Server not configured");
         }

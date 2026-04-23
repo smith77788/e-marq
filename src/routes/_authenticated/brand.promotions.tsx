@@ -112,7 +112,7 @@ function fromLocalInput(s: string): string | null {
 function BrandPromotionsPage() {
   const { tenant: tenantId } = useSearch({ from: "/_authenticated/brand/promotions" });
   const { user, loading } = useAuth();
-  const { tenants } = useTenantContext();
+  const { tenants, current, currentTenantId, setCurrentTenantId } = useTenantContext();
   const { t } = useT();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -135,26 +135,36 @@ function BrandPromotionsPage() {
       })),
   });
 
-  if (!loading && tenantsQuery.data && tenantsQuery.data.length > 0 && !tenantId) {
-    void navigate({
-      to: "/brand/promotions",
-      search: { tenant: tenantsQuery.data[0].id },
-      replace: true,
-    });
-  }
+  const effectiveTenantId =
+    tenantId ?? currentTenantId ?? current?.tenant_id ?? tenantsQuery.data?.[0]?.id ?? null;
 
-  const current = tenantsQuery.data?.find((tt) => tt.id === tenantId);
+  useEffect(() => {
+    if (!effectiveTenantId) return;
+    if (tenantId !== effectiveTenantId) {
+      void navigate({
+        to: "/brand/promotions",
+        search: { tenant: effectiveTenantId },
+        replace: true,
+      });
+      return;
+    }
+    if (currentTenantId !== effectiveTenantId) {
+      setCurrentTenantId(effectiveTenantId);
+    }
+  }, [tenantId, effectiveTenantId, currentTenantId, navigate, setCurrentTenantId]);
+
+  const currentItem = tenantsQuery.data?.find((tt) => tt.id === effectiveTenantId);
 
   const promosQuery = useQuery({
-    queryKey: ["brand-promotions", tenantId],
-    enabled: !!tenantId,
+    queryKey: ["brand-promotions", effectiveTenantId],
+    enabled: !!effectiveTenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("promotions")
         .select(
           "id, code, name, promo_type, value, min_order_cents, usage_limit, usage_per_customer, times_used, starts_at, ends_at, is_active",
         )
-        .eq("tenant_id", tenantId!)
+        .eq("tenant_id", effectiveTenantId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as PromoRow[];
@@ -211,7 +221,7 @@ function BrandPromotionsPage() {
   };
 
   const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["brand-promotions", tenantId] });
+    qc.invalidateQueries({ queryKey: ["brand-promotions", effectiveTenantId] });
   };
 
   const buildPayload = () => ({
@@ -306,7 +316,7 @@ function BrandPromotionsPage() {
     );
   }
 
-  if (!current) {
+  if (!currentItem) {
     return <p className="text-sm text-muted-foreground">Завантажую бренд…</p>;
   }
 
@@ -421,7 +431,7 @@ function BrandPromotionsPage() {
         <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
           <SheetHeader>
             <SheetTitle>{editing ? t("bpr.edit.title") : t("bpr.create.title")}</SheetTitle>
-            <SheetDescription>{current.name}</SheetDescription>
+            <SheetDescription>{currentItem?.name}</SheetDescription>
           </SheetHeader>
 
           <form

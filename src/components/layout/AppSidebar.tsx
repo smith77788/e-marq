@@ -229,9 +229,10 @@ type Props = {
   isSuperAdmin: boolean;
   brandName?: string | null;
   tenantSlug?: string | null;
+  currentTenantId?: string | null;
 };
 
-export function AppSidebar({ isSuperAdmin, brandName, tenantSlug }: Props) {
+export function AppSidebar({ isSuperAdmin, brandName, tenantSlug, currentTenantId }: Props) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
@@ -239,6 +240,8 @@ export function AppSidebar({ isSuperAdmin, brandName, tenantSlug }: Props) {
   const { t } = useT();
   const groups = isSuperAdmin ? ADMIN_NAV : OWNER_NAV;
   const [handbookOpen, setHandbookOpen] = useState(false);
+
+  const withTenantSearch = currentTenantId ? { tenant: currentTenantId } : undefined;
 
   /**
    * Smart hash navigation:
@@ -257,7 +260,6 @@ export function AppSidebar({ isSuperAdmin, brandName, tenantSlug }: Props) {
         }
         return false;
       };
-      // Poll up to ~2s for the section to mount (handles lazy-loaded data).
       const pollScroll = () => {
         let attempts = 0;
         const tick = () => {
@@ -271,11 +273,11 @@ export function AppSidebar({ isSuperAdmin, brandName, tenantSlug }: Props) {
         history.replaceState(null, "", `${to}#${hash}`);
         return;
       }
-      void Promise.resolve(navigate({ to, hash })).then(() => {
+      void Promise.resolve(navigate({ to, hash, search: withTenantSearch as never })).then(() => {
         requestAnimationFrame(() => requestAnimationFrame(pollScroll));
       });
     },
-    [location.pathname, navigate],
+    [location.pathname, navigate, withTenantSearch],
   );
 
   return (
@@ -356,14 +358,14 @@ export function AppSidebar({ isSuperAdmin, brandName, tenantSlug }: Props) {
                       <SidebarMenuButton asChild tooltip={label}>
                         {item.hash ? (
                           <a
-                            href={`${item.to}#${item.hash}`}
+                            href={`${item.to}${currentTenantId ? `?tenant=${currentTenantId}` : ""}#${item.hash}`}
                             onClick={(e) => handleHashNav(e, item.to, item.hash!)}
                             className={linkClasses}
                           >
                             {inner}
                           </a>
                         ) : (
-                          <Link to={item.to} className={linkClasses}>
+                          <Link to={item.to} search={withTenantSearch} className={linkClasses}>
                             {inner}
                           </Link>
                         )}
@@ -405,6 +407,7 @@ export function AppSidebar({ isSuperAdmin, brandName, tenantSlug }: Props) {
               ) : (
                 <Link
                   to="/brand"
+                  search={withTenantSearch}
                   className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
                 >
                   <ShoppingBag className="h-4 w-4 text-success" />
@@ -417,6 +420,7 @@ export function AppSidebar({ isSuperAdmin, brandName, tenantSlug }: Props) {
             <SidebarMenuButton asChild tooltip={t("sb.settings")}>
               <Link
                 to={isSuperAdmin ? "/admin/health" : "/brand/settings"}
+                search={!isSuperAdmin ? withTenantSearch : undefined}
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
               >
                 <Settings className="h-4 w-4 text-accent" />

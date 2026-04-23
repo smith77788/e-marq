@@ -6,7 +6,7 @@
  * any tenant admin/owner CRUD products inside their own tenant; super_admin
  * sees everything.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -77,7 +77,7 @@ export const Route = createFileRoute("/_authenticated/brand/products")({
 function BrandProductsPage() {
   const { tenant: tenantId } = useSearch({ from: "/_authenticated/brand/products" });
   const { user, loading } = useAuth();
-  const { tenants } = useTenantContext();
+  const { tenants, current, currentTenantId, setCurrentTenantId } = useTenantContext();
   const { t } = useT();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -100,27 +100,36 @@ function BrandProductsPage() {
       })),
   });
 
-  // Auto-select first tenant when not in URL
-  if (!loading && tenantsQuery.data && tenantsQuery.data.length > 0 && !tenantId) {
-    void navigate({
-      to: "/brand/products",
-      search: { tenant: tenantsQuery.data[0].id },
-      replace: true,
-    });
-  }
+  const effectiveTenantId =
+    tenantId ?? currentTenantId ?? current?.tenant_id ?? tenantsQuery.data?.[0]?.id ?? null;
 
-  const current = tenantsQuery.data?.find((tt) => tt.id === tenantId);
+  useEffect(() => {
+    if (!effectiveTenantId) return;
+    if (tenantId !== effectiveTenantId) {
+      void navigate({
+        to: "/brand/products",
+        search: { tenant: effectiveTenantId },
+        replace: true,
+      });
+      return;
+    }
+    if (currentTenantId !== effectiveTenantId) {
+      setCurrentTenantId(effectiveTenantId);
+    }
+  }, [tenantId, effectiveTenantId, currentTenantId, navigate, setCurrentTenantId]);
+
+  const currentItem = tenantsQuery.data?.find((tt) => tt.id === effectiveTenantId);
 
   const productsQuery = useQuery({
-    queryKey: ["brand-products", tenantId],
-    enabled: !!tenantId,
+    queryKey: ["brand-products", effectiveTenantId],
+    enabled: !!effectiveTenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
         .select(
           "id, name, sku, price_cents, currency, stock, is_active, description, image_url, created_at",
         )
-        .eq("tenant_id", tenantId!)
+        .eq("tenant_id", effectiveTenantId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as ProductRow[];
@@ -133,12 +142,12 @@ function BrandProductsPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["brand-products", tenantId] });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["brand-products", effectiveTenantId] });
 
   const createMutation = useMutation({
     mutationFn: async (values: ProductFormValues) => {
-      const { error } = await supabase.from("products").insert({
-        tenant_id: tenantId!,
+        const { error } = await supabase.from("products").insert({
+          tenant_id: effectiveTenantId!,
         name: values.name,
         sku: values.sku || null,
         price_cents: values.price_cents,
@@ -224,7 +233,7 @@ function BrandProductsPage() {
     );
   }
 
-  if (!current) {
+  if (!currentItem) {
     return <p className="text-sm text-muted-foreground">Завантажую бренд…</p>;
   }
 
@@ -240,9 +249,14 @@ function BrandProductsPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="outline" size="sm">
-            <Link to="/s/$slug" params={{ slug: current.slug }} target="_blank" rel="noreferrer">
+            <Link
+              to="/s/$slug"
+              params={{ slug: currentItem.slug }}
+              target="_blank"
+              rel="noreferrer"
+            >
               <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
-              /s/{current.slug}
+              /s/{currentItem.slug}
             </Link>
           </Button>
           <Button size="sm" onClick={() => setCreateOpen(true)}>
@@ -333,7 +347,7 @@ function BrandProductsPage() {
                       <Link
                         to="/brand/products/$productId"
                         params={{ productId: p.id }}
-                        search={{ tenant: tenantId }}
+                        search={{ tenant: effectiveTenantId }}
                         className="hover:underline hover:text-primary"
                       >
                         {p.name}
@@ -388,7 +402,7 @@ function BrandProductsPage() {
         <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
           <SheetHeader>
             <SheetTitle>{t("bp.create.title")}</SheetTitle>
-            <SheetDescription>{current.name}</SheetDescription>
+            <SheetDescription>{currentItem.name}</SheetDescription>
           </SheetHeader>
           <div className="mt-6">
             <ProductForm
