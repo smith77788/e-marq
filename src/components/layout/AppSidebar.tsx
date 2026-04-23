@@ -229,6 +229,7 @@ type Props = {
   isSuperAdmin: boolean;
   brandName?: string | null;
   tenantSlug?: string | null;
+  currentTenantId?: string | null;
 };
 
 export function AppSidebar({ isSuperAdmin, brandName, tenantSlug }: Props) {
