@@ -103,12 +103,14 @@ async function runForTenant(tenantId: string) {
           continue;
         }
         const lang = detectLanguage(text);
-        if (lang !== "uk" && lang !== "ru") {
+        // Google-hunter: дозволяємо uk/ru/en (BARF/pet food часто англомовні)
+        if (lang === "other") {
           stats.lang_skip++;
           continue;
         }
         const intent = scoreIntent(text, settings.intent_keywords);
-        if (intent.score < 0.15) {
+        // Поріг 0.10 — щоб ловити навіть одиничні матчі ключових слів
+        if (intent.score < 0.1) {
           stats.intent_skip++;
           continue;
         }
