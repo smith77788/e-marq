@@ -38,6 +38,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { IntegrationCard } from "@/components/integrations/IntegrationCard";
 import { IntegrationWizard } from "@/components/integrations/IntegrationWizard";
+import { IntegrationManageDialog } from "@/components/integrations/IntegrationManageDialog";
 
 import {
   CATEGORIES,
@@ -56,6 +57,7 @@ function IntegrationsHubPage() {
   const { current, currentTenantId, loading } = useTenantContext();
   const qc = useQueryClient();
   const [active, setActive] = useState<IntegrationDef | null>(null);
+  const [manage, setManage] = useState<IntegrationDef | null>(null);
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<IntegrationCategory | "all">("all");
   const [syncTarget, setSyncTarget] = useState<IntegrationDef | null>(null);
@@ -252,7 +254,12 @@ function IntegrationsHubPage() {
                     isConnected={connected}
                     canSync={canSync}
                     syncing={syncing === integration.id}
-                    onSelect={setActive}
+                    onSelect={(i) => {
+                      // Якщо вже підключено — відкриваємо панель керування,
+                      // інакше — wizard підключення.
+                      if (connectedSet.has(i.id)) setManage(i);
+                      else setActive(i);
+                    }}
                     onSync={(i) => {
                       setSyncTarget(i);
                       setSyncEntity(
@@ -326,6 +333,12 @@ function IntegrationsHubPage() {
         integration={active}
         tenantId={currentTenantId}
         onClose={() => setActive(null)}
+      />
+
+      <IntegrationManageDialog
+        integration={manage}
+        tenantId={currentTenantId}
+        onClose={() => setManage(null)}
       />
 
       <Dialog open={!!syncTarget} onOpenChange={(o) => !o && setSyncTarget(null)}>

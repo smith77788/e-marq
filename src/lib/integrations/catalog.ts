@@ -246,6 +246,24 @@ export const INTEGRATIONS: IntegrationDef[] = [
 
   // ───────── UKRAINE / СНД ─────────
   {
+    id: "dntrade",
+    name: "DN Trade",
+    category: "ukraine",
+    description:
+      "Українська ERP/складська система: товари, склади, клієнти й замовлення. Має повний health-check, dry-run і webhook.",
+    icon: Database,
+    status: "ready",
+    method: "apiKey",
+    imports: ["products", "customers", "orders"],
+    instructions: [
+      "У кабінеті DN Trade: Профіль → API → створити ApiKey з правами читання.",
+      "Скопіюйте ApiKey (формат довгий рядок).",
+      "Вставте ключ у поле нижче — ми перевіримо його через GET /products/stores.",
+      "Після підключення відкриється спеціальне меню: повний sync, інкрементальний sync, dry-run і webhook.",
+    ],
+    requires: "Активний акаунт DN Trade з доступом до API",
+  },
+  {
     id: "bitrix24",
     name: "Bitrix24",
     category: "ukraine",
