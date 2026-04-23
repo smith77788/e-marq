@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAdminCapabilities } from "@/hooks/useAdminCapabilities";
 
 type TenantRow = {
   tenant_id: string;
@@ -37,6 +38,9 @@ type TenantRow = {
 
 export function UserTenantsManager({ userId }: { userId: string }) {
   const qc = useQueryClient();
+  const { has } = useAdminCapabilities();
+  const canChangePlan = has("change_plans");
+  const canManageUsers = has("manage_users");
 
   const tenantsQuery = useQuery({
     queryKey: ["admin-user-tenants", userId],
