@@ -306,11 +306,20 @@ function BrandSiteBuilderPage() {
     },
   });
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     void user;
-    if (!profileQuery.data) {
+    if (!draft || !draft.brand_name.trim()) {
       toast.info(t("sbu.action.notReady"));
+      setTab("profile");
       return;
+    }
+    // Якщо профілю ще нема або є зміни — спочатку зберігаємо, потім генеруємо.
+    if (!profileQuery.data || dirty || isNew) {
+      try {
+        await saveMut.mutateAsync(draft);
+      } catch {
+        return; // toast уже показано всередині saveMut.onError
+      }
     }
     generateMut.mutate();
   };
