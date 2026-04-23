@@ -426,6 +426,21 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
                   </AlertDescription>
                 </Alert>
               )}
+
+              {/* Verify result */}
+              {verifyResult && (isApiKey || isRest) && (
+                <Alert
+                  variant={verifyResult.ok ? "default" : "destructive"}
+                  className={verifyResult.ok ? "border-success/40 bg-success/5" : ""}
+                >
+                  {verifyResult.ok ? (
+                    <CheckCircle2 className="h-4 w-4 text-success" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4" />
+                  )}
+                  <AlertDescription>{verifyResult.message}</AlertDescription>
+                </Alert>
+              )}
             </div>
           )}
 
