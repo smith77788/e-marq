@@ -302,7 +302,7 @@ function TopupDialog({
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success(`Зараховано ${credits.toLocaleString("uk-UA")} AI-кредитів`);
+      toast.success(`Зараховано ${credits.toLocaleString("uk-UA")} кредитів балансу`);
       setOpen(false);
       setReason("");
       onSuccess();
@@ -321,12 +321,15 @@ function TopupDialog({
       <DialogContent className="w-[calc(100%-1.5rem)] max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Поповнення балансу</DialogTitle>
-          <DialogDescription>Оберіть кількість AI-кредитів і спосіб оплати.</DialogDescription>
+          <DialogDescription>
+            Оберіть кількість кредитів балансу і спосіб оплати. Кредити витрачаються на тариф та
+            додаткові опції (SMS, преміум-домени).
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Кількість AI-кредитів</Label>
+            <Label>Кількість кредитів</Label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {TOPUP_PRESETS.map((p) => (
                 <button
