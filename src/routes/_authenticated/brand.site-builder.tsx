@@ -408,11 +408,15 @@ function BrandSiteBuilderPage() {
             <Button
               size="sm"
               onClick={handleGenerate}
-              disabled={!profileQuery.data || generateMut.isPending}
+              disabled={
+                !draft?.brand_name.trim() || generateMut.isPending || saveMut.isPending
+              }
               className="bg-gradient-primary text-primary-foreground"
             >
               <Wand2 className="mr-2 h-4 w-4" />
-              {generateMut.isPending ? t("sbu.action.generating") : t("sbu.action.generate")}
+              {generateMut.isPending || saveMut.isPending
+                ? t("sbu.action.generating")
+                : t("sbu.action.generate")}
             </Button>
           </div>
         </>
