@@ -5,7 +5,8 @@ import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Search, ShieldCheck, ShieldOff, Users } from "lucide-react";
+import { ChevronDown, ChevronRight, Search, ShieldCheck, ShieldOff, Users } from "lucide-react";
+import { UserTenantsManager } from "@/components/admin/UserTenantsManager";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ function AdminUsersPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [confirmTarget, setConfirmTarget] = useState<UserRow | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   const usersQuery = useQuery({
     queryKey: ["admin-users"],
@@ -160,59 +162,81 @@ function AdminUsersPage() {
               <TableBody>
                 {filtered.map((u) => {
                   const isMe = u.user_id === currentUser?.id;
+                  const isOpen = expanded === u.user_id;
                   return (
-                    <TableRow key={u.user_id}>
-                      <TableCell className="font-medium">
-                        {u.email ?? <span className="text-muted-foreground">(без email)</span>}
-                        {isMe && (
-                          <Badge variant="outline" className="ml-2 text-[10px]">
-                            це ви
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {u.is_super_admin ? (
-                          <Badge className="text-[10px]">super_admin</Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-[10px]">
-                            користувач
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right font-mono text-xs">
-                        {u.tenant_count}
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {new Date(u.created_at).toLocaleDateString("uk-UA")}
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {u.last_sign_in_at
-                          ? new Date(u.last_sign_in_at).toLocaleDateString("uk-UA")
-                          : "—"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {u.is_super_admin ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={isMe || revokeMutation.isPending || adminCount <= 1}
-                            onClick={() => setConfirmTarget(u)}
+                    <>
+                      <TableRow key={u.user_id}>
+                        <TableCell className="font-medium">
+                          <button
+                            type="button"
+                            onClick={() => setExpanded(isOpen ? null : u.user_id)}
+                            className="mr-1 inline-flex h-5 w-5 items-center justify-center rounded hover:bg-muted"
+                            aria-label={isOpen ? "Згорнути" : "Розгорнути"}
                           >
-                            <ShieldOff className="mr-1.5 h-3.5 w-3.5" />
-                            Зняти роль
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            disabled={grantMutation.isPending}
-                            onClick={() => grantMutation.mutate(u.user_id)}
-                          >
-                            <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />
-                            Зробити адміном
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
+                            {isOpen ? (
+                              <ChevronDown className="h-3.5 w-3.5" />
+                            ) : (
+                              <ChevronRight className="h-3.5 w-3.5" />
+                            )}
+                          </button>
+                          {u.email ?? <span className="text-muted-foreground">(без email)</span>}
+                          {isMe && (
+                            <Badge variant="outline" className="ml-2 text-[10px]">
+                              це ви
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {u.is_super_admin ? (
+                            <Badge className="text-[10px]">super_admin</Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-[10px]">
+                              користувач
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-xs">
+                          {u.tenant_count}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {new Date(u.created_at).toLocaleDateString("uk-UA")}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {u.last_sign_in_at
+                            ? new Date(u.last_sign_in_at).toLocaleDateString("uk-UA")
+                            : "—"}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {u.is_super_admin ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={isMe || revokeMutation.isPending || adminCount <= 1}
+                              onClick={() => setConfirmTarget(u)}
+                            >
+                              <ShieldOff className="mr-1.5 h-3.5 w-3.5" />
+                              Зняти роль
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              disabled={grantMutation.isPending}
+                              onClick={() => grantMutation.mutate(u.user_id)}
+                            >
+                              <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />
+                              Зробити адміном
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                      {isOpen && (
+                        <TableRow key={`${u.user_id}-exp`} className="bg-muted/10 hover:bg-muted/10">
+                          <TableCell colSpan={6} className="p-3">
+                            <UserTenantsManager userId={u.user_id} />
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
                   );
                 })}
               </TableBody>
