@@ -31,6 +31,7 @@ import { useTenantContext } from "@/hooks/useTenantContext";
 import { OutreachHunterSection } from "@/components/admin/OutreachHunterTabs";
 import { MagnetPreviewDialog } from "@/components/admin/MagnetPreviewDialog";
 import { TelegramConnectCard } from "@/components/owner/TelegramConnectCard";
+import { TelegramUserConnectCard } from "@/components/owner/TelegramUserConnectCard";
 import { friendlyAgentSummary, friendlyAgentError, agentLabel } from "@/lib/outreach/agentSummary";
 
 export const Route = createFileRoute("/_authenticated/admin/lead-radar")({
@@ -263,7 +264,12 @@ function Content() {
         </div>
       </header>
 
-      {telegramTenantId && <TelegramConnectCard tenantId={telegramTenantId} />}
+      {telegramTenantId && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <TelegramConnectCard tenantId={telegramTenantId} />
+          <TelegramUserConnectCard tenantId={telegramTenantId} />
+        </div>
+      )}
 
       <Tabs defaultValue="prospects">
         <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-muted/40 p-1">
