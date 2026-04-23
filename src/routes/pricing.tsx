@@ -17,40 +17,77 @@ export const Route = createFileRoute("/pricing")({
   component: Pricing,
 });
 
+type PlanCard = {
+  name: string;
+  price: string;
+  cadence: string;
+  desc: string;
+  features: string[];
+  cta: string;
+  highlight: boolean;
+};
+
 function Pricing() {
   const { t } = useT();
-  const plans = [
+
+  // Чотирирівнева структура: Free → Starter → Growth → Scale
+  // Free дає малому бізнесу одразу базовий пакет, кожен наступний рівень
+  // відкриває більше агентів та вищі ліміти каталогу.
+  const plans: PlanCard[] = [
     {
-      name: t("pr.pilotName"),
-      price: t("pr.pilotPrice"),
-      cadence: t("pr.pilotCadence"),
-      desc: t("pr.pilotDesc"),
-      features: [t("pr.pilotF1"), t("pr.pilotF2"), t("pr.pilotF3"), t("pr.pilotF4")],
-      cta: t("pr.pilotCta"),
+      name: "Free",
+      price: "0 ₴",
+      cadence: "назавжди",
+      desc: "Старт для малого бізнесу: базові агенти, що вже приносять користь з першого дня.",
+      features: [
+        "8 базових ШІ-агентів (відновлення кошика, попередження про залишки, ранкова зведення, anti-fraud)",
+        "До 50 товарів та 100 замовлень/міс",
+        "1 учасник команди",
+        "Telegram-бот власника + email-сповіщення",
+      ],
+      cta: "Почати безкоштовно",
       highlight: false,
     },
     {
-      name: t("pr.growthName"),
-      price: t("pr.growthPrice"),
-      cadence: t("pr.growthCadence"),
-      desc: t("pr.growthDesc"),
+      name: "Starter",
+      price: "1 199 ₴",
+      cadence: "за бренд / місяць",
+      desc: "Для бренду, що почав рости. Додає аналітику, AOV-оптимізацію та broadcast-розсилки.",
       features: [
-        t("pr.growthF1"),
-        t("pr.growthF2"),
-        t("pr.growthF3"),
-        t("pr.growthF4"),
-        t("pr.growthF5"),
+        "23 ШІ-агенти (Free + AOV, churn, LTV, attribution, cohorts, broadcasts)",
+        "До 300 товарів та 1 000 замовлень/міс",
+        "5 учасників команди",
+        "Розширена аналітика (cohort, attribution, funnel)",
       ],
-      cta: t("pr.growthCta"),
+      cta: "Почати з Starter",
+      highlight: false,
+    },
+    {
+      name: "Growth",
+      price: "3 999 ₴",
+      cadence: "за бренд / місяць",
+      desc: "Повна оптимізація доходу: ціни, SEO, лояльність, прогнози інвентаря.",
+      features: [
+        "47 ШІ-агентів (Starter + ціновий оптимізатор, SEO-loop, лояльність, VIP)",
+        "До 3 000 товарів та 10 000 замовлень/міс",
+        "15 учасників команди",
+        "Programmatic SEO, predictive pricing, bundle recommender",
+      ],
+      cta: "Перейти на Growth",
       highlight: true,
     },
     {
-      name: t("pr.portName"),
-      price: t("pr.portPrice"),
-      cadence: t("pr.portCadence"),
-      desc: t("pr.portDesc"),
-      features: [t("pr.portF1"), t("pr.portF2"), t("pr.portF3"), t("pr.portF4")],
-      cta: t("pr.portCta"),
+      name: "Scale",
+      price: "11 999 ₴",
+      cadence: "за бренд / місяць",
+      desc: "Усі 58 агентів + meta-навчання, де система оптимізує саму себе.",
+      features: [
+        "Усі ШІ-агенти + AI-quality meta-loops (memory feedback, learning loop)",
+        "Без обмежень на товари, замовлення, клієнтів",
+        "50 учасників команди + ролі",
+        "Пріоритетна підтримка та SLA",
+      ],
+      cta: "Зв'язатися",
       highlight: false,
     },
   ];
@@ -64,16 +101,18 @@ function Pricing() {
             <Sparkles className="mr-1 h-3 w-3" /> {t("pr.badge")}
           </Badge>
           <h1 className="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            {t("pr.title")}
+            Один тариф — усі агенти працюють без квот
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-base text-muted-foreground">
-            {t("pr.subtitle")}
+            Жодних AI-кредитів і списань за запуск. Дорожчий тариф просто відкриває більше агентів і
+            вищі ліміти каталогу. Малий бізнес стартує безкоштовно, а коли MARQ збільшує дохід —
+            переходить на наступний рівень.
           </p>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-16">
-        <div className="grid gap-6 md:grid-cols-3">
+      <section className="mx-auto max-w-7xl px-4 py-16">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {plans.map((p) => (
             <Card
               key={p.name}
