@@ -28,9 +28,9 @@ function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      void navigate({ to: "/dashboard", replace: true });
+      window.location.assign("/dashboard");
     }
-  }, [loading, user, navigate]);
+  }, [loading, user]);
 
   async function onGoogle() {
     setSubmitting(true);
