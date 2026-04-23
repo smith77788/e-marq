@@ -34,6 +34,9 @@ import { useTenantContext } from "@/hooks/useTenantContext";
 import { useT, type TKey } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/brand/site-builder")({
+  validateSearch: (s: Record<string, unknown>): { tenant?: string } => ({
+    tenant: typeof s.tenant === "string" ? s.tenant : undefined,
+  }),
   component: BrandSiteBuilderPage,
 });
 
@@ -154,8 +157,9 @@ function profileToDraft(p: SiteBrandProfile): ProfileDraft {
 }
 
 function BrandSiteBuilderPage() {
+  const { tenant: urlTenant } = useSearch({ from: "/_authenticated/brand/site-builder" });
   const { t } = useT();
-  const { current, loading } = useTenantContext();
+  const { current, currentTenantId, setCurrentTenantId, tenants, loading } = useTenantContext();
   const { user } = useAuth();
   const qc = useQueryClient();
   const [tab, setTab] = useState("profile");
@@ -177,7 +181,10 @@ function BrandSiteBuilderPage() {
   const template = templateQuery.data;
 
   // 2) Brand profile
-  const tenantId = current?.tenant_id ?? null;
+  const tenantId = urlTenant ?? currentTenantId ?? current?.tenant_id ?? tenants[0]?.tenant_id ?? null;
+  useEffect(() => {
+    if (tenantId && currentTenantId !== tenantId) setCurrentTenantId(tenantId);
+  }, [tenantId, currentTenantId, setCurrentTenantId]);
   const profileQuery = useQuery({
     queryKey: ["site-brand-profile", tenantId, template?.id],
     enabled: !!tenantId && !!template?.id,
