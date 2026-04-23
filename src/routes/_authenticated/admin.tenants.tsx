@@ -1,7 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+/**
+ * Super-admin tenants list.
+ * Uses `get_all_tenants_overview` so super-admin sees plan, balances and usage
+ * for every tenant in one shot. Includes inline status switcher and quick deep-link
+ * into tenant details.
+ */
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { Search, Building2, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
@@ -9,6 +16,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -19,10 +33,43 @@ import {
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { PlanBadge } from "@/components/admin/PlanBadge";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants")({
   component: AdminTenantsPage,
 });
+
+type OverviewRow = {
+  tenant_id: string;
+  tenant_name: string;
+  tenant_slug: string;
+  status: string;
+  plan_key: string;
+  plan_name: string;
+  subscription_status: string;
+  ai_credits_balance: number;
+  money_balance_cents: number;
+  ai_runs_this_period: number;
+  orders_this_period: number;
+  products_count: number;
+  customers_count: number;
+  created_at: string;
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  active: "активний",
+  suspended: "призупинено",
+  inactive: "вимкнено",
+};
+
+const SUB_LABEL: Record<string, string> = {
+  trial: "пробний",
+  active: "активний",
+  past_due: "прострочено",
+  suspended: "призупинено",
+  cancelled: "скасовано",
+  no_plan: "без тарифу",
+};
 
 function slugify(input: string) {
   return input
@@ -36,21 +83,20 @@ function slugify(input: string) {
 function AdminTenantsPage() {
   const { isSuperAdmin, loading, user } = useAuth();
   const qc = useQueryClient();
+  const [search, setSearch] = useState("");
 
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
 
-  const tenantsQuery = useQuery({
-    queryKey: ["admin-tenants"],
+  const overviewQuery = useQuery({
+    queryKey: ["all-tenants-overview"],
     enabled: isSuperAdmin,
+    refetchInterval: 60_000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tenants")
-        .select("id, name, slug, status, owner_user_id, created_at")
-        .order("created_at", { ascending: false });
+      const { data, error } = await supabase.rpc("get_all_tenants_overview");
       if (error) throw error;
-      return data;
+      return (data ?? []) as OverviewRow[];
     },
   });
 
@@ -59,11 +105,7 @@ function AdminTenantsPage() {
       if (!user) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("tenants")
-        .insert({
-          name: input.name,
-          slug: input.slug,
-          owner_user_id: user.id,
-        })
+        .insert({ name: input.name, slug: input.slug, owner_user_id: user.id })
         .select()
         .single();
       if (error) throw error;
@@ -74,33 +116,41 @@ function AdminTenantsPage() {
       setName("");
       setSlug("");
       setSlugTouched(false);
-      void qc.invalidateQueries({ queryKey: ["admin-tenants"] });
+      void qc.invalidateQueries({ queryKey: ["all-tenants-overview"] });
       void qc.invalidateQueries({ queryKey: ["my-tenants"] });
     },
-    onError: (err) => {
-      toast.error(err instanceof Error ? err.message : "Не вдалося створити бренд");
-    },
+    onError: (err) => toast.error(err instanceof Error ? err.message : "Не вдалося створити бренд"),
   });
 
-  if (loading) {
-    return <PageSkeleton blocks={3} />;
-  }
+  const setStatus = useMutation({
+    mutationFn: async ({ tenantId, status }: { tenantId: string; status: string }) => {
+      const { error } = await supabase.rpc("admin_set_tenant_status", {
+        _tenant_id: tenantId,
+        _status: status,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Статус оновлено");
+      void qc.invalidateQueries({ queryKey: ["all-tenants-overview"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
-  if (!isSuperAdmin) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Доступ заборонено</CardTitle>
-          <CardDescription>Ця сторінка лише для супер-адміністраторів.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Link to="/dashboard" className="text-sm font-medium text-primary hover:underline">
-            ← На головну
-          </Link>
-        </CardContent>
-      </Card>
+  const filtered = useMemo(() => {
+    const rows = overviewQuery.data ?? [];
+    if (!search) return rows;
+    const q = search.toLowerCase();
+    return rows.filter(
+      (r) =>
+        r.tenant_name.toLowerCase().includes(q) ||
+        r.tenant_slug.toLowerCase().includes(q) ||
+        r.plan_key.includes(q),
     );
-  }
+  }, [overviewQuery.data, search]);
+
+  if (loading) return <PageSkeleton blocks={3} />;
+  if (!isSuperAdmin) return <Navigate to="/brand" />;
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -112,18 +162,15 @@ function AdminTenantsPage() {
     createTenant.mutate({ name: name.trim(), slug: finalSlug });
   }
 
-  const STATUS_LABEL: Record<string, string> = {
-    active: "активний",
-    suspended: "призупинено",
-    inactive: "вимкнено",
-  };
-
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Бренди</h1>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
+          Усі бренди платформи
+        </p>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Бренди</h1>
         <p className="text-sm text-muted-foreground">
-          Створення та керування всіма робочими просторами брендів.
+          Тарифи, баланси, навантаження — оновлюється кожну хвилину.
         </p>
       </div>
 
@@ -171,43 +218,107 @@ function AdminTenantsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Усі бренди</CardTitle>
-          <CardDescription>Усього: {tenantsQuery.data?.length ?? 0}</CardDescription>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-primary" />
+                Усі бренди
+              </CardTitle>
+              <CardDescription>
+                {filtered.length} з {overviewQuery.data?.length ?? 0}
+              </CardDescription>
+            </div>
+            <div className="relative max-w-xs flex-1">
+              <Search className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Пошук за назвою, адресою, тарифом…"
+                className="h-8 pl-7 text-xs"
+              />
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          {tenantsQuery.isLoading ? (
-            <TableSkeleton rows={5} columns={4} />
-          ) : tenantsQuery.data && tenantsQuery.data.length > 0 ? (
+          {overviewQuery.isLoading ? (
+            <TableSkeleton rows={5} columns={7} />
+          ) : filtered.length > 0 ? (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Назва</TableHead>
-                    <TableHead>Адреса</TableHead>
+                    <TableHead>Бренд</TableHead>
+                    <TableHead>Тариф</TableHead>
+                    <TableHead>Підписка</TableHead>
+                    <TableHead className="text-right">AI-кредити</TableHead>
+                    <TableHead className="text-right">Баланс ₴</TableHead>
+                    <TableHead className="text-right">Замовлень</TableHead>
                     <TableHead>Статус</TableHead>
-                    <TableHead>Створено</TableHead>
+                    <TableHead className="text-right">Дії</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tenantsQuery.data.map((t) => (
-                    <TableRow key={t.id}>
-                      <TableCell className="font-medium">
+                  {filtered.map((t) => (
+                    <TableRow key={t.tenant_id}>
+                      <TableCell>
                         <Link
                           to="/admin/tenants/$tenantId"
-                          params={{ tenantId: t.id }}
-                          className="hover:underline"
+                          params={{ tenantId: t.tenant_id }}
+                          className="font-medium hover:underline"
                         >
-                          {t.name}
+                          {t.tenant_name}
                         </Link>
+                        <div className="font-mono text-[10px] text-muted-foreground">
+                          /{t.tenant_slug}
+                        </div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">/{t.slug}</TableCell>
                       <TableCell>
-                        <Badge variant={t.status === "active" ? "default" : "outline"}>
-                          {STATUS_LABEL[t.status] ?? t.status}
+                        <PlanBadge planKey={t.plan_key} planName={t.plan_name} />
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-[10px]">
+                          {SUB_LABEL[t.subscription_status] ?? t.subscription_status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {new Date(t.created_at).toLocaleDateString("uk-UA")}
+                      <TableCell className="text-right font-mono text-xs">
+                        {Number(t.ai_credits_balance).toLocaleString("uk-UA")}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-xs">
+                        {(Number(t.money_balance_cents) / 100).toLocaleString("uk-UA", {
+                          maximumFractionDigits: 0,
+                        })}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-xs">
+                        {Number(t.orders_this_period).toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          value={t.status}
+                          onValueChange={(v) =>
+                            v !== t.status && setStatus.mutate({ tenantId: t.tenant_id, status: v })
+                          }
+                          disabled={setStatus.isPending}
+                        >
+                          <SelectTrigger className="h-7 w-32 text-[11px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="active">{STATUS_LABEL.active}</SelectItem>
+                            <SelectItem value="suspended">{STATUS_LABEL.suspended}</SelectItem>
+                            <SelectItem value="inactive">{STATUS_LABEL.inactive}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button asChild size="sm" variant="ghost">
+                          <Link
+                            to="/admin/tenants/$tenantId"
+                            params={{ tenantId: t.tenant_id }}
+                          >
+                            Деталі
+                            <ExternalLink className="ml-1 h-3 w-3" />
+                          </Link>
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -216,7 +327,9 @@ function AdminTenantsPage() {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Поки що брендів немає. Створіть перший вище.
+              {search
+                ? "Нічого не знайдено за цим запитом."
+                : "Поки що брендів немає. Створіть перший вище."}
             </p>
           )}
         </CardContent>
