@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminCapabilities } from "@/hooks/useAdminCapabilities";
 import { PlanBadge } from "@/components/admin/PlanBadge";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants")({
