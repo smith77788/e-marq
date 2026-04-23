@@ -108,15 +108,29 @@ function IntegrationsHubPage() {
       } = await supabase.auth.getSession();
       const token = session?.access_token;
       if (!token) throw new Error("Сесія не знайдена");
-      const res = await fetch(`/api/integrations/sync/${provider}`, {
+      // DN Trade — повноцінний pipeline (incremental, mapping_errors).
+      const isDn = provider === "dntrade";
+      const url = isDn
+        ? `/hooks/integrations/dntrade-sync`
+        : `/api/integrations/sync/${provider}`;
+      const body = isDn
+        ? { tenant_id: currentTenantId, kinds: [entity] }
+        : { entityKind: entity, tenantId: currentTenantId };
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ entityKind: entity, tenantId: currentTenantId }),
+        body: JSON.stringify(body),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Помилка синку");
-      toast.success(`Синхронізовано: ${json.imported} рядків`, {
-        description: json.failed > 0 ? `Помилок: ${json.failed}` : undefined,
+      const importedCount = isDn
+        ? (json.summary?.products?.upserted ?? 0) +
+          (json.summary?.customers?.upserted ?? 0) +
+          (json.summary?.orders?.inserted ?? 0)
+        : (json.imported ?? 0);
+      const failedCount = isDn ? (json.summary?.errors?.length ?? 0) : (json.failed ?? 0);
+      toast.success(`Синхронізовано: ${importedCount} рядків`, {
+        description: failedCount > 0 ? `Помилок: ${failedCount}` : undefined,
       });
       qc.invalidateQueries({ queryKey: ["import-jobs", currentTenantId] });
       qc.invalidateQueries({ queryKey: ["tenant-integrations", currentTenantId] });
