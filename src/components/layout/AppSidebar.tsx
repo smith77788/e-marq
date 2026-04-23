@@ -190,6 +190,12 @@ const ADMIN_SYSTEM: NavGroup = {
       tone: "text-accent",
     },
     {
+      labelKey: "sb.adminPermissions" as TKey,
+      to: "/admin/permissions",
+      icon: ShieldCheck,
+      tone: "text-primary",
+    },
+    {
       labelKey: "sb.topupRequests" as TKey,
       to: "/admin/topup-requests",
       icon: CreditCard,
