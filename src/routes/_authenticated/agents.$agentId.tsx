@@ -45,6 +45,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { getAgentMeta, type AgentMeta } from "@/lib/acos/agentCatalog";
 import { humanizeAgentId } from "@/lib/acos/agentLabels";
 import { AgentPermissionsCard } from "@/components/owner/AgentPermissionsCard";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
+import { useAuth } from "@/hooks/useAuth";
+import { AgentsPaywall } from "@/components/owner/AgentsPaywall";
 
 export const Route = createFileRoute("/_authenticated/agents/$agentId")({
   head: () => ({
@@ -125,8 +128,15 @@ function AgentDetailPage() {
 
   const { t, lang } = useT();
   const { current, loading: tenantLoading } = useTenantContext();
+  const { isSuperAdmin } = useAuth();
   const tenantId = current?.tenant_id ?? null;
+  const gate = useSubscriptionGate(tenantId);
+  const showPaywall = !isSuperAdmin && !!tenantId && !gate.loading && !gate.hasAccess;
   const [running, setRunning] = useState(false);
+
+  if (showPaywall && tenantId) {
+    return <AgentsPaywall tenantId={tenantId} status={gate.status} />;
+  }
 
   const fourteenDaysAgo = useMemo(
     () => new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
