@@ -92,7 +92,8 @@ export const Route = createFileRoute("/api/telegram/user/queue-action")({
             target: target as never,
             status: "queued",
             scheduled_for: new Date().toISOString(),
-            source: "manual",
+            origin: "manual",
+            requested_by: auth.userId,
           } as never)
           .select("id, scheduled_for")
           .single();
