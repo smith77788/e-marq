@@ -36,6 +36,14 @@ import {
   marqClientTs,
   agentsReadme,
 } from "./templates";
+import {
+  nicheBriefMd,
+  nicheSeedJson,
+  lovableRemixPrompt,
+  pagesInventoryMd,
+  readNicheProfile,
+  isWizardComplete,
+} from "./nicheTemplates";
 
 export type BuiltArchive = {
   bytes: Uint8Array;
@@ -61,7 +69,17 @@ export async function buildBrandArchive(ctx: SafeBrandContext): Promise<BuiltArc
   zip.file(".env.example", envExample(ctx));
 
   // Brand content for one-shot Lovable-chat seeding.
-  zip.file("seed.json", seedJson(ctx));
+  // Use niche-aware seed if the wizard was completed; otherwise legacy seed.
+  const niche = readNicheProfile(ctx);
+  const wizardOk = isWizardComplete(niche);
+  zip.file("seed.json", wizardOk ? nicheSeedJson(ctx) : seedJson(ctx));
+
+  // Niche-tailored docs (only when wizard completed).
+  if (wizardOk) {
+    zip.file("NICHE_BRIEF.md", nicheBriefMd(ctx));
+    zip.file("LOVABLE_REMIX_PROMPT.md", lovableRemixPrompt(ctx));
+    zip.file("PAGES_INVENTORY.md", pagesInventoryMd(ctx));
+  }
 
   // Legacy theme overlay kept for users who only want the color tokens.
   zip.file("theme.css", themeCss(ctx));

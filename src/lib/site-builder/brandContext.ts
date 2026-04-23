@@ -41,6 +41,7 @@ export type SafeBrandContext = {
     hero_copy: string | null;
     about_copy: string | null;
     legal_pages: Record<string, unknown>;
+    niche_profile: Record<string, unknown>;
   };
 };
 
@@ -102,6 +103,10 @@ export async function loadSafeBrandContext(
       hero_copy: profile.hero_copy,
       about_copy: profile.about_copy,
       legal_pages: (profile.legal_pages ?? {}) as Record<string, unknown>,
+      niche_profile: ((profile as { niche_profile?: unknown }).niche_profile ?? {}) as Record<
+        string,
+        unknown
+      >,
     },
   };
 }
