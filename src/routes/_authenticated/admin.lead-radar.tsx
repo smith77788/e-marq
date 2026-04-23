@@ -454,7 +454,7 @@ function Content() {
   );
 }
 
-function ProspectRow({ prospect }: { prospect: Prospect }) {
+function ProspectRow({ prospect, tenantId }: { prospect: Prospect; tenantId: string | null }) {
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
 
