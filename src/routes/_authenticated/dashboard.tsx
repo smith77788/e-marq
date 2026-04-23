@@ -92,12 +92,20 @@ function DashboardPage() {
               })}
             </ul>
           ) : (
-            <div className="space-y-3 text-sm text-muted-foreground">
-              <p>Поки немає жодного магазину.</p>
-              {isSuperAdmin && (
-                <Link to="/admin/tenants" className="font-medium text-primary hover:underline">
-                  Створити перший магазин →
+            <div className="space-y-4 text-sm text-muted-foreground">
+              <p>Поки немає жодного магазину. Створіть свій бізнес — займе хвилину.</p>
+              <Button asChild>
+                <Link to="/onboarding">
+                  <Wand2 className="mr-2 h-4 w-4" />
+                  Створити бізнес
                 </Link>
+              </Button>
+              {isSuperAdmin && (
+                <p className="text-xs">
+                  <Link to="/admin/tenants" className="text-primary hover:underline">
+                    Або відкрити список усіх магазинів (admin) →
+                  </Link>
+                </p>
               )}
             </div>
           )}
