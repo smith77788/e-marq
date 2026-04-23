@@ -52,6 +52,7 @@ function AdminUsersPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [confirmTarget, setConfirmTarget] = useState<UserRow | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   const usersQuery = useQuery({
     queryKey: ["admin-users"],
