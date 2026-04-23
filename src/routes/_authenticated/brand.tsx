@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Bot, Settings, Wand2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Bot, Clock, Settings, ShieldAlert, Wand2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
