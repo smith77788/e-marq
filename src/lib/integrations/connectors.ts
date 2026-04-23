@@ -263,7 +263,8 @@ async function pullBitrix24(input: ConnectorPullInput): Promise<ConnectorPullRes
 
   const method = input.entityKind === "customers" ? "crm.contact.list" : "crm.deal.list";
   const url = `${base}/${method}.json?start=0`;
-  const res = await fetch(url);
+  // Bitrix24 self-hosted часто на http — дозволяємо, але safeFetch блокує приватні IP.
+  const res = await safeFetch(url, { allowHttp: true });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`Bitrix24 API ${res.status}: ${body.slice(0, 300)}`);
@@ -312,7 +313,7 @@ async function pullPoster(input: ConnectorPullInput): Promise<ConnectorPullResul
         : "transactions.getTransactions";
 
   const url = `https://${domain}/api/${method}?token=${encodeURIComponent(token)}&num=${limit}`;
-  const res = await fetch(url);
+  const res = await safeFetch(url);
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`Poster API ${res.status}: ${body.slice(0, 300)}`);
