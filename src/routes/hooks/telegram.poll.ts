@@ -245,6 +245,7 @@ async function processMessage(u: TgUpdate, appOrigin: string): Promise<void> {
       true,
     );
     return;
+  }
 
   // ---- /start <slug> binds chat → tenant (customer flow) ----
   const startMatch = text.match(/^\/start\s+([a-z0-9_-]+)/i);
