@@ -49,8 +49,8 @@ const FIELD_LABEL: Record<string, string> = {
   max_products: "Скільки товарів максимум",
   max_orders_per_month: "Замовлень на місяць",
   max_customers: "Клієнтів у базі",
-  max_ai_runs_per_month: "Запусків ШІ-помічників на місяць",
-  max_ai_credits_monthly_grant: "Кредитів ШІ щомісяця",
+  max_ai_runs_per_month: "Запусків агентів/міс (legacy, лиши порожнім = ∞)",
+  max_ai_credits_monthly_grant: "Бонус кредитів балансу при переході (для add-ons)",
   max_outbound_messages_per_month: "Повідомлень клієнтам на місяць",
   max_storage_mb: "Місце для файлів (МБ)",
   max_team_members: "Учасників у команді",
@@ -244,10 +244,11 @@ function PlanCard({
               Клієнтів: <strong>{plan.max_customers ?? "∞"}</strong>
             </div>
             <div>
-              Запусків ШІ/міс: <strong>{plan.max_ai_runs_per_month ?? "∞"}</strong>
+              Агентів дозволено:{" "}
+              <strong>{plan.agents_allowed.length === 0 ? "усі" : plan.agents_allowed.length}</strong>
             </div>
             <div>
-              Кредитів ШІ:{" "}
+              Бонус кредитів балансу:{" "}
               <strong>{plan.max_ai_credits_monthly_grant.toLocaleString("uk-UA")}</strong>
             </div>
             <div>
