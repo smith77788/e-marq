@@ -182,6 +182,14 @@ function BrandSiteBuilderPage() {
 
   // 2) Brand profile
   const tenantId = urlTenant ?? currentTenantId ?? current?.tenant_id ?? tenants[0]?.tenant_id ?? null;
+  const activeTenant = useMemo(
+    () =>
+      current ??
+      tenants.find((tt) => tt.tenant_id === tenantId) ??
+      tenants[0] ??
+      null,
+    [current, tenants, tenantId],
+  );
   useEffect(() => {
     if (tenantId && currentTenantId !== tenantId) setCurrentTenantId(tenantId);
   }, [tenantId, currentTenantId, setCurrentTenantId]);
@@ -221,10 +229,10 @@ function BrandSiteBuilderPage() {
   useEffect(() => {
     if (profileQuery.data) {
       setDraft(profileToDraft(profileQuery.data));
-    } else if (profileQuery.isFetched && current) {
-      setDraft(emptyDraft(current.tenant_name));
+    } else if (profileQuery.isFetched && activeTenant) {
+      setDraft(emptyDraft(activeTenant.tenant_name));
     }
-  }, [profileQuery.data, profileQuery.isFetched, current]);
+  }, [profileQuery.data, profileQuery.isFetched, activeTenant]);
 
   const saveMut = useMutation({
     mutationFn: async (next: ProfileDraft) => {
@@ -326,7 +334,7 @@ function BrandSiteBuilderPage() {
     generateMut.mutate();
   };
 
-  if (loading) {
+  if (loading || (!activeTenant && tenants.length === 0 && (templateQuery.isLoading || profileQuery.isLoading))) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-9 w-64" />
@@ -335,7 +343,7 @@ function BrandSiteBuilderPage() {
     );
   }
 
-  if (!current) {
+  if (!activeTenant) {
     return (
       <Card>
         <CardHeader>
