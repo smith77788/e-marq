@@ -6,13 +6,24 @@
  * doesn't require editing 6 files.
  */
 import { Link } from "@tanstack/react-router";
-import { Sparkles } from "lucide-react";
+import { Menu, Sparkles } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 import { useT } from "@/lib/i18n";
 
 export function MarketingHeader() {
   const { t } = useT();
+  const [open, setOpen] = useState(false);
+  const navItems = [
+    { to: "/how-it-works" as const, label: t("site.nav.how") },
+    { to: "/agents" as const, label: t("site.nav.agents") },
+    { to: "/pricing" as const, label: t("site.nav.pricing") },
+    { to: "/about" as const, label: t("site.nav.about") },
+    { to: "/handbook" as const, label: t("site.nav.handbook") },
+    { to: "/contact" as const, label: t("site.nav.contact") },
+  ];
   return (
     <header className="border-b border-border bg-background/70 backdrop-blur sticky top-0 z-30">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
