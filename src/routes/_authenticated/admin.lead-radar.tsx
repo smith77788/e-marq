@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import {
   Filter,
   Globe,
+  Instagram,
   Loader2,
   Magnet,
   Play,
@@ -31,6 +32,7 @@ import { OutreachHunterSection } from "@/components/admin/OutreachHunterTabs";
 import { MagnetPreviewDialog } from "@/components/admin/MagnetPreviewDialog";
 import { TelegramConnectCard } from "@/components/owner/TelegramConnectCard";
 import { TelegramUserConnectCard } from "@/components/owner/TelegramUserConnectCard";
+import { TelegramUserDmDialog } from "@/components/owner/TelegramUserDmDialog";
 import { friendlyAgentSummary, friendlyAgentError, agentLabel } from "@/lib/outreach/agentSummary";
 
 export const Route = createFileRoute("/_authenticated/admin/lead-radar")({
@@ -112,11 +114,11 @@ const STATUS_TONE: Record<string, string> = {
 function summarizeBatchResult(payload: Record<string, unknown>): string {
   const summary = (payload.summary ?? {}) as Record<string, unknown>;
   const tenants = Object.values(summary);
-  const inserted = tenants.reduce((sum, item) => {
+  const inserted = tenants.reduce<number>((sum, item) => {
     const stats = (item as { stats?: Record<string, unknown> })?.stats ?? {};
     return sum + (typeof stats.inserted === "number" ? stats.inserted : 0);
   }, 0);
-  const candidates = tenants.reduce((sum, item) => {
+  const candidates = tenants.reduce<number>((sum, item) => {
     const stats = (item as { stats?: Record<string, unknown> })?.stats ?? {};
     return sum + (typeof stats.candidates === "number" ? stats.candidates : 0);
   }, 0);
@@ -162,12 +164,11 @@ function Content() {
   const magnets = useQuery({
     queryKey: ["lead-magnets", currentTenantId],
     queryFn: async () => {
-      let q = supabase
+      const q = supabase
         .from("lead_magnets")
         .select("id, slug, title, topic, views_count, signups_attributed, is_published, created_at")
         .order("created_at", { ascending: false })
         .limit(50);
-      if (currentTenantId) q = q.eq("tenant_id", currentTenantId);
       const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as unknown as Magnet[];
@@ -282,10 +283,10 @@ function Content() {
             size="sm"
             variant="outline"
             disabled={runAgent.isPending}
-            onClick={() => runAgent.mutate("web-prospector")}
+            onClick={() => runAgent.mutate("lead-radar-scan")}
             className="w-full sm:w-auto"
           >
-            {runAgent.isPending && runAgent.variables === "web-prospector" ? (
+            {runAgent.isPending && runAgent.variables === "lead-radar-scan" ? (
               <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
             ) : (
               <Globe className="mr-1.5 h-3.5 w-3.5" />
@@ -296,10 +297,10 @@ function Content() {
             size="sm"
             variant="outline"
             disabled={runAgent.isPending}
-            onClick={() => runAgent.mutate("social-engager")}
+            onClick={() => runAgent.mutate("lead-radar-compose")}
             className="w-full sm:w-auto"
           >
-            {runAgent.isPending && runAgent.variables === "social-engager" ? (
+            {runAgent.isPending && runAgent.variables === "lead-radar-compose" ? (
               <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
             ) : (
               <Instagram className="mr-1.5 h-3.5 w-3.5" />
@@ -415,7 +416,7 @@ function Content() {
                     <div key={o.id} className="px-4 py-2 text-sm">
                       <div className="flex flex-wrap items-center gap-2 text-xs">
                         <Badge variant="outline">{o.channel}</Badge>
-                        <Badge variant="secondary">{o.intent}</Badge>
+                        <Badge variant="secondary">{o.action_type}</Badge>
                         <Badge
                           variant="outline"
                           className={
@@ -432,14 +433,29 @@ function Content() {
                           {new Date(o.created_at).toLocaleString("uk-UA")}
                         </span>
                       </div>
-                      {typeof o.payload?.subject === "string" && (
-                        <p className="mt-1 text-foreground">{String(o.payload.subject)}</p>
-                      )}
-                      {typeof o.payload?.body === "string" && (
-                        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
-                          {String(o.payload.body)}
-                        </p>
-                      )}
+                      <p className="mt-1 line-clamp-2 text-foreground">{o.draft_text}</p>
+                      <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground">
+                        <a
+                          href={o.landing_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          лендинг
+                        </a>
+                        {o.promo_code && <span>promo: {o.promo_code}</span>}
+                        {o.posted_url && (
+                          <a
+                            href={o.posted_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-success hover:underline"
+                          >
+                            публікація
+                          </a>
+                        )}
+                        {o.failed_reason && <span className="text-destructive">{o.failed_reason}</span>}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -518,7 +534,7 @@ function ProspectRow({ prospect, tenantId }: { prospect: Prospect; tenantId: str
   const updateStatus = async (next: string) => {
     setBusy(true);
     const { error } = await supabase
-      .from("lead_prospects")
+      .from("outreach_leads")
       .update({ status: next })
       .eq("id", prospect.id);
     setBusy(false);
@@ -537,13 +553,13 @@ function ProspectRow({ prospect, tenantId }: { prospect: Prospect; tenantId: str
       toast.error("Авторизуйтеся");
       return;
     }
-    const r = await fetch(`/hooks/agents/social-engager`, {
+    const r = await fetch(`/hooks/agents/outreach-composer`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify({ prospect_id: prospect.id }),
+      body: JSON.stringify({ tenant_id: prospect.tenant_id, lead_id: prospect.id }),
     });
     setBusy(false);
     if (!r.ok) toast.error("Помилка outreach");
@@ -559,7 +575,9 @@ function ProspectRow({ prospect, tenantId }: { prospect: Prospect; tenantId: str
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate text-sm font-semibold text-foreground">{prospect.name}</p>
+            <p className="truncate text-sm font-semibold text-foreground">
+              {prospect.title ?? prospect.author_handle ?? prospect.source_url}
+            </p>
             <Badge variant="outline" className={STATUS_TONE[prospect.status] ?? "border-border"}>
               {STATUS_LABEL[prospect.status] ?? prospect.status}
             </Badge>
@@ -568,37 +586,31 @@ function ProspectRow({ prospect, tenantId }: { prospect: Prospect; tenantId: str
               className="font-mono text-[10px]"
               title="Оцінка релевантності 0–100"
             >
-              відповідність {prospect.fit_score}
+              intent {(prospect.intent_score * 100).toFixed(0)}
             </Badge>
-            {prospect.niche && (
+            {prospect.language && (
               <Badge variant="outline" className="text-[10px]">
-                {prospect.niche}
+                {prospect.language}
               </Badge>
             )}
-            <span className="text-xs text-muted-foreground">{prospect.source}</span>
+            <span className="text-xs text-muted-foreground">{prospect.channel}</span>
           </div>
+          <p className="line-clamp-3 text-sm text-muted-foreground">{prospect.content}</p>
           <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-            {prospect.website_url && (
-              <a
-                href={prospect.website_url}
-                target="_blank"
-                rel="noreferrer"
-                className="text-primary hover:underline"
-              >
-                {prospect.website_url}
-              </a>
-            )}
-            {prospect.instagram_handle && (
-              <a
-                href={`https://instagram.com/${prospect.instagram_handle.replace(/^@/, "")}`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-primary hover:underline"
-              >
-                @{prospect.instagram_handle.replace(/^@/, "")}
-              </a>
-            )}
-            {prospect.email && <span>✉ {prospect.email}</span>}
+            <a
+              href={prospect.source_url}
+              target="_blank"
+              rel="noreferrer"
+              className="text-primary hover:underline"
+            >
+              {prospect.source_url}
+            </a>
+            {prospect.author_handle && <span>автор: {prospect.author_handle}</span>}
+            {(prospect.matched_keywords ?? []).slice(0, 5).map((keyword) => (
+              <Badge key={keyword} variant="secondary" className="text-[10px]">
+                {keyword}
+              </Badge>
+            ))}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-1.5 sm:flex-nowrap">
@@ -609,24 +621,18 @@ function ProspectRow({ prospect, tenantId }: { prospect: Prospect; tenantId: str
           <TelegramUserDmDialog
             tenantId={tenantId}
             prospectId={prospect.id}
-            prospectName={prospect.name}
-            defaultPeer={
-              typeof prospect.signals?.telegram_handle === "string"
-                ? String(prospect.signals.telegram_handle)
-                : prospect.instagram_handle
-                  ? `@${prospect.instagram_handle.replace(/^@/, "")}`
-                  : ""
-            }
-            defaultText={`Привіт! Знайшов ваш бренд "${prospect.name}" — у MARQ є кілька ідей, що можуть зекономити вам години роботи. Цікаво коротко обмінятись?`}
+            prospectName={prospect.title ?? prospect.author_handle ?? "лід"}
+            defaultPeer={prospect.author_handle ? `@${prospect.author_handle.replace(/^@/, "")}` : ""}
+            defaultText={`Привіт! Побачив ваш запит${prospect.title ? ` «${prospect.title}»` : ""} — у MARQ є кілька ідей, що можуть зекономити години ручної роботи. Цікаво коротко обмінятись?`}
           />
           <Button
             size="sm"
             variant="outline"
             disabled={busy}
-            onClick={() => updateStatus("qualified")}
+            onClick={() => updateStatus("queued")}
           >
             <Play className="mr-1 h-3.5 w-3.5" />
-            Відібрати
+            У чергу
           </Button>
           <Button
             size="sm"
