@@ -333,7 +333,7 @@ function Content() {
               <CardContent className="p-0">
                 <div className="divide-y divide-border">
                   {filteredProspects.map((p) => (
-                    <ProspectRow key={p.id} prospect={p} />
+                    <ProspectRow key={p.id} prospect={p} tenantId={telegramTenantId} />
                   ))}
                 </div>
               </CardContent>
