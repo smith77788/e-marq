@@ -82,13 +82,22 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
 
   const tenants = useMemo(() => {
     const own = tenantsQuery.data ?? [];
-    if (own.length > 0) return own;
-    if (isSuperAdmin && adminFallbackQuery.data) return adminFallbackQuery.data;
-    return own;
+    const fallback = isSuperAdmin ? (adminFallbackQuery.data ?? []) : [];
+    if (own.length === 0) return fallback;
+    if (fallback.length === 0) return own;
+    // Merge: own memberships first (priority), then fallback tenants the user
+    // is not yet a member of. Super-admins who also own a brand see their own
+    // brand as the default — not the alphabetically-first tenant.
+    const ownIds = new Set(own.map((t) => t.tenant_id));
+    const extra = fallback.filter((t) => !ownIds.has(t.tenant_id));
+    return [...own, ...extra];
   }, [tenantsQuery.data, adminFallbackQuery.data, isSuperAdmin]);
 
-  // Auto-select first tenant if nothing chosen yet, or if stored id is not in list
+  // Auto-select first tenant if nothing chosen yet, or if stored id is not in list.
+  // Wait for the membership query to settle before auto-picking so super-admins
+  // who own a brand don't briefly land on an alphabetically-first fallback tenant.
   useEffect(() => {
+    if (tenantsQuery.isLoading) return;
     if (tenants.length === 0) return;
     if (!currentTenantId || !tenants.find((t) => t.tenant_id === currentTenantId)) {
       const next = tenants[0].tenant_id;
@@ -99,7 +108,7 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
         /* ignore */
       }
     }
-  }, [tenants, currentTenantId]);
+  }, [tenants, currentTenantId, tenantsQuery.isLoading]);
 
   const setCurrentTenantId = useCallback((id: string) => {
     _setCurrent(id);
