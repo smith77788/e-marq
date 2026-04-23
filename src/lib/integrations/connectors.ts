@@ -16,6 +16,16 @@
 import Papa from "papaparse";
 import type { EntityKind, ParsedRow } from "./parser";
 import { safeFetch } from "./safeFetch";
+import {
+  type DnOrder,
+  type DnPartner,
+  type DnProduct,
+  listOrders,
+  listPartners,
+  listProducts,
+  unwrapList,
+  verifyApiKey as dntradeVerifyApiKey,
+} from "@/lib/dntrade/client";
 
 export type ConnectorPullInput = {
   provider: string;
@@ -448,6 +458,64 @@ function identityMapping(entityKind: EntityKind): Record<string, string> {
   return m;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DN TRADE (адаптер на існуючий typed-client; верифікація + пробний pull)
+// Повний sync (повний/інкрементальний/dry-run) живе у /hooks/integrations/dntrade-sync.
+// Цей адаптер дає universal-інтерфейс «verify» і легкий pull для перевірки.
+// ─────────────────────────────────────────────────────────────────────────────
+async function pullDnTrade(input: ConnectorPullInput): Promise<ConnectorPullResult> {
+  const apiKey = ensure(input.credentials, "DN Trade ApiKey");
+  const limit = Math.min(input.limit ?? 50, 50);
+
+  if (input.entityKind === "products") {
+    const resp = await listProducts(apiKey, { limit, offset: 0 });
+    const items = unwrapList<DnProduct>(resp, "products").slice(0, limit);
+    const rows: ParsedRow[] = items.map((p) => ({
+      name: asString(p.title),
+      sku: asString(p.sku ?? p.code),
+      price_cents: centsFromMajor(p.price),
+      stock: Math.max(0, Math.floor(Number(p.balance ?? 0))),
+      description: asString(p.short_description ?? p.description),
+      image_url: asString(p.image_path ?? p.images?.[0]),
+      currency: "UAH",
+    }));
+    return { rows, mapping: identityMapping("products") };
+  }
+
+  if (input.entityKind === "customers") {
+    const resp = await listPartners(apiKey, { limit, offset: 0 });
+    const items = unwrapList<DnPartner>(resp, "partners").slice(0, limit);
+    const rows: ParsedRow[] = items.map((c) => ({
+      name: asString(c.title ?? c.full_title) || asString(c.email),
+      email: asString(c.email),
+      phone: asString(c.phone_number),
+      telegram_username: "",
+    }));
+    return { rows, mapping: identityMapping("customers") };
+  }
+
+  // orders
+  const resp = await listOrders(apiKey, { limit, offset: 0 });
+  const items = unwrapList<DnOrder>(resp, "orders").slice(0, limit);
+  const rows: ParsedRow[] = items.map((o) => ({
+    customer_name: asString(o.personal_info?.name) || `Замовлення #${asString(o.number ?? o.external_id)}`,
+    customer_email: "",
+    total_cents: centsFromMajor(o.total ?? o.amount),
+    currency: "UAH",
+    status: o.paid ? "paid" : asString(o.status || "pending"),
+    payment_method: "manual",
+    external_id: asString(o.external_id),
+  }));
+  return { rows, mapping: identityMapping("orders") };
+}
+
+/** Швидка валідація DN Trade ApiKey (через дешевий /products/stores). */
+export async function verifyDnTradeKey(apiKey: string): Promise<{ ok: boolean; error?: string }> {
+  const r = await dntradeVerifyApiKey(apiKey);
+  if (r.ok) return { ok: true };
+  return { ok: false, error: `DN Trade ${r.status}: ${r.message}` };
+}
+
 export const CONNECTOR_REGISTRY: Record<
   string,
   (input: ConnectorPullInput) => Promise<ConnectorPullResult>
@@ -459,6 +527,7 @@ export const CONNECTOR_REGISTRY: Record<
   poster_pos: pullPoster,
   google_sheets: pullGoogleSheets,
   rest_api: pullRest,
+  dntrade: pullDnTrade,
 };
 
 export function isConnectorSupported(provider: string): boolean {
