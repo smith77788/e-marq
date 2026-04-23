@@ -1,11 +1,17 @@
 /**
- * Outreach Hunter — порт з Basic Food, multi-tenant edition.
- * Рендериться як набір вкладок усередині Lead Radar.
+ * Outreach Hunter — multi-tenant edition (2026 редакція).
  *
- * Канали: Reddit, Google, Telegram, Instagram + спільний composer/executor.
- * Кнопки запускають серверні агенти (POST /hooks/agents/outreach-*).
+ * Покращення:
+ *  - усі запити фільтруються по поточному тенанту (super-admin перемикає бренд через TenantSwitcher);
+ *  - кнопка «Оновити» робить справжній refetch + показує крутилку та timestamp останнього оновлення;
+ *  - auto-refresh раз на 60 сек, коли вкладка активна;
+ *  - оптимістичне оновлення при відхиленні/підтвердженні (UI миттєво реагує);
+ *  - bulk-дії: «Згенерувати драфти для всіх нових», «Відхилити всі видимі»;
+ *  - лічильники по статусах прямо у фільтрах;
+ *  - запуск hunter-агентів передає tenant_id у body, щоб скан був прицільний;
+ *  - людський empty-state, який пояснює наступний крок.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -17,12 +23,12 @@ import {
   Instagram,
   Loader2,
   MessageSquare,
-  Play,
   RefreshCw,
   Search,
   Send,
   Shield,
   Sparkles,
+  Trash2,
   Wand2,
   X,
 } from "lucide-react";
@@ -34,6 +40,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenantContext } from "@/hooks/useTenantContext";
 import { friendlyAgentSummary, friendlyAgentError, agentLabel } from "@/lib/outreach/agentSummary";
 
 // ───────── Типи ─────────
@@ -89,10 +96,10 @@ type OutreachMetric = {
 };
 
 const HUNTERS = [
-  { id: "outreach-reddit-hunter", label: "Reddit пошук", icon: Search, tone: "default" },
-  { id: "outreach-google-hunter", label: "Google пошук", icon: Globe, tone: "default" },
-  { id: "outreach-telegram-hunter", label: "Telegram пошук", icon: MessageSquare, tone: "default" },
-  { id: "outreach-instagram-hunter", label: "Instagram пошук", icon: Instagram, tone: "default" },
+  { id: "outreach-reddit-hunter", label: "Reddit пошук", icon: Search },
+  { id: "outreach-google-hunter", label: "Google пошук", icon: Globe },
+  { id: "outreach-telegram-hunter", label: "Telegram пошук", icon: MessageSquare },
+  { id: "outreach-instagram-hunter", label: "Instagram пошук", icon: Instagram },
 ] as const;
 
 const PIPELINE = [
@@ -173,7 +180,7 @@ const STATUS_TONE_ACTION: Record<string, string> = {
 };
 
 // ───────── HOOK: запуск агента ─────────
-function useRunAgent() {
+function useRunAgent(tenantId: string | null) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (agent: string) => {
@@ -185,7 +192,7 @@ function useRunAgent() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify(tenantId ? { tenant_id: tenantId } : {}),
       });
       const json = (await r.json().catch(() => ({}))) as Record<string, unknown>;
       if (!r.ok) throw new Error(String(json.error ?? `HTTP ${r.status}`));
@@ -195,31 +202,116 @@ function useRunAgent() {
       toast.success(`${agentLabel(agent)} відпрацював`, {
         description: friendlyAgentSummary(agent, payload),
       });
-      qc.invalidateQueries({ queryKey: ["outreach-leads"] });
-      qc.invalidateQueries({ queryKey: ["outreach-actions"] });
-      qc.invalidateQueries({ queryKey: ["outreach-metrics"] });
+      qc.invalidateQueries({ queryKey: ["outreach-leads"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["outreach-actions"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["outreach-metrics"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["outreach-counts"], refetchType: "active" });
     },
     onError: (e: Error) =>
       toast.error("Не вдалося запустити агента", { description: friendlyAgentError(e.message) }),
   });
 }
 
+/** Кнопка справжнього refetch: показує спінер і час останнього оновлення. */
+function RefreshButton({
+  isFetching,
+  dataUpdatedAt,
+  onRefetch,
+}: {
+  isFetching: boolean;
+  dataUpdatedAt: number;
+  onRefetch: () => void;
+}) {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((n) => n + 1), 30_000);
+    return () => clearInterval(id);
+  }, []);
+  // Force re-render every 30s so the relative timestamp stays fresh
+  void tick;
+
+  const ago = useMemo(() => {
+    if (!dataUpdatedAt) return "ще не оновлювалось";
+    const sec = Math.max(0, Math.round((Date.now() - dataUpdatedAt) / 1000));
+    if (sec < 5) return "щойно";
+    if (sec < 60) return `${sec} с тому`;
+    const min = Math.round(sec / 60);
+    if (min < 60) return `${min} хв тому`;
+    return `${Math.round(min / 60)} год тому`;
+  }, [dataUpdatedAt, tick]);
+
+  return (
+    <div className="ml-auto flex items-center gap-2">
+      <span className="text-[10px] text-muted-foreground hidden sm:inline">Оновлено {ago}</span>
+      <Button variant="outline" size="sm" onClick={onRefetch} disabled={isFetching}>
+        {isFetching ? (
+          <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+        )}
+        Оновити
+      </Button>
+    </div>
+  );
+}
+
+/** Спільний хук: лічильники по статусах для активного тенанту. */
+function useStatusCounts(
+  table: "outreach_leads" | "outreach_actions",
+  tenantId: string | null,
+  statuses: readonly string[],
+) {
+  return useQuery({
+    queryKey: ["outreach-counts", table, tenantId],
+    enabled: !!tenantId,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const result: Record<string, number> = { all: 0 };
+      const all = await supabase
+        .from(table)
+        .select("*", { count: "exact", head: true })
+        .eq("tenant_id", tenantId!);
+      result.all = all.count ?? 0;
+      await Promise.all(
+        statuses
+          .filter((s) => s !== "all")
+          .map(async (s) => {
+            const { count } = await supabase
+              .from(table)
+              .select("*", { count: "exact", head: true })
+              .eq("tenant_id", tenantId!)
+              .eq("status", s);
+            result[s] = count ?? 0;
+          }),
+      );
+      return result;
+    },
+  });
+}
+
 // ───────── ВКЛАДКА: leads ─────────
 export function OutreachLeadsTab() {
   const qc = useQueryClient();
+  const { currentTenantId, current } = useTenantContext();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [channelFilter, setChannelFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
-  const runAgent = useRunAgent();
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const runAgent = useRunAgent(currentTenantId);
+  const counts = useStatusCounts("outreach_leads", currentTenantId, LEAD_STATUSES);
 
   const leads = useQuery({
-    queryKey: ["outreach-leads", statusFilter, channelFilter],
+    queryKey: ["outreach-leads", currentTenantId, statusFilter, channelFilter],
+    enabled: !!currentTenantId,
+    refetchInterval: 60_000,
     queryFn: async () => {
       let q = supabase
         .from("outreach_leads")
         .select(
           "id, tenant_id, channel, source_url, source_platform_id, author_handle, title, content, language, intent_score, matched_keywords, status, fingerprint, discovered_at",
         )
+        .eq("tenant_id", currentTenantId!)
+        .order("intent_score", { ascending: false })
         .order("discovered_at", { ascending: false })
         .limit(200);
       if (statusFilter !== "all") q = q.eq("status", statusFilter);
@@ -241,30 +333,97 @@ export function OutreachLeadsTab() {
     );
   }, [leads.data, search]);
 
+  const bulkReject = async () => {
+    const ids = filtered.filter((l) => l.status !== "rejected").map((l) => l.id);
+    if (ids.length === 0) return;
+    if (!confirm(`Відхилити ${ids.length} лідів(а)?`)) return;
+    setBulkBusy(true);
+    const { error } = await supabase
+      .from("outreach_leads")
+      .update({ status: "rejected" } as never)
+      .in("id", ids);
+    setBulkBusy(false);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(`Відхилено ${ids.length}`);
+      qc.invalidateQueries({ queryKey: ["outreach-leads"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["outreach-counts"], refetchType: "active" });
+    }
+  };
+
+  const bulkCompose = async () => {
+    if (!currentTenantId) return;
+    setBulkBusy(true);
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      if (!session) throw new Error("Авторизуйтеся");
+      const r = await fetch(`/hooks/agents/outreach-composer`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ tenant_id: currentTenantId, limit: 25 }),
+      });
+      const json = (await r.json().catch(() => ({}))) as Record<string, unknown>;
+      if (!r.ok) throw new Error(String(json.error ?? `HTTP ${r.status}`));
+      toast.success("Composer відпрацював", {
+        description: friendlyAgentSummary("outreach-composer", json),
+      });
+      qc.invalidateQueries({ queryKey: ["outreach-leads"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["outreach-actions"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["outreach-counts"], refetchType: "active" });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  if (!currentTenantId) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center text-sm text-muted-foreground">
+          Виберіть бренд у перемикачі вгорі — Outreach Hunter працює пер-тенантно.
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
-        {HUNTERS.map((h) => {
-          const Icon = h.icon;
-          return (
-            <Button
-              key={h.id}
-              size="sm"
-              variant="outline"
-              disabled={runAgent.isPending}
-              onClick={() => runAgent.mutate(h.id)}
-            >
-              {runAgent.isPending && runAgent.variables === h.id ? (
-                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Icon className="mr-1.5 h-3.5 w-3.5" />
-              )}
-              {h.label}
-            </Button>
-          );
-        })}
-      </div>
+      {/* Hunter buttons */}
+      <Card>
+        <CardContent className="space-y-2 p-3 sm:p-4">
+          <p className="text-xs text-muted-foreground">
+            Запустити пошук для бренду <span className="font-medium text-foreground">{current?.tenant_name ?? ""}</span>
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            {HUNTERS.map((h) => {
+              const Icon = h.icon;
+              const busy = runAgent.isPending && runAgent.variables === h.id;
+              return (
+                <Button
+                  key={h.id}
+                  size="sm"
+                  variant="outline"
+                  disabled={runAgent.isPending}
+                  onClick={() => runAgent.mutate(h.id)}
+                >
+                  {busy ? (
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Icon className="mr-1.5 h-3.5 w-3.5" />
+                  )}
+                  {h.label}
+                </Button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
+      {/* Filters */}
       <Card>
         <CardContent className="space-y-3 p-3 sm:p-4">
           <div className="flex flex-wrap items-center gap-2">
@@ -287,33 +446,53 @@ export function OutreachLeadsTab() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-muted-foreground">Статус:</span>
-            {LEAD_STATUSES.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setStatusFilter(s)}
-                className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-                  statusFilter === s
-                    ? "border-primary bg-primary/10 text-foreground"
-                    : "border-border bg-card text-muted-foreground hover:bg-muted/50"
-                }`}
-              >
-                {STATUS_LABEL_LEAD[s] ?? s}
-              </button>
-            ))}
+            {LEAD_STATUSES.map((s) => {
+              const n = counts.data?.[s] ?? 0;
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setStatusFilter(s)}
+                  className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                    statusFilter === s
+                      ? "border-primary bg-primary/10 text-foreground"
+                      : "border-border bg-card text-muted-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  {STATUS_LABEL_LEAD[s] ?? s}
+                  <span className="ml-1.5 text-[10px] opacity-70">{n}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
             <Input
               placeholder="Пошук по тексту, автору, тегу…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-xs"
             />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => qc.invalidateQueries({ queryKey: ["outreach-leads"] })}
-            >
-              <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Оновити
+            <Button size="sm" variant="outline" disabled={bulkBusy} onClick={bulkCompose}>
+              {bulkBusy ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Wand2 className="mr-1.5 h-3.5 w-3.5" />}
+              Згенерувати драфти для нових
             </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={bulkBusy || filtered.length === 0}
+              onClick={bulkReject}
+              className="text-muted-foreground"
+            >
+              <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Відхилити видимі
+            </Button>
+            <RefreshButton
+              isFetching={leads.isFetching || counts.isFetching}
+              dataUpdatedAt={leads.dataUpdatedAt}
+              onRefetch={() => {
+                void leads.refetch();
+                void counts.refetch();
+              }}
+            />
           </div>
         </CardContent>
       </Card>
@@ -322,8 +501,23 @@ export function OutreachLeadsTab() {
         <Skeleton className="h-48" />
       ) : filtered.length === 0 ? (
         <Card>
-          <CardContent className="p-8 text-center text-sm text-muted-foreground">
-            Поки що немає лідів. Запустіть будь-який пошуковий агент вище.
+          <CardContent className="space-y-2 p-8 text-center text-sm text-muted-foreground">
+            <p>Поки що немає лідів за обраними фільтрами.</p>
+            <p className="text-xs">
+              Натисніть один із пошукових агентів вище, або{" "}
+              <button
+                type="button"
+                className="text-primary hover:underline"
+                onClick={() => {
+                  setStatusFilter("all");
+                  setChannelFilter("all");
+                  setSearch("");
+                }}
+              >
+                скиньте фільтри
+              </button>
+              .
+            </p>
           </CardContent>
         </Card>
       ) : (
@@ -361,8 +555,9 @@ function LeadRow({ lead }: { lead: OutreachLead }) {
       const json = (await r.json().catch(() => ({}))) as Record<string, unknown>;
       if (!r.ok) throw new Error(String(json.error ?? `HTTP ${r.status}`));
       toast.success("Драфт згенеровано");
-      qc.invalidateQueries({ queryKey: ["outreach-leads"] });
-      qc.invalidateQueries({ queryKey: ["outreach-actions"] });
+      qc.invalidateQueries({ queryKey: ["outreach-leads"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["outreach-actions"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["outreach-counts"], refetchType: "active" });
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -372,15 +567,24 @@ function LeadRow({ lead }: { lead: OutreachLead }) {
 
   const updateStatus = async (next: string) => {
     setBusy(true);
+    // Optimistic update
+    const prev = qc.getQueriesData<OutreachLead[]>({ queryKey: ["outreach-leads"] });
+    qc.setQueriesData<OutreachLead[]>({ queryKey: ["outreach-leads"] }, (old) =>
+      old?.map((l) => (l.id === lead.id ? { ...l, status: next } : l)) ?? old,
+    );
     const { error } = await supabase
       .from("outreach_leads")
-      .update({ status: next })
+      .update({ status: next } as never)
       .eq("id", lead.id);
     setBusy(false);
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Статус оновлено");
-      qc.invalidateQueries({ queryKey: ["outreach-leads"] });
+    if (error) {
+      // rollback
+      for (const [key, value] of prev) qc.setQueryData(key, value);
+      toast.error(error.message);
+    } else {
+      toast.success(next === "rejected" ? "Лід відхилено" : "Статус оновлено");
+      qc.invalidateQueries({ queryKey: ["outreach-counts"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["outreach-leads"], refetchType: "active" });
     }
   };
 
@@ -434,21 +638,28 @@ function LeadRow({ lead }: { lead: OutreachLead }) {
         <Button
           size="sm"
           variant="outline"
-          disabled={busy || lead.status === "acted"}
+          disabled={busy || lead.status === "acted" || lead.status === "queued"}
           onClick={runComposerForLead}
         >
           <Wand2 className="mr-1 h-3.5 w-3.5" />
           Згенерувати драфт
         </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          disabled={busy || lead.status === "rejected"}
-          onClick={() => updateStatus("rejected")}
-        >
-          <X className="mr-1 h-3.5 w-3.5" />
-          Відхилити
-        </Button>
+        {lead.status !== "rejected" ? (
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={busy}
+            onClick={() => updateStatus("rejected")}
+          >
+            <X className="mr-1 h-3.5 w-3.5" />
+            Відхилити
+          </Button>
+        ) : (
+          <Button size="sm" variant="ghost" disabled={busy} onClick={() => updateStatus("new")}>
+            <RefreshCw className="mr-1 h-3.5 w-3.5" />
+            Повернути
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -457,17 +668,22 @@ function LeadRow({ lead }: { lead: OutreachLead }) {
 // ───────── ВКЛАДКА: actions ─────────
 export function OutreachActionsTab() {
   const qc = useQueryClient();
+  const { currentTenantId } = useTenantContext();
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const runAgent = useRunAgent();
+  const runAgent = useRunAgent(currentTenantId);
+  const counts = useStatusCounts("outreach_actions", currentTenantId, ACTION_STATUSES);
 
   const actions = useQuery({
-    queryKey: ["outreach-actions", statusFilter],
+    queryKey: ["outreach-actions", currentTenantId, statusFilter],
+    enabled: !!currentTenantId,
+    refetchInterval: 60_000,
     queryFn: async () => {
       let q = supabase
         .from("outreach_actions")
         .select(
           "id, tenant_id, lead_id, channel, action_type, draft_text, draft_alt_text, utm_campaign, promo_code, landing_url, status, posted_at, posted_url, failed_reason, retry_count, created_at",
         )
+        .eq("tenant_id", currentTenantId!)
         .order("created_at", { ascending: false })
         .limit(200);
       if (statusFilter !== "all") q = q.eq("status", statusFilter);
@@ -477,54 +693,96 @@ export function OutreachActionsTab() {
     },
   });
 
+  const bulkApprove = async () => {
+    const ids = (actions.data ?? []).filter((a) => a.status === "pending_review").map((a) => a.id);
+    if (ids.length === 0) return;
+    if (!confirm(`Підтвердити ${ids.length} драфт(ів)?`)) return;
+    const { error } = await supabase
+      .from("outreach_actions")
+      .update({ status: "approved" } as never)
+      .in("id", ids);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(`Підтверджено ${ids.length}`);
+      qc.invalidateQueries({ queryKey: ["outreach-actions"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["outreach-counts"], refetchType: "active" });
+    }
+  };
+
+  if (!currentTenantId) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center text-sm text-muted-foreground">
+          Виберіть бренд у перемикачі вгорі.
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
-        {PIPELINE.map((p) => {
-          const Icon = p.icon;
-          return (
-            <Button
-              key={p.id}
-              size="sm"
-              variant="outline"
-              disabled={runAgent.isPending}
-              onClick={() => runAgent.mutate(p.id)}
-            >
-              {runAgent.isPending && runAgent.variables === p.id ? (
-                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Icon className="mr-1.5 h-3.5 w-3.5" />
-              )}
-              {p.label}
-            </Button>
-          );
-        })}
-      </div>
+      <Card>
+        <CardContent className="flex flex-wrap items-center gap-2 p-3 sm:p-4">
+          {PIPELINE.map((p) => {
+            const Icon = p.icon;
+            const busy = runAgent.isPending && runAgent.variables === p.id;
+            return (
+              <Button
+                key={p.id}
+                size="sm"
+                variant="outline"
+                disabled={runAgent.isPending}
+                onClick={() => runAgent.mutate(p.id)}
+              >
+                {busy ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Icon className="mr-1.5 h-3.5 w-3.5" />
+                )}
+                {p.label}
+              </Button>
+            );
+          })}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent className="flex flex-wrap items-center gap-2 p-3 sm:p-4">
           <Filter className="h-4 w-4 text-muted-foreground" />
-          {ACTION_STATUSES.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => setStatusFilter(s)}
-              className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-                statusFilter === s
-                  ? "border-primary bg-primary/10 text-foreground"
-                  : "border-border bg-card text-muted-foreground hover:bg-muted/50"
-              }`}
-            >
-              {STATUS_LABEL_ACTION[s] ?? s}
-            </button>
-          ))}
+          {ACTION_STATUSES.map((s) => {
+            const n = counts.data?.[s] ?? 0;
+            return (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setStatusFilter(s)}
+                className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                  statusFilter === s
+                    ? "border-primary bg-primary/10 text-foreground"
+                    : "border-border bg-card text-muted-foreground hover:bg-muted/50"
+                }`}
+              >
+                {STATUS_LABEL_ACTION[s] ?? s}
+                <span className="ml-1.5 text-[10px] opacity-70">{n}</span>
+              </button>
+            );
+          })}
           <Button
-            variant="ghost"
             size="sm"
-            onClick={() => qc.invalidateQueries({ queryKey: ["outreach-actions"] })}
+            variant="outline"
+            disabled={(counts.data?.pending_review ?? 0) === 0}
+            onClick={bulkApprove}
           >
-            <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Оновити
+            <Check className="mr-1.5 h-3.5 w-3.5" /> Підтвердити всі pending
           </Button>
+          <RefreshButton
+            isFetching={actions.isFetching || counts.isFetching}
+            dataUpdatedAt={actions.dataUpdatedAt}
+            onRefetch={() => {
+              void actions.refetch();
+              void counts.refetch();
+            }}
+          />
         </CardContent>
       </Card>
 
@@ -533,7 +791,7 @@ export function OutreachActionsTab() {
       ) : (actions.data?.length ?? 0) === 0 ? (
         <Card>
           <CardContent className="p-8 text-center text-sm text-muted-foreground">
-            Немає драфтів. Спочатку запустіть пошуковий агент, потім Composer.
+            Немає драфтів за обраним фільтром. Спочатку запустіть пошуковий агент, потім Composer.
           </CardContent>
         </Card>
       ) : (
@@ -558,15 +816,22 @@ function ActionRow({ action }: { action: OutreachAction }) {
 
   const setStatus = async (next: string) => {
     setBusy(true);
+    const prev = qc.getQueriesData<OutreachAction[]>({ queryKey: ["outreach-actions"] });
+    qc.setQueriesData<OutreachAction[]>({ queryKey: ["outreach-actions"] }, (old) =>
+      old?.map((a) => (a.id === action.id ? { ...a, status: next } : a)) ?? old,
+    );
     const { error } = await supabase
       .from("outreach_actions")
-      .update({ status: next })
+      .update({ status: next } as never)
       .eq("id", action.id);
     setBusy(false);
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Статус оновлено");
-      qc.invalidateQueries({ queryKey: ["outreach-actions"] });
+    if (error) {
+      for (const [key, value] of prev) qc.setQueryData(key, value);
+      toast.error(error.message);
+    } else {
+      toast.success(next === "rejected" ? "Драфт відхилено" : "Статус оновлено");
+      qc.invalidateQueries({ queryKey: ["outreach-actions"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["outreach-counts"], refetchType: "active" });
     }
   };
 
@@ -590,8 +855,9 @@ function ActionRow({ action }: { action: OutreachAction }) {
       const json = (await r.json().catch(() => ({}))) as Record<string, unknown>;
       if (!r.ok) throw new Error(String(json.error ?? `HTTP ${r.status}`));
       toast.success("Виконано", { description: String(json.action ?? "") });
-      qc.invalidateQueries({ queryKey: ["outreach-actions"] });
-      qc.invalidateQueries({ queryKey: ["outreach-leads"] });
+      qc.invalidateQueries({ queryKey: ["outreach-actions"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["outreach-leads"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["outreach-counts"], refetchType: "active" });
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -700,6 +966,11 @@ function ActionRow({ action }: { action: OutreachAction }) {
             Опублікувати
           </Button>
         )}
+        {action.status === "rejected" && (
+          <Button size="sm" variant="ghost" disabled={busy} onClick={() => setStatus("pending_review")}>
+            <RefreshCw className="mr-1 h-3.5 w-3.5" /> Повернути в pending
+          </Button>
+        )}
         {action.status === "posted" && (
           <Badge variant="outline" className="border-success/40 text-success">
             <CheckCircle2 className="mr-1 h-3 w-3" /> опубліковано
@@ -712,16 +983,19 @@ function ActionRow({ action }: { action: OutreachAction }) {
 
 // ───────── ВКЛАДКА: ROI / metrics ─────────
 export function OutreachMetricsTab() {
-  const qc = useQueryClient();
+  const { currentTenantId } = useTenantContext();
 
   const metrics = useQuery({
-    queryKey: ["outreach-metrics"],
+    queryKey: ["outreach-metrics", currentTenantId],
+    enabled: !!currentTenantId,
+    refetchInterval: 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("outreach_metrics")
         .select(
           "id, tenant_id, action_id, lead_id, channel, utm_campaign, promo_code, visits, signups, orders, revenue_cents, recorded_at",
         )
+        .eq("tenant_id", currentTenantId!)
         .order("recorded_at", { ascending: false })
         .limit(200);
       if (error) throw error;
@@ -742,6 +1016,16 @@ export function OutreachMetricsTab() {
       { visits: 0, signups: 0, orders: 0, revenue_cents: 0 },
     );
   }, [metrics.data]);
+
+  if (!currentTenantId) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center text-sm text-muted-foreground">
+          Виберіть бренд у перемикачі вгорі.
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -773,13 +1057,11 @@ export function OutreachMetricsTab() {
       </div>
 
       <div className="flex justify-end">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => qc.invalidateQueries({ queryKey: ["outreach-metrics"] })}
-        >
-          <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Оновити
-        </Button>
+        <RefreshButton
+          isFetching={metrics.isFetching}
+          dataUpdatedAt={metrics.dataUpdatedAt}
+          onRefetch={() => void metrics.refetch()}
+        />
       </div>
 
       <Card>
@@ -828,16 +1110,24 @@ export function OutreachMetricsTab() {
 
 // ───────── ОБ'ЄДНАНИЙ ВИВІД для Lead Radar ─────────
 export function OutreachHunterSection() {
+  const { current } = useTenantContext();
   return (
     <div className="space-y-4">
-      <header className="flex items-center gap-3">
+      <header className="flex flex-wrap items-center gap-3">
         <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
           <Sparkles className="h-4 w-4 text-primary-foreground" />
         </span>
-        <div>
+        <div className="flex-1 min-w-0">
           <h2 className="text-lg font-semibold text-foreground">Outreach Hunter</h2>
           <p className="text-xs text-muted-foreground">
-            Шукаємо людей з купівельним наміром у відкритих джерелах і пишемо корисні відповіді.
+            Шукаємо людей з купівельним наміром у відкритих джерелах і пишемо корисні відповіді
+            {current ? (
+              <>
+                {" "}для бренду <span className="font-medium text-foreground">{current.tenant_name}</span>.
+              </>
+            ) : (
+              "."
+            )}
           </p>
         </div>
       </header>
