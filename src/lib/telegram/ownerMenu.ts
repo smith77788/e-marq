@@ -35,6 +35,8 @@ export function normalizeOwnerCommand(text: string): string | null {
   const trimmed = text.trim();
   const lower = trimmed.toLowerCase();
   if (COMMAND_LABELS[lower]) return COMMAND_LABELS[lower];
+  // Bare /start for an already-bound owner re-opens the cockpit menu
+  if (/^\/start\s*$/i.test(trimmed)) return "/menu";
   if (/^\/(menu|metrics|orders|insights|agents|site|help)\b/i.test(trimmed)) {
     return trimmed.toLowerCase().split(/\s+/)[0];
   }
