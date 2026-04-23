@@ -30,6 +30,7 @@ import { ProductImagesPanel } from "@/components/admin/ProductImagesPanel";
 import { ProductVariantsPanel } from "@/components/admin/ProductVariantsPanel";
 import { ProductSeoPanel } from "@/components/admin/ProductSeoPanel";
 import { ProductAnalyticsPanel } from "@/components/admin/ProductAnalyticsPanel";
+import { useTenantContext } from "@/hooks/useTenantContext";
 
 type ProductRecord = {
   id: string;
@@ -63,6 +64,7 @@ function ProductDetailEditor() {
   const { productId } = Route.useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { tenants } = useTenantContext();
 
   const productQuery = useQuery({
     queryKey: ["brand-product", productId],
@@ -85,13 +87,8 @@ function ProductDetailEditor() {
     queryKey: ["product-tenant-slug", productQuery.data?.tenant_id],
     enabled: !!productQuery.data?.tenant_id,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tenants")
-        .select("slug, name")
-        .eq("id", productQuery.data!.tenant_id)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
+      const tenant = tenants.find((item) => item.tenant_id === productQuery.data!.tenant_id);
+      return tenant ? { slug: tenant.tenant_slug, name: tenant.tenant_name } : null;
     },
   });
 
