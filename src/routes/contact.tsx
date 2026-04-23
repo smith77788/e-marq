@@ -29,17 +29,30 @@ function ContactPage() {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
     setSubmitting(true);
-    // Lightweight mailto fallback — keeps the page functional without backend wiring
-    const subject = encodeURIComponent(`MARQ inquiry — ${name || "no name"}`);
-    const body = encodeURIComponent(`From: ${name} <${email}>\n\n${message}`);
-    window.location.href = `mailto:hello@marq.app?subject=${subject}&body=${body}`;
-    setTimeout(() => {
-      toast.success(t("ct.toastOk"));
+    try {
+      const res = await fetch("/api/public/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), email: email.trim(), message: message.trim() }),
+      });
+      const data = (await res.json().catch(() => ({ ok: false }))) as { ok?: boolean; error?: string };
+      if (data.ok) {
+        toast.success(t("ct.toastOk"));
+        setName("");
+        setEmail("");
+        setMessage("");
+      } else {
+        toast.error(data.error || "Не вдалося надіслати. Спробуйте ще раз.");
+      }
+    } catch {
+      toast.error("Не вдалося надіслати. Перевірте з'єднання.");
+    } finally {
       setSubmitting(false);
-    }, 400);
+    }
   };
 
   return (
