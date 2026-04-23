@@ -8,7 +8,7 @@
  */
 import { useMemo } from "react";
 import { Building2, Check, ChevronsUpDown, Plus, ShieldCheck } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   DropdownMenu,
@@ -36,6 +36,7 @@ export function TenantSwitcher() {
   const { tenants, current, setCurrentTenantId } = useTenantContext();
   const { isSuperAdmin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // For super-admin: fetch every tenant so they can hop in even without membership.
   const adminTenantsQuery = useQuery({
@@ -89,10 +90,38 @@ export function TenantSwitcher() {
     return null;
   }
 
+  /**
+   * Перемикаємо тенант, лишаючись на поточному маршруті, якщо він
+   * tenant-aware (приймає `?tenant=` у search). Інакше падаємо назад
+   * на дашборд бренду.
+   *
+   * Раніше тут завжди був редирект на `/brand`, через що користувач
+   * "вилітав" з /admin/users, /brand/products тощо щоразу, коли просто
+   * хотів перемкнути контекст — цей баг ламав усю навігацію.
+   */
   const onSelect = (id: string) => {
     setCurrentTenantId(id);
+    const path = location.pathname;
+    // Шляхи, що мають свій tenant search-param — оновлюємо лише param.
+    const tenantAware =
+      path === "/brand" ||
+      path.startsWith("/brand/") ||
+      path === "/onboarding" ||
+      path.startsWith("/agents/");
+    if (tenantAware) {
+      void navigate({
+        to: path,
+        search: (prev: Record<string, unknown>) => ({ ...prev, tenant: id }),
+        replace: true,
+      } as never);
+      return;
+    }
+    // Адмінські маршрути не мають tenant search — лишаємось де є.
+    if (path.startsWith("/admin")) return;
+    // Інакше — на дашборд бренду.
     void navigate({ to: "/brand", search: { tenant: id } });
   };
+
 
   const noneSelected = !current;
 
