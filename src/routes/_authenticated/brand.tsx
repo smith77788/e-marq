@@ -109,7 +109,7 @@ function BrandPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="outline" size="sm">
-            <Link to="/brand/site-builder">
+            <Link to="/brand/site-builder" search={{ tenant: current.tenant_id }}>
               <Wand2 className="mr-1.5 h-3.5 w-3.5 text-accent" />
               Конструктор сайту
             </Link>
@@ -213,7 +213,11 @@ function BrandPage() {
               /s/{current.tenant_slug}
             </Link>
             . Дизайн, контент і колір магазину налаштовуйте у{" "}
-            <Link to="/brand/site-builder" className="text-primary hover:underline">
+            <Link
+              to="/brand/site-builder"
+              search={{ tenant: current.tenant_id }}
+              className="text-primary hover:underline"
+            >
               Конструкторі сайту
             </Link>
             .
