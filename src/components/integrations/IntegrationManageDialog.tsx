@@ -148,10 +148,19 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
     mutationFn: async (entity: "products" | "customers" | "orders") => {
       if (!integration) return;
       setSyncEntity(entity);
-      const res = await fetch(`/api/integrations/sync/${integration.id}`, {
+      // DN Trade має власний повноцінний sync-pipeline
+      // (incremental, mapping_errors, dntrade_sync_errors).
+      const isDn = integration.id === "dntrade";
+      const url = isDn
+        ? `/hooks/integrations/dntrade-sync`
+        : `/api/integrations/sync/${integration.id}`;
+      const body = isDn
+        ? { tenant_id: tenantId, kinds: [entity] }
+        : { entityKind: entity, tenantId };
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await authHeader()) },
-        body: JSON.stringify({ entityKind: entity, tenantId }),
+        body: JSON.stringify(body),
       });
       const json = (await res.json()) as {
         ok?: boolean;
@@ -159,8 +168,23 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
         failed?: number;
         skipped?: number;
         error?: string;
+        summary?: {
+          products?: { upserted?: number };
+          customers?: { upserted?: number };
+          orders?: { inserted?: number };
+          errors?: string[];
+        };
       };
       if (!res.ok) throw new Error(json.error ?? "Помилка синку");
+      // Нормалізуємо DN Trade summary до спільного формату
+      if (isDn && json.summary) {
+        const s = json.summary;
+        const importedCount =
+          (s.products?.upserted ?? 0) +
+          (s.customers?.upserted ?? 0) +
+          (s.orders?.inserted ?? 0);
+        return { imported: importedCount, failed: s.errors?.length ?? 0, skipped: 0 };
+      }
       return json;
     },
     onSuccess: (json) => {
