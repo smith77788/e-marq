@@ -315,15 +315,34 @@ function AdminTenantsPage() {
                         </Select>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button asChild size="sm" variant="ghost">
-                          <Link
-                            to="/admin/tenants/$tenantId"
-                            params={{ tenantId: t.tenant_id }}
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              setQuickTarget({
+                                tenant_id: t.tenant_id,
+                                tenant_name: t.tenant_name,
+                                tenant_slug: t.tenant_slug,
+                                status: t.status,
+                                plan_key: t.plan_key,
+                                plan_name: t.plan_name,
+                              })
+                            }
                           >
-                            Деталі
-                            <ExternalLink className="ml-1 h-3 w-3" />
-                          </Link>
-                        </Button>
+                            <Zap className="mr-1 h-3 w-3" />
+                            Дії
+                          </Button>
+                          <Button asChild size="sm" variant="ghost">
+                            <Link
+                              to="/admin/tenants/$tenantId"
+                              params={{ tenantId: t.tenant_id }}
+                            >
+                              Деталі
+                              <ExternalLink className="ml-1 h-3 w-3" />
+                            </Link>
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
