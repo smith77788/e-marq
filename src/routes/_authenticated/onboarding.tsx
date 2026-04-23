@@ -966,3 +966,151 @@ function OnboardingError({
     </Card>
   );
 }
+
+function slugify(input: string): string {
+  const map: Record<string, string> = {
+    а: "a", б: "b", в: "v", г: "h", ґ: "g", д: "d", е: "e", є: "ie", ж: "zh", з: "z",
+    и: "y", і: "i", ї: "i", й: "i", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p",
+    р: "r", с: "s", т: "t", у: "u", ф: "f", х: "kh", ц: "ts", ч: "ch", ш: "sh", щ: "shch",
+    ь: "", ю: "iu", я: "ia", "'": "", "`": "", "ʼ": "",
+  };
+  return (
+    input
+      .toLowerCase()
+      .split("")
+      .map((c) => map[c] ?? c)
+      .join("")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 48) || `brand-${Math.random().toString(36).slice(2, 8)}`
+  );
+}
+
+function CreateFirstTenant({
+  lang,
+  qc,
+  navigate,
+}: {
+  lang: Lang;
+  qc: QC;
+  navigate: ReturnType<typeof useNavigate>;
+}) {
+  const { user } = useAuth();
+  const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
+  const [touched, setTouched] = useState(false);
+
+  const create = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error("not_authenticated");
+      const cleanName = name.trim();
+      if (cleanName.length < 2) {
+        throw new Error(lang === "ua" ? "Назва занадто коротка" : "Name too short");
+      }
+      let baseSlug = (slug || slugify(cleanName)).trim().toLowerCase();
+      if (!baseSlug) baseSlug = slugify(cleanName);
+      let attempt = baseSlug;
+      for (let i = 0; i < 4; i++) {
+        const { data, error } = await supabase
+          .from("tenants")
+          .insert({ name: cleanName, slug: attempt, owner_user_id: user.id, status: "active" })
+          .select("id, slug")
+          .single();
+        if (!error && data) return data;
+        if (error && /duplicate|unique/i.test(error.message)) {
+          attempt = `${baseSlug}-${Math.random().toString(36).slice(2, 5)}`;
+          continue;
+        }
+        if (error) throw error;
+      }
+      throw new Error(
+        lang === "ua" ? "Не вдалось підібрати унікальний slug" : "Couldn't pick a unique slug",
+      );
+    },
+    onSuccess: (data) => {
+      toast.success(lang === "ua" ? "Бізнес створено ✓" : "Business created ✓");
+      qc.invalidateQueries({ queryKey: ["my-tenants"] });
+      navigate({
+        to: "/onboarding",
+        search: { tenant: data.id, slug: data.slug },
+        replace: true,
+      });
+    },
+    onError: (e: Error) =>
+      toast.error(e.message || (lang === "ua" ? "Помилка створення" : "Failed to create")),
+  });
+
+  return (
+    <div className="mx-auto max-w-lg space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">
+          {lang === "ua" ? "Створіть свій бізнес" : "Create your business"}
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          {lang === "ua"
+            ? "Це займе хвилину. Все можна змінити пізніше."
+            : "This takes a minute. You can change anything later."}
+        </p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{lang === "ua" ? "Назва бізнесу" : "Business name"}</CardTitle>
+          <CardDescription>
+            {lang === "ua"
+              ? "Як ваш бренд бачитимуть клієнти. Наприклад, Кавовий Рай."
+              : "How customers see your brand. E.g. Sunrise Coffee."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="biz-name">{lang === "ua" ? "Назва" : "Name"}</Label>
+            <Input
+              id="biz-name"
+              value={name}
+              autoFocus
+              onChange={(e) => {
+                setName(e.target.value);
+                if (!touched) setSlug(slugify(e.target.value));
+              }}
+              placeholder={lang === "ua" ? "Кавовий Рай" : "Sunrise Coffee"}
+              maxLength={80}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="biz-slug">
+              {lang === "ua" ? "Адреса вітрини" : "Storefront URL"}
+            </Label>
+            <div className="flex items-center gap-1 rounded-md border bg-muted/30 px-2 py-1.5 text-sm">
+              <span className="text-muted-foreground">/s/</span>
+              <Input
+                id="biz-slug"
+                value={slug}
+                onChange={(e) => {
+                  setTouched(true);
+                  setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
+                }}
+                placeholder="kavoviy-ray"
+                maxLength={48}
+                className="h-7 border-0 bg-transparent px-1 focus-visible:ring-0"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {lang === "ua"
+                ? "Лише латиниця, цифри та дефіс. Має бути унікальною."
+                : "Latin letters, digits and dashes only. Must be unique."}
+            </p>
+          </div>
+          <Button
+            onClick={() => create.mutate()}
+            disabled={create.isPending || name.trim().length < 2}
+            className="w-full"
+          >
+            {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {lang === "ua" ? "Створити бізнес" : "Create business"}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
