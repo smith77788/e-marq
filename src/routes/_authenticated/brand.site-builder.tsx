@@ -313,8 +313,10 @@ function BrandSiteBuilderPage() {
       setTab("profile");
       return;
     }
-    // Якщо профілю ще нема або є зміни — спочатку зберігаємо, потім генеруємо.
-    if (!profileQuery.data || dirty || isNew) {
+    // Якщо профілю ще нема або поточний draft відрізняється — зберігаємо.
+    const savedDraft = profileQuery.data ? profileToDraft(profileQuery.data) : null;
+    const needsSave = !savedDraft || JSON.stringify(savedDraft) !== JSON.stringify(draft);
+    if (needsSave) {
       try {
         await saveMut.mutateAsync(draft);
       } catch {
