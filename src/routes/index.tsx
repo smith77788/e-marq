@@ -73,7 +73,10 @@ function Index() {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate({ to: "/dashboard" });
+      // Use a hard navigation here too. After an OAuth round-trip the auth
+      // context is freshly hydrated and a soft navigate() can race with the
+      // protected-route guard reading a stale user=null.
+      window.location.assign("/dashboard");
     }
   }, [loading, user, navigate]);
 
