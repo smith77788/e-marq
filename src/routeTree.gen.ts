@@ -130,6 +130,7 @@ import { Route as HooksAgentsCustomerVoiceRouteImport } from './routes/hooks/age
 import { Route as HooksAgentsCustomerSegmentsAutoRouteImport } from './routes/hooks/agents.customer-segments-auto'
 import { Route as HooksAgentsCustomerChurnPredictorRouteImport } from './routes/hooks/agents.customer-churn-predictor'
 import { Route as HooksAgentsCsatDispatcherRouteImport } from './routes/hooks/agents.csat-dispatcher'
+import { Route as HooksAgentsCronChunkRouteImport } from './routes/hooks/agents.cron-chunk'
 import { Route as HooksAgentsCronAllRouteImport } from './routes/hooks/agents.cron-all'
 import { Route as HooksAgentsContentVelocityRouteImport } from './routes/hooks/agents.content-velocity'
 import { Route as HooksAgentsContentMagnetRouteImport } from './routes/hooks/agents.content-magnet'
@@ -879,6 +880,11 @@ const HooksAgentsCsatDispatcherRoute =
     path: '/hooks/agents/csat-dispatcher',
     getParentRoute: () => rootRouteImport,
   } as any)
+const HooksAgentsCronChunkRoute = HooksAgentsCronChunkRouteImport.update({
+  id: '/hooks/agents/cron-chunk',
+  path: '/hooks/agents/cron-chunk',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsCronAllRoute = HooksAgentsCronAllRouteImport.update({
   id: '/hooks/agents/cron-all',
   path: '/hooks/agents/cron-all',
@@ -1421,6 +1427,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/content-magnet': typeof HooksAgentsContentMagnetRoute
   '/hooks/agents/content-velocity': typeof HooksAgentsContentVelocityRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
+  '/hooks/agents/cron-chunk': typeof HooksAgentsCronChunkRoute
   '/hooks/agents/csat-dispatcher': typeof HooksAgentsCsatDispatcherRoute
   '/hooks/agents/customer-churn-predictor': typeof HooksAgentsCustomerChurnPredictorRoute
   '/hooks/agents/customer-segments-auto': typeof HooksAgentsCustomerSegmentsAutoRoute
@@ -1625,6 +1632,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/content-magnet': typeof HooksAgentsContentMagnetRoute
   '/hooks/agents/content-velocity': typeof HooksAgentsContentVelocityRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
+  '/hooks/agents/cron-chunk': typeof HooksAgentsCronChunkRoute
   '/hooks/agents/csat-dispatcher': typeof HooksAgentsCsatDispatcherRoute
   '/hooks/agents/customer-churn-predictor': typeof HooksAgentsCustomerChurnPredictorRoute
   '/hooks/agents/customer-segments-auto': typeof HooksAgentsCustomerSegmentsAutoRoute
@@ -1832,6 +1840,7 @@ export interface FileRoutesById {
   '/hooks/agents/content-magnet': typeof HooksAgentsContentMagnetRoute
   '/hooks/agents/content-velocity': typeof HooksAgentsContentVelocityRoute
   '/hooks/agents/cron-all': typeof HooksAgentsCronAllRoute
+  '/hooks/agents/cron-chunk': typeof HooksAgentsCronChunkRoute
   '/hooks/agents/csat-dispatcher': typeof HooksAgentsCsatDispatcherRoute
   '/hooks/agents/customer-churn-predictor': typeof HooksAgentsCustomerChurnPredictorRoute
   '/hooks/agents/customer-segments-auto': typeof HooksAgentsCustomerSegmentsAutoRoute
@@ -2039,6 +2048,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/content-magnet'
     | '/hooks/agents/content-velocity'
     | '/hooks/agents/cron-all'
+    | '/hooks/agents/cron-chunk'
     | '/hooks/agents/csat-dispatcher'
     | '/hooks/agents/customer-churn-predictor'
     | '/hooks/agents/customer-segments-auto'
@@ -2243,6 +2253,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/content-magnet'
     | '/hooks/agents/content-velocity'
     | '/hooks/agents/cron-all'
+    | '/hooks/agents/cron-chunk'
     | '/hooks/agents/csat-dispatcher'
     | '/hooks/agents/customer-churn-predictor'
     | '/hooks/agents/customer-segments-auto'
@@ -2449,6 +2460,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/content-magnet'
     | '/hooks/agents/content-velocity'
     | '/hooks/agents/cron-all'
+    | '/hooks/agents/cron-chunk'
     | '/hooks/agents/csat-dispatcher'
     | '/hooks/agents/customer-churn-predictor'
     | '/hooks/agents/customer-segments-auto'
@@ -2629,6 +2641,7 @@ export interface RootRouteChildren {
   HooksAgentsContentMagnetRoute: typeof HooksAgentsContentMagnetRoute
   HooksAgentsContentVelocityRoute: typeof HooksAgentsContentVelocityRoute
   HooksAgentsCronAllRoute: typeof HooksAgentsCronAllRoute
+  HooksAgentsCronChunkRoute: typeof HooksAgentsCronChunkRoute
   HooksAgentsCsatDispatcherRoute: typeof HooksAgentsCsatDispatcherRoute
   HooksAgentsCustomerChurnPredictorRoute: typeof HooksAgentsCustomerChurnPredictorRoute
   HooksAgentsCustomerSegmentsAutoRoute: typeof HooksAgentsCustomerSegmentsAutoRoute
@@ -3595,6 +3608,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HooksAgentsCsatDispatcherRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hooks/agents/cron-chunk': {
+      id: '/hooks/agents/cron-chunk'
+      path: '/hooks/agents/cron-chunk'
+      fullPath: '/hooks/agents/cron-chunk'
+      preLoaderRoute: typeof HooksAgentsCronChunkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hooks/agents/cron-all': {
       id: '/hooks/agents/cron-all'
       path: '/hooks/agents/cron-all'
@@ -4384,6 +4404,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsContentMagnetRoute: HooksAgentsContentMagnetRoute,
   HooksAgentsContentVelocityRoute: HooksAgentsContentVelocityRoute,
   HooksAgentsCronAllRoute: HooksAgentsCronAllRoute,
+  HooksAgentsCronChunkRoute: HooksAgentsCronChunkRoute,
   HooksAgentsCsatDispatcherRoute: HooksAgentsCsatDispatcherRoute,
   HooksAgentsCustomerChurnPredictorRoute:
     HooksAgentsCustomerChurnPredictorRoute,
