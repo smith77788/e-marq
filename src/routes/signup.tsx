@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,6 @@ export const Route = createFileRoute("/signup")({
 });
 
 function SignupPage() {
-  const navigate = useNavigate();
   const { t } = useT();
   const [submitting, setSubmitting] = useState(false);
 
@@ -28,7 +27,7 @@ function SignupPage() {
     setSubmitting(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}/dashboard`,
       });
       if (result.error) {
         toast.error(
@@ -39,7 +38,9 @@ function SignupPage() {
       }
       if (result.redirected) return;
       toast.success(t("auth.created"));
-      navigate({ to: "/dashboard" });
+      // Hard navigate so the auth context fully hydrates before the
+      // protected-route guard runs (avoids the desktop "stuck on signin" bug).
+      window.location.assign("/dashboard");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.failSignup"));
       setSubmitting(false);

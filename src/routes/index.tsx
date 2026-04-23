@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { buildSeo } from "@/lib/seo";
 import { useEffect } from "react";
 import {
@@ -69,13 +69,15 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { user, loading } = useAuth();
   const { t } = useT();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && user) {
-      navigate({ to: "/dashboard" });
+      // Hard navigation: after an OAuth round-trip the auth context is freshly
+      // hydrated and a soft navigate() can race with the protected-route guard
+      // reading a stale user=null (causes "nothing happens after sign-in").
+      window.location.assign("/dashboard");
     }
-  }, [loading, user, navigate]);
+  }, [loading, user]);
 
   const loops = [
     {
