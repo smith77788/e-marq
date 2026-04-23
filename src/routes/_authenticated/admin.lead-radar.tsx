@@ -41,30 +41,32 @@ export const Route = createFileRoute("/_authenticated/admin/lead-radar")({
 
 type Prospect = {
   id: string;
-  source: string;
-  source_query: string | null;
-  name: string;
-  website_url: string | null;
-  instagram_handle: string | null;
-  email: string | null;
-  niche: string | null;
-  estimated_size: string | null;
-  fit_score: number;
-  signals: Record<string, unknown>;
+  tenant_id: string;
+  channel: string;
+  source_url: string;
+  author_handle: string | null;
+  title: string | null;
+  content: string;
+  language: string | null;
+  intent_score: number;
+  matched_keywords: string[];
   status: string;
-  notes: string | null;
-  last_contacted_at: string | null;
+  discovered_at: string;
   created_at: string;
 };
 
 type Outreach = {
   id: string;
-  prospect_id: string;
+  tenant_id: string;
+  lead_id: string;
   channel: string;
-  intent: string;
+  action_type: string;
   status: string;
-  payload: Record<string, unknown>;
-  sent_at: string | null;
+  draft_text: string;
+  landing_url: string;
+  promo_code: string | null;
+  posted_url: string | null;
+  failed_reason: string | null;
   created_at: string;
 };
 
@@ -81,30 +83,47 @@ type Magnet = {
 
 const STATUSES = [
   "all",
-  "discovered",
-  "qualified",
-  "engaging",
-  "converted",
+  "new",
+  "composing",
+  "queued",
+  "acted",
   "rejected",
-  "unreachable",
+  "duplicate",
+  "expired",
 ] as const;
 const STATUS_LABEL: Record<string, string> = {
   all: "усі",
-  discovered: "знайдені",
-  qualified: "відібрані",
-  engaging: "у роботі",
-  converted: "стали клієнтами",
+  new: "нові",
+  composing: "генерація",
+  queued: "у черзі",
+  acted: "оброблені",
   rejected: "відхилені",
-  unreachable: "не вдалось зв'язатись",
+  duplicate: "дублікати",
+  expired: "застарілі",
 };
 const STATUS_TONE: Record<string, string> = {
-  discovered: "border-info/40 text-info",
-  qualified: "border-primary/40 text-primary",
-  engaging: "border-warning/40 text-warning",
-  converted: "border-success/40 text-success",
+  new: "border-info/40 text-info",
+  composing: "border-warning/40 text-warning",
+  queued: "border-primary/40 text-primary",
+  acted: "border-success/40 text-success",
   rejected: "border-muted-foreground/40 text-muted-foreground",
-  unreachable: "border-destructive/40 text-destructive",
+  duplicate: "border-muted-foreground/40 text-muted-foreground",
+  expired: "border-destructive/40 text-destructive",
 };
+
+function summarizeBatchResult(payload: Record<string, unknown>): string {
+  const summary = (payload.summary ?? {}) as Record<string, unknown>;
+  const tenants = Object.values(summary);
+  const inserted = tenants.reduce<number>((sum, item) => {
+    const stats = (item as { stats?: Record<string, unknown> })?.stats ?? {};
+    return sum + (typeof stats.inserted === "number" ? stats.inserted : 0);
+  }, 0);
+  const candidates = tenants.reduce<number>((sum, item) => {
+    const stats = (item as { stats?: Record<string, unknown> })?.stats ?? {};
+    return sum + (typeof stats.candidates === "number" ? stats.candidates : 0);
+  }, 0);
+  return `Кандидатів: ${candidates}, нових лідів: ${inserted}.`;
+}
 
 function LeadRadarPage() {
   const { isSuperAdmin, loading } = useAuth();
@@ -124,16 +143,17 @@ function Content() {
   const telegramTenantId = currentTenantId ?? tenants[0]?.tenant_id ?? null;
 
   const prospects = useQuery({
-    queryKey: ["lead-prospects", statusFilter],
+    queryKey: ["lead-prospects", currentTenantId, statusFilter],
     queryFn: async () => {
       let q = supabase
-        .from("lead_prospects")
+        .from("outreach_leads")
         .select(
-          "id, source, source_query, name, website_url, instagram_handle, email, niche, estimated_size, fit_score, signals, status, notes, last_contacted_at, created_at",
+          "id, tenant_id, channel, source_url, author_handle, title, content, language, intent_score, matched_keywords, status, discovered_at, created_at",
         )
-        .order("fit_score", { ascending: false })
+        .order("discovered_at", { ascending: false })
         .order("created_at", { ascending: false })
         .limit(200);
+      if (currentTenantId) q = q.eq("tenant_id", currentTenantId);
       if (statusFilter !== "all") q = q.eq("status", statusFilter);
       const { data, error } = await q;
       if (error) throw error;
@@ -142,51 +162,89 @@ function Content() {
   });
 
   const magnets = useQuery({
-    queryKey: ["lead-magnets"],
+    queryKey: ["lead-magnets", currentTenantId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const q = supabase
         .from("lead_magnets")
         .select("id, slug, title, topic, views_count, signups_attributed, is_published, created_at")
         .order("created_at", { ascending: false })
         .limit(50);
+      const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as unknown as Magnet[];
     },
   });
 
   const outreach = useQuery({
-    queryKey: ["lead-outreach"],
+    queryKey: ["lead-outreach", currentTenantId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("lead_outreach")
-        .select("id, prospect_id, channel, intent, status, payload, sent_at, created_at")
+      let q = supabase
+        .from("outreach_actions")
+        .select(
+          "id, tenant_id, lead_id, channel, action_type, status, draft_text, landing_url, promo_code, posted_url, failed_reason, created_at",
+        )
         .order("created_at", { ascending: false })
         .limit(50);
+      if (currentTenantId) q = q.eq("tenant_id", currentTenantId);
+      const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as unknown as Outreach[];
     },
   });
 
   const runAgent = useMutation({
-    mutationFn: async (agent: "web-prospector" | "social-engager" | "content-magnet") => {
+    mutationFn: async (
+      agent: "lead-radar-scan" | "lead-radar-compose" | "content-magnet",
+    ) => {
       const session = (await supabase.auth.getSession()).data.session;
       if (!session) throw new Error("Авторизуйтеся");
-      const r = await fetch(`/hooks/agents/${agent}`, {
+      const payload = currentTenantId ? { tenant_id: currentTenantId } : {};
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      };
+
+      if (agent === "lead-radar-scan") {
+        const [googleRes, redditRes] = await Promise.all([
+          fetch(`/hooks/agents/outreach-google-hunter`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(payload),
+          }),
+          fetch(`/hooks/agents/outreach-reddit-hunter`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(payload),
+          }),
+        ]);
+        const google = (await googleRes.json().catch(() => ({}))) as Record<string, unknown>;
+        const reddit = (await redditRes.json().catch(() => ({}))) as Record<string, unknown>;
+        if (!googleRes.ok) throw new Error(String(google.error ?? `HTTP ${googleRes.status}`));
+        if (!redditRes.ok) throw new Error(String(reddit.error ?? `HTTP ${redditRes.status}`));
+        return { agent, payload: { google, reddit } };
+      }
+
+      const route = agent === "lead-radar-compose" ? "outreach-composer" : agent;
+      const r = await fetch(`/hooks/agents/${route}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({}),
+        headers,
+        body: JSON.stringify(payload),
       });
       const json = (await r.json().catch(() => ({}))) as Record<string, unknown>;
       if (!r.ok) throw new Error(String(json.error ?? `HTTP ${r.status}`));
       return { agent, payload: json };
     },
     onSuccess: ({ agent, payload }) => {
-      toast.success(`${agentLabel(agent)} відпрацював`, {
-        description: friendlyAgentSummary(agent, payload),
-      });
+      const description =
+        agent === "lead-radar-scan"
+          ? `${summarizeBatchResult((payload as { google: Record<string, unknown> }).google)} ${summarizeBatchResult((payload as { reddit: Record<string, unknown> }).reddit)}`
+          : friendlyAgentSummary(agent === "lead-radar-compose" ? "outreach-composer" : agent, payload);
+      toast.success(
+        agent === "lead-radar-scan"
+          ? "Google та Reddit hunter відпрацювали"
+          : `${agentLabel(agent === "lead-radar-compose" ? "outreach-composer" : agent)} відпрацював`,
+        { description },
+      );
       qc.invalidateQueries({ queryKey: ["lead-prospects"] });
       qc.invalidateQueries({ queryKey: ["lead-magnets"] });
       qc.invalidateQueries({ queryKey: ["lead-outreach"] });
@@ -200,7 +258,7 @@ function Content() {
     if (!search.trim()) return rows;
     const s = search.trim().toLowerCase();
     return rows.filter((r) =>
-      [r.name, r.website_url, r.instagram_handle, r.email, r.niche, r.source_query]
+      [r.title, r.content, r.author_handle, r.source_url, ...(r.matched_keywords ?? [])]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(s)),
     );
@@ -225,10 +283,10 @@ function Content() {
             size="sm"
             variant="outline"
             disabled={runAgent.isPending}
-            onClick={() => runAgent.mutate("web-prospector")}
+            onClick={() => runAgent.mutate("lead-radar-scan")}
             className="w-full sm:w-auto"
           >
-            {runAgent.isPending && runAgent.variables === "web-prospector" ? (
+            {runAgent.isPending && runAgent.variables === "lead-radar-scan" ? (
               <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
             ) : (
               <Globe className="mr-1.5 h-3.5 w-3.5" />
@@ -239,10 +297,10 @@ function Content() {
             size="sm"
             variant="outline"
             disabled={runAgent.isPending}
-            onClick={() => runAgent.mutate("social-engager")}
+            onClick={() => runAgent.mutate("lead-radar-compose")}
             className="w-full sm:w-auto"
           >
-            {runAgent.isPending && runAgent.variables === "social-engager" ? (
+            {runAgent.isPending && runAgent.variables === "lead-radar-compose" ? (
               <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
             ) : (
               <Instagram className="mr-1.5 h-3.5 w-3.5" />
@@ -358,7 +416,7 @@ function Content() {
                     <div key={o.id} className="px-4 py-2 text-sm">
                       <div className="flex flex-wrap items-center gap-2 text-xs">
                         <Badge variant="outline">{o.channel}</Badge>
-                        <Badge variant="secondary">{o.intent}</Badge>
+                        <Badge variant="secondary">{o.action_type}</Badge>
                         <Badge
                           variant="outline"
                           className={
@@ -375,14 +433,29 @@ function Content() {
                           {new Date(o.created_at).toLocaleString("uk-UA")}
                         </span>
                       </div>
-                      {typeof o.payload?.subject === "string" && (
-                        <p className="mt-1 text-foreground">{String(o.payload.subject)}</p>
-                      )}
-                      {typeof o.payload?.body === "string" && (
-                        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
-                          {String(o.payload.body)}
-                        </p>
-                      )}
+                      <p className="mt-1 line-clamp-2 text-foreground">{o.draft_text}</p>
+                      <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground">
+                        <a
+                          href={o.landing_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          лендинг
+                        </a>
+                        {o.promo_code && <span>promo: {o.promo_code}</span>}
+                        {o.posted_url && (
+                          <a
+                            href={o.posted_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-success hover:underline"
+                          >
+                            публікація
+                          </a>
+                        )}
+                        {o.failed_reason && <span className="text-destructive">{o.failed_reason}</span>}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -461,7 +534,7 @@ function ProspectRow({ prospect, tenantId }: { prospect: Prospect; tenantId: str
   const updateStatus = async (next: string) => {
     setBusy(true);
     const { error } = await supabase
-      .from("lead_prospects")
+      .from("outreach_leads")
       .update({ status: next })
       .eq("id", prospect.id);
     setBusy(false);
@@ -480,13 +553,13 @@ function ProspectRow({ prospect, tenantId }: { prospect: Prospect; tenantId: str
       toast.error("Авторизуйтеся");
       return;
     }
-    const r = await fetch(`/hooks/agents/social-engager`, {
+    const r = await fetch(`/hooks/agents/outreach-composer`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify({ prospect_id: prospect.id }),
+      body: JSON.stringify({ tenant_id: prospect.tenant_id, lead_id: prospect.id }),
     });
     setBusy(false);
     if (!r.ok) toast.error("Помилка outreach");
@@ -502,7 +575,9 @@ function ProspectRow({ prospect, tenantId }: { prospect: Prospect; tenantId: str
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate text-sm font-semibold text-foreground">{prospect.name}</p>
+            <p className="truncate text-sm font-semibold text-foreground">
+              {prospect.title ?? prospect.author_handle ?? prospect.source_url}
+            </p>
             <Badge variant="outline" className={STATUS_TONE[prospect.status] ?? "border-border"}>
               {STATUS_LABEL[prospect.status] ?? prospect.status}
             </Badge>
@@ -511,37 +586,31 @@ function ProspectRow({ prospect, tenantId }: { prospect: Prospect; tenantId: str
               className="font-mono text-[10px]"
               title="Оцінка релевантності 0–100"
             >
-              відповідність {prospect.fit_score}
+              intent {(prospect.intent_score * 100).toFixed(0)}
             </Badge>
-            {prospect.niche && (
+            {prospect.language && (
               <Badge variant="outline" className="text-[10px]">
-                {prospect.niche}
+                {prospect.language}
               </Badge>
             )}
-            <span className="text-xs text-muted-foreground">{prospect.source}</span>
+            <span className="text-xs text-muted-foreground">{prospect.channel}</span>
           </div>
+          <p className="line-clamp-3 text-sm text-muted-foreground">{prospect.content}</p>
           <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-            {prospect.website_url && (
-              <a
-                href={prospect.website_url}
-                target="_blank"
-                rel="noreferrer"
-                className="text-primary hover:underline"
-              >
-                {prospect.website_url}
-              </a>
-            )}
-            {prospect.instagram_handle && (
-              <a
-                href={`https://instagram.com/${prospect.instagram_handle.replace(/^@/, "")}`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-primary hover:underline"
-              >
-                @{prospect.instagram_handle.replace(/^@/, "")}
-              </a>
-            )}
-            {prospect.email && <span>✉ {prospect.email}</span>}
+            <a
+              href={prospect.source_url}
+              target="_blank"
+              rel="noreferrer"
+              className="text-primary hover:underline"
+            >
+              {prospect.source_url}
+            </a>
+            {prospect.author_handle && <span>автор: {prospect.author_handle}</span>}
+            {(prospect.matched_keywords ?? []).slice(0, 5).map((keyword) => (
+              <Badge key={keyword} variant="secondary" className="text-[10px]">
+                {keyword}
+              </Badge>
+            ))}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-1.5 sm:flex-nowrap">
@@ -552,24 +621,18 @@ function ProspectRow({ prospect, tenantId }: { prospect: Prospect; tenantId: str
           <TelegramUserDmDialog
             tenantId={tenantId}
             prospectId={prospect.id}
-            prospectName={prospect.name}
-            defaultPeer={
-              typeof prospect.signals?.telegram_handle === "string"
-                ? String(prospect.signals.telegram_handle)
-                : prospect.instagram_handle
-                  ? `@${prospect.instagram_handle.replace(/^@/, "")}`
-                  : ""
-            }
-            defaultText={`Привіт! Знайшов ваш бренд "${prospect.name}" — у MARQ є кілька ідей, що можуть зекономити вам години роботи. Цікаво коротко обмінятись?`}
+            prospectName={prospect.title ?? prospect.author_handle ?? "лід"}
+            defaultPeer={prospect.author_handle ? `@${prospect.author_handle.replace(/^@/, "")}` : ""}
+            defaultText={`Привіт! Побачив ваш запит${prospect.title ? ` «${prospect.title}»` : ""} — у MARQ є кілька ідей, що можуть зекономити години ручної роботи. Цікаво коротко обмінятись?`}
           />
           <Button
             size="sm"
             variant="outline"
             disabled={busy}
-            onClick={() => updateStatus("qualified")}
+            onClick={() => updateStatus("queued")}
           >
             <Play className="mr-1 h-3.5 w-3.5" />
-            Відібрати
+            У чергу
           </Button>
           <Button
             size="sm"
