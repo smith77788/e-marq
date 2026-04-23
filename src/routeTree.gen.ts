@@ -189,6 +189,9 @@ import { Route as AuthenticatedAdminCommandsRouteImport } from './routes/_authen
 import { Route as SSlugProductsProductIdRouteImport } from './routes/s.$slug.products.$productId'
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
 import { Route as SSlugCollectionsHandleRouteImport } from './routes/s.$slug.collections.$handle'
+import { Route as ApiTelegramUserStatusRouteImport } from './routes/api/telegram.user.status'
+import { Route as ApiTelegramUserSignInRouteImport } from './routes/api/telegram.user.sign-in'
+import { Route as ApiTelegramUserSendCodeRouteImport } from './routes/api/telegram.user.send-code'
 import { Route as ApiSiteBuilderDownloadBuildIdRouteImport } from './routes/api/site-builder.download.$buildId'
 import { Route as ApiPublicShippingNpRouteImport } from './routes/api/public/shipping.np'
 import { Route as ApiPublicPaymentsWayforpayInitRouteImport } from './routes/api/public/payments.wayforpay-init'
@@ -1199,6 +1202,21 @@ const SSlugCollectionsHandleRoute = SSlugCollectionsHandleRouteImport.update({
   path: '/collections/$handle',
   getParentRoute: () => SSlugRoute,
 } as any)
+const ApiTelegramUserStatusRoute = ApiTelegramUserStatusRouteImport.update({
+  id: '/api/telegram/user/status',
+  path: '/api/telegram/user/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTelegramUserSignInRoute = ApiTelegramUserSignInRouteImport.update({
+  id: '/api/telegram/user/sign-in',
+  path: '/api/telegram/user/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTelegramUserSendCodeRoute = ApiTelegramUserSendCodeRouteImport.update({
+  id: '/api/telegram/user/send-code',
+  path: '/api/telegram/user/send-code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSiteBuilderDownloadBuildIdRoute =
   ApiSiteBuilderDownloadBuildIdRouteImport.update({
     id: '/api/site-builder/download/$buildId',
@@ -1506,6 +1524,9 @@ export interface FileRoutesByFullPath {
   '/api/public/payments/wayforpay-init': typeof ApiPublicPaymentsWayforpayInitRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/api/site-builder/download/$buildId': typeof ApiSiteBuilderDownloadBuildIdRoute
+  '/api/telegram/user/send-code': typeof ApiTelegramUserSendCodeRoute
+  '/api/telegram/user/sign-in': typeof ApiTelegramUserSignInRoute
+  '/api/telegram/user/status': typeof ApiTelegramUserStatusRoute
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
   '/s/$slug/products/$productId': typeof SSlugProductsProductIdRoute
@@ -1705,6 +1726,9 @@ export interface FileRoutesByTo {
   '/api/public/payments/wayforpay-init': typeof ApiPublicPaymentsWayforpayInitRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/api/site-builder/download/$buildId': typeof ApiSiteBuilderDownloadBuildIdRoute
+  '/api/telegram/user/send-code': typeof ApiTelegramUserSendCodeRoute
+  '/api/telegram/user/sign-in': typeof ApiTelegramUserSignInRoute
+  '/api/telegram/user/status': typeof ApiTelegramUserStatusRoute
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
   '/s/$slug/products/$productId': typeof SSlugProductsProductIdRoute
@@ -1907,6 +1931,9 @@ export interface FileRoutesById {
   '/api/public/payments/wayforpay-init': typeof ApiPublicPaymentsWayforpayInitRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/api/site-builder/download/$buildId': typeof ApiSiteBuilderDownloadBuildIdRoute
+  '/api/telegram/user/send-code': typeof ApiTelegramUserSendCodeRoute
+  '/api/telegram/user/sign-in': typeof ApiTelegramUserSignInRoute
+  '/api/telegram/user/status': typeof ApiTelegramUserStatusRoute
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
   '/s/$slug/products/$productId': typeof SSlugProductsProductIdRoute
@@ -2109,6 +2136,9 @@ export interface FileRouteTypes {
     | '/api/public/payments/wayforpay-init'
     | '/api/public/shipping/np'
     | '/api/site-builder/download/$buildId'
+    | '/api/telegram/user/send-code'
+    | '/api/telegram/user/sign-in'
+    | '/api/telegram/user/status'
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
     | '/s/$slug/products/$productId'
@@ -2308,6 +2338,9 @@ export interface FileRouteTypes {
     | '/api/public/payments/wayforpay-init'
     | '/api/public/shipping/np'
     | '/api/site-builder/download/$buildId'
+    | '/api/telegram/user/send-code'
+    | '/api/telegram/user/sign-in'
+    | '/api/telegram/user/status'
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
     | '/s/$slug/products/$productId'
@@ -2509,6 +2542,9 @@ export interface FileRouteTypes {
     | '/api/public/payments/wayforpay-init'
     | '/api/public/shipping/np'
     | '/api/site-builder/download/$buildId'
+    | '/api/telegram/user/send-code'
+    | '/api/telegram/user/sign-in'
+    | '/api/telegram/user/status'
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
     | '/s/$slug/products/$productId'
@@ -2676,6 +2712,9 @@ export interface RootRouteChildren {
   ApiPublicPaymentsWayforpayInitRoute: typeof ApiPublicPaymentsWayforpayInitRoute
   ApiPublicShippingNpRoute: typeof ApiPublicShippingNpRoute
   ApiSiteBuilderDownloadBuildIdRoute: typeof ApiSiteBuilderDownloadBuildIdRoute
+  ApiTelegramUserSendCodeRoute: typeof ApiTelegramUserSendCodeRoute
+  ApiTelegramUserSignInRoute: typeof ApiTelegramUserSignInRoute
+  ApiTelegramUserStatusRoute: typeof ApiTelegramUserStatusRoute
   ApiPublicIntegrationsInboundProviderRoute: typeof ApiPublicIntegrationsInboundProviderRoute
 }
 
@@ -3941,6 +3980,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SSlugCollectionsHandleRouteImport
       parentRoute: typeof SSlugRoute
     }
+    '/api/telegram/user/status': {
+      id: '/api/telegram/user/status'
+      path: '/api/telegram/user/status'
+      fullPath: '/api/telegram/user/status'
+      preLoaderRoute: typeof ApiTelegramUserStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/telegram/user/sign-in': {
+      id: '/api/telegram/user/sign-in'
+      path: '/api/telegram/user/sign-in'
+      fullPath: '/api/telegram/user/sign-in'
+      preLoaderRoute: typeof ApiTelegramUserSignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/telegram/user/send-code': {
+      id: '/api/telegram/user/send-code'
+      path: '/api/telegram/user/send-code'
+      fullPath: '/api/telegram/user/send-code'
+      preLoaderRoute: typeof ApiTelegramUserSendCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/site-builder/download/$buildId': {
       id: '/api/site-builder/download/$buildId'
       path: '/api/site-builder/download/$buildId'
@@ -4400,6 +4460,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicPaymentsWayforpayInitRoute: ApiPublicPaymentsWayforpayInitRoute,
   ApiPublicShippingNpRoute: ApiPublicShippingNpRoute,
   ApiSiteBuilderDownloadBuildIdRoute: ApiSiteBuilderDownloadBuildIdRoute,
+  ApiTelegramUserSendCodeRoute: ApiTelegramUserSendCodeRoute,
+  ApiTelegramUserSignInRoute: ApiTelegramUserSignInRoute,
+  ApiTelegramUserStatusRoute: ApiTelegramUserStatusRoute,
   ApiPublicIntegrationsInboundProviderRoute:
     ApiPublicIntegrationsInboundProviderRoute,
 }
