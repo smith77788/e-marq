@@ -158,6 +158,7 @@ import { Route as HooksAgentsActionWatchdogRouteImport } from './routes/hooks/ag
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
 import { Route as ApiTelegramStatusRouteImport } from './routes/api/telegram.status'
 import { Route as ApiSiteBuilderBuildRouteImport } from './routes/api/site-builder.build'
+import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 import { Route as ApiEmailOrderStatusRouteImport } from './routes/api/email.order-status'
 import { Route as ApiEmailOrderConfirmationRouteImport } from './routes/api/email.order-confirmation'
 import { Route as ApiEmailDomainVerifyRouteImport } from './routes/api/email.domain-verify'
@@ -1032,6 +1033,11 @@ const ApiSiteBuilderBuildRoute = ApiSiteBuilderBuildRouteImport.update({
   path: '/api/site-builder/build',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
+  id: '/api/public/contact',
+  path: '/api/public/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiEmailOrderStatusRoute = ApiEmailOrderStatusRouteImport.update({
   id: '/api/email/order-status',
   path: '/api/email/order-status',
@@ -1400,6 +1406,7 @@ export interface FileRoutesByFullPath {
   '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
   '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
   '/api/telegram/status': typeof ApiTelegramStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
@@ -1605,6 +1612,7 @@ export interface FileRoutesByTo {
   '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
   '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
   '/api/telegram/status': typeof ApiTelegramStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
@@ -1813,6 +1821,7 @@ export interface FileRoutesById {
   '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
   '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
   '/api/telegram/status': typeof ApiTelegramStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
@@ -2021,6 +2030,7 @@ export interface FileRouteTypes {
     | '/api/email/domain-verify'
     | '/api/email/order-confirmation'
     | '/api/email/order-status'
+    | '/api/public/contact'
     | '/api/site-builder/build'
     | '/api/telegram/status'
     | '/hooks/actions/apply'
@@ -2226,6 +2236,7 @@ export interface FileRouteTypes {
     | '/api/email/domain-verify'
     | '/api/email/order-confirmation'
     | '/api/email/order-status'
+    | '/api/public/contact'
     | '/api/site-builder/build'
     | '/api/telegram/status'
     | '/hooks/actions/apply'
@@ -2433,6 +2444,7 @@ export interface FileRouteTypes {
     | '/api/email/domain-verify'
     | '/api/email/order-confirmation'
     | '/api/email/order-status'
+    | '/api/public/contact'
     | '/api/site-builder/build'
     | '/api/telegram/status'
     | '/hooks/actions/apply'
@@ -2614,6 +2626,7 @@ export interface RootRouteChildren {
   ApiEmailDomainVerifyRoute: typeof ApiEmailDomainVerifyRoute
   ApiEmailOrderConfirmationRoute: typeof ApiEmailOrderConfirmationRoute
   ApiEmailOrderStatusRoute: typeof ApiEmailOrderStatusRoute
+  ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiSiteBuilderBuildRoute: typeof ApiSiteBuilderBuildRoute
   ApiTelegramStatusRoute: typeof ApiTelegramStatusRoute
   HooksActionsApplyRoute: typeof HooksActionsApplyRoute
@@ -3804,6 +3817,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSiteBuilderBuildRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/contact': {
+      id: '/api/public/contact'
+      path: '/api/public/contact'
+      fullPath: '/api/public/contact'
+      preLoaderRoute: typeof ApiPublicContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/email/order-status': {
       id: '/api/email/order-status'
       path: '/api/email/order-status'
@@ -4377,6 +4397,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiEmailDomainVerifyRoute: ApiEmailDomainVerifyRoute,
   ApiEmailOrderConfirmationRoute: ApiEmailOrderConfirmationRoute,
   ApiEmailOrderStatusRoute: ApiEmailOrderStatusRoute,
+  ApiPublicContactRoute: ApiPublicContactRoute,
   ApiSiteBuilderBuildRoute: ApiSiteBuilderBuildRoute,
   ApiTelegramStatusRoute: ApiTelegramStatusRoute,
   HooksActionsApplyRoute: HooksActionsApplyRoute,
