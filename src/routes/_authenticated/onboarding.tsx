@@ -175,9 +175,7 @@ function OnboardingPage() {
 
   const stepDone = (i: number): boolean => {
     if (!status) return false;
-    return (
-      [status.s1, status.s2, status.s3, status.s4, status.s5, status.s6, status.s7][i] ?? false
-    );
+    return [status.s1, status.s2, status.s3, status.s4, status.s5, status.s6][i] ?? false;
   };
 
   const steps: Array<{ titleKey: TKey; descKey: TKey; render: () => ReactElement }> = [
@@ -210,11 +208,6 @@ function OnboardingPage() {
       titleKey: "onb.s6.title",
       descKey: "onb.s6.desc",
       render: () => <Step6Payment tenantId={tenantId} qc={qc} />,
-    },
-    {
-      titleKey: "onb.s7.title",
-      descKey: "onb.s7.desc",
-      render: () => <Step7Team tenantId={tenantId} tenantSlug={tenantSlug} />,
     },
   ];
 
