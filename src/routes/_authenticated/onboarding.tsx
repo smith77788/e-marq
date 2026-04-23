@@ -995,12 +995,16 @@ function CreateFirstTenant({
       if (!baseSlug) baseSlug = slugify(cleanName);
       let attempt = baseSlug;
       for (let i = 0; i < 4; i++) {
-        const { data, error } = await supabase
-          .from("tenants")
-          .insert({ name: cleanName, slug: attempt, owner_user_id: user.id, status: "active" })
-          .select("id, slug")
-          .single();
-        if (!error && data) return data;
+        // Use SECURITY DEFINER RPC so RLS edge cases (auth.uid mismatches,
+        // trigger ordering) cannot block creation. Function lives in DB.
+        const { data, error } = await supabase.rpc("create_my_tenant", {
+          _name: cleanName,
+          _slug: attempt,
+        });
+        if (!error && data) {
+          const row = Array.isArray(data) ? data[0] : data;
+          return { id: row.id as string, slug: row.slug as string };
+        }
         if (error && /duplicate|unique/i.test(error.message)) {
           attempt = `${baseSlug}-${Math.random().toString(36).slice(2, 5)}`;
           continue;
