@@ -23,7 +23,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type Role = "owner" | "admin" | "editor" | "viewer" | "member";
+type Role = "owner" | "admin" | "member";
+type InviteRoleInput = "admin" | "editor" | "viewer";
 
 type MemberRow = {
   user_id: string;
@@ -56,7 +57,7 @@ const ROLE_LABEL: Record<string, string> = {
 export function MembersTab({ tenantId }: { tenantId: string }) {
   const qc = useQueryClient();
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<Role>("admin");
+  const [role, setRole] = useState<InviteRoleInput>("admin");
 
   const membersQuery = useQuery({
     queryKey: ["tenant-members-v2", tenantId],
@@ -83,11 +84,10 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
   const invite = useMutation({
     mutationFn: async () => {
       if (!/\S+@\S+\.\S+/.test(email)) throw new Error("Невірний email");
-      const apiRole = role === "member" ? "viewer" : role === "owner" ? "admin" : role;
       const { error } = await supabase.rpc("create_tenant_invitation", {
         _tenant_id: tenantId,
         _email: email.trim().toLowerCase(),
-        _role: apiRole,
+        _role: role,
       });
       if (error) throw error;
     },
@@ -174,7 +174,7 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
             </div>
             <div className="space-y-2">
               <Label>Роль</Label>
-              <Select value={role} onValueChange={(v) => setRole(v as Role)}>
+              <Select value={role} onValueChange={(v) => setRole(v as InviteRoleInput)}>
                 <SelectTrigger className="w-44">
                   <SelectValue />
                 </SelectTrigger>
@@ -284,7 +284,7 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
                   {!m.is_owner && (
                     <div className="flex items-center gap-1">
                       <Select
-                        value={m.role ?? "viewer"}
+                        value={m.role ?? "member"}
                         onValueChange={(v) =>
                           updateRole.mutate({ userId: m.user_id, newRole: v as Role })
                         }
@@ -293,8 +293,7 @@ export function MembersTab({ tenantId }: { tenantId: string }) {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="viewer">Перегляд</SelectItem>
-                          <SelectItem value="editor">Редактор</SelectItem>
+                          <SelectItem value="member">Учасник</SelectItem>
                           <SelectItem value="admin">Адміністратор</SelectItem>
                         </SelectContent>
                       </Select>
