@@ -233,7 +233,7 @@ function BrandProductsPage() {
     );
   }
 
-  if (!current) {
+  if (!currentItem) {
     return <p className="text-sm text-muted-foreground">Завантажую бренд…</p>;
   }
 
@@ -249,9 +249,14 @@ function BrandProductsPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="outline" size="sm">
-            <Link to="/s/$slug" params={{ slug: current.slug }} target="_blank" rel="noreferrer">
+            <Link
+              to="/s/$slug"
+              params={{ slug: currentItem.slug }}
+              target="_blank"
+              rel="noreferrer"
+            >
               <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
-              /s/{current.slug}
+              /s/{currentItem.slug}
             </Link>
           </Button>
           <Button size="sm" onClick={() => setCreateOpen(true)}>
@@ -342,7 +347,7 @@ function BrandProductsPage() {
                       <Link
                         to="/brand/products/$productId"
                         params={{ productId: p.id }}
-                        search={{ tenant: tenantId }}
+                        search={{ tenant: effectiveTenantId }}
                         className="hover:underline hover:text-primary"
                       >
                         {p.name}
@@ -397,7 +402,7 @@ function BrandProductsPage() {
         <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
           <SheetHeader>
             <SheetTitle>{t("bp.create.title")}</SheetTitle>
-            <SheetDescription>{current.name}</SheetDescription>
+            <SheetDescription>{currentItem.name}</SheetDescription>
           </SheetHeader>
           <div className="mt-6">
             <ProductForm

@@ -97,7 +97,7 @@ const STATUS_VARIANT: Record<OrderStatus, "default" | "secondary" | "outline" | 
 function BrandOrdersPage() {
   const { tenant: tenantId } = useSearch({ from: "/_authenticated/brand/orders" });
   const { user, loading } = useAuth();
-  const { tenants } = useTenantContext();
+  const { tenants, current, currentTenantId, setCurrentTenantId } = useTenantContext();
   const { t } = useT();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -120,26 +120,36 @@ function BrandOrdersPage() {
       })),
   });
 
-  if (!loading && tenantsQuery.data && tenantsQuery.data.length > 0 && !tenantId) {
-    void navigate({
-      to: "/brand/orders",
-      search: { tenant: tenantsQuery.data[0].id },
-      replace: true,
-    });
-  }
+  const effectiveTenantId =
+    tenantId ?? currentTenantId ?? current?.tenant_id ?? tenantsQuery.data?.[0]?.id ?? null;
 
-  const current = tenantsQuery.data?.find((tt) => tt.id === tenantId);
+  useEffect(() => {
+    if (!effectiveTenantId) return;
+    if (tenantId !== effectiveTenantId) {
+      void navigate({
+        to: "/brand/orders",
+        search: { tenant: effectiveTenantId },
+        replace: true,
+      });
+      return;
+    }
+    if (currentTenantId !== effectiveTenantId) {
+      setCurrentTenantId(effectiveTenantId);
+    }
+  }, [tenantId, effectiveTenantId, currentTenantId, navigate, setCurrentTenantId]);
+
+  const currentItem = tenantsQuery.data?.find((tt) => tt.id === effectiveTenantId);
 
   const ordersQuery = useQuery({
-    queryKey: ["brand-orders", tenantId],
-    enabled: !!tenantId,
+    queryKey: ["brand-orders", effectiveTenantId],
+    enabled: !!effectiveTenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
         .select(
           "id, tenant_id, customer_email, customer_name, customer_user_id, status, total_cents, currency, payment_method, payment_ref, paid_at, shipping_address, shipping_method, shipping_cost_cents, tracking_number, tracking_url, fulfilled_at, notes, created_at",
         )
-        .eq("tenant_id", tenantId!)
+        .eq("tenant_id", effectiveTenantId!)
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
