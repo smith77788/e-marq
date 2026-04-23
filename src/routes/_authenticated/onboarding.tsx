@@ -99,7 +99,7 @@ function OnboardingPage() {
     staleTime: 5_000,
     queryFn: async () => {
       if (!tenantId) return null;
-      const [tn, prod, cust, cfg, tg, inv] = await Promise.all([
+      const [tn, prod, cust, cfg, tg] = await Promise.all([
         supabase.from("tenants").select("name").eq("id", tenantId).maybeSingle(),
         supabase
           .from("products")
@@ -115,16 +115,8 @@ function OnboardingPage() {
           .from("telegram_chat_routing")
           .select("chat_id", { count: "exact", head: true })
           .eq("tenant_id", tenantId),
-        supabase
-          .from("tenant_invitations")
-          .select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId),
       ]);
-      // Якщо хоч один із запитів повернув помилку — кидаємо, щоб React Query
-      // зробив retry, а UI показав чесний "Помилка" замість фейкового "0/7".
-      const firstErr = [tn.error, prod.error, cust.error, cfg.error, tg.error, inv.error].find(
-        Boolean,
-      );
+      const firstErr = [tn.error, prod.error, cust.error, cfg.error, tg.error].find(Boolean);
       if (firstErr) throw firstErr;
       const features = (cfg.data?.features ?? {}) as Record<string, unknown>;
       return {
@@ -134,7 +126,6 @@ function OnboardingPage() {
         s4: (cust.count ?? 0) > 0,
         s5: !!features.tracking_installed,
         s6: !!features.payment_method,
-        s7: (inv.count ?? 0) > 0,
       };
     },
   });
@@ -184,9 +175,7 @@ function OnboardingPage() {
 
   const stepDone = (i: number): boolean => {
     if (!status) return false;
-    return (
-      [status.s1, status.s2, status.s3, status.s4, status.s5, status.s6, status.s7][i] ?? false
-    );
+    return [status.s1, status.s2, status.s3, status.s4, status.s5, status.s6][i] ?? false;
   };
 
   const steps: Array<{ titleKey: TKey; descKey: TKey; render: () => ReactElement }> = [
@@ -219,11 +208,6 @@ function OnboardingPage() {
       titleKey: "onb.s6.title",
       descKey: "onb.s6.desc",
       render: () => <Step6Payment tenantId={tenantId} qc={qc} />,
-    },
-    {
-      titleKey: "onb.s7.title",
-      descKey: "onb.s7.desc",
-      render: () => <Step7Team tenantId={tenantId} tenantSlug={tenantSlug} />,
     },
   ];
 

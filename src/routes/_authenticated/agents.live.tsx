@@ -9,6 +9,9 @@ import { AcosAgentRuns } from "@/components/admin/AcosAgentRuns";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { useT, tStatic } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
+import { useAuth } from "@/hooks/useAuth";
+import { AgentsPaywall } from "@/components/owner/AgentsPaywall";
 
 export const Route = createFileRoute("/_authenticated/agents/live")({
   head: () => ({
@@ -99,10 +102,17 @@ const LIVE_AGENT_IDS = [
 
 function AgentsLivePage() {
   const { current, loading } = useTenantContext();
+  const { isSuperAdmin } = useAuth();
   const { t } = useT();
   const [running, setRunning] = useState(false);
 
   const tenantId = current?.tenant_id ?? null;
+  const gate = useSubscriptionGate(tenantId);
+  const showPaywall = !isSuperAdmin && !!tenantId && !gate.loading && !gate.hasAccess;
+
+  if (showPaywall && tenantId) {
+    return <AgentsPaywall tenantId={tenantId} status={gate.status} />;
+  }
 
   async function runAll() {
     if (!tenantId) return;
