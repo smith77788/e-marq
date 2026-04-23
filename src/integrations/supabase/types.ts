@@ -3973,6 +3973,7 @@ export type Database = {
           legal_pages: Json
           locale: string
           logo_url: string | null
+          niche_profile: Json
           og_image_url: string | null
           primary_color: string
           social_links: Json
@@ -4001,6 +4002,7 @@ export type Database = {
           legal_pages?: Json
           locale?: string
           logo_url?: string | null
+          niche_profile?: Json
           og_image_url?: string | null
           primary_color?: string
           social_links?: Json
@@ -4029,6 +4031,7 @@ export type Database = {
           legal_pages?: Json
           locale?: string
           logo_url?: string | null
+          niche_profile?: Json
           og_image_url?: string | null
           primary_color?: string
           social_links?: Json
