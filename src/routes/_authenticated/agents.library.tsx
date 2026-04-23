@@ -39,6 +39,9 @@ import {
   type AgentMeta,
 } from "@/lib/acos/agentCatalog";
 import { humanizeAgentId } from "@/lib/acos/agentLabels";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
+import { useAuth } from "@/hooks/useAuth";
+import { AgentsPaywall } from "@/components/owner/AgentsPaywall";
 
 export const Route = createFileRoute("/_authenticated/agents/library")({
   head: () => ({
@@ -93,7 +96,10 @@ type PermRow = { agent_id: string; mode: "off" | "suggest" | "auto" };
 function AgentLibraryPage() {
   const { t } = useT();
   const { current, loading: tenantLoading } = useTenantContext();
+  const { isSuperAdmin } = useAuth();
   const tenantId = current?.tenant_id ?? null;
+  const gate = useSubscriptionGate(tenantId);
+  const showPaywall = !isSuperAdmin && !!tenantId && !gate.loading && !gate.hasAccess;
 
   const sevenDaysAgo = useMemo(
     () => new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
