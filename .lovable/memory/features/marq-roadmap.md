@@ -274,6 +274,26 @@ type: feature
 - **Project-wide hygiene**: `prettier --write src/**` повторно (новий `types.ts` після підключення Telegram-схеми втратив форматування — повернули). `tsc --noEmit` 0 errors, ESLint 0 errors (15 fast-refresh warnings — shadcn/router, не критично).
 - **Чекап інтеграції**: `/api/telegram/status` GET повертає 200 з `error/hint` коли connector не підключено — клієнт коректно показує блок «Не підключено» без throw. POST правильно мерджить existing channels (не перетирає reddit/google/blog).
 
+### Sprint 23 — Reanimation Phase 2: cron infrastructure fixes ✅
+**Контекст:** після першої фази реанімації (Sprint 21) виявлено що 75+ агентів НЕ запускались на проді, тільки `agents/tick` (sales-bot + dispatch). Корінь — heavy `cron-all` таймаутив (>8с) бо викликав 75 агентів послідовно.
+
+**Виправлено:**
+1. **Дубль `telegram-poll`** видалено (`telegram-poll-every-minute` конфліктував з `marq-telegram-poll-2min` → 409 «two getUpdates instances»).
+2. **5 cron-задач** переведено з нестабільного `id-preview--*.lovable.app` (404 HTML) на стабільний `e-marq.lovable.app`: abandoned-cart-all, feedback-loop-all, reorder-all, sales-bot-all, winback-all.
+3. **Heavy `cron-all` (timeout)** замінено на 5 chunked-cron'ів через новий `/hooks/agents/cron-chunk`:
+   - `agents-chunk-catalog-daily` @ 06:00 (8 discoverers)
+   - `agents-chunk-marketing-daily` @ 07:00 (12 ROI/promo)
+   - `agents-chunk-ops-daily` @ 08:00 (12 ops/safety)
+   - `agents-chunk-retention-daily` @ 09:00 (16 retention/email)
+   - `agents-chunk-lead-gen-30min` (6 multi-tenant)
+   Кожен chunk: tenants × agents паралельно, без вкладеного fetch-каскаду.
+4. **Google-hunter intent threshold** опущено з 0.15 до 0.10 + дозволено `en` (раніше викидало 9 матчів — `BARF`/`raw food` запити майже завжди en).
+5. **Telegram min intent score** для basic-food опущено з 0.18 до 0.10.
+
+**Залишається (потребує дій користувача):**
+- DNTrade: `dntrade-cron` вертає `"no api key"` → користувач має внести API-ключ у `/brand/integrations`.
+- MTProto bridge не розгорнуто → 0 сесій, 0 виконаних tg-user-actions. Потрібен Node-host (Sprint 20).
+
 ## Backlog
 
 ### Sprint 20 — Керування від імені особистого Telegram-акаунта (не бота) ⏳ (DB+API+UI+Manual DM готові, чекаємо MTProto bridge runtime + secrets)
