@@ -5196,9 +5196,33 @@ export type Database = {
         }
         Returns: number
       }
+      admin_adjust_ai_credits: {
+        Args: { _delta: number; _reason?: string; _tenant_id: string }
+        Returns: number
+      }
+      admin_adjust_money_balance: {
+        Args: { _delta_cents: number; _reason?: string; _tenant_id: string }
+        Returns: number
+      }
       admin_grant_super_admin: {
         Args: { _target_user_id: string }
         Returns: undefined
+      }
+      admin_list_user_tenants: {
+        Args: { _target_user_id: string }
+        Returns: {
+          ai_credits_balance: number
+          current_period_end: string
+          money_balance_cents: number
+          plan_key: string
+          plan_name: string
+          role: string
+          subscription_status: string
+          tenant_id: string
+          tenant_name: string
+          tenant_slug: string
+          tenant_status: string
+        }[]
       }
       admin_list_users: {
         Args: never
