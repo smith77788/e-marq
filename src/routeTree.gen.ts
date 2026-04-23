@@ -61,6 +61,7 @@ import { Route as HooksAgentsVipConciergeRouteImport } from './routes/hooks/agen
 import { Route as HooksAgentsUgcHarvesterRouteImport } from './routes/hooks/agents.ugc-harvester'
 import { Route as HooksAgentsTimeOfDayPricerRouteImport } from './routes/hooks/agents.time-of-day-pricer'
 import { Route as HooksAgentsTickRouteImport } from './routes/hooks/agents.tick'
+import { Route as HooksAgentsTgUserActionExecutorRouteImport } from './routes/hooks/agents.tg-user-action-executor'
 import { Route as HooksAgentsStockoutRouteImport } from './routes/hooks/agents.stockout'
 import { Route as HooksAgentsSocialProofLiveRouteImport } from './routes/hooks/agents.social-proof-live'
 import { Route as HooksAgentsSocialEngagerRouteImport } from './routes/hooks/agents.social-engager'
@@ -484,6 +485,12 @@ const HooksAgentsTickRoute = HooksAgentsTickRouteImport.update({
   path: '/hooks/agents/tick',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsTgUserActionExecutorRoute =
+  HooksAgentsTgUserActionExecutorRouteImport.update({
+    id: '/hooks/agents/tg-user-action-executor',
+    path: '/hooks/agents/tg-user-action-executor',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsStockoutRoute = HooksAgentsStockoutRouteImport.update({
   id: '/hooks/agents/stockout',
   path: '/hooks/agents/stockout',
@@ -1475,6 +1482,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/social-engager': typeof HooksAgentsSocialEngagerRoute
   '/hooks/agents/social-proof-live': typeof HooksAgentsSocialProofLiveRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
+  '/hooks/agents/tg-user-action-executor': typeof HooksAgentsTgUserActionExecutorRoute
   '/hooks/agents/tick': typeof HooksAgentsTickRoute
   '/hooks/agents/time-of-day-pricer': typeof HooksAgentsTimeOfDayPricerRoute
   '/hooks/agents/ugc-harvester': typeof HooksAgentsUgcHarvesterRoute
@@ -1677,6 +1685,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/social-engager': typeof HooksAgentsSocialEngagerRoute
   '/hooks/agents/social-proof-live': typeof HooksAgentsSocialProofLiveRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
+  '/hooks/agents/tg-user-action-executor': typeof HooksAgentsTgUserActionExecutorRoute
   '/hooks/agents/tick': typeof HooksAgentsTickRoute
   '/hooks/agents/time-of-day-pricer': typeof HooksAgentsTimeOfDayPricerRoute
   '/hooks/agents/ugc-harvester': typeof HooksAgentsUgcHarvesterRoute
@@ -1882,6 +1891,7 @@ export interface FileRoutesById {
   '/hooks/agents/social-engager': typeof HooksAgentsSocialEngagerRoute
   '/hooks/agents/social-proof-live': typeof HooksAgentsSocialProofLiveRoute
   '/hooks/agents/stockout': typeof HooksAgentsStockoutRoute
+  '/hooks/agents/tg-user-action-executor': typeof HooksAgentsTgUserActionExecutorRoute
   '/hooks/agents/tick': typeof HooksAgentsTickRoute
   '/hooks/agents/time-of-day-pricer': typeof HooksAgentsTimeOfDayPricerRoute
   '/hooks/agents/ugc-harvester': typeof HooksAgentsUgcHarvesterRoute
@@ -2087,6 +2097,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/social-engager'
     | '/hooks/agents/social-proof-live'
     | '/hooks/agents/stockout'
+    | '/hooks/agents/tg-user-action-executor'
     | '/hooks/agents/tick'
     | '/hooks/agents/time-of-day-pricer'
     | '/hooks/agents/ugc-harvester'
@@ -2289,6 +2300,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/social-engager'
     | '/hooks/agents/social-proof-live'
     | '/hooks/agents/stockout'
+    | '/hooks/agents/tg-user-action-executor'
     | '/hooks/agents/tick'
     | '/hooks/agents/time-of-day-pricer'
     | '/hooks/agents/ugc-harvester'
@@ -2493,6 +2505,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/social-engager'
     | '/hooks/agents/social-proof-live'
     | '/hooks/agents/stockout'
+    | '/hooks/agents/tg-user-action-executor'
     | '/hooks/agents/tick'
     | '/hooks/agents/time-of-day-pricer'
     | '/hooks/agents/ugc-harvester'
@@ -2671,6 +2684,7 @@ export interface RootRouteChildren {
   HooksAgentsSocialEngagerRoute: typeof HooksAgentsSocialEngagerRoute
   HooksAgentsSocialProofLiveRoute: typeof HooksAgentsSocialProofLiveRoute
   HooksAgentsStockoutRoute: typeof HooksAgentsStockoutRoute
+  HooksAgentsTgUserActionExecutorRoute: typeof HooksAgentsTgUserActionExecutorRoute
   HooksAgentsTickRoute: typeof HooksAgentsTickRoute
   HooksAgentsTimeOfDayPricerRoute: typeof HooksAgentsTimeOfDayPricerRoute
   HooksAgentsUgcHarvesterRoute: typeof HooksAgentsUgcHarvesterRoute
@@ -3082,6 +3096,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/tick'
       fullPath: '/hooks/agents/tick'
       preLoaderRoute: typeof HooksAgentsTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/tg-user-action-executor': {
+      id: '/hooks/agents/tg-user-action-executor'
+      path: '/hooks/agents/tg-user-action-executor'
+      fullPath: '/hooks/agents/tg-user-action-executor'
+      preLoaderRoute: typeof HooksAgentsTgUserActionExecutorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/stockout': {
@@ -4414,6 +4435,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsSocialEngagerRoute: HooksAgentsSocialEngagerRoute,
   HooksAgentsSocialProofLiveRoute: HooksAgentsSocialProofLiveRoute,
   HooksAgentsStockoutRoute: HooksAgentsStockoutRoute,
+  HooksAgentsTgUserActionExecutorRoute: HooksAgentsTgUserActionExecutorRoute,
   HooksAgentsTickRoute: HooksAgentsTickRoute,
   HooksAgentsTimeOfDayPricerRoute: HooksAgentsTimeOfDayPricerRoute,
   HooksAgentsUgcHarvesterRoute: HooksAgentsUgcHarvesterRoute,
