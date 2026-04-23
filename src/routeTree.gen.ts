@@ -175,7 +175,10 @@ import { Route as AuthenticatedBrandPromotionsRouteImport } from './routes/_auth
 import { Route as AuthenticatedBrandProductsRouteImport } from './routes/_authenticated/brand.products'
 import { Route as AuthenticatedBrandOrdersRouteImport } from './routes/_authenticated/brand.orders'
 import { Route as AuthenticatedBrandIntegrationsRouteImport } from './routes/_authenticated/brand.integrations'
+import { Route as AuthenticatedBrandInsightsRouteImport } from './routes/_authenticated/brand.insights'
 import { Route as AuthenticatedBrandEmailRouteImport } from './routes/_authenticated/brand.email'
+import { Route as AuthenticatedBrandCustomersRouteImport } from './routes/_authenticated/brand.customers'
+import { Route as AuthenticatedBrandChannelsRouteImport } from './routes/_authenticated/brand.channels'
 import { Route as AuthenticatedBrandCatalogRouteImport } from './routes/_authenticated/brand.catalog'
 import { Route as AuthenticatedBrandBillingRouteImport } from './routes/_authenticated/brand.billing'
 import { Route as AuthenticatedAgentsLiveRouteImport } from './routes/_authenticated/agents.live'
@@ -1127,11 +1130,29 @@ const AuthenticatedBrandIntegrationsRoute =
     path: '/integrations',
     getParentRoute: () => AuthenticatedBrandRoute,
   } as any)
+const AuthenticatedBrandInsightsRoute =
+  AuthenticatedBrandInsightsRouteImport.update({
+    id: '/insights',
+    path: '/insights',
+    getParentRoute: () => AuthenticatedBrandRoute,
+  } as any)
 const AuthenticatedBrandEmailRoute = AuthenticatedBrandEmailRouteImport.update({
   id: '/email',
   path: '/email',
   getParentRoute: () => AuthenticatedBrandRoute,
 } as any)
+const AuthenticatedBrandCustomersRoute =
+  AuthenticatedBrandCustomersRouteImport.update({
+    id: '/customers',
+    path: '/customers',
+    getParentRoute: () => AuthenticatedBrandRoute,
+  } as any)
+const AuthenticatedBrandChannelsRoute =
+  AuthenticatedBrandChannelsRouteImport.update({
+    id: '/channels',
+    path: '/channels',
+    getParentRoute: () => AuthenticatedBrandRoute,
+  } as any)
 const AuthenticatedBrandCatalogRoute =
   AuthenticatedBrandCatalogRouteImport.update({
     id: '/catalog',
@@ -1396,7 +1417,10 @@ export interface FileRoutesByFullPath {
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/brand/catalog': typeof AuthenticatedBrandCatalogRoute
+  '/brand/channels': typeof AuthenticatedBrandChannelsRoute
+  '/brand/customers': typeof AuthenticatedBrandCustomersRoute
   '/brand/email': typeof AuthenticatedBrandEmailRoute
+  '/brand/insights': typeof AuthenticatedBrandInsightsRoute
   '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/brand/orders': typeof AuthenticatedBrandOrdersRoute
   '/brand/products': typeof AuthenticatedBrandProductsRouteWithChildren
@@ -1603,7 +1627,10 @@ export interface FileRoutesByTo {
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/brand/catalog': typeof AuthenticatedBrandCatalogRoute
+  '/brand/channels': typeof AuthenticatedBrandChannelsRoute
+  '/brand/customers': typeof AuthenticatedBrandCustomersRoute
   '/brand/email': typeof AuthenticatedBrandEmailRoute
+  '/brand/insights': typeof AuthenticatedBrandInsightsRoute
   '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/brand/orders': typeof AuthenticatedBrandOrdersRoute
   '/brand/products': typeof AuthenticatedBrandProductsRouteWithChildren
@@ -1813,7 +1840,10 @@ export interface FileRoutesById {
   '/_authenticated/agents/live': typeof AuthenticatedAgentsLiveRoute
   '/_authenticated/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/_authenticated/brand/catalog': typeof AuthenticatedBrandCatalogRoute
+  '/_authenticated/brand/channels': typeof AuthenticatedBrandChannelsRoute
+  '/_authenticated/brand/customers': typeof AuthenticatedBrandCustomersRoute
   '/_authenticated/brand/email': typeof AuthenticatedBrandEmailRoute
+  '/_authenticated/brand/insights': typeof AuthenticatedBrandInsightsRoute
   '/_authenticated/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/_authenticated/brand/orders': typeof AuthenticatedBrandOrdersRoute
   '/_authenticated/brand/products': typeof AuthenticatedBrandProductsRouteWithChildren
@@ -2023,7 +2053,10 @@ export interface FileRouteTypes {
     | '/agents/live'
     | '/brand/billing'
     | '/brand/catalog'
+    | '/brand/channels'
+    | '/brand/customers'
     | '/brand/email'
+    | '/brand/insights'
     | '/brand/integrations'
     | '/brand/orders'
     | '/brand/products'
@@ -2230,7 +2263,10 @@ export interface FileRouteTypes {
     | '/agents/live'
     | '/brand/billing'
     | '/brand/catalog'
+    | '/brand/channels'
+    | '/brand/customers'
     | '/brand/email'
+    | '/brand/insights'
     | '/brand/integrations'
     | '/brand/orders'
     | '/brand/products'
@@ -2439,7 +2475,10 @@ export interface FileRouteTypes {
     | '/_authenticated/agents/live'
     | '/_authenticated/brand/billing'
     | '/_authenticated/brand/catalog'
+    | '/_authenticated/brand/channels'
+    | '/_authenticated/brand/customers'
     | '/_authenticated/brand/email'
+    | '/_authenticated/brand/insights'
     | '/_authenticated/brand/integrations'
     | '/_authenticated/brand/orders'
     | '/_authenticated/brand/products'
@@ -3948,11 +3987,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBrandIntegrationsRouteImport
       parentRoute: typeof AuthenticatedBrandRoute
     }
+    '/_authenticated/brand/insights': {
+      id: '/_authenticated/brand/insights'
+      path: '/insights'
+      fullPath: '/brand/insights'
+      preLoaderRoute: typeof AuthenticatedBrandInsightsRouteImport
+      parentRoute: typeof AuthenticatedBrandRoute
+    }
     '/_authenticated/brand/email': {
       id: '/_authenticated/brand/email'
       path: '/email'
       fullPath: '/brand/email'
       preLoaderRoute: typeof AuthenticatedBrandEmailRouteImport
+      parentRoute: typeof AuthenticatedBrandRoute
+    }
+    '/_authenticated/brand/customers': {
+      id: '/_authenticated/brand/customers'
+      path: '/customers'
+      fullPath: '/brand/customers'
+      preLoaderRoute: typeof AuthenticatedBrandCustomersRouteImport
+      parentRoute: typeof AuthenticatedBrandRoute
+    }
+    '/_authenticated/brand/channels': {
+      id: '/_authenticated/brand/channels'
+      path: '/channels'
+      fullPath: '/brand/channels'
+      preLoaderRoute: typeof AuthenticatedBrandChannelsRouteImport
       parentRoute: typeof AuthenticatedBrandRoute
     }
     '/_authenticated/brand/catalog': {
@@ -4256,7 +4316,10 @@ const AuthenticatedBrandProductsRouteWithChildren =
 interface AuthenticatedBrandRouteChildren {
   AuthenticatedBrandBillingRoute: typeof AuthenticatedBrandBillingRoute
   AuthenticatedBrandCatalogRoute: typeof AuthenticatedBrandCatalogRoute
+  AuthenticatedBrandChannelsRoute: typeof AuthenticatedBrandChannelsRoute
+  AuthenticatedBrandCustomersRoute: typeof AuthenticatedBrandCustomersRoute
   AuthenticatedBrandEmailRoute: typeof AuthenticatedBrandEmailRoute
+  AuthenticatedBrandInsightsRoute: typeof AuthenticatedBrandInsightsRoute
   AuthenticatedBrandIntegrationsRoute: typeof AuthenticatedBrandIntegrationsRoute
   AuthenticatedBrandOrdersRoute: typeof AuthenticatedBrandOrdersRoute
   AuthenticatedBrandProductsRoute: typeof AuthenticatedBrandProductsRouteWithChildren
@@ -4269,7 +4332,10 @@ interface AuthenticatedBrandRouteChildren {
 const AuthenticatedBrandRouteChildren: AuthenticatedBrandRouteChildren = {
   AuthenticatedBrandBillingRoute: AuthenticatedBrandBillingRoute,
   AuthenticatedBrandCatalogRoute: AuthenticatedBrandCatalogRoute,
+  AuthenticatedBrandChannelsRoute: AuthenticatedBrandChannelsRoute,
+  AuthenticatedBrandCustomersRoute: AuthenticatedBrandCustomersRoute,
   AuthenticatedBrandEmailRoute: AuthenticatedBrandEmailRoute,
+  AuthenticatedBrandInsightsRoute: AuthenticatedBrandInsightsRoute,
   AuthenticatedBrandIntegrationsRoute: AuthenticatedBrandIntegrationsRoute,
   AuthenticatedBrandOrdersRoute: AuthenticatedBrandOrdersRoute,
   AuthenticatedBrandProductsRoute: AuthenticatedBrandProductsRouteWithChildren,
