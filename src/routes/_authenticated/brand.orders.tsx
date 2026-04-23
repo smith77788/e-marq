@@ -175,7 +175,7 @@ function BrandOrdersPage() {
   });
 
   const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["brand-orders", tenantId] });
+    qc.invalidateQueries({ queryKey: ["brand-orders", effectiveTenantId] });
   };
 
   const statusMutation = useMutation({
@@ -239,7 +239,7 @@ function BrandOrdersPage() {
     );
   }
 
-  if (!current) {
+  if (!currentItem) {
     return <p className="text-sm text-muted-foreground">Завантажую бренд…</p>;
   }
 

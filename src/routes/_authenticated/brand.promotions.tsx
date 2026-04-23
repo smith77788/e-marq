@@ -221,7 +221,7 @@ function BrandPromotionsPage() {
   };
 
   const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["brand-promotions", tenantId] });
+    qc.invalidateQueries({ queryKey: ["brand-promotions", effectiveTenantId] });
   };
 
   const buildPayload = () => ({
@@ -316,7 +316,7 @@ function BrandPromotionsPage() {
     );
   }
 
-  if (!current) {
+  if (!currentItem) {
     return <p className="text-sm text-muted-foreground">Завантажую бренд…</p>;
   }
 

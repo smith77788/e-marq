@@ -232,7 +232,7 @@ function BrandCollectionsPage() {
   };
 
   const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["brand-collections", tenantId] });
+    qc.invalidateQueries({ queryKey: ["brand-collections", effectiveTenantId] });
   };
 
   const saveAssignments = async (collectionId: string, productIds: string[]) => {
