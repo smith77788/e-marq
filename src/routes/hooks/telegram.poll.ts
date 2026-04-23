@@ -12,6 +12,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendTelegramText } from "@/lib/acos/channels";
+import { handleOwnerCommand, sendOwnerMessage } from "@/lib/telegram/ownerMenu";
 import type { Tables } from "@/integrations/supabase/types";
 
 const TG_GATEWAY = "https://connector-gateway.lovable.dev/telegram";
