@@ -43,6 +43,9 @@ import {
 } from "@/lib/acos/geoTargets";
 
 export const Route = createFileRoute("/_authenticated/brand/settings")({
+  validateSearch: (s: Record<string, unknown>): { tenant?: string } => ({
+    tenant: typeof s.tenant === "string" ? s.tenant : undefined,
+  }),
   component: StoreSettingsPage,
 });
 
@@ -90,8 +93,9 @@ function pickStr(o: Json | null, k: string, fallback = ""): string {
 }
 
 function StoreSettingsPage() {
-  const { current, currentTenantId } = useTenantContext();
-  const tenantId = currentTenantId ?? current?.tenant_id ?? null;
+  const { tenant: urlTenant } = useSearch({ from: "/_authenticated/brand/settings" });
+  const { current, currentTenantId, setCurrentTenantId, tenants } = useTenantContext();
+  const tenantId = urlTenant ?? currentTenantId ?? current?.tenant_id ?? tenants[0]?.tenant_id ?? null;
   const qc = useQueryClient();
   const [form, setForm] = useState<StoreForm>(DEFAULTS);
 
@@ -108,6 +112,12 @@ function StoreSettingsPage() {
       return (data ?? null) as TenantConfigRow | null;
     },
   });
+
+  useEffect(() => {
+    if (tenantId && urlTenant !== tenantId) {
+      setCurrentTenantId(tenantId);
+    }
+  }, [tenantId, urlTenant, setCurrentTenantId]);
 
   useEffect(() => {
     const r = cfgQuery.data;

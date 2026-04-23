@@ -90,7 +90,7 @@ function slugify(s: string): string {
 function BrandCollectionsPage() {
   const { tenant: tenantId } = useSearch({ from: "/_authenticated/brand/catalog" });
   const { user, loading } = useAuth();
-  const { tenants } = useTenantContext();
+  const { tenants, current, currentTenantId, setCurrentTenantId } = useTenantContext();
   const { t } = useT();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -113,29 +113,38 @@ function BrandCollectionsPage() {
       })),
   });
 
-  if (!loading && tenantsQuery.data && tenantsQuery.data.length > 0 && !tenantId) {
-    void navigate({
-      to: "/brand/catalog",
-      search: { tenant: tenantsQuery.data[0].id },
-      replace: true,
-    });
-  }
+  const effectiveTenantId =
+    tenantId ?? currentTenantId ?? current?.tenant_id ?? tenantsQuery.data?.[0]?.id ?? null;
 
-  const current = tenantsQuery.data?.find((tt) => tt.id === tenantId);
+  useEffect(() => {
+    if (!effectiveTenantId) return;
+    if (tenantId !== effectiveTenantId) {
+      void navigate({
+        to: "/brand/catalog",
+        search: { tenant: effectiveTenantId },
+        replace: true,
+      });
+      return;
+    }
+    if (currentTenantId !== effectiveTenantId) {
+      setCurrentTenantId(effectiveTenantId);
+    }
+  }, [tenantId, effectiveTenantId, currentTenantId, navigate, setCurrentTenantId]);
+
+  const currentItem = tenantsQuery.data?.find((tt) => tt.id === effectiveTenantId);
 
   const collectionsQuery = useQuery({
-    queryKey: ["brand-collections", tenantId],
-    enabled: !!tenantId,
+    queryKey: ["brand-collections", effectiveTenantId],
+    enabled: !!effectiveTenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("collections")
         .select("id, name, handle, description, image_url, is_active")
-        .eq("tenant_id", tenantId!)
+        .eq("tenant_id", effectiveTenantId!)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false });
       if (error) throw error;
 
-      // Fetch product counts per collection in one batched query.
       const ids = (data ?? []).map((c) => c.id);
       const counts: Record<string, number> = {};
       if (ids.length > 0) {
@@ -153,13 +162,13 @@ function BrandCollectionsPage() {
   });
 
   const productsQuery = useQuery({
-    queryKey: ["brand-collections-products", tenantId],
-    enabled: !!tenantId,
+    queryKey: ["brand-collections-products", effectiveTenantId],
+    enabled: !!effectiveTenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
         .select("id, name")
-        .eq("tenant_id", tenantId!)
+        .eq("tenant_id", effectiveTenantId!)
         .eq("is_active", true)
         .order("name");
       if (error) throw error;
