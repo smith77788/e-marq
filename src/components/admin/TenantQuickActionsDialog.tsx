@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Pause, Play, PowerOff, Sparkles, LogIn, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenantContext } from "@/hooks/useTenantContext";
+import { useAdminCapabilities } from "@/hooks/useAdminCapabilities";
 import {
   Dialog,
   DialogContent,
@@ -56,6 +57,9 @@ export function TenantQuickActionsDialog({
   const qc = useQueryClient();
   const navigate = useNavigate();
   const { setCurrentTenantId } = useTenantContext();
+  const { has } = useAdminCapabilities();
+  const canChangeStatus = has("change_status");
+  const canChangePlan = has("change_plans");
   const [planKey, setPlanKey] = useState<string>("");
 
   const plansQuery = useQuery({
@@ -146,7 +150,7 @@ export function TenantQuickActionsDialog({
               <Button
                 size="sm"
                 variant={isSuspended ? "default" : "outline"}
-                disabled={busy || isSuspended}
+                disabled={busy || isSuspended || !canChangeStatus}
                 onClick={() => setStatus.mutate("suspended")}
               >
                 <Pause className="mr-1 h-3 w-3" /> Пауза
@@ -154,7 +158,7 @@ export function TenantQuickActionsDialog({
               <Button
                 size="sm"
                 variant={isActive ? "default" : "outline"}
-                disabled={busy || isActive}
+                disabled={busy || isActive || !canChangeStatus}
                 onClick={() => setStatus.mutate("active")}
               >
                 <Play className="mr-1 h-3 w-3" /> Відновити
@@ -162,12 +166,17 @@ export function TenantQuickActionsDialog({
               <Button
                 size="sm"
                 variant="outline"
-                disabled={busy || tenant.status === "inactive"}
+                disabled={busy || tenant.status === "inactive" || !canChangeStatus}
                 onClick={() => setStatus.mutate("inactive")}
               >
                 <PowerOff className="mr-1 h-3 w-3" /> Вимкнути
               </Button>
             </div>
+            {!canChangeStatus && (
+              <p className="text-[11px] text-muted-foreground">
+                Немає права «Зміна статусу».
+              </p>
+            )}
           </div>
 
           {/* Plan */}
@@ -180,7 +189,7 @@ export function TenantQuickActionsDialog({
               <Select
                 value={planKey || tenant.plan_key}
                 onValueChange={setPlanKey}
-                disabled={busy || plansQuery.isLoading}
+                disabled={busy || plansQuery.isLoading || !canChangePlan}
               >
                 <SelectTrigger className="h-9 text-xs">
                   <SelectValue placeholder="Оберіть тариф" />
@@ -200,7 +209,7 @@ export function TenantQuickActionsDialog({
               </Select>
               <Button
                 size="sm"
-                disabled={busy || !planKey || planKey === tenant.plan_key}
+                disabled={busy || !planKey || planKey === tenant.plan_key || !canChangePlan}
                 onClick={() => changePlan.mutate(planKey)}
               >
                 {changePlan.isPending ? (
@@ -210,6 +219,11 @@ export function TenantQuickActionsDialog({
                 )}
               </Button>
             </div>
+            {!canChangePlan && (
+              <p className="text-[11px] text-muted-foreground">
+                Немає права «Зміна тарифів».
+              </p>
+            )}
           </div>
 
           {/* Enter as owner */}

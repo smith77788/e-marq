@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminCapabilities } from "@/hooks/useAdminCapabilities";
 import { PlanBadge } from "@/components/admin/PlanBadge";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants")({
@@ -86,6 +87,8 @@ function slugify(input: string) {
 
 function AdminTenantsPage() {
   const { isSuperAdmin, loading, user } = useAuth();
+  const { has } = useAdminCapabilities();
+  const canChangeStatus = has("change_status");
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
 
@@ -302,7 +305,7 @@ function AdminTenantsPage() {
                           onValueChange={(v) =>
                             v !== t.status && setStatus.mutate({ tenantId: t.tenant_id, status: v })
                           }
-                          disabled={setStatus.isPending}
+                          disabled={setStatus.isPending || !canChangeStatus}
                         >
                           <SelectTrigger className="h-7 w-32 text-[11px]">
                             <SelectValue />

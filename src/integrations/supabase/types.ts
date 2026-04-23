@@ -114,6 +114,59 @@ export type Database = {
           },
         ]
       }
+      admin_capabilities: {
+        Row: {
+          description: string
+          key: string
+          label: string
+          sort_order: number
+        }
+        Insert: {
+          description: string
+          key: string
+          label: string
+          sort_order?: number
+        }
+        Update: {
+          description?: string
+          key?: string
+          label?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      admin_permissions: {
+        Row: {
+          capability: string
+          granted_at: string
+          granted_by: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          capability: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          capability?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_permissions_capability_fkey"
+            columns: ["capability"]
+            isOneToOne: false
+            referencedRelation: "admin_capabilities"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
       agent_conflicts: {
         Row: {
           conflict_type: string
@@ -5212,9 +5265,26 @@ export type Database = {
           owner_id: string
         }[]
       }
+      admin_grant_capability: {
+        Args: { _capability: string; _target_user: string }
+        Returns: undefined
+      }
       admin_grant_super_admin: {
         Args: { _target_user_id: string }
         Returns: undefined
+      }
+      admin_has_capability: {
+        Args: { _capability: string; _user_id: string }
+        Returns: boolean
+      }
+      admin_list_admin_users: {
+        Args: never
+        Returns: {
+          capabilities: string[]
+          email: string
+          is_super_admin: boolean
+          user_id: string
+        }[]
       }
       admin_list_tenant_invites: {
         Args: { _tenant_id: string }
@@ -5270,6 +5340,10 @@ export type Database = {
       admin_mark_topup_paid: {
         Args: { _manager_note?: string; _request_id: string }
         Returns: Json
+      }
+      admin_revoke_capability: {
+        Args: { _capability: string; _target_user: string }
+        Returns: undefined
       }
       admin_revoke_super_admin: {
         Args: { _target_user_id: string }

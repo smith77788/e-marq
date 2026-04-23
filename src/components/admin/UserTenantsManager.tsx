@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAdminCapabilities } from "@/hooks/useAdminCapabilities";
 
 type TenantRow = {
   tenant_id: string;
@@ -37,6 +38,9 @@ type TenantRow = {
 
 export function UserTenantsManager({ userId }: { userId: string }) {
   const qc = useQueryClient();
+  const { has } = useAdminCapabilities();
+  const canChangePlan = has("change_plans");
+  const canManageUsers = has("manage_users");
 
   const tenantsQuery = useQuery({
     queryKey: ["admin-user-tenants", userId],
@@ -138,6 +142,8 @@ export function UserTenantsManager({ userId }: { userId: string }) {
             adjustMoney.mutate({ tenantId: t.tenant_id, deltaCents })
           }
           busy={changePlan.isPending || adjustCredits.isPending || adjustMoney.isPending}
+          canChangePlan={canChangePlan}
+          canManageUsers={canManageUsers}
         />
       ))}
     </div>
@@ -151,6 +157,8 @@ function TenantBlock({
   onAdjustCredits,
   onAdjustMoney,
   busy,
+  canChangePlan,
+  canManageUsers,
 }: {
   tenant: TenantRow;
   plans: { key: string; name: string; price_cents_monthly: number }[];
@@ -158,6 +166,8 @@ function TenantBlock({
   onAdjustCredits: (delta: number) => void;
   onAdjustMoney: (deltaCents: number) => void;
   busy: boolean;
+  canChangePlan: boolean;
+  canManageUsers: boolean;
 }) {
   const [creditsDelta, setCreditsDelta] = useState("100");
   const [moneyDelta, setMoneyDelta] = useState("100");
@@ -200,7 +210,7 @@ function TenantBlock({
           <Select
             value={tenant.plan_key}
             onValueChange={(v) => v !== tenant.plan_key && onChangePlan(v)}
-            disabled={busy}
+            disabled={busy || !canChangePlan}
           >
             <SelectTrigger className="h-8 text-xs">
               <SelectValue />
@@ -233,7 +243,7 @@ function TenantBlock({
             <Button
               size="sm"
               variant="outline"
-              disabled={busy}
+              disabled={busy || !canManageUsers}
               onClick={() => onAdjustCredits(parseInt(creditsDelta || "0", 10))}
             >
               +
@@ -241,7 +251,7 @@ function TenantBlock({
             <Button
               size="sm"
               variant="outline"
-              disabled={busy}
+              disabled={busy || !canManageUsers}
               onClick={() => onAdjustCredits(-parseInt(creditsDelta || "0", 10))}
             >
               −
@@ -266,7 +276,7 @@ function TenantBlock({
             <Button
               size="sm"
               variant="outline"
-              disabled={busy}
+              disabled={busy || !canManageUsers}
               onClick={() => onAdjustMoney(Math.round(parseFloat(moneyDelta || "0") * 100))}
             >
               +
@@ -274,7 +284,7 @@ function TenantBlock({
             <Button
               size="sm"
               variant="outline"
-              disabled={busy}
+              disabled={busy || !canManageUsers}
               onClick={() => onAdjustMoney(-Math.round(parseFloat(moneyDelta || "0") * 100))}
             >
               −
