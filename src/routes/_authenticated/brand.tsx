@@ -75,9 +75,20 @@ function BrandPage() {
     return (
       <Card className="fade-in-soft">
         <CardHeader>
-          <CardTitle>{t("brand.noBrandTitle")}</CardTitle>
-          <CardDescription>{t("brand.noBrandDesc")}</CardDescription>
+          <CardTitle>Створіть свій перший бренд</CardTitle>
+          <CardDescription>
+            Створіть бренд за хвилину — після перевірки супер-адміном він стане активним і ви
+            отримаєте доступ до всіх інструментів.
+          </CardDescription>
         </CardHeader>
+        <div className="flex flex-wrap gap-2 px-6 pb-6">
+          <Button asChild>
+            <Link to="/onboarding">
+              <Wand2 className="mr-1.5 h-4 w-4" />
+              Створити бренд
+            </Link>
+          </Button>
+        </div>
       </Card>
     );
   }
