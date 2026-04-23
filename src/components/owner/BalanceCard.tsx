@@ -1,15 +1,20 @@
 /**
  * Баланс бренду + поповнення + журнал операцій.
  *
+ * Кредити балансу — універсальна валюта на акаунті бренду. Використовуються для:
+ *  - Оплати тарифу/підписки (auto-renewal, у майбутньому).
+ *  - Додаткових платних опцій: SMS-розсилки, преміум-домени, prioritized
+ *    site-builder білди тощо (вводитимуться поетапно).
+ *  Усі ШІ-агенти працюють за підпискою без списань кредитів.
+ *
  * Поповнення:
  *  - Manual (адмін-власник тенанта одразу зараховує суму через RPC
- *    owner_topup_ai_credits — це працює як «кредит-нота» для AI-кредитів).
+ *    owner_topup_ai_credits — назва RPC історична, насправді це універсальні
+ *    кредити балансу).
  *  - Bank transfer (показуємо реквізити, користувач переказує гроші,
  *    адміністратор підтверджує вручну).
  *  - Online (LiqPay/WayForPay/Monobank) — поки що недоступно для тарифу,
  *    повідомляємо чесно.
- *
- * Все в одному компоненті, без зайвих залежностей.
  */
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -154,25 +159,20 @@ export function BalanceCard({ tenantId, tenantSlug }: { tenantId: string; tenant
           />
         </div>
         <CardDescription>
-          AI-кредити споживаються агентами. Баланс грошей — резерв для майбутніх онлайн-оплат.
+          Кредити балансу — універсальна валюта акаунту: оплата тарифу та додаткові опції (SMS,
+          преміум-домени, прискорені білди). Агенти працюють за підпискою без списань.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {balanceQuery.isLoading ? (
           <p className="text-xs text-muted-foreground">Завантажую баланс…</p>
         ) : balance ? (
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <Stat
               icon={<Sparkles className="h-4 w-4 text-accent" />}
-              label="AI-кредити"
+              label="Кредити балансу"
               value={balance.ai_credits_balance.toLocaleString("uk-UA")}
-              hint={`Спожито за період: ${balance.ai_credits_consumed_this_period.toLocaleString("uk-UA")}`}
-            />
-            <Stat
-              icon={<Coins className="h-4 w-4 text-warning" />}
-              label="Нараховано за період"
-              value={balance.ai_credits_granted_this_period.toLocaleString("uk-UA")}
-              hint="Скидається при перемиканні тарифу"
+              hint="Для оплати тарифу та додаткових опцій"
             />
             <Stat
               icon={<Banknote className="h-4 w-4 text-success" />}
