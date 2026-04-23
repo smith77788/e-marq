@@ -276,7 +276,7 @@ type: feature
 
 ## Backlog
 
-### Sprint 20 (planned) — Керування від імені особистого Telegram-акаунта (не бота)
+### Sprint 20 — Керування від імені особистого Telegram-акаунта (не бота) ⏳ (DB+API+UI готові, чекаємо MTProto bridge runtime + secrets)
 **Мета:** дати власнику можливість виконувати дії в Lead Radar / Outreach Hunter не від імені бренд-бота, а від його власного особистого Telegram-профілю — як вручну з кабінету, так і автоматизовано агентами на їх розсуд.
 
 **Що має вміти агент від імені користувача:**
@@ -300,13 +300,14 @@ type: feature
 - **Agent mode:** новий agent `agents.outreach-user-engager` — періодично сканує prospects зі статусом `new` + intent_score > 0.5, обирає action за risk-mode, виконує через runner, пише результат у `outreach_actions`.
 - **Compliance:** показуємо warning при підключенні («ваш особистий аккаунт — Telegram може забанити за спам, MARQ не несе відповідальності»). Logs зберігаються 90д для аудиту.
 
-**Етапи (коли почнемо):**
-1. DB: `tenant_configs.bot.telegram_user` JSONB (session_encrypted, phone, last_login_at, quotas), міграція + RLS
-2. External runner repo / Inngest function для MTProto (gramjs)
-3. UI Login flow (phone code + 2FA) → encrypted session save
-4. Manual actions UI (3 кнопки на prospect)
-5. `agents.outreach-user-engager` із risk-mode
-6. Compliance warning, logs viewer, kill-switch
+**Поточний стан:**
+1. ✅ DB: `tg_user_sessions` (encrypted_session, login_state, status), `tg_user_actions` (queue), `tg_user_quotas` (per-action limits + delays + autonomy switch), `tg_user_action_log` + RPC `tg_user_count_actions`
+2. ✅ Bridge client: `src/lib/telegram/mtprotoBridge.ts` — HMAC-signed HTTPS до зовнішнього Node-сервісу (gramjs/Telethon). AES-GCM helpers для session blobs. ENV: `TG_MTPROTO_BRIDGE_URL`, `TG_MTPROTO_BRIDGE_SECRET`, `TG_SESSION_ENC_KEY` (поки не задані — UI показує warning).
+3. ✅ API роути: `/api/telegram/user/{status,send-code,sign-in}` — phone → SMS code → optional 2FA password.
+4. ✅ Executor agent: `/hooks/agents/tg-user-action-executor` — обробляє чергу з квотами (per-action), human-like delay, flood_wait reschedule, session_expired handling. Готовий під cron.
+5. ✅ UI: `TelegramUserConnectCard` поряд з ботом на `/admin/lead-radar`.
+6. ⏳ TODO коли активують MTProto-міст: розгорнути Node-сервіс (gramjs) на Render/Fly/Railway, реалізувати HMAC-перевірку, ендпоінти `/v1/auth/{send-code,sign-in,whoami,logout}` + `/v1/actions/execute`. Додати секрети `TG_MTPROTO_BRIDGE_URL/SECRET` + `TG_SESSION_ENC_KEY`.
+7. ⏳ TODO: Manual action UI на prospect-row (3 кнопки), `agents.outreach-user-engager` для авто-інженджменту з risk-mode, виклик executor у `agents.cron-all`.
 
 ### Sprint 21 (planned) — Скарги на Telegram (reports на чат / канал / бот / профіль / повідомлення)
 **Мета:** дати власнику (вручну) і агентам (автоматично, з обережністю) можливість надсилати **офіційні скарги** в Telegram на спам/фрод/контрафакт, що шкодить бренду — без виходу з кабінету MARQ.
