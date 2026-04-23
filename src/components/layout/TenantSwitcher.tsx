@@ -52,13 +52,41 @@ export function TenantSwitcher() {
     },
   });
 
+  // Fetch verification status for own tenants (pending vs active).
+  // RLS lets owners SELECT their own brand, so this works for non-admins too.
+  const verificationQuery = useQuery({
+    queryKey: ["tenant-verification-status", tenants.map((t) => t.tenant_id).join(",")],
+    enabled: tenants.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tenants")
+        .select("id, status, rejection_reason")
+        .in(
+          "id",
+          tenants.map((t) => t.tenant_id),
+        );
+      if (error) throw error;
+      const map = new Map<string, { status: string; rejection_reason: string | null }>();
+      for (const t of data ?? []) {
+        map.set(t.id, { status: t.status, rejection_reason: t.rejection_reason ?? null });
+      }
+      return map;
+    },
+  });
+
   // Merge: own memberships first (with role + plan), then any extra brands
   // visible to admin only (so admin sees full list).
-  const merged: Array<MyTenant & { isAdminOnly?: boolean }> = useMemo(() => {
+  const merged: Array<MyTenant & { isAdminOnly?: boolean; verificationStatus?: string; rejectionReason?: string | null }> = useMemo(() => {
     const owned = tenants ?? [];
-    if (!isSuperAdmin) return owned;
+    const vmap = verificationQuery.data;
+    const withVerification = owned.map((t) => ({
+      ...t,
+      verificationStatus: vmap?.get(t.tenant_id)?.status,
+      rejectionReason: vmap?.get(t.tenant_id)?.rejection_reason ?? null,
+    }));
+    if (!isSuperAdmin) return withVerification;
     const ownedIds = new Set(owned.map((t) => t.tenant_id));
-    const extras: Array<MyTenant & { isAdminOnly?: boolean }> = (adminTenantsQuery.data ?? [])
+    const extras = (adminTenantsQuery.data ?? [])
       .filter((t) => !ownedIds.has(t.id))
       .map((t) => ({
         tenant_id: t.id,
@@ -68,10 +96,12 @@ export function TenantSwitcher() {
         plan_key: "—",
         plan_name: "—",
         status: t.status,
+        verificationStatus: t.status,
+        rejectionReason: null,
         isAdminOnly: true,
       }));
-    return [...owned, ...extras];
-  }, [tenants, adminTenantsQuery.data, isSuperAdmin]);
+    return [...withVerification, ...extras];
+  }, [tenants, adminTenantsQuery.data, isSuperAdmin, verificationQuery.data]);
 
   if (merged.length === 0) {
     if (isSuperAdmin) {
