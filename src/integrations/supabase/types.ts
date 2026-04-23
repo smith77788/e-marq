@@ -5908,7 +5908,7 @@ export type Database = {
         | "referral_rewarded"
       order_status: "pending" | "paid" | "fulfilled" | "cancelled" | "refunded"
       tenant_role: "owner" | "admin" | "member"
-      tenant_status: "active" | "suspended" | "archived"
+      tenant_status: "active" | "suspended" | "archived" | "pending"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -6100,7 +6100,7 @@ export const Constants = {
       ],
       order_status: ["pending", "paid", "fulfilled", "cancelled", "refunded"],
       tenant_role: ["owner", "admin", "member"],
-      tenant_status: ["active", "suspended", "archived"],
+      tenant_status: ["active", "suspended", "archived", "pending"],
     },
   },
 } as const
