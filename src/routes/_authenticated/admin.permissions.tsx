@@ -155,7 +155,7 @@ function AdminPermissionsPage() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           {u.is_super_admin && (
-                            <Crown className="h-3.5 w-3.5 text-amber-500" />
+                            <Crown className="h-3.5 w-3.5 text-primary" />
                           )}
                           <div className="min-w-0">
                             <div className="text-sm font-medium">
