@@ -549,6 +549,19 @@ function ProspectRow({ prospect, tenantId }: { prospect: Prospect; tenantId: str
             <Sparkles className="mr-1 h-3.5 w-3.5" />
             Написати
           </Button>
+          <TelegramUserDmDialog
+            tenantId={tenantId}
+            prospectId={prospect.id}
+            prospectName={prospect.name}
+            defaultPeer={
+              typeof prospect.signals?.telegram_handle === "string"
+                ? String(prospect.signals.telegram_handle)
+                : prospect.instagram_handle
+                  ? `@${prospect.instagram_handle.replace(/^@/, "")}`
+                  : ""
+            }
+            defaultText={`Привіт! Знайшов ваш бренд "${prospect.name}" — у MARQ є кілька ідей, що можуть зекономити вам години роботи. Цікаво коротко обмінятись?`}
+          />
           <Button
             size="sm"
             variant="outline"
