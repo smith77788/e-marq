@@ -211,6 +211,8 @@ function TenantBlock({
             value={tenant.plan_key}
             onValueChange={(v) => v !== tenant.plan_key && onChangePlan(v)}
             disabled={busy || !canChangePlan}
+          >
+            <SelectTrigger className="h-8 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
