@@ -210,9 +210,7 @@ function TenantBlock({
           <Select
             value={tenant.plan_key}
             onValueChange={(v) => v !== tenant.plan_key && onChangePlan(v)}
-            disabled={busy}
-          >
-            <SelectTrigger className="h-8 text-xs">
+            disabled={busy || !canChangePlan}
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -243,7 +241,7 @@ function TenantBlock({
             <Button
               size="sm"
               variant="outline"
-              disabled={busy}
+              disabled={busy || !canManageUsers}
               onClick={() => onAdjustCredits(parseInt(creditsDelta || "0", 10))}
             >
               +
@@ -251,7 +249,7 @@ function TenantBlock({
             <Button
               size="sm"
               variant="outline"
-              disabled={busy}
+              disabled={busy || !canManageUsers}
               onClick={() => onAdjustCredits(-parseInt(creditsDelta || "0", 10))}
             >
               −
@@ -276,7 +274,7 @@ function TenantBlock({
             <Button
               size="sm"
               variant="outline"
-              disabled={busy}
+              disabled={busy || !canManageUsers}
               onClick={() => onAdjustMoney(Math.round(parseFloat(moneyDelta || "0") * 100))}
             >
               +
@@ -284,7 +282,7 @@ function TenantBlock({
             <Button
               size="sm"
               variant="outline"
-              disabled={busy}
+              disabled={busy || !canManageUsers}
               onClick={() => onAdjustMoney(-Math.round(parseFloat(moneyDelta || "0") * 100))}
             >
               −
