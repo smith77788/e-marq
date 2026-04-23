@@ -305,7 +305,7 @@ function AdminTenantsPage() {
                           onValueChange={(v) =>
                             v !== t.status && setStatus.mutate({ tenantId: t.tenant_id, status: v })
                           }
-                          disabled={setStatus.isPending}
+                          disabled={setStatus.isPending || !canChangeStatus}
                         >
                           <SelectTrigger className="h-7 w-32 text-[11px]">
                             <SelectValue />
