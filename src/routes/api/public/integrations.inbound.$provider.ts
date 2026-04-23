@@ -135,10 +135,11 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
                   skipped++;
                   continue;
                 }
-                const { error } = await supabaseAdmin.from("products").insert({
+                const sku = get(row, "sku") || null;
+                const payload = {
                   tenant_id: tenantId,
                   name,
-                  sku: get(row, "sku") || null,
+                  sku,
                   price_cents: parsePriceToCents(get(row, "price_cents") || get(row, "price")),
                   stock: parseInt(get(row, "stock") || "0", 10) || 0,
                   description: get(row, "description") || null,
@@ -146,7 +147,13 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
                   currency: (get(row, "currency") || "UAH").toUpperCase().slice(0, 3),
                   is_active: true,
                   metadata: { import_source: provider, import_job_id: job.id },
-                });
+                };
+                const q = sku
+                  ? supabaseAdmin
+                      .from("products")
+                      .upsert(payload, { onConflict: "tenant_id,sku" })
+                  : supabaseAdmin.from("products").insert(payload);
+                const { error } = await q;
                 if (error) {
                   failed++;
                   errors.push({ row: i + 1, message: error.message });
@@ -157,17 +164,24 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
                   skipped++;
                   continue;
                 }
-                const { error } = await supabaseAdmin.from("customers").insert({
+                const email = get(row, "email").toLowerCase() || null;
+                const payload = {
                   tenant_id: tenantId,
                   name,
-                  email: get(row, "email").toLowerCase() || null,
+                  email,
                   telegram_username: get(row, "telegram_username") || null,
                   metadata: {
                     phone: get(row, "phone") || null,
                     import_source: provider,
                     import_job_id: job.id,
                   },
-                });
+                };
+                const q = email
+                  ? supabaseAdmin
+                      .from("customers")
+                      .upsert(payload, { onConflict: "tenant_id,email" })
+                  : supabaseAdmin.from("customers").insert(payload);
+                const { error } = await q;
                 if (error) {
                   failed++;
                   errors.push({ row: i + 1, message: error.message });
@@ -201,7 +215,8 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
                 const rawPm = get(row, "payment_method").toLowerCase();
                 const paymentMethod =
                   rawPm === "stripe" || rawPm === "stripe_card" ? "stripe_card" : "manual";
-                const { error } = await supabaseAdmin.from("orders").insert({
+                const externalId = get(row, "external_id") || get(row, "id") || null;
+                const payload = {
                   tenant_id: tenantId,
                   customer_name: customerName,
                   customer_email: get(row, "customer_email").toLowerCase() || null,
@@ -211,11 +226,37 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
                   payment_method: paymentMethod,
                   paid_at: finalStatus === "paid" ? new Date().toISOString() : null,
                   metadata: {
-                    external_id: get(row, "external_id") || get(row, "id") || null,
+                    external_id: externalId,
                     import_source: provider,
                     import_job_id: job.id,
                   },
-                });
+                };
+                if (externalId) {
+                  const { data: existing } = await supabaseAdmin
+                    .from("orders")
+                    .select("id")
+                    .eq("tenant_id", tenantId)
+                    .eq("metadata->>external_id", externalId)
+                    .maybeSingle();
+                  if (existing) {
+                    const { error } = await supabaseAdmin
+                      .from("orders")
+                      .update({
+                        status: finalStatus,
+                        total_cents: total,
+                        paid_at: payload.paid_at,
+                      })
+                      .eq("id", existing.id);
+                    if (error) {
+                      failed++;
+                      errors.push({ row: i + 1, message: error.message });
+                    } else {
+                      skipped++;
+                    }
+                    continue;
+                  }
+                }
+                const { error } = await supabaseAdmin.from("orders").insert(payload);
                 if (error) {
                   failed++;
                   errors.push({ row: i + 1, message: error.message });
