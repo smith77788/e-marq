@@ -174,18 +174,7 @@ function OnboardingPage() {
   }
 
   if (!tenantId || !tenantSlug) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("onb.title")}</CardTitle>
-          <CardDescription>
-            {lang === "ua"
-              ? "Спочатку створіть бренд або попросіть головного адміністратора додати вас."
-              : "Create a brand first or ask a super-admin to add you."}
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    );
+    return <CreateFirstTenant lang={lang} qc={qc} navigate={navigate} />;
   }
 
   // 4. Перше завантаження статусів — показуємо скелетон над майстром,
