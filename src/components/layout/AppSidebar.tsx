@@ -110,12 +110,11 @@ const GROWTH: NavGroup = {
   items: [
     {
       labelKey: "sb.insights",
-      to: "/brand",
-      hash: "insights",
+      to: "/brand/insights",
       icon: Lightbulb,
       tone: "text-warning",
     },
-    { labelKey: "sb.customers", to: "/brand", hash: "customers", icon: Users, tone: "text-info" },
+    { labelKey: "sb.customers", to: "/brand/customers", icon: Users, tone: "text-info" },
     { labelKey: "sb.agents", to: "/agents/library", icon: Bot, tone: "text-accent" },
   ],
 };
@@ -124,7 +123,7 @@ const SETUP: NavGroup = {
   labelKey: "sb.setup",
   tone: "text-muted-foreground",
   items: [
-    { labelKey: "sb.channels", to: "/brand", hash: "channels", icon: Plug, tone: "text-primary" },
+    { labelKey: "sb.channels", to: "/brand/channels", icon: Plug, tone: "text-primary" },
     {
       labelKey: "sb.integrations" as TKey,
       to: "/brand/integrations",
