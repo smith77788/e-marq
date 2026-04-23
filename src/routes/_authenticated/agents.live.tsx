@@ -102,10 +102,17 @@ const LIVE_AGENT_IDS = [
 
 function AgentsLivePage() {
   const { current, loading } = useTenantContext();
+  const { isSuperAdmin } = useAuth();
   const { t } = useT();
   const [running, setRunning] = useState(false);
 
   const tenantId = current?.tenant_id ?? null;
+  const gate = useSubscriptionGate(tenantId);
+  const showPaywall = !isSuperAdmin && !!tenantId && !gate.loading && !gate.hasAccess;
+
+  if (showPaywall && tenantId) {
+    return <AgentsPaywall tenantId={tenantId} status={gate.status} />;
+  }
 
   async function runAll() {
     if (!tenantId) return;
