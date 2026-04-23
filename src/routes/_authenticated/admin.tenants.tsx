@@ -13,6 +13,7 @@ import {
   TenantQuickActionsDialog,
   type QuickActionsTenant,
 } from "@/components/admin/TenantQuickActionsDialog";
+import { PendingTenantsCard } from "@/components/admin/PendingTenantsCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
@@ -181,6 +182,8 @@ function AdminTenantsPage() {
           Тарифи, баланси, навантаження — оновлюється кожну хвилину.
         </p>
       </div>
+
+      <PendingTenantsCard />
 
       <Card>
         <CardHeader>

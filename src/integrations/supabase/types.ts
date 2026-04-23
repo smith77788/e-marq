@@ -4758,27 +4758,39 @@ export type Database = {
           id: string
           name: string
           owner_user_id: string
+          rejection_reason: string | null
           slug: string
           status: Database["public"]["Enums"]["tenant_status"]
           updated_at: string
+          verification_requested_at: string | null
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
           owner_user_id: string
+          rejection_reason?: string | null
           slug: string
           status?: Database["public"]["Enums"]["tenant_status"]
           updated_at?: string
+          verification_requested_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
           owner_user_id?: string
+          rejection_reason?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["tenant_status"]
           updated_at?: string
+          verification_requested_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: []
       }
@@ -5286,6 +5298,18 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_list_pending_tenants: {
+        Args: never
+        Returns: {
+          created_at: string
+          owner_email: string
+          owner_user_id: string
+          tenant_id: string
+          tenant_name: string
+          tenant_slug: string
+          verification_requested_at: string
+        }[]
+      }
       admin_list_tenant_invites: {
         Args: { _tenant_id: string }
         Returns: {
@@ -5341,6 +5365,28 @@ export type Database = {
         Args: { _manager_note?: string; _request_id: string }
         Returns: Json
       }
+      admin_reject_tenant: {
+        Args: { _reason: string; _tenant_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          name: string
+          owner_user_id: string
+          rejection_reason: string | null
+          slug: string
+          status: Database["public"]["Enums"]["tenant_status"]
+          updated_at: string
+          verification_requested_at: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tenants"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_revoke_capability: {
         Args: { _capability: string; _target_user: string }
         Returns: undefined
@@ -5356,9 +5402,35 @@ export type Database = {
           id: string
           name: string
           owner_user_id: string
+          rejection_reason: string | null
           slug: string
           status: Database["public"]["Enums"]["tenant_status"]
           updated_at: string
+          verification_requested_at: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tenants"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_verify_tenant: {
+        Args: { _tenant_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          name: string
+          owner_user_id: string
+          rejection_reason: string | null
+          slug: string
+          status: Database["public"]["Enums"]["tenant_status"]
+          updated_at: string
+          verification_requested_at: string | null
+          verified_at: string | null
+          verified_by: string | null
         }
         SetofOptions: {
           from: "*"
@@ -5457,9 +5529,13 @@ export type Database = {
           id: string
           name: string
           owner_user_id: string
+          rejection_reason: string | null
           slug: string
           status: Database["public"]["Enums"]["tenant_status"]
           updated_at: string
+          verification_requested_at: string | null
+          verified_at: string | null
+          verified_by: string | null
         }
         SetofOptions: {
           from: "*"
@@ -5908,7 +5984,7 @@ export type Database = {
         | "referral_rewarded"
       order_status: "pending" | "paid" | "fulfilled" | "cancelled" | "refunded"
       tenant_role: "owner" | "admin" | "member"
-      tenant_status: "active" | "suspended" | "archived"
+      tenant_status: "active" | "suspended" | "archived" | "pending"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -6100,7 +6176,7 @@ export const Constants = {
       ],
       order_status: ["pending", "paid", "fulfilled", "cancelled", "refunded"],
       tenant_role: ["owner", "admin", "member"],
-      tenant_status: ["active", "suspended", "archived"],
+      tenant_status: ["active", "suspended", "archived", "pending"],
     },
   },
 } as const

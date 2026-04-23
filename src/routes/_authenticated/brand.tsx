@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Bot, Settings, Wand2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Bot, Clock, Settings, ShieldAlert, Wand2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -75,9 +77,20 @@ function BrandPage() {
     return (
       <Card className="fade-in-soft">
         <CardHeader>
-          <CardTitle>{t("brand.noBrandTitle")}</CardTitle>
-          <CardDescription>{t("brand.noBrandDesc")}</CardDescription>
+          <CardTitle>Створіть свій перший бренд</CardTitle>
+          <CardDescription>
+            Створіть бренд за хвилину — після перевірки супер-адміном він стане активним і ви
+            отримаєте доступ до всіх інструментів.
+          </CardDescription>
         </CardHeader>
+        <div className="flex flex-wrap gap-2 px-6 pb-6">
+          <Button asChild>
+            <Link to="/onboarding">
+              <Wand2 className="mr-1.5 h-4 w-4" />
+              Створити бренд
+            </Link>
+          </Button>
+        </div>
       </Card>
     );
   }
@@ -86,7 +99,94 @@ function BrandPage() {
     return <CockpitSkeleton variant="owner" />;
   }
 
+  return <BrandCockpit currentTenantId={current.tenant_id} currentTenantName={current.tenant_name} currentTenantSlug={current.tenant_slug} />;
+}
+
+function BrandCockpit({
+  currentTenantId,
+  currentTenantName,
+  currentTenantSlug,
+}: {
+  currentTenantId: string;
+  currentTenantName: string;
+  currentTenantSlug: string;
+}) {
+  const { t } = useT();
+
+  const verification = useQuery({
+    queryKey: ["tenant-verification", currentTenantId],
+    refetchInterval: 30_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tenants")
+        .select("status, rejection_reason")
+        .eq("id", currentTenantId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const isPending = verification.data?.status === "pending";
+  const isRejected =
+    verification.data?.status === "suspended" && !!verification.data?.rejection_reason;
+
   return (
+    <div className="reveal-stagger space-y-6">
+      {isPending && (
+        <Card className="border-warning/50 bg-warning/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Clock className="h-4 w-4 text-warning" />
+              Бренд очікує верифікації
+            </CardTitle>
+            <CardDescription>
+              Ми вже сповістили супер-адміна. Як тільки заявку підтвердять — ви отримаєте повний
+              доступ до автоматизації, агентів та виплат. Поки що можна налаштувати каталог,
+              канали, інтеграції.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+      {isRejected && (
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ShieldAlert className="h-4 w-4 text-destructive" />
+              Заявку відхилено
+            </CardTitle>
+            <CardDescription>
+              <strong className="text-foreground">Причина:</strong>{" "}
+              {verification.data?.rejection_reason}. Зв&apos;яжіться з підтримкою або створіть
+              новий бренд із оновленими даними.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+      <BrandCockpitInner
+        currentTenantId={currentTenantId}
+        currentTenantName={currentTenantName}
+        currentTenantSlug={currentTenantSlug}
+        t={t}
+      />
+    </div>
+  );
+}
+
+function BrandCockpitInner({
+  currentTenantId,
+  currentTenantName,
+  currentTenantSlug,
+  t,
+}: {
+  currentTenantId: string;
+  currentTenantName: string;
+  currentTenantSlug: string;
+  t: ReturnType<typeof useT>["t"];
+}) {
+  const current = { tenant_id: currentTenantId, tenant_name: currentTenantName, tenant_slug: currentTenantSlug };
+  return (
+    <>
     <div className="reveal-stagger space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -225,5 +325,6 @@ function BrandPage() {
         </CardHeader>
       </Card>
     </div>
+    </>
   );
 }
