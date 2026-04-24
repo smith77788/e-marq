@@ -509,6 +509,7 @@ function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
       setPrice("");
       setStock("");
       qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
+      qc.invalidateQueries({ queryKey: ["onboarding-status", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -568,6 +569,7 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
       toast.success(`Готово · додано клієнтів: ${n}`);
       setCsv("");
       qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
+      qc.invalidateQueries({ queryKey: ["onboarding-status", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -637,6 +639,7 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
       toast.success(t("common.save") + " ✓");
       qc.invalidateQueries({ queryKey: ["tenant-config", tenantId] });
       qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
+      qc.invalidateQueries({ queryKey: ["onboarding-status", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
