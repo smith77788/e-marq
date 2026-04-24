@@ -1,11 +1,37 @@
+import { useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Boxes, Search, ShoppingCart, Sparkles, Users } from "lucide-react";
+import {
+  Activity,
+  BarChart3,
+  Bell,
+  Bot,
+  Boxes,
+  Brain,
+  Coins,
+  Mail,
+  Megaphone,
+  Search,
+  Shield,
+  ShoppingCart,
+  Sparkles,
+  Tag,
+  Truck,
+  Users,
+  Zap,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MarketingHeader, MarketingFooter } from "@/components/marketing/MarketingShell";
-import { useT, tStatic } from "@/lib/i18n";
+import { useT, tStatic, type TKey } from "@/lib/i18n";
 import { buildSeo } from "@/lib/seo";
+import {
+  AGENT_CATALOG,
+  CATEGORY_ORDER,
+  type AgentCategory,
+  type AgentMeta,
+} from "@/lib/acos/agentCatalog";
+import { humanizeAgentId } from "@/lib/acos/agentLabels";
 
 export const Route = createFileRoute("/agents")({
   head: () =>
@@ -17,43 +43,59 @@ export const Route = createFileRoute("/agents")({
   component: Agents,
 });
 
+const ICON_MAP: Record<AgentMeta["icon"], typeof Bot> = {
+  Users,
+  Boxes,
+  ShoppingCart,
+  Search,
+  Tag,
+  Mail,
+  Bot,
+  Brain,
+  Sparkles,
+  Shield,
+  Truck,
+  Coins,
+  Activity,
+  Bell,
+  BarChart3,
+  Megaphone,
+  Zap,
+};
+
+const CATEGORY_TONE: Record<AgentCategory, string> = {
+  growth: "text-success border-success/30 bg-success/5",
+  retention: "text-info border-info/30 bg-info/5",
+  operations: "text-warning border-warning/30 bg-warning/5",
+  communication: "text-primary border-primary/30 bg-primary/5",
+  content_seo: "text-accent border-accent/30 bg-accent/5",
+  analytics: "text-info border-info/30 bg-info/5",
+  ai_quality: "text-primary border-primary/30 bg-primary/5",
+  safety: "text-destructive border-destructive/30 bg-destructive/5",
+};
+
+const CATEGORY_LABEL: Record<AgentCategory, string> = {
+  growth: "Зростання та продажі",
+  retention: "Утримання клієнтів",
+  operations: "Операції та склад",
+  communication: "Комунікації",
+  content_seo: "Контент і SEO",
+  analytics: "Аналітика",
+  ai_quality: "Якість AI",
+  safety: "Безпека",
+};
+
 function Agents() {
   const { t } = useT();
 
-  const agents = [
-    {
-      icon: Users,
-      name: t("ag.churnName"),
-      summary: t("ag.churnSummary"),
-      impact: t("ag.churnImpact"),
-      triggers: ["recency_days", "drift_ratio", "lifetime_value_cents"],
-      actions: [t("ag.churnAct")],
-    },
-    {
-      icon: Boxes,
-      name: t("ag.stockName"),
-      summary: t("ag.stockSummary"),
-      impact: t("ag.stockImpact"),
-      triggers: ["units_sold_14d", "velocity_per_day", "days_of_supply"],
-      actions: [t("ag.stockAct")],
-    },
-    {
-      icon: ShoppingCart,
-      name: t("ag.aovName"),
-      summary: t("ag.aovSummary"),
-      impact: t("ag.aovImpact"),
-      triggers: ["abandoned_sessions", "abandoned_checkouts", "recoverable_revenue_cents"],
-      actions: [t("ag.aovAct")],
-    },
-    {
-      icon: Search,
-      name: t("ag.searchName"),
-      summary: t("ag.searchSummary"),
-      impact: t("ag.searchImpact"),
-      triggers: ["searches_zero_results", "miss_rate"],
-      actions: [t("ag.searchAct")],
-    },
-  ];
+  const grouped = useMemo(() => {
+    const map = new Map<AgentCategory, AgentMeta[]>();
+    for (const cat of CATEGORY_ORDER) map.set(cat, []);
+    for (const a of AGENT_CATALOG) {
+      map.get(a.category)?.push(a);
+    }
+    return map;
+  }, []);
 
   return (
     <main className="min-h-screen bg-background">
@@ -69,57 +111,71 @@ function Agents() {
           <p className="mx-auto mt-6 max-w-2xl text-base text-muted-foreground">
             {t("ag.subtitle")}
           </p>
+          <p className="mx-auto mt-4 text-sm text-muted-foreground">
+            <strong className="text-foreground">{AGENT_CATALOG.length}</strong> помічників у{" "}
+            {CATEGORY_ORDER.length} категоріях
+          </p>
         </div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-4 py-16">
-        <div className="grid gap-5 md:grid-cols-2">
-          {agents.map((a) => {
-            const Icon = a.icon;
-            return (
-              <Card key={a.name} className="border-border bg-card/60">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <Icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <CardTitle className="text-lg">{a.name}</CardTitle>
-                  </div>
-                  <CardDescription className="mt-3">{a.summary}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-sm font-medium text-primary">→ {a.impact}</p>
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      {t("ag.signals")}
-                    </p>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {a.triggers.map((tr) => (
-                        <Badge key={tr} variant="outline" className="text-[10px]">
-                          {tr}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      {t("ag.action")}
-                    </p>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {a.actions.map((act) => (
-                        <Badge key={act} variant="secondary" className="text-[10px]">
-                          {act}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+      <section className="mx-auto max-w-6xl space-y-12 px-4 py-16">
+        {CATEGORY_ORDER.map((cat) => {
+          const items = grouped.get(cat) ?? [];
+          if (items.length === 0) return null;
+          return (
+            <div key={cat} className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Badge variant="outline" className={CATEGORY_TONE[cat]}>
+                  {CATEGORY_LABEL[cat]}
+                </Badge>
+                <span className="text-xs text-muted-foreground">
+                  {items.length} {items.length === 1 ? "помічник" : "помічників"}
+                </span>
+              </div>
 
-        <div className="mt-12 text-center">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {items.map((agent) => {
+                  const Icon = ICON_MAP[agent.icon] ?? Bot;
+                  const titleKey = `agc.${agent.i18nKey}.title` as TKey;
+                  const whatKey = `agc.${agent.i18nKey}.what` as TKey;
+                  const impactKey = `agc.${agent.i18nKey}.impact` as TKey;
+                  const titleResolved = t(titleKey);
+                  const title =
+                    titleResolved === titleKey ? humanizeAgentId(agent.id) : titleResolved;
+                  const whatResolved = t(whatKey);
+                  const summary = whatResolved === whatKey ? "" : whatResolved;
+                  const impactResolved = t(impactKey);
+                  const impact = impactResolved === impactKey ? "" : impactResolved;
+
+                  return (
+                    <Card key={agent.id} className="border-border bg-card/60">
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`flex h-10 w-10 items-center justify-center rounded-lg ${CATEGORY_TONE[cat]}`}
+                          >
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <CardTitle className="text-base">{title}</CardTitle>
+                        </div>
+                        {summary && (
+                          <CardDescription className="mt-3 text-xs">{summary}</CardDescription>
+                        )}
+                      </CardHeader>
+                      {impact && (
+                        <CardContent>
+                          <p className="text-sm font-medium text-primary">→ {impact}</p>
+                        </CardContent>
+                      )}
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+
+        <div className="pt-8 text-center">
           <Button asChild size="lg">
             <Link to="/signup">{t("ag.runOnStore")}</Link>
           </Button>
