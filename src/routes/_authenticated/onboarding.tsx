@@ -99,7 +99,7 @@ function OnboardingPage() {
     staleTime: 5_000,
     queryFn: async () => {
       if (!tenantId) return null;
-      const [tn, prod, cust, cfg, tg] = await Promise.all([
+      const [tn, prod, cust, cfg, tg, mem, ev] = await Promise.all([
         supabase.from("tenants").select("name").eq("id", tenantId).maybeSingle(),
         supabase
           .from("products")
@@ -115,17 +115,32 @@ function OnboardingPage() {
           .from("telegram_chat_routing")
           .select("chat_id", { count: "exact", head: true })
           .eq("tenant_id", tenantId),
+        supabase
+          .from("tenant_memberships")
+          .select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId),
+        supabase
+          .from("events")
+          .select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId)
+          .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
       ]);
-      const firstErr = [tn.error, prod.error, cust.error, cfg.error, tg.error].find(Boolean);
+      const firstErr = [tn.error, prod.error, cust.error, cfg.error, tg.error, mem.error, ev.error].find(
+        Boolean,
+      );
       if (firstErr) throw firstErr;
       const features = (cfg.data?.features ?? {}) as Record<string, unknown>;
+      // s5 (tracking) — рахуємо як готовий, якщо є хоч 1 подія за останні 7 днів
+      // АБО якщо власник явно поставив прапорець tracking_installed.
+      const trackingDone = !!features.tracking_installed || (ev.count ?? 0) > 0;
       return {
         s1: !!(tn.data?.name && tn.data.name.trim().length > 1),
         s2: (tg.count ?? 0) > 0,
         s3: (prod.count ?? 0) > 0,
         s4: (cust.count ?? 0) > 0,
-        s5: !!features.tracking_installed,
-        s6: !!features.payment_method,
+        s5: trackingDone,
+        s6: typeof features.payment_method === "string",
+        s7: (mem.count ?? 0) > 1,
       };
     },
   });
@@ -175,7 +190,7 @@ function OnboardingPage() {
 
   const stepDone = (i: number): boolean => {
     if (!status) return false;
-    return [status.s1, status.s2, status.s3, status.s4, status.s5, status.s6][i] ?? false;
+    return [status.s1, status.s2, status.s3, status.s4, status.s5, status.s6, status.s7][i] ?? false;
   };
 
   const steps: Array<{ titleKey: TKey; descKey: TKey; render: () => ReactElement }> = [
@@ -208,6 +223,11 @@ function OnboardingPage() {
       titleKey: "onb.s6.title",
       descKey: "onb.s6.desc",
       render: () => <Step6Payment tenantId={tenantId} qc={qc} />,
+    },
+    {
+      titleKey: "onb.s7.title",
+      descKey: "onb.s7.desc",
+      render: () => <Step7Team tenantId={tenantId} tenantSlug={tenantSlug} />,
     },
   ];
 
@@ -392,6 +412,8 @@ function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
       toast.success(t("common.save") + " ✓");
       qc.invalidateQueries({ queryKey: ["tenant", tenantId] });
       qc.invalidateQueries({ queryKey: ["my-tenants"] });
+      qc.invalidateQueries({ queryKey: ["onboarding-status", tenantId] });
+      qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -487,6 +509,7 @@ function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
       setPrice("");
       setStock("");
       qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
+      qc.invalidateQueries({ queryKey: ["onboarding-status", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -546,6 +569,7 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
       toast.success(`Готово · додано клієнтів: ${n}`);
       setCsv("");
       qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
+      qc.invalidateQueries({ queryKey: ["onboarding-status", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -615,6 +639,7 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
       toast.success(t("common.save") + " ✓");
       qc.invalidateQueries({ queryKey: ["tenant-config", tenantId] });
       qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
+      qc.invalidateQueries({ queryKey: ["onboarding-status", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
