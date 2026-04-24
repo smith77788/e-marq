@@ -49,7 +49,12 @@ import {
 } from "@/lib/integrations/catalog";
 import { isConnectorSupported } from "@/lib/integrations/connectors";
 
+type Search = { tenant?: string };
+
 export const Route = createFileRoute("/_authenticated/brand/integrations")({
+  validateSearch: (s: Record<string, unknown>): Search => ({
+    tenant: typeof s.tenant === "string" ? s.tenant : undefined,
+  }),
   component: IntegrationsHubPage,
 });
 
