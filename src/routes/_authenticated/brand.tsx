@@ -328,3 +328,27 @@ function BrandCockpitInner({
     </>
   );
 }
+
+/**
+ * Render DnTradeIntegrationCard only when a DN Trade integration row already exists.
+ * Otherwise show a small CTA pointing to the integrations hub — keeps the dashboard
+ * uncluttered for tenants that don't use DN Trade.
+ */
+function DnTradeIntegrationCardGuard({ tenantId }: { tenantId: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["dntrade-integration-exists", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tenant_integrations")
+        .select("id")
+        .eq("tenant_id", tenantId)
+        .eq("provider", "dntrade")
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+  if (isLoading) return null;
+  if (data) return <DnTradeIntegrationCard tenantId={tenantId} />;
+  return null;
+}
