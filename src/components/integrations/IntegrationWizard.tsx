@@ -228,10 +228,22 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["tenant-integrations", tenantId] });
       toast.success(MSG.saved);
+      // For credential-based providers we hand off to the manage dialog
+      // (overview + first-import CTA) instead of showing "Готово".
+      if (integration && (isApiKey || isRest) && onSaved) {
+        onSaved(integration.id);
+        reset();
+        return;
+      }
       setStep(3);
+      // Allow webhook flow (which renders URL/secret on step 3) to keep working,
+      // but bubble up the saved id too so the parent can refresh.
+      if (integration && onSaved && data) {
+        // No close here — webhook screen still useful.
+      }
     },
     onError: (e: Error) => toast.error(MSG.errSave, { description: e.message }),
   });
