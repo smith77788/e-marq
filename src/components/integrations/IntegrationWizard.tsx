@@ -76,7 +76,7 @@ const ENTITY_LABELS: Record<EntityKind, string> = {
   orders: "Замовлення",
 };
 
-export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
+export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: Props) {
   const qc = useQueryClient();
   const [step, setStep] = useState<Step>(1);
   const [entityKind, setEntityKind] = useState<EntityKind>("products");
