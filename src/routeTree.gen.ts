@@ -25,6 +25,7 @@ import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as MSlugRouteImport } from './routes/m.$slug'
 import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
 import { Route as HandbookDntradeWebhookRouteImport } from './routes/handbook.dntrade-webhook'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ApiMarqKeysRouteImport } from './routes/api/marq-keys'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
@@ -300,6 +301,11 @@ const HandbookDntradeWebhookRoute = HandbookDntradeWebhookRouteImport.update({
   id: '/dntrade-webhook',
   path: '/dntrade-webhook',
   getParentRoute: () => HandbookRoute,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiMarqKeysRoute = ApiMarqKeysRouteImport.update({
   id: '/api/marq-keys',
@@ -1413,6 +1419,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/api/marq-keys': typeof ApiMarqKeysRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/m/$slug': typeof MSlugRoute
@@ -1626,6 +1633,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/api/marq-keys': typeof ApiMarqKeysRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/m/$slug': typeof MSlugRoute
@@ -1840,6 +1848,7 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/api/marq-keys': typeof ApiMarqKeysRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/m/$slug': typeof MSlugRoute
@@ -2055,6 +2064,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/profile'
     | '/api/marq-keys'
+    | '/auth/callback'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
     | '/m/$slug'
@@ -2268,6 +2278,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/profile'
     | '/api/marq-keys'
+    | '/auth/callback'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
     | '/m/$slug'
@@ -2481,6 +2492,7 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/profile'
     | '/api/marq-keys'
+    | '/auth/callback'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
     | '/m/$slug'
@@ -2692,6 +2704,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiMarqKeysRoute: typeof ApiMarqKeysRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   HooksIngestRoute: typeof HooksIngestRoute
   MSlugRoute: typeof MSlugRoute
   SSlugRoute: typeof SSlugRouteWithChildren
@@ -2963,6 +2976,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/handbook/dntrade-webhook'
       preLoaderRoute: typeof HandbookDntradeWebhookRouteImport
       parentRoute: typeof HandbookRoute
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/marq-keys': {
       id: '/api/marq-keys'
@@ -4516,6 +4536,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiMarqKeysRoute: ApiMarqKeysRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   HooksIngestRoute: HooksIngestRoute,
   MSlugRoute: MSlugRoute,
   SSlugRoute: SSlugRouteWithChildren,

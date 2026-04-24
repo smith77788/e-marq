@@ -35,21 +35,17 @@ function LoginPage() {
   async function onGoogle() {
     setSubmitting(true);
     try {
-      // Send the user back directly to /dashboard after the OAuth round-trip.
-      // Using window.location.origin would land them on "/" where a second
-      // client-side redirect is needed — that race caused repeated logins
-      // ("nothing happens after sign-in") on desktop.
+      // Route OAuth through a public callback page first so the auth context
+      // can hydrate before we enter protected routes on desktop browsers.
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/dashboard`,
+        redirect_uri: `${window.location.origin}/auth/callback`,
       });
       if (result.redirected) return; // full-page redirect to Google in flight
 
       if (result.error) {
         const { data } = await supabase.auth.getSession();
         if (data.session) {
-          // Hard reload — guarantees the auth context picks up the new
-          // session before the protected route guard runs.
-          window.location.assign("/dashboard");
+          window.location.assign("/auth/callback");
           return;
         }
         const msg = result.error instanceof Error ? result.error.message : String(result.error);
@@ -61,9 +57,7 @@ function LoginPage() {
       }
 
       toast.success(t("auth.welcome"));
-      // Hard navigate to avoid a race between setSession() and the
-      // _authenticated guard reading a stale user=null.
-      window.location.assign("/dashboard");
+      window.location.assign("/auth/callback");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.fail"));
       setSubmitting(false);
