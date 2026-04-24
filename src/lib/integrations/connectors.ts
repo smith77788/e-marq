@@ -534,8 +534,42 @@ export function isConnectorSupported(provider: string): boolean {
   return provider in CONNECTOR_REGISTRY;
 }
 
+/** Translates raw safeFetch / network errors into UA-friendly text. */
+function humanizeConnectorError(err: unknown): Error {
+  const raw = err instanceof Error ? err.message : String(err);
+  // SSRF / private network blocks
+  if (
+    /приватні|локальні|metadata|приватну адресу|небезпечний протокол/i.test(raw) ||
+    /Дозволено лише https/i.test(raw)
+  ) {
+    return new Error(
+      "Цей URL не дозволено (приватна, локальна або небезпечна адреса). Використайте публічний https-домен.",
+    );
+  }
+  if (/Невалідний URL/i.test(raw)) {
+    return new Error("Некоректний URL. Перевірте, що адреса починається з https:// і містить домен.");
+  }
+  if (/Заборонено облікові дані в URL/i.test(raw)) {
+    return new Error("Не вставляйте логін/пароль у URL. Передавайте ключ окремим полем.");
+  }
+  if (/Відповідь занадто велика/i.test(raw)) {
+    return new Error("Відповідь зовнішнього API задовелика (>10 МБ). Зменшіть обсяг імпорту.");
+  }
+  // fetch failures (DNS, timeout, abort)
+  if (/aborted|timeout|ETIMEDOUT|ENOTFOUND|fetch failed/i.test(raw)) {
+    return new Error(
+      "Не вдалось підʼєднатись до сервера. Перевірте домен, мережу і доступність API.",
+    );
+  }
+  return err instanceof Error ? err : new Error(raw);
+}
+
 export async function runConnectorPull(input: ConnectorPullInput): Promise<ConnectorPullResult> {
   const fn = CONNECTOR_REGISTRY[input.provider];
   if (!fn) throw new Error(`Конектор "${input.provider}" не підтримує автоматичний імпорт.`);
-  return fn(input);
+  try {
+    return await fn(input);
+  } catch (e) {
+    throw humanizeConnectorError(e);
+  }
 }
