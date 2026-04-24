@@ -120,10 +120,38 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
       } = await supabase.auth.getSession();
       const token = session?.access_token;
       if (!token) throw new Error("Сесія не знайдена. Перезавантажте сторінку.");
+
+      // DN Trade — окремий легкий verify через спецроут /hooks/integrations/dntrade-verify.
+      if (integration.id === "dntrade") {
+        const res = await fetch(`/hooks/integrations/dntrade-verify`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ tenant_id: tenantId, api_key: apiKey }),
+        });
+        const json = (await res.json()) as {
+          valid?: boolean;
+          message?: string;
+          error?: string;
+        };
+        if (!res.ok) {
+          const msg = json.error ?? "Не вдалось перевірити";
+          setVerifyResult({ ok: false, message: msg });
+          toast.error("Помилка перевірки", { description: msg });
+          return;
+        }
+        if (json.valid) {
+          setVerifyResult({ ok: true, message: "DN Trade ApiKey робочий." });
+          toast.success("Підключення робоче");
+        } else {
+          const msg =
+            json.message ?? "DN Trade відхилив ключ. Перевірте, що це ApiKey з правами читання.";
+          setVerifyResult({ ok: false, message: msg });
+          toast.error("Невалідний ключ DN Trade", { description: msg });
+        }
+        return;
+      }
+
       // Підбираємо найбільш безпечний entityKind для тестового pull:
-      // - Bitrix24 не вміє products → беремо customers;
-      // - Stripe не вміє products → customers;
-      // - решта — products.
       const entity =
         integration.id === "bitrix24" || integration.id === "stripe" ? "customers" : "products";
       const res = await fetch(`/api/integrations/verify/${integration.id}`, {
