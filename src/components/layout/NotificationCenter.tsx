@@ -357,28 +357,23 @@ export function NotificationCenter() {
 
                 return (
                   <li key={n.id}>
-                    {n.link ? (
-                      <a
-                        href={n.link}
-                        className="block"
-                        onClick={() => {
-                          setOpen(false);
-                          if (!n.is_read) void markRead(n.id);
-                        }}
-                      >
-                        {item}
-                      </a>
-                    ) : (
-                      <button
-                        type="button"
-                        className="block w-full text-left"
-                        onClick={() => {
-                          if (!n.is_read) void markRead(n.id);
-                        }}
-                      >
-                        {item}
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      className="block w-full text-left"
+                      onClick={() => {
+                        setOpen(false);
+                        if (!n.is_read) void markRead(n.id);
+                        const target = resolveNotifTarget(n);
+                        // Split optional `#hash` so router scrolls correctly
+                        const [path, hash] = target.split("#");
+                        void navigate({
+                          to: path,
+                          ...(hash ? { hash } : {}),
+                        });
+                      }}
+                    >
+                      {item}
+                    </button>
                   </li>
                 );
               })}
