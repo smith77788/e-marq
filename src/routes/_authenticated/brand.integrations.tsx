@@ -352,6 +352,13 @@ function IntegrationsHubPage() {
         integration={active}
         tenantId={currentTenantId}
         onClose={() => setActive(null)}
+        onSaved={(integrationId) => {
+          // Open the manage dialog with first-import CTA right after a successful save.
+          const def = INTEGRATIONS.find((i) => i.id === integrationId) ?? null;
+          setActive(null);
+          if (def) setManage(def);
+          qc.invalidateQueries({ queryKey: ["tenant-integrations", currentTenantId] });
+        }}
       />
 
       <IntegrationManageDialog
