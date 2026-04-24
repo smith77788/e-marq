@@ -139,18 +139,27 @@ mirrorToMarq({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="universal" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="universal" className="text-xs">
-              <Globe className="mr-1.5 h-3.5 w-3.5" />
-              Сайт або лендінг
+          <TabsList className="grid h-auto w-full grid-cols-1 gap-1 sm:grid-cols-3">
+            <TabsTrigger
+              value="universal"
+              className="w-full justify-start gap-1.5 text-xs sm:justify-center"
+            >
+              <Globe className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">Сайт або лендінг</span>
             </TabsTrigger>
-            <TabsTrigger value="mirror" className="text-xs">
-              <Code2 className="mr-1.5 h-3.5 w-3.5" />
-              Свій застосунок
+            <TabsTrigger
+              value="mirror"
+              className="w-full justify-start gap-1.5 text-xs sm:justify-center"
+            >
+              <Code2 className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">Свій застосунок</span>
             </TabsTrigger>
-            <TabsTrigger value="platforms" className="text-xs">
-              <ShoppingBag className="mr-1.5 h-3.5 w-3.5" />
-              Shopify · WordPress
+            <TabsTrigger
+              value="platforms"
+              className="w-full justify-start gap-1.5 text-xs sm:justify-center"
+            >
+              <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">Shopify · WordPress</span>
             </TabsTrigger>
           </TabsList>
 
