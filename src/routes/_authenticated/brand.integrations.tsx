@@ -235,6 +235,22 @@ function IntegrationsHubPage() {
         </p>
       </header>
 
+      {!isTenantActive && (
+        <Card className="border-warning/40 bg-warning/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base text-warning">
+              <Clock className="h-4 w-4" />
+              Бренд очікує верифікації
+            </CardTitle>
+            <CardDescription>
+              Підключення зовнішніх джерел даних стане доступним після того, як супер-адмін
+              підтвердить ваш бренд. Поки що ви можете переглядати каталог інтеграцій, але кнопки
+              «Підключити» та «Синхронізувати» заблоковані.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
       {/* Пошук + фільтр */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-md flex-1">
@@ -280,7 +296,7 @@ function IntegrationsHubPage() {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((integration) => {
                 const connected = connectedSet.has(integration.id);
-                const canSync = connected && isConnectorSupported(integration.id);
+                const canSync = connected && isConnectorSupported(integration.id) && isTenantActive;
                 return (
                   <IntegrationCard
                     key={integration.id}
@@ -289,12 +305,22 @@ function IntegrationsHubPage() {
                     canSync={canSync}
                     syncing={syncing === integration.id}
                     onSelect={(i) => {
+                      if (!isTenantActive && !connectedSet.has(i.id)) {
+                        toast.warning("Бренд ще не верифіковано", {
+                          description: "Підключення стане доступним після підтвердження адміном.",
+                        });
+                        return;
+                      }
                       // Якщо вже підключено — відкриваємо панель керування,
                       // інакше — wizard підключення.
                       if (connectedSet.has(i.id)) setManage(i);
                       else setActive(i);
                     }}
                     onSync={(i) => {
+                      if (!isTenantActive) {
+                        toast.warning("Бренд ще не верифіковано");
+                        return;
+                      }
                       setSyncTarget(i);
                       setSyncEntity(
                         i.imports.includes("orders")
