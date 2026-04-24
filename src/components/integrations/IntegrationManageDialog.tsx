@@ -239,13 +239,44 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
     onError: (e: Error) => toast.error(MSG.errSave, { description: e.message }),
   });
 
+  const generateSecret = useMutation({
+    mutationFn: async () => {
+      if (!integration || !tenantId) return;
+      // Якщо рядка інтеграції ще немає — створюємо мінімальний (тільки для webhook-методів).
+      const secret = crypto.randomUUID().replace(/-/g, "");
+      if (!integ.data) {
+        const { error } = await supabase.from("tenant_integrations").insert({
+          tenant_id: tenantId,
+          provider: integration.id,
+          is_active: true,
+          webhook_secret: secret,
+          credentials_encrypted: null,
+          config: {},
+        });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("tenant_integrations")
+          .update({ webhook_secret: secret })
+          .eq("id", integ.data.id);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Webhook secret згенеровано");
+      void qc.invalidateQueries({
+        queryKey: ["tenant-integration-detail", tenantId, integration?.id],
+      });
+      void qc.invalidateQueries({ queryKey: ["tenant-integrations", tenantId] });
+    },
+    onError: (e: Error) => toast.error(MSG.errSave, { description: e.message }),
+  });
+
   if (!integration) return null;
   const Icon = integration.icon;
   const data = integ.data;
 
-  const webhookUrl = data?.webhook_secret
-    ? `${window.location.origin}/api/public/integrations/inbound/${integration.id}?tenant=${tenantId}`
-    : null;
+  const webhookUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/api/public/integrations/inbound/${integration.id}?tenant=${tenantId}`;
 
   function copy(text: string, label: string) {
     navigator.clipboard.writeText(text).then(() => toast.success(`${label} скопійовано`));
