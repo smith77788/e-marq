@@ -35,6 +35,19 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-sync")({
         const ctx = await authorizeAgentRequest(token, tenantId);
         if ("error" in ctx) return jsonError(ctx.error, ctx.status);
 
+        // Guard: tenant must be active
+        const { data: tenant } = await supabaseAdmin
+          .from("tenants")
+          .select("status")
+          .eq("id", tenantId)
+          .maybeSingle();
+        if (tenant && tenant.status !== "active") {
+          return jsonError(
+            "Бренд ще не верифіковано адміністратором. Синхронізація стане доступною після підтвердження.",
+            403,
+          );
+        }
+
         // Load integration row
         const { data: integ, error: loadErr } = await supabaseAdmin
           .from("tenant_integrations")
