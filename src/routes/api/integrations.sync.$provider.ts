@@ -74,6 +74,22 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
           }
           const { entityKind, tenantId, limit } = parsed.data;
 
+          // Guard: tenant must be active
+          const { data: tenant } = await supabaseAdmin
+            .from("tenants")
+            .select("status")
+            .eq("id", tenantId)
+            .maybeSingle();
+          if (tenant && tenant.status !== "active") {
+            return jsonResponse(
+              {
+                error:
+                  "Бренд ще не верифіковано адміністратором. Синхронізація стане доступною після підтвердження.",
+              },
+              403,
+            );
+          }
+
           // 3. RLS перевірка: tenant_integrations доступний користувачу як admin.
           const { data: integ, error: integErr } = await userClient
             .from("tenant_integrations")
@@ -85,6 +101,24 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
           if (!integ)
             return jsonResponse({ error: "Інтеграцію не знайдено або немає доступу." }, 404);
           if (!integ.is_active) return jsonResponse({ error: "Інтеграція деактивована." }, 400);
+
+          // 3.5 Створюємо import_job ОДРАЗУ (status=running), щоб журнал завжди мав запис.
+          const { data: job, error: jobErr } = await supabaseAdmin
+            .from("import_jobs")
+            .insert({
+              tenant_id: tenantId,
+              integration_id: integ.id,
+              source_provider: provider,
+              source_kind: "scheduled",
+              entity_kind: entityKind,
+              status: "running",
+              rows_total: 0,
+              created_by: userId,
+              started_at: new Date().toISOString(),
+            })
+            .select("id")
+            .single();
+          if (jobErr || !job) return jsonResponse({ error: jobErr?.message ?? "job error" }, 500);
 
           // 4. Тягнемо дані з зовнішнього API.
           let pulled;
@@ -98,7 +132,16 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
             });
           } catch (e) {
             const msg = e instanceof Error ? e.message : String(e);
-            // Записуємо помилку у last_sync_status і виходимо.
+            // Mark job failed
+            await supabaseAdmin
+              .from("import_jobs")
+              .update({
+                status: "failed",
+                error_summary: [{ row: 0, message: msg }],
+                finished_at: new Date().toISOString(),
+              })
+              .eq("id", job.id);
+            // Save tenant_integrations status too.
             await supabaseAdmin
               .from("tenant_integrations")
               .update({
@@ -107,26 +150,14 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
                 last_sync_error: msg.slice(0, 500),
               })
               .eq("id", integ.id);
-            return jsonResponse({ error: msg }, 502);
+            return jsonResponse({ error: msg, jobId: job.id }, 502);
           }
 
-          // 5. Створюємо import_job і пишемо у БД через service-role.
-          const { data: job, error: jobErr } = await supabaseAdmin
+          // 5. Оновлюємо rows_total після успішного pull.
+          await supabaseAdmin
             .from("import_jobs")
-            .insert({
-              tenant_id: tenantId,
-              integration_id: integ.id,
-              source_provider: provider,
-              source_kind: "scheduled",
-              entity_kind: entityKind,
-              status: "running",
-              rows_total: pulled.rows.length,
-              created_by: userId,
-              started_at: new Date().toISOString(),
-            })
-            .select("id")
-            .single();
-          if (jobErr || !job) return jsonResponse({ error: jobErr?.message ?? "job error" }, 500);
+            .update({ rows_total: pulled.rows.length })
+            .eq("id", job.id);
 
           // 6. Імпорт.
           let imported = 0,
