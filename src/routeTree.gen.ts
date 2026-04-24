@@ -30,8 +30,8 @@ import { Route as ApiMarqKeysRouteImport } from './routes/api/marq-keys'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedBrandRouteImport } from './routes/_authenticated/brand'
 import { Route as SSlugIndexRouteImport } from './routes/s.$slug.index'
+import { Route as AuthenticatedBrandIndexRouteImport } from './routes/_authenticated/brand.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as TrackSlugJsRouteImport } from './routes/track.$slug.js'
 import { Route as SSlugWishlistRouteImport } from './routes/s.$slug.wishlist'
@@ -327,15 +327,15 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedBrandRoute = AuthenticatedBrandRouteImport.update({
-  id: '/brand',
-  path: '/brand',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const SSlugIndexRoute = SSlugIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => SSlugRoute,
+} as any)
+const AuthenticatedBrandIndexRoute = AuthenticatedBrandIndexRouteImport.update({
+  id: '/brand/',
+  path: '/brand/',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/admin/',
@@ -1098,80 +1098,80 @@ const AuthenticatedInviteTokenRoute =
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedBrandTeamRoute = AuthenticatedBrandTeamRouteImport.update({
-  id: '/team',
-  path: '/team',
-  getParentRoute: () => AuthenticatedBrandRoute,
+  id: '/brand/team',
+  path: '/brand/team',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedBrandSiteBuilderRoute =
   AuthenticatedBrandSiteBuilderRouteImport.update({
-    id: '/site-builder',
-    path: '/site-builder',
-    getParentRoute: () => AuthenticatedBrandRoute,
+    id: '/brand/site-builder',
+    path: '/brand/site-builder',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedBrandSettingsRoute =
   AuthenticatedBrandSettingsRouteImport.update({
-    id: '/settings',
-    path: '/settings',
-    getParentRoute: () => AuthenticatedBrandRoute,
+    id: '/brand/settings',
+    path: '/brand/settings',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedBrandPromotionsRoute =
   AuthenticatedBrandPromotionsRouteImport.update({
-    id: '/promotions',
-    path: '/promotions',
-    getParentRoute: () => AuthenticatedBrandRoute,
+    id: '/brand/promotions',
+    path: '/brand/promotions',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedBrandProductsRoute =
   AuthenticatedBrandProductsRouteImport.update({
-    id: '/products',
-    path: '/products',
-    getParentRoute: () => AuthenticatedBrandRoute,
+    id: '/brand/products',
+    path: '/brand/products',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedBrandOrdersRoute =
   AuthenticatedBrandOrdersRouteImport.update({
-    id: '/orders',
-    path: '/orders',
-    getParentRoute: () => AuthenticatedBrandRoute,
+    id: '/brand/orders',
+    path: '/brand/orders',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedBrandIntegrationsRoute =
   AuthenticatedBrandIntegrationsRouteImport.update({
-    id: '/integrations',
-    path: '/integrations',
-    getParentRoute: () => AuthenticatedBrandRoute,
+    id: '/brand/integrations',
+    path: '/brand/integrations',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedBrandInsightsRoute =
   AuthenticatedBrandInsightsRouteImport.update({
-    id: '/insights',
-    path: '/insights',
-    getParentRoute: () => AuthenticatedBrandRoute,
+    id: '/brand/insights',
+    path: '/brand/insights',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedBrandEmailRoute = AuthenticatedBrandEmailRouteImport.update({
-  id: '/email',
-  path: '/email',
-  getParentRoute: () => AuthenticatedBrandRoute,
+  id: '/brand/email',
+  path: '/brand/email',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedBrandCustomersRoute =
   AuthenticatedBrandCustomersRouteImport.update({
-    id: '/customers',
-    path: '/customers',
-    getParentRoute: () => AuthenticatedBrandRoute,
+    id: '/brand/customers',
+    path: '/brand/customers',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedBrandChannelsRoute =
   AuthenticatedBrandChannelsRouteImport.update({
-    id: '/channels',
-    path: '/channels',
-    getParentRoute: () => AuthenticatedBrandRoute,
+    id: '/brand/channels',
+    path: '/brand/channels',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedBrandCatalogRoute =
   AuthenticatedBrandCatalogRouteImport.update({
-    id: '/catalog',
-    path: '/catalog',
-    getParentRoute: () => AuthenticatedBrandRoute,
+    id: '/brand/catalog',
+    path: '/brand/catalog',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedBrandBillingRoute =
   AuthenticatedBrandBillingRouteImport.update({
-    id: '/billing',
-    path: '/billing',
-    getParentRoute: () => AuthenticatedBrandRoute,
+    id: '/brand/billing',
+    path: '/brand/billing',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedAgentsLiveRoute = AuthenticatedAgentsLiveRouteImport.update({
   id: '/agents/live',
@@ -1414,7 +1414,6 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/brand': typeof AuthenticatedBrandRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -1587,6 +1586,7 @@ export interface FileRoutesByFullPath {
   '/s/$slug/wishlist': typeof SSlugWishlistRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/brand/': typeof AuthenticatedBrandIndexRoute
   '/s/$slug/': typeof SSlugIndexRoute
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
@@ -1628,7 +1628,6 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/brand': typeof AuthenticatedBrandRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -1800,6 +1799,7 @@ export interface FileRoutesByTo {
   '/s/$slug/wishlist': typeof SSlugWishlistRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/brand': typeof AuthenticatedBrandIndexRoute
   '/s/$slug': typeof SSlugIndexRoute
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
@@ -1843,7 +1843,6 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/_authenticated/brand': typeof AuthenticatedBrandRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
@@ -2016,6 +2015,7 @@ export interface FileRoutesById {
   '/s/$slug/wishlist': typeof SSlugWishlistRoute
   '/track/$slug/js': typeof TrackSlugJsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/brand/': typeof AuthenticatedBrandIndexRoute
   '/s/$slug/': typeof SSlugIndexRoute
   '/_authenticated/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
@@ -2059,7 +2059,6 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/signup'
     | '/sitemap.xml'
-    | '/brand'
     | '/dashboard'
     | '/onboarding'
     | '/profile'
@@ -2232,6 +2231,7 @@ export interface FileRouteTypes {
     | '/s/$slug/wishlist'
     | '/track/$slug/js'
     | '/admin/'
+    | '/brand/'
     | '/s/$slug/'
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
@@ -2273,7 +2273,6 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/signup'
     | '/sitemap.xml'
-    | '/brand'
     | '/dashboard'
     | '/onboarding'
     | '/profile'
@@ -2445,6 +2444,7 @@ export interface FileRouteTypes {
     | '/s/$slug/wishlist'
     | '/track/$slug/js'
     | '/admin'
+    | '/brand'
     | '/s/$slug'
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
@@ -2487,7 +2487,6 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/signup'
     | '/sitemap.xml'
-    | '/_authenticated/brand'
     | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
     | '/_authenticated/profile'
@@ -2660,6 +2659,7 @@ export interface FileRouteTypes {
     | '/s/$slug/wishlist'
     | '/track/$slug/js'
     | '/_authenticated/admin/'
+    | '/_authenticated/brand/'
     | '/s/$slug/'
     | '/_authenticated/admin/dntrade-health/$tenantId'
     | '/_authenticated/admin/tenants/$tenantId'
@@ -3012,19 +3012,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/brand': {
-      id: '/_authenticated/brand'
-      path: '/brand'
-      fullPath: '/brand'
-      preLoaderRoute: typeof AuthenticatedBrandRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/s/$slug/': {
       id: '/s/$slug/'
       path: '/'
       fullPath: '/s/$slug/'
       preLoaderRoute: typeof SSlugIndexRouteImport
       parentRoute: typeof SSlugRoute
+    }
+    '/_authenticated/brand/': {
+      id: '/_authenticated/brand/'
+      path: '/brand'
+      fullPath: '/brand/'
+      preLoaderRoute: typeof AuthenticatedBrandIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
@@ -3987,94 +3987,94 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/brand/team': {
       id: '/_authenticated/brand/team'
-      path: '/team'
+      path: '/brand/team'
       fullPath: '/brand/team'
       preLoaderRoute: typeof AuthenticatedBrandTeamRouteImport
-      parentRoute: typeof AuthenticatedBrandRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/brand/site-builder': {
       id: '/_authenticated/brand/site-builder'
-      path: '/site-builder'
+      path: '/brand/site-builder'
       fullPath: '/brand/site-builder'
       preLoaderRoute: typeof AuthenticatedBrandSiteBuilderRouteImport
-      parentRoute: typeof AuthenticatedBrandRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/brand/settings': {
       id: '/_authenticated/brand/settings'
-      path: '/settings'
+      path: '/brand/settings'
       fullPath: '/brand/settings'
       preLoaderRoute: typeof AuthenticatedBrandSettingsRouteImport
-      parentRoute: typeof AuthenticatedBrandRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/brand/promotions': {
       id: '/_authenticated/brand/promotions'
-      path: '/promotions'
+      path: '/brand/promotions'
       fullPath: '/brand/promotions'
       preLoaderRoute: typeof AuthenticatedBrandPromotionsRouteImport
-      parentRoute: typeof AuthenticatedBrandRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/brand/products': {
       id: '/_authenticated/brand/products'
-      path: '/products'
+      path: '/brand/products'
       fullPath: '/brand/products'
       preLoaderRoute: typeof AuthenticatedBrandProductsRouteImport
-      parentRoute: typeof AuthenticatedBrandRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/brand/orders': {
       id: '/_authenticated/brand/orders'
-      path: '/orders'
+      path: '/brand/orders'
       fullPath: '/brand/orders'
       preLoaderRoute: typeof AuthenticatedBrandOrdersRouteImport
-      parentRoute: typeof AuthenticatedBrandRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/brand/integrations': {
       id: '/_authenticated/brand/integrations'
-      path: '/integrations'
+      path: '/brand/integrations'
       fullPath: '/brand/integrations'
       preLoaderRoute: typeof AuthenticatedBrandIntegrationsRouteImport
-      parentRoute: typeof AuthenticatedBrandRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/brand/insights': {
       id: '/_authenticated/brand/insights'
-      path: '/insights'
+      path: '/brand/insights'
       fullPath: '/brand/insights'
       preLoaderRoute: typeof AuthenticatedBrandInsightsRouteImport
-      parentRoute: typeof AuthenticatedBrandRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/brand/email': {
       id: '/_authenticated/brand/email'
-      path: '/email'
+      path: '/brand/email'
       fullPath: '/brand/email'
       preLoaderRoute: typeof AuthenticatedBrandEmailRouteImport
-      parentRoute: typeof AuthenticatedBrandRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/brand/customers': {
       id: '/_authenticated/brand/customers'
-      path: '/customers'
+      path: '/brand/customers'
       fullPath: '/brand/customers'
       preLoaderRoute: typeof AuthenticatedBrandCustomersRouteImport
-      parentRoute: typeof AuthenticatedBrandRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/brand/channels': {
       id: '/_authenticated/brand/channels'
-      path: '/channels'
+      path: '/brand/channels'
       fullPath: '/brand/channels'
       preLoaderRoute: typeof AuthenticatedBrandChannelsRouteImport
-      parentRoute: typeof AuthenticatedBrandRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/brand/catalog': {
       id: '/_authenticated/brand/catalog'
-      path: '/catalog'
+      path: '/brand/catalog'
       fullPath: '/brand/catalog'
       preLoaderRoute: typeof AuthenticatedBrandCatalogRouteImport
-      parentRoute: typeof AuthenticatedBrandRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/brand/billing': {
       id: '/_authenticated/brand/billing'
-      path: '/billing'
+      path: '/brand/billing'
       fullPath: '/brand/billing'
       preLoaderRoute: typeof AuthenticatedBrandBillingRouteImport
-      parentRoute: typeof AuthenticatedBrandRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/agents/live': {
       id: '/_authenticated/agents/live'
@@ -4359,56 +4359,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthenticatedBrandProductsRouteChildren {
-  AuthenticatedBrandProductsProductIdRoute: typeof AuthenticatedBrandProductsProductIdRoute
-}
-
-const AuthenticatedBrandProductsRouteChildren: AuthenticatedBrandProductsRouteChildren =
-  {
-    AuthenticatedBrandProductsProductIdRoute:
-      AuthenticatedBrandProductsProductIdRoute,
-  }
-
-const AuthenticatedBrandProductsRouteWithChildren =
-  AuthenticatedBrandProductsRoute._addFileChildren(
-    AuthenticatedBrandProductsRouteChildren,
-  )
-
-interface AuthenticatedBrandRouteChildren {
-  AuthenticatedBrandBillingRoute: typeof AuthenticatedBrandBillingRoute
-  AuthenticatedBrandCatalogRoute: typeof AuthenticatedBrandCatalogRoute
-  AuthenticatedBrandChannelsRoute: typeof AuthenticatedBrandChannelsRoute
-  AuthenticatedBrandCustomersRoute: typeof AuthenticatedBrandCustomersRoute
-  AuthenticatedBrandEmailRoute: typeof AuthenticatedBrandEmailRoute
-  AuthenticatedBrandInsightsRoute: typeof AuthenticatedBrandInsightsRoute
-  AuthenticatedBrandIntegrationsRoute: typeof AuthenticatedBrandIntegrationsRoute
-  AuthenticatedBrandOrdersRoute: typeof AuthenticatedBrandOrdersRoute
-  AuthenticatedBrandProductsRoute: typeof AuthenticatedBrandProductsRouteWithChildren
-  AuthenticatedBrandPromotionsRoute: typeof AuthenticatedBrandPromotionsRoute
-  AuthenticatedBrandSettingsRoute: typeof AuthenticatedBrandSettingsRoute
-  AuthenticatedBrandSiteBuilderRoute: typeof AuthenticatedBrandSiteBuilderRoute
-  AuthenticatedBrandTeamRoute: typeof AuthenticatedBrandTeamRoute
-}
-
-const AuthenticatedBrandRouteChildren: AuthenticatedBrandRouteChildren = {
-  AuthenticatedBrandBillingRoute: AuthenticatedBrandBillingRoute,
-  AuthenticatedBrandCatalogRoute: AuthenticatedBrandCatalogRoute,
-  AuthenticatedBrandChannelsRoute: AuthenticatedBrandChannelsRoute,
-  AuthenticatedBrandCustomersRoute: AuthenticatedBrandCustomersRoute,
-  AuthenticatedBrandEmailRoute: AuthenticatedBrandEmailRoute,
-  AuthenticatedBrandInsightsRoute: AuthenticatedBrandInsightsRoute,
-  AuthenticatedBrandIntegrationsRoute: AuthenticatedBrandIntegrationsRoute,
-  AuthenticatedBrandOrdersRoute: AuthenticatedBrandOrdersRoute,
-  AuthenticatedBrandProductsRoute: AuthenticatedBrandProductsRouteWithChildren,
-  AuthenticatedBrandPromotionsRoute: AuthenticatedBrandPromotionsRoute,
-  AuthenticatedBrandSettingsRoute: AuthenticatedBrandSettingsRoute,
-  AuthenticatedBrandSiteBuilderRoute: AuthenticatedBrandSiteBuilderRoute,
-  AuthenticatedBrandTeamRoute: AuthenticatedBrandTeamRoute,
-}
-
-const AuthenticatedBrandRouteWithChildren =
-  AuthenticatedBrandRoute._addFileChildren(AuthenticatedBrandRouteChildren)
-
 interface AuthenticatedAdminDntradeHealthRouteChildren {
   AuthenticatedAdminDntradeHealthTenantIdRoute: typeof AuthenticatedAdminDntradeHealthTenantIdRoute
 }
@@ -4439,8 +4389,22 @@ const AuthenticatedAdminTenantsRouteWithChildren =
     AuthenticatedAdminTenantsRouteChildren,
   )
 
+interface AuthenticatedBrandProductsRouteChildren {
+  AuthenticatedBrandProductsProductIdRoute: typeof AuthenticatedBrandProductsProductIdRoute
+}
+
+const AuthenticatedBrandProductsRouteChildren: AuthenticatedBrandProductsRouteChildren =
+  {
+    AuthenticatedBrandProductsProductIdRoute:
+      AuthenticatedBrandProductsProductIdRoute,
+  }
+
+const AuthenticatedBrandProductsRouteWithChildren =
+  AuthenticatedBrandProductsRoute._addFileChildren(
+    AuthenticatedBrandProductsRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
-  AuthenticatedBrandRoute: typeof AuthenticatedBrandRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
@@ -4457,12 +4421,25 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAgentsAgentIdRoute: typeof AuthenticatedAgentsAgentIdRoute
   AuthenticatedAgentsLibraryRoute: typeof AuthenticatedAgentsLibraryRoute
   AuthenticatedAgentsLiveRoute: typeof AuthenticatedAgentsLiveRoute
+  AuthenticatedBrandBillingRoute: typeof AuthenticatedBrandBillingRoute
+  AuthenticatedBrandCatalogRoute: typeof AuthenticatedBrandCatalogRoute
+  AuthenticatedBrandChannelsRoute: typeof AuthenticatedBrandChannelsRoute
+  AuthenticatedBrandCustomersRoute: typeof AuthenticatedBrandCustomersRoute
+  AuthenticatedBrandEmailRoute: typeof AuthenticatedBrandEmailRoute
+  AuthenticatedBrandInsightsRoute: typeof AuthenticatedBrandInsightsRoute
+  AuthenticatedBrandIntegrationsRoute: typeof AuthenticatedBrandIntegrationsRoute
+  AuthenticatedBrandOrdersRoute: typeof AuthenticatedBrandOrdersRoute
+  AuthenticatedBrandProductsRoute: typeof AuthenticatedBrandProductsRouteWithChildren
+  AuthenticatedBrandPromotionsRoute: typeof AuthenticatedBrandPromotionsRoute
+  AuthenticatedBrandSettingsRoute: typeof AuthenticatedBrandSettingsRoute
+  AuthenticatedBrandSiteBuilderRoute: typeof AuthenticatedBrandSiteBuilderRoute
+  AuthenticatedBrandTeamRoute: typeof AuthenticatedBrandTeamRoute
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedBrandIndexRoute: typeof AuthenticatedBrandIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedBrandRoute: AuthenticatedBrandRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
@@ -4480,8 +4457,22 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAgentsAgentIdRoute: AuthenticatedAgentsAgentIdRoute,
   AuthenticatedAgentsLibraryRoute: AuthenticatedAgentsLibraryRoute,
   AuthenticatedAgentsLiveRoute: AuthenticatedAgentsLiveRoute,
+  AuthenticatedBrandBillingRoute: AuthenticatedBrandBillingRoute,
+  AuthenticatedBrandCatalogRoute: AuthenticatedBrandCatalogRoute,
+  AuthenticatedBrandChannelsRoute: AuthenticatedBrandChannelsRoute,
+  AuthenticatedBrandCustomersRoute: AuthenticatedBrandCustomersRoute,
+  AuthenticatedBrandEmailRoute: AuthenticatedBrandEmailRoute,
+  AuthenticatedBrandInsightsRoute: AuthenticatedBrandInsightsRoute,
+  AuthenticatedBrandIntegrationsRoute: AuthenticatedBrandIntegrationsRoute,
+  AuthenticatedBrandOrdersRoute: AuthenticatedBrandOrdersRoute,
+  AuthenticatedBrandProductsRoute: AuthenticatedBrandProductsRouteWithChildren,
+  AuthenticatedBrandPromotionsRoute: AuthenticatedBrandPromotionsRoute,
+  AuthenticatedBrandSettingsRoute: AuthenticatedBrandSettingsRoute,
+  AuthenticatedBrandSiteBuilderRoute: AuthenticatedBrandSiteBuilderRoute,
+  AuthenticatedBrandTeamRoute: AuthenticatedBrandTeamRoute,
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  AuthenticatedBrandIndexRoute: AuthenticatedBrandIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

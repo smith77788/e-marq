@@ -35,7 +35,7 @@ import { DnTradeIntegrationCard } from "@/components/owner/DnTradeIntegrationCar
 
 type Search = { tenant?: string };
 
-export const Route = createFileRoute("/_authenticated/brand")({
+export const Route = createFileRoute("/_authenticated/brand/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
     tenant: typeof s.tenant === "string" ? s.tenant : undefined,
   }),
@@ -43,7 +43,7 @@ export const Route = createFileRoute("/_authenticated/brand")({
 });
 
 function BrandPage() {
-  const { tenant: tenantSearchId } = useSearch({ from: "/_authenticated/brand" });
+  const { tenant: tenantSearchId } = useSearch({ from: "/_authenticated/brand/" });
   const { loading: authLoading } = useAuth();
   const { t } = useT();
   const navigate = useNavigate();
