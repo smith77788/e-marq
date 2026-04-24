@@ -64,6 +64,8 @@ type Props = {
   integration: IntegrationDef | null;
   tenantId: string;
   onClose: () => void;
+  /** Called after successful save with the integration id (e.g. to open the manage dialog). */
+  onSaved?: (integrationId: string) => void;
 };
 
 type Step = 1 | 2 | 3;
