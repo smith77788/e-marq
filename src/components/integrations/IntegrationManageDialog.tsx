@@ -543,63 +543,71 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
             </TabsContent>
 
             {/* ── Webhook ── */}
-            {(webhookUrl || isWebhook) && (
+            {isWebhook && (
               <TabsContent value="webhook" className="space-y-3">
-                {webhookUrl && data?.webhook_secret ? (
-                  <>
-                    <Alert className="border-success/40 bg-success/5">
-                      <Webhook className="h-4 w-4 text-success" />
-                      <AlertDescription>
-                        <strong>Webhook активний.</strong> Зовнішня система може PUSHити сюди дані.
-                      </AlertDescription>
-                    </Alert>
-                    <div className="space-y-2">
-                      <Label className="text-xs uppercase tracking-wider text-muted-foreground">
-                        Webhook URL
-                      </Label>
-                      <div className="flex gap-2">
-                        <Input readOnly value={webhookUrl} className="font-mono text-xs" />
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => copy(webhookUrl, "URL")}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
+                <Alert className="border-primary/40 bg-primary/5">
+                  <Webhook className="h-4 w-4 text-primary" />
+                  <AlertDescription>
+                    Скопіюйте URL та секрет у налаштування зовнішньої системи (Zapier, Make,
+                    n8n…). Дані надсилайте методом POST.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Webhook URL
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input readOnly value={webhookUrl} className="font-mono text-xs" />
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => copy(webhookUrl, "URL")}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+                    X-Webhook-Secret
+                  </Label>
+                  {data?.webhook_secret ? (
+                    <div className="flex gap-2">
+                      <Input
+                        readOnly
+                        value={data.webhook_secret}
+                        className="font-mono text-xs"
+                      />
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => copy(data.webhook_secret!, "Секрет")}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs uppercase tracking-wider text-muted-foreground">
-                        X-Webhook-Secret
-                      </Label>
-                      <div className="flex gap-2">
-                        <Input
-                          readOnly
-                          value={data.webhook_secret}
-                          className="font-mono text-xs"
-                        />
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => copy(data.webhook_secret!, "Секрет")}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Передавайте у заголовку <code>X-Webhook-Secret</code>. Тіло POST:{" "}
-                        <code>{`{ entity, rows: [...] }`}</code>.
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      Webhook ще не згенеровано. Перепідключіть інтеграцію через wizard.
-                    </AlertDescription>
-                  </Alert>
-                )}
+                  ) : (
+                    <Button
+                      onClick={() => generateSecret.mutate()}
+                      disabled={generateSecret.isPending}
+                      variant="outline"
+                      className="w-full gap-1"
+                    >
+                      {generateSecret.isPending ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-3 w-3" />
+                      )}
+                      Згенерувати секрет
+                    </Button>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Передавайте у заголовку <code>X-Webhook-Secret</code>. Тіло POST:{" "}
+                    <code>{`{ entity, rows: [...] }`}</code>.
+                  </p>
+                </div>
               </TabsContent>
             )}
 
