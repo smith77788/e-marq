@@ -5361,6 +5361,16 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_list_users_for_permissions: {
+        Args: { _search?: string }
+        Returns: {
+          capabilities: string[]
+          email: string
+          is_super_admin: boolean
+          tenant_count: number
+          user_id: string
+        }[]
+      }
       admin_mark_topup_paid: {
         Args: { _manager_note?: string; _request_id: string }
         Returns: Json
