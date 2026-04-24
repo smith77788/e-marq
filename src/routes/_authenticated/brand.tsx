@@ -231,7 +231,7 @@ function BrandCockpitInner({
 
       <OwnerTelegramBindCard tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
 
-      <DnTradeIntegrationCard tenantId={current.tenant_id} />
+      <DnTradeIntegrationCardGuard tenantId={current.tenant_id} />
 
       <CockpitHero tenantId={current.tenant_id} />
 
