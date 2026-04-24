@@ -27,7 +27,7 @@ function SignupPage() {
     setSubmitting(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/dashboard`,
+        redirect_uri: `${window.location.origin}/auth/callback`,
       });
       if (result.error) {
         toast.error(
@@ -38,9 +38,7 @@ function SignupPage() {
       }
       if (result.redirected) return;
       toast.success(t("auth.created"));
-      // Hard navigate so the auth context fully hydrates before the
-      // protected-route guard runs (avoids the desktop "stuck on signin" bug).
-      window.location.assign("/dashboard");
+      window.location.assign("/auth/callback");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.failSignup"));
       setSubmitting(false);

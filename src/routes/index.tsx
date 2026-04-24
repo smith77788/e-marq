@@ -72,10 +72,7 @@ function Index() {
 
   useEffect(() => {
     if (!loading && user) {
-      // Hard navigation: after an OAuth round-trip the auth context is freshly
-      // hydrated and a soft navigate() can race with the protected-route guard
-      // reading a stale user=null (causes "nothing happens after sign-in").
-      window.location.assign("/dashboard");
+      window.location.assign("/auth/callback");
     }
   }, [loading, user]);
 
