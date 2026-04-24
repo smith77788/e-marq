@@ -64,6 +64,8 @@ type Props = {
   integration: IntegrationDef | null;
   tenantId: string;
   onClose: () => void;
+  /** Called after successful save with the integration id (e.g. to open the manage dialog). */
+  onSaved?: (integrationId: string) => void;
 };
 
 type Step = 1 | 2 | 3;
@@ -74,7 +76,7 @@ const ENTITY_LABELS: Record<EntityKind, string> = {
   orders: "Замовлення",
 };
 
-export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
+export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: Props) {
   const qc = useQueryClient();
   const [step, setStep] = useState<Step>(1);
   const [entityKind, setEntityKind] = useState<EntityKind>("products");
@@ -120,10 +122,38 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
       } = await supabase.auth.getSession();
       const token = session?.access_token;
       if (!token) throw new Error("Сесія не знайдена. Перезавантажте сторінку.");
+
+      // DN Trade — окремий легкий verify через спецроут /hooks/integrations/dntrade-verify.
+      if (integration.id === "dntrade") {
+        const res = await fetch(`/hooks/integrations/dntrade-verify`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ tenant_id: tenantId, api_key: apiKey }),
+        });
+        const json = (await res.json()) as {
+          valid?: boolean;
+          message?: string;
+          error?: string;
+        };
+        if (!res.ok) {
+          const msg = json.error ?? "Не вдалось перевірити";
+          setVerifyResult({ ok: false, message: msg });
+          toast.error("Помилка перевірки", { description: msg });
+          return;
+        }
+        if (json.valid) {
+          setVerifyResult({ ok: true, message: "DN Trade ApiKey робочий." });
+          toast.success("Підключення робоче");
+        } else {
+          const msg =
+            json.message ?? "DN Trade відхилив ключ. Перевірте, що це ApiKey з правами читання.";
+          setVerifyResult({ ok: false, message: msg });
+          toast.error("Невалідний ключ DN Trade", { description: msg });
+        }
+        return;
+      }
+
       // Підбираємо найбільш безпечний entityKind для тестового pull:
-      // - Bitrix24 не вміє products → беремо customers;
-      // - Stripe не вміє products → customers;
-      // - решта — products.
       const entity =
         integration.id === "bitrix24" || integration.id === "stripe" ? "customers" : "products";
       const res = await fetch(`/api/integrations/verify/${integration.id}`, {
@@ -198,10 +228,22 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["tenant-integrations", tenantId] });
       toast.success(MSG.saved);
+      // For credential-based providers we hand off to the manage dialog
+      // (overview + first-import CTA) instead of showing "Готово".
+      if (integration && (isApiKey || isRest) && onSaved) {
+        onSaved(integration.id);
+        reset();
+        return;
+      }
       setStep(3);
+      // Allow webhook flow (which renders URL/secret on step 3) to keep working,
+      // but bubble up the saved id too so the parent can refresh.
+      if (integration && onSaved && data) {
+        // No close here — webhook screen still useful.
+      }
     },
     onError: (e: Error) => toast.error(MSG.errSave, { description: e.message }),
   });
@@ -245,8 +287,13 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
     navigator.clipboard.writeText(text).then(() => toast.success(MSG.copied));
   }
 
-  const canSaveConn =
-    (isApiKey && apiKey.trim().length > 0) || (isRest && restUrl.trim().length > 0) || isWebhook;
+  const credsFilled =
+    (isApiKey && apiKey.trim().length > 0) || (isRest && restUrl.trim().length > 0);
+  // Для apiKey/rest вимагаємо успішну перевірку перед збереженням,
+  // щоб не записувати в БД свідомо зламані ключі.
+  const requiresVerify = isApiKey || isRest;
+  const verified = verifyResult?.ok === true;
+  const canSaveConn = isWebhook || (credsFilled && (!requiresVerify || verified));
 
   return (
     <Dialog open={!!integration} onOpenChange={(o) => !o && (onClose(), reset())}>
@@ -370,8 +417,15 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
                               : "joinposter.com"
                         }
                         value={domain}
-                        onChange={(e) => setDomain(e.target.value)}
+                        onChange={(e) => {
+                          setDomain(e.target.value);
+                          setVerifyResult(null);
+                        }}
                       />
+                      <p className="text-xs text-muted-foreground">
+                        Тільки публічний https-домен. Локальні адреси (localhost, IP з приватної
+                        мережі) заблоковані з міркувань безпеки.
+                      </p>
                     </div>
                   )}
                   <div className="space-y-1">
@@ -381,10 +435,15 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
                       type="password"
                       placeholder="вставте ключ сюди…"
                       value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
+                      onChange={(e) => {
+                        setApiKey(e.target.value);
+                        setVerifyResult(null);
+                      }}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Ключ зберігається у захищеному вигляді. Тільки наш сервер його бачить.
+                      Ключ зберігається у захищеному вигляді. Спочатку натисніть{" "}
+                      <strong>«Перевірити»</strong> — після успішної перевірки зʼявиться кнопка
+                      «Створити підключення».
                     </p>
                   </div>
                 </div>
@@ -399,8 +458,14 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
                       id="resturl"
                       placeholder="https://api.example.com/data.json"
                       value={restUrl}
-                      onChange={(e) => setRestUrl(e.target.value)}
+                      onChange={(e) => {
+                        setRestUrl(e.target.value);
+                        setVerifyResult(null);
+                      }}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Має бути публічний https URL. Локальні / приватні адреси заблоковані.
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <Label htmlFor="restkey">Заголовок Authorization (необовʼязково)</Label>
@@ -408,7 +473,10 @@ export function IntegrationWizard({ integration, tenantId, onClose }: Props) {
                       id="restkey"
                       placeholder="Bearer ваш-токен"
                       value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
+                      onChange={(e) => {
+                        setApiKey(e.target.value);
+                        setVerifyResult(null);
+                      }}
                     />
                   </div>
                 </div>

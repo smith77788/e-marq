@@ -69,6 +69,21 @@ function IntegrationsHubPage() {
   const [syncEntity, setSyncEntity] = useState<"products" | "customers" | "orders">("products");
   const [syncing, setSyncing] = useState<string | null>(null);
 
+  const { data: tenantStatus } = useQuery({
+    queryKey: ["tenant-status", currentTenantId],
+    enabled: !!currentTenantId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tenants")
+        .select("status")
+        .eq("id", currentTenantId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.status as string | undefined;
+    },
+  });
+  const isTenantActive = !tenantStatus || tenantStatus === "active";
+
   const { data: connected } = useQuery({
     queryKey: ["tenant-integrations", currentTenantId],
     enabled: !!currentTenantId,
@@ -352,6 +367,13 @@ function IntegrationsHubPage() {
         integration={active}
         tenantId={currentTenantId}
         onClose={() => setActive(null)}
+        onSaved={(integrationId) => {
+          // Open the manage dialog with first-import CTA right after a successful save.
+          const def = INTEGRATIONS.find((i) => i.id === integrationId) ?? null;
+          setActive(null);
+          if (def) setManage(def);
+          qc.invalidateQueries({ queryKey: ["tenant-integrations", currentTenantId] });
+        }}
       />
 
       <IntegrationManageDialog

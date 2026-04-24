@@ -6,6 +6,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { authorizeAgentRequest, jsonError, jsonOk } from "@/lib/acos/agentRuntime";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { verifyApiKey } from "@/lib/dntrade/client";
 
 export const Route = createFileRoute("/hooks/integrations/dntrade-verify")({
@@ -30,9 +31,26 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-verify")({
         const ctx = await authorizeAgentRequest(token, tenantId);
         if ("error" in ctx) return jsonError(ctx.error, ctx.status);
 
+        // Guard: tenant must be active
+        const { data: tenant } = await supabaseAdmin
+          .from("tenants")
+          .select("status")
+          .eq("id", tenantId)
+          .maybeSingle();
+        if (tenant && tenant.status !== "active") {
+          return jsonError(
+            "Бренд ще не верифіковано адміністратором. Підключення стане доступним після підтвердження.",
+            403,
+          );
+        }
+
         const result = await verifyApiKey(apiKey);
         if (result.ok) return jsonOk({ valid: true });
-        return jsonOk({ valid: false, status: result.status, message: result.message });
+        return jsonOk({
+          valid: false,
+          status: result.status,
+          message: `DN Trade відхилив ключ (HTTP ${result.status}). Перевірте, що це ApiKey з правами читання.`,
+        });
       },
     },
   },
