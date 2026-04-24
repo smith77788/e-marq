@@ -235,6 +235,22 @@ function IntegrationsHubPage() {
         </p>
       </header>
 
+      {!isTenantActive && (
+        <Card className="border-warning/40 bg-warning/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base text-warning">
+              <Clock className="h-4 w-4" />
+              Бренд очікує верифікації
+            </CardTitle>
+            <CardDescription>
+              Підключення зовнішніх джерел даних стане доступним після того, як супер-адмін
+              підтвердить ваш бренд. Поки що ви можете переглядати каталог інтеграцій, але кнопки
+              «Підключити» та «Синхронізувати» заблоковані.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
       {/* Пошук + фільтр */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-md flex-1">
