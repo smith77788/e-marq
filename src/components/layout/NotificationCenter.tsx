@@ -10,6 +10,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
   Bell,
@@ -41,7 +42,54 @@ type NotifRow = {
   link: string | null;
   is_read: boolean;
   created_at: string;
+  metadata: Record<string, unknown> | null;
 };
+
+/**
+ * Resolve a notification to its best destination route.
+ * Prefer specific deep-links over the generic `/brand` saved on the row.
+ */
+function resolveNotifTarget(n: NotifRow): string {
+  const meta = (n.metadata ?? {}) as {
+    insight_type?: string;
+    insight_id?: string;
+    integration_id?: string;
+    provider?: string;
+  };
+
+  // DN Trade health alerts → integrations page
+  if (n.kind === "dntrade_unhealthy" || n.kind === "dntrade_partial_repeat") {
+    return "/brand/integrations";
+  }
+
+  // Digests → insights page
+  if (n.kind === "daily_digest" || n.kind === "weekly_digest") {
+    return "/brand/insights";
+  }
+
+  // Insights — route by insight_type to most relevant page
+  if (n.kind === "insight") {
+    const t = meta.insight_type ?? "";
+    if (t.startsWith("setup_no_telegram") || t.startsWith("channel_"))
+      return "/brand/channels";
+    if (t.startsWith("setup_no_products") || t.startsWith("bootstrap_catalog"))
+      return "/brand/products";
+    if (t.startsWith("bootstrap_margin") || t.includes("margin"))
+      return "/brand/products";
+    if (t.startsWith("bootstrap_data_gaps") || t.startsWith("setup_"))
+      return "/brand/integrations";
+    if (t.includes("email") || t.includes("campaign")) return "/brand/email";
+    if (t.includes("customer") || t.includes("churn") || t.includes("ltv"))
+      return "/brand/customers";
+    if (t.includes("order") || t.includes("cart")) return "/brand/orders";
+    if (t.includes("promo") || t.includes("discount")) return "/brand/promotions";
+    // Fallback for any insight: jump to insights board with hash
+    return meta.insight_id ? `/brand/insights#${meta.insight_id}` : "/brand/insights";
+  }
+
+  // Test pings and unknown kinds → fall back to stored link or dashboard
+  return n.link ?? "/brand";
+}
 
 const PAGE_SIZE = 30;
 
@@ -71,6 +119,7 @@ export function NotificationCenter() {
   const { t, lang } = useT();
   const { user } = useAuth();
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "unread">("unread");
   const [marking, setMarking] = useState(false);
@@ -96,7 +145,9 @@ export function NotificationCenter() {
     queryFn: async () => {
       let q = supabase
         .from("owner_notifications")
-        .select("id, tenant_id, kind, severity, title, body, link, is_read, created_at")
+        .select(
+          "id, tenant_id, kind, severity, title, body, link, is_read, created_at, metadata",
+        )
         .in("tenant_id", tenantIds)
         .order("created_at", { ascending: false })
         .limit(PAGE_SIZE);
@@ -306,28 +357,23 @@ export function NotificationCenter() {
 
                 return (
                   <li key={n.id}>
-                    {n.link ? (
-                      <a
-                        href={n.link}
-                        className="block"
-                        onClick={() => {
-                          setOpen(false);
-                          if (!n.is_read) void markRead(n.id);
-                        }}
-                      >
-                        {item}
-                      </a>
-                    ) : (
-                      <button
-                        type="button"
-                        className="block w-full text-left"
-                        onClick={() => {
-                          if (!n.is_read) void markRead(n.id);
-                        }}
-                      >
-                        {item}
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      className="block w-full text-left"
+                      onClick={() => {
+                        setOpen(false);
+                        if (!n.is_read) void markRead(n.id);
+                        const target = resolveNotifTarget(n);
+                        // Split optional `#hash` so router scrolls correctly
+                        const [path, hash] = target.split("#");
+                        void navigate({
+                          to: path,
+                          ...(hash ? { hash } : {}),
+                        } as Parameters<typeof navigate>[0]);
+                      }}
+                    >
+                      {item}
+                    </button>
                   </li>
                 );
               })}
