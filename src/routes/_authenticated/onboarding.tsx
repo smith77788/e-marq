@@ -412,6 +412,8 @@ function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
       toast.success(t("common.save") + " ✓");
       qc.invalidateQueries({ queryKey: ["tenant", tenantId] });
       qc.invalidateQueries({ queryKey: ["my-tenants"] });
+      qc.invalidateQueries({ queryKey: ["onboarding-status", tenantId] });
+      qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
