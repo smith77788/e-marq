@@ -287,8 +287,13 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
     navigator.clipboard.writeText(text).then(() => toast.success(MSG.copied));
   }
 
-  const canSaveConn =
-    (isApiKey && apiKey.trim().length > 0) || (isRest && restUrl.trim().length > 0) || isWebhook;
+  const credsFilled =
+    (isApiKey && apiKey.trim().length > 0) || (isRest && restUrl.trim().length > 0);
+  // Для apiKey/rest вимагаємо успішну перевірку перед збереженням,
+  // щоб не записувати в БД свідомо зламані ключі.
+  const requiresVerify = isApiKey || isRest;
+  const verified = verifyResult?.ok === true;
+  const canSaveConn = isWebhook || (credsFilled && (!requiresVerify || verified));
 
   return (
     <Dialog open={!!integration} onOpenChange={(o) => !o && (onClose(), reset())}>
