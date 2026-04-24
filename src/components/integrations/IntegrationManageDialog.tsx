@@ -397,6 +397,40 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
                 )}
               </div>
 
+              {/* Перший імпорт — велика CTA, якщо ще нічого не синкнуто */}
+              {supported && data?.is_active && !data?.last_sync_at && (
+                <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <div className="text-sm font-medium">Запустити перший імпорт</div>
+                      <p className="text-xs text-muted-foreground">
+                        Підтягнемо все, що є в {integration.name}: товари, клієнтів, замовлення.
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => {
+                        const first =
+                          (integration.imports[0] as
+                            | "products"
+                            | "customers"
+                            | "orders"
+                            | undefined) ?? "products";
+                        sync.mutate(first);
+                      }}
+                      disabled={sync.isPending}
+                      className="shrink-0 gap-1"
+                    >
+                      {sync.isPending ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Play className="h-3 w-3" />
+                      )}
+                      Запустити
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Швидкі sync-кнопки */}
               {supported && data?.is_active && (
                 <div className="space-y-2">
