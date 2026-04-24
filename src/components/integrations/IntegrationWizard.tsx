@@ -417,8 +417,15 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                               : "joinposter.com"
                         }
                         value={domain}
-                        onChange={(e) => setDomain(e.target.value)}
+                        onChange={(e) => {
+                          setDomain(e.target.value);
+                          setVerifyResult(null);
+                        }}
                       />
+                      <p className="text-xs text-muted-foreground">
+                        Тільки публічний https-домен. Локальні адреси (localhost, IP з приватної
+                        мережі) заблоковані з міркувань безпеки.
+                      </p>
                     </div>
                   )}
                   <div className="space-y-1">
@@ -428,10 +435,15 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                       type="password"
                       placeholder="вставте ключ сюди…"
                       value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
+                      onChange={(e) => {
+                        setApiKey(e.target.value);
+                        setVerifyResult(null);
+                      }}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Ключ зберігається у захищеному вигляді. Тільки наш сервер його бачить.
+                      Ключ зберігається у захищеному вигляді. Спочатку натисніть{" "}
+                      <strong>«Перевірити»</strong> — після успішної перевірки зʼявиться кнопка
+                      «Створити підключення».
                     </p>
                   </div>
                 </div>
@@ -446,8 +458,14 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                       id="resturl"
                       placeholder="https://api.example.com/data.json"
                       value={restUrl}
-                      onChange={(e) => setRestUrl(e.target.value)}
+                      onChange={(e) => {
+                        setRestUrl(e.target.value);
+                        setVerifyResult(null);
+                      }}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Має бути публічний https URL. Локальні / приватні адреси заблоковані.
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <Label htmlFor="restkey">Заголовок Authorization (необовʼязково)</Label>
@@ -455,7 +473,10 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                       id="restkey"
                       placeholder="Bearer ваш-токен"
                       value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
+                      onChange={(e) => {
+                        setApiKey(e.target.value);
+                        setVerifyResult(null);
+                      }}
                     />
                   </div>
                 </div>
