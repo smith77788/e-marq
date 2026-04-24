@@ -13,7 +13,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { isConnectorSupported, runConnectorPull } from "@/lib/integrations/connectors";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import {
+  isConnectorSupported,
+  runConnectorPull,
+  verifyDnTradeKey,
+} from "@/lib/integrations/connectors";
 
 const BodySchema = z.object({
   tenantId: z.string().uuid(),
@@ -66,6 +71,23 @@ export const Route = createFileRoute("/api/integrations/verify/$provider")({
           const { tenantId, entityKind } = parsed.data;
           let { credentials, config } = parsed.data;
 
+          // Guard: tenant must be active
+          const { data: tenant } = await supabaseAdmin
+            .from("tenants")
+            .select("status")
+            .eq("id", tenantId)
+            .maybeSingle();
+          if (tenant && tenant.status !== "active") {
+            return jsonResponse(
+              {
+                ok: false,
+                error:
+                  "Бренд ще не верифіковано адміністратором. Підключення стане доступним після підтвердження.",
+              },
+              403,
+            );
+          }
+
           // Якщо credentials/config не передані — беремо з БД (RLS перевірить доступ).
           if (!credentials || !config) {
             const { data: integ, error: integErr } = await userClient
@@ -76,15 +98,42 @@ export const Route = createFileRoute("/api/integrations/verify/$provider")({
               .maybeSingle();
             if (integErr)
               return jsonResponse({ ok: false, error: "Немає доступу до інтеграції" }, 403);
-            if (!integ)
-              return jsonResponse({ ok: false, error: "Інтеграцію не знайдено" }, 404);
-            credentials = credentials ?? (integ.credentials_encrypted ?? undefined);
-            config = config ?? ((integ.config as Record<string, unknown>) ?? {});
+            if (!integ && !credentials)
+              return jsonResponse(
+                {
+                  ok: false,
+                  error: "Введіть ключ для перевірки. Інтеграцію ще не збережено.",
+                },
+                400,
+              );
+            if (integ) {
+              credentials = credentials ?? (integ.credentials_encrypted ?? undefined);
+              config = config ?? ((integ.config as Record<string, unknown>) ?? {});
+            }
+          }
+
+          // DN Trade — окремий легкий verify через /products/stores (без pull).
+          if (provider === "dntrade") {
+            if (!credentials) {
+              return jsonResponse(
+                { ok: false, error: "Введіть ApiKey DN Trade." },
+                400,
+              );
+            }
+            const r = await verifyDnTradeKey(credentials);
+            if (r.ok) return jsonResponse({ ok: true, sample: 1 });
+            return jsonResponse(
+              {
+                ok: false,
+                error:
+                  "Сервер DN Trade відхилив ключ. Перевірте, що це ApiKey з правами читання. " +
+                  (r.error ?? ""),
+              },
+              200,
+            );
           }
 
           // Робимо пробний pull з limit=1.
-          // Для providers що не підтримують entityKind=customers (e.g. Bitrix products) —
-          // catch і повертаємо ok=false з причиною.
           try {
             const result = await runConnectorPull({
               provider,
