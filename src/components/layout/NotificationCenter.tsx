@@ -369,7 +369,7 @@ export function NotificationCenter() {
                         void navigate({
                           to: path,
                           ...(hash ? { hash } : {}),
-                        });
+                        } as Parameters<typeof navigate>[0]);
                       }}
                     >
                       {item}
