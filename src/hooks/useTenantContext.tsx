@@ -1,10 +1,13 @@
 /**
  * Global tenant context.
- * - Lists all tenants the current user is a member of (via get_my_tenants RPC).
- * - For super-admin without memberships, falls back to ALL tenants from the
- *   tenants table so they can immediately operate on any brand.
- * - Tracks the currently selected tenant; persists in localStorage and syncs
- *   with the ?tenant=... query param when on /brand or /onboarding.
+ *
+ * - `tenants` — лише бренди, де користувач є членом (через RPC get_my_tenants).
+ *   Це і є його "Мої бренди" — те, чим він володіє або куди його запросили.
+ * - `allTenantsForAdmin` — окремий список УСІХ tenants системи, доступний лише
+ *   супер-адмінам для адмінських сторінок (Cross-tenant, Lead Radar тощо).
+ *   НЕ змішується з `tenants`, щоб у дашборді й перемикачі бренду супер-адмін
+ *   бачив лише свої бренди, а не всі чужі.
+ * - currentTenantId синхронізується з ?tenant=... та localStorage.
  */
 import {
   createContext,
@@ -30,7 +33,10 @@ export type MyTenant = {
 };
 
 type Ctx = {
+  /** Бренди користувача (мої). Для всіх ролей — лише ті, де є membership. */
   tenants: MyTenant[];
+  /** Окремий список УСІХ tenants для супер-адмінських інструментів. */
+  allTenantsForAdmin: MyTenant[];
   currentTenantId: string | null;
   current: MyTenant | null;
   setCurrentTenantId: (id: string) => void;
@@ -57,10 +63,11 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  // Fallback for super-admins: if they don't have any memberships yet, show
-  // every tenant so they can manage brands without joining each one manually.
-  const adminFallbackQuery = useQuery({
-    queryKey: ["admin-tenant-fallback"],
+  // Окремий запит для адмінів — повний список tenants системи. Використовується
+  // лише в адмінських інструментах (cross-tenant, lead radar). НЕ зливається
+  // з `tenants` — інакше супер-адмін бачив би в перемикачі бренду чужі магазини.
+  const adminAllTenantsQuery = useQuery({
+    queryKey: ["all-tenants-for-admin"],
     enabled: !!user && isSuperAdmin,
     queryFn: async () => {
       const { data, error } = await supabase
@@ -80,22 +87,13 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const tenants = useMemo(() => {
-    const own = tenantsQuery.data ?? [];
-    const fallback = isSuperAdmin ? (adminFallbackQuery.data ?? []) : [];
-    if (own.length === 0) return fallback;
-    if (fallback.length === 0) return own;
-    // Merge: own memberships first (priority), then fallback tenants the user
-    // is not yet a member of. Super-admins who also own a brand see their own
-    // brand as the default — not the alphabetically-first tenant.
-    const ownIds = new Set(own.map((t) => t.tenant_id));
-    const extra = fallback.filter((t) => !ownIds.has(t.tenant_id));
-    return [...own, ...extra];
-  }, [tenantsQuery.data, adminFallbackQuery.data, isSuperAdmin]);
+  const tenants = useMemo(() => tenantsQuery.data ?? [], [tenantsQuery.data]);
+  const allTenantsForAdmin = useMemo(
+    () => adminAllTenantsQuery.data ?? [],
+    [adminAllTenantsQuery.data],
+  );
 
   // Auto-select first tenant if nothing chosen yet, or if stored id is not in list.
-  // Wait for the membership query to settle before auto-picking so super-admins
-  // who own a brand don't briefly land on an alphabetically-first fallback tenant.
   useEffect(() => {
     if (tenantsQuery.isLoading) return;
     if (tenants.length === 0) return;
@@ -127,19 +125,19 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
   const value = useMemo<Ctx>(
     () => ({
       tenants,
+      allTenantsForAdmin,
       currentTenantId,
       current,
       setCurrentTenantId,
-      loading: tenantsQuery.isLoading || (isSuperAdmin && adminFallbackQuery.isLoading),
+      loading: tenantsQuery.isLoading,
     }),
     [
       tenants,
+      allTenantsForAdmin,
       currentTenantId,
       current,
       setCurrentTenantId,
       tenantsQuery.isLoading,
-      adminFallbackQuery.isLoading,
-      isSuperAdmin,
     ],
   );
 
