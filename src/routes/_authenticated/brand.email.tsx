@@ -22,7 +22,12 @@ import { EmailCampaignWizard } from "@/components/owner/EmailCampaignWizard";
 import { EmailDomainCard } from "@/components/owner/EmailDomainCard";
 import { EmailAutomationsCard } from "@/components/owner/EmailAutomationsCard";
 
+type Search = { tenant?: string };
+
 export const Route = createFileRoute("/_authenticated/brand/email")({
+  validateSearch: (s: Record<string, unknown>): Search => ({
+    tenant: typeof s.tenant === "string" ? s.tenant : undefined,
+  }),
   component: BrandEmailPage,
 });
 

@@ -1,18 +1,25 @@
 /**
  * Admin permissions matrix.
- * Lists every admin/super-admin and lets a manager (super-admin or holder of
- * `manage_permissions`) toggle each granular capability per user.
- * Super-admins are read-only here — they always have all capabilities.
+ * Перелічує УСІХ зареєстрованих користувачів і дозволяє super-admin або
+ * утримувачу `manage_permissions` увімкнути/вимкнути будь-яку capability
+ * для будь-якого користувача. Super-admin відмічений короною — для нього
+ * перемикачі заблоковані, бо він і так має повний доступ.
+ *
+ * Раніше тут показувалися лише існуючі адміни — тому надати право користувачу,
+ * який ще не є адміном, було неможливо. Тепер RPC `admin_list_users_for_permissions`
+ * повертає всіх користувачів із пошуком за email.
  */
+import { useState } from "react";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Crown, ShieldCheck } from "lucide-react";
+import { Crown, Search, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -28,11 +35,12 @@ export const Route = createFileRoute("/_authenticated/admin/permissions")({
   component: AdminPermissionsPage,
 });
 
-type AdminUserRow = {
+type UserRow = {
   user_id: string;
   email: string | null;
   is_super_admin: boolean;
   capabilities: string[];
+  tenant_count: number;
 };
 
 type Capability = {
@@ -45,6 +53,7 @@ type Capability = {
 function AdminPermissionsPage() {
   const { loading, has } = useAdminCapabilities();
   const qc = useQueryClient();
+  const [search, setSearch] = useState("");
 
   const canManage = has("manage_permissions");
 
@@ -61,13 +70,15 @@ function AdminPermissionsPage() {
     },
   });
 
-  const adminsQuery = useQuery({
-    queryKey: ["admin-users-permissions"],
+  const usersQuery = useQuery({
+    queryKey: ["users-for-permissions", search],
     enabled: canManage,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("admin_list_admin_users");
+      const { data, error } = await supabase.rpc("admin_list_users_for_permissions", {
+        _search: search || undefined,
+      });
       if (error) throw error;
-      return (data ?? []) as AdminUserRow[];
+      return (data ?? []) as UserRow[];
     },
   });
 
@@ -81,7 +92,7 @@ function AdminPermissionsPage() {
     },
     onSuccess: () => {
       toast.success("Право видано");
-      void qc.invalidateQueries({ queryKey: ["admin-users-permissions"] });
+      void qc.invalidateQueries({ queryKey: ["users-for-permissions"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -96,7 +107,7 @@ function AdminPermissionsPage() {
     },
     onSuccess: () => {
       toast.success("Право відкликано");
-      void qc.invalidateQueries({ queryKey: ["admin-users-permissions"] });
+      void qc.invalidateQueries({ queryKey: ["users-for-permissions"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -105,7 +116,7 @@ function AdminPermissionsPage() {
   if (!canManage) return <Navigate to="/admin" />;
 
   const caps = capsQuery.data ?? [];
-  const admins = adminsQuery.data ?? [];
+  const users = usersQuery.data ?? [];
 
   return (
     <div className="space-y-6">
@@ -123,23 +134,36 @@ function AdminPermissionsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-primary" />
-            Матриця прав
-          </CardTitle>
-          <CardDescription>
-            {admins.length} адмінів · {caps.length} прав
-          </CardDescription>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-primary" />
+                Матриця прав
+              </CardTitle>
+              <CardDescription>
+                {users.length} користувачів · {caps.length} прав
+              </CardDescription>
+            </div>
+            <div className="relative max-w-xs flex-1">
+              <Search className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Пошук за email…"
+                className="h-8 pl-7 text-xs"
+              />
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          {capsQuery.isLoading || adminsQuery.isLoading ? (
+          {capsQuery.isLoading || usersQuery.isLoading ? (
             <TableSkeleton rows={4} columns={6} />
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Адмін</TableHead>
+                    <TableHead>Користувач</TableHead>
                     {caps.map((c) => (
                       <TableHead key={c.key} className="text-center">
                         <span title={c.description} className="cursor-help">
@@ -150,7 +174,7 @@ function AdminPermissionsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {admins.map((u) => (
+                  {users.map((u) => (
                     <TableRow key={u.user_id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -161,11 +185,18 @@ function AdminPermissionsPage() {
                             <div className="text-sm font-medium">
                               {u.email ?? "—"}
                             </div>
-                            {u.is_super_admin && (
-                              <Badge variant="secondary" className="text-[10px]">
-                                super-admin
-                              </Badge>
-                            )}
+                            <div className="flex items-center gap-1.5">
+                              {u.is_super_admin && (
+                                <Badge variant="secondary" className="text-[10px]">
+                                  super-admin
+                                </Badge>
+                              )}
+                              {u.tenant_count > 0 && (
+                                <Badge variant="outline" className="text-[10px]">
+                                  {u.tenant_count} брендів
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </TableCell>
@@ -189,10 +220,10 @@ function AdminPermissionsPage() {
                       })}
                     </TableRow>
                   ))}
-                  {admins.length === 0 && (
+                  {users.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={caps.length + 1} className="text-center text-sm text-muted-foreground">
-                        Адмінів ще немає.
+                        {search ? "Користувачів не знайдено." : "Користувачів ще немає."}
                       </TableCell>
                     </TableRow>
                   )}
