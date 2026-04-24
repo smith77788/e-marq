@@ -119,6 +119,7 @@ export function NotificationCenter() {
   const { t, lang } = useT();
   const { user } = useAuth();
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "unread">("unread");
   const [marking, setMarking] = useState(false);
