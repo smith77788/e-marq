@@ -318,7 +318,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
               <TabsTrigger value="history" className="flex-1">
                 Історія ({jobs.data?.length ?? 0})
               </TabsTrigger>
-              {(webhookUrl || isWebhook) && (
+              {isWebhook && (
                 <TabsTrigger value="webhook" className="flex-1">
                   Webhook
                 </TabsTrigger>
