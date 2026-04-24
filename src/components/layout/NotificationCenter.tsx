@@ -144,7 +144,9 @@ export function NotificationCenter() {
     queryFn: async () => {
       let q = supabase
         .from("owner_notifications")
-        .select("id, tenant_id, kind, severity, title, body, link, is_read, created_at")
+        .select(
+          "id, tenant_id, kind, severity, title, body, link, is_read, created_at, metadata",
+        )
         .in("tenant_id", tenantIds)
         .order("created_at", { ascending: false })
         .limit(PAGE_SIZE);
