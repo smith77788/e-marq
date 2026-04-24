@@ -75,7 +75,7 @@ function AdminPermissionsPage() {
     enabled: canManage,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("admin_list_users_for_permissions", {
-        _search: search || null,
+        _search: search || undefined,
       });
       if (error) throw error;
       return (data ?? []) as UserRow[];
