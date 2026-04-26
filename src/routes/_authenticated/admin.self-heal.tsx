@@ -271,6 +271,31 @@ function SelfHealContent() {
     }
   };
 
+  const callDismiss = async (
+    kind: "incident" | "action",
+    id: string,
+    reason: string,
+  ) => {
+    const { data: session } = await supabase.auth.getSession();
+    const token = session.session?.access_token;
+    if (!token) return toast.error("Not authenticated");
+    const res = await fetch("/hooks/agents/self-heal-dismiss", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ kind, id, reason }),
+    });
+    const json = (await res.json()) as { ok?: boolean; message?: string; error?: string };
+    if (res.ok && json.ok) {
+      toast.success(json.message ?? "Dismissed");
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["self-heal-incidents"] }),
+        qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
+      ]);
+    } else {
+      toast.error(json.error ?? "Failed");
+    }
+  };
+
   const toggleAutoHeal = async (next: boolean) => {
     const { error } = await supabase
       .from("self_heal_settings")
