@@ -8,7 +8,7 @@ export const detectAgentRunsStuck: DetectorFn = async ({ tenantId }) => {
   const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString();
   let query = supabaseAdmin
     .from("acos_agent_runs")
-    .select("id, agent_key, tenant_id, started_at")
+    .select("id, agent_id, tenant_id, started_at")
     .eq("status", "running")
     .lt("started_at", cutoff)
     .limit(100);
@@ -29,7 +29,7 @@ export const detectAgentRunsStuck: DetectorFn = async ({ tenantId }) => {
     severity: rs.length > 5 ? "p1" : "p2",
     title: `${rs.length} agent runs stuck >30min`,
     root_cause: "Agent run has status=running but no heartbeat for 30+ minutes",
-    scope: { count: rs.length, agents: [...new Set(rs.map((r) => r.agent_key))] },
+    scope: { count: rs.length, agents: [...new Set(rs.map((r) => r.agent_id))] },
     fingerprint: `agent_runs_stuck:${tKey}`,
     regression_risk: "low",
     proposed_actions: [
