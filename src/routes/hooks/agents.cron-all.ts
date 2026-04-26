@@ -9,7 +9,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
 import { jsonError, jsonOk } from "@/lib/acos/agentRuntime";
-import { isCronToken } from "@/lib/acos/cronAuth";
+import { getInternalCronToken, isCronToken } from "@/lib/acos/cronAuth";
 
 export const Route = createFileRoute("/hooks/agents/cron-all")({
   server: {
