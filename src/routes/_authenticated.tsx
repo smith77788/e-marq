@@ -50,7 +50,6 @@ function AuthenticatedLayout() {
     return <Navigate to="/login" replace />;
   }
 
-
   async function handleSignOut() {
     await signOut();
     router.invalidate();
