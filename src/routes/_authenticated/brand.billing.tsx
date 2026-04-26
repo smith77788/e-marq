@@ -129,6 +129,8 @@ function BrandBillingPage() {
   const summary = summaryQuery.data;
   const activeTenant = tenants.find((t) => t.tenant_id === effectiveTenantId) ?? current;
 
+  const showAutopayBanner = autopay && !!desiredPlan && desiredPlan !== "free";
+
   return (
     <div className="space-y-6">
       <div>
@@ -145,6 +147,22 @@ function BrandBillingPage() {
           лише обсягу (товари, замовлення, клієнти).
         </p>
       </div>
+
+      {showAutopayBanner && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Crown className="h-4 w-4 text-primary" />
+              Крок 3 з 3 · підтвердіть оплату тарифу{" "}
+              {desiredPlan ? desiredPlan[0].toUpperCase() + desiredPlan.slice(1) : ""}
+            </CardTitle>
+            <CardDescription>
+              Тариф уже обрано на сторінці цін. Натисніть «Перейти на цей тариф» нижче — і ми
+              активуємо підписку.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
 
       {summary && (
         <Card>
@@ -170,7 +188,12 @@ function BrandBillingPage() {
       <BalanceCard tenantId={effectiveTenantId} tenantSlug={activeTenant?.tenant_slug ?? "brand"} />
 
       {summary && (
-        <OwnerPlanSwitcher tenantId={effectiveTenantId} currentPlanKey={summary.plan.key} />
+        <OwnerPlanSwitcher
+          tenantId={effectiveTenantId}
+          currentPlanKey={summary.plan.key}
+          highlightPlanKey={desiredPlan}
+          autoScroll={showAutopayBanner}
+        />
       )}
     </div>
   );
