@@ -2,7 +2,7 @@
  * Self-service plan switcher for tenant owners/admins.
  * Calls owner_change_plan RPC (server-side enforces is_tenant_admin).
  */
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Crown } from "lucide-react";
