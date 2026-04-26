@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { trackBilling } from "@/lib/billingTelemetry";
 import { PlanBadge } from "@/components/admin/PlanBadge";
 
 type Plan = {
