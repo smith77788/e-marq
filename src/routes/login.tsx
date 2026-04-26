@@ -158,6 +158,15 @@ function LoginPage() {
               {t("auth.create")}
             </Link>
           </p>
+          <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
+            <Link to="/terms" className="text-primary hover:underline">
+              {t("site.legal.terms")}
+            </Link>
+            {" · "}
+            <Link to="/privacy" className="text-primary hover:underline">
+              {t("site.legal.privacy")}
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </main>

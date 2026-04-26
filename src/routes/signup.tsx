@@ -141,6 +141,17 @@ function SignupPage() {
               {t("auth.signin")}
             </Link>
           </p>
+          <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
+            {t("site.legal.agree")}{" "}
+            <Link to="/terms" className="text-primary hover:underline">
+              {t("site.legal.terms")}
+            </Link>{" "}
+            {t("site.legal.and")}{" "}
+            <Link to="/privacy" className="text-primary hover:underline">
+              {t("site.legal.privacy")}
+            </Link>
+            .
+          </p>
         </CardContent>
       </Card>
     </main>
