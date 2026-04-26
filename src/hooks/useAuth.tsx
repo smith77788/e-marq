@@ -10,7 +10,11 @@ type AuthContextValue = {
   isSuperAdmin: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<SignUpResult>;
+  signUp: (
+    email: string,
+    password: string,
+    options?: { emailRedirectTo?: string },
+  ) => Promise<SignUpResult>;
   signOut: () => Promise<void>;
   requestPasswordReset: (email: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
@@ -94,8 +98,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw new Error(humanizeAuthError(error.message));
   }
 
-  async function signUp(email: string, password: string): Promise<SignUpResult> {
-    const redirectUrl = `${window.location.origin}/`;
+  async function signUp(
+    email: string,
+    password: string,
+    options?: { emailRedirectTo?: string },
+  ): Promise<SignUpResult> {
+    // Default lands on /auth/callback so the post-auth redirect logic
+    // (sessionStorage `marq.postAuthDest`) can honor pricing-funnel intent.
+    const redirectUrl = options?.emailRedirectTo ?? `${window.location.origin}/auth/callback`;
     const { data, error } = await supabase.auth.signUp({
       email: normalizeEmail(email),
       password,
