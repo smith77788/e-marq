@@ -87,6 +87,16 @@ function BrandBillingPage() {
     };
   }, [effectiveTenantId]);
 
+  // Funnel checkpoint: позначаємо коли користувач прийшов з Pricing → Signup → Pay.
+  const checkoutLoggedRef = useRef(false);
+  useEffect(() => {
+    if (!effectiveTenantId || checkoutLoggedRef.current) return;
+    if (autopay && desiredPlan && desiredPlan !== "free") {
+      checkoutLoggedRef.current = true;
+      trackBilling(effectiveTenantId, "funnel.checkout_open", { plan: desiredPlan });
+    }
+  }, [effectiveTenantId, autopay, desiredPlan]);
+
   // Якщо запит даних плану звалився — фіксуємо як nav_failed (інколи це таймаут RPC)
   useEffect(() => {
     if (effectiveTenantId && summaryQuery.isError) {
