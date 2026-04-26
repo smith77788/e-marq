@@ -61,10 +61,15 @@ const PLAN_LABEL: Record<NonNullable<SignupSearch["plan"]>, string> = {
 function SignupPage() {
   const { t } = useT();
   const { signUp } = useAuth();
+  const search = Route.useSearch();
   const [submitting, setSubmitting] = useState(false);
   const [emailSubmitting, setEmailSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const destination = postSignupDestination(search);
+  const planLabel = search.plan ? PLAN_LABEL[search.plan] : null;
+  const goingToCheckout = search.next === "checkout" && !!search.plan && search.plan !== "free";
 
   async function onEmailSubmit(e: FormEvent) {
     e.preventDefault();
@@ -80,7 +85,7 @@ function SignupPage() {
         setEmailSubmitting(false);
       } else {
         toast.success(t("auth.created"));
-        window.location.assign("/dashboard");
+        window.location.assign(destination);
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.failSignup"));
@@ -91,6 +96,17 @@ function SignupPage() {
   async function onGoogle() {
     setSubmitting(true);
     try {
+      // Persist desired destination across the OAuth round-trip.
+      // /auth/callback will read this and finalize navigation.
+      try {
+        if (goingToCheckout) {
+          window.sessionStorage.setItem("marq.postAuthDest", destination);
+        } else {
+          window.sessionStorage.removeItem("marq.postAuthDest");
+        }
+      } catch {
+        /* storage may be blocked */
+      }
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: `${window.location.origin}/auth/callback`,
       });
@@ -117,8 +133,17 @@ function SignupPage() {
       </div>
       <Card className="w-full max-w-md">
         <CardHeader>
+          {planLabel && goingToCheckout && (
+            <Badge variant="outline" className="mb-2 w-fit border-primary/40 bg-primary/5 text-primary">
+              Крок 2 з 3 · обрано тариф {planLabel}
+            </Badge>
+          )}
           <CardTitle>{t("auth.signupTitle")}</CardTitle>
-          <CardDescription>{t("auth.signupDesc")}</CardDescription>
+          <CardDescription>
+            {goingToCheckout
+              ? `Створіть акаунт — і ми одразу відкриємо оплату тарифу ${planLabel}.`
+              : t("auth.signupDesc")}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={onEmailSubmit} className="space-y-3">
