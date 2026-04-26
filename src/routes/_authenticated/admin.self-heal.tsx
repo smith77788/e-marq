@@ -143,10 +143,8 @@ function SelfHealContent() {
       const { data, error } = await supabase
         .from("self_heal_incidents")
         .select("*")
-        .in("status", ["open", "fixing", "monitoring", "blocked"])
-        .order("severity", { ascending: true })
         .order("last_seen_at", { ascending: false })
-        .limit(100);
+        .limit(200);
       if (error) throw error;
       return (data ?? []) as Incident[];
     },
@@ -160,7 +158,7 @@ function SelfHealContent() {
         .from("self_heal_actions")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(100);
+        .limit(200);
       if (error) throw error;
       return (data ?? []) as ActionRow[];
     },
