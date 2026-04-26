@@ -79,7 +79,22 @@ function SignupPage() {
     }
     setEmailSubmitting(true);
     try {
-      const result = await signUp(email, password);
+      // Persist funnel intent so it survives:
+      //  (a) immediate signup w/ session  → /auth/callback reads it
+      //  (b) email-confirm round-trip     → /auth/callback reads it after the
+      //      user clicks the confirm link from their inbox.
+      try {
+        if (goingToCheckout) {
+          window.sessionStorage.setItem("marq.postAuthDest", destination);
+        } else {
+          window.sessionStorage.removeItem("marq.postAuthDest");
+        }
+      } catch {
+        /* storage may be blocked */
+      }
+      const result = await signUp(email, password, {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      });
       if (result.needsEmailConfirmation) {
         toast.success(t("auth.checkEmail"));
         setEmailSubmitting(false);
