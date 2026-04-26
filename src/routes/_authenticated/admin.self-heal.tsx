@@ -180,16 +180,25 @@ function SelfHealContent() {
     },
   });
 
-  const incidents = incidentsQ.data ?? [];
+  const incidentsAll = incidentsQ.data ?? [];
   const actions = actionsQ.data ?? [];
   const settings = settingsQ.data;
 
+  const incidents = useMemo(
+    () => incidentsAll.filter((i) => ["open", "fixing", "monitoring", "blocked"].includes(i.status)),
+    [incidentsAll],
+  );
+
+  // ANY skipped action with a decision other than "apply" is something the admin can act on.
   const pendingProposals = useMemo(
-    () => actions.filter((a) => a.decision === "propose" && a.status === "skipped"),
+    () => actions.filter((a) => a.status === "skipped" && a.decision !== "apply"),
     [actions],
   );
   const recentApplied = useMemo(
-    () => actions.filter((a) => a.status === "applied" || a.status === "reverted").slice(0, 50),
+    () =>
+      actions
+        .filter((a) => a.status === "applied" || a.status === "reverted" || a.status === "failed")
+        .slice(0, 50),
     [actions],
   );
 
