@@ -354,16 +354,16 @@ function SelfHealContent() {
         />
       </div>
 
-      {/* PENDING PROPOSALS */}
+      {/* PENDING PROPOSALS / BLOCKED ACTIONS */}
       {pendingProposals.length > 0 && (
         <Card className="border-warning/40 shadow-glow-violet">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-warning" />
-              Pending proposals ({pendingProposals.length})
+              Pending actions ({pendingProposals.length})
             </CardTitle>
             <CardDescription>
-              Risky fixes that need explicit Apply confirmation.
+              Дії, що чекають на ручне рішення (BLOCK = ризикові, PROPOSE = запропоновані, MONITOR = лише спостереження).
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -371,27 +371,53 @@ function SelfHealContent() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Kind</TableHead>
+                  <TableHead className="w-24">Decision</TableHead>
                   <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {pendingProposals.map((a) => (
                   <TableRow key={a.id}>
                     <TableCell className="font-mono text-xs">{a.kind}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "text-xs uppercase",
+                          a.decision === "block" && "border-destructive/40 text-destructive",
+                          a.decision === "propose" && "border-warning/40 text-warning",
+                          a.decision === "monitor" && "border-muted text-muted-foreground",
+                        )}
+                      >
+                        {a.decision}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {new Date(a.created_at).toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        type="button"
-                        onClick={() =>
-                          callAction("/hooks/agents/self-heal-apply", a.id, "Applied")
-                        }
-                      >
-                        Apply
-                      </Button>
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          size="sm"
+                          type="button"
+                          onClick={() =>
+                            callAction("/hooks/agents/self-heal-apply", a.id, "Applied")
+                          }
+                        >
+                          {a.decision === "block" ? "Force apply" : "Apply"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          type="button"
+                          onClick={() =>
+                            callDismiss("action", a.id, "Dismissed by admin")
+                          }
+                        >
+                          Dismiss
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -427,6 +453,7 @@ function SelfHealContent() {
                   <TableHead>Root cause</TableHead>
                   <TableHead className="w-20">Risk</TableHead>
                   <TableHead className="w-24">Status</TableHead>
+                  <TableHead className="w-20 text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -447,6 +474,16 @@ function SelfHealContent() {
                       <Badge variant="outline" className="text-xs">
                         {i.status}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        type="button"
+                        onClick={() => callDismiss("incident", i.id, "Dismissed by admin")}
+                      >
+                        Dismiss
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
