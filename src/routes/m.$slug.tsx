@@ -56,6 +56,15 @@ export const Route = createFileRoute("/m/$slug")({
       </p>
     </main>
   ),
+  errorComponent: ({ error }: { error: Error }) => (
+    <main className="mx-auto max-w-2xl px-4 py-24 text-center">
+      <h1 className="text-2xl font-bold">Не вдалося відкрити сторінку</h1>
+      <p className="mt-2 text-sm text-destructive">{error.message}</p>
+      <Link to="/" className="mt-4 inline-flex text-primary underline">
+        На головну
+      </Link>
+    </main>
+  ),
 });
 
 function MagnetPage() {
