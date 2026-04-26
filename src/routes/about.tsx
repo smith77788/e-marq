@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Compass, Heart, Sparkles, Target, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MarketingHeader, MarketingFooter } from "@/components/marketing/MarketingShell";
 import { useT, tStatic } from "@/lib/i18n";
 import { buildSeo } from "@/lib/seo";

@@ -1,7 +1,7 @@
 /**
  * Tiny dependency-free SVG sparkline. Used inside the detail drawer.
  */
-import * as React from "react";
+
 
 type Props = {
   data: number[];
