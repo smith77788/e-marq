@@ -125,7 +125,9 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
     enabled: !!integ.data,
     refetchInterval: 60_000,
     queryFn: async () => {
-      const res = await fetch(`/hooks/integrations/dntrade-webhook-health?tenant=${tenantId}`);
+      const res = await fetch(`/hooks/integrations/dntrade-webhook-health?tenant=${tenantId}`, {
+        headers: await authHeader(),
+      });
       const json = (await res.json()) as {
         status: "healthy" | "degraded" | "unhealthy" | "missing" | "error";
         ready: boolean;
