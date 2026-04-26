@@ -24,6 +24,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex, nofollow" }],
+  }),
   beforeLoad: ({ location }) => {
     if (typeof window === "undefined") return;
     try {
