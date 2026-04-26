@@ -431,6 +431,8 @@ const dict = {
     "site.legal.contactSales": "Потрібен індивідуальний пакет?",
     "site.legal.contactSalesCta": "Поговоримо",
     "site.legal.priceNote": "Оплата в гривнях. Курс конвертації — індикативний.",
+    "site.legal.kicker": "Юридичне",
+    "site.legal.updated": "Оновлено",
 
     // About page (UA)
     "ab.metaTitle": "Про MARQ — автономна команда зростання для D2C",
@@ -1825,6 +1827,8 @@ const dict = {
     "site.legal.contactSales": "Need a custom plan?",
     "site.legal.contactSalesCta": "Let's talk",
     "site.legal.priceNote": "Billed in UAH. USD conversion is indicative.",
+    "site.legal.kicker": "Legal",
+    "site.legal.updated": "Updated",
 
     "ab.metaTitle": "About MARQ — the autonomous growth team for D2C",
     "ab.metaDesc":
