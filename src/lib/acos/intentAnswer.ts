@@ -58,12 +58,6 @@ function normalize(s: string): string {
     .trim();
 }
 
-/** Чи містить нормалізована стрічка хоч одне зі слів-стемів (префіксний матч). */
-function hasStem(text: string, stems: string[]): boolean {
-  const tokens = text.split(" ");
-  return stems.some((stem) => tokens.some((tok) => tok.startsWith(stem)));
-}
-
 /** Скоринг наміру: кожен hit = 1; додатковий бонус за множинні збіги. */
 function score(text: string, stems: string[]): number {
   const tokens = text.split(" ");
