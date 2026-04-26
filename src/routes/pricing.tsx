@@ -160,7 +160,24 @@ function Pricing() {
                   ))}
                 </ul>
                 <Button asChild className="w-full" variant={p.highlight ? "default" : "outline"}>
-                  <Link to={p.ctaTo}>{p.cta}</Link>
+                  {p.ctaTo === "/signup" && p.planKey ? (
+                    <Link
+                      to="/signup"
+                      search={{ plan: p.planKey, next: "checkout" }}
+                      onClick={() => {
+                        try {
+                          window.sessionStorage.setItem("marq.funnel.plan", p.planKey!);
+                          window.sessionStorage.setItem("marq.funnel.t0", String(Date.now()));
+                        } catch {
+                          /* storage may be blocked */
+                        }
+                      }}
+                    >
+                      {p.cta}
+                    </Link>
+                  ) : (
+                    <Link to={p.ctaTo}>{p.cta}</Link>
+                  )}
                 </Button>
               </CardContent>
             </Card>
