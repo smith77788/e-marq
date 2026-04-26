@@ -23,8 +23,23 @@ function AuthCallbackPage() {
   useEffect(() => {
     if (loading) return;
 
+    // Honor a one-shot post-auth destination set by /signup or /login when the
+    // user came in from a Pricing CTA. Collapses the funnel to 3 steps.
+    function readAndClearDest(): string | null {
+      try {
+        const dest = window.sessionStorage.getItem("marq.postAuthDest");
+        if (dest) {
+          window.sessionStorage.removeItem("marq.postAuthDest");
+          if (dest.startsWith("/") && !dest.startsWith("//")) return dest;
+        }
+      } catch {
+        /* storage may be blocked */
+      }
+      return null;
+    }
+
     if (user) {
-      window.location.replace("/dashboard");
+      window.location.replace(readAndClearDest() ?? "/dashboard");
       return;
     }
 
@@ -34,7 +49,7 @@ function AuthCallbackPage() {
       if (cancelled) return;
 
       if (data.session?.user) {
-        window.location.replace("/dashboard");
+        window.location.replace(readAndClearDest() ?? "/dashboard");
         return;
       }
 
