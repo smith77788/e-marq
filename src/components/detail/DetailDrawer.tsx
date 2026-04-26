@@ -433,6 +433,7 @@ export function DetailDrawer() {
             <DrawerTitle className="pr-8">{title}</DrawerTitle>
             <DrawerDescription className="sr-only">Розширена деталь елементу</DrawerDescription>
             <button
+              type="button"
               onClick={() => ctrl.close()}
               aria-label="Закрити"
               className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"

@@ -289,6 +289,7 @@ export function AcosInsightsQueue({ tenantId }: Props) {
             {(["new", "in_review", "approved", "applied", "all"] as const).map((f) => (
               <button
                 key={f}
+                type="button"
                 onClick={() => setStatusFilter(f)}
                 className={`rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
                   statusFilter === f
@@ -306,6 +307,7 @@ export function AcosInsightsQueue({ tenantId }: Props) {
           {types.length > 1 && (
             <div className="flex flex-wrap gap-1.5">
               <button
+                type="button"
                 onClick={() => setTypeFilter("all")}
                 className={`rounded-md border px-2 py-0.5 text-[11px] transition-colors ${
                   typeFilter === "all"
@@ -318,6 +320,7 @@ export function AcosInsightsQueue({ tenantId }: Props) {
               {types.map((t) => (
                 <button
                   key={t}
+                  type="button"
                   onClick={() => setTypeFilter(t)}
                   className={`rounded-md border px-2 py-0.5 text-[11px] transition-colors ${
                     typeFilter === t
