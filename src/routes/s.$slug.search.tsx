@@ -3,7 +3,7 @@
  * product list. Reads `?q=` from URL.
  */
 import { useMemo } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { loadStorefrontShell, type StorefrontShell } from "@/lib/storefront/loaders";
@@ -31,6 +31,14 @@ export const Route = createFileRoute("/s/$slug/search")({
       <p className="text-sm text-destructive">
         {tStatic("sf.search.error")}: {error.message}
       </p>
+    </div>
+  ),
+  notFoundComponent: () => (
+    <div className="mx-auto max-w-4xl px-4 py-12 text-center">
+      <p className="text-sm text-muted-foreground">Магазин не знайдено.</p>
+      <Link to="/" className="mt-3 inline-flex text-sm text-primary underline">
+        На головну
+      </Link>
     </div>
   ),
   component: SearchPage,
