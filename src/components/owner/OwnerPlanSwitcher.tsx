@@ -122,6 +122,7 @@ export function OwnerPlanSwitcher({
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {plans.map((p) => {
             const isCurrent = p.key === currentPlanKey;
+            const isHighlighted = !!highlightPlanKey && p.key === highlightPlanKey && !isCurrent;
             const priceLabel =
               p.price_cents_monthly === 0
                 ? "безкоштовно"
@@ -129,13 +130,24 @@ export function OwnerPlanSwitcher({
             return (
               <div
                 key={p.id}
-                className={`rounded-lg border p-4 ${
-                  isCurrent ? "border-primary bg-primary/5" : "border-border bg-card"
+                ref={isHighlighted ? highlightRef : undefined}
+                className={`rounded-lg border p-4 transition-shadow ${
+                  isHighlighted
+                    ? "border-primary bg-primary/10 shadow-lg ring-2 ring-primary/40"
+                    : isCurrent
+                      ? "border-primary bg-primary/5"
+                      : "border-border bg-card"
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <PlanBadge planKey={p.key} planName={p.name} />
-                  {isCurrent && <Badge variant="default">Поточний</Badge>}
+                  {isCurrent ? (
+                    <Badge variant="default">Поточний</Badge>
+                  ) : isHighlighted ? (
+                    <Badge variant="outline" className="border-primary/40 text-primary">
+                      Обрано
+                    </Badge>
+                  ) : null}
                 </div>
                 <p className="mt-2 text-2xl font-bold tabular-nums">{priceLabel}</p>
                 {p.description && (
@@ -163,7 +175,9 @@ export function OwnerPlanSwitcher({
                     ? "Уже активний"
                     : change.isPending
                       ? "Оновлюю…"
-                      : "Перейти на цей тариф"}
+                      : isHighlighted
+                        ? "Активувати цей тариф"
+                        : "Перейти на цей тариф"}
                 </Button>
               </div>
             );
