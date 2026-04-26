@@ -180,6 +180,12 @@ const ADMIN_SYSTEM: NavGroup = {
       icon: HeartPulse,
       tone: "text-destructive",
     },
+    {
+      labelKey: "sb.selfHeal" as TKey,
+      to: "/admin/self-heal",
+      icon: Sparkles,
+      tone: "text-success",
+    },
     { labelKey: "sb.crossTenant" as TKey, to: "/admin/overview", icon: Layers, tone: "text-info" },
     { labelKey: "sb.allTenants", to: "/admin/tenants", icon: Building2, tone: "text-primary" },
     { labelKey: "sb.plansCatalog" as TKey, to: "/admin/plans", icon: Coins, tone: "text-warning" },

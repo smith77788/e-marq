@@ -196,6 +196,7 @@ import { Route as AuthenticatedAgentsAgentIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminTopupRequestsRouteImport } from './routes/_authenticated/admin.topup-requests'
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin.tenants'
+import { Route as AuthenticatedAdminSelfHealRouteImport } from './routes/_authenticated/admin.self-heal'
 import { Route as AuthenticatedAdminPlansRouteImport } from './routes/_authenticated/admin.plans'
 import { Route as AuthenticatedAdminPermissionsRouteImport } from './routes/_authenticated/admin.permissions'
 import { Route as AuthenticatedAdminOverviewRouteImport } from './routes/_authenticated/admin.overview'
@@ -1258,6 +1259,12 @@ const AuthenticatedAdminTenantsRoute =
     path: '/admin/tenants',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAdminSelfHealRoute =
+  AuthenticatedAdminSelfHealRouteImport.update({
+    id: '/admin/self-heal',
+    path: '/admin/self-heal',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminPlansRoute = AuthenticatedAdminPlansRouteImport.update({
   id: '/admin/plans',
   path: '/admin/plans',
@@ -1486,6 +1493,7 @@ export interface FileRoutesByFullPath {
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/admin/permissions': typeof AuthenticatedAdminPermissionsRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
+  '/admin/self-heal': typeof AuthenticatedAdminSelfHealRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/admin/topup-requests': typeof AuthenticatedAdminTopupRequestsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -1707,6 +1715,7 @@ export interface FileRoutesByTo {
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/admin/permissions': typeof AuthenticatedAdminPermissionsRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
+  '/admin/self-heal': typeof AuthenticatedAdminSelfHealRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/admin/topup-requests': typeof AuthenticatedAdminTopupRequestsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -1931,6 +1940,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/_authenticated/admin/permissions': typeof AuthenticatedAdminPermissionsRoute
   '/_authenticated/admin/plans': typeof AuthenticatedAdminPlansRoute
+  '/_authenticated/admin/self-heal': typeof AuthenticatedAdminSelfHealRoute
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/_authenticated/admin/topup-requests': typeof AuthenticatedAdminTopupRequestsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -2155,6 +2165,7 @@ export interface FileRouteTypes {
     | '/admin/overview'
     | '/admin/permissions'
     | '/admin/plans'
+    | '/admin/self-heal'
     | '/admin/tenants'
     | '/admin/topup-requests'
     | '/admin/users'
@@ -2376,6 +2387,7 @@ export interface FileRouteTypes {
     | '/admin/overview'
     | '/admin/permissions'
     | '/admin/plans'
+    | '/admin/self-heal'
     | '/admin/tenants'
     | '/admin/topup-requests'
     | '/admin/users'
@@ -2599,6 +2611,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/overview'
     | '/_authenticated/admin/permissions'
     | '/_authenticated/admin/plans'
+    | '/_authenticated/admin/self-heal'
     | '/_authenticated/admin/tenants'
     | '/_authenticated/admin/topup-requests'
     | '/_authenticated/admin/users'
@@ -4281,6 +4294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTenantsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/self-heal': {
+      id: '/_authenticated/admin/self-heal'
+      path: '/admin/self-heal'
+      fullPath: '/admin/self-heal'
+      preLoaderRoute: typeof AuthenticatedAdminSelfHealRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/plans': {
       id: '/_authenticated/admin/plans'
       path: '/admin/plans'
@@ -4578,6 +4598,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminOverviewRoute: typeof AuthenticatedAdminOverviewRoute
   AuthenticatedAdminPermissionsRoute: typeof AuthenticatedAdminPermissionsRoute
   AuthenticatedAdminPlansRoute: typeof AuthenticatedAdminPlansRoute
+  AuthenticatedAdminSelfHealRoute: typeof AuthenticatedAdminSelfHealRoute
   AuthenticatedAdminTenantsRoute: typeof AuthenticatedAdminTenantsRouteWithChildren
   AuthenticatedAdminTopupRequestsRoute: typeof AuthenticatedAdminTopupRequestsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
@@ -4614,6 +4635,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminOverviewRoute: AuthenticatedAdminOverviewRoute,
   AuthenticatedAdminPermissionsRoute: AuthenticatedAdminPermissionsRoute,
   AuthenticatedAdminPlansRoute: AuthenticatedAdminPlansRoute,
+  AuthenticatedAdminSelfHealRoute: AuthenticatedAdminSelfHealRoute,
   AuthenticatedAdminTenantsRoute: AuthenticatedAdminTenantsRouteWithChildren,
   AuthenticatedAdminTopupRequestsRoute: AuthenticatedAdminTopupRequestsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
