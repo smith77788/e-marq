@@ -17,8 +17,11 @@ export const Route = createFileRoute("/pricing")({
   component: Pricing,
 });
 
+type PlanKey = "free" | "starter" | "growth" | "scale";
+
 type PlanCard = {
   name: string;
+  planKey: PlanKey | null; // null → не передаємо planKey (Scale → contact)
   price: string;
   priceUsd: string;
   cadence: string;
