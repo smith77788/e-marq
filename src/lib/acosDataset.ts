@@ -261,28 +261,11 @@ type Customer = {
 function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
-function pickN<T>(arr: T[], n: number): T[] {
-  const copy = [...arr];
-  const out: T[] = [];
-  for (let i = 0; i < n && copy.length > 0; i++) {
-    out.push(copy.splice(Math.floor(Math.random() * copy.length), 1)[0]);
-  }
-  return out;
-}
 function randInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-function randFloat(min: number, max: number) {
-  return Math.random() * (max - min) + min;
-}
 function uuid() {
   return crypto.randomUUID();
-}
-
-function isoDaysAgo(days: number, hourJitter = true): string {
-  const now = Date.now();
-  const ms = now - days * 24 * 60 * 60 * 1000 - (hourJitter ? randInt(0, 86400) * 1000 : 0);
-  return new Date(ms).toISOString();
 }
 
 // ---------------------------------------------------------------------------

@@ -15,7 +15,6 @@ import {
   authorizeAgentRequest,
   failAgentRun,
   finishAgentRun,
-  insertInsightsDedup,
   jsonError,
   jsonOk,
   startAgentRun,

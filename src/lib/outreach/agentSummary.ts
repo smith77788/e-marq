@@ -63,7 +63,7 @@ type AgentResponse = {
  *   - "Instagram вимкнено в налаштуваннях outreach (3 проєкти)"
  *   - "0 нових дописів — спробуйте додати ключові слова"
  */
-export function friendlyAgentSummary(agent: string, raw: unknown): string {
+export function friendlyAgentSummary(_agent: string, raw: unknown): string {
   if (!raw || typeof raw !== "object") {
     return "Агент відпрацював.";
   }

@@ -25,7 +25,6 @@ import {
   Banknote,
   CheckCircle2,
   Clock,
-  Coins,
   Copy,
   CreditCard,
   History,

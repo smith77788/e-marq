@@ -45,7 +45,7 @@ export const Route = createFileRoute("/_authenticated/brand/")({
 function BrandPage() {
   const { tenant: tenantSearchId } = useSearch({ from: "/_authenticated/brand/" });
   const { loading: authLoading } = useAuth();
-  const { t } = useT();
+  useT();
   const navigate = useNavigate();
   const { tenants, current, currentTenantId, setCurrentTenantId, loading } = useTenantContext();
 

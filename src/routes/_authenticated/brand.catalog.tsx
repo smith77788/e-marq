@@ -7,7 +7,7 @@
  * Tenant scoping: ?tenant=<id> search param, mirroring /brand/products.
  * RLS: collections_admin_write — only members of the tenant can mutate.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";

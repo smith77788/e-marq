@@ -20,7 +20,6 @@ import {
   ArrowRight,
   CheckCircle2,
   Copy,
-  ExternalLink,
   FileSpreadsheet,
   Loader2,
   Upload,

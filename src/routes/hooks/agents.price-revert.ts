@@ -172,9 +172,6 @@ export const Route = createFileRoute("/hooks/agents/price-revert")({
           // actions.apply, щоб ціна реально відкотилася без участі власника.
           let autoApplied = 0;
           if (created > 0) {
-            const dedupKeys = candidates.map(
-              (c) => `revert::${(c.metrics as { source_action_id?: string }).source_action_id}`,
-            );
             const { data: freshInsights } = await supabaseAdmin
               .from("ai_insights")
               .select("id, metrics")

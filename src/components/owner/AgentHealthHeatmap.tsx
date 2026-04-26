@@ -132,7 +132,6 @@ export function AgentHealthHeatmap({ tenantId }: Props) {
               </thead>
               <tbody>
                 {grid.rows.map((r) => {
-                  const failureRate = r.total > 0 ? r.failed / r.total : 0;
                   return (
                     <tr key={r.agent_id} className="border-t border-border/40">
                       <td

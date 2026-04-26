@@ -131,11 +131,7 @@ async function buildMetrics(tenantId: string, appOrigin: string): Promise<string
 }
 
 async function buildOrders(tenantId: string, appOrigin: string): Promise<string> {
-  const { data: tenant } = await supabaseAdmin
-    .from("tenants")
-    .select("slug")
-    .eq("id", tenantId)
-    .maybeSingle();
+  await supabaseAdmin.from("tenants").select("slug").eq("id", tenantId).maybeSingle();
   const { data: orders } = await supabaseAdmin
     .from("orders")
     .select("id, total_cents, status, customer_email, customer_name, created_at")

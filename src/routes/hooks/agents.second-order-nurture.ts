@@ -74,8 +74,6 @@ export const Route = createFileRoute("/hooks/agents/second-order-nurture")({
             return jsonOk({ run_id: handle.runId, targets: 0, insights_created: 0 });
           }
 
-          // Get last bought product per customer to power cross-sell suggestion
-          const custIds = targets.map((c) => c.id);
           // Need to fetch via orders + order_items
           const { data: orders } = await supabaseAdmin
             .from("orders")

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Crown, Mail, MessageCircle, TrendingUp, Users } from "lucide-react";
+import { Crown, MessageCircle, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
