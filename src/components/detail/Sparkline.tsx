@@ -2,7 +2,6 @@
  * Tiny dependency-free SVG sparkline. Used inside the detail drawer.
  */
 
-
 type Props = {
   data: number[];
   height?: number;
