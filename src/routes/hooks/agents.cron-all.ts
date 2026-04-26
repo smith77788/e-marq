@@ -52,7 +52,7 @@ export const Route = createFileRoute("/hooks/agents/cron-all")({
         if (error) return jsonError("Failed to list tenants", 500, { details: error.message });
 
         const origin = new URL(request.url).origin;
-        const cronToken = process.env.SUPABASE_PUBLISHABLE_KEY ?? "";
+        const cronToken = getInternalCronToken();
 
         const started = Date.now();
         const results = await Promise.allSettled(
