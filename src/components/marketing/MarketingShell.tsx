@@ -77,10 +77,10 @@ export function MarketingHeader() {
         </nav>
         <div className="flex items-center gap-1 sm:gap-2">
           <LanguageSwitcher />
-          <Button asChild size="sm" variant="ghost" className="hidden sm:inline-flex">
+          <Button asChild size="sm" variant="ghost" className="hidden xs:inline-flex sm:inline-flex">
             <Link to="/login">{t("site.nav.signin")}</Link>
           </Button>
-          <Button asChild size="sm" className="hidden sm:inline-flex">
+          <Button asChild size="sm" className="inline-flex">
             <Link to="/signup">{t("site.nav.signup")}</Link>
           </Button>
           <Sheet open={open} onOpenChange={setOpen}>
@@ -128,8 +128,8 @@ export function MarketingFooter() {
   const { t } = useT();
   return (
     <footer className="border-t border-border bg-background">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-4">
-        <div>
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-5">
+        <div className="md:col-span-2">
           <Link to="/" className="flex items-center gap-2 font-semibold text-foreground">
             <Sparkles className="h-4 w-4 text-primary" />
             MARQ
@@ -180,14 +180,6 @@ export function MarketingFooter() {
                 {t("site.nav.contact")}
               </Link>
             </li>
-          </ul>
-        </div>
-
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-foreground">
-            {t("site.foot.account")}
-          </p>
-          <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
             <li>
               <Link to="/login" className="hover:text-foreground">
                 {t("site.nav.signin")}
@@ -196,6 +188,29 @@ export function MarketingFooter() {
             <li>
               <Link to="/signup" className="hover:text-foreground">
                 {t("site.nav.signup")}
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-foreground">
+            {t("site.foot.legal")}
+          </p>
+          <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+            <li>
+              <Link to="/terms" className="hover:text-foreground">
+                {t("site.legal.terms")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/privacy" className="hover:text-foreground">
+                {t("site.legal.privacy")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/refund" className="hover:text-foreground">
+                {t("site.legal.refund")}
               </Link>
             </li>
           </ul>
