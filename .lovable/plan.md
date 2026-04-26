@@ -1,83 +1,150 @@
+# Self-Healing Agent в адмінці
 
+## Важливо: чесно про межі можливого
 
-# План: налагодити підключення зовнішніх БД-програм (DN Trade, Shopify, WooCommerce, Bitrix24, Stripe, Poster, REST, Sheets)
+Ти просиш "агента з повними правами щоб робив все замість мене" — потрібно відразу розмежувати, що **технічно можливо**, а що **ні**, бо інакше буде недовіра до результату.
 
-## Що зараз ламається (виявлено в коді/БД)
+### ❌ Чого агент у браузері НЕ може (фізично)
+- Редагувати вихідний код проекту (`.tsx` файли). Код змінює лише Lovable-агент через мене — це закрита система.
+- Деплоїти нові версії сайту.
+- Створювати міграції БД на льоту.
+- Запускати `npm install` чи додавати залежності.
 
-1. **Wizard двічі ламається на DN Trade**
-   - У хабі `/brand/integrations` для DN Trade відкривається **загальний** `IntegrationWizard`, який кличе `/api/integrations/verify/dntrade` → `pullDnTrade()`. Але DN Trade має ВЛАСНИЙ роут `/hooks/integrations/dntrade-verify` з мʼякою логікою (повертає `valid:false` без 4xx). Універсальний роут просто кидає сирі помилки `DN Trade XXX:`.
-   - Кнопка «Створити підключення» в універсальному wizard **зберігає ключ ДО перевірки** і не кличе `dntrade-verify` — тобто ключ уже в БД, навіть якщо невірний; sync потім падає мовчки в `last_sync_error`.
-   - На дашборді `/brand` `DnTradeIntegrationCard` дублює цю саму інтеграцію. Користувачу здається, що є «два різні DN Trade», і два UI-стани розʼїжджаються.
+> Будь-хто, хто пообіцяє "агента що сам пише код у вашому Lovable-проекті з адмінки" — обманює. Lovable-білд закритий.
 
-2. **Verify-роут видає 401 для нових тенантів**
-   - `/api/integrations/verify/$provider` робить `userClient.from("tenant_integrations").select(...)` з RLS, але **до того як інтеграція збережена**. Якщо `credentials` не передані (через крок «Перевірити» з порожнім полем), повертає 404 «Інтеграцію не знайдено». Текст помилки в UI виглядає як «не вдалось підключитись».
-   - Сам роут не верифікує що користувач — admin саме `tenant_id` (просто `getClaims` + RLS). Для DN Trade-токена з оголошеним admin RLS це працює, але повідомлення про помилку нечитабельне.
+### ✅ Що агент МОЖЕ робити автономно (і це багато)
+Він працює як **operations brain** — фіксить **конфіг, дані, налаштування, runtime-стани**, які і складають 90% реальних інцидентів у продакшені:
 
-3. **Sync-кнопки в `IntegrationManageDialog` падають мовчки**
-   - Для не-DN Trade провайдерів кличеться `/api/integrations/sync/$provider`. Якщо конектор кидає 502, toast показує `e.message`, але запис у `import_jobs` НЕ створюється (помилка до `insert`). У результаті в журналі імпортів — порожньо, а власник не розуміє «чому нічого не сталось».
-
-4. **Pending-tenant блокує всі інтеграції**
-   - Новий бренд створюється зі статусом `pending`. RLS `tenant_integrations` пускає лише `is_tenant_admin` (через `tenant_memberships`). Membership створюється, тож формально політика проходить — АЛЕ роути типу `/hooks/integrations/dntrade-sync` мовчки працюють і пишуть дані в pending-тенант, що нелогічно. Краще блокувати sync до верифікації і показати чесне повідомлення.
-
-5. **Webhook URL для inbound показується в UI лише після збереження** — користувач не може скопіювати приклад наперед.
-
-6. **Немає UI-фідбеку про мережеві блокування `safeFetch`**
-   - Якщо власник вводить Shopify домен типу `localhost:3000` або self-hosted Bitrix у приватній мережі, `safeFetch` кидає «Заборонено: приватні / локальні / metadata-адреси». Це показується сирим текстом — але без підказки «введи публічний домен».
-
-7. **`DnTradeIntegrationCard` показується ВСІМ брендам на `/brand`**
-   - Навіть якщо бренд — кавʼярня, що ніколи не використовуватиме DN Trade. Створює шум. Має зʼявлятись **тільки** коли в `tenant_integrations` уже є рядок `provider='dntrade'` АБО користувач явно вибрав це з хабу.
-
----
-
-## Що зробити
-
-### 1. Уніфікувати DN Trade в одному UX
-- В `IntegrationWizard` для `integration.id === "dntrade"`:
-  1. Замість `/api/integrations/verify/dntrade` кликати `/hooks/integrations/dntrade-verify`.
-  2. Кнопка «Перевірити» обовʼязкова перед «Створити підключення». Якщо `valid:false` → блокуємо збереження.
-  3. Після збереження — НЕ показувати «Готово!», а перенаправляти на `/brand/integrations` з відкритим `IntegrationManageDialog` для DN Trade, який має CTA «Запустити перший повний sync».
-- На `/brand` (дашборд) рендерити `DnTradeIntegrationCard` тільки якщо `tenant_integrations` має рядок з `provider='dntrade'`.
-
-### 2. Надійний verify
-- Дозволити `/api/integrations/verify/$provider` працювати **без** запису в БД, якщо `credentials` передано в body (зараз ця гілка вже є, але впаде на `BodySchema` для DN Trade бо `credentials` повинен бути `string`, а DN Trade key — довгий — ок).
-- Для DN Trade окрема гілка `if (provider === 'dntrade')` → виклик `verifyDnTradeKey` без pull.
-- Зрозумілі повідомлення українською: «Сервер DN Trade відхилив ключ. Перевірте, що це ApiKey з прав читання.»
-- Для Shopify/Woo/Bitrix — підказки «домен має бути публічним https://».
-
-### 3. Гарантоване створення `import_jobs`
-- В `/api/integrations/sync/$provider` створювати `import_jobs` **до** `runConnectorPull`, зі `status='running'`, `rows_total=0`. Якщо connector кидає — оновити job `status='failed'`, `error_summary=[{message}]`. Так власник завжди бачить факт спроби в журналі імпортів.
-
-### 4. Блокування для pending-тенантів
-- В `/api/integrations/verify`, `/api/integrations/sync`, `/hooks/integrations/dntrade-sync`, `/hooks/integrations/dntrade-verify`: перевіряти `tenants.status`. Якщо `pending` або `rejected` — повертати 403 з повідомленням «Бренд ще не верифіковано супер-адміном».
-- В UI `/brand/integrations`: коли `current.status !== 'active'`, показувати банер замість списку інтеграцій («Підключення доступні після верифікації бренду адміністратором»).
-
-### 5. Покращити `IntegrationManageDialog`
-- Webhook tab показувати ЗАВЖДИ для inbound-можливих провайдерів (зараз — тільки після генерації). Автоматично генерувати `webhook_secret` при першому відкритті, якщо порожньо.
-- Кнопка «Запустити перший імпорт» додатково в overview, окремо від трьох sync-кнопок.
-
-### 6. UX-помилки `safeFetch`
-- В `runConnectorPull` обгортати помилки `safeFetch` в локалізований текст: «Цей URL не дозволено (приватна або локальна мережа). Використайте публічний https-домен.»
-
-### 7. Невелике прибирання дашборду
-- `DnTradeIntegrationCard` лише коли є рядок інтеграції; інакше — кнопка-плашка «Підключити DN Trade →» що веде у `/brand/integrations`.
+1. **Моніторити** — читати `agent_runs`, `outreach_actions`, `email_sends`, `orders`, `dntrade_health`, balance, RLS-помилки, edge-function logs.
+2. **Діагностувати** — групувати помилки в інциденти (INC-XXXX), визначати severity (P0–P3), root cause.
+3. **Авто-лікувати безпечно** (whitelist дій, кожна reversible):
+   - Перепланувати failed `outreach_actions` з transient-помилками
+   - Авто-паузити канал який має >5 fails / <2 success за 24h
+   - Знімати "stuck" `pending` ордери старші 48h → `pending_review`
+   - Перезапускати застряглі `agent_runs` зі статусом `running` >30хв
+   - Вимикати агент, який падає 5 разів поспіль (kill-switch)
+   - Збільшувати `retry_count`, обнуляти rate-limit лічильники
+   - Чистити прострочені `notifications` / `aiAskHistory`
+4. **Пропонувати** (з кнопкою Apply, не авто) — все що ризикованіше: масові апдейти, зміни тарифу, пересилання email.
+5. **Блокувати** — фікси, де regression risk = HIGH.
 
 ---
 
-## Технічні зміни (файли)
+## Архітектура
 
-- `src/components/integrations/IntegrationWizard.tsx` — спецгілка для `dntrade`, обовʼязковий verify перед save, нормалізація помилок.
-- `src/routes/api/integrations.verify.$provider.ts` — гілка для `dntrade` через `verifyDnTradeKey`, перевірка статусу tenant, локалізовані помилки.
-- `src/routes/api/integrations.sync.$provider.ts` — створення `import_jobs` до pull, оновлення на failed, перевірка tenant status.
-- `src/routes/hooks/integrations.dntrade-sync.ts` + `dntrade-verify.ts` — guard на `tenants.status='active'`.
-- `src/routes/_authenticated/brand.tsx` — умовний рендер `DnTradeIntegrationCard` тільки якщо інтеграція реально існує.
-- `src/routes/_authenticated/brand.integrations.tsx` — банер про pending tenant; auto-open manage-dialog після збереження.
-- `src/components/integrations/IntegrationManageDialog.tsx` — webhook tab з auto-generate, окрема CTA «Перший імпорт».
-- `src/lib/integrations/connectors.ts` — обгортка `safeFetch` помилок у людську мову.
+```text
+┌─────────────────────────────────────────────────────────────┐
+│  /admin/self-heal  (нова сторінка в адмінці, super-admin)  │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──────────┐  ┌──────────────┐  ┌────────────────────┐   │
+│  │ Incidents│  │ Auto-Heal Log│  │ Health Dashboard   │   │
+│  │  Queue   │  │  (last 100)  │  │ (5 modules status) │   │
+│  └──────────┘  └──────────────┘  └────────────────────┘   │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐  │
+│  │  Pending Proposals (потребують Apply від адміна)    │  │
+│  └─────────────────────────────────────────────────────┘  │
+│                                                             │
+│  [▶ Run Cycle Now]  [⏸ Auto-Heal: ON/OFF]  [⚙ Rules]      │
+└─────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+        POST /hooks/agents/self-heal-engine
+                          │
+            ┌─────────────┼─────────────┐
+            ▼             ▼             ▼
+       DETECT         ANALYZE       APPLY/PROPOSE
+     (читає 6+      (групує в      (whitelist
+      таблиць)       INC-XXXX)      dії, лог)
+                          │
+                          ▼
+               self_heal_incidents (нова таблиця)
+               self_heal_actions   (нова таблиця)
+```
 
-## Перевірка після впровадження
-1. Створити новий бренд як звичайний користувач → бачимо банер «Очікує верифікації» → інтеграції недоступні.
-2. Адмін верифікує → відкриваємо `/brand/integrations` → DN Trade → вводимо невірний ключ → отримуємо «DN Trade відхилив ключ».
-3. Вводимо валідний ключ → автоматично відкривається manage-діалог → запускаємо повний sync → в журналі імпортів зʼявляється рядок `running` → потім `completed`.
-4. Перевіряємо Shopify з фейковим доменом → отримуємо «домен має бути публічним https://».
-5. Webhook (Zapier) — копіюємо URL/secret одразу на кроці 1, без зайвого збереження.
+---
 
+## Що буду робити (по кроках)
+
+### 1. БД (міграція)
+- `self_heal_incidents` — `id, tenant_id, code, severity (p0-p3), title, root_cause, scope_json, regression_risk, status (open|fixing|fixed|blocked|monitoring), created_at, resolved_at`
+- `self_heal_actions` — `id, incident_id, kind, payload_json, decision (apply|propose|block|monitor), applied_at, applied_by, reversible, revert_payload`
+- `self_heal_settings` — `key, value` (auto-heal on/off, allowed kinds, severity-threshold)
+- RLS: лише super_admin читає/пише.
+
+### 2. Бекенд-движок
+- **`POST /hooks/agents/self-heal-engine`** — головний цикл. Авторизація: cron-token АБО super_admin JWT. Запускає всі детектори по черзі, створює інциденти, виконує whitelist auto-heal дії.
+- **`POST /hooks/agents/self-heal-apply`** — застосовує конкретну `propose`-дію після кліку адміна.
+- **`POST /hooks/agents/self-heal-revert`** — відкочує дію (зберігаємо `revert_payload`).
+- pg_cron щохвилини викликає engine (як `agents.tick`).
+
+### 3. Детектори (в `src/lib/self-heal/detectors/`)
+Кожен — чиста функція `(tenantId) → Incident[]`:
+- `outreachFailures.ts` — transient fails → reschedule
+- `agentRunsStuck.ts` — `running` >30хв → reset
+- `agentRunsFailing.ts` — 5 fails поспіль → kill-switch
+- `dntradeStale.ts` — sync >24h → propose re-sync
+- `emailBounces.ts` — bounce-rate >5% → propose pause sender
+- `ordersStuck.ts` — `pending` >48h → flag for review
+- `balanceDepleted.ts` — balance <0 → propose top-up reminder
+- `rlsErrors.ts` — читає postgres_logs за останню годину
+
+### 4. Auto-Heal Engine (`src/lib/self-heal/engine.ts`)
+- `runCycle()` — викликає всі детектори, dedupe по `code+scope`, для кожного інциденту → `decideAction()`.
+- `decideAction()` — логіка APPLY/PROPOSE/BLOCK/MONITOR на основі severity + regression risk + whitelist.
+- Whitelist (auto-apply без аппрува): `reschedule_outreach`, `reset_stuck_agent_run`, `kill_failing_agent`, `cleanup_expired_notifications`. Все інше → PROPOSE.
+
+### 5. UI — `src/routes/_authenticated/admin.self-heal.tsx`
+- **Health Dashboard** — 5 карток (Detector / Root Cause / Isolation / Auto-Fix / Regression Guard) зі статусом OK/WARN/FAIL.
+- **Incidents Queue** — таблиця активних інцидентів (severity badge, root cause, scope, кнопки Apply/Block/Revert).
+- **Auto-Heal Log** — останні 100 виконаних дій з кнопкою "Revert".
+- **Pending Proposals** — окремий список з action-кнопками.
+- **Settings panel** — toggle Auto-Heal ON/OFF, вибір allowed kinds, severity threshold.
+- Realtime — підписка на `self_heal_incidents` через Supabase channel.
+- Доступ: `useAuth().isSuperAdmin === true` (інакше redirect на `/admin`).
+
+### 6. Інтеграція в адмінку
+- Додаю пункт "🛡 Self-Heal" в `AppSidebar` (admin-секція).
+- Лінк з `admin.health.tsx` (поточний health monitor) — "Open Self-Heal".
+- Toast у `InsightToasts` коли створюється P0/P1 інцидент.
+
+---
+
+## Безпека (Zero-Breakage Rule)
+- Кожна auto-apply дія має **revert_payload** (відкат одним кліком).
+- Whitelist жорстко зашитий у код — не редагується з UI.
+- BLOCK при `regression_risk = HIGH` — нічого не робиться, лише логується.
+- Dedupe — повторний інцидент того ж `code+scope` за 1h не створює нову auto-apply дію.
+- Kill-switch на всю систему: один toggle вимикає все автоматичне виконання.
+- RLS на всіх 3 нових таблицях — тільки super_admin.
+
+---
+
+## Що відразу буде працювати
+- Перепланування завислих outreach-повідомлень
+- Авто-пауза каналу що масово фейлить
+- Reset застряглих агент-ранів
+- Kill-switch для агентів-рецидивістів
+- Алерти про stale dntrade sync, bounce-spike, depleted balance
+- Повний audit log з можливістю revert
+
+## Що залишиться ручним (PROPOSE)
+- Зміни тарифів, балансів, прав
+- Масові апдейти БД
+- Все що чіпає юзерські дані напряму
+
+## Файли (новостворені)
+- Міграція БД (3 таблиці + RLS)
+- `src/lib/self-heal/engine.ts`
+- `src/lib/self-heal/detectors/*.ts` (8 файлів)
+- `src/lib/self-heal/actions.ts` (whitelist + executors)
+- `src/routes/hooks/agents.self-heal-engine.ts`
+- `src/routes/hooks/agents.self-heal-apply.ts`
+- `src/routes/hooks/agents.self-heal-revert.ts`
+- `src/routes/_authenticated/admin.self-heal.tsx`
+- `src/components/admin/SelfHealDashboard.tsx`
+- `src/components/admin/SelfHealIncidentsQueue.tsx`
+- `src/components/admin/SelfHealActionsLog.tsx`
+- Edit: `src/components/layout/AppSidebar.tsx` (+1 пункт меню)
+
+Орієнтовно ~1500 LOC. Це великий, але цільний шматок — за один прохід зроблю кістяк (міграція + engine + 3 ключові детектори + UI), далі додам решту детекторів інкрементально, щоб нічого не зламати.

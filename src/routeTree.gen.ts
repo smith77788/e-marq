@@ -73,6 +73,9 @@ import { Route as HooksAgentsSocialProofLiveRouteImport } from './routes/hooks/a
 import { Route as HooksAgentsSocialEngagerRouteImport } from './routes/hooks/agents.social-engager'
 import { Route as HooksAgentsShippingOptimizerRouteImport } from './routes/hooks/agents.shipping-optimizer'
 import { Route as HooksAgentsSeoRewriterRouteImport } from './routes/hooks/agents.seo-rewriter'
+import { Route as HooksAgentsSelfHealRevertRouteImport } from './routes/hooks/agents.self-heal-revert'
+import { Route as HooksAgentsSelfHealEngineRouteImport } from './routes/hooks/agents.self-heal-engine'
+import { Route as HooksAgentsSelfHealApplyRouteImport } from './routes/hooks/agents.self-heal-apply'
 import { Route as HooksAgentsSegmentationRouteImport } from './routes/hooks/agents.segmentation'
 import { Route as HooksAgentsSecondOrderNurtureRouteImport } from './routes/hooks/agents.second-order-nurture'
 import { Route as HooksAgentsSeasonalityDetectorRouteImport } from './routes/hooks/agents.seasonality-detector'
@@ -193,6 +196,7 @@ import { Route as AuthenticatedAgentsAgentIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminTopupRequestsRouteImport } from './routes/_authenticated/admin.topup-requests'
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin.tenants'
+import { Route as AuthenticatedAdminSelfHealRouteImport } from './routes/_authenticated/admin.self-heal'
 import { Route as AuthenticatedAdminPlansRouteImport } from './routes/_authenticated/admin.plans'
 import { Route as AuthenticatedAdminPermissionsRouteImport } from './routes/_authenticated/admin.permissions'
 import { Route as AuthenticatedAdminOverviewRouteImport } from './routes/_authenticated/admin.overview'
@@ -564,6 +568,24 @@ const HooksAgentsSeoRewriterRoute = HooksAgentsSeoRewriterRouteImport.update({
   path: '/hooks/agents/seo-rewriter',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksAgentsSelfHealRevertRoute =
+  HooksAgentsSelfHealRevertRouteImport.update({
+    id: '/hooks/agents/self-heal-revert',
+    path: '/hooks/agents/self-heal-revert',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsSelfHealEngineRoute =
+  HooksAgentsSelfHealEngineRouteImport.update({
+    id: '/hooks/agents/self-heal-engine',
+    path: '/hooks/agents/self-heal-engine',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsSelfHealApplyRoute =
+  HooksAgentsSelfHealApplyRouteImport.update({
+    id: '/hooks/agents/self-heal-apply',
+    path: '/hooks/agents/self-heal-apply',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HooksAgentsSegmentationRoute = HooksAgentsSegmentationRouteImport.update({
   id: '/hooks/agents/segmentation',
   path: '/hooks/agents/segmentation',
@@ -1237,6 +1259,12 @@ const AuthenticatedAdminTenantsRoute =
     path: '/admin/tenants',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAdminSelfHealRoute =
+  AuthenticatedAdminSelfHealRouteImport.update({
+    id: '/admin/self-heal',
+    path: '/admin/self-heal',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminPlansRoute = AuthenticatedAdminPlansRouteImport.update({
   id: '/admin/plans',
   path: '/admin/plans',
@@ -1465,6 +1493,7 @@ export interface FileRoutesByFullPath {
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/admin/permissions': typeof AuthenticatedAdminPermissionsRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
+  '/admin/self-heal': typeof AuthenticatedAdminSelfHealRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/admin/topup-requests': typeof AuthenticatedAdminTopupRequestsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -1585,6 +1614,9 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/seasonality-detector': typeof HooksAgentsSeasonalityDetectorRoute
   '/hooks/agents/second-order-nurture': typeof HooksAgentsSecondOrderNurtureRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
+  '/hooks/agents/self-heal-apply': typeof HooksAgentsSelfHealApplyRoute
+  '/hooks/agents/self-heal-engine': typeof HooksAgentsSelfHealEngineRoute
+  '/hooks/agents/self-heal-revert': typeof HooksAgentsSelfHealRevertRoute
   '/hooks/agents/seo-rewriter': typeof HooksAgentsSeoRewriterRoute
   '/hooks/agents/shipping-optimizer': typeof HooksAgentsShippingOptimizerRoute
   '/hooks/agents/social-engager': typeof HooksAgentsSocialEngagerRoute
@@ -1683,6 +1715,7 @@ export interface FileRoutesByTo {
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/admin/permissions': typeof AuthenticatedAdminPermissionsRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
+  '/admin/self-heal': typeof AuthenticatedAdminSelfHealRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/admin/topup-requests': typeof AuthenticatedAdminTopupRequestsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -1803,6 +1836,9 @@ export interface FileRoutesByTo {
   '/hooks/agents/seasonality-detector': typeof HooksAgentsSeasonalityDetectorRoute
   '/hooks/agents/second-order-nurture': typeof HooksAgentsSecondOrderNurtureRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
+  '/hooks/agents/self-heal-apply': typeof HooksAgentsSelfHealApplyRoute
+  '/hooks/agents/self-heal-engine': typeof HooksAgentsSelfHealEngineRoute
+  '/hooks/agents/self-heal-revert': typeof HooksAgentsSelfHealRevertRoute
   '/hooks/agents/seo-rewriter': typeof HooksAgentsSeoRewriterRoute
   '/hooks/agents/shipping-optimizer': typeof HooksAgentsShippingOptimizerRoute
   '/hooks/agents/social-engager': typeof HooksAgentsSocialEngagerRoute
@@ -1904,6 +1940,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/overview': typeof AuthenticatedAdminOverviewRoute
   '/_authenticated/admin/permissions': typeof AuthenticatedAdminPermissionsRoute
   '/_authenticated/admin/plans': typeof AuthenticatedAdminPlansRoute
+  '/_authenticated/admin/self-heal': typeof AuthenticatedAdminSelfHealRoute
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRouteWithChildren
   '/_authenticated/admin/topup-requests': typeof AuthenticatedAdminTopupRequestsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -2024,6 +2061,9 @@ export interface FileRoutesById {
   '/hooks/agents/seasonality-detector': typeof HooksAgentsSeasonalityDetectorRoute
   '/hooks/agents/second-order-nurture': typeof HooksAgentsSecondOrderNurtureRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
+  '/hooks/agents/self-heal-apply': typeof HooksAgentsSelfHealApplyRoute
+  '/hooks/agents/self-heal-engine': typeof HooksAgentsSelfHealEngineRoute
+  '/hooks/agents/self-heal-revert': typeof HooksAgentsSelfHealRevertRoute
   '/hooks/agents/seo-rewriter': typeof HooksAgentsSeoRewriterRoute
   '/hooks/agents/shipping-optimizer': typeof HooksAgentsShippingOptimizerRoute
   '/hooks/agents/social-engager': typeof HooksAgentsSocialEngagerRoute
@@ -2125,6 +2165,7 @@ export interface FileRouteTypes {
     | '/admin/overview'
     | '/admin/permissions'
     | '/admin/plans'
+    | '/admin/self-heal'
     | '/admin/tenants'
     | '/admin/topup-requests'
     | '/admin/users'
@@ -2245,6 +2286,9 @@ export interface FileRouteTypes {
     | '/hooks/agents/seasonality-detector'
     | '/hooks/agents/second-order-nurture'
     | '/hooks/agents/segmentation'
+    | '/hooks/agents/self-heal-apply'
+    | '/hooks/agents/self-heal-engine'
+    | '/hooks/agents/self-heal-revert'
     | '/hooks/agents/seo-rewriter'
     | '/hooks/agents/shipping-optimizer'
     | '/hooks/agents/social-engager'
@@ -2343,6 +2387,7 @@ export interface FileRouteTypes {
     | '/admin/overview'
     | '/admin/permissions'
     | '/admin/plans'
+    | '/admin/self-heal'
     | '/admin/tenants'
     | '/admin/topup-requests'
     | '/admin/users'
@@ -2463,6 +2508,9 @@ export interface FileRouteTypes {
     | '/hooks/agents/seasonality-detector'
     | '/hooks/agents/second-order-nurture'
     | '/hooks/agents/segmentation'
+    | '/hooks/agents/self-heal-apply'
+    | '/hooks/agents/self-heal-engine'
+    | '/hooks/agents/self-heal-revert'
     | '/hooks/agents/seo-rewriter'
     | '/hooks/agents/shipping-optimizer'
     | '/hooks/agents/social-engager'
@@ -2563,6 +2611,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/overview'
     | '/_authenticated/admin/permissions'
     | '/_authenticated/admin/plans'
+    | '/_authenticated/admin/self-heal'
     | '/_authenticated/admin/tenants'
     | '/_authenticated/admin/topup-requests'
     | '/_authenticated/admin/users'
@@ -2683,6 +2732,9 @@ export interface FileRouteTypes {
     | '/hooks/agents/seasonality-detector'
     | '/hooks/agents/second-order-nurture'
     | '/hooks/agents/segmentation'
+    | '/hooks/agents/self-heal-apply'
+    | '/hooks/agents/self-heal-engine'
+    | '/hooks/agents/self-heal-revert'
     | '/hooks/agents/seo-rewriter'
     | '/hooks/agents/shipping-optimizer'
     | '/hooks/agents/social-engager'
@@ -2873,6 +2925,9 @@ export interface RootRouteChildren {
   HooksAgentsSeasonalityDetectorRoute: typeof HooksAgentsSeasonalityDetectorRoute
   HooksAgentsSecondOrderNurtureRoute: typeof HooksAgentsSecondOrderNurtureRoute
   HooksAgentsSegmentationRoute: typeof HooksAgentsSegmentationRoute
+  HooksAgentsSelfHealApplyRoute: typeof HooksAgentsSelfHealApplyRoute
+  HooksAgentsSelfHealEngineRoute: typeof HooksAgentsSelfHealEngineRoute
+  HooksAgentsSelfHealRevertRoute: typeof HooksAgentsSelfHealRevertRoute
   HooksAgentsSeoRewriterRoute: typeof HooksAgentsSeoRewriterRoute
   HooksAgentsShippingOptimizerRoute: typeof HooksAgentsShippingOptimizerRoute
   HooksAgentsSocialEngagerRoute: typeof HooksAgentsSocialEngagerRoute
@@ -3376,6 +3431,27 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/seo-rewriter'
       fullPath: '/hooks/agents/seo-rewriter'
       preLoaderRoute: typeof HooksAgentsSeoRewriterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/self-heal-revert': {
+      id: '/hooks/agents/self-heal-revert'
+      path: '/hooks/agents/self-heal-revert'
+      fullPath: '/hooks/agents/self-heal-revert'
+      preLoaderRoute: typeof HooksAgentsSelfHealRevertRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/self-heal-engine': {
+      id: '/hooks/agents/self-heal-engine'
+      path: '/hooks/agents/self-heal-engine'
+      fullPath: '/hooks/agents/self-heal-engine'
+      preLoaderRoute: typeof HooksAgentsSelfHealEngineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/self-heal-apply': {
+      id: '/hooks/agents/self-heal-apply'
+      path: '/hooks/agents/self-heal-apply'
+      fullPath: '/hooks/agents/self-heal-apply'
+      preLoaderRoute: typeof HooksAgentsSelfHealApplyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/segmentation': {
@@ -4218,6 +4294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTenantsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/self-heal': {
+      id: '/_authenticated/admin/self-heal'
+      path: '/admin/self-heal'
+      fullPath: '/admin/self-heal'
+      preLoaderRoute: typeof AuthenticatedAdminSelfHealRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/plans': {
       id: '/_authenticated/admin/plans'
       path: '/admin/plans'
@@ -4515,6 +4598,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminOverviewRoute: typeof AuthenticatedAdminOverviewRoute
   AuthenticatedAdminPermissionsRoute: typeof AuthenticatedAdminPermissionsRoute
   AuthenticatedAdminPlansRoute: typeof AuthenticatedAdminPlansRoute
+  AuthenticatedAdminSelfHealRoute: typeof AuthenticatedAdminSelfHealRoute
   AuthenticatedAdminTenantsRoute: typeof AuthenticatedAdminTenantsRouteWithChildren
   AuthenticatedAdminTopupRequestsRoute: typeof AuthenticatedAdminTopupRequestsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
@@ -4551,6 +4635,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminOverviewRoute: AuthenticatedAdminOverviewRoute,
   AuthenticatedAdminPermissionsRoute: AuthenticatedAdminPermissionsRoute,
   AuthenticatedAdminPlansRoute: AuthenticatedAdminPlansRoute,
+  AuthenticatedAdminSelfHealRoute: AuthenticatedAdminSelfHealRoute,
   AuthenticatedAdminTenantsRoute: AuthenticatedAdminTenantsRouteWithChildren,
   AuthenticatedAdminTopupRequestsRoute: AuthenticatedAdminTopupRequestsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
@@ -4740,6 +4825,9 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsSeasonalityDetectorRoute: HooksAgentsSeasonalityDetectorRoute,
   HooksAgentsSecondOrderNurtureRoute: HooksAgentsSecondOrderNurtureRoute,
   HooksAgentsSegmentationRoute: HooksAgentsSegmentationRoute,
+  HooksAgentsSelfHealApplyRoute: HooksAgentsSelfHealApplyRoute,
+  HooksAgentsSelfHealEngineRoute: HooksAgentsSelfHealEngineRoute,
+  HooksAgentsSelfHealRevertRoute: HooksAgentsSelfHealRevertRoute,
   HooksAgentsSeoRewriterRoute: HooksAgentsSeoRewriterRoute,
   HooksAgentsShippingOptimizerRoute: HooksAgentsShippingOptimizerRoute,
   HooksAgentsSocialEngagerRoute: HooksAgentsSocialEngagerRoute,

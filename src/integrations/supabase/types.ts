@@ -4005,6 +4005,146 @@ export type Database = {
           },
         ]
       }
+      self_heal_actions: {
+        Row: {
+          applied_at: string | null
+          applied_by: string | null
+          created_at: string
+          decision: string
+          id: string
+          incident_id: string | null
+          kind: string
+          payload_json: Json
+          result_text: string | null
+          reversible: boolean
+          revert_payload: Json | null
+          reverted_at: string | null
+          reverted_by: string | null
+          status: string
+        }
+        Insert: {
+          applied_at?: string | null
+          applied_by?: string | null
+          created_at?: string
+          decision: string
+          id?: string
+          incident_id?: string | null
+          kind: string
+          payload_json?: Json
+          result_text?: string | null
+          reversible?: boolean
+          revert_payload?: Json | null
+          reverted_at?: string | null
+          reverted_by?: string | null
+          status?: string
+        }
+        Update: {
+          applied_at?: string | null
+          applied_by?: string | null
+          created_at?: string
+          decision?: string
+          id?: string
+          incident_id?: string | null
+          kind?: string
+          payload_json?: Json
+          result_text?: string | null
+          reversible?: boolean
+          revert_payload?: Json | null
+          reverted_at?: string | null
+          reverted_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "self_heal_actions_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "self_heal_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      self_heal_incidents: {
+        Row: {
+          created_at: string
+          detector: string
+          fingerprint: string
+          first_seen_at: string
+          id: string
+          inc_code: string
+          last_seen_at: string
+          occurrences: number
+          regression_risk: string
+          resolved_at: string | null
+          root_cause: string | null
+          scope_json: Json
+          severity: string
+          status: string
+          tenant_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          detector: string
+          fingerprint: string
+          first_seen_at?: string
+          id?: string
+          inc_code: string
+          last_seen_at?: string
+          occurrences?: number
+          regression_risk?: string
+          resolved_at?: string | null
+          root_cause?: string | null
+          scope_json?: Json
+          severity: string
+          status?: string
+          tenant_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          detector?: string
+          fingerprint?: string
+          first_seen_at?: string
+          id?: string
+          inc_code?: string
+          last_seen_at?: string
+          occurrences?: number
+          regression_risk?: string
+          resolved_at?: string | null
+          root_cause?: string | null
+          scope_json?: Json
+          severity?: string
+          status?: string
+          tenant_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      self_heal_settings: {
+        Row: {
+          description: string | null
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          description?: string | null
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       site_brand_profiles: {
         Row: {
           about_copy: string | null
