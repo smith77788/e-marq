@@ -137,7 +137,11 @@ async function callBridge<T>(path: string, payload: unknown): Promise<BridgeResu
 
   const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
   if (res.status === 401 || res.status === 403) {
-    return { ok: false, code: "bridge_unauthorized", message: String(json.error ?? "unauthorized") };
+    return {
+      ok: false,
+      code: "bridge_unauthorized",
+      message: String(json.error ?? "unauthorized"),
+    };
   }
   if (!res.ok || json.ok === false) {
     const code = String(json.code ?? "bridge_error") as BridgeError["code"];
@@ -221,9 +225,6 @@ export function decryptSession(payload: string): string {
   if (!ivB64 || !encB64 || !tagB64) throw new Error("invalid_session_payload");
   const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(ivB64, "base64"));
   decipher.setAuthTag(Buffer.from(tagB64, "base64"));
-  const dec = Buffer.concat([
-    decipher.update(Buffer.from(encB64, "base64")),
-    decipher.final(),
-  ]);
+  const dec = Buffer.concat([decipher.update(Buffer.from(encB64, "base64")), decipher.final()]);
   return dec.toString("utf8");
 }

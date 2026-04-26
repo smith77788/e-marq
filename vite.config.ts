@@ -11,10 +11,7 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
-        "@radix-ui/react-slot": path.resolve(
-          process.cwd(),
-          "node_modules/@radix-ui/react-slot",
-        ),
+        "@radix-ui/react-slot": path.resolve(process.cwd(), "node_modules/@radix-ui/react-slot"),
       },
     },
     optimizeDeps: {

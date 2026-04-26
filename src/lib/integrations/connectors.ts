@@ -224,7 +224,8 @@ async function pullStripe(input: ConnectorPullInput): Promise<ConnectorPullResul
   }
 
   const resource = input.entityKind === "customers" ? "customers" : "charges";
-  const expand = resource === "charges" ? "&expand[]=data.customer&expand[]=data.billing_details" : "";
+  const expand =
+    resource === "charges" ? "&expand[]=data.customer&expand[]=data.billing_details" : "";
   const url = `https://api.stripe.com/v1/${resource}?limit=${limit}${expand}`;
   const res = await safeFetch(url, { headers: { Authorization: `Bearer ${key}` } });
   if (!res.ok) {
@@ -498,7 +499,8 @@ async function pullDnTrade(input: ConnectorPullInput): Promise<ConnectorPullResu
   const resp = await listOrders(apiKey, { limit, offset: 0 });
   const items = unwrapList<DnOrder>(resp, "orders").slice(0, limit);
   const rows: ParsedRow[] = items.map((o) => ({
-    customer_name: asString(o.personal_info?.name) || `Замовлення #${asString(o.number ?? o.external_id)}`,
+    customer_name:
+      asString(o.personal_info?.name) || `Замовлення #${asString(o.number ?? o.external_id)}`,
     customer_email: "",
     total_cents: centsFromMajor(o.total ?? o.amount),
     currency: "UAH",
@@ -547,7 +549,9 @@ function humanizeConnectorError(err: unknown): Error {
     );
   }
   if (/Невалідний URL/i.test(raw)) {
-    return new Error("Некоректний URL. Перевірте, що адреса починається з https:// і містить домен.");
+    return new Error(
+      "Некоректний URL. Перевірте, що адреса починається з https:// і містить домен.",
+    );
   }
   if (/Заборонено облікові дані в URL/i.test(raw)) {
     return new Error("Не вставляйте логін/пароль у URL. Передавайте ключ окремим полем.");

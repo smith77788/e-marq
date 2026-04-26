@@ -107,18 +107,15 @@ export const Route = createFileRoute("/api/integrations/verify/$provider")({
                 400,
               );
             if (integ) {
-              credentials = credentials ?? (integ.credentials_encrypted ?? undefined);
-              config = config ?? ((integ.config as Record<string, unknown>) ?? {});
+              credentials = credentials ?? integ.credentials_encrypted ?? undefined;
+              config = config ?? (integ.config as Record<string, unknown>) ?? {};
             }
           }
 
           // DN Trade — окремий легкий verify через /products/stores (без pull).
           if (provider === "dntrade") {
             if (!credentials) {
-              return jsonResponse(
-                { ok: false, error: "Введіть ApiKey DN Trade." },
-                400,
-              );
+              return jsonResponse({ ok: false, error: "Введіть ApiKey DN Trade." }, 400);
             }
             const r = await verifyDnTradeKey(credentials);
             if (r.ok) return jsonResponse({ ok: true, sample: 1 });

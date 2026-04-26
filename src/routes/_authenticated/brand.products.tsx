@@ -142,12 +142,13 @@ function BrandProductsPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["brand-products", effectiveTenantId] });
+  const invalidate = () =>
+    qc.invalidateQueries({ queryKey: ["brand-products", effectiveTenantId] });
 
   const createMutation = useMutation({
     mutationFn: async (values: ProductFormValues) => {
-        const { error } = await supabase.from("products").insert({
-          tenant_id: effectiveTenantId!,
+      const { error } = await supabase.from("products").insert({
+        tenant_id: effectiveTenantId!,
         name: values.name,
         sku: values.sku || null,
         price_cents: values.price_cents,

@@ -130,9 +130,7 @@ function IntegrationsHubPage() {
       if (!token) throw new Error("Сесія не знайдена");
       // DN Trade — повноцінний pipeline (incremental, mapping_errors).
       const isDn = provider === "dntrade";
-      const url = isDn
-        ? `/hooks/integrations/dntrade-sync`
-        : `/api/integrations/sync/${provider}`;
+      const url = isDn ? `/hooks/integrations/dntrade-sync` : `/api/integrations/sync/${provider}`;
       const body = isDn
         ? { tenant_id: currentTenantId, kinds: [entity] }
         : { entityKind: entity, tenantId: currentTenantId };

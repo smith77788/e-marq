@@ -33,10 +33,10 @@ export const Route = createFileRoute("/api/telegram/user/sign-in")({
           .eq("tenant_id", tenantId)
           .maybeSingle();
         const phone = (existing as { phone?: string } | null)?.phone ?? "";
-        const loginState =
-          ((existing as { login_state?: Record<string, unknown> } | null)?.login_state ?? {}) as {
-            phone_code_hash?: string;
-          };
+        const loginState = ((existing as { login_state?: Record<string, unknown> } | null)
+          ?.login_state ?? {}) as {
+          phone_code_hash?: string;
+        };
         const hash = loginState.phone_code_hash ?? "";
         if (!phone || !hash) return jsonResponse({ error: "no_pending_code" }, 400);
 

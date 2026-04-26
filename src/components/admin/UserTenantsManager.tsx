@@ -124,9 +124,7 @@ export function UserTenantsManager({ userId }: { userId: string }) {
   }
   const tenants = tenantsQuery.data ?? [];
   if (tenants.length === 0) {
-    return (
-      <p className="text-xs text-muted-foreground">У цього користувача немає брендів.</p>
-    );
+    return <p className="text-xs text-muted-foreground">У цього користувача немає брендів.</p>;
   }
 
   return (
@@ -138,9 +136,7 @@ export function UserTenantsManager({ userId }: { userId: string }) {
           plans={plansQuery.data ?? []}
           onChangePlan={(planKey) => changePlan.mutate({ tenantId: t.tenant_id, planKey })}
           onAdjustCredits={(delta) => adjustCredits.mutate({ tenantId: t.tenant_id, delta })}
-          onAdjustMoney={(deltaCents) =>
-            adjustMoney.mutate({ tenantId: t.tenant_id, deltaCents })
-          }
+          onAdjustMoney={(deltaCents) => adjustMoney.mutate({ tenantId: t.tenant_id, deltaCents })}
           busy={changePlan.isPending || adjustCredits.isPending || adjustMoney.isPending}
           canChangePlan={canChangePlan}
           canManageUsers={canManageUsers}

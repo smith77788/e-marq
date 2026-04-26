@@ -95,7 +95,8 @@ function pickStr(o: Json | null, k: string, fallback = ""): string {
 function StoreSettingsPage() {
   const { tenant: urlTenant } = useSearch({ from: "/_authenticated/brand/settings" });
   const { current, currentTenantId, setCurrentTenantId, tenants } = useTenantContext();
-  const tenantId = urlTenant ?? currentTenantId ?? current?.tenant_id ?? tenants[0]?.tenant_id ?? null;
+  const tenantId =
+    urlTenant ?? currentTenantId ?? current?.tenant_id ?? tenants[0]?.tenant_id ?? null;
   const qc = useQueryClient();
   const [form, setForm] = useState<StoreForm>(DEFAULTS);
 

@@ -340,10 +340,7 @@ function AdminTenantsPage() {
                             Дії
                           </Button>
                           <Button asChild size="sm" variant="ghost">
-                            <Link
-                              to="/admin/tenants/$tenantId"
-                              params={{ tenantId: t.tenant_id }}
-                            >
+                            <Link to="/admin/tenants/$tenantId" params={{ tenantId: t.tenant_id }}>
                               Деталі
                               <ExternalLink className="ml-1 h-3 w-3" />
                             </Link>

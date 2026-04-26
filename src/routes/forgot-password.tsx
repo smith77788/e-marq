@@ -50,9 +50,7 @@ function ForgotPasswordPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>{t("auth.resetTitle")}</CardTitle>
-          <CardDescription>
-            {sent ? t("auth.resetSent") : t("auth.resetDesc")}
-          </CardDescription>
+          <CardDescription>{sent ? t("auth.resetSent") : t("auth.resetDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {!sent && (

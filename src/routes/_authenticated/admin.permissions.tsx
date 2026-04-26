@@ -124,9 +124,7 @@ function AdminPermissionsPage() {
         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
           Безпека · ролі
         </p>
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Права адміністраторів
-        </h1>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Права адміністраторів</h1>
         <p className="text-sm text-muted-foreground">
           Видавайте лише ті права, які потрібні для роботи. Super-admin завжди має повний доступ.
         </p>
@@ -178,13 +176,9 @@ function AdminPermissionsPage() {
                     <TableRow key={u.user_id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          {u.is_super_admin && (
-                            <Crown className="h-3.5 w-3.5 text-primary" />
-                          )}
+                          {u.is_super_admin && <Crown className="h-3.5 w-3.5 text-primary" />}
                           <div className="min-w-0">
-                            <div className="text-sm font-medium">
-                              {u.email ?? "—"}
-                            </div>
+                            <div className="text-sm font-medium">{u.email ?? "—"}</div>
                             <div className="flex items-center gap-1.5">
                               {u.is_super_admin && (
                                 <Badge variant="secondary" className="text-[10px]">
@@ -201,18 +195,15 @@ function AdminPermissionsPage() {
                         </div>
                       </TableCell>
                       {caps.map((c) => {
-                        const enabled =
-                          u.is_super_admin || (u.capabilities ?? []).includes(c.key);
+                        const enabled = u.is_super_admin || (u.capabilities ?? []).includes(c.key);
                         return (
                           <TableCell key={c.key} className="text-center">
                             <Switch
                               checked={enabled}
                               disabled={u.is_super_admin || grant.isPending || revoke.isPending}
                               onCheckedChange={(next) => {
-                                if (next)
-                                  grant.mutate({ userId: u.user_id, cap: c.key });
-                                else
-                                  revoke.mutate({ userId: u.user_id, cap: c.key });
+                                if (next) grant.mutate({ userId: u.user_id, cap: c.key });
+                                else revoke.mutate({ userId: u.user_id, cap: c.key });
                               }}
                             />
                           </TableCell>
@@ -222,7 +213,10 @@ function AdminPermissionsPage() {
                   ))}
                   {users.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={caps.length + 1} className="text-center text-sm text-muted-foreground">
+                      <TableCell
+                        colSpan={caps.length + 1}
+                        className="text-center text-sm text-muted-foreground"
+                      >
                         {search ? "Користувачів не знайдено." : "Користувачів ще немає."}
                       </TableCell>
                     </TableRow>

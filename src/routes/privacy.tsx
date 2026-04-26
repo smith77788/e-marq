@@ -52,8 +52,8 @@ function PrivacyUA() {
           <strong>Дані бренду:</strong> назва, slug, налаштування магазину, інтеграції.
         </li>
         <li>
-          <strong>Бізнес-дані:</strong> товари, клієнти, замовлення, події, які ви завантажуєте
-          або які надходять через інтеграції.
+          <strong>Бізнес-дані:</strong> товари, клієнти, замовлення, події, які ви завантажуєте або
+          які надходять через інтеграції.
         </li>
         <li>
           <strong>Технічні логи:</strong> час доступу, тип браузера, помилки — для діагностики.
@@ -72,14 +72,12 @@ function PrivacyUA() {
       <h2>3. Хто має доступ</h2>
       <p>
         Доступ до ваших даних мають лише: ви та запрошені члени вашої команди; обмежене коло
-        інженерів MARQ виключно для технічної підтримки за вашим явним запитом; підрядники
-        обробки даних (хостинг, email-провайдер) — на умовах конфіденційності.
+        інженерів MARQ виключно для технічної підтримки за вашим явним запитом; підрядники обробки
+        даних (хостинг, email-провайдер) — на умовах конфіденційності.
       </p>
 
       <h2>4. Передача третім сторонам</h2>
-      <p>
-        Ми не продаємо й не передаємо ваші дані для маркетингу. Ми використовуємо такі сервіси:
-      </p>
+      <p>Ми не продаємо й не передаємо ваші дані для маркетингу. Ми використовуємо такі сервіси:</p>
       <ul>
         <li>Хостинг бази даних та edge-функцій (Supabase / Cloudflare).</li>
         <li>OAuth-провайдер Google для входу.</li>
@@ -89,8 +87,8 @@ function PrivacyUA() {
 
       <h2>5. Зберігання та видалення</h2>
       <p>
-        Дані зберігаються доки активний акаунт. Після закриття акаунту дані видаляються протягом
-        30 днів, окрім того, що вимагає податкове законодавство (виставлені рахунки).
+        Дані зберігаються доки активний акаунт. Після закриття акаунту дані видаляються протягом 30
+        днів, окрім того, що вимагає податкове законодавство (виставлені рахунки).
       </p>
 
       <h2>6. Ваші права (GDPR / UA)</h2>
@@ -118,8 +116,8 @@ function PrivacyUA() {
 
       <h2>9. Зміни цієї політики</h2>
       <p>
-        Про істотні зміни ми повідомимо на email за 14 днів. Поточна версія завжди доступна на
-        цій сторінці.
+        Про істотні зміни ми повідомимо на email за 14 днів. Поточна версія завжди доступна на цій
+        сторінці.
       </p>
     </>
   );
@@ -137,8 +135,8 @@ function PrivacyEN() {
           <strong>Brand data:</strong> name, slug, store settings, integrations.
         </li>
         <li>
-          <strong>Business data:</strong> products, customers, orders, events you upload or
-          receive via integrations.
+          <strong>Business data:</strong> products, customers, orders, events you upload or receive
+          via integrations.
         </li>
         <li>
           <strong>Technical logs:</strong> access time, browser type, errors — for diagnostics.
@@ -172,8 +170,8 @@ function PrivacyEN() {
 
       <h2>5. Retention and deletion</h2>
       <p>
-        Data is retained while the account is active. After closure, data is deleted within 30
-        days, except where tax law requires retention (issued invoices).
+        Data is retained while the account is active. After closure, data is deleted within 30 days,
+        except where tax law requires retention (issued invoices).
       </p>
 
       <h2>6. Your rights (GDPR)</h2>
@@ -201,8 +199,8 @@ function PrivacyEN() {
 
       <h2>9. Changes to this policy</h2>
       <p>
-        Material changes are communicated by email at least 14 days in advance. The current
-        version is always available on this page.
+        Material changes are communicated by email at least 14 days in advance. The current version
+        is always available on this page.
       </p>
     </>
   );

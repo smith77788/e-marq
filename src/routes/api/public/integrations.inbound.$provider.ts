@@ -149,9 +149,7 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
                   metadata: { import_source: provider, import_job_id: job.id },
                 };
                 const q = sku
-                  ? supabaseAdmin
-                      .from("products")
-                      .upsert(payload, { onConflict: "tenant_id,sku" })
+                  ? supabaseAdmin.from("products").upsert(payload, { onConflict: "tenant_id,sku" })
                   : supabaseAdmin.from("products").insert(payload);
                 const { error } = await q;
                 if (error) {

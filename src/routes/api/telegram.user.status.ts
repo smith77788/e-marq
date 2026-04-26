@@ -22,9 +22,7 @@ type SessionRow = {
 async function readSession(tenantId: string): Promise<SessionRow | null> {
   const { data } = await supabaseAdmin
     .from("tg_user_sessions")
-    .select(
-      "id,status,phone,user_id_tg,username,first_name,encrypted_session,dc_id,last_used_at",
-    )
+    .select("id,status,phone,user_id_tg,username,first_name,encrypted_session,dc_id,last_used_at")
     .eq("tenant_id", tenantId)
     .maybeSingle();
   return (data as SessionRow | null) ?? null;

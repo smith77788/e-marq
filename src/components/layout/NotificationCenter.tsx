@@ -70,14 +70,11 @@ function resolveNotifTarget(n: NotifRow): string {
   // Insights — route by insight_type to most relevant page
   if (n.kind === "insight") {
     const t = meta.insight_type ?? "";
-    if (t.startsWith("setup_no_telegram") || t.startsWith("channel_"))
-      return "/brand/channels";
+    if (t.startsWith("setup_no_telegram") || t.startsWith("channel_")) return "/brand/channels";
     if (t.startsWith("setup_no_products") || t.startsWith("bootstrap_catalog"))
       return "/brand/products";
-    if (t.startsWith("bootstrap_margin") || t.includes("margin"))
-      return "/brand/products";
-    if (t.startsWith("bootstrap_data_gaps") || t.startsWith("setup_"))
-      return "/brand/integrations";
+    if (t.startsWith("bootstrap_margin") || t.includes("margin")) return "/brand/products";
+    if (t.startsWith("bootstrap_data_gaps") || t.startsWith("setup_")) return "/brand/integrations";
     if (t.includes("email") || t.includes("campaign")) return "/brand/email";
     if (t.includes("customer") || t.includes("churn") || t.includes("ltv"))
       return "/brand/customers";
@@ -145,9 +142,7 @@ export function NotificationCenter() {
     queryFn: async () => {
       let q = supabase
         .from("owner_notifications")
-        .select(
-          "id, tenant_id, kind, severity, title, body, link, is_read, created_at, metadata",
-        )
+        .select("id, tenant_id, kind, severity, title, body, link, is_read, created_at, metadata")
         .in("tenant_id", tenantIds)
         .order("created_at", { ascending: false })
         .limit(PAGE_SIZE);

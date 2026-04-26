@@ -180,9 +180,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
       if (isDn && json.summary) {
         const s = json.summary;
         const importedCount =
-          (s.products?.upserted ?? 0) +
-          (s.customers?.upserted ?? 0) +
-          (s.orders?.inserted ?? 0);
+          (s.products?.upserted ?? 0) + (s.customers?.upserted ?? 0) + (s.orders?.inserted ?? 0);
         return { imported: importedCount, failed: s.errors?.length ?? 0, skipped: 0 };
       }
       return json;
@@ -225,10 +223,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
   const disconnect = useMutation({
     mutationFn: async () => {
       if (!integ.data) return;
-      const { error } = await supabase
-        .from("tenant_integrations")
-        .delete()
-        .eq("id", integ.data.id);
+      const { error } = await supabase.from("tenant_integrations").delete().eq("id", integ.data.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -303,7 +298,9 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
                   </Badge>
                 )}
               </div>
-              <div className="text-xs font-normal text-muted-foreground">Керування підключенням</div>
+              <div className="text-xs font-normal text-muted-foreground">
+                Керування підключенням
+              </div>
             </div>
           </DialogTitle>
           <DialogDescription>{integration.description}</DialogDescription>
@@ -548,8 +545,8 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
                 <Alert className="border-primary/40 bg-primary/5">
                   <Webhook className="h-4 w-4 text-primary" />
                   <AlertDescription>
-                    Скопіюйте URL та секрет у налаштування зовнішньої системи (Zapier, Make,
-                    n8n…). Дані надсилайте методом POST.
+                    Скопіюйте URL та секрет у налаштування зовнішньої системи (Zapier, Make, n8n…).
+                    Дані надсилайте методом POST.
                   </AlertDescription>
                 </Alert>
 
@@ -559,11 +556,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
                   </Label>
                   <div className="flex gap-2">
                     <Input readOnly value={webhookUrl} className="font-mono text-xs" />
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => copy(webhookUrl, "URL")}
-                    >
+                    <Button size="icon" variant="outline" onClick={() => copy(webhookUrl, "URL")}>
                       <Copy className="h-4 w-4" />
                     </Button>
                   </div>
@@ -575,11 +568,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
                   </Label>
                   {data?.webhook_secret ? (
                     <div className="flex gap-2">
-                      <Input
-                        readOnly
-                        value={data.webhook_secret}
-                        className="font-mono text-xs"
-                      />
+                      <Input readOnly value={data.webhook_secret} className="font-mono text-xs" />
                       <Button
                         size="icon"
                         variant="outline"
@@ -648,9 +637,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
               <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="space-y-0.5">
-                    <div className="text-sm font-medium text-destructive">
-                      Повністю відключити
-                    </div>
+                    <div className="text-sm font-medium text-destructive">Повністю відключити</div>
                     <p className="text-xs text-muted-foreground">
                       Видалить ключ і конфіг. Раніше імпортовані дані залишаться.
                     </p>
