@@ -18,7 +18,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { jsonError } from "@/lib/acos/agentRuntime";
+import { authorizeAgentRequest, jsonError } from "@/lib/acos/agentRuntime";
 
 const STALE_SYNC_MS = 24 * 60 * 60 * 1000;
 
@@ -36,6 +36,11 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-webhook-health
         const url = new URL(request.url);
         const tenantId = url.searchParams.get("tenant");
         if (!tenantId) return jsonError("tenant query required", 400);
+        const token = (request.headers.get("authorization") ?? "")
+          .replace(/^Bearer\s+/i, "")
+          .trim();
+        const ctx = await authorizeAgentRequest(token, tenantId);
+        if ("error" in ctx) return jsonError(ctx.error, ctx.status);
 
         const { data: integ, error } = await supabaseAdmin
           .from("tenant_integrations")

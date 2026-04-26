@@ -76,6 +76,14 @@ export const Route = createFileRoute("/s/$slug/checkout")({
       <p className="text-sm text-destructive">Помилка: {error.message}</p>
     </div>
   ),
+  notFoundComponent: () => (
+    <div className="mx-auto max-w-2xl px-4 py-12 text-center">
+      <p className="text-sm text-muted-foreground">Магазин не знайдено.</p>
+      <Link to="/" className="mt-3 inline-flex text-sm text-primary underline">
+        На головну
+      </Link>
+    </div>
+  ),
   component: CheckoutPage,
 });
 
