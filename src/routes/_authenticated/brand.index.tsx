@@ -141,11 +141,26 @@ function BrandCockpit({
               Бренд очікує верифікації
             </CardTitle>
             <CardDescription>
-              Ми вже сповістили супер-адміна. Як тільки заявку підтвердять — ви отримаєте повний
-              доступ до автоматизації, агентів та виплат. Поки що можна налаштувати каталог,
-              канали, інтеграції.
+              Зазвичай це займає <strong className="text-foreground">до 24 годин</strong>. Ми надішлемо
+              сповіщення на пошту та в Telegram, щойно бренд активують. Поки що можна підготувати каталог,
+              канали та інтеграції — все збережеться автоматично.
             </CardDescription>
           </CardHeader>
+          <div className="flex flex-wrap gap-2 px-6 pb-6">
+            <Button asChild size="sm" variant="outline">
+              <Link to="/brand/products" search={{ tenant: currentTenantId }}>
+                Додати товари
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/brand/integrations" search={{ tenant: currentTenantId }}>
+                Підключити інтеграції
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="ghost">
+              <Link to="/contact">Написати в підтримку</Link>
+            </Button>
+          </div>
         </Card>
       )}
       {isRejected && (
