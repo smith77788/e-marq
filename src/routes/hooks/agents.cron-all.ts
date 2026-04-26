@@ -9,6 +9,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
 import { jsonError, jsonOk } from "@/lib/acos/agentRuntime";
+import { getInternalCronToken, isCronToken } from "@/lib/acos/cronAuth";
 
 export const Route = createFileRoute("/hooks/agents/cron-all")({
   server: {
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/hooks/agents/cron-all")({
 
         // Authorize: cron uses publishable key, manual uses super_admin JWT
         let authed: "cron" | "super_admin" | null = null;
-        if (token && token === process.env.SUPABASE_PUBLISHABLE_KEY) {
+        if (token && isCronToken(token)) {
           authed = "cron";
         } else if (token) {
           const url = process.env.SUPABASE_URL;
@@ -51,7 +52,7 @@ export const Route = createFileRoute("/hooks/agents/cron-all")({
         if (error) return jsonError("Failed to list tenants", 500, { details: error.message });
 
         const origin = new URL(request.url).origin;
-        const cronToken = process.env.SUPABASE_PUBLISHABLE_KEY ?? "";
+        const cronToken = getInternalCronToken();
 
         const started = Date.now();
         const results = await Promise.allSettled(

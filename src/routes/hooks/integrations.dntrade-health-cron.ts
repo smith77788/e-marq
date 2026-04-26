@@ -15,6 +15,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { jsonError, jsonOk } from "@/lib/acos/agentRuntime";
+import { isCronToken } from "@/lib/acos/cronAuth";
 
 const ALERT_UNHEALTHY_MIN = 30;
 const ALERT_PARTIAL_THRESHOLD = 3;
@@ -133,7 +134,7 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-health-cron")(
         const token = (request.headers.get("authorization") ?? "")
           .replace(/^Bearer\s+/i, "")
           .trim();
-        if (!token || token !== process.env.SUPABASE_PUBLISHABLE_KEY) {
+        if (!token || !isCronToken(token)) {
           return jsonError("Unauthorized", 401);
         }
 

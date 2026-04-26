@@ -4319,6 +4319,47 @@ export type Database = {
           },
         ]
       }
+      telegram_owner_pairings: {
+        Row: {
+          consumed_at: string | null
+          consumed_chat_id: string | null
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          pairing_code: string
+          tenant_id: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          consumed_chat_id?: string | null
+          created_at?: string
+          created_by: string
+          expires_at?: string
+          id?: string
+          pairing_code: string
+          tenant_id: string
+        }
+        Update: {
+          consumed_at?: string | null
+          consumed_chat_id?: string | null
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          pairing_code?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_owner_pairings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_api_keys: {
         Row: {
           created_at: string

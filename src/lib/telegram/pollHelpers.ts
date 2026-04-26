@@ -208,16 +208,54 @@ export async function processMessage(u: TgUpdate, appOrigin: string): Promise<vo
   const username = msg.from?.username ?? msg.chat?.username ?? null;
   const firstName = msg.from?.first_name ?? msg.chat?.first_name ?? null;
 
-  const ownerStart = text.match(/^\/start\s+owner\s+([a-z0-9_-]+)/i);
+  // Owner pairing — accepts a one-time code (8 chars) generated in the
+  // authenticated dashboard. The legacy form `/start owner <slug>` is now
+  // rejected because it let any Telegram user claim ownership of any brand
+  // by reading the public storefront slug.
+  const ownerStart = text.match(/^\/start\s+owner(?:\s+(\S+))?/i);
   if (ownerStart) {
-    const slug = ownerStart[1].toLowerCase();
+    const code = (ownerStart[1] ?? "").trim();
+    if (!code) {
+      await sendTelegramText(
+        chatId,
+        `Щоб привʼязати власника, відкрийте «Налаштування → Telegram» у MARQ і скопіюйте одноразовий код. Потім надішліть сюди:\n<code>/start owner КОД</code>`,
+      );
+      return;
+    }
+    // Reject obviously slug-like inputs (lowercase letters/digits, length>8) early
+    // so we don't even hit the DB with crawler traffic.
+    const looksLikePairingCode = /^[A-Z0-9]{6,12}$/.test(code);
+    if (!looksLikePairingCode) {
+      await sendTelegramText(
+        chatId,
+        `Цей код не схожий на одноразовий. Згенеруйте новий у MARQ → Налаштування → Telegram.`,
+      );
+      return;
+    }
+    const { data: pairing } = await supabaseAdmin
+      .from("telegram_owner_pairings")
+      .select("id, tenant_id, expires_at, consumed_at")
+      .eq("pairing_code", code)
+      .maybeSingle();
+    if (!pairing) {
+      await sendTelegramText(chatId, `Код не знайдено або вже використано. Згенеруйте новий.`);
+      return;
+    }
+    if (pairing.consumed_at) {
+      await sendTelegramText(chatId, `Цей код уже використано. Згенеруйте новий у MARQ.`);
+      return;
+    }
+    if (new Date(pairing.expires_at).getTime() < Date.now()) {
+      await sendTelegramText(chatId, `Код прострочений. Згенеруйте новий у MARQ.`);
+      return;
+    }
     const { data: tenant } = await supabaseAdmin
       .from("tenants")
       .select("id, name")
-      .eq("slug", slug)
+      .eq("id", pairing.tenant_id)
       .maybeSingle();
     if (!tenant) {
-      await sendTelegramText(chatId, `Бренд «${slug}» не знайдено.`);
+      await sendTelegramText(chatId, `Бренд не знайдено.`);
       return;
     }
     const { error: rpcErr } = await supabaseAdmin
@@ -228,6 +266,10 @@ export async function processMessage(u: TgUpdate, appOrigin: string): Promise<vo
       await sendTelegramText(chatId, `Не вдалося привʼязати: ${rpcErr.message}`);
       return;
     }
+    await supabaseAdmin
+      .from("telegram_owner_pairings")
+      .update({ consumed_at: new Date().toISOString(), consumed_chat_id: chatId })
+      .eq("id", pairing.id);
     await sendOwnerMessage(
       chatId,
       `🔔 Тепер ви отримуєте сповіщення власника для <b>${tenant.name}</b>. Інсайти та дії агентів, що чекають підтвердження, прийдуть сюди з кнопками «Застосувати» / «Сховати».\n\nНатискайте кнопки нижче або надсилайте /menu щоб відкрити кокпіт у Telegram.`,
