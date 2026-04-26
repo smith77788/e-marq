@@ -6057,6 +6057,14 @@ export type Database = {
             }
             Returns: string
           }
+      self_heal_dismiss_action: {
+        Args: { p_action_id: string; p_reason?: string }
+        Returns: undefined
+      }
+      self_heal_dismiss_incident: {
+        Args: { p_incident_id: string; p_reason?: string }
+        Returns: undefined
+      }
       set_owner_telegram_chat: {
         Args: { _chat_id: string; _tenant_id: string }
         Returns: undefined

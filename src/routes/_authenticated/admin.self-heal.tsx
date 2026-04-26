@@ -143,10 +143,8 @@ function SelfHealContent() {
       const { data, error } = await supabase
         .from("self_heal_incidents")
         .select("*")
-        .in("status", ["open", "fixing", "monitoring", "blocked"])
-        .order("severity", { ascending: true })
         .order("last_seen_at", { ascending: false })
-        .limit(100);
+        .limit(200);
       if (error) throw error;
       return (data ?? []) as Incident[];
     },
@@ -160,7 +158,7 @@ function SelfHealContent() {
         .from("self_heal_actions")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(100);
+        .limit(200);
       if (error) throw error;
       return (data ?? []) as ActionRow[];
     },
@@ -182,16 +180,25 @@ function SelfHealContent() {
     },
   });
 
-  const incidents = incidentsQ.data ?? [];
+  const incidentsAll = incidentsQ.data ?? [];
   const actions = actionsQ.data ?? [];
   const settings = settingsQ.data;
 
+  const incidents = useMemo(
+    () => incidentsAll.filter((i) => ["open", "fixing", "monitoring", "blocked"].includes(i.status)),
+    [incidentsAll],
+  );
+
+  // ANY skipped action with a decision other than "apply" is something the admin can act on.
   const pendingProposals = useMemo(
-    () => actions.filter((a) => a.decision === "propose" && a.status === "skipped"),
+    () => actions.filter((a) => a.status === "skipped" && a.decision !== "apply"),
     [actions],
   );
   const recentApplied = useMemo(
-    () => actions.filter((a) => a.status === "applied" || a.status === "reverted").slice(0, 50),
+    () =>
+      actions
+        .filter((a) => a.status === "applied" || a.status === "reverted" || a.status === "failed")
+        .slice(0, 50),
     [actions],
   );
 
@@ -261,6 +268,31 @@ function SelfHealContent() {
       ]);
     } else {
       toast.error(json.error ?? json.message ?? "Failed");
+    }
+  };
+
+  const callDismiss = async (
+    kind: "incident" | "action",
+    id: string,
+    reason: string,
+  ) => {
+    const { data: session } = await supabase.auth.getSession();
+    const token = session.session?.access_token;
+    if (!token) return toast.error("Not authenticated");
+    const res = await fetch("/hooks/agents/self-heal-dismiss", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ kind, id, reason }),
+    });
+    const json = (await res.json()) as { ok?: boolean; message?: string; error?: string };
+    if (res.ok && json.ok) {
+      toast.success(json.message ?? "Dismissed");
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["self-heal-incidents"] }),
+        qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
+      ]);
+    } else {
+      toast.error(json.error ?? "Failed");
     }
   };
 
@@ -347,16 +379,16 @@ function SelfHealContent() {
         />
       </div>
 
-      {/* PENDING PROPOSALS */}
+      {/* PENDING PROPOSALS / BLOCKED ACTIONS */}
       {pendingProposals.length > 0 && (
         <Card className="border-warning/40 shadow-glow-violet">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-warning" />
-              Pending proposals ({pendingProposals.length})
+              Pending actions ({pendingProposals.length})
             </CardTitle>
             <CardDescription>
-              Risky fixes that need explicit Apply confirmation.
+              Дії, що чекають на ручне рішення (BLOCK = ризикові, PROPOSE = запропоновані, MONITOR = лише спостереження).
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -364,27 +396,53 @@ function SelfHealContent() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Kind</TableHead>
+                  <TableHead className="w-24">Decision</TableHead>
                   <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {pendingProposals.map((a) => (
                   <TableRow key={a.id}>
                     <TableCell className="font-mono text-xs">{a.kind}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "text-xs uppercase",
+                          a.decision === "block" && "border-destructive/40 text-destructive",
+                          a.decision === "propose" && "border-warning/40 text-warning",
+                          a.decision === "monitor" && "border-muted text-muted-foreground",
+                        )}
+                      >
+                        {a.decision}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {new Date(a.created_at).toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        type="button"
-                        onClick={() =>
-                          callAction("/hooks/agents/self-heal-apply", a.id, "Applied")
-                        }
-                      >
-                        Apply
-                      </Button>
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          size="sm"
+                          type="button"
+                          onClick={() =>
+                            callAction("/hooks/agents/self-heal-apply", a.id, "Applied")
+                          }
+                        >
+                          {a.decision === "block" ? "Force apply" : "Apply"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          type="button"
+                          onClick={() =>
+                            callDismiss("action", a.id, "Dismissed by admin")
+                          }
+                        >
+                          Dismiss
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -420,6 +478,7 @@ function SelfHealContent() {
                   <TableHead>Root cause</TableHead>
                   <TableHead className="w-20">Risk</TableHead>
                   <TableHead className="w-24">Status</TableHead>
+                  <TableHead className="w-20 text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -440,6 +499,16 @@ function SelfHealContent() {
                       <Badge variant="outline" className="text-xs">
                         {i.status}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        type="button"
+                        onClick={() => callDismiss("incident", i.id, "Dismissed by admin")}
+                      >
+                        Dismiss
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}

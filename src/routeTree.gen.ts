@@ -75,6 +75,7 @@ import { Route as HooksAgentsShippingOptimizerRouteImport } from './routes/hooks
 import { Route as HooksAgentsSeoRewriterRouteImport } from './routes/hooks/agents.seo-rewriter'
 import { Route as HooksAgentsSelfHealRevertRouteImport } from './routes/hooks/agents.self-heal-revert'
 import { Route as HooksAgentsSelfHealEngineRouteImport } from './routes/hooks/agents.self-heal-engine'
+import { Route as HooksAgentsSelfHealDismissRouteImport } from './routes/hooks/agents.self-heal-dismiss'
 import { Route as HooksAgentsSelfHealApplyRouteImport } from './routes/hooks/agents.self-heal-apply'
 import { Route as HooksAgentsSegmentationRouteImport } from './routes/hooks/agents.segmentation'
 import { Route as HooksAgentsSecondOrderNurtureRouteImport } from './routes/hooks/agents.second-order-nurture'
@@ -578,6 +579,12 @@ const HooksAgentsSelfHealEngineRoute =
   HooksAgentsSelfHealEngineRouteImport.update({
     id: '/hooks/agents/self-heal-engine',
     path: '/hooks/agents/self-heal-engine',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HooksAgentsSelfHealDismissRoute =
+  HooksAgentsSelfHealDismissRouteImport.update({
+    id: '/hooks/agents/self-heal-dismiss',
+    path: '/hooks/agents/self-heal-dismiss',
     getParentRoute: () => rootRouteImport,
   } as any)
 const HooksAgentsSelfHealApplyRoute =
@@ -1615,6 +1622,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/second-order-nurture': typeof HooksAgentsSecondOrderNurtureRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/self-heal-apply': typeof HooksAgentsSelfHealApplyRoute
+  '/hooks/agents/self-heal-dismiss': typeof HooksAgentsSelfHealDismissRoute
   '/hooks/agents/self-heal-engine': typeof HooksAgentsSelfHealEngineRoute
   '/hooks/agents/self-heal-revert': typeof HooksAgentsSelfHealRevertRoute
   '/hooks/agents/seo-rewriter': typeof HooksAgentsSeoRewriterRoute
@@ -1837,6 +1845,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/second-order-nurture': typeof HooksAgentsSecondOrderNurtureRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/self-heal-apply': typeof HooksAgentsSelfHealApplyRoute
+  '/hooks/agents/self-heal-dismiss': typeof HooksAgentsSelfHealDismissRoute
   '/hooks/agents/self-heal-engine': typeof HooksAgentsSelfHealEngineRoute
   '/hooks/agents/self-heal-revert': typeof HooksAgentsSelfHealRevertRoute
   '/hooks/agents/seo-rewriter': typeof HooksAgentsSeoRewriterRoute
@@ -2062,6 +2071,7 @@ export interface FileRoutesById {
   '/hooks/agents/second-order-nurture': typeof HooksAgentsSecondOrderNurtureRoute
   '/hooks/agents/segmentation': typeof HooksAgentsSegmentationRoute
   '/hooks/agents/self-heal-apply': typeof HooksAgentsSelfHealApplyRoute
+  '/hooks/agents/self-heal-dismiss': typeof HooksAgentsSelfHealDismissRoute
   '/hooks/agents/self-heal-engine': typeof HooksAgentsSelfHealEngineRoute
   '/hooks/agents/self-heal-revert': typeof HooksAgentsSelfHealRevertRoute
   '/hooks/agents/seo-rewriter': typeof HooksAgentsSeoRewriterRoute
@@ -2287,6 +2297,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/second-order-nurture'
     | '/hooks/agents/segmentation'
     | '/hooks/agents/self-heal-apply'
+    | '/hooks/agents/self-heal-dismiss'
     | '/hooks/agents/self-heal-engine'
     | '/hooks/agents/self-heal-revert'
     | '/hooks/agents/seo-rewriter'
@@ -2509,6 +2520,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/second-order-nurture'
     | '/hooks/agents/segmentation'
     | '/hooks/agents/self-heal-apply'
+    | '/hooks/agents/self-heal-dismiss'
     | '/hooks/agents/self-heal-engine'
     | '/hooks/agents/self-heal-revert'
     | '/hooks/agents/seo-rewriter'
@@ -2733,6 +2745,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/second-order-nurture'
     | '/hooks/agents/segmentation'
     | '/hooks/agents/self-heal-apply'
+    | '/hooks/agents/self-heal-dismiss'
     | '/hooks/agents/self-heal-engine'
     | '/hooks/agents/self-heal-revert'
     | '/hooks/agents/seo-rewriter'
@@ -2926,6 +2939,7 @@ export interface RootRouteChildren {
   HooksAgentsSecondOrderNurtureRoute: typeof HooksAgentsSecondOrderNurtureRoute
   HooksAgentsSegmentationRoute: typeof HooksAgentsSegmentationRoute
   HooksAgentsSelfHealApplyRoute: typeof HooksAgentsSelfHealApplyRoute
+  HooksAgentsSelfHealDismissRoute: typeof HooksAgentsSelfHealDismissRoute
   HooksAgentsSelfHealEngineRoute: typeof HooksAgentsSelfHealEngineRoute
   HooksAgentsSelfHealRevertRoute: typeof HooksAgentsSelfHealRevertRoute
   HooksAgentsSeoRewriterRoute: typeof HooksAgentsSeoRewriterRoute
@@ -3445,6 +3459,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/self-heal-engine'
       fullPath: '/hooks/agents/self-heal-engine'
       preLoaderRoute: typeof HooksAgentsSelfHealEngineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/self-heal-dismiss': {
+      id: '/hooks/agents/self-heal-dismiss'
+      path: '/hooks/agents/self-heal-dismiss'
+      fullPath: '/hooks/agents/self-heal-dismiss'
+      preLoaderRoute: typeof HooksAgentsSelfHealDismissRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/self-heal-apply': {
@@ -4826,6 +4847,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsSecondOrderNurtureRoute: HooksAgentsSecondOrderNurtureRoute,
   HooksAgentsSegmentationRoute: HooksAgentsSegmentationRoute,
   HooksAgentsSelfHealApplyRoute: HooksAgentsSelfHealApplyRoute,
+  HooksAgentsSelfHealDismissRoute: HooksAgentsSelfHealDismissRoute,
   HooksAgentsSelfHealEngineRoute: HooksAgentsSelfHealEngineRoute,
   HooksAgentsSelfHealRevertRoute: HooksAgentsSelfHealRevertRoute,
   HooksAgentsSeoRewriterRoute: HooksAgentsSeoRewriterRoute,
