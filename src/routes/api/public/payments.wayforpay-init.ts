@@ -5,9 +5,14 @@
  * Returns: { ok: true, action, formFields, intentId }
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { buildWayForPayForm } from "@/lib/payments/wayforpay.server";
 import { readGatewayConfig } from "@/lib/payments/types";
+
+const wayForPayInitBodySchema = z.object({
+  orderId: z.string().uuid(),
+});
 
 const ipBuckets = new Map<string, { count: number; reset: number }>();
 const RATE_LIMIT = 10;
@@ -45,16 +50,18 @@ export const Route = createFileRoute("/api/public/payments/wayforpay-init")({
           return Response.json({ ok: false, error: "rate_limited" }, { status: 429 });
         }
 
-        let body: { orderId?: unknown };
+        let rawBody: unknown;
         try {
-          body = (await request.json()) as { orderId?: unknown };
+          rawBody = await request.json();
         } catch {
           return Response.json({ ok: false, error: "bad_json" }, { status: 400 });
         }
-        const orderId = typeof body.orderId === "string" ? body.orderId.trim() : "";
-        if (!/^[0-9a-f-]{36}$/i.test(orderId)) {
+
+        const parsedBody = wayForPayInitBodySchema.safeParse(rawBody);
+        if (!parsedBody.success) {
           return Response.json({ ok: false, error: "invalid_order_id" }, { status: 400 });
         }
+        const orderId = parsedBody.data.orderId;
 
         const { data: order } = await supabaseAdmin
           .from("orders")
