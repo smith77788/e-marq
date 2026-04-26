@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { createFileRoute, Outlet, useNavigate, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Outlet, useNavigate, useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
@@ -27,20 +26,30 @@ function AuthenticatedLayout() {
   const navigate = useNavigate();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!loading && !user) {
-      void navigate({ to: "/login" });
-    }
-  }, [loading, user, navigate]);
-
-  if (loading || !user) {
-    // Static, no animation — keeps the boot screen calm and predictable.
+  // Auth still hydrating: show a quiet boot screen (no protected content yet).
+  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background" aria-hidden>
         <span className="sr-only">{t("hdr.booting")}</span>
       </div>
     );
   }
+
+  // Auth resolved → no user. Declarative redirect avoids the useEffect flash
+  // of an unauthenticated layout shell. We also stash the original href so
+  // /login can redirect back after sign-in.
+  if (!user) {
+    try {
+      const here = window.location.pathname + window.location.search;
+      if (here && here !== "/login") {
+        window.sessionStorage.setItem("marq.postAuthDest", here);
+      }
+    } catch {
+      /* storage may be blocked */
+    }
+    return <Navigate to="/login" replace />;
+  }
+
 
   async function handleSignOut() {
     await signOut();

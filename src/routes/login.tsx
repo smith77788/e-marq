@@ -32,9 +32,22 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  function readAndClearDest(): string {
+    try {
+      const dest = window.sessionStorage.getItem("marq.postAuthDest");
+      if (dest) {
+        window.sessionStorage.removeItem("marq.postAuthDest");
+        if (dest.startsWith("/") && !dest.startsWith("//")) return dest;
+      }
+    } catch {
+      /* storage may be blocked */
+    }
+    return "/dashboard";
+  }
+
   useEffect(() => {
     if (!loading && user) {
-      window.location.assign("/dashboard");
+      window.location.assign(readAndClearDest());
     }
   }, [loading, user]);
 
@@ -48,7 +61,7 @@ function LoginPage() {
     try {
       await signIn(email, password);
       toast.success(t("auth.welcome"));
-      window.location.assign("/dashboard");
+      window.location.assign(readAndClearDest());
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.fail"));
       setEmailSubmitting(false);
