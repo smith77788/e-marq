@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate, Outlet, useNavigate, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useNavigate, useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
@@ -17,6 +17,21 @@ import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated")({
+  beforeLoad: ({ location }) => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem("sb-igzcukhnarwezxwdyonn-auth-token");
+      const session = raw ? JSON.parse(raw) : null;
+      if (session?.access_token) return;
+      const here = location.href;
+      if (here && here !== "/login") {
+        window.sessionStorage.setItem("marq.postAuthDest", here);
+      }
+    } catch {
+      /* auth storage may be blocked or malformed */
+    }
+    throw redirect({ to: "/login", replace: true });
+  },
   component: AuthenticatedLayout,
 });
 
@@ -35,19 +50,10 @@ function AuthenticatedLayout() {
     );
   }
 
-  // Auth resolved → no user. Declarative redirect avoids the useEffect flash
-  // of an unauthenticated layout shell. We also stash the original href so
-  // /login can redirect back after sign-in.
+  // Auth resolved → no user. The route guard normally handles this before
+  // render; this remains as a defensive fallback for expired/cleared sessions.
   if (!user) {
-    try {
-      const here = window.location.pathname + window.location.search;
-      if (here && here !== "/login") {
-        window.sessionStorage.setItem("marq.postAuthDest", here);
-      }
-    } catch {
-      /* storage may be blocked */
-    }
-    return <Navigate to="/login" replace />;
+    throw redirect({ to: "/login", replace: true });
   }
 
   async function handleSignOut() {
