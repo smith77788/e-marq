@@ -9,10 +9,11 @@ import { jsonError, jsonOk } from "@/lib/acos/agentRuntime";
 import { runWinbackForTenant } from "./engines.winback";
 import { dispatchTenantOutbound } from "@/lib/acos/channels";
 import type { Database } from "@/integrations/supabase/types";
+import { isCronToken } from "@/lib/acos/cronAuth";
 
 async function isAuthorized(token: string): Promise<boolean> {
   if (!token) return false;
-  if (token === process.env.SUPABASE_PUBLISHABLE_KEY) return true;
+  if (isCronToken(token)) return true;
   const url = process.env.SUPABASE_URL;
   const anon = process.env.SUPABASE_PUBLISHABLE_KEY;
   if (!url || !anon) return false;

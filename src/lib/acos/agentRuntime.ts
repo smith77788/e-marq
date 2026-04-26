@@ -11,6 +11,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
 import { buildInsightCopy } from "@/lib/acos/insightCopy";
+import { isCronToken } from "@/lib/acos/cronAuth";
 
 export type AgentInsightInput = {
   tenant_id: string;
@@ -37,7 +38,7 @@ export async function authorizeAgentRequest(
 ): Promise<AuthContext | { error: string; status: number }> {
   if (!token) return { error: "Missing bearer token", status: 401 };
 
-  if (token === process.env.SUPABASE_PUBLISHABLE_KEY) {
+  if (isCronToken(token)) {
     return { kind: "cron" };
   }
 
