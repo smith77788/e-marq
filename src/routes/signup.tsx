@@ -6,13 +6,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, tStatic } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 import { NOINDEX_META } from "@/lib/seo";
 
+type SignupSearch = {
+  plan?: "free" | "starter" | "growth" | "scale";
+  next?: "checkout";
+};
+
+const ALLOWED_PLANS = new Set(["free", "starter", "growth", "scale"]);
+
 export const Route = createFileRoute("/signup")({
+  validateSearch: (s: Record<string, unknown>): SignupSearch => ({
+    plan:
+      typeof s.plan === "string" && ALLOWED_PLANS.has(s.plan)
+        ? (s.plan as SignupSearch["plan"])
+        : undefined,
+    next: s.next === "checkout" ? "checkout" : undefined,
+  }),
   head: () => ({
     meta: [
       { title: `${tStatic("auth.signupTitle")} — MARQ` },
@@ -22,6 +37,26 @@ export const Route = createFileRoute("/signup")({
   }),
   component: SignupPage,
 });
+
+/**
+ * Pricing → Signup → Pay (3 steps): if the user arrived from /pricing with a
+ * plan, send them straight to /brand/billing?autopay=1&plan=… so the billing
+ * page can immediately pre-select & confirm. Free plan / no plan → normal
+ * /auth/callback → /dashboard flow.
+ */
+function postSignupDestination(search: SignupSearch): string {
+  if (search.next === "checkout" && search.plan && search.plan !== "free") {
+    return `/brand/billing?autopay=1&plan=${encodeURIComponent(search.plan)}`;
+  }
+  return "/auth/callback";
+}
+
+const PLAN_LABEL: Record<NonNullable<SignupSearch["plan"]>, string> = {
+  free: "Free",
+  starter: "Starter",
+  growth: "Growth",
+  scale: "Scale",
+};
 
 function SignupPage() {
   const { t } = useT();
