@@ -31,12 +31,31 @@ type Plan = {
 export function OwnerPlanSwitcher({
   tenantId,
   currentPlanKey,
+  highlightPlanKey,
+  autoScroll,
 }: {
   tenantId: string;
   currentPlanKey: string;
+  /** Plan key the user pre-selected on /pricing → highlight + scroll into view. */
+  highlightPlanKey?: string | null;
+  /** When true, scroll the highlighted plan card into view on mount. */
+  autoScroll?: boolean;
 }) {
   const qc = useQueryClient();
   const [reason, setReason] = useState("");
+  const highlightRef = useRef<HTMLDivElement | null>(null);
+
+  // Pricing → Signup → Pay funnel: scroll highlighted plan into view once
+  // plans are loaded so the user immediately sees the «Перейти на цей тариф» CTA.
+  useEffect(() => {
+    if (!autoScroll || !highlightPlanKey) return;
+    const el = highlightRef.current;
+    if (!el) return;
+    const id = window.setTimeout(() => {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 150);
+    return () => window.clearTimeout(id);
+  }, [autoScroll, highlightPlanKey]);
 
   const plansQuery = useQuery({
     queryKey: ["plans-public-catalog"],
