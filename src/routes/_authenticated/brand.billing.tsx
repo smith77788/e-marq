@@ -16,7 +16,13 @@ import { OwnerPlanSwitcher } from "@/components/owner/OwnerPlanSwitcher";
 import { BalanceCard } from "@/components/owner/BalanceCard";
 import { trackBilling } from "@/lib/billingTelemetry";
 
-type Search = { tenant?: string };
+type Search = {
+  tenant?: string;
+  plan?: "free" | "starter" | "growth" | "scale";
+  autopay?: boolean;
+};
+
+const ALLOWED_PLAN_KEYS = new Set(["free", "starter", "growth", "scale"]);
 
 const SUB_STATUS_LABEL: Record<string, string> = {
   trial: "пробний період",
@@ -29,6 +35,11 @@ const SUB_STATUS_LABEL: Record<string, string> = {
 export const Route = createFileRoute("/_authenticated/brand/billing")({
   validateSearch: (s: Record<string, unknown>): Search => ({
     tenant: typeof s.tenant === "string" ? s.tenant : undefined,
+    plan:
+      typeof s.plan === "string" && ALLOWED_PLAN_KEYS.has(s.plan)
+        ? (s.plan as Search["plan"])
+        : undefined,
+    autopay: s.autopay === "1" || s.autopay === 1 || s.autopay === true,
   }),
   component: BrandBillingPage,
 });
