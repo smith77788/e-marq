@@ -421,7 +421,16 @@ const dict = {
     "site.foot.product": "Продукт",
     "site.foot.company": "Компанія",
     "site.foot.account": "Аккаунт",
+    "site.foot.legal": "Юридичне",
     "site.foot.builtFor": "Створено для незалежних D2C-брендів",
+    "site.legal.terms": "Умови використання",
+    "site.legal.privacy": "Політика конфіденційності",
+    "site.legal.refund": "Повернення коштів",
+    "site.legal.agree": "Реєструючись, ви погоджуєтесь з",
+    "site.legal.and": "та",
+    "site.legal.contactSales": "Потрібен індивідуальний пакет?",
+    "site.legal.contactSalesCta": "Поговоримо",
+    "site.legal.priceNote": "Оплата в гривнях. Курс конвертації — індикативний.",
 
     // About page (UA)
     "ab.metaTitle": "Про MARQ — автономна команда зростання для D2C",
@@ -1806,7 +1815,16 @@ const dict = {
     "site.foot.product": "Product",
     "site.foot.company": "Company",
     "site.foot.account": "Account",
+    "site.foot.legal": "Legal",
     "site.foot.builtFor": "Built for independent D2C brands",
+    "site.legal.terms": "Terms of Service",
+    "site.legal.privacy": "Privacy Policy",
+    "site.legal.refund": "Refund Policy",
+    "site.legal.agree": "By signing up, you agree to our",
+    "site.legal.and": "and",
+    "site.legal.contactSales": "Need a custom plan?",
+    "site.legal.contactSalesCta": "Let's talk",
+    "site.legal.priceNote": "Billed in UAH. USD conversion is indicative.",
 
     "ab.metaTitle": "About MARQ — the autonomous growth team for D2C",
     "ab.metaDesc":

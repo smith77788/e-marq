@@ -20,10 +20,12 @@ export const Route = createFileRoute("/pricing")({
 type PlanCard = {
   name: string;
   price: string;
+  priceUsd: string;
   cadence: string;
   desc: string;
   features: string[];
   cta: string;
+  ctaTo: "/signup" | "/contact";
   highlight: boolean;
 };
 
@@ -31,12 +33,12 @@ function Pricing() {
   const { t } = useT();
 
   // Чотирирівнева структура: Free → Starter → Growth → Scale
-  // Free дає малому бізнесу одразу базовий пакет, кожен наступний рівень
-  // відкриває більше агентів та вищі ліміти каталогу.
+  // USD — індикативно (40 ₴ = $1) для міжнародних відвідувачів.
   const plans: PlanCard[] = [
     {
       name: "Free",
       price: "0 ₴",
+      priceUsd: "$0",
       cadence: "назавжди",
       desc: "Старт для малого бізнесу: базові агенти, що вже приносять користь з першого дня.",
       features: [
@@ -46,11 +48,13 @@ function Pricing() {
         "Telegram-бот власника + email-сповіщення",
       ],
       cta: "Почати безкоштовно",
+      ctaTo: "/signup",
       highlight: false,
     },
     {
       name: "Starter",
       price: "1 199 ₴",
+      priceUsd: "≈ $30",
       cadence: "за бренд / місяць",
       desc: "Для бренду, що почав рости. Додає аналітику, AOV-оптимізацію та broadcast-розсилки.",
       features: [
@@ -60,11 +64,13 @@ function Pricing() {
         "Розширена аналітика (cohort, attribution, funnel)",
       ],
       cta: "Почати з Starter",
+      ctaTo: "/signup",
       highlight: false,
     },
     {
       name: "Growth",
       price: "3 999 ₴",
+      priceUsd: "≈ $100",
       cadence: "за бренд / місяць",
       desc: "Повна оптимізація доходу: ціни, SEO, лояльність, прогнози інвентаря.",
       features: [
@@ -74,11 +80,13 @@ function Pricing() {
         "Programmatic SEO, predictive pricing, bundle recommender",
       ],
       cta: "Перейти на Growth",
+      ctaTo: "/signup",
       highlight: true,
     },
     {
       name: "Scale",
       price: "11 999 ₴",
+      priceUsd: "≈ $300",
       cadence: "за бренд / місяць",
       desc: "Усі 58 агентів + meta-навчання, де система оптимізує саму себе.",
       features: [
@@ -87,7 +95,8 @@ function Pricing() {
         "50 учасників команди + ролі",
         "Пріоритетна підтримка та SLA",
       ],
-      cta: "Зв'язатися",
+      cta: "Зв'язатися з продажами",
+      ctaTo: "/contact",
       highlight: false,
     },
   ];
@@ -127,10 +136,11 @@ function Pricing() {
                   </Badge>
                 )}
                 <CardTitle className="text-xl">{p.name}</CardTitle>
-                <div className="mt-2 flex items-baseline gap-1">
+                <div className="mt-2 flex items-baseline gap-2">
                   <span className="text-3xl font-bold text-foreground">{p.price}</span>
                   <span className="text-xs text-muted-foreground">{p.cadence}</span>
                 </div>
+                <p className="mt-1 text-xs text-muted-foreground">{p.priceUsd} / mo</p>
                 <CardDescription className="mt-2">{p.desc}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -143,14 +153,36 @@ function Pricing() {
                   ))}
                 </ul>
                 <Button asChild className="w-full" variant={p.highlight ? "default" : "outline"}>
-                  <Link to="/signup">{p.cta}</Link>
+                  <Link to={p.ctaTo}>{p.cta}</Link>
                 </Button>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <p className="mt-10 text-center text-xs text-muted-foreground">{t("pr.note")}</p>
+        <div className="mx-auto mt-10 max-w-2xl rounded-lg border border-border bg-muted/20 p-6 text-center">
+          <p className="text-sm font-medium text-foreground">
+            {t("site.legal.contactSales")}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Гібридні тарифи, custom-агенти, корпоративні умови та on-prem — обговорюємо індивідуально.
+          </p>
+          <Button asChild variant="outline" size="sm" className="mt-4">
+            <Link to="/contact">{t("site.legal.contactSalesCta")}</Link>
+          </Button>
+        </div>
+
+        <p className="mt-6 text-center text-xs text-muted-foreground">{t("pr.note")}</p>
+        <p className="mt-2 text-center text-xs text-muted-foreground">
+          {t("site.legal.priceNote")}{" "}
+          <Link to="/refund" className="text-primary hover:underline">
+            {t("site.legal.refund")}
+          </Link>
+          {" · "}
+          <Link to="/terms" className="text-primary hover:underline">
+            {t("site.legal.terms")}
+          </Link>
+        </p>
       </section>
       <MarketingFooter />
     </main>
