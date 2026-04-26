@@ -40,6 +40,7 @@ function Pricing() {
   const plans: PlanCard[] = [
     {
       name: "Free",
+      planKey: "free",
       price: "0 ₴",
       priceUsd: "$0",
       cadence: "назавжди",
@@ -56,6 +57,7 @@ function Pricing() {
     },
     {
       name: "Starter",
+      planKey: "starter",
       price: "1 199 ₴",
       priceUsd: "≈ $30",
       cadence: "за бренд / місяць",
@@ -72,6 +74,7 @@ function Pricing() {
     },
     {
       name: "Growth",
+      planKey: "growth",
       price: "3 999 ₴",
       priceUsd: "≈ $100",
       cadence: "за бренд / місяць",
@@ -88,6 +91,7 @@ function Pricing() {
     },
     {
       name: "Scale",
+      planKey: null,
       price: "11 999 ₴",
       priceUsd: "≈ $300",
       cadence: "за бренд / місяць",
