@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, redirect, useNavigate, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Outlet, redirect, useNavigate, useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
@@ -53,7 +53,7 @@ function AuthenticatedLayout() {
   // Auth resolved → no user. The route guard normally handles this before
   // render; this remains as a defensive fallback for expired/cleared sessions.
   if (!user) {
-    throw redirect({ to: "/login", replace: true });
+    return <Navigate to="/login" replace />;
   }
 
   async function handleSignOut() {
