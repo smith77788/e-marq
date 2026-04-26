@@ -16,7 +16,13 @@ import { OwnerPlanSwitcher } from "@/components/owner/OwnerPlanSwitcher";
 import { BalanceCard } from "@/components/owner/BalanceCard";
 import { trackBilling } from "@/lib/billingTelemetry";
 
-type Search = { tenant?: string };
+type Search = {
+  tenant?: string;
+  plan?: "free" | "starter" | "growth" | "scale";
+  autopay?: boolean;
+};
+
+const ALLOWED_PLAN_KEYS = new Set(["free", "starter", "growth", "scale"]);
 
 const SUB_STATUS_LABEL: Record<string, string> = {
   trial: "пробний період",
@@ -29,12 +35,19 @@ const SUB_STATUS_LABEL: Record<string, string> = {
 export const Route = createFileRoute("/_authenticated/brand/billing")({
   validateSearch: (s: Record<string, unknown>): Search => ({
     tenant: typeof s.tenant === "string" ? s.tenant : undefined,
+    plan:
+      typeof s.plan === "string" && ALLOWED_PLAN_KEYS.has(s.plan)
+        ? (s.plan as Search["plan"])
+        : undefined,
+    autopay: s.autopay === "1" || s.autopay === 1 || s.autopay === true,
   }),
   component: BrandBillingPage,
 });
 
 function BrandBillingPage() {
-  const { tenant: urlTenant } = useSearch({ from: "/_authenticated/brand/billing" });
+  const { tenant: urlTenant, plan: desiredPlan, autopay } = useSearch({
+    from: "/_authenticated/brand/billing",
+  });
   const { current, currentTenantId, setCurrentTenantId, tenants, loading } = useTenantContext();
 
   // Sync URL → context
@@ -73,6 +86,16 @@ function BrandBillingPage() {
       }
     };
   }, [effectiveTenantId]);
+
+  // Funnel checkpoint: позначаємо коли користувач прийшов з Pricing → Signup → Pay.
+  const checkoutLoggedRef = useRef(false);
+  useEffect(() => {
+    if (!effectiveTenantId || checkoutLoggedRef.current) return;
+    if (autopay && desiredPlan && desiredPlan !== "free") {
+      checkoutLoggedRef.current = true;
+      trackBilling(effectiveTenantId, "funnel.checkout_open", { plan: desiredPlan });
+    }
+  }, [effectiveTenantId, autopay, desiredPlan]);
 
   // Якщо запит даних плану звалився — фіксуємо як nav_failed (інколи це таймаут RPC)
   useEffect(() => {
@@ -116,6 +139,8 @@ function BrandBillingPage() {
   const summary = summaryQuery.data;
   const activeTenant = tenants.find((t) => t.tenant_id === effectiveTenantId) ?? current;
 
+  const showAutopayBanner = autopay && !!desiredPlan && desiredPlan !== "free";
+
   return (
     <div className="space-y-6">
       <div>
@@ -132,6 +157,22 @@ function BrandBillingPage() {
           лише обсягу (товари, замовлення, клієнти).
         </p>
       </div>
+
+      {showAutopayBanner && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Crown className="h-4 w-4 text-primary" />
+              Крок 3 з 3 · підтвердіть оплату тарифу{" "}
+              {desiredPlan ? desiredPlan[0].toUpperCase() + desiredPlan.slice(1) : ""}
+            </CardTitle>
+            <CardDescription>
+              Тариф уже обрано на сторінці цін. Натисніть «Перейти на цей тариф» нижче — і ми
+              активуємо підписку.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
 
       {summary && (
         <Card>
@@ -157,7 +198,12 @@ function BrandBillingPage() {
       <BalanceCard tenantId={effectiveTenantId} tenantSlug={activeTenant?.tenant_slug ?? "brand"} />
 
       {summary && (
-        <OwnerPlanSwitcher tenantId={effectiveTenantId} currentPlanKey={summary.plan.key} />
+        <OwnerPlanSwitcher
+          tenantId={effectiveTenantId}
+          currentPlanKey={summary.plan.key}
+          highlightPlanKey={desiredPlan}
+          autoScroll={showAutopayBanner}
+        />
       )}
     </div>
   );

@@ -2,7 +2,7 @@
  * Self-service plan switcher for tenant owners/admins.
  * Calls owner_change_plan RPC (server-side enforces is_tenant_admin).
  */
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Crown } from "lucide-react";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { trackBilling } from "@/lib/billingTelemetry";
 import { PlanBadge } from "@/components/admin/PlanBadge";
 
 type Plan = {
@@ -31,12 +32,31 @@ type Plan = {
 export function OwnerPlanSwitcher({
   tenantId,
   currentPlanKey,
+  highlightPlanKey,
+  autoScroll,
 }: {
   tenantId: string;
   currentPlanKey: string;
+  /** Plan key the user pre-selected on /pricing → highlight + scroll into view. */
+  highlightPlanKey?: string | null;
+  /** When true, scroll the highlighted plan card into view on mount. */
+  autoScroll?: boolean;
 }) {
   const qc = useQueryClient();
   const [reason, setReason] = useState("");
+  const highlightRef = useRef<HTMLDivElement | null>(null);
+
+  // Pricing → Signup → Pay funnel: scroll highlighted plan into view once
+  // plans are loaded so the user immediately sees the «Перейти на цей тариф» CTA.
+  useEffect(() => {
+    if (!autoScroll || !highlightPlanKey) return;
+    const el = highlightRef.current;
+    if (!el) return;
+    const id = window.setTimeout(() => {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 150);
+    return () => window.clearTimeout(id);
+  }, [autoScroll, highlightPlanKey]);
 
   const plansQuery = useQuery({
     queryKey: ["plans-public-catalog"],
@@ -103,6 +123,7 @@ export function OwnerPlanSwitcher({
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {plans.map((p) => {
             const isCurrent = p.key === currentPlanKey;
+            const isHighlighted = !!highlightPlanKey && p.key === highlightPlanKey && !isCurrent;
             const priceLabel =
               p.price_cents_monthly === 0
                 ? "безкоштовно"
@@ -110,13 +131,24 @@ export function OwnerPlanSwitcher({
             return (
               <div
                 key={p.id}
-                className={`rounded-lg border p-4 ${
-                  isCurrent ? "border-primary bg-primary/5" : "border-border bg-card"
+                ref={isHighlighted ? highlightRef : undefined}
+                className={`rounded-lg border p-4 transition-shadow ${
+                  isHighlighted
+                    ? "border-primary bg-primary/10 shadow-lg ring-2 ring-primary/40"
+                    : isCurrent
+                      ? "border-primary bg-primary/5"
+                      : "border-border bg-card"
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <PlanBadge planKey={p.key} planName={p.name} />
-                  {isCurrent && <Badge variant="default">Поточний</Badge>}
+                  {isCurrent ? (
+                    <Badge variant="default">Поточний</Badge>
+                  ) : isHighlighted ? (
+                    <Badge variant="outline" className="border-primary/40 text-primary">
+                      Обрано
+                    </Badge>
+                  ) : null}
                 </div>
                 <p className="mt-2 text-2xl font-bold tabular-nums">{priceLabel}</p>
                 {p.description && (
@@ -138,13 +170,21 @@ export function OwnerPlanSwitcher({
                   className="mt-4 w-full"
                   variant={isCurrent ? "outline" : "default"}
                   disabled={isCurrent || change.isPending}
-                  onClick={() => change.mutate(p.key)}
+                  onClick={() => {
+                    trackBilling(tenantId, "funnel.payment_started", {
+                      plan: p.key,
+                      from_pricing: !!highlightPlanKey && p.key === highlightPlanKey,
+                    });
+                    change.mutate(p.key);
+                  }}
                 >
                   {isCurrent
                     ? "Уже активний"
                     : change.isPending
                       ? "Оновлюю…"
-                      : "Перейти на цей тариф"}
+                      : isHighlighted
+                        ? "Активувати цей тариф"
+                        : "Перейти на цей тариф"}
                 </Button>
               </div>
             );

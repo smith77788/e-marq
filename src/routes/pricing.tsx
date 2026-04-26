@@ -17,8 +17,11 @@ export const Route = createFileRoute("/pricing")({
   component: Pricing,
 });
 
+type PlanKey = "free" | "starter" | "growth" | "scale";
+
 type PlanCard = {
   name: string;
+  planKey: PlanKey | null; // null → не передаємо planKey (Scale → contact)
   price: string;
   priceUsd: string;
   cadence: string;
@@ -37,6 +40,7 @@ function Pricing() {
   const plans: PlanCard[] = [
     {
       name: "Free",
+      planKey: "free",
       price: "0 ₴",
       priceUsd: "$0",
       cadence: "назавжди",
@@ -53,6 +57,7 @@ function Pricing() {
     },
     {
       name: "Starter",
+      planKey: "starter",
       price: "1 199 ₴",
       priceUsd: "≈ $30",
       cadence: "за бренд / місяць",
@@ -69,6 +74,7 @@ function Pricing() {
     },
     {
       name: "Growth",
+      planKey: "growth",
       price: "3 999 ₴",
       priceUsd: "≈ $100",
       cadence: "за бренд / місяць",
@@ -85,6 +91,7 @@ function Pricing() {
     },
     {
       name: "Scale",
+      planKey: null,
       price: "11 999 ₴",
       priceUsd: "≈ $300",
       cadence: "за бренд / місяць",
@@ -153,7 +160,24 @@ function Pricing() {
                   ))}
                 </ul>
                 <Button asChild className="w-full" variant={p.highlight ? "default" : "outline"}>
-                  <Link to={p.ctaTo}>{p.cta}</Link>
+                  {p.ctaTo === "/signup" && p.planKey ? (
+                    <Link
+                      to="/signup"
+                      search={{ plan: p.planKey, next: "checkout" }}
+                      onClick={() => {
+                        try {
+                          window.sessionStorage.setItem("marq.funnel.plan", p.planKey!);
+                          window.sessionStorage.setItem("marq.funnel.t0", String(Date.now()));
+                        } catch {
+                          /* storage may be blocked */
+                        }
+                      }}
+                    >
+                      {p.cta}
+                    </Link>
+                  ) : (
+                    <Link to={p.ctaTo}>{p.cta}</Link>
+                  )}
                 </Button>
               </CardContent>
             </Card>

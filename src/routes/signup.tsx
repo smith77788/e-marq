@@ -6,13 +6,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, tStatic } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 import { NOINDEX_META } from "@/lib/seo";
 
+type SignupSearch = {
+  plan?: "free" | "starter" | "growth" | "scale";
+  next?: "checkout";
+};
+
+const ALLOWED_PLANS = new Set(["free", "starter", "growth", "scale"]);
+
 export const Route = createFileRoute("/signup")({
+  validateSearch: (s: Record<string, unknown>): SignupSearch => ({
+    plan:
+      typeof s.plan === "string" && ALLOWED_PLANS.has(s.plan)
+        ? (s.plan as SignupSearch["plan"])
+        : undefined,
+    next: s.next === "checkout" ? "checkout" : undefined,
+  }),
   head: () => ({
     meta: [
       { title: `${tStatic("auth.signupTitle")} — MARQ` },
@@ -23,13 +38,38 @@ export const Route = createFileRoute("/signup")({
   component: SignupPage,
 });
 
+/**
+ * Pricing → Signup → Pay (3 steps): if the user arrived from /pricing with a
+ * plan, send them straight to /brand/billing?autopay=1&plan=… so the billing
+ * page can immediately pre-select & confirm. Free plan / no plan → normal
+ * /auth/callback → /dashboard flow.
+ */
+function postSignupDestination(search: SignupSearch): string {
+  if (search.next === "checkout" && search.plan && search.plan !== "free") {
+    return `/brand/billing?autopay=1&plan=${encodeURIComponent(search.plan)}`;
+  }
+  return "/auth/callback";
+}
+
+const PLAN_LABEL: Record<NonNullable<SignupSearch["plan"]>, string> = {
+  free: "Free",
+  starter: "Starter",
+  growth: "Growth",
+  scale: "Scale",
+};
+
 function SignupPage() {
   const { t } = useT();
   const { signUp } = useAuth();
+  const search = Route.useSearch();
   const [submitting, setSubmitting] = useState(false);
   const [emailSubmitting, setEmailSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const destination = postSignupDestination(search);
+  const planLabel = search.plan ? PLAN_LABEL[search.plan] : null;
+  const goingToCheckout = search.next === "checkout" && !!search.plan && search.plan !== "free";
 
   async function onEmailSubmit(e: FormEvent) {
     e.preventDefault();
@@ -45,7 +85,7 @@ function SignupPage() {
         setEmailSubmitting(false);
       } else {
         toast.success(t("auth.created"));
-        window.location.assign("/dashboard");
+        window.location.assign(destination);
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.failSignup"));
@@ -56,6 +96,17 @@ function SignupPage() {
   async function onGoogle() {
     setSubmitting(true);
     try {
+      // Persist desired destination across the OAuth round-trip.
+      // /auth/callback will read this and finalize navigation.
+      try {
+        if (goingToCheckout) {
+          window.sessionStorage.setItem("marq.postAuthDest", destination);
+        } else {
+          window.sessionStorage.removeItem("marq.postAuthDest");
+        }
+      } catch {
+        /* storage may be blocked */
+      }
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: `${window.location.origin}/auth/callback`,
       });
@@ -82,8 +133,17 @@ function SignupPage() {
       </div>
       <Card className="w-full max-w-md">
         <CardHeader>
+          {planLabel && goingToCheckout && (
+            <Badge variant="outline" className="mb-2 w-fit border-primary/40 bg-primary/5 text-primary">
+              Крок 2 з 3 · обрано тариф {planLabel}
+            </Badge>
+          )}
           <CardTitle>{t("auth.signupTitle")}</CardTitle>
-          <CardDescription>{t("auth.signupDesc")}</CardDescription>
+          <CardDescription>
+            {goingToCheckout
+              ? `Створіть акаунт — і ми одразу відкриємо оплату тарифу ${planLabel}.`
+              : t("auth.signupDesc")}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={onEmailSubmit} className="space-y-3">
