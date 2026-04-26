@@ -17,7 +17,11 @@ type BillingEvent =
   | "billing.cta_click" //  «Оплата та баланс» click
   | "billing.page_view" //  /brand/billing відкрито
   | "billing.page_bounce" //  закрив швидко (<2с)
-  | "billing.nav_failed"; //  не вдалось завантажити
+  | "billing.nav_failed" //  не вдалось завантажити
+  | "funnel.pricing_cta" //  Pricing → Signup CTA натиснуто (з planKey)
+  | "funnel.signup_done" //  Signup completed з planKey
+  | "funnel.checkout_open" //  /brand/billing відкрилось у autopay-режимі
+  | "funnel.payment_started"; //  користувач натиснув «Активувати» / «Перейти»
 
 const SS_KEY = "marq.billingNavFailures";
 const ALERT_FLAG = "marq.billingNavFailureAlert";
