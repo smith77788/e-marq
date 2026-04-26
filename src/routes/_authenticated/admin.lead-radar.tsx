@@ -193,9 +193,7 @@ function Content() {
   });
 
   const runAgent = useMutation({
-    mutationFn: async (
-      agent: "lead-radar-scan" | "lead-radar-compose" | "content-magnet",
-    ) => {
+    mutationFn: async (agent: "lead-radar-scan" | "lead-radar-compose" | "content-magnet") => {
       const session = (await supabase.auth.getSession()).data.session;
       if (!session) throw new Error("Авторизуйтеся");
       const payload = currentTenantId ? { tenant_id: currentTenantId } : {};
@@ -238,7 +236,10 @@ function Content() {
       const description =
         agent === "lead-radar-scan"
           ? `${summarizeBatchResult((payload as { google: Record<string, unknown> }).google)} ${summarizeBatchResult((payload as { reddit: Record<string, unknown> }).reddit)}`
-          : friendlyAgentSummary(agent === "lead-radar-compose" ? "outreach-composer" : agent, payload);
+          : friendlyAgentSummary(
+              agent === "lead-radar-compose" ? "outreach-composer" : agent,
+              payload,
+            );
       toast.success(
         agent === "lead-radar-scan"
           ? "Google та Reddit hunter відпрацювали"
@@ -454,7 +455,9 @@ function Content() {
                             публікація
                           </a>
                         )}
-                        {o.failed_reason && <span className="text-destructive">{o.failed_reason}</span>}
+                        {o.failed_reason && (
+                          <span className="text-destructive">{o.failed_reason}</span>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -622,7 +625,9 @@ function ProspectRow({ prospect, tenantId }: { prospect: Prospect; tenantId: str
             tenantId={tenantId}
             prospectId={prospect.id}
             prospectName={prospect.title ?? prospect.author_handle ?? "лід"}
-            defaultPeer={prospect.author_handle ? `@${prospect.author_handle.replace(/^@/, "")}` : ""}
+            defaultPeer={
+              prospect.author_handle ? `@${prospect.author_handle.replace(/^@/, "")}` : ""
+            }
             defaultText={`Привіт! Побачив ваш запит${prospect.title ? ` «${prospect.title}»` : ""} — у MARQ є кілька ідей, що можуть зекономити години ручної роботи. Цікаво коротко обмінятись?`}
           />
           <Button
@@ -631,8 +636,7 @@ function ProspectRow({ prospect, tenantId }: { prospect: Prospect; tenantId: str
             disabled={busy}
             onClick={() => updateStatus("queued")}
           >
-            <Play className="mr-1 h-3.5 w-3.5" />
-            У чергу
+            <Play className="mr-1 h-3.5 w-3.5" />У чергу
           </Button>
           <Button
             size="sm"

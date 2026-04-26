@@ -19,8 +19,7 @@ const schema = z.object({
 export const Route = createFileRoute("/api/public/contact")({
   server: {
     handlers: {
-      OPTIONS: async () =>
-        new Response(null, { status: 204, headers: CORS }),
+      OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
       POST: async ({ request }) => {
         try {
           const body = await request.json().catch(() => null);
@@ -34,7 +33,8 @@ export const Route = createFileRoute("/api/public/contact")({
           const { name, email, message, website } = parsed.data;
 
           const url = process.env.VITE_SUPABASE_URL!;
-          const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY!;
+          const key =
+            process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY!;
           const supa = createClient<Database>(url, key);
 
           const { error } = await supa.from("lead_prospects").insert({
@@ -50,10 +50,10 @@ export const Route = createFileRoute("/api/public/contact")({
 
           if (error) {
             console.error("contact form insert failed", error);
-            return new Response(
-              JSON.stringify({ ok: false, error: "Storage failed" }),
-              { status: 200, headers: { "Content-Type": "application/json", ...CORS } },
-            );
+            return new Response(JSON.stringify({ ok: false, error: "Storage failed" }), {
+              status: 200,
+              headers: { "Content-Type": "application/json", ...CORS },
+            });
           }
 
           return new Response(JSON.stringify({ ok: true }), {

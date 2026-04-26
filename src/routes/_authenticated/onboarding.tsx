@@ -125,9 +125,15 @@ function OnboardingPage() {
           .eq("tenant_id", tenantId)
           .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
       ]);
-      const firstErr = [tn.error, prod.error, cust.error, cfg.error, tg.error, mem.error, ev.error].find(
-        Boolean,
-      );
+      const firstErr = [
+        tn.error,
+        prod.error,
+        cust.error,
+        cfg.error,
+        tg.error,
+        mem.error,
+        ev.error,
+      ].find(Boolean);
       if (firstErr) throw firstErr;
       const features = (cfg.data?.features ?? {}) as Record<string, unknown>;
       // s5 (tracking) — рахуємо як готовий, якщо є хоч 1 подія за останні 7 днів
@@ -190,7 +196,9 @@ function OnboardingPage() {
 
   const stepDone = (i: number): boolean => {
     if (!status) return false;
-    return [status.s1, status.s2, status.s3, status.s4, status.s5, status.s6, status.s7][i] ?? false;
+    return (
+      [status.s1, status.s2, status.s3, status.s4, status.s5, status.s6, status.s7][i] ?? false
+    );
   };
 
   const steps: Array<{ titleKey: TKey; descKey: TKey; render: () => ReactElement }> = [
@@ -978,10 +986,42 @@ function OnboardingError({
 
 function slugify(input: string): string {
   const map: Record<string, string> = {
-    а: "a", б: "b", в: "v", г: "h", ґ: "g", д: "d", е: "e", є: "ie", ж: "zh", з: "z",
-    и: "y", і: "i", ї: "i", й: "i", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p",
-    р: "r", с: "s", т: "t", у: "u", ф: "f", х: "kh", ц: "ts", ч: "ch", ш: "sh", щ: "shch",
-    ь: "", ю: "iu", я: "ia", "'": "", "`": "", "ʼ": "",
+    а: "a",
+    б: "b",
+    в: "v",
+    г: "h",
+    ґ: "g",
+    д: "d",
+    е: "e",
+    є: "ie",
+    ж: "zh",
+    з: "z",
+    и: "y",
+    і: "i",
+    ї: "i",
+    й: "i",
+    к: "k",
+    л: "l",
+    м: "m",
+    н: "n",
+    о: "o",
+    п: "p",
+    р: "r",
+    с: "s",
+    т: "t",
+    у: "u",
+    ф: "f",
+    х: "kh",
+    ц: "ts",
+    ч: "ch",
+    ш: "sh",
+    щ: "shch",
+    ь: "",
+    ю: "iu",
+    я: "ia",
+    "'": "",
+    "`": "",
+    ʼ: "",
   };
   return (
     input
@@ -1091,9 +1131,7 @@ function CreateFirstTenant({
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="biz-slug">
-              {lang === "ua" ? "Адреса вітрини" : "Storefront URL"}
-            </Label>
+            <Label htmlFor="biz-slug">{lang === "ua" ? "Адреса вітрини" : "Storefront URL"}</Label>
             <div className="flex items-center gap-1 rounded-md border bg-muted/30 px-2 py-1.5 text-sm">
               <span className="text-muted-foreground">/s/</span>
               <Input

@@ -7,13 +7,7 @@ import { Bot, Crown, Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-export function AgentsPaywall({
-  tenantId,
-  status,
-}: {
-  tenantId: string;
-  status: string | null;
-}) {
+export function AgentsPaywall({ tenantId, status }: { tenantId: string; status: string | null }) {
   return (
     <div className="mx-auto max-w-2xl p-4 md:p-6">
       <Card className="border-primary/30 bg-gradient-to-br from-primary/5 via-background to-accent/5">

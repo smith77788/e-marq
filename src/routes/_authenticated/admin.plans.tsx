@@ -245,7 +245,9 @@ function PlanCard({
             </div>
             <div>
               Агентів дозволено:{" "}
-              <strong>{plan.agents_allowed.length === 0 ? "усі" : plan.agents_allowed.length}</strong>
+              <strong>
+                {plan.agents_allowed.length === 0 ? "усі" : plan.agents_allowed.length}
+              </strong>
             </div>
             <div>
               Бонус кредитів балансу:{" "}

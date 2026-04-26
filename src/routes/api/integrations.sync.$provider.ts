@@ -194,9 +194,7 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
                 };
                 // Якщо sku є — upsert по (tenant_id, sku); якщо немає — insert.
                 const q = sku
-                  ? supabaseAdmin
-                      .from("products")
-                      .upsert(payload, { onConflict: "tenant_id,sku" })
+                  ? supabaseAdmin.from("products").upsert(payload, { onConflict: "tenant_id,sku" })
                   : supabaseAdmin.from("products").insert(payload);
                 const { error } = await q;
                 if (error) {

@@ -182,13 +182,10 @@ function BrandSiteBuilderPage() {
   const template = templateQuery.data;
 
   // 2) Brand profile
-  const tenantId = urlTenant ?? currentTenantId ?? current?.tenant_id ?? tenants[0]?.tenant_id ?? null;
+  const tenantId =
+    urlTenant ?? currentTenantId ?? current?.tenant_id ?? tenants[0]?.tenant_id ?? null;
   const activeTenant = useMemo(
-    () =>
-      current ??
-      tenants.find((tt) => tt.tenant_id === tenantId) ??
-      tenants[0] ??
-      null,
+    () => current ?? tenants.find((tt) => tt.tenant_id === tenantId) ?? tenants[0] ?? null,
     [current, tenants, tenantId],
   );
   useEffect(() => {
@@ -344,7 +341,10 @@ function BrandSiteBuilderPage() {
     generateMut.mutate();
   };
 
-  if (loading || (!activeTenant && tenants.length === 0 && (templateQuery.isLoading || profileQuery.isLoading))) {
+  if (
+    loading ||
+    (!activeTenant && tenants.length === 0 && (templateQuery.isLoading || profileQuery.isLoading))
+  ) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-9 w-64" />
@@ -431,9 +431,7 @@ function BrandSiteBuilderPage() {
             <Button
               size="sm"
               onClick={handleGenerate}
-              disabled={
-                !draft?.brand_name.trim() || generateMut.isPending || saveMut.isPending
-              }
+              disabled={!draft?.brand_name.trim() || generateMut.isPending || saveMut.isPending}
               className="bg-gradient-primary text-primary-foreground"
             >
               <Wand2 className="mr-2 h-4 w-4" />

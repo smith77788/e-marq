@@ -77,7 +77,12 @@ export function MarketingHeader() {
         </nav>
         <div className="flex items-center gap-1 sm:gap-2">
           <LanguageSwitcher />
-          <Button asChild size="sm" variant="ghost" className="hidden xs:inline-flex sm:inline-flex">
+          <Button
+            asChild
+            size="sm"
+            variant="ghost"
+            className="hidden xs:inline-flex sm:inline-flex"
+          >
             <Link to="/login">{t("site.nav.signin")}</Link>
           </Button>
           <Button asChild size="sm" className="inline-flex">

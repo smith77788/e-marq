@@ -397,7 +397,8 @@ export function OutreachLeadsTab() {
       <Card>
         <CardContent className="space-y-2 p-3 sm:p-4">
           <p className="text-xs text-muted-foreground">
-            Запустити пошук для бренду <span className="font-medium text-foreground">{current?.tenant_name ?? ""}</span>
+            Запустити пошук для бренду{" "}
+            <span className="font-medium text-foreground">{current?.tenant_name ?? ""}</span>
           </p>
           <div className="flex flex-wrap items-center gap-2">
             {HUNTERS.map((h) => {
@@ -474,7 +475,11 @@ export function OutreachLeadsTab() {
               className="max-w-xs"
             />
             <Button size="sm" variant="outline" disabled={bulkBusy} onClick={bulkCompose}>
-              {bulkBusy ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Wand2 className="mr-1.5 h-3.5 w-3.5" />}
+              {bulkBusy ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Wand2 className="mr-1.5 h-3.5 w-3.5" />
+              )}
               Згенерувати драфти для нових
             </Button>
             <Button
@@ -570,8 +575,9 @@ function LeadRow({ lead }: { lead: OutreachLead }) {
     setBusy(true);
     // Optimistic update
     const prev = qc.getQueriesData<OutreachLead[]>({ queryKey: ["outreach-leads"] });
-    qc.setQueriesData<OutreachLead[]>({ queryKey: ["outreach-leads"] }, (old) =>
-      old?.map((l) => (l.id === lead.id ? { ...l, status: next } : l)) ?? old,
+    qc.setQueriesData<OutreachLead[]>(
+      { queryKey: ["outreach-leads"] },
+      (old) => old?.map((l) => (l.id === lead.id ? { ...l, status: next } : l)) ?? old,
     );
     const { error } = await supabase
       .from("outreach_leads")
@@ -818,8 +824,9 @@ function ActionRow({ action }: { action: OutreachAction }) {
   const setStatus = async (next: string) => {
     setBusy(true);
     const prev = qc.getQueriesData<OutreachAction[]>({ queryKey: ["outreach-actions"] });
-    qc.setQueriesData<OutreachAction[]>({ queryKey: ["outreach-actions"] }, (old) =>
-      old?.map((a) => (a.id === action.id ? { ...a, status: next } : a)) ?? old,
+    qc.setQueriesData<OutreachAction[]>(
+      { queryKey: ["outreach-actions"] },
+      (old) => old?.map((a) => (a.id === action.id ? { ...a, status: next } : a)) ?? old,
     );
     const { error } = await supabase
       .from("outreach_actions")
@@ -968,7 +975,12 @@ function ActionRow({ action }: { action: OutreachAction }) {
           </Button>
         )}
         {action.status === "rejected" && (
-          <Button size="sm" variant="ghost" disabled={busy} onClick={() => setStatus("pending_review")}>
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={busy}
+            onClick={() => setStatus("pending_review")}
+          >
             <RefreshCw className="mr-1 h-3.5 w-3.5" /> Повернути в pending
           </Button>
         )}
@@ -1124,7 +1136,9 @@ export function OutreachHunterSection() {
             Шукаємо людей з купівельним наміром у відкритих джерелах і пишемо корисні відповіді
             {current ? (
               <>
-                {" "}для бренду <span className="font-medium text-foreground">{current.tenant_name}</span>.
+                {" "}
+                для бренду{" "}
+                <span className="font-medium text-foreground">{current.tenant_name}</span>.
               </>
             ) : (
               "."

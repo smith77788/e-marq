@@ -39,7 +39,10 @@ function ContactPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name.trim(), email: email.trim(), message: message.trim() }),
       });
-      const data = (await res.json().catch(() => ({ ok: false }))) as { ok?: boolean; error?: string };
+      const data = (await res.json().catch(() => ({ ok: false }))) as {
+        ok?: boolean;
+        error?: string;
+      };
       if (data.ok) {
         toast.success(t("ct.toastOk"));
         setName("");

@@ -135,9 +135,7 @@ export function TenantQuickActionsDialog({
               /{tenant.tenant_slug}
             </Badge>
           </DialogTitle>
-          <DialogDescription>
-            Швидкі дії: статус · тариф · вхід як власник
-          </DialogDescription>
+          <DialogDescription>Швидкі дії: статус · тариф · вхід як власник</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -173,9 +171,7 @@ export function TenantQuickActionsDialog({
               </Button>
             </div>
             {!canChangeStatus && (
-              <p className="text-[11px] text-muted-foreground">
-                Немає права «Зміна статусу».
-              </p>
+              <p className="text-[11px] text-muted-foreground">Немає права «Зміна статусу».</p>
             )}
           </div>
 
@@ -199,9 +195,7 @@ export function TenantQuickActionsDialog({
                     <SelectItem key={p.key} value={p.key} className="text-xs">
                       {p.name}{" "}
                       <span className="ml-1 text-muted-foreground">
-                        ({p.price_cents_monthly === 0
-                          ? "free"
-                          : `${p.price_cents_monthly / 100}₴`})
+                        ({p.price_cents_monthly === 0 ? "free" : `${p.price_cents_monthly / 100}₴`})
                       </span>
                     </SelectItem>
                   ))}
@@ -220,23 +214,14 @@ export function TenantQuickActionsDialog({
               </Button>
             </div>
             {!canChangePlan && (
-              <p className="text-[11px] text-muted-foreground">
-                Немає права «Зміна тарифів».
-              </p>
+              <p className="text-[11px] text-muted-foreground">Немає права «Зміна тарифів».</p>
             )}
           </div>
 
           {/* Enter as owner */}
           <div className="space-y-2">
-            <Label className="text-xs uppercase tracking-wide text-muted-foreground">
-              Доступ
-            </Label>
-            <Button
-              variant="secondary"
-              className="w-full"
-              onClick={enterAsOwner}
-              disabled={busy}
-            >
+            <Label className="text-xs uppercase tracking-wide text-muted-foreground">Доступ</Label>
+            <Button variant="secondary" className="w-full" onClick={enterAsOwner} disabled={busy}>
               <LogIn className="mr-2 h-4 w-4" />
               Увійти як власник цього бренду
             </Button>

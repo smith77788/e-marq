@@ -134,7 +134,10 @@ function SignupPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           {planLabel && goingToCheckout && (
-            <Badge variant="outline" className="mb-2 w-fit border-primary/40 bg-primary/5 text-primary">
+            <Badge
+              variant="outline"
+              className="mb-2 w-fit border-primary/40 bg-primary/5 text-primary"
+            >
               Крок 2 з 3 · обрано тариф {planLabel}
             </Badge>
           )}

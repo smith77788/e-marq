@@ -186,12 +186,36 @@ export function OutreachSettingsTab() {
     mutationFn: async () => {
       if (!currentTenantId) throw new Error("Виберіть бренд");
       const rows: { tenant_id: string; key: string; value: Json }[] = [
-        { tenant_id: currentTenantId, key: "active_channels", value: form.active_channels as unknown as Json },
-        { tenant_id: currentTenantId, key: "rate_limits", value: form.rate_limits as unknown as Json },
-        { tenant_id: currentTenantId, key: "blocked_keywords", value: csvToList(form.blocked_keywords) as unknown as Json },
-        { tenant_id: currentTenantId, key: "intent_keywords", value: csvToList(form.intent_keywords) as unknown as Json },
-        { tenant_id: currentTenantId, key: "reddit_subreddits", value: csvToList(form.reddit_subreddits) as unknown as Json },
-        { tenant_id: currentTenantId, key: "telegram_channels", value: csvToList(form.telegram_channels) as unknown as Json },
+        {
+          tenant_id: currentTenantId,
+          key: "active_channels",
+          value: form.active_channels as unknown as Json,
+        },
+        {
+          tenant_id: currentTenantId,
+          key: "rate_limits",
+          value: form.rate_limits as unknown as Json,
+        },
+        {
+          tenant_id: currentTenantId,
+          key: "blocked_keywords",
+          value: csvToList(form.blocked_keywords) as unknown as Json,
+        },
+        {
+          tenant_id: currentTenantId,
+          key: "intent_keywords",
+          value: csvToList(form.intent_keywords) as unknown as Json,
+        },
+        {
+          tenant_id: currentTenantId,
+          key: "reddit_subreddits",
+          value: csvToList(form.reddit_subreddits) as unknown as Json,
+        },
+        {
+          tenant_id: currentTenantId,
+          key: "telegram_channels",
+          value: csvToList(form.telegram_channels) as unknown as Json,
+        },
         {
           tenant_id: currentTenantId,
           key: "telegram_max_channels_per_run",
@@ -221,9 +245,21 @@ export function OutreachSettingsTab() {
             utm_medium: form.default_landing_utm_medium,
           } as unknown as Json,
         },
-        { tenant_id: currentTenantId, key: "reddit_posting_enabled", value: form.reddit_posting_enabled as unknown as Json },
-        { tenant_id: currentTenantId, key: "telegram_posting_enabled", value: form.telegram_posting_enabled as unknown as Json },
-        { tenant_id: currentTenantId, key: "instagram_posting_enabled", value: form.instagram_posting_enabled as unknown as Json },
+        {
+          tenant_id: currentTenantId,
+          key: "reddit_posting_enabled",
+          value: form.reddit_posting_enabled as unknown as Json,
+        },
+        {
+          tenant_id: currentTenantId,
+          key: "telegram_posting_enabled",
+          value: form.telegram_posting_enabled as unknown as Json,
+        },
+        {
+          tenant_id: currentTenantId,
+          key: "instagram_posting_enabled",
+          value: form.instagram_posting_enabled as unknown as Json,
+        },
       ];
 
       const { error } = await supabase
@@ -275,11 +311,7 @@ export function OutreachSettingsTab() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap items-center gap-2 pt-0">
-          <Button
-            size="sm"
-            disabled={!dirty || save.isPending}
-            onClick={() => save.mutate()}
-          >
+          <Button size="sm" disabled={!dirty || save.isPending} onClick={() => save.mutate()}>
             {save.isPending ? (
               <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
             ) : (
@@ -300,9 +332,7 @@ export function OutreachSettingsTab() {
             )}
             Скинути до збереженого
           </Button>
-          {dirty && (
-            <span className="text-xs text-warning">Є незбережені зміни</span>
-          )}
+          {dirty && <span className="text-xs text-warning">Є незбережені зміни</span>}
         </CardContent>
       </Card>
 

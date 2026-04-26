@@ -29,14 +29,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 type UserStatus = {
   bridge_ready: boolean;
-  status:
-    | "none"
-    | "code_sent"
-    | "password_required"
-    | "active"
-    | "expired"
-    | "logged_out"
-    | string;
+  status: "none" | "code_sent" | "password_required" | "active" | "expired" | "logged_out" | string;
   alive: boolean | null;
   phone: string | null;
   user_id: number | null;
@@ -266,7 +259,8 @@ export function TelegramUserConnectCard({ tenantId }: Props) {
               <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Smartphone className="h-3.5 w-3.5" />
-                  Код надіслано на <span className="font-medium text-foreground">{data?.phone}</span>
+                  Код надіслано на{" "}
+                  <span className="font-medium text-foreground">{data?.phone}</span>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="tg-code" className="text-xs">
@@ -300,9 +294,7 @@ export function TelegramUserConnectCard({ tenantId }: Props) {
                 <div className="flex flex-wrap gap-2">
                   <Button
                     onClick={() => signInM.mutate()}
-                    disabled={
-                      signInM.isPending || code.length < 4 || (needsPassword && !password)
-                    }
+                    disabled={signInM.isPending || code.length < 4 || (needsPassword && !password)}
                   >
                     {signInM.isPending ? (
                       <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
@@ -323,8 +315,8 @@ export function TelegramUserConnectCard({ tenantId }: Props) {
             )}
 
             <p className="text-xs text-muted-foreground">
-              Сесія зберігається зашифровано на сервері (AES-GCM). Ви можете завершити її
-              будь-якої миті — агенти негайно зупинять виконання.
+              Сесія зберігається зашифровано на сервері (AES-GCM). Ви можете завершити її будь-якої
+              миті — агенти негайно зупинять виконання.
             </p>
           </div>
         )}

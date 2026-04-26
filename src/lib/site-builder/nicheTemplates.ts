@@ -84,10 +84,10 @@ export function readNicheProfile(ctx: SafeBrandContext): NicheProfile {
 export function isWizardComplete(p: NicheProfile): boolean {
   return Boolean(
     p.business_type.trim() &&
-      p.target_audience.trim() &&
-      p.products_overview.trim() &&
-      p.usp.trim() &&
-      p.must_have_features.length >= 3,
+    p.target_audience.trim() &&
+    p.products_overview.trim() &&
+    p.usp.trim() &&
+    p.must_have_features.length >= 3,
   );
 }
 
@@ -154,7 +154,11 @@ function detectCategoryPreset(p: NicheProfile): Array<{ handle: string; name: st
 
 // ---------- Hero copy variants by tone ----------
 
-function heroByTone(brand: string, usp: string, tone: string): { headline: string; sub: string; cta: string } {
+function heroByTone(
+  brand: string,
+  usp: string,
+  tone: string,
+): { headline: string; sub: string; cta: string } {
   const u = usp || `Якісні товари для тих, хто цінує деталі`;
   switch (tone) {
     case "premium":
@@ -231,7 +235,9 @@ function faqStarter(brand: string, p: NicheProfile): Array<{ q: string; a: strin
 
 // ---------- Programmatic SEO landing ideas ----------
 
-function programmaticSeoIdeas(p: NicheProfile): Array<{ slug: string; title: string; intent: string }> {
+function programmaticSeoIdeas(
+  p: NicheProfile,
+): Array<{ slug: string; title: string; intent: string }> {
   const cats = detectCategoryPreset(p).map((c) => c.handle);
   const cities = ["kyiv", "lviv", "odesa", "kharkiv", "dnipro"];
   const ideas: Array<{ slug: string; title: string; intent: string }> = [];
@@ -471,7 +477,8 @@ ${
       ? "- /instagram + InstagramCTA — залиш.\n"
       : "- /instagram, InstagramCTA, FloatingInstagramButton — приховай.\n"
   }${
-    p.must_have_features.includes("category-landings") || p.must_have_features.includes("programmatic-seo")
+    p.must_have_features.includes("category-landings") ||
+    p.must_have_features.includes("programmatic-seo")
       ? "- /l/:slug + /category/:slug — згенеруй сторінки з programmatic_seo_seed (у seed.json).\n"
       : ""
   }
@@ -542,8 +549,7 @@ Resend API key, тощо) — у тебе має бути ВЛАСНИЙ Lovable
 export function pagesInventoryMd(ctx: SafeBrandContext): string {
   const p = readNicheProfile(ctx);
   const enabled = new Set(p.must_have_features);
-  const mark = (key: string, alwaysOn = false) =>
-    alwaysOn || enabled.has(key) ? "✅" : "🚫";
+  const mark = (key: string, alwaysOn = false) => (alwaysOn || enabled.has(key) ? "✅" : "🚫");
 
   return `# Інвентар сторінок шаблону basic-food.shop
 

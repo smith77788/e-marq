@@ -185,11 +185,10 @@ function Pricing() {
         </div>
 
         <div className="mx-auto mt-10 max-w-2xl rounded-lg border border-border bg-muted/20 p-6 text-center">
-          <p className="text-sm font-medium text-foreground">
-            {t("site.legal.contactSales")}
-          </p>
+          <p className="text-sm font-medium text-foreground">{t("site.legal.contactSales")}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Гібридні тарифи, custom-агенти, корпоративні умови та on-prem — обговорюємо індивідуально.
+            Гібридні тарифи, custom-агенти, корпоративні умови та on-prem — обговорюємо
+            індивідуально.
           </p>
           <Button asChild variant="outline" size="sm" className="mt-4">
             <Link to="/contact">{t("site.legal.contactSalesCta")}</Link>

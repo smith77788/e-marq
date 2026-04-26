@@ -199,7 +199,11 @@ function InviteCreator({
           </div>
         </div>
 
-        <Button onClick={() => create.mutate()} disabled={create.isPending} className="w-full sm:w-auto">
+        <Button
+          onClick={() => create.mutate()}
+          disabled={create.isPending}
+          className="w-full sm:w-auto"
+        >
           {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Згенерувати посилання
         </Button>
@@ -299,9 +303,7 @@ function PendingInvitations({ tenantId, brandName }: { tenantId: string; brandNa
             const url = `${window.location.origin}/invite/${inv.token}`;
             const expiresIn = Math.max(
               0,
-              Math.round(
-                (new Date(inv.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
-              ),
+              Math.round((new Date(inv.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
             );
             return (
               <li
@@ -333,9 +335,7 @@ function PendingInvitations({ tenantId, brandName }: { tenantId: string; brandNa
                     variant="outline"
                     className="h-7 px-2"
                     onClick={() => {
-                      navigator.clipboard
-                        .writeText(url)
-                        .then(() => toast.success("Скопійовано"));
+                      navigator.clipboard.writeText(url).then(() => toast.success("Скопійовано"));
                     }}
                   >
                     <Copy className="h-3 w-3" />

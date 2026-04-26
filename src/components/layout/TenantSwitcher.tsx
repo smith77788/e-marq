@@ -76,7 +76,13 @@ export function TenantSwitcher() {
 
   // Merge: own memberships first (with role + plan), then any extra brands
   // visible to admin only (so admin sees full list).
-  const merged: Array<MyTenant & { isAdminOnly?: boolean; verificationStatus?: string; rejectionReason?: string | null }> = useMemo(() => {
+  const merged: Array<
+    MyTenant & {
+      isAdminOnly?: boolean;
+      verificationStatus?: string;
+      rejectionReason?: string | null;
+    }
+  > = useMemo(() => {
     const owned = tenants ?? [];
     const vmap = verificationQuery.data;
     const withVerification = owned.map((t) => ({
@@ -152,7 +158,6 @@ export function TenantSwitcher() {
     void navigate({ to: "/brand", search: { tenant: id } });
   };
 
-
   const noneSelected = !current;
 
   return (
@@ -198,10 +203,7 @@ export function TenantSwitcher() {
             </div>
             <div className="flex items-center gap-1">
               {t.verificationStatus === "pending" ? (
-                <Badge
-                  variant="outline"
-                  className="border-warning/40 text-warning text-[10px]"
-                >
+                <Badge variant="outline" className="border-warning/40 text-warning text-[10px]">
                   <Clock className="mr-1 h-2.5 w-2.5" /> очікує
                 </Badge>
               ) : t.verificationStatus === "suspended" && t.rejectionReason ? (

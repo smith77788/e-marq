@@ -95,13 +95,7 @@ export function PendingTenantsCard() {
 
   return (
     <>
-      <Card
-        className={
-          items.length > 0
-            ? "border-warning/50 bg-warning/5"
-            : "border-dashed"
-        }
-      >
+      <Card className={items.length > 0 ? "border-warning/50 bg-warning/5" : "border-dashed"}>
         <CardHeader>
           <div className="flex items-center justify-between gap-2">
             <div>
@@ -146,7 +140,9 @@ export function PendingTenantsCard() {
                     <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       <span>
                         Власник:{" "}
-                        <span className="font-mono">{t.owner_email ?? t.owner_user_id.slice(0, 8)}</span>
+                        <span className="font-mono">
+                          {t.owner_email ?? t.owner_user_id.slice(0, 8)}
+                        </span>
                       </span>
                       <span className="inline-flex items-center gap-1">
                         <Clock className="h-3 w-3" />

@@ -230,7 +230,10 @@ function AdminUsersPage() {
                         </TableCell>
                       </TableRow>
                       {isOpen && (
-                        <TableRow key={`${u.user_id}-exp`} className="bg-muted/10 hover:bg-muted/10">
+                        <TableRow
+                          key={`${u.user_id}-exp`}
+                          className="bg-muted/10 hover:bg-muted/10"
+                        >
                           <TableCell colSpan={6} className="p-3">
                             <UserTenantsManager userId={u.user_id} />
                           </TableCell>

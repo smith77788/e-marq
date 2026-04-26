@@ -144,8 +144,8 @@ export function NicheWizard({
               Бриф для AI-генератора
             </CardTitle>
             <CardDescription className="max-w-2xl">
-              Відповіді сформують hero-копію, категорії, FAQ, блог-теми, програмні
-              SEO-лендінги та готовий промпт для Lovable у генерованому архіві.
+              Відповіді сформують hero-копію, категорії, FAQ, блог-теми, програмні SEO-лендінги та
+              готовий промпт для Lovable у генерованому архіві.
             </CardDescription>
           </div>
           <Badge
@@ -156,9 +156,7 @@ export function NicheWizard({
                 : "border-muted-foreground/30 text-muted-foreground"
             }
           >
-            {completeness.score === completeness.total && (
-              <Check className="mr-1 h-3 w-3" />
-            )}
+            {completeness.score === completeness.total && <Check className="mr-1 h-3 w-3" />}
             {completeness.score}/{completeness.total} заповнено
           </Badge>
         </div>
@@ -188,9 +186,7 @@ export function NicheWizard({
               value={draft.target_audience}
               onChange={(e) => set("target_audience", e.target.value)}
             />
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              Кому продаєте? Один рядок.
-            </p>
+            <p className="mt-1 text-[11px] text-muted-foreground">Кому продаєте? Один рядок.</p>
           </div>
         </div>
 
@@ -210,8 +206,7 @@ export function NicheWizard({
         {/* 4 */}
         <div>
           <Label className="mb-1 block text-xs">
-            4. Унікальна торгова пропозиція (USP){" "}
-            <span className="text-destructive">*</span>
+            4. Унікальна торгова пропозиція (USP) <span className="text-destructive">*</span>
           </Label>
           <Textarea
             rows={2}
@@ -252,9 +247,7 @@ export function NicheWizard({
 
         {/* 6. Features */}
         <div>
-          <Label className="mb-2 block text-xs">
-            6. Які фічі активувати? (мін. 3)
-          </Label>
+          <Label className="mb-2 block text-xs">6. Які фічі активувати? (мін. 3)</Label>
           <div className="space-y-3">
             {Object.entries(featureGroups).map(([group, items]) => (
               <div key={group}>
@@ -290,9 +283,7 @@ export function NicheWizard({
 
         {/* 7. Competitors */}
         <div>
-          <Label className="mb-2 block text-xs">
-            7. 1–3 сайти-бенчмарки (опційно, для тону)
-          </Label>
+          <Label className="mb-2 block text-xs">7. 1–3 сайти-бенчмарки (опційно, для тону)</Label>
           <div className="grid gap-2 md:grid-cols-3">
             {[0, 1, 2].map((i) => (
               <Input

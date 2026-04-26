@@ -5,11 +5,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { authorizeAgentRequest, jsonError, jsonOk } from "@/lib/acos/agentRuntime";
-import {
-  executeAction,
-  isBridgeConfigured,
-  type BridgeAction,
-} from "@/lib/telegram/mtprotoBridge";
+import { executeAction, isBridgeConfigured, type BridgeAction } from "@/lib/telegram/mtprotoBridge";
 
 const AGENT_ID = "tg-user-action-executor";
 const DEFAULT_BATCH = 25;
@@ -316,9 +312,7 @@ export const Route = createFileRoute("/hooks/agents/tg-user-action-executor")({
                 last_error: errMsg,
                 executed_at: new Date().toISOString(),
                 scheduled_for: isFlood
-                  ? new Date(
-                      Date.now() + (result.retry_after_seconds ?? 300) * 1000,
-                    ).toISOString()
+                  ? new Date(Date.now() + (result.retry_after_seconds ?? 300) * 1000).toISOString()
                   : new Date().toISOString(),
               } as never)
               .eq("id", row.id);
@@ -345,9 +339,7 @@ export const Route = createFileRoute("/hooks/agents/tg-user-action-executor")({
           const delayMs =
             1000 *
             (quota.delay_min_seconds +
-              Math.floor(
-                Math.random() * (quota.delay_max_seconds - quota.delay_min_seconds + 1),
-              ));
+              Math.floor(Math.random() * (quota.delay_max_seconds - quota.delay_min_seconds + 1)));
           await new Promise((r) => setTimeout(r, Math.min(delayMs, 5000)));
         }
 

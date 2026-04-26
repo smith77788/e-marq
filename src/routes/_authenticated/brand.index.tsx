@@ -79,8 +79,8 @@ function BrandPage() {
         <CardHeader>
           <CardTitle>Створіть свій перший бренд</CardTitle>
           <CardDescription>
-            Створіть бренд за хвилину. Активація — до 24 годин після перевірки супер-адміном.
-            Поки чекаєте — можна додати товари та підключити інтеграції.
+            Створіть бренд за хвилину. Активація — до 24 годин після перевірки супер-адміном. Поки
+            чекаєте — можна додати товари та підключити інтеграції.
           </CardDescription>
         </CardHeader>
         <div className="flex flex-wrap gap-2 px-6 pb-6">
@@ -99,7 +99,13 @@ function BrandPage() {
     return <CockpitSkeleton variant="owner" />;
   }
 
-  return <BrandCockpit currentTenantId={current.tenant_id} currentTenantName={current.tenant_name} currentTenantSlug={current.tenant_slug} />;
+  return (
+    <BrandCockpit
+      currentTenantId={current.tenant_id}
+      currentTenantName={current.tenant_name}
+      currentTenantSlug={current.tenant_slug}
+    />
+  );
 }
 
 function BrandCockpit({
@@ -141,9 +147,9 @@ function BrandCockpit({
               Бренд очікує верифікації
             </CardTitle>
             <CardDescription>
-              Зазвичай це займає <strong className="text-foreground">до 24 годин</strong>. Ми надішлемо
-              лист на вашу пошту, щойно бренд активують. Поки що можна підготувати каталог,
-              канали та інтеграції — все збережеться автоматично.
+              Зазвичай це займає <strong className="text-foreground">до 24 годин</strong>. Ми
+              надішлемо лист на вашу пошту, щойно бренд активують. Поки що можна підготувати
+              каталог, канали та інтеграції — все збережеться автоматично.
             </CardDescription>
           </CardHeader>
           <div className="flex flex-wrap gap-2 px-6 pb-6">
@@ -172,8 +178,8 @@ function BrandCockpit({
             </CardTitle>
             <CardDescription>
               <strong className="text-foreground">Причина:</strong>{" "}
-              {verification.data?.rejection_reason}. Зв&apos;яжіться з підтримкою або створіть
-              новий бренд із оновленими даними.
+              {verification.data?.rejection_reason}. Зв&apos;яжіться з підтримкою або створіть новий
+              бренд із оновленими даними.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -199,147 +205,151 @@ function BrandCockpitInner({
   currentTenantSlug: string;
   t: ReturnType<typeof useT>["t"];
 }) {
-  const current = { tenant_id: currentTenantId, tenant_name: currentTenantName, tenant_slug: currentTenantSlug };
+  const current = {
+    tenant_id: currentTenantId,
+    tenant_name: currentTenantName,
+    tenant_slug: currentTenantSlug,
+  };
   return (
     <>
-    <div className="reveal-stagger space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
-              <Bot className="h-4 w-4 text-primary-foreground" />
-            </span>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              {current.tenant_name}
-            </h1>
-            <Badge variant="outline" className="font-mono text-[10px]">
-              /{current.tenant_slug}
-            </Badge>
-            <Badge variant="outline" className="border-success/40 text-success text-[10px]">
-              <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-              {t("brand.live")}
-            </Badge>
+      <div className="reveal-stagger space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
+                <Bot className="h-4 w-4 text-primary-foreground" />
+              </span>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                {current.tenant_name}
+              </h1>
+              <Badge variant="outline" className="font-mono text-[10px]">
+                /{current.tenant_slug}
+              </Badge>
+              <Badge variant="outline" className="border-success/40 text-success text-[10px]">
+                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                {t("brand.live")}
+              </Badge>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">{t("brand.missionSubtitle")}</p>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">{t("brand.missionSubtitle")}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button asChild variant="outline" size="sm">
-            <Link to="/brand/site-builder" search={{ tenant: current.tenant_id }}>
-              <Wand2 className="mr-1.5 h-3.5 w-3.5 text-accent" />
-              Конструктор сайту
-            </Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link to="/s/$slug" params={{ slug: current.tenant_slug }}>
-              <Settings className="mr-1.5 h-3.5 w-3.5 text-primary" />
-              Відкрити магазин
-            </Link>
-          </Button>
-        </div>
-      </div>
-
-      <SetupChecklist tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
-
-      <SetupReadinessCard tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
-
-      <PlanUsageCard tenantId={current.tenant_id} />
-
-      <OwnerTelegramBindCard tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
-
-      <DnTradeIntegrationCardGuard tenantId={current.tenant_id} />
-
-      <CockpitHero tenantId={current.tenant_id} />
-
-      <AskPinsBoard />
-
-      <AnalyticsWindowProvider initial={30}>
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            {t("brand.revenuePerf")}
-          </h2>
-          <AnalyticsWindowToggle />
-        </div>
-
-        <div className="grid gap-4 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <RevenueTrendChart tenantId={current.tenant_id} />
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/brand/site-builder" search={{ tenant: current.tenant_id }}>
+                <Wand2 className="mr-1.5 h-3.5 w-3.5 text-accent" />
+                Конструктор сайту
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/s/$slug" params={{ slug: current.tenant_slug }}>
+                <Settings className="mr-1.5 h-3.5 w-3.5 text-primary" />
+                Відкрити магазин
+              </Link>
+            </Button>
           </div>
-          <FunnelChart tenantId={current.tenant_id} />
         </div>
 
-        <KpiDashboard tenantId={current.tenant_id} />
-      </AnalyticsWindowProvider>
+        <SetupChecklist tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <LifecycleDistribution tenantId={current.tenant_id} />
-        <CohortRetention tenantId={current.tenant_id} />
-      </div>
+        <SetupReadinessCard tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
 
-      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-        {t("brand.autonomousFleet")}
-      </h2>
+        <PlanUsageCard tenantId={current.tenant_id} />
 
-      <AgentHealthHeatmap tenantId={current.tenant_id} />
+        <OwnerTelegramBindCard tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
 
-      <RevenueFeed tenantId={current.tenant_id} />
+        <DnTradeIntegrationCardGuard tenantId={current.tenant_id} />
 
-      <section id="insights" className="scroll-mt-24 space-y-6">
-        <InsightsPanel tenantId={current.tenant_id} />
-      </section>
+        <CockpitHero tenantId={current.tenant_id} />
 
-      <AgentTimeline tenantId={current.tenant_id} />
+        <AskPinsBoard />
 
-      <MemoryInspector tenantId={current.tenant_id} />
+        <AnalyticsWindowProvider initial={30}>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              {t("brand.revenuePerf")}
+            </h2>
+            <AnalyticsWindowToggle />
+          </div>
 
-      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-        {t("brand.customersChannels")}
-      </h2>
+          <div className="grid gap-4 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <RevenueTrendChart tenantId={current.tenant_id} />
+            </div>
+            <FunnelChart tenantId={current.tenant_id} />
+          </div>
 
-      <section id="customers" className="scroll-mt-24 space-y-6">
-        <TopCustomers tenantId={current.tenant_id} />
-        <div className="grid gap-6 lg:grid-cols-2">
-          <CustomerRoster tenantId={current.tenant_id} />
-          <ChannelSetup tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
+          <KpiDashboard tenantId={current.tenant_id} />
+        </AnalyticsWindowProvider>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <LifecycleDistribution tenantId={current.tenant_id} />
+          <CohortRetention tenantId={current.tenant_id} />
         </div>
-      </section>
 
-      <section id="channels" className="scroll-mt-24 space-y-4">
         <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          {t("sb.channels")}
+          {t("brand.autonomousFleet")}
         </h2>
-        <ChannelSetup tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
-      </section>
 
-      <IntegrationGuide tenantSlug={current.tenant_slug} />
+        <AgentHealthHeatmap tenantId={current.tenant_id} />
 
-      <Card className="border-dashed">
-        <CardHeader>
-          <CardTitle className="text-sm flex items-center gap-2">
-            <Settings className="h-4 w-4 text-muted-foreground" />
-            Магазин і каталог
-          </CardTitle>
-          <CardDescription className="text-xs">
-            Ваш публічний магазин:{" "}
-            <Link
-              to="/s/$slug"
-              params={{ slug: current.tenant_slug }}
-              className="text-primary hover:underline"
-            >
-              /s/{current.tenant_slug}
-            </Link>
-            . Дизайн, контент і колір магазину налаштовуйте у{" "}
-            <Link
-              to="/brand/site-builder"
-              search={{ tenant: current.tenant_id }}
-              className="text-primary hover:underline"
-            >
-              Конструкторі сайту
-            </Link>
-            .
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    </div>
+        <RevenueFeed tenantId={current.tenant_id} />
+
+        <section id="insights" className="scroll-mt-24 space-y-6">
+          <InsightsPanel tenantId={current.tenant_id} />
+        </section>
+
+        <AgentTimeline tenantId={current.tenant_id} />
+
+        <MemoryInspector tenantId={current.tenant_id} />
+
+        <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          {t("brand.customersChannels")}
+        </h2>
+
+        <section id="customers" className="scroll-mt-24 space-y-6">
+          <TopCustomers tenantId={current.tenant_id} />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <CustomerRoster tenantId={current.tenant_id} />
+            <ChannelSetup tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
+          </div>
+        </section>
+
+        <section id="channels" className="scroll-mt-24 space-y-4">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            {t("sb.channels")}
+          </h2>
+          <ChannelSetup tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
+        </section>
+
+        <IntegrationGuide tenantSlug={current.tenant_slug} />
+
+        <Card className="border-dashed">
+          <CardHeader>
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Settings className="h-4 w-4 text-muted-foreground" />
+              Магазин і каталог
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Ваш публічний магазин:{" "}
+              <Link
+                to="/s/$slug"
+                params={{ slug: current.tenant_slug }}
+                className="text-primary hover:underline"
+              >
+                /s/{current.tenant_slug}
+              </Link>
+              . Дизайн, контент і колір магазину налаштовуйте у{" "}
+              <Link
+                to="/brand/site-builder"
+                search={{ tenant: current.tenant_id }}
+                className="text-primary hover:underline"
+              >
+                Конструкторі сайту
+              </Link>
+              .
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
     </>
   );
 }

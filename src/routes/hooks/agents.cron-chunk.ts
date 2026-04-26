@@ -153,8 +153,7 @@ export const Route = createFileRoute("/hooks/agents/cron-chunk")({
                 return {
                   agent: a,
                   ok: res.ok,
-                  insights_created:
-                    typeof j.insights_created === "number" ? j.insights_created : 0,
+                  insights_created: typeof j.insights_created === "number" ? j.insights_created : 0,
                 };
               }),
             );
