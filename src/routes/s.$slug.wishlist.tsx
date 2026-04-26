@@ -35,6 +35,14 @@ export const Route = createFileRoute("/s/$slug/wishlist")({
       </p>
     </div>
   ),
+  notFoundComponent: () => (
+    <div className="mx-auto max-w-4xl px-4 py-12 text-center">
+      <p className="text-sm text-muted-foreground">Магазин не знайдено.</p>
+      <Link to="/" className="mt-3 inline-flex text-sm text-primary underline">
+        На головну
+      </Link>
+    </div>
+  ),
   component: WishlistPage,
 });
 
