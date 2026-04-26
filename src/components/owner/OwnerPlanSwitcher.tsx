@@ -170,7 +170,13 @@ export function OwnerPlanSwitcher({
                   className="mt-4 w-full"
                   variant={isCurrent ? "outline" : "default"}
                   disabled={isCurrent || change.isPending}
-                  onClick={() => change.mutate(p.key)}
+                  onClick={() => {
+                    trackBilling(tenantId, "funnel.payment_started", {
+                      plan: p.key,
+                      from_pricing: !!highlightPlanKey && p.key === highlightPlanKey,
+                    });
+                    change.mutate(p.key);
+                  }}
                 >
                   {isCurrent
                     ? "Уже активний"
