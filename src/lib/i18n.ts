@@ -4,8 +4,20 @@
  */
 import { useSyncExternalStore } from "react";
 
-export type Lang = "ua" | "en";
+export type Lang = "ua" | "en" | "ru";
 const STORAGE_KEY = "acos.lang";
+
+export const LANG_LABELS: Record<Lang, string> = {
+  ua: "Українська",
+  en: "English",
+  ru: "Русский",
+};
+
+export const LANG_SHORT: Record<Lang, string> = {
+  ua: "UA",
+  en: "EN",
+  ru: "RU",
+};
 
 const dict = {
   ua: {
@@ -2762,7 +2774,11 @@ const dict = {
     "sf.collection.sort.nameAsc": "By name",
     "sf.breadcrumb.shop": "Shop",
   },
-} satisfies Record<Lang, Record<string, string>>;
+  // Російський словник — поки порожній. Усі ключі автоматично падають
+  // на українські значення (див. lookup нижче). Перекладені ключі
+  // додавайте сюди поступово — вони одразу почнуть використовуватись.
+  ru: {} as Partial<Record<string, string>>,
+} satisfies { ua: Record<string, string>; en: Record<string, string>; ru: Partial<Record<string, string>> };
 
 export type TKey = keyof (typeof dict)["ua"];
 
@@ -2770,8 +2786,13 @@ let current: Lang = "ua";
 const listeners = new Set<() => void>();
 
 function readInitial(): Lang {
-  // Українська — єдина мова інтерфейсу. Старий збережений вибір (наприклад "en")
-  // ігноруємо, щоб одразу прибрати англомовні тексти.
+  if (typeof window === "undefined") return "ua";
+  try {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    if (saved === "ua" || saved === "en" || saved === "ru") return saved;
+  } catch {
+    /* ignore */
+  }
   return "ua";
 }
 
@@ -2783,13 +2804,23 @@ export function getLang(): Lang {
   return current;
 }
 
+/** Lookup з fallback: для RU спершу шукаємо в ru, потім падаємо на ua. */
+function lookup(lang: Lang, key: string): string | undefined {
+  if (lang === "ru") {
+    return dict.ru[key] ?? dict.ua[key as TKey];
+  }
+  return (dict[lang] as Record<string, string>)[key];
+}
+
 export function setLang(lang: Lang) {
-  // Перемикання мови вимкнено: інтерфейс лишається українською.
-  // Підпис лишаємо для зворотної сумісності з кодом, що його викликає.
-  void lang;
-  current = "ua";
+  if (lang !== "ua" && lang !== "en" && lang !== "ru") return;
+  current = lang;
   if (typeof window !== "undefined") {
-    window.localStorage.setItem(STORAGE_KEY, "ua");
+    try {
+      window.localStorage.setItem(STORAGE_KEY, lang);
+    } catch {
+      /* ignore */
+    }
   }
   for (const fn of listeners) fn();
 }
@@ -2811,11 +2842,12 @@ export function useT() {
   return {
     lang,
     setLang,
-    t: (key: TKey, fallback?: string) => dict[lang][key] ?? fallback ?? key,
+    t: (key: TKey, fallback?: string) => lookup(lang, key) ?? fallback ?? key,
   };
 }
 
 /** Чистий helper (для не-React коду). */
 export function tStatic(key: TKey, lang: Lang = current): string {
-  return dict[lang][key] ?? key;
+  return lookup(lang, key) ?? key;
 }
+
