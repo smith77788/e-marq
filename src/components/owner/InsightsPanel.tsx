@@ -84,9 +84,12 @@ const TYPE_STYLE: Record<string, { Icon: typeof Lightbulb; cls: string }> = {
   },
 };
 
-function pickCopy(metrics: Record<string, unknown>, lang: "ua" | "en"): InsightCopy | null {
+function pickCopy(metrics: Record<string, unknown>, lang: "ua" | "en" | "ru"): InsightCopy | null {
   const raw = metrics?._copy as LocalizedCopy | undefined;
-  if (raw && typeof raw === "object" && raw[lang]) return raw[lang];
+  if (!raw || typeof raw !== "object") return null;
+  // RU копії поки немає — падаємо на UA
+  const effective = lang === "ru" ? "ua" : lang;
+  if (raw[effective]) return raw[effective];
   return null;
 }
 
