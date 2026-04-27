@@ -4,8 +4,20 @@
  */
 import { useSyncExternalStore } from "react";
 
-export type Lang = "ua" | "en";
+export type Lang = "ua" | "en" | "ru";
 const STORAGE_KEY = "acos.lang";
+
+export const LANG_LABELS: Record<Lang, string> = {
+  ua: "Українська",
+  en: "English",
+  ru: "Русский",
+};
+
+export const LANG_SHORT: Record<Lang, string> = {
+  ua: "UA",
+  en: "EN",
+  ru: "RU",
+};
 
 const dict = {
   ua: {
