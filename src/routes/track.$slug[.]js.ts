@@ -19,8 +19,12 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 export const Route = createFileRoute("/track/$slug.js")({
   server: {
     handlers: {
-      GET: async ({ params, request }) => {
-        const slug = params.slug;
+      GET: async ({ request }) => {
+        // Param key is literally "slug.js" because of the [.]js suffix in the
+        // file name, so we extract the slug from the URL path directly.
+        const url = new URL(request.url);
+        const match = url.pathname.match(/\/track\/([^/]+?)\.js$/);
+        const slug = match?.[1] ?? "";
         const { data: tenant } = await supabaseAdmin
           .from("tenants")
           .select("id, slug, status")
