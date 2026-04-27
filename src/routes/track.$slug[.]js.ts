@@ -16,7 +16,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-export const Route = createFileRoute("/track/$slug/js")({
+export const Route = createFileRoute("/track/$slug.js")({
   server: {
     handlers: {
       GET: async ({ params, request }) => {
