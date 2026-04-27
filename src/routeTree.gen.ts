@@ -26,6 +26,7 @@ import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TrackSlugDotjsRouteImport } from './routes/track.$slug[.]js'
 import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as MSlugRouteImport } from './routes/m.$slug'
 import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
@@ -38,7 +39,6 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as SSlugIndexRouteImport } from './routes/s.$slug.index'
 import { Route as AuthenticatedBrandIndexRouteImport } from './routes/_authenticated/brand.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
-import { Route as TrackSlugJsRouteImport } from './routes/track.$slug.js'
 import { Route as SSlugWishlistRouteImport } from './routes/s.$slug.wishlist'
 import { Route as SSlugSearchRouteImport } from './routes/s.$slug.search'
 import { Route as SSlugCheckoutRouteImport } from './routes/s.$slug.checkout'
@@ -317,6 +317,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackSlugDotjsRoute = TrackSlugDotjsRouteImport.update({
+  id: '/track/$slug.js',
+  path: '/track/$slug.js',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SSlugRoute = SSlugRouteImport.update({
   id: '/s/$slug',
   path: '/s/$slug',
@@ -376,11 +381,6 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
   getParentRoute: () => AuthenticatedRoute,
-} as any)
-const TrackSlugJsRoute = TrackSlugJsRouteImport.update({
-  id: '/track/$slug/js',
-  path: '/track/$slug/js',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const SSlugWishlistRoute = SSlugWishlistRouteImport.update({
   id: '/wishlist',
@@ -1493,6 +1493,7 @@ export interface FileRoutesByFullPath {
   '/hooks/ingest': typeof HooksIngestRoute
   '/m/$slug': typeof MSlugRoute
   '/s/$slug': typeof SSlugRouteWithChildren
+  '/track/$slug.js': typeof TrackSlugDotjsRoute
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   '/admin/health': typeof AuthenticatedAdminHealthRoute
@@ -1659,7 +1660,6 @@ export interface FileRoutesByFullPath {
   '/s/$slug/checkout': typeof SSlugCheckoutRoute
   '/s/$slug/search': typeof SSlugSearchRoute
   '/s/$slug/wishlist': typeof SSlugWishlistRoute
-  '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/brand/': typeof AuthenticatedBrandIndexRoute
   '/s/$slug/': typeof SSlugIndexRoute
@@ -1716,6 +1716,7 @@ export interface FileRoutesByTo {
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/m/$slug': typeof MSlugRoute
+  '/track/$slug.js': typeof TrackSlugDotjsRoute
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   '/admin/health': typeof AuthenticatedAdminHealthRoute
@@ -1882,7 +1883,6 @@ export interface FileRoutesByTo {
   '/s/$slug/checkout': typeof SSlugCheckoutRoute
   '/s/$slug/search': typeof SSlugSearchRoute
   '/s/$slug/wishlist': typeof SSlugWishlistRoute
-  '/track/$slug/js': typeof TrackSlugJsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/brand': typeof AuthenticatedBrandIndexRoute
   '/s/$slug': typeof SSlugIndexRoute
@@ -1942,6 +1942,7 @@ export interface FileRoutesById {
   '/hooks/ingest': typeof HooksIngestRoute
   '/m/$slug': typeof MSlugRoute
   '/s/$slug': typeof SSlugRouteWithChildren
+  '/track/$slug.js': typeof TrackSlugDotjsRoute
   '/_authenticated/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/_authenticated/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   '/_authenticated/admin/health': typeof AuthenticatedAdminHealthRoute
@@ -2108,7 +2109,6 @@ export interface FileRoutesById {
   '/s/$slug/checkout': typeof SSlugCheckoutRoute
   '/s/$slug/search': typeof SSlugSearchRoute
   '/s/$slug/wishlist': typeof SSlugWishlistRoute
-  '/track/$slug/js': typeof TrackSlugJsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/brand/': typeof AuthenticatedBrandIndexRoute
   '/s/$slug/': typeof SSlugIndexRoute
@@ -2168,6 +2168,7 @@ export interface FileRouteTypes {
     | '/hooks/ingest'
     | '/m/$slug'
     | '/s/$slug'
+    | '/track/$slug.js'
     | '/admin/commands'
     | '/admin/dntrade-health'
     | '/admin/health'
@@ -2334,7 +2335,6 @@ export interface FileRouteTypes {
     | '/s/$slug/checkout'
     | '/s/$slug/search'
     | '/s/$slug/wishlist'
-    | '/track/$slug/js'
     | '/admin/'
     | '/brand/'
     | '/s/$slug/'
@@ -2391,6 +2391,7 @@ export interface FileRouteTypes {
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
     | '/m/$slug'
+    | '/track/$slug.js'
     | '/admin/commands'
     | '/admin/dntrade-health'
     | '/admin/health'
@@ -2557,7 +2558,6 @@ export interface FileRouteTypes {
     | '/s/$slug/checkout'
     | '/s/$slug/search'
     | '/s/$slug/wishlist'
-    | '/track/$slug/js'
     | '/admin'
     | '/brand'
     | '/s/$slug'
@@ -2616,6 +2616,7 @@ export interface FileRouteTypes {
     | '/hooks/ingest'
     | '/m/$slug'
     | '/s/$slug'
+    | '/track/$slug.js'
     | '/_authenticated/admin/commands'
     | '/_authenticated/admin/dntrade-health'
     | '/_authenticated/admin/health'
@@ -2782,7 +2783,6 @@ export interface FileRouteTypes {
     | '/s/$slug/checkout'
     | '/s/$slug/search'
     | '/s/$slug/wishlist'
-    | '/track/$slug/js'
     | '/_authenticated/admin/'
     | '/_authenticated/brand/'
     | '/s/$slug/'
@@ -2838,6 +2838,7 @@ export interface RootRouteChildren {
   HooksIngestRoute: typeof HooksIngestRoute
   MSlugRoute: typeof MSlugRoute
   SSlugRoute: typeof SSlugRouteWithChildren
+  TrackSlugDotjsRoute: typeof TrackSlugDotjsRoute
   ApiAiAskRoute: typeof ApiAiAskRoute
   ApiDomainsVerifyRoute: typeof ApiDomainsVerifyRoute
   ApiEmailCampaignSendRoute: typeof ApiEmailCampaignSendRoute
@@ -2973,7 +2974,6 @@ export interface RootRouteChildren {
   HooksIntegrationsDntradeWeeklyDigestRoute: typeof HooksIntegrationsDntradeWeeklyDigestRoute
   HooksTelegramNotifyOwnerRoute: typeof HooksTelegramNotifyOwnerRoute
   HooksTelegramPollRoute: typeof HooksTelegramPollRoute
-  TrackSlugJsRoute: typeof TrackSlugJsRoute
   ApiIntegrationsSyncProviderRoute: typeof ApiIntegrationsSyncProviderRoute
   ApiIntegrationsVerifyProviderRoute: typeof ApiIntegrationsVerifyProviderRoute
   ApiOrdersOrderIdTelegramMessageRoute: typeof ApiOrdersOrderIdTelegramMessageRoute
@@ -3118,6 +3118,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/track/$slug.js': {
+      id: '/track/$slug.js'
+      path: '/track/$slug.js'
+      fullPath: '/track/$slug.js'
+      preLoaderRoute: typeof TrackSlugDotjsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/s/$slug': {
       id: '/s/$slug'
       path: '/s/$slug'
@@ -3201,13 +3208,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
-    }
-    '/track/$slug/js': {
-      id: '/track/$slug/js'
-      path: '/track/$slug/js'
-      fullPath: '/track/$slug/js'
-      preLoaderRoute: typeof TrackSlugJsRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/s/$slug/wishlist': {
       id: '/s/$slug/wishlist'
@@ -4742,6 +4742,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksIngestRoute: HooksIngestRoute,
   MSlugRoute: MSlugRoute,
   SSlugRoute: SSlugRouteWithChildren,
+  TrackSlugDotjsRoute: TrackSlugDotjsRoute,
   ApiAiAskRoute: ApiAiAskRoute,
   ApiDomainsVerifyRoute: ApiDomainsVerifyRoute,
   ApiEmailCampaignSendRoute: ApiEmailCampaignSendRoute,
@@ -4884,7 +4885,6 @@ const rootRouteChildren: RootRouteChildren = {
     HooksIntegrationsDntradeWeeklyDigestRoute,
   HooksTelegramNotifyOwnerRoute: HooksTelegramNotifyOwnerRoute,
   HooksTelegramPollRoute: HooksTelegramPollRoute,
-  TrackSlugJsRoute: TrackSlugJsRoute,
   ApiIntegrationsSyncProviderRoute: ApiIntegrationsSyncProviderRoute,
   ApiIntegrationsVerifyProviderRoute: ApiIntegrationsVerifyProviderRoute,
   ApiOrdersOrderIdTelegramMessageRoute: ApiOrdersOrderIdTelegramMessageRoute,
