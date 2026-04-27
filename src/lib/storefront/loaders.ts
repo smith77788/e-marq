@@ -122,14 +122,16 @@ export async function loadStorefrontShell(slug: string): Promise<StorefrontShell
     features: StorefrontConfig["features"];
   };
 
-  const { data: tenant, error: tErr } = await supabase
-    .from("tenants")
-    .select("id, name, slug, status")
-    .eq("id", cfgPayload.tenant_id)
-    .eq("status", "active")
-    .maybeSingle();
-  if (tErr) throw tErr;
-  if (!tenant) throw notFound();
+  // `get_storefront_config` is SECURITY DEFINER and already filters by
+  // active tenant + slug — re-querying public.tenants directly fails for
+  // anonymous visitors (RLS blocks SELECT for the `anon` role). Synthesize
+  // the tenant shell from the RPC payload instead.
+  const tenant: StorefrontTenant = {
+    id: cfgPayload.tenant_id,
+    name: cfgPayload.brand_name,
+    slug,
+    status: "active",
+  };
 
   // Try v2 first (richer data: compare_at_price, tags, has_variants).
   let products: StorefrontProduct[] = [];
