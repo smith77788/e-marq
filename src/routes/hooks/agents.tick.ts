@@ -40,15 +40,12 @@ export const Route = createFileRoute("/hooks/agents/tick")({
           if ("error" in ctx) return jsonError(ctx.error, ctx.status);
         }
 
+        // tick.ts is cron-only — every iteration runs under the same cron context.
+        const tickCtx = { kind: "cron" } as const;
         const summary: Record<string, unknown>[] = [];
         for (const t of tenants) {
           // Per-tenant agent run so /agents.live and HealthCheckAgent can see the pulse.
-          // Ctx falls back to "cron" when iterating over the cron-loaded tenants list.
-          const tickCtx =
-            tenantId && "kind" in (await authorizeAgentRequest(token, t.id))
-              ? ({ kind: "cron" } as const)
-              : ({ kind: "cron" } as const);
-          let handle;
+          let handle: Awaited<ReturnType<typeof startAgentRun>>;
           try {
             handle = await startAgentRun(AGENT_ID, t.id, tickCtx);
           } catch (startErr) {
@@ -61,9 +58,17 @@ export const Route = createFileRoute("/hooks/agents/tick")({
           try {
             const sales = await runSalesBotForTenant(t.id, 10);
             const dispatch = await dispatchTenantOutbound(t.id, 50);
+            const salesSent =
+              typeof sales === "object" && sales !== null && "sent" in sales
+                ? (sales as { sent?: number }).sent ?? 0
+                : 0;
+            const dispatchSent =
+              typeof dispatch === "object" && dispatch !== null && "sent" in dispatch
+                ? (dispatch as { sent?: number }).sent ?? 0
+                : 0;
             await finishAgentRun(handle, 0, {
-              sales_messages: typeof sales === "object" && sales ? (sales as Record<string, unknown>).sent ?? 0 : 0,
-              dispatch_messages: typeof dispatch === "object" && dispatch ? (dispatch as Record<string, unknown>).sent ?? 0 : 0,
+              sales_messages: salesSent,
+              dispatch_messages: dispatchSent,
             });
             summary.push({ tenant_id: t.id, sales, dispatch });
           } catch (err) {
