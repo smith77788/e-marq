@@ -6,8 +6,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { dispatchTenantOutbound } from "@/lib/acos/channels";
 import { runSalesBotForTenant } from "@/lib/acos/salesBot";
-import { authorizeAgentRequest, jsonError } from "@/lib/acos/agentRuntime";
+import {
+  authorizeAgentRequest,
+  failAgentRun,
+  finishAgentRun,
+  jsonError,
+  startAgentRun,
+} from "@/lib/acos/agentRuntime";
 import { isCronToken } from "@/lib/acos/cronAuth";
+
+const AGENT_ID = "tick";
 
 export const Route = createFileRoute("/hooks/agents/tick")({
   server: {
@@ -34,11 +42,32 @@ export const Route = createFileRoute("/hooks/agents/tick")({
 
         const summary: Record<string, unknown>[] = [];
         for (const t of tenants) {
+          // Per-tenant agent run so /agents.live and HealthCheckAgent can see the pulse.
+          // Ctx falls back to "cron" when iterating over the cron-loaded tenants list.
+          const tickCtx =
+            tenantId && "kind" in (await authorizeAgentRequest(token, t.id))
+              ? ({ kind: "cron" } as const)
+              : ({ kind: "cron" } as const);
+          let handle;
+          try {
+            handle = await startAgentRun(AGENT_ID, t.id, tickCtx);
+          } catch (startErr) {
+            summary.push({
+              tenant_id: t.id,
+              error: `start_run_failed: ${startErr instanceof Error ? startErr.message : String(startErr)}`,
+            });
+            continue;
+          }
           try {
             const sales = await runSalesBotForTenant(t.id, 10);
             const dispatch = await dispatchTenantOutbound(t.id, 50);
+            await finishAgentRun(handle, 0, {
+              sales_messages: typeof sales === "object" && sales ? (sales as Record<string, unknown>).sent ?? 0 : 0,
+              dispatch_messages: typeof dispatch === "object" && dispatch ? (dispatch as Record<string, unknown>).sent ?? 0 : 0,
+            });
             summary.push({ tenant_id: t.id, sales, dispatch });
           } catch (err) {
+            await failAgentRun(handle, err);
             summary.push({
               tenant_id: t.id,
               error: err instanceof Error ? err.message : String(err),
