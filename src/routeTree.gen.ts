@@ -124,6 +124,7 @@ import { Route as HooksAgentsLearningLoopMonitorRouteImport } from './routes/hoo
 import { Route as HooksAgentsInventoryRebalanceRouteImport } from './routes/hooks/agents.inventory-rebalance'
 import { Route as HooksAgentsInventoryForecastRouteImport } from './routes/hooks/agents.inventory-forecast'
 import { Route as HooksAgentsIntegrationScoutRouteImport } from './routes/hooks/agents.integration-scout'
+import { Route as HooksAgentsHealthCheckRouteImport } from './routes/hooks/agents.health-check'
 import { Route as HooksAgentsGeoDemandRouteImport } from './routes/hooks/agents.geo-demand'
 import { Route as HooksAgentsFunnelHealerRouteImport } from './routes/hooks/agents.funnel-healer'
 import { Route as HooksAgentsFirstOrderFunnelRouteImport } from './routes/hooks/agents.first-order-funnel'
@@ -860,6 +861,11 @@ const HooksAgentsIntegrationScoutRoute =
     path: '/hooks/agents/integration-scout',
     getParentRoute: () => rootRouteImport,
   } as any)
+const HooksAgentsHealthCheckRoute = HooksAgentsHealthCheckRouteImport.update({
+  id: '/hooks/agents/health-check',
+  path: '/hooks/agents/health-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HooksAgentsGeoDemandRoute = HooksAgentsGeoDemandRouteImport.update({
   id: '/hooks/agents/geo-demand',
   path: '/hooks/agents/geo-demand',
@@ -1575,6 +1581,7 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/first-order-funnel': typeof HooksAgentsFirstOrderFunnelRoute
   '/hooks/agents/funnel-healer': typeof HooksAgentsFunnelHealerRoute
   '/hooks/agents/geo-demand': typeof HooksAgentsGeoDemandRoute
+  '/hooks/agents/health-check': typeof HooksAgentsHealthCheckRoute
   '/hooks/agents/integration-scout': typeof HooksAgentsIntegrationScoutRoute
   '/hooks/agents/inventory-forecast': typeof HooksAgentsInventoryForecastRoute
   '/hooks/agents/inventory-rebalance': typeof HooksAgentsInventoryRebalanceRoute
@@ -1798,6 +1805,7 @@ export interface FileRoutesByTo {
   '/hooks/agents/first-order-funnel': typeof HooksAgentsFirstOrderFunnelRoute
   '/hooks/agents/funnel-healer': typeof HooksAgentsFunnelHealerRoute
   '/hooks/agents/geo-demand': typeof HooksAgentsGeoDemandRoute
+  '/hooks/agents/health-check': typeof HooksAgentsHealthCheckRoute
   '/hooks/agents/integration-scout': typeof HooksAgentsIntegrationScoutRoute
   '/hooks/agents/inventory-forecast': typeof HooksAgentsInventoryForecastRoute
   '/hooks/agents/inventory-rebalance': typeof HooksAgentsInventoryRebalanceRoute
@@ -2024,6 +2032,7 @@ export interface FileRoutesById {
   '/hooks/agents/first-order-funnel': typeof HooksAgentsFirstOrderFunnelRoute
   '/hooks/agents/funnel-healer': typeof HooksAgentsFunnelHealerRoute
   '/hooks/agents/geo-demand': typeof HooksAgentsGeoDemandRoute
+  '/hooks/agents/health-check': typeof HooksAgentsHealthCheckRoute
   '/hooks/agents/integration-scout': typeof HooksAgentsIntegrationScoutRoute
   '/hooks/agents/inventory-forecast': typeof HooksAgentsInventoryForecastRoute
   '/hooks/agents/inventory-rebalance': typeof HooksAgentsInventoryRebalanceRoute
@@ -2250,6 +2259,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/first-order-funnel'
     | '/hooks/agents/funnel-healer'
     | '/hooks/agents/geo-demand'
+    | '/hooks/agents/health-check'
     | '/hooks/agents/integration-scout'
     | '/hooks/agents/inventory-forecast'
     | '/hooks/agents/inventory-rebalance'
@@ -2473,6 +2483,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/first-order-funnel'
     | '/hooks/agents/funnel-healer'
     | '/hooks/agents/geo-demand'
+    | '/hooks/agents/health-check'
     | '/hooks/agents/integration-scout'
     | '/hooks/agents/inventory-forecast'
     | '/hooks/agents/inventory-rebalance'
@@ -2698,6 +2709,7 @@ export interface FileRouteTypes {
     | '/hooks/agents/first-order-funnel'
     | '/hooks/agents/funnel-healer'
     | '/hooks/agents/geo-demand'
+    | '/hooks/agents/health-check'
     | '/hooks/agents/integration-scout'
     | '/hooks/agents/inventory-forecast'
     | '/hooks/agents/inventory-rebalance'
@@ -2892,6 +2904,7 @@ export interface RootRouteChildren {
   HooksAgentsFirstOrderFunnelRoute: typeof HooksAgentsFirstOrderFunnelRoute
   HooksAgentsFunnelHealerRoute: typeof HooksAgentsFunnelHealerRoute
   HooksAgentsGeoDemandRoute: typeof HooksAgentsGeoDemandRoute
+  HooksAgentsHealthCheckRoute: typeof HooksAgentsHealthCheckRoute
   HooksAgentsIntegrationScoutRoute: typeof HooksAgentsIntegrationScoutRoute
   HooksAgentsInventoryForecastRoute: typeof HooksAgentsInventoryForecastRoute
   HooksAgentsInventoryRebalanceRoute: typeof HooksAgentsInventoryRebalanceRoute
@@ -3802,6 +3815,13 @@ declare module '@tanstack/react-router' {
       path: '/hooks/agents/integration-scout'
       fullPath: '/hooks/agents/integration-scout'
       preLoaderRoute: typeof HooksAgentsIntegrationScoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/agents/health-check': {
+      id: '/hooks/agents/health-check'
+      path: '/hooks/agents/health-check'
+      fullPath: '/hooks/agents/health-check'
+      preLoaderRoute: typeof HooksAgentsHealthCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/geo-demand': {
@@ -4797,6 +4817,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsFirstOrderFunnelRoute: HooksAgentsFirstOrderFunnelRoute,
   HooksAgentsFunnelHealerRoute: HooksAgentsFunnelHealerRoute,
   HooksAgentsGeoDemandRoute: HooksAgentsGeoDemandRoute,
+  HooksAgentsHealthCheckRoute: HooksAgentsHealthCheckRoute,
   HooksAgentsIntegrationScoutRoute: HooksAgentsIntegrationScoutRoute,
   HooksAgentsInventoryForecastRoute: HooksAgentsInventoryForecastRoute,
   HooksAgentsInventoryRebalanceRoute: HooksAgentsInventoryRebalanceRoute,
