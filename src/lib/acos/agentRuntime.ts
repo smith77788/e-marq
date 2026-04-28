@@ -104,7 +104,24 @@ export async function finishAgentRun(
 }
 
 export async function failAgentRun(handle: RunHandle, err: unknown) {
-  const msg = err instanceof Error ? err.message : String(err);
+  // Normalise any error shape into a useful string. Supabase errors are plain
+  // objects and used to serialise as "[object Object]" — losing the cause and
+  // making /agents.live useless.
+  let msg: string;
+  if (err instanceof Error) {
+    msg = err.message;
+  } else if (err && typeof err === "object") {
+    const e = err as { message?: unknown; code?: unknown; details?: unknown; hint?: unknown };
+    const parts = [
+      typeof e.message === "string" ? e.message : null,
+      typeof e.code === "string" ? `code=${e.code}` : null,
+      typeof e.details === "string" ? `details=${e.details}` : null,
+      typeof e.hint === "string" ? `hint=${e.hint}` : null,
+    ].filter(Boolean);
+    msg = parts.length > 0 ? parts.join(" | ") : JSON.stringify(err).slice(0, 500);
+  } else {
+    msg = String(err);
+  }
   await supabaseAdmin
     .from("acos_agent_runs")
     .update({

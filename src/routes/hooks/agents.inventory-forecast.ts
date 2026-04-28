@@ -97,9 +97,11 @@ export const Route = createFileRoute("/hooks/agents/inventory-forecast")({
 
           for (const p of products) {
             const totalSold = sold.get(p.id) ?? 0;
-            const dailyVelocity = totalSold / WINDOW_DAYS;
-            const predicted30d = Math.round(dailyVelocity * HORIZON_DAYS);
-            const stock = p.stock ?? 0;
+            const dailyVelocity = WINDOW_DAYS > 0 ? totalSold / WINDOW_DAYS : 0;
+            const predicted30d = Number.isFinite(dailyVelocity)
+              ? Math.max(0, Math.round(dailyVelocity * HORIZON_DAYS))
+              : 0;
+            const stock = Number.isFinite(p.stock) ? p.stock ?? 0 : 0;
 
             let stockoutAt: string | null = null;
             if (dailyVelocity > 0 && stock > 0) {
