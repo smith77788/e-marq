@@ -2774,10 +2774,190 @@ const dict = {
     "sf.collection.sort.nameAsc": "By name",
     "sf.breadcrumb.shop": "Shop",
   },
-  // Російський словник — поки порожній. Усі ключі автоматично падають
-  // на українські значення (див. lookup нижче). Перекладені ключі
-  // додавайте сюди поступово — вони одразу почнуть використовуватись.
-  ru: {} as Partial<Record<string, string>>,
+  // Русский словарь. Ключи, которых нет здесь, автоматически берутся из ua
+  // (см. функцию lookup ниже). Переводим постепенно по приоритетным секциям.
+  ru: {
+    // Header / nav
+    "nav.brand": "Мой бренд",
+    "nav.dashboard": "Панель",
+    "nav.tenants": "Бренды (Admin)",
+    "nav.signout": "Выйти",
+    "nav.lang": "Язык",
+
+    // Sidebar — owner
+    "sb.cockpit": "Кокпит",
+    "sb.overview": "Обзор",
+    "sb.revenue": "Выручка",
+    "sb.growth": "Рост",
+    "sb.insights": "Инсайты",
+    "sb.customers": "Клиенты",
+    "sb.agents": "Агенты",
+    "sb.setup": "Настройка",
+    "sb.channels": "Каналы",
+    "sb.integrations": "Импорт данных",
+    "sb.onboarding": "Онбординг",
+    "sb.storefront": "Витрина",
+    "sb.settings": "Параметры",
+    "sb.billing": "Тариф и баланс",
+    "sb.planBilling": "Тариф и счёт",
+    "sb.profile": "Мой профиль",
+
+    // Sidebar — super-admin
+    "sb.system": "Система",
+    "sb.missionControl": "Командный центр",
+    "sb.crossTenant": "Обзор по всем",
+    "sb.allTenants": "Все бренды",
+    "sb.plansCatalog": "Каталог тарифов",
+    "sb.adminUsers": "Пользователи",
+    "sb.adminPermissions": "Права админов",
+    "sb.dntradeHealth": "DN Trade · Health",
+    "sb.healthMonitor": "Health-монитор брендов",
+    "sb.selfHeal": "🛡 Self-Heal Engine",
+    "sb.topupRequests": "Заявки на оплату",
+    "sb.leadRadar": "Lead Radar",
+    "sb.adminCommands": "⚡ Команды системы",
+    "sb.liveRuns": "Запуски в эфире",
+    "sb.agentLibrary": "Библиотека агентов",
+    "sb.insightStream": "Поток инсайтов",
+    "sb.brandLabel": "Бренд",
+
+    // Header
+    "hdr.booting": "Запуск кокпита…",
+    "hdr.superAdmin": "Супер-админ",
+
+    // Cockpit Hero
+    "hero.revenue30": "Выручка · 30д",
+    "hero.thisWeek": "на этой неделе",
+    "hero.aiAttributed": "Создано ИИ",
+    "hero.ofRevenue": "выручки",
+    "hero.7d": "за 7д",
+    "hero.autonomous": "АВТОНОМНО",
+    "hero.conversion7": "Конверсия · 7д",
+    "hero.converted": "сообщений сконвертировано из",
+    "hero.customers": "Клиенты",
+    "hero.active": "активные · состояние агентов",
+
+    // Brand page sections
+    "brand.missionSubtitle":
+      "Кокпит миссии · что сделал автономный флот, кого знает, сколько заработал.",
+    "brand.live": "В ЭФИРЕ",
+    "brand.revenuePerf": "Выручка и производительность",
+    "brand.autonomousFleet": "Автономный флот",
+    "brand.customersChannels": "Клиенты и каналы",
+    "brand.noBrandTitle": "Бренд ещё не создан",
+    "brand.noBrandDesc":
+      "У вас пока нет бренда. Попросите супер-админа создать его и назначить вас владельцем.",
+    "brand.loadingBrand": "Загрузка бренда…",
+
+    // Mission Control (admin)
+    "mc.title": "Командный центр",
+    "mc.subtitle": "Глобальный контроль всех брендов, агентов и выручки в реальном времени.",
+    "mc.gmv30": "GMV · 30д",
+    "mc.activeTenants": "Активные бренды",
+    "mc.pendingActions": "Действия на одобрение",
+    "mc.agentHealth": "Здоровье агентов",
+    "mc.insights24h": "Инсайты · 24ч",
+    "mc.totalCustomers": "Всего клиентов",
+    "mc.runs24h": "Запуски агентов · 24ч",
+    "mc.crossTenantPulse": "Пульс по всем брендам",
+    "mc.leaderboard": "Лидерборд брендов",
+    "mc.systemHealth": "Состояние системы",
+    "mc.viewAll": "Посмотреть всё",
+
+    // Insights panel
+    "insights.title": "Что ИИ нашёл для тебя",
+    "insights.desc": "Автоматические выводы агентов. Один клик — и действие применено.",
+    "insights.empty.title": "Всё под контролем",
+    "insights.empty.desc": "Новых инсайтов нет. Агенты работают по расписанию.",
+    "insights.apply": "Применить",
+    "insights.dismiss": "Скрыть",
+    "insights.confidence": "уверенность",
+    "insights.why": "Почему это важно",
+    "insights.what": "Что сделать",
+    "insights.tech": "Технические детали",
+
+    // Real-time toasts
+    "toast.newInsight": "Новый инсайт",
+    "toast.criticalInsight": "Критический инсайт",
+    "toast.highInsight": "Инсайт высокого приоритета",
+    "toast.actionApplied": "Действие применено",
+    "toast.agentCompleted": "Агент завершил работу",
+    "toast.agentFailed": "Агент упал с ошибкой",
+    "toast.openLabel": "Открыть",
+    "toast.detailsLabel": "Детали",
+    "a11y.skipToContent": "Перейти к основному содержимому",
+    "a11y.mainNav": "Главная навигация",
+    "a11y.mainContent": "Основное содержимое",
+
+    // Onboarding wizard
+    "onb.title": "Быстрый старт за 7 шагов",
+    "onb.subtitle":
+      "Настрой свой автономный Revenue OS. Можно вернуться и дозаполнить позже.",
+    "onb.step": "Шаг",
+    "onb.of": "из",
+    "onb.next": "Далее",
+    "onb.back": "Назад",
+    "onb.skip": "Пропустить",
+    "onb.finish": "Завершить и открыть панель",
+    "onb.completed": "Готово ✓",
+    "onb.tip": "Подсказка",
+    "onb.s1.title": "Название бренда",
+    "onb.s1.desc": "Так твой бренд будут видеть покупатели на витрине и в сообщениях бота.",
+    "onb.s1.placeholder": "Напр. Coffee Lab",
+    "onb.s2.title": "Канал связи (Telegram)",
+    "onb.s2.desc":
+      "Бот общается с покупателями и отправляет напоминания. Создай бота через @BotFather, скопируй токен — мы сохраним его в зашифрованном виде.",
+    "onb.s2.tokenLabel": "Bot token (необязательно сейчас — можно добавить позже)",
+    "onb.s2.help":
+      "Как создать: 1) открой @BotFather в Telegram, 2) /newbot, 3) скопируй токен сюда.",
+    "onb.s3.title": "Первый товар",
+    "onb.s3.desc":
+      "Хотя бы один товар, чтобы боту было что предлагать. Детали можно отредактировать позже.",
+    "onb.s3.namePh": "Напр. Espresso Blend 250g",
+    "onb.s3.pricePh": "Цена (₴)",
+    "onb.s3.stockPh": "Остаток на складе",
+    "onb.s4.title": "Импорт клиентов",
+    "onb.s4.desc":
+      "Загрузи CSV (email, name) — или используй демо-сид, если просто тестируешь.",
+    "onb.s4.csv": "Загрузить CSV",
+    "onb.s4.demo": "Засеять демо-клиентов",
+    "onb.s4.csvHint": "Формат: первая строка — заголовок 'email,name'.",
+    "onb.s5.title": "Tracking-сниппет на сайт",
+    "onb.s5.desc":
+      "Вставь эту строку на свой сайт перед </body>. Мы начнём видеть просмотры, корзины, покупки — без этого агенты будут работать только на исторических данных.",
+    "onb.s5.copy": "Скопировать сниппет",
+    "onb.s5.copied": "Скопировано ✓",
+    "onb.s6.title": "Способ оплаты",
+    "onb.s6.desc":
+      "Как покупатели будут платить. Пока можно выбрать ручную оплату — позже подключим Stripe.",
+    "onb.s6.manual": "Ручная оплата (банк / наличные)",
+    "onb.s6.stripe": "Stripe (подключим позже)",
+    "onb.s7.title": "Пригласить команду",
+    "onb.s7.desc":
+      "Email коллег, которые будут помогать с брендом. Мы отправим им приглашение (можно пропустить).",
+    "onb.s7.emailPh": "colleague@example.com",
+    "onb.s7.add": "Добавить",
+    "onb.s7.invited": "Приглашён",
+
+    // Setup checklist
+    "checklist.title": "Чек-лист настройки",
+    "checklist.desc":
+      "Все настройки для запуска автономного Revenue OS на одном экране.",
+    "checklist.continue": "Продолжить настройку",
+    "checklist.allDone": "Всё готово — ИИ-агенты работают в фоне 🚀",
+    "checklist.s1": "Бренд создан",
+    "checklist.s2": "Telegram-канал подключён",
+    "checklist.s3": "Хотя бы 1 товар в каталоге",
+    "checklist.s4": "Клиенты импортированы",
+    "checklist.s5": "Tracking-сниппет установлен",
+    "checklist.s6": "Способ оплаты выбран",
+    "checklist.s7": "Команда приглашена",
+
+    // Generic
+    "common.optional": "(необязательно)",
+    "common.loading": "Загрузка…",
+    "common.save": "Сохранить",
+  } as Partial<Record<string, string>>,
 } satisfies { ua: Record<string, string>; en: Record<string, string>; ru: Partial<Record<string, string>> };
 
 export type TKey = keyof (typeof dict)["ua"];
