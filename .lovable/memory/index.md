@@ -15,3 +15,4 @@ Forecasting layer: BEFORE INSERT trigger на decision_queue додає payload.
 - [Forecasting](mem://architecture/forecasting) — _forecast_for_action() + trigger; basis ladder tenant_history → blended → global_prior → heuristic; UI sorts pending by expected_revenue desc
 - [Forecast calibration](mem://architecture/forecast-calibration) — daily compute_forecast_calibration() vs action_outcomes; MAPE/bias/hit-rate per action_type у forecast_calibration; UI "Точність прогнозу AI" на /brand/insights
 - [Value-aware auto-approval](mem://features/value-aware-auto-approval) — ORDER BY forecast.expected_revenue desc + guardrails (high_value_low_confidence, daily_cap=20/24h); skip_reason у payload; UI guardian badge
+- [Morning Brief digest](mem://features/morning-brief) — daily 08:00 UTC narrative Telegram з time saved, top win, guardian count, forecast потенціал; FIX 04-29: tenants.id (не tenant_id)
