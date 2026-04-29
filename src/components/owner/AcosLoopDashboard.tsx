@@ -76,7 +76,7 @@ function fmtMoney(cents: number | null) {
 }
 
 export function AcosLoopDashboard({ tenantId }: { tenantId: string }) {
-  const { toast } = useToast();
+  
   const [loading, setLoading] = useState(true);
   const [overview, setOverview] = useState<Overview | null>(null);
   const [agents, setAgents] = useState<AgentPerf[]>([]);
