@@ -131,7 +131,7 @@ function DecisionList({ tenantId }: { tenantId: string }) {
     setBusyId(id);
     const { data, error } = await supabase.rpc("owner_reject_decision", {
       _decision_id: id,
-      _reason: reason || null,
+      _reason: reason || undefined,
     });
     setBusyId(null);
     if (error) { toast.error(error.message); return; }
