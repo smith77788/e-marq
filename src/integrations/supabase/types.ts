@@ -6970,6 +6970,13 @@ export type Database = {
         Returns: number
       }
       measure_outcomes_all_tenants: { Args: never; Returns: Json }
+      measure_pending_outcomes: {
+        Args: never
+        Returns: {
+          measured_count: number
+          success_count: number
+        }[]
+      }
       notify_owner_telegram: {
         Args: { _kind: string; _source_id: string; _tenant_id: string }
         Returns: undefined
