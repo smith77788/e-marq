@@ -26,6 +26,7 @@ import {
   ShoppingCart,
   Sparkles,
   Tag,
+  TrendingUp,
   Users,
   UsersRound,
   Wand2,
