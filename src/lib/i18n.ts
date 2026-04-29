@@ -35,6 +35,7 @@ const dict = {
     "sb.growth": "Зростання",
     "sb.insights": "Інсайти",
     "sb.acosLoop": "ACOS Loop",
+    "sb.roi": "ROI від AI",
     "sb.customers": "Клієнти",
     "sb.agents": "Агенти",
     "sb.setup": "Налаштування",
