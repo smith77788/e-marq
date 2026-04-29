@@ -94,6 +94,39 @@ export function IntegrationCard({
       <CardContent className="flex flex-1 flex-col gap-3">
         <p className="line-clamp-3 text-sm text-muted-foreground">{integration.description}</p>
 
+        {isConnected && lastSyncAt && (
+          <div
+            className={cn(
+              "flex items-center gap-1.5 text-[11px]",
+              syncFailed
+                ? "text-destructive"
+                : syncStale
+                  ? "text-warning"
+                  : "text-muted-foreground",
+            )}
+            title={`Останній синк: ${new Date(lastSyncAt).toLocaleString("uk-UA")} · статус: ${lastSyncStatus ?? "—"}`}
+          >
+            {syncFailed ? (
+              <AlertCircle className="h-3 w-3" />
+            ) : syncStale ? (
+              <Clock className="h-3 w-3" />
+            ) : (
+              <CheckCircle2 className="h-3 w-3" />
+            )}
+            <span>
+              синк: {relativeTime(lastSyncAt)}
+              {syncFailed && " · з помилками"}
+              {!syncFailed && syncStale && " · давно"}
+            </span>
+          </div>
+        )}
+        {isConnected && !lastSyncAt && (
+          <div className="flex items-center gap-1.5 text-[11px] text-warning">
+            <Clock className="h-3 w-3" />
+            <span>ще не синхронізовано</span>
+          </div>
+        )}
+
         <div className="flex flex-wrap gap-1">
           {integration.imports.map((imp) => (
             <span
