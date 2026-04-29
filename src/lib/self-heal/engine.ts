@@ -108,6 +108,33 @@ export async function runSelfHealCycle(tenantId: string | null = null): Promise<
 
         for (const action of draft.proposed_actions) {
           const decision = decide(draft, action, settings);
+
+          // Dedupe non-apply decisions: skip persisting a fresh row when an
+          // identical (incident, kind, decision) entry was created in the last
+          // 24h. Without this, long-lived high-risk incidents (e.g. orders_stuck
+          // → block) flood the inbox with a new BLOCK row every 5 minutes.
+          if (decision !== "apply") {
+            const { data: existingAction } = await supabaseAdmin
+              .from("self_heal_actions")
+              .select("id, decision, status, created_at")
+              .eq("incident_id", incident.id)
+              .eq("kind", action.kind)
+              .in("status", ["skipped", "pending"])
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            if (
+              existingAction &&
+              existingAction.decision === decision &&
+              Date.now() - new Date(existingAction.created_at).getTime() <
+                24 * 3600_000
+            ) {
+              if (decision === "propose") summary.actions_proposed++;
+              else if (decision === "block") summary.actions_blocked++;
+              continue;
+            }
+          }
+
           const { actionId, applied } = await persistAction(
             incident.id,
             action,

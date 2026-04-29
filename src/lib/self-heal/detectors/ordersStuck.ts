@@ -7,6 +7,14 @@ import type { DetectorFn } from "../types";
 
 export const detectOrdersStuck: DetectorFn = async ({ tenantId }) => {
   if (!tenantId) return [];
+  // Skip pilot tenants: synthetic orders constantly stay in `pending` and
+  // would otherwise flood Decision Inbox with BLOCK rows every 5 min.
+  const { data: tenant } = await supabaseAdmin
+    .from("tenants")
+    .select("is_pilot")
+    .eq("id", tenantId)
+    .maybeSingle();
+  if (tenant?.is_pilot) return [];
   const cutoff = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
   const { data: orders, count } = await supabaseAdmin
     .from("orders")
