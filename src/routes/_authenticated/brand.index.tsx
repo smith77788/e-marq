@@ -262,6 +262,8 @@ function BrandCockpitInner({
 
         <CockpitHero tenantId={current.tenant_id} />
 
+        <ACOSStats tenantId={current.tenant_id} />
+
         <AcosLoopSummary tenantId={current.tenant_id} />
 
         <AskPinsBoard />
