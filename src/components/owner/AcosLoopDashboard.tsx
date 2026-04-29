@@ -197,7 +197,7 @@ export function AcosLoopDashboard({ tenantId }: { tenantId: string }) {
               : "text-muted-foreground"
           }
         />
-        <KpiCard label="Executing" value={overview?.decisions_executing ?? 0} />
+        <KpiCard label="Approved" value={overview?.decisions_approved ?? 0} />
         <KpiCard label="Done" value={overview?.decisions_done ?? 0} />
         <KpiCard
           label="Attributed revenue"
