@@ -11,9 +11,87 @@
  * Імпорт виконуємо через існуючий runImport() (через service-role клієнта).
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { createHmac, timingSafeEqual } from "crypto";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { parsePriceToCents } from "@/lib/integrations/parser";
+
+/**
+ * Shopify webhook topics → our internal entity kind.
+ * See: https://shopify.dev/docs/api/admin-rest/2024-10/resources/webhook#event-topics
+ */
+function shopifyTopicToEntity(topic: string): "products" | "customers" | "orders" | null {
+  if (topic.startsWith("products/")) return "products";
+  if (topic.startsWith("customers/")) return "customers";
+  if (topic.startsWith("orders/")) return "orders";
+  return null;
+}
+
+/**
+ * Verify Shopify HMAC signature. Shopify signs the raw request body with the
+ * shared webhook secret using HMAC-SHA256 and sends the result base64-encoded
+ * in the X-Shopify-Hmac-Sha256 header. The comparison MUST be timing-safe.
+ */
+function verifyShopifyHmac(rawBody: string, signature: string, secret: string): boolean {
+  if (!signature || !secret) return false;
+  const expected = createHmac("sha256", secret).update(rawBody, "utf8").digest("base64");
+  const a = Buffer.from(signature);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  try {
+    return timingSafeEqual(a, b);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Map a single native Shopify entity (one product / customer / order) to our
+ * canonical row shape so the existing import loop below can process it.
+ */
+function shopifyEntityToRow(
+  entity: "products" | "customers" | "orders",
+  it: Record<string, unknown>,
+): Record<string, unknown> {
+  const asString = (v: unknown): string => (v == null ? "" : String(v));
+  if (entity === "products") {
+    const variants = (it.variants as Array<Record<string, unknown>>) ?? [];
+    const v = variants[0] ?? {};
+    const images = (it.images as Array<Record<string, unknown>>) ?? [];
+    return {
+      name: asString(it.title),
+      sku: asString(v.sku),
+      price: asString(v.price),
+      stock: asString(v.inventory_quantity ?? 0),
+      description: asString(it.body_html).replace(/<[^>]+>/g, "").slice(0, 2000),
+      image_url: asString((images[0] as { src?: string } | undefined)?.src),
+      currency: "UAH",
+    };
+  }
+  if (entity === "customers") {
+    return {
+      name:
+        `${asString(it.first_name)} ${asString(it.last_name)}`.trim() ||
+        asString(it.email),
+      email: asString(it.email),
+      phone: asString(it.phone),
+    };
+  }
+  // orders
+  const customer = (it.customer as Record<string, unknown>) ?? {};
+  const gateways = it.payment_gateway_names as string[] | undefined;
+  return {
+    customer_name:
+      `${asString(customer.first_name)} ${asString(customer.last_name)}`.trim() ||
+      asString(it.email),
+    customer_email: asString(it.email ?? customer.email),
+    total: asString(it.total_price),
+    currency: asString(it.currency || "UAH"),
+    status: asString(it.financial_status || "pending"),
+    payment_method: asString(gateways?.[0] ?? "manual"),
+    external_id: asString(it.id),
+  };
+}
 
 const BodySchema = z.object({
   entity: z.enum(["products", "customers", "orders"]),
@@ -38,7 +116,8 @@ function jsonResponse(body: unknown, status = 200) {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, X-Webhook-Secret",
+      "Access-Control-Allow-Headers":
+        "Content-Type, X-Webhook-Secret, X-Shopify-Hmac-Sha256, X-Shopify-Topic, X-Shopify-Shop-Domain",
     },
   });
 }
@@ -52,7 +131,8 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
           headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, X-Webhook-Secret",
+            "Access-Control-Allow-Headers":
+              "Content-Type, X-Webhook-Secret, X-Shopify-Hmac-Sha256, X-Shopify-Topic, X-Shopify-Shop-Domain",
           },
         }),
 
@@ -65,12 +145,7 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
             return jsonResponse({ error: "missing or invalid tenant id" }, 400);
           }
 
-          const headerSecret = request.headers.get("x-webhook-secret") ?? "";
-          if (!headerSecret) {
-            return jsonResponse({ error: "missing X-Webhook-Secret" }, 401);
-          }
-
-          // 1. Знайти інтеграцію.
+          // 1. Знайти інтеграцію (потрібен webhook_secret для будь-якого provider-а).
           const { data: integ, error: integErr } = await supabaseAdmin
             .from("tenant_integrations")
             .select("id, webhook_secret, is_active")
@@ -84,17 +159,57 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
           if (!integ.webhook_secret) {
             return jsonResponse({ error: "webhook not enabled for this integration" }, 403);
           }
-          if (!timingSafeEqualString(headerSecret, integ.webhook_secret)) {
-            return jsonResponse({ error: "invalid secret" }, 401);
-          }
 
-          // 2. Розпарсити body.
-          const raw = await request.json().catch(() => null);
-          const parsed = BodySchema.safeParse(raw);
-          if (!parsed.success) {
-            return jsonResponse({ error: "invalid payload", details: parsed.error.format() }, 400);
+          // 2. Read raw body once — needed for HMAC verification (Shopify) AND parsing.
+          const rawBody = await request.text();
+
+          let entity: "products" | "customers" | "orders";
+          let rows: Array<Record<string, unknown>>;
+          let mapping: Record<string, string> | undefined;
+
+          if (provider === "shopify") {
+            // Shopify-native flow: HMAC + per-topic single entity.
+            const hmacHeader = request.headers.get("x-shopify-hmac-sha256") ?? "";
+            const topic = (request.headers.get("x-shopify-topic") ?? "").toLowerCase();
+            if (!verifyShopifyHmac(rawBody, hmacHeader, integ.webhook_secret)) {
+              return jsonResponse({ error: "invalid Shopify HMAC signature" }, 401);
+            }
+            const topicEntity = shopifyTopicToEntity(topic);
+            if (!topicEntity) {
+              return jsonResponse({ error: `unsupported Shopify topic: ${topic}` }, 400);
+            }
+            let payload: Record<string, unknown>;
+            try {
+              payload = JSON.parse(rawBody) as Record<string, unknown>;
+            } catch {
+              return jsonResponse({ error: "invalid JSON body" }, 400);
+            }
+            entity = topicEntity;
+            rows = [shopifyEntityToRow(topicEntity, payload)];
+            mapping = undefined;
+          } else {
+            // Generic flow: shared X-Webhook-Secret + canonical {entity, rows, mapping} body.
+            const headerSecret = request.headers.get("x-webhook-secret") ?? "";
+            if (!headerSecret) {
+              return jsonResponse({ error: "missing X-Webhook-Secret" }, 401);
+            }
+            if (!timingSafeEqualString(headerSecret, integ.webhook_secret)) {
+              return jsonResponse({ error: "invalid secret" }, 401);
+            }
+            let raw: unknown = null;
+            try {
+              raw = JSON.parse(rawBody);
+            } catch {
+              return jsonResponse({ error: "invalid JSON body" }, 400);
+            }
+            const parsed = BodySchema.safeParse(raw);
+            if (!parsed.success) {
+              return jsonResponse({ error: "invalid payload", details: parsed.error.format() }, 400);
+            }
+            entity = parsed.data.entity;
+            rows = parsed.data.rows as Array<Record<string, unknown>>;
+            mapping = parsed.data.mapping;
           }
-          const { entity, rows, mapping } = parsed.data;
 
           // 3. Створити job + імпортувати інлайн (для невеликих обсягів).
           const { data: job, error: jobErr } = await supabaseAdmin

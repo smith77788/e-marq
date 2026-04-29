@@ -93,8 +93,8 @@ export const INTEGRATIONS: IntegrationDef[] = [
     instructions: [
       "У Shopify Admin відкрийте Settings → Apps and sales channels → Develop apps.",
       "Створіть Custom App, дайте дозволи: read_products, read_customers, read_orders.",
-      "Скопіюйте Admin API access token.",
-      "Введіть домен магазину (наприклад: my-shop.myshopify.com) і token нижче.",
+      "Скопіюйте Admin API access token, введіть домен (my-shop.myshopify.com) і token нижче.",
+      "Опційно — для миттєвого синку: у Shopify Admin → Settings → Notifications → Webhooks додайте orders/create + products/update з URL виду /api/public/integrations/inbound/shopify?tenant=<tenant_id> і HMAC secret з картки нижче.",
     ],
   },
   {
