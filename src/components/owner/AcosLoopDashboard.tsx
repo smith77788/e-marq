@@ -419,6 +419,7 @@ export function AcosLoopDashboard({ tenantId }: { tenantId: string }) {
           )}
         </CardContent>
       </Card>
+      </div>
 
       {/* Footer success-rate */}
       <p className="text-center text-xs text-muted-foreground">
