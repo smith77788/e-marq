@@ -33,6 +33,7 @@ import { LifecycleDistribution } from "@/components/owner/LifecycleDistribution"
 import { PlanUsageCard } from "@/components/owner/PlanUsageCard";
 import { OwnerTelegramBindCard } from "@/components/owner/OwnerTelegramBindCard";
 import { DnTradeIntegrationCard } from "@/components/owner/DnTradeIntegrationCard";
+import { ACOSStats } from "@/components/owner/ACOSStats";
 
 type Search = { tenant?: string };
 
