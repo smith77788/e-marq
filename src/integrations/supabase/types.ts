@@ -7160,11 +7160,6 @@ export type Database = {
             }
             Returns: string
           }
-      propose_decisions_all_tenants: { Args: never; Returns: Json }
-      propose_decisions_from_insights: {
-        Args: { _tenant: string }
-        Returns: number
-      }
       reconcile_dispatched_ai_actions: { Args: never; Returns: Json }
       refresh_all_signal_metrics: { Args: never; Returns: Json }
       refresh_customer_metrics_30d: {
