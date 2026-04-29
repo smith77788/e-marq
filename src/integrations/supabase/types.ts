@@ -415,6 +415,8 @@ export type Database = {
           agent_id: string
           applied_at: string | null
           created_at: string
+          dispatch_request_id: number | null
+          dispatched_at: string | null
           expected_impact: string | null
           id: string
           measured_at: string | null
@@ -434,6 +436,8 @@ export type Database = {
           agent_id: string
           applied_at?: string | null
           created_at?: string
+          dispatch_request_id?: number | null
+          dispatched_at?: string | null
           expected_impact?: string | null
           id?: string
           measured_at?: string | null
@@ -453,6 +457,8 @@ export type Database = {
           agent_id?: string
           applied_at?: string | null
           created_at?: string
+          dispatch_request_id?: number | null
+          dispatched_at?: string | null
           expected_impact?: string | null
           id?: string
           measured_at?: string | null
@@ -6313,6 +6319,7 @@ export type Database = {
       }
     }
     Functions: {
+      _agent_slug_for: { Args: { _agent_id: string }; Returns: string }
       _high_impact_agent_for: {
         Args: { _action_type: string }
         Returns: string
@@ -7034,6 +7041,7 @@ export type Database = {
         Args: { _tenant: string }
         Returns: number
       }
+      reconcile_dispatched_ai_actions: { Args: never; Returns: Json }
       refresh_all_signal_metrics: { Args: never; Returns: Json }
       refresh_customer_metrics_30d: {
         Args: { _tenant: string }
@@ -7048,6 +7056,7 @@ export type Database = {
         Args: { _ids: string[]; _reason?: string }
         Returns: Json
       }
+      run_pending_ai_actions: { Args: { _limit?: number }; Returns: Json }
       self_heal_dismiss_action: {
         Args: { p_action_id: string; p_reason?: string }
         Returns: undefined
