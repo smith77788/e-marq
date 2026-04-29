@@ -6625,6 +6625,7 @@ export type Database = {
         }
       }
       approve_decisions: { Args: { _ids: string[] }; Returns: Json }
+      archive_stale_outreach_actions: { Args: never; Returns: number }
       auto_approve_eligible_decisions: {
         Args: never
         Returns: {
