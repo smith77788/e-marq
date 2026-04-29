@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "service role manages agent permissions" ON public.agent_permissions;
