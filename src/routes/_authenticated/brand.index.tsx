@@ -24,6 +24,7 @@ import { SetupChecklist } from "@/components/owner/SetupChecklist";
 import { SetupReadinessCard } from "@/components/owner/SetupReadinessCard";
 import { AnalyticsWindowProvider, AnalyticsWindowToggle } from "@/components/owner/AnalyticsWindow";
 import { CockpitHero } from "@/components/owner/CockpitHero";
+import { AcosLoopSummary } from "@/components/owner/AcosLoopSummary";
 import { AskPinsBoard } from "@/components/owner/AskPinsBoard";
 import { FunnelChart } from "@/components/owner/FunnelChart";
 import { CohortRetention } from "@/components/owner/CohortRetention";
@@ -259,6 +260,8 @@ function BrandCockpitInner({
         <DnTradeIntegrationCardGuard tenantId={current.tenant_id} />
 
         <CockpitHero tenantId={current.tenant_id} />
+
+        <AcosLoopSummary tenantId={current.tenant_id} />
 
         <AskPinsBoard />
 
