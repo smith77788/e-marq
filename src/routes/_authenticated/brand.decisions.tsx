@@ -13,7 +13,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Check, X, Clock, AlertCircle, ChevronDown, ChevronRight, Trash2 } from "lucide-react";
+import { Check, X, Clock, AlertCircle, ChevronDown, ChevronRight, Trash2, ShieldAlert } from "lucide-react";
+
+const SKIP_REASON_LABELS: Record<string, { label: string; hint: string }> = {
+  high_value_low_confidence: {
+    label: "Високий ризик",
+    hint: "Очікуваний дохід > 500 ₴, але впевненість прогнозу < 40% — потрібне ваше рішення.",
+  },
+  daily_cap_reached: {
+    label: "Денний ліміт",
+    hint: "AI вже виконав 20 авто-дій за добу. Решта — на ваш розгляд.",
+  },
+};
 
 type Decision = {
   id: string;
@@ -352,10 +363,23 @@ function DecisionCard({
               )}
             </CardDescription>
           </div>
-          <Badge variant={stale ? "destructive" : "secondary"} className="gap-1">
-            {stale ? <AlertCircle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-            {ageHours < 1 ? "<1 год" : `${ageHours} год тому`}
-          </Badge>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {(() => {
+              const skip = (d.payload as { auto_approval_skip_reason?: string } | null)?.auto_approval_skip_reason;
+              const meta = skip ? SKIP_REASON_LABELS[skip] : null;
+              if (!meta) return null;
+              return (
+                <Badge variant="outline" className="gap-1 border-amber-500/50 text-amber-700 dark:text-amber-400" title={meta.hint}>
+                  <ShieldAlert className="h-3 w-3" />
+                  {meta.label}
+                </Badge>
+              );
+            })()}
+            <Badge variant={stale ? "destructive" : "secondary"} className="gap-1">
+              {stale ? <AlertCircle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+              {ageHours < 1 ? "<1 год" : `${ageHours} год тому`}
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
