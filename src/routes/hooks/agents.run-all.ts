@@ -1,9 +1,15 @@
 /**
  * ACOS Orchestrator: runs all agents for a tenant in parallel.
- * Body: { tenant_id }
+ * Body: { tenant_id? }
+ *
+ * If `tenant_id` is omitted (cron-style invocation) we fan-out across every
+ * active tenant. This is what the `marq-agents-run-all-15min` pg_cron job
+ * does — it must NOT 400. Cron auth is required for fan-out mode.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { authorizeAgentRequest, jsonError, jsonOk } from "@/lib/acos/agentRuntime";
+import { isCronToken } from "@/lib/acos/cronAuth";
 
 const AGENTS = [
   // Original ACOS agents
