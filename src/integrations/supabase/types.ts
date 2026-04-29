@@ -6710,6 +6710,11 @@ export type Database = {
         Args: { _limit?: number; _tenant: string }
         Returns: number
       }
+      generate_data_driven_insights: {
+        Args: { _tenant_id: string }
+        Returns: number
+      }
+      generate_insights_for_all_tenants: { Args: never; Returns: number }
       get_agent_permission: {
         Args: { _agent_id: string; _tenant_id: string }
         Returns: {
