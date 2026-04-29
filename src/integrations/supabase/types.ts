@@ -7094,6 +7094,10 @@ export type Database = {
         Returns: undefined
       }
       owner_approve_decision: { Args: { _decision_id: string }; Returns: Json }
+      owner_bulk_reject_decisions: {
+        Args: { _action_type: string; _reason?: string; _tenant_id: string }
+        Returns: Json
+      }
       owner_change_plan: {
         Args: { _plan_key: string; _reason?: string; _tenant_id: string }
         Returns: {
