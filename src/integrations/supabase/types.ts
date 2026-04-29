@@ -6380,6 +6380,15 @@ export type Database = {
         Args: { _action_type: string; _insight_type: string; _payload: Json }
         Returns: string
       }
+      _decision_semantic_key_full: {
+        Args: {
+          _action_type: string
+          _insight_type: string
+          _payload: Json
+          _title: string
+        }
+        Returns: string
+      }
       _high_impact_agent_for: {
         Args: { _action_type: string }
         Returns: string
