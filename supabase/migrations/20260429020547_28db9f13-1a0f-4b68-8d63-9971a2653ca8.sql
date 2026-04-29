@@ -1,0 +1,2 @@
+SELECT * FROM public.auto_approve_eligible_decisions();
+SELECT id, action_type, status, approved_by_auto, approved_at FROM public.decision_queue WHERE id IN ('159ff0be-d106-4583-a724-f1560c91aa52','396a112c-0517-40c0-995c-f8aa243effb7');
