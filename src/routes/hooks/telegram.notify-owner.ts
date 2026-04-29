@@ -226,6 +226,7 @@ async function tgSendCard(
   chatId: string,
   text: string,
   buttons: { text: string; data: string }[][],
+  parseMode: "HTML" | "Markdown" = "HTML",
 ): Promise<{ ok: true; message_id: number } | { ok: false; error: string }> {
   const lovableKey = process.env.LOVABLE_API_KEY;
   const tgKey = process.env.TELEGRAM_API_KEY;
@@ -241,7 +242,7 @@ async function tgSendCard(
     body: JSON.stringify({
       chat_id: chatId,
       text,
-      parse_mode: "HTML",
+      parse_mode: parseMode,
       disable_web_page_preview: true,
       reply_markup: {
         inline_keyboard: buttons.map((row) =>
