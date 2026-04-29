@@ -6375,6 +6375,10 @@ export type Database = {
         Returns: string
       }
       _is_in_db_safe_action: { Args: { _t: string }; Returns: boolean }
+      _map_insight_to_action: {
+        Args: { _insight_type: string }
+        Returns: string
+      }
       accept_tenant_invitation: { Args: { _token: string }; Returns: Json }
       add_balance: {
         Args: {
@@ -6704,6 +6708,14 @@ export type Database = {
           _tenant_id: string
         }
         Returns: boolean
+      }
+      convert_insights_to_decisions: {
+        Args: never
+        Returns: {
+          by_action: Json
+          converted: number
+          skipped: number
+        }[]
       }
       create_my_tenant: {
         Args: { _name: string; _slug: string }
@@ -7138,6 +7150,7 @@ export type Database = {
         Returns: Json
       }
       run_pending_ai_actions: { Args: { _limit?: number }; Returns: Json }
+      run_sql_loop_tick: { Args: never; Returns: Json }
       self_heal_dismiss_action: {
         Args: { p_action_id: string; p_reason?: string }
         Returns: undefined
