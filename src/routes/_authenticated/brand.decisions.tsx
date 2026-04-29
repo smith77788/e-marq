@@ -183,6 +183,14 @@ function DecisionList({ tenantId }: { tenantId: string }) {
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(d);
     }
+    // sort items within each group by forecast.expected_revenue_cents desc
+    for (const [, items] of map) {
+      items.sort((a, b) => {
+        const av = Number(((a.payload as { forecast?: { expected_revenue_cents?: number } } | null)?.forecast?.expected_revenue_cents) ?? 0);
+        const bv = Number(((b.payload as { forecast?: { expected_revenue_cents?: number } } | null)?.forecast?.expected_revenue_cents) ?? 0);
+        return bv - av;
+      });
+    }
     return Array.from(map.entries()).sort((a, b) => b[1].length - a[1].length);
   }, [decisions]);
 
