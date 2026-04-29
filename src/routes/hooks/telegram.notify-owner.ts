@@ -16,10 +16,11 @@ const APP_BASE = process.env.APP_BASE_URL ?? "https://e-marq.lovable.app";
 type OutboxRow = {
   id: string;
   tenant_id: string;
-  source_kind: "insight" | "action" | "notification";
-  source_id: string;
+  source_kind: "insight" | "action" | "notification" | "digest";
+  source_id: string | null;
   chat_id: string | null;
   status: string;
+  payload?: Record<string, unknown> | null;
 };
 
 type RenderResult = { text: string; buttons: { text: string; data: string }[][] } | null;
@@ -206,11 +207,18 @@ async function renderNotification(tenantId: string, notifId: string): Promise<Re
 async function renderForKind(row: OutboxRow): Promise<RenderResult> {
   switch (row.source_kind) {
     case "insight":
-      return renderInsight(row.tenant_id, row.source_id);
+      return row.source_id ? renderInsight(row.tenant_id, row.source_id) : null;
     case "action":
-      return renderAction(row.tenant_id, row.source_id);
+      return row.source_id ? renderAction(row.tenant_id, row.source_id) : null;
     case "notification":
-      return renderNotification(row.tenant_id, row.source_id);
+      return row.source_id ? renderNotification(row.tenant_id, row.source_id) : null;
+    case "digest": {
+      const text = (row.payload as { text?: string } | null)?.text;
+      if (!text) return null;
+      return { text, buttons: [] };
+    }
+    default:
+      return null;
   }
 }
 
@@ -218,6 +226,7 @@ async function tgSendCard(
   chatId: string,
   text: string,
   buttons: { text: string; data: string }[][],
+  parseMode: "HTML" | "Markdown" = "HTML",
 ): Promise<{ ok: true; message_id: number } | { ok: false; error: string }> {
   const lovableKey = process.env.LOVABLE_API_KEY;
   const tgKey = process.env.TELEGRAM_API_KEY;
@@ -233,7 +242,7 @@ async function tgSendCard(
     body: JSON.stringify({
       chat_id: chatId,
       text,
-      parse_mode: "HTML",
+      parse_mode: parseMode,
       disable_web_page_preview: true,
       reply_markup: {
         inline_keyboard: buttons.map((row) =>
@@ -275,7 +284,9 @@ async function processRow(
   const card = await renderForKind(row);
   if (!card) return { status: "skipped", error: "source no longer actionable" };
 
-  const sent = await tgSendCard(row.chat_id, card.text, card.buttons);
+  const parseMode =
+    (row.payload as { parse_mode?: "HTML" | "Markdown" } | null)?.parse_mode ?? "HTML";
+  const sent = await tgSendCard(row.chat_id, card.text, card.buttons, parseMode);
   if (!sent.ok) return { status: "failed", error: sent.error };
   return { status: "sent", message_id: sent.message_id };
 }
@@ -339,7 +350,7 @@ async function pushAndUpdate(row: OutboxRow) {
 async function drainPending(limit = 30) {
   const { data: rows } = await supabaseAdmin
     .from("owner_telegram_outbox")
-    .select("id, tenant_id, source_kind, source_id, chat_id, status")
+    .select("id, tenant_id, source_kind, source_id, chat_id, status, payload")
     .eq("status", "pending")
     .order("created_at", { ascending: true })
     .limit(limit);
