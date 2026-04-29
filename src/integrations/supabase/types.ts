@@ -65,6 +65,13 @@ export type Database = {
             foreignKeyName: "ab_tests_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "ab_tests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -105,6 +112,13 @@ export type Database = {
           tenant_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "acos_agent_runs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "acos_agent_runs_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -265,6 +279,13 @@ export type Database = {
             foreignKeyName: "agent_conflicts_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "agent_conflicts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -318,6 +339,13 @@ export type Database = {
             foreignKeyName: "agent_health_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "agent_health_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -364,6 +392,13 @@ export type Database = {
           weekly_run_limit?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "agent_permissions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "agent_permissions_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -443,6 +478,13 @@ export type Database = {
             foreignKeyName: "ai_actions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "ai_actions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -498,6 +540,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ai_insights_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "ai_insights_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -560,6 +609,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ai_memory_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "ai_memory_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -641,6 +697,13 @@ export type Database = {
             foreignKeyName: "balance_ledger_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "balance_ledger_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -687,6 +750,13 @@ export type Database = {
           value?: Json
         }
         Relationships: [
+          {
+            foreignKeyName: "bootstrap_facts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "bootstrap_facts_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -760,6 +830,13 @@ export type Database = {
             foreignKeyName: "cart_recovery_attempts_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "cart_recovery_attempts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -821,6 +898,13 @@ export type Database = {
             foreignKeyName: "channel_attribution_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "channel_attribution_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -859,6 +943,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_products_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "collection_products_tenant_id_fkey"
@@ -923,6 +1014,13 @@ export type Database = {
             foreignKeyName: "collections_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "collections_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -981,6 +1079,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "content_pages_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "content_pages_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -1051,6 +1156,13 @@ export type Database = {
             foreignKeyName: "content_performance_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "content_performance_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -1105,6 +1217,13 @@ export type Database = {
             foreignKeyName: "conversations_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "conversations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -1142,6 +1261,13 @@ export type Database = {
           tenant_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "customer_cohorts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "customer_cohorts_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -1204,6 +1330,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "customers"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_ltv_scores_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "customer_ltv_scores_tenant_id_fkey"
@@ -1304,6 +1437,13 @@ export type Database = {
             foreignKeyName: "customer_segments_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "customer_segments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -1384,6 +1524,13 @@ export type Database = {
             foreignKeyName: "customers_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "customers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -1427,6 +1574,13 @@ export type Database = {
           tenant_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "daily_digests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "daily_digests_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -1477,6 +1631,13 @@ export type Database = {
           win_count?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "decision_policies_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "decision_policies_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -1618,6 +1779,13 @@ export type Database = {
             foreignKeyName: "dntrade_health_log_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "dntrade_health_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -1661,6 +1829,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tenant_integrations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dntrade_sync_errors_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "dntrade_sync_errors_tenant_id_fkey"
@@ -1722,6 +1897,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "customers"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_campaign_recipients_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "email_campaign_recipients_tenant_id_fkey"
@@ -1789,6 +1971,13 @@ export type Database = {
             foreignKeyName: "email_campaigns_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "email_campaigns_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -1820,6 +2009,13 @@ export type Database = {
           tenant_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "email_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "email_events_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -1902,6 +2098,13 @@ export type Database = {
             foreignKeyName: "email_sends_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "email_sends_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -1936,6 +2139,13 @@ export type Database = {
           tenant_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "email_suppressions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "email_suppressions_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -1993,6 +2203,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "events_tenant_id_fkey"
@@ -2085,6 +2302,13 @@ export type Database = {
             foreignKeyName: "import_field_mappings_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "import_field_mappings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -2160,6 +2384,13 @@ export type Database = {
             foreignKeyName: "import_jobs_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "import_jobs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -2191,6 +2422,13 @@ export type Database = {
           tenant_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "integration_rate_limits_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "integration_rate_limits_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -2244,6 +2482,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_forecasts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "inventory_forecasts_tenant_id_fkey"
@@ -2421,6 +2666,13 @@ export type Database = {
             foreignKeyName: "lead_prospects_converted_tenant_id_fkey"
             columns: ["converted_tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "lead_prospects_converted_tenant_id_fkey"
+            columns: ["converted_tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -2458,6 +2710,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "loyalty_accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "loyalty_accounts_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -2505,6 +2764,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "loyalty_programs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "loyalty_programs_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -2564,6 +2830,13 @@ export type Database = {
             foreignKeyName: "loyalty_transactions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "loyalty_transactions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -2613,6 +2886,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "orders"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_fraud_signals_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "order_fraud_signals_tenant_id_fkey"
@@ -2671,6 +2951,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "order_items_tenant_id_fkey"
@@ -2759,6 +3046,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "orders_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -2860,6 +3154,13 @@ export type Database = {
             foreignKeyName: "outbound_messages_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "outbound_messages_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -2947,6 +3248,13 @@ export type Database = {
             foreignKeyName: "outreach_actions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "outreach_actions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -3023,6 +3331,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "outreach_leads_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "outreach_leads_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -3112,6 +3427,13 @@ export type Database = {
             foreignKeyName: "outreach_metrics_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "outreach_metrics_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -3143,6 +3465,13 @@ export type Database = {
           value?: Json
         }
         Relationships: [
+          {
+            foreignKeyName: "outreach_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "outreach_settings_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -3200,6 +3529,13 @@ export type Database = {
             foreignKeyName: "owner_notifications_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "owner_notifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -3246,6 +3582,13 @@ export type Database = {
           tg_message_id?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "owner_telegram_outbox_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "owner_telegram_outbox_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -3302,6 +3645,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "orders"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_callbacks_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "payment_callbacks_log_tenant_id_fkey"
@@ -3373,6 +3723,13 @@ export type Database = {
             foreignKeyName: "payment_intents_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "payment_intents_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -3413,6 +3770,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "plans"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_change_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "plan_change_log_tenant_id_fkey"
@@ -3560,6 +3924,13 @@ export type Database = {
             foreignKeyName: "price_elasticity_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "price_elasticity_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -3626,6 +3997,13 @@ export type Database = {
             foreignKeyName: "pricing_decisions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "pricing_decisions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -3673,6 +4051,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_affinity_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "product_affinity_tenant_id_fkey"
@@ -3737,6 +4122,13 @@ export type Database = {
             foreignKeyName: "product_bundles_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "product_bundles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -3794,6 +4186,13 @@ export type Database = {
             foreignKeyName: "product_costs_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "product_costs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -3837,6 +4236,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_images_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "product_images_tenant_id_fkey"
@@ -3968,6 +4374,13 @@ export type Database = {
             foreignKeyName: "product_variants_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "product_variants_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -4044,6 +4457,13 @@ export type Database = {
           weight_grams?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "products_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "products_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -4128,6 +4548,13 @@ export type Database = {
             foreignKeyName: "promotions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "promotions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -4181,6 +4608,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restock_notifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "restock_notifications_tenant_id_fkey"
@@ -4263,6 +4697,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "customers"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "search_queries_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "search_queries_tenant_id_fkey"
@@ -4513,6 +4954,13 @@ export type Database = {
             foreignKeyName: "site_brand_profiles_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "site_brand_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -4574,6 +5022,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "site_templates"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_builds_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "site_builds_tenant_id_fkey"
@@ -4675,6 +5130,13 @@ export type Database = {
             foreignKeyName: "social_proof_events_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "social_proof_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -4722,6 +5184,13 @@ export type Database = {
             foreignKeyName: "telegram_chat_routing_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "telegram_chat_routing_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -4759,6 +5228,13 @@ export type Database = {
           tenant_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "telegram_owner_pairings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "telegram_owner_pairings_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -4819,6 +5295,13 @@ export type Database = {
             foreignKeyName: "tenant_api_keys_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "tenant_api_keys_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -4856,6 +5339,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tenant_balances_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "tenant_balances_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -4907,6 +5397,13 @@ export type Database = {
             foreignKeyName: "tenant_configs_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: true
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "tenant_configs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -4953,6 +5450,13 @@ export type Database = {
           verified_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "tenant_domains_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "tenant_domains_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -5019,6 +5523,13 @@ export type Database = {
             foreignKeyName: "tenant_integrations_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "tenant_integrations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -5069,6 +5580,13 @@ export type Database = {
             foreignKeyName: "tenant_invitations_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "tenant_invitations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -5097,6 +5615,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tenant_memberships_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "tenant_memberships_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -5161,6 +5686,13 @@ export type Database = {
             foreignKeyName: "tenant_subscriptions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: true
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "tenant_subscriptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -5192,6 +5724,13 @@ export type Database = {
           value?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "tenant_usage_counters_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "tenant_usage_counters_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -5295,6 +5834,13 @@ export type Database = {
             foreignKeyName: "tg_user_action_log_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "tg_user_action_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -5373,6 +5919,13 @@ export type Database = {
             foreignKeyName: "tg_user_actions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "tg_user_actions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -5441,6 +5994,13 @@ export type Database = {
             foreignKeyName: "tg_user_quotas_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: true
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "tg_user_quotas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -5499,6 +6059,13 @@ export type Database = {
           username?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "tg_user_sessions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
           {
             foreignKeyName: "tg_user_sessions_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -5571,6 +6138,13 @@ export type Database = {
             foreignKeyName: "topup_requests_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "topup_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -5630,6 +6204,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
           },
           {
             foreignKeyName: "ugc_items_tenant_id_fkey"
@@ -5696,7 +6277,40 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      acos_loop_overview: {
+        Row: {
+          attributed_revenue_cents: number | null
+          decisions_30d: number | null
+          decisions_approved: number | null
+          decisions_done: number | null
+          decisions_failed: number | null
+          decisions_pending: number | null
+          decisions_rejected: number | null
+          insights_30d: number | null
+          insights_new: number | null
+          outcomes_measured: number | null
+          outcomes_success: number | null
+          outcomes_total: number | null
+          success_rate: number | null
+          tenant_id: string | null
+          tenant_name: string | null
+        }
+        Relationships: []
+      }
+      agent_performance_30d: {
+        Row: {
+          action_type: string | null
+          agent_id: string | null
+          executions: number | null
+          last_measured_at: string | null
+          measured: number | null
+          revenue_cents: number | null
+          success_rate: number | null
+          successes: number | null
+          tenant_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _is_in_db_safe_action: { Args: { _t: string }; Returns: boolean }
@@ -6330,6 +6944,11 @@ export type Database = {
         }
         Returns: undefined
       }
+      measure_decision_outcomes: {
+        Args: { _limit?: number; _tenant: string }
+        Returns: number
+      }
+      measure_outcomes_all_tenants: { Args: never; Returns: Json }
       notify_owner_telegram: {
         Args: { _kind: string; _source_id: string; _tenant_id: string }
         Returns: undefined
