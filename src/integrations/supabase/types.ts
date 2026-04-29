@@ -114,6 +114,65 @@ export type Database = {
           },
         ]
       }
+      action_outcomes: {
+        Row: {
+          action_id: string | null
+          action_type: string
+          actual: Json
+          agent_id: string
+          attributed_revenue_cents: number
+          baseline: Json
+          decision_id: string | null
+          delta: Json
+          id: string
+          measured_at: string
+          measurement_window: string
+          notes: string | null
+          success: boolean | null
+          tenant_id: string
+        }
+        Insert: {
+          action_id?: string | null
+          action_type: string
+          actual?: Json
+          agent_id: string
+          attributed_revenue_cents?: number
+          baseline?: Json
+          decision_id?: string | null
+          delta?: Json
+          id?: string
+          measured_at?: string
+          measurement_window?: string
+          notes?: string | null
+          success?: boolean | null
+          tenant_id: string
+        }
+        Update: {
+          action_id?: string | null
+          action_type?: string
+          actual?: Json
+          agent_id?: string
+          attributed_revenue_cents?: number
+          baseline?: Json
+          decision_id?: string | null
+          delta?: Json
+          id?: string
+          measured_at?: string
+          measurement_window?: string
+          notes?: string | null
+          success?: boolean | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_outcomes_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "decision_queue"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_capabilities: {
         Row: {
           description: string
@@ -1155,6 +1214,51 @@ export type Database = {
           },
         ]
       }
+      customer_metrics_30d: {
+        Row: {
+          avg_order_cents: number
+          churn_risk: number
+          computed_at: string
+          customer_id: string
+          days_since_last: number | null
+          last_order_at: string | null
+          lifecycle_stage: string | null
+          orders_30d: number
+          revenue_30d_cents: number
+          tenant_id: string
+          window_end: string
+          window_start: string
+        }
+        Insert: {
+          avg_order_cents?: number
+          churn_risk?: number
+          computed_at?: string
+          customer_id: string
+          days_since_last?: number | null
+          last_order_at?: string | null
+          lifecycle_stage?: string | null
+          orders_30d?: number
+          revenue_30d_cents?: number
+          tenant_id: string
+          window_end: string
+          window_start: string
+        }
+        Update: {
+          avg_order_cents?: number
+          churn_risk?: number
+          computed_at?: string
+          customer_id?: string
+          days_since_last?: number | null
+          last_order_at?: string | null
+          lifecycle_stage?: string | null
+          orders_30d?: number
+          revenue_30d_cents?: number
+          tenant_id?: string
+          window_end?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       customer_segments: {
         Row: {
           avg_ltv_cents: number
@@ -1378,6 +1482,86 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decision_queue: {
+        Row: {
+          action_type: string
+          agent_id: string
+          approved_at: string | null
+          approved_by: string | null
+          batch_id: string | null
+          confidence: number
+          created_at: string
+          executed_at: string | null
+          executor_action_id: string | null
+          expected_impact: Json
+          expires_at: string
+          id: string
+          insight_id: string | null
+          payload: Json
+          rationale: string | null
+          rejected_reason: string | null
+          requires_approval: boolean
+          status: Database["public"]["Enums"]["decision_status"]
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          agent_id: string
+          approved_at?: string | null
+          approved_by?: string | null
+          batch_id?: string | null
+          confidence?: number
+          created_at?: string
+          executed_at?: string | null
+          executor_action_id?: string | null
+          expected_impact?: Json
+          expires_at?: string
+          id?: string
+          insight_id?: string | null
+          payload?: Json
+          rationale?: string | null
+          rejected_reason?: string | null
+          requires_approval?: boolean
+          status?: Database["public"]["Enums"]["decision_status"]
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          agent_id?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          batch_id?: string | null
+          confidence?: number
+          created_at?: string
+          executed_at?: string | null
+          executor_action_id?: string | null
+          expected_impact?: Json
+          expires_at?: string
+          id?: string
+          insight_id?: string | null
+          payload?: Json
+          rationale?: string | null
+          rejected_reason?: string | null
+          requires_approval?: boolean
+          status?: Database["public"]["Enums"]["decision_status"]
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_queue_insight_id_fkey"
+            columns: ["insight_id"]
+            isOneToOne: false
+            referencedRelation: "ai_insights"
             referencedColumns: ["id"]
           },
         ]
@@ -1818,6 +2002,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      funnel_metrics_14d: {
+        Row: {
+          add_to_cart: number
+          checkout: number
+          computed_at: string
+          day: string
+          paid_orders: number
+          product_views: number
+          revenue_cents: number
+          tenant_id: string
+          visits: number
+        }
+        Insert: {
+          add_to_cart?: number
+          checkout?: number
+          computed_at?: string
+          day: string
+          paid_orders?: number
+          product_views?: number
+          revenue_cents?: number
+          tenant_id: string
+          visits?: number
+        }
+        Update: {
+          add_to_cart?: number
+          checkout?: number
+          computed_at?: string
+          day?: string
+          paid_orders?: number
+          product_views?: number
+          revenue_cents?: number
+          tenant_id?: string
+          visits?: number
+        }
+        Relationships: []
       }
       import_field_mappings: {
         Row: {
@@ -3626,6 +3846,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      product_metrics_14d: {
+        Row: {
+          add_to_cart: number
+          computed_at: string
+          conversion_rate: number
+          current_stock: number | null
+          is_stocked_out: boolean
+          orders_count: number
+          product_id: string
+          revenue_cents: number
+          tenant_id: string
+          units_sold: number
+          views: number
+          window_end: string
+          window_start: string
+        }
+        Insert: {
+          add_to_cart?: number
+          computed_at?: string
+          conversion_rate?: number
+          current_stock?: number | null
+          is_stocked_out?: boolean
+          orders_count?: number
+          product_id: string
+          revenue_cents?: number
+          tenant_id: string
+          units_sold?: number
+          views?: number
+          window_end: string
+          window_start: string
+        }
+        Update: {
+          add_to_cart?: number
+          computed_at?: string
+          conversion_rate?: number
+          current_stock?: number | null
+          is_stocked_out?: boolean
+          orders_count?: number
+          product_id?: string
+          revenue_cents?: number
+          tenant_id?: string
+          units_sold?: number
+          views?: number
+          window_end?: string
+          window_start?: string
+        }
+        Relationships: []
       }
       product_variants: {
         Row: {
@@ -6094,6 +6362,16 @@ export type Database = {
             }
             Returns: string
           }
+      refresh_all_signal_metrics: { Args: never; Returns: Json }
+      refresh_customer_metrics_30d: {
+        Args: { _tenant: string }
+        Returns: number
+      }
+      refresh_funnel_metrics_14d: { Args: { _tenant: string }; Returns: number }
+      refresh_product_metrics_14d: {
+        Args: { _tenant: string }
+        Returns: number
+      }
       self_heal_dismiss_action: {
         Args: { p_action_id: string; p_reason?: string }
         Returns: undefined
@@ -6160,6 +6438,14 @@ export type Database = {
       agent_mode: "off" | "suggest" | "auto"
       agent_risk_level: "low" | "medium" | "high"
       app_role: "super_admin"
+      decision_status:
+        | "pending"
+        | "approved"
+        | "executing"
+        | "done"
+        | "rejected"
+        | "expired"
+        | "failed"
       event_type:
         | "product_viewed"
         | "add_to_cart"
@@ -6351,6 +6637,15 @@ export const Constants = {
       agent_mode: ["off", "suggest", "auto"],
       agent_risk_level: ["low", "medium", "high"],
       app_role: ["super_admin"],
+      decision_status: [
+        "pending",
+        "approved",
+        "executing",
+        "done",
+        "rejected",
+        "expired",
+        "failed",
+      ],
       event_type: [
         "product_viewed",
         "add_to_cart",
