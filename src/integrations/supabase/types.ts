@@ -7197,6 +7197,7 @@ export type Database = {
         Args: { p_incident_id: string; p_reason?: string }
         Returns: undefined
       }
+      send_owner_daily_digest: { Args: never; Returns: Json }
       set_owner_telegram_chat: {
         Args: { _chat_id: string; _tenant_id: string }
         Returns: undefined
