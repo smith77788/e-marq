@@ -6376,6 +6376,10 @@ export type Database = {
     }
     Functions: {
       _agent_slug_for: { Args: { _agent_id: string }; Returns: string }
+      _decision_semantic_key: {
+        Args: { _action_type: string; _insight_type: string; _payload: Json }
+        Returns: string
+      }
       _high_impact_agent_for: {
         Args: { _action_type: string }
         Returns: string
