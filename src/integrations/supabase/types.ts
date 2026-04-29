@@ -5750,6 +5750,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_pilot: boolean
           name: string
           owner_user_id: string
           rejection_reason: string | null
@@ -5763,6 +5764,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          is_pilot?: boolean
           name: string
           owner_user_id: string
           rejection_reason?: string | null
@@ -5776,6 +5778,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          is_pilot?: boolean
           name?: string
           owner_user_id?: string
           rejection_reason?: string | null
@@ -6493,6 +6496,7 @@ export type Database = {
         Returns: {
           created_at: string
           id: string
+          is_pilot: boolean
           name: string
           owner_user_id: string
           rejection_reason: string | null
@@ -6536,6 +6540,7 @@ export type Database = {
         Returns: {
           created_at: string
           id: string
+          is_pilot: boolean
           name: string
           owner_user_id: string
           rejection_reason: string | null
@@ -6558,6 +6563,7 @@ export type Database = {
         Returns: {
           created_at: string
           id: string
+          is_pilot: boolean
           name: string
           owner_user_id: string
           rejection_reason: string | null
@@ -6664,6 +6670,7 @@ export type Database = {
         Returns: {
           created_at: string
           id: string
+          is_pilot: boolean
           name: string
           owner_user_id: string
           rejection_reason: string | null
@@ -6694,6 +6701,7 @@ export type Database = {
         Args: { _email: string; _role?: string; _tenant_id: string }
         Returns: Json
       }
+      daily_pilot_simulator: { Args: never; Returns: Json }
       demo_measure_recent_outcomes: {
         Args: never
         Returns: {
@@ -7101,6 +7109,14 @@ export type Database = {
       set_owner_telegram_chat: {
         Args: { _chat_id: string; _tenant_id: string }
         Returns: undefined
+      }
+      simulate_pilot_orders: {
+        Args: { _days?: number; _tenant_id: string }
+        Returns: {
+          items_created: number
+          orders_created: number
+          revenue_cents: number
+        }[]
       }
       subscribe_restock_notification: {
         Args: {
