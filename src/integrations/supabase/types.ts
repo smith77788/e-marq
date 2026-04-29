@@ -14,24 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      _sim_debug: {
-        Row: {
-          id: number
-          ran_at: string | null
-          result: string | null
-        }
-        Insert: {
-          id?: number
-          ran_at?: string | null
-          result?: string | null
-        }
-        Update: {
-          id?: number
-          ran_at?: string | null
-          result?: string | null
-        }
-        Relationships: []
-      }
       ab_tests: {
         Row: {
           created_at: string
