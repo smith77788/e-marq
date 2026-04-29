@@ -6,7 +6,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
+import { AlertCircle, ArrowRight, CheckCircle2, Clock, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { METHOD_LABELS, STATUS_LABELS, type IntegrationDef } from "@/lib/integrations/catalog";
 
@@ -15,6 +15,10 @@ type Props = {
   isConnected?: boolean;
   canSync?: boolean;
   syncing?: boolean;
+  /** ISO timestamp коли востаннє синхронізовано (з tenant_integrations.last_sync_at). */
+  lastSyncAt?: string | null;
+  /** Статус останньої синхронізації: completed | completed_with_errors | failed | running. */
+  lastSyncStatus?: string | null;
   onSelect: (integration: IntegrationDef) => void;
   onSync?: (integration: IntegrationDef) => void;
 };
@@ -26,6 +30,22 @@ const IMPORT_LABELS: Record<string, string> = {
   transactions: "транзакції",
   events: "події",
 };
+
+/** Humanized "5 хв тому" / "2 год тому" / "3 дні тому" / "щойно". */
+function relativeTime(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  if (Number.isNaN(ms) || ms < 0) return "щойно";
+  const sec = Math.floor(ms / 1000);
+  if (sec < 60) return "щойно";
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min} хв тому`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} год тому`;
+  const day = Math.floor(hr / 24);
+  if (day < 30) return `${day} дн. тому`;
+  const mo = Math.floor(day / 30);
+  return `${mo} міс. тому`;
+}
 
 export function IntegrationCard({
   integration,
