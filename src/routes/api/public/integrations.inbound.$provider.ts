@@ -11,9 +11,87 @@
  * Імпорт виконуємо через існуючий runImport() (через service-role клієнта).
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { createHmac, timingSafeEqual } from "crypto";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { parsePriceToCents } from "@/lib/integrations/parser";
+
+/**
+ * Shopify webhook topics → our internal entity kind.
+ * See: https://shopify.dev/docs/api/admin-rest/2024-10/resources/webhook#event-topics
+ */
+function shopifyTopicToEntity(topic: string): "products" | "customers" | "orders" | null {
+  if (topic.startsWith("products/")) return "products";
+  if (topic.startsWith("customers/")) return "customers";
+  if (topic.startsWith("orders/")) return "orders";
+  return null;
+}
+
+/**
+ * Verify Shopify HMAC signature. Shopify signs the raw request body with the
+ * shared webhook secret using HMAC-SHA256 and sends the result base64-encoded
+ * in the X-Shopify-Hmac-Sha256 header. The comparison MUST be timing-safe.
+ */
+function verifyShopifyHmac(rawBody: string, signature: string, secret: string): boolean {
+  if (!signature || !secret) return false;
+  const expected = createHmac("sha256", secret).update(rawBody, "utf8").digest("base64");
+  const a = Buffer.from(signature);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  try {
+    return timingSafeEqual(a, b);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Map a single native Shopify entity (one product / customer / order) to our
+ * canonical row shape so the existing import loop below can process it.
+ */
+function shopifyEntityToRow(
+  entity: "products" | "customers" | "orders",
+  it: Record<string, unknown>,
+): Record<string, unknown> {
+  const asString = (v: unknown): string => (v == null ? "" : String(v));
+  if (entity === "products") {
+    const variants = (it.variants as Array<Record<string, unknown>>) ?? [];
+    const v = variants[0] ?? {};
+    const images = (it.images as Array<Record<string, unknown>>) ?? [];
+    return {
+      name: asString(it.title),
+      sku: asString(v.sku),
+      price: asString(v.price),
+      stock: asString(v.inventory_quantity ?? 0),
+      description: asString(it.body_html).replace(/<[^>]+>/g, "").slice(0, 2000),
+      image_url: asString((images[0] as { src?: string } | undefined)?.src),
+      currency: "UAH",
+    };
+  }
+  if (entity === "customers") {
+    return {
+      name:
+        `${asString(it.first_name)} ${asString(it.last_name)}`.trim() ||
+        asString(it.email),
+      email: asString(it.email),
+      phone: asString(it.phone),
+    };
+  }
+  // orders
+  const customer = (it.customer as Record<string, unknown>) ?? {};
+  const gateways = it.payment_gateway_names as string[] | undefined;
+  return {
+    customer_name:
+      `${asString(customer.first_name)} ${asString(customer.last_name)}`.trim() ||
+      asString(it.email),
+    customer_email: asString(it.email ?? customer.email),
+    total: asString(it.total_price),
+    currency: asString(it.currency || "UAH"),
+    status: asString(it.financial_status || "pending"),
+    payment_method: asString(gateways?.[0] ?? "manual"),
+    external_id: asString(it.id),
+  };
+}
 
 const BodySchema = z.object({
   entity: z.enum(["products", "customers", "orders"]),
