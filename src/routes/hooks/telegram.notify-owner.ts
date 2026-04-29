@@ -284,7 +284,9 @@ async function processRow(
   const card = await renderForKind(row);
   if (!card) return { status: "skipped", error: "source no longer actionable" };
 
-  const sent = await tgSendCard(row.chat_id, card.text, card.buttons);
+  const parseMode =
+    (row.payload as { parse_mode?: "HTML" | "Markdown" } | null)?.parse_mode ?? "HTML";
+  const sent = await tgSendCard(row.chat_id, card.text, card.buttons, parseMode);
   if (!sent.ok) return { status: "failed", error: sent.error };
   return { status: "sent", message_id: sent.message_id };
 }
