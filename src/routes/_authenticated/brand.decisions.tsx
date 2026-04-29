@@ -279,6 +279,40 @@ function DecisionList({ tenantId }: { tenantId: string }) {
   );
 }
 
+const BASIS_LABELS: Record<string, string> = {
+  tenant_history: "ваша історія",
+  blended: "ваша історія + бенчмарк",
+  global_prior: "бенчмарк індустрії",
+  heuristic: "початкова оцінка",
+  prior: "початкова оцінка",
+};
+
+function ForecastBlock({ payload }: { payload: Record<string, unknown> | null }) {
+  const forecast = (payload?.forecast ?? null) as
+    | { expected_revenue_cents?: number; confidence?: number; basis?: string; tenant_samples?: number }
+    | null;
+  if (!forecast || !forecast.expected_revenue_cents) return null;
+  const uah = (forecast.expected_revenue_cents / 100).toLocaleString("uk-UA", {
+    style: "currency",
+    currency: "UAH",
+    maximumFractionDigits: 0,
+  });
+  const confPct = Math.round((forecast.confidence ?? 0) * 100);
+  const basisLabel = BASIS_LABELS[forecast.basis ?? "prior"] ?? forecast.basis;
+  return (
+    <div className="rounded-md border border-primary/20 bg-primary/5 p-3 text-xs space-y-1">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="text-muted-foreground">Очікуваний дохід (30д)</span>
+        <span className="text-base font-semibold text-primary">{uah}</span>
+      </div>
+      <div className="flex items-center justify-between text-muted-foreground">
+        <span>Впевненість: {confPct}%</span>
+        <span>Базис: {basisLabel}{forecast.tenant_samples ? ` · n=${forecast.tenant_samples}` : ""}</span>
+      </div>
+    </div>
+  );
+}
+
 function DecisionCard({
   decision: d,
   busy,
