@@ -116,7 +116,7 @@ const GROWTH: NavGroup = {
       tone: "text-warning",
     },
     {
-      labelKey: "sb.insights" as TKey,
+      labelKey: "sb.acosLoop",
       to: "/brand/acos-loop",
       icon: TrendingUp,
       tone: "text-primary",
