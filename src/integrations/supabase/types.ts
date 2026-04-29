@@ -6680,6 +6680,13 @@ export type Database = {
         Args: { _email: string; _role?: string; _tenant_id: string }
         Returns: Json
       }
+      demo_measure_recent_outcomes: {
+        Args: never
+        Returns: {
+          measured_count: number
+          success_count: number
+        }[]
+      }
       dispatch_high_impact_all_tenants: { Args: never; Returns: Json }
       dispatch_high_impact_decisions: {
         Args: { _tenant_id: string }
