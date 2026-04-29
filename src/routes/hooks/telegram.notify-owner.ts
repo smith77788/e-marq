@@ -207,11 +207,18 @@ async function renderNotification(tenantId: string, notifId: string): Promise<Re
 async function renderForKind(row: OutboxRow): Promise<RenderResult> {
   switch (row.source_kind) {
     case "insight":
-      return renderInsight(row.tenant_id, row.source_id);
+      return row.source_id ? renderInsight(row.tenant_id, row.source_id) : null;
     case "action":
-      return renderAction(row.tenant_id, row.source_id);
+      return row.source_id ? renderAction(row.tenant_id, row.source_id) : null;
     case "notification":
-      return renderNotification(row.tenant_id, row.source_id);
+      return row.source_id ? renderNotification(row.tenant_id, row.source_id) : null;
+    case "digest": {
+      const text = (row.payload as { text?: string } | null)?.text;
+      if (!text) return null;
+      return { text, buttons: [] };
+    }
+    default:
+      return null;
   }
 }
 
