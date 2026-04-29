@@ -105,10 +105,8 @@ export function AcosLoopDashboard({ tenantId }: { tenantId: string }) {
       setAgents((agR.data as AgentPerf[]) ?? []);
       setPending((pdR.data as Pending[]) ?? []);
     } catch (e) {
-      toast({
-        title: "Помилка завантаження",
+      toast.error("Помилка завантаження", {
         description: String((e as Error)?.message ?? e),
-        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -137,14 +135,12 @@ export function AcosLoopDashboard({ tenantId }: { tenantId: string }) {
         _ids: Array.from(selected),
       });
       if (error) throw error;
-      toast({ title: `Схвалено: ${selected.size}` });
+      toast.success(`Схвалено: ${selected.size}`);
       setSelected(new Set());
       await refresh();
     } catch (e) {
-      toast({
-        title: "Не вдалося схвалити",
+      toast.error("Не вдалося схвалити", {
         description: String((e as Error)?.message ?? e),
-        variant: "destructive",
       });
     } finally {
       setBusy(false);
@@ -160,14 +156,12 @@ export function AcosLoopDashboard({ tenantId }: { tenantId: string }) {
         _reason: "owner rejected from dashboard",
       });
       if (error) throw error;
-      toast({ title: `Відхилено: ${selected.size}` });
+      toast.success(`Відхилено: ${selected.size}`);
       setSelected(new Set());
       await refresh();
     } catch (e) {
-      toast({
-        title: "Не вдалося відхилити",
+      toast.error("Не вдалося відхилити", {
         description: String((e as Error)?.message ?? e),
-        variant: "destructive",
       });
     } finally {
       setBusy(false);
