@@ -7106,6 +7106,7 @@ export type Database = {
         Returns: number
       }
       touch_tenant_api_key: { Args: { _key_id: string }; Returns: undefined }
+      unstick_executing_decisions: { Args: never; Returns: number }
       validate_discount_code: {
         Args: {
           _code: string
