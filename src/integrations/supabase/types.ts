@@ -6330,6 +6330,11 @@ export type Database = {
         }
         Returns: undefined
       }
+      measure_decision_outcomes: {
+        Args: { _limit?: number; _tenant: string }
+        Returns: number
+      }
+      measure_outcomes_all_tenants: { Args: never; Returns: Json }
       notify_owner_telegram: {
         Args: { _kind: string; _source_id: string; _tenant_id: string }
         Returns: undefined
