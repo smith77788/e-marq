@@ -318,11 +318,12 @@ function DecisionCard({
       </CardHeader>
       <CardContent className="space-y-3">
         {d.rationale && <p className="text-sm">{d.rationale}</p>}
-        {d.expected_impact && Object.keys(d.expected_impact).length > 0 && (
-          <pre className="overflow-x-auto rounded bg-muted/50 p-2 text-xs">
-            {JSON.stringify(d.expected_impact, null, 2)}
-          </pre>
-        )}
+        <ForecastBlock payload={d.payload} />
+      </CardContent>
+
+      {/* legacy expected_impact dump kept hidden — forecast is now in payload.forecast */}
+      <CardContent className="hidden">
+        {d.expected_impact && JSON.stringify(d.expected_impact)}
 
         {showReject ? (
           <div className="space-y-2">
