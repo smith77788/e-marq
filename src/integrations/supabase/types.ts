@@ -6283,6 +6283,20 @@ export type Database = {
       }
     }
     Views: {
+      acos_loop_activity: {
+        Row: {
+          detail: string | null
+          event_at: string | null
+          event_type: string | null
+          layer: string | null
+          ref_id: string | null
+          risk_level: string | null
+          subtype: string | null
+          tenant_id: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
       acos_loop_overview: {
         Row: {
           attributed_revenue_cents: number | null

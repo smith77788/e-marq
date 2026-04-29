@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { CheckCircle2, XCircle, RefreshCw, TrendingUp, Inbox } from "lucide-react";
+import { AcosActivityFeed } from "./AcosActivityFeed";
 
 type Overview = {
   tenant_id: string | null;
@@ -363,7 +364,11 @@ export function AcosLoopDashboard({ tenantId }: { tenantId: string }) {
         </CardContent>
       </Card>
 
-      {/* Agent performance */}
+      {/* Activity feed + Agent performance side-by-side on desktop */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <AcosActivityFeed tenantId={tenantId} />
+
+        {/* Agent performance */}
       <Card>
         <CardHeader>
           <CardTitle>Agent ROI (30 днів)</CardTitle>
@@ -414,6 +419,7 @@ export function AcosLoopDashboard({ tenantId }: { tenantId: string }) {
           )}
         </CardContent>
       </Card>
+      </div>
 
       {/* Footer success-rate */}
       <p className="text-center text-xs text-muted-foreground">
