@@ -293,15 +293,18 @@ function IntegrationsHubPage() {
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((integration) => {
-                const connected = connectedSet.has(integration.id);
-                const canSync = connected && isConnectorSupported(integration.id) && isTenantActive;
+                const isConn = connectedSet.has(integration.id);
+                const canSync = isConn && isConnectorSupported(integration.id) && isTenantActive;
+                const connRow = (connected ?? []).find((c) => c.provider === integration.id);
                 return (
                   <IntegrationCard
                     key={integration.id}
                     integration={integration}
-                    isConnected={connected}
+                    isConnected={isConn}
                     canSync={canSync}
                     syncing={syncing === integration.id}
+                    lastSyncAt={connRow?.last_sync_at ?? null}
+                    lastSyncStatus={connRow?.last_sync_status ?? null}
                     onSelect={(i) => {
                       if (!isTenantActive && !connectedSet.has(i.id)) {
                         toast.warning("Бренд ще не верифіковано", {
