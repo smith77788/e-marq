@@ -285,6 +285,39 @@ export function AcosLoopDashboard({ tenantId }: { tenantId: string }) {
                 <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
                 <span>Обрати все</span>
               </div>
+              {/* Quick-select chips */}
+              {(groups.byRisk.size > 0 || groups.byType.size > 0) && (
+                <div className="flex flex-wrap gap-1.5 pb-1">
+                  {Array.from(groups.byRisk.entries()).map(([risk, ids]) => (
+                    <button
+                      key={`r-${risk}`}
+                      type="button"
+                      onClick={() => selectGroup(ids)}
+                      className={`rounded-full border px-2 py-0.5 text-[11px] transition-colors ${
+                        ids.every((id) => selected.has(id))
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      risk:{risk} ({ids.length})
+                    </button>
+                  ))}
+                  {Array.from(groups.byType.entries()).map(([t, ids]) => (
+                    <button
+                      key={`t-${t}`}
+                      type="button"
+                      onClick={() => selectGroup(ids)}
+                      className={`rounded-full border px-2 py-0.5 text-[11px] transition-colors ${
+                        ids.every((id) => selected.has(id))
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      {t} ({ids.length})
+                    </button>
+                  ))}
+                </div>
+              )}
               <ScrollArea className="h-[420px] pr-3">
                 <div className="space-y-2">
                   {pending.map((d) => (
