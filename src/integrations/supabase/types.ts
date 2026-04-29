@@ -6313,6 +6313,10 @@ export type Database = {
       }
     }
     Functions: {
+      _high_impact_agent_for: {
+        Args: { _action_type: string }
+        Returns: string
+      }
       _is_in_db_safe_action: { Args: { _t: string }; Returns: boolean }
       accept_tenant_invitation: { Args: { _token: string }; Returns: Json }
       add_balance: {
@@ -6668,6 +6672,16 @@ export type Database = {
       create_tenant_invitation: {
         Args: { _email: string; _role?: string; _tenant_id: string }
         Returns: Json
+      }
+      dispatch_high_impact_all_tenants: { Args: never; Returns: Json }
+      dispatch_high_impact_decisions: {
+        Args: { _tenant_id: string }
+        Returns: {
+          action_id: string
+          action_type: string
+          agent_id: string
+          decision_id: string
+        }[]
       }
       dntrade_partial_count_recent: {
         Args: { _hours?: number; _tenant_id: string }
