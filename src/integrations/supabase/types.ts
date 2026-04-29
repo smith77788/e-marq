@@ -655,6 +655,36 @@ export type Database = {
         }
         Relationships: []
       }
+      auto_approval_policy: {
+        Row: {
+          action_type: string
+          created_at: string
+          enabled: boolean
+          max_age_hours: number
+          min_success_history: number
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          enabled?: boolean
+          max_age_hours?: number
+          min_success_history?: number
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          enabled?: boolean
+          max_age_hours?: number
+          min_success_history?: number
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       balance_ledger: {
         Row: {
           actor_user_id: string | null
@@ -1659,6 +1689,7 @@ export type Database = {
           agent_id: string
           approved_at: string | null
           approved_by: string | null
+          approved_by_auto: boolean
           batch_id: string | null
           confidence: number
           created_at: string
@@ -1682,6 +1713,7 @@ export type Database = {
           agent_id: string
           approved_at?: string | null
           approved_by?: string | null
+          approved_by_auto?: boolean
           batch_id?: string | null
           confidence?: number
           created_at?: string
@@ -1705,6 +1737,7 @@ export type Database = {
           agent_id?: string
           approved_at?: string | null
           approved_by?: string | null
+          approved_by_auto?: boolean
           batch_id?: string | null
           confidence?: number
           created_at?: string
@@ -6582,6 +6615,13 @@ export type Database = {
         }
       }
       approve_decisions: { Args: { _ids: string[] }; Returns: Json }
+      auto_approve_eligible_decisions: {
+        Args: never
+        Returns: {
+          approved_count: number
+          by_action: Json
+        }[]
+      }
       can_auto_apply_action: {
         Args: {
           _agent_id: string
