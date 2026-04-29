@@ -5609,6 +5609,10 @@ export type Database = {
         Args: { _target_user_id: string }
         Returns: undefined
       }
+      admin_set_cron_job_command: {
+        Args: { p_command: string; p_jobname: string }
+        Returns: number
+      }
       admin_set_tenant_status: {
         Args: { _status: string; _tenant_id: string }
         Returns: {
