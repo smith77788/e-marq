@@ -183,6 +183,14 @@ function DecisionList({ tenantId }: { tenantId: string }) {
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(d);
     }
+    // sort items within each group by forecast.expected_revenue_cents desc
+    for (const [, items] of map) {
+      items.sort((a, b) => {
+        const av = Number(((a.payload as { forecast?: { expected_revenue_cents?: number } } | null)?.forecast?.expected_revenue_cents) ?? 0);
+        const bv = Number(((b.payload as { forecast?: { expected_revenue_cents?: number } } | null)?.forecast?.expected_revenue_cents) ?? 0);
+        return bv - av;
+      });
+    }
     return Array.from(map.entries()).sort((a, b) => b[1].length - a[1].length);
   }, [decisions]);
 
@@ -279,6 +287,40 @@ function DecisionList({ tenantId }: { tenantId: string }) {
   );
 }
 
+const BASIS_LABELS: Record<string, string> = {
+  tenant_history: "ваша історія",
+  blended: "ваша історія + бенчмарк",
+  global_prior: "бенчмарк індустрії",
+  heuristic: "початкова оцінка",
+  prior: "початкова оцінка",
+};
+
+function ForecastBlock({ payload }: { payload: Record<string, unknown> | null }) {
+  const forecast = (payload?.forecast ?? null) as
+    | { expected_revenue_cents?: number; confidence?: number; basis?: string; tenant_samples?: number }
+    | null;
+  if (!forecast || !forecast.expected_revenue_cents) return null;
+  const uah = (forecast.expected_revenue_cents / 100).toLocaleString("uk-UA", {
+    style: "currency",
+    currency: "UAH",
+    maximumFractionDigits: 0,
+  });
+  const confPct = Math.round((forecast.confidence ?? 0) * 100);
+  const basisLabel = BASIS_LABELS[forecast.basis ?? "prior"] ?? forecast.basis;
+  return (
+    <div className="rounded-md border border-primary/20 bg-primary/5 p-3 text-xs space-y-1">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="text-muted-foreground">Очікуваний дохід (30д)</span>
+        <span className="text-base font-semibold text-primary">{uah}</span>
+      </div>
+      <div className="flex items-center justify-between text-muted-foreground">
+        <span>Впевненість: {confPct}%</span>
+        <span>Базис: {basisLabel}{forecast.tenant_samples ? ` · n=${forecast.tenant_samples}` : ""}</span>
+      </div>
+    </div>
+  );
+}
+
 function DecisionCard({
   decision: d,
   busy,
@@ -318,11 +360,7 @@ function DecisionCard({
       </CardHeader>
       <CardContent className="space-y-3">
         {d.rationale && <p className="text-sm">{d.rationale}</p>}
-        {d.expected_impact && Object.keys(d.expected_impact).length > 0 && (
-          <pre className="overflow-x-auto rounded bg-muted/50 p-2 text-xs">
-            {JSON.stringify(d.expected_impact, null, 2)}
-          </pre>
-        )}
+        <ForecastBlock payload={d.payload} />
 
         {showReject ? (
           <div className="space-y-2">
