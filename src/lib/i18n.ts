@@ -1455,6 +1455,7 @@ const dict = {
     "sb.growth": "Growth",
     "sb.insights": "Insights",
     "sb.acosLoop": "ACOS Loop",
+    "sb.roi": "AI ROI",
     "sb.customers": "Customers",
     "sb.agents": "Agents",
     "sb.setup": "Setup",
