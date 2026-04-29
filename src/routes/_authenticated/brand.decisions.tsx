@@ -319,11 +319,6 @@ function DecisionCard({
       <CardContent className="space-y-3">
         {d.rationale && <p className="text-sm">{d.rationale}</p>}
         <ForecastBlock payload={d.payload} />
-      </CardContent>
-
-      {/* legacy expected_impact dump kept hidden — forecast is now in payload.forecast */}
-      <CardContent className="hidden">
-        {d.expected_impact && JSON.stringify(d.expected_impact)}
 
         {showReject ? (
           <div className="space-y-2">
