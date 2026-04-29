@@ -13,3 +13,4 @@ Forecasting layer: BEFORE INSERT trigger на decision_queue додає payload.
 ## Memories
 - [MARQ Roadmap](mem://features/marq-roadmap) — спринти 1-12, Outreach Hunter, Site Builder, Email automations, inline preview правило.
 - [Forecasting](mem://architecture/forecasting) — _forecast_for_action() + trigger; basis ladder tenant_history → blended → global_prior → heuristic; UI sorts pending by expected_revenue desc
+- [Forecast calibration](mem://architecture/forecast-calibration) — daily compute_forecast_calibration() vs action_outcomes; MAPE/bias/hit-rate per action_type у forecast_calibration; UI "Точність прогнозу AI" на /brand/insights
