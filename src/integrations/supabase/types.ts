@@ -5482,15 +5482,15 @@ export type Database = {
       admin_list_cron_jobs: {
         Args: never
         Returns: {
-          active: boolean
-          command: string
-          jobid: number
-          jobname: string
-          last_run_started: string
-          last_run_status: string
-          runs_50: number
-          schedule: string
-          successes_50: number
+          out_active: boolean
+          out_command: string
+          out_jobid: number
+          out_jobname: string
+          out_last_run_started: string
+          out_last_run_status: string
+          out_runs_50: number
+          out_schedule: string
+          out_successes_50: number
         }[]
       }
       admin_list_pending_tenants: {
