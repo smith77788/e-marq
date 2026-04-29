@@ -121,6 +121,12 @@ const GROWTH: NavGroup = {
       icon: TrendingUp,
       tone: "text-primary",
     },
+    {
+      labelKey: "sb.roi",
+      to: "/brand/roi",
+      icon: Coins,
+      tone: "text-success",
+    },
     { labelKey: "sb.customers", to: "/brand/customers", icon: Users, tone: "text-info" },
     { labelKey: "sb.agents", to: "/agents/library", icon: Bot, tone: "text-accent" },
   ],
