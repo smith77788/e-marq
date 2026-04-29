@@ -7118,6 +7118,20 @@ export type Database = {
           revenue_cents: number
         }[]
       }
+      simulate_pilot_orders_with_lift: {
+        Args: {
+          _days_back?: number
+          _lift_window_days?: number
+          _tenant_id: string
+        }
+        Returns: {
+          baseline_revenue_cents: number
+          items_created: number
+          lift_revenue_cents: number
+          orders_created: number
+          revenue_cents: number
+        }[]
+      }
       subscribe_restock_notification: {
         Args: {
           _email: string
