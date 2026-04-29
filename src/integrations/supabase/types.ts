@@ -6699,6 +6699,12 @@ export type Database = {
       }
       cleanup_anon_rate_limit: { Args: never; Returns: undefined }
       cleanup_restock_rate_limit: { Args: never; Returns: undefined }
+      compute_agent_health_daily: {
+        Args: never
+        Returns: {
+          rows_upserted: number
+        }[]
+      }
       consume_ai_credits: {
         Args: {
           _amount: number
