@@ -16,10 +16,11 @@ const APP_BASE = process.env.APP_BASE_URL ?? "https://e-marq.lovable.app";
 type OutboxRow = {
   id: string;
   tenant_id: string;
-  source_kind: "insight" | "action" | "notification";
-  source_id: string;
+  source_kind: "insight" | "action" | "notification" | "digest";
+  source_id: string | null;
   chat_id: string | null;
   status: string;
+  payload?: Record<string, unknown> | null;
 };
 
 type RenderResult = { text: string; buttons: { text: string; data: string }[][] } | null;
