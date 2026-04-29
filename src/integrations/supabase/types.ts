@@ -6940,6 +6940,7 @@ export type Database = {
           tenant_slug: string
         }[]
       }
+      get_owner_roi_summary: { Args: { _tenant_id: string }; Returns: Json }
       get_pending_decisions: {
         Args: { _limit?: number; _tenant: string }
         Returns: {
