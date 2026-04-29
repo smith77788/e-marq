@@ -364,7 +364,11 @@ export function AcosLoopDashboard({ tenantId }: { tenantId: string }) {
         </CardContent>
       </Card>
 
-      {/* Agent performance */}
+      {/* Activity feed + Agent performance side-by-side on desktop */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <AcosActivityFeed tenantId={tenantId} />
+
+        {/* Agent performance */}
       <Card>
         <CardHeader>
           <CardTitle>Agent ROI (30 днів)</CardTitle>
