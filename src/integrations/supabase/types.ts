@@ -5699,6 +5699,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _is_in_db_safe_action: { Args: { _t: string }; Returns: boolean }
       accept_tenant_invitation: { Args: { _token: string }; Returns: Json }
       add_balance: {
         Args: {
@@ -6062,6 +6063,11 @@ export type Database = {
         Args: { _tenant_id: string }
         Returns: number
       }
+      execute_decisions_all_tenants: { Args: never; Returns: Json }
+      execute_pending_decisions: {
+        Args: { _limit?: number; _tenant: string }
+        Returns: number
+      }
       get_agent_permission: {
         Args: { _agent_id: string; _tenant_id: string }
         Returns: {
@@ -6262,6 +6268,16 @@ export type Database = {
       is_super_admin: { Args: never; Returns: boolean }
       is_tenant_admin: { Args: { _tenant_id: string }; Returns: boolean }
       is_tenant_member: { Args: { _tenant_id: string }; Returns: boolean }
+      mark_decision_outcome: {
+        Args: {
+          _actual?: Json
+          _attributed_revenue_cents?: number
+          _decision_id: string
+          _notes?: string
+          _success: boolean
+        }
+        Returns: undefined
+      }
       mark_order_paid: {
         Args: { _order_id: string; _payment_ref?: string }
         Returns: {
