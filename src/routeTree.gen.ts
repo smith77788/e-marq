@@ -192,6 +192,7 @@ import { Route as AuthenticatedBrandCustomersRouteImport } from './routes/_authe
 import { Route as AuthenticatedBrandChannelsRouteImport } from './routes/_authenticated/brand.channels'
 import { Route as AuthenticatedBrandCatalogRouteImport } from './routes/_authenticated/brand.catalog'
 import { Route as AuthenticatedBrandBillingRouteImport } from './routes/_authenticated/brand.billing'
+import { Route as AuthenticatedBrandAcosLoopRouteImport } from './routes/_authenticated/brand.acos-loop'
 import { Route as AuthenticatedAgentsLiveRouteImport } from './routes/_authenticated/agents.live'
 import { Route as AuthenticatedAgentsLibraryRouteImport } from './routes/_authenticated/agents.library'
 import { Route as AuthenticatedAgentsAgentIdRouteImport } from './routes/_authenticated/agents.$agentId'
@@ -1238,6 +1239,12 @@ const AuthenticatedBrandBillingRoute =
     path: '/brand/billing',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedBrandAcosLoopRoute =
+  AuthenticatedBrandAcosLoopRouteImport.update({
+    id: '/brand/acos-loop',
+    path: '/brand/acos-loop',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAgentsLiveRoute = AuthenticatedAgentsLiveRouteImport.update({
   id: '/agents/live',
   path: '/agents/live',
@@ -1514,6 +1521,7 @@ export interface FileRoutesByFullPath {
   '/agents/$agentId': typeof AuthenticatedAgentsAgentIdRoute
   '/agents/library': typeof AuthenticatedAgentsLibraryRoute
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
+  '/brand/acos-loop': typeof AuthenticatedBrandAcosLoopRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/brand/catalog': typeof AuthenticatedBrandCatalogRoute
   '/brand/channels': typeof AuthenticatedBrandChannelsRoute
@@ -1738,6 +1746,7 @@ export interface FileRoutesByTo {
   '/agents/$agentId': typeof AuthenticatedAgentsAgentIdRoute
   '/agents/library': typeof AuthenticatedAgentsLibraryRoute
   '/agents/live': typeof AuthenticatedAgentsLiveRoute
+  '/brand/acos-loop': typeof AuthenticatedBrandAcosLoopRoute
   '/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/brand/catalog': typeof AuthenticatedBrandCatalogRoute
   '/brand/channels': typeof AuthenticatedBrandChannelsRoute
@@ -1965,6 +1974,7 @@ export interface FileRoutesById {
   '/_authenticated/agents/$agentId': typeof AuthenticatedAgentsAgentIdRoute
   '/_authenticated/agents/library': typeof AuthenticatedAgentsLibraryRoute
   '/_authenticated/agents/live': typeof AuthenticatedAgentsLiveRoute
+  '/_authenticated/brand/acos-loop': typeof AuthenticatedBrandAcosLoopRoute
   '/_authenticated/brand/billing': typeof AuthenticatedBrandBillingRoute
   '/_authenticated/brand/catalog': typeof AuthenticatedBrandCatalogRoute
   '/_authenticated/brand/channels': typeof AuthenticatedBrandChannelsRoute
@@ -2192,6 +2202,7 @@ export interface FileRouteTypes {
     | '/agents/$agentId'
     | '/agents/library'
     | '/agents/live'
+    | '/brand/acos-loop'
     | '/brand/billing'
     | '/brand/catalog'
     | '/brand/channels'
@@ -2416,6 +2427,7 @@ export interface FileRouteTypes {
     | '/agents/$agentId'
     | '/agents/library'
     | '/agents/live'
+    | '/brand/acos-loop'
     | '/brand/billing'
     | '/brand/catalog'
     | '/brand/channels'
@@ -2642,6 +2654,7 @@ export interface FileRouteTypes {
     | '/_authenticated/agents/$agentId'
     | '/_authenticated/agents/library'
     | '/_authenticated/agents/live'
+    | '/_authenticated/brand/acos-loop'
     | '/_authenticated/brand/billing'
     | '/_authenticated/brand/catalog'
     | '/_authenticated/brand/channels'
@@ -4293,6 +4306,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBrandBillingRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/brand/acos-loop': {
+      id: '/_authenticated/brand/acos-loop'
+      path: '/brand/acos-loop'
+      fullPath: '/brand/acos-loop'
+      preLoaderRoute: typeof AuthenticatedBrandAcosLoopRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/agents/live': {
       id: '/_authenticated/agents/live'
       path: '/agents/live'
@@ -4646,6 +4666,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAgentsAgentIdRoute: typeof AuthenticatedAgentsAgentIdRoute
   AuthenticatedAgentsLibraryRoute: typeof AuthenticatedAgentsLibraryRoute
   AuthenticatedAgentsLiveRoute: typeof AuthenticatedAgentsLiveRoute
+  AuthenticatedBrandAcosLoopRoute: typeof AuthenticatedBrandAcosLoopRoute
   AuthenticatedBrandBillingRoute: typeof AuthenticatedBrandBillingRoute
   AuthenticatedBrandCatalogRoute: typeof AuthenticatedBrandCatalogRoute
   AuthenticatedBrandChannelsRoute: typeof AuthenticatedBrandChannelsRoute
@@ -4683,6 +4704,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAgentsAgentIdRoute: AuthenticatedAgentsAgentIdRoute,
   AuthenticatedAgentsLibraryRoute: AuthenticatedAgentsLibraryRoute,
   AuthenticatedAgentsLiveRoute: AuthenticatedAgentsLiveRoute,
+  AuthenticatedBrandAcosLoopRoute: AuthenticatedBrandAcosLoopRoute,
   AuthenticatedBrandBillingRoute: AuthenticatedBrandBillingRoute,
   AuthenticatedBrandCatalogRoute: AuthenticatedBrandCatalogRoute,
   AuthenticatedBrandChannelsRoute: AuthenticatedBrandChannelsRoute,
