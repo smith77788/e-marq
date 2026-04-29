@@ -2259,6 +2259,48 @@ export type Database = {
           },
         ]
       }
+      forecast_calibration: {
+        Row: {
+          action_type: string
+          avg_actual_cents: number
+          avg_forecast_cents: number
+          bias_cents: number
+          computed_at: string
+          hit_rate: number
+          id: string
+          mape_pct: number | null
+          median_ratio: number | null
+          sample_size: number
+          tenant_id: string | null
+        }
+        Insert: {
+          action_type: string
+          avg_actual_cents: number
+          avg_forecast_cents: number
+          bias_cents: number
+          computed_at?: string
+          hit_rate: number
+          id?: string
+          mape_pct?: number | null
+          median_ratio?: number | null
+          sample_size: number
+          tenant_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          avg_actual_cents?: number
+          avg_forecast_cents?: number
+          bias_cents?: number
+          computed_at?: string
+          hit_rate?: number
+          id?: string
+          mape_pct?: number | null
+          median_ratio?: number | null
+          sample_size?: number
+          tenant_id?: string | null
+        }
+        Relationships: []
+      }
       funnel_metrics_14d: {
         Row: {
           add_to_cart: number
@@ -6742,6 +6784,7 @@ export type Database = {
           rows_upserted: number
         }[]
       }
+      compute_forecast_calibration: { Args: never; Returns: Json }
       consume_ai_credits: {
         Args: {
           _amount: number
@@ -6868,6 +6911,21 @@ export type Database = {
       get_effective_limit: {
         Args: { _limit_key: string; _tenant_id: string }
         Returns: number
+      }
+      get_forecast_calibration: {
+        Args: { _tenant_id: string }
+        Returns: {
+          action_type: string
+          avg_actual_cents: number
+          avg_forecast_cents: number
+          bias_cents: number
+          computed_at: string
+          hit_rate: number
+          mape_pct: number
+          median_ratio: number
+          sample_size: number
+          scope: string
+        }[]
       }
       get_invitation_by_token: { Args: { _token: string }; Returns: Json }
       get_my_tenants: {

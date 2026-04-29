@@ -12,6 +12,7 @@ import { InsightsPanel } from "@/components/owner/InsightsPanel";
 import { AgentTimeline } from "@/components/owner/AgentTimeline";
 import { MemoryInspector } from "@/components/owner/MemoryInspector";
 import { ACOSStats } from "@/components/owner/ACOSStats";
+import { ForecastCalibration } from "@/components/owner/ForecastCalibration";
 
 type Search = { tenant?: string };
 
@@ -76,6 +77,7 @@ function InsightsPage() {
       </div>
 
       <ACOSStats tenantId={tenantId} />
+      <ForecastCalibration tenantId={tenantId} />
       <InsightsPanel tenantId={tenantId} />
       <AgentTimeline tenantId={tenantId} />
       <MemoryInspector tenantId={tenantId} />
