@@ -6389,6 +6389,10 @@ export type Database = {
         }
         Returns: string
       }
+      _forecast_for_action: {
+        Args: { _action_type: string; _tenant_id: string }
+        Returns: Json
+      }
       _high_impact_agent_for: {
         Args: { _action_type: string }
         Returns: string
@@ -6658,6 +6662,7 @@ export type Database = {
           by_action: Json
         }[]
       }
+      backfill_decision_forecasts: { Args: never; Returns: number }
       can_auto_apply_action: {
         Args: {
           _agent_id: string
