@@ -5935,6 +5935,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      approve_decisions: { Args: { _ids: string[] }; Returns: Json }
       can_auto_apply_action: {
         Args: {
           _agent_id: string
@@ -6108,6 +6109,23 @@ export type Database = {
           tenant_id: string
           tenant_name: string
           tenant_slug: string
+        }[]
+      }
+      get_pending_decisions: {
+        Args: { _limit?: number; _tenant: string }
+        Returns: {
+          action_type: string
+          agent_id: string
+          confidence: number
+          created_at: string
+          expected_impact: Json
+          expires_at: string
+          id: string
+          insight_type: string
+          payload: Json
+          rationale: string
+          risk_level: string
+          title: string
         }[]
       }
       get_public_order: { Args: { _order_id: string }; Returns: Json }
@@ -6362,6 +6380,11 @@ export type Database = {
             }
             Returns: string
           }
+      propose_decisions_all_tenants: { Args: never; Returns: Json }
+      propose_decisions_from_insights: {
+        Args: { _tenant: string }
+        Returns: number
+      }
       refresh_all_signal_metrics: { Args: never; Returns: Json }
       refresh_customer_metrics_30d: {
         Args: { _tenant: string }
@@ -6371,6 +6394,10 @@ export type Database = {
       refresh_product_metrics_14d: {
         Args: { _tenant: string }
         Returns: number
+      }
+      reject_decisions: {
+        Args: { _ids: string[]; _reason?: string }
+        Returns: Json
       }
       self_heal_dismiss_action: {
         Args: { p_action_id: string; p_reason?: string }
