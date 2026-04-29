@@ -52,12 +52,19 @@ export function IntegrationCard({
   isConnected,
   canSync,
   syncing,
+  lastSyncAt,
+  lastSyncStatus,
   onSelect,
   onSync,
 }: Props) {
   const Icon = integration.icon;
   const status = STATUS_LABELS[integration.status];
   const isComingSoon = integration.status === "comingSoon";
+  const syncStale = lastSyncAt
+    ? Date.now() - new Date(lastSyncAt).getTime() > 24 * 60 * 60 * 1000
+    : false;
+  const syncFailed =
+    lastSyncStatus === "failed" || lastSyncStatus === "completed_with_errors";
 
   return (
     <Card
