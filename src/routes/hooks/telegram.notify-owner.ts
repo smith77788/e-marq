@@ -259,7 +259,7 @@ async function tgSendCard(
 
 async function processRow(
   row: OutboxRow,
-): Promise<{ status: "sent" | "skipped" | "failed"; error?: string }> {
+): Promise<{ status: "sent" | "skipped" | "failed"; error?: string; message_id?: number }> {
   if (!row.chat_id) {
     // refresh chat from tenant_configs in case it was set after enqueue
     const { data: cfg } = await supabaseAdmin
@@ -277,7 +277,7 @@ async function processRow(
 
   const sent = await tgSendCard(row.chat_id, card.text, card.buttons);
   if (!sent.ok) return { status: "failed", error: sent.error };
-  return { status: "sent", error: String(sent.message_id) };
+  return { status: "sent", message_id: sent.message_id };
 }
 
 async function handleSingle(tenantId: string, kind: OutboxRow["source_kind"], sourceId: string) {
@@ -323,7 +323,7 @@ async function pushAndUpdate(row: OutboxRow) {
       .update({
         status: "sent",
         sent_at: new Date().toISOString(),
-        tg_message_id: Number(result.error),
+        tg_message_id: result.message_id ?? null,
         error: null,
       })
       .eq("id", row.id);
