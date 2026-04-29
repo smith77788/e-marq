@@ -17,16 +17,19 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { CheckCircle2, XCircle, RefreshCw, TrendingUp, Inbox } from "lucide-react";
 
 type Overview = {
   tenant_id: string | null;
   tenant_name: string | null;
   insights_30d: number | null;
+  insights_new: number | null;
+  decisions_30d: number | null;
   decisions_pending: number | null;
-  decisions_executing: number | null;
+  decisions_approved: number | null;
   decisions_done: number | null;
+  decisions_failed: number | null;
   decisions_rejected: number | null;
   outcomes_total: number | null;
   outcomes_measured: number | null;
