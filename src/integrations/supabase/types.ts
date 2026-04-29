@@ -5450,6 +5450,16 @@ export type Database = {
         Args: { _delta_cents: number; _reason?: string; _tenant_id: string }
         Returns: number
       }
+      admin_cron_job_runs: {
+        Args: { p_jobname: string; p_limit?: number }
+        Returns: {
+          out_end_time: string
+          out_return_message: string
+          out_runid: number
+          out_start_time: string
+          out_status: string
+        }[]
+      }
       admin_get_tenant_owner: {
         Args: { _tenant_id: string }
         Returns: {
