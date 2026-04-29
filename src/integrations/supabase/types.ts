@@ -7110,6 +7110,14 @@ export type Database = {
         Args: { _chat_id: string; _tenant_id: string }
         Returns: undefined
       }
+      simulate_lift_for_recent_decisions: {
+        Args: { _tenant_id: string }
+        Returns: {
+          decisions_lifted: number
+          orders_created: number
+          revenue_cents: number
+        }[]
+      }
       simulate_pilot_orders: {
         Args: { _days?: number; _tenant_id: string }
         Returns: {
