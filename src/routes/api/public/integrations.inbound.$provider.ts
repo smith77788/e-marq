@@ -116,7 +116,8 @@ function jsonResponse(body: unknown, status = 200) {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, X-Webhook-Secret",
+      "Access-Control-Allow-Headers":
+        "Content-Type, X-Webhook-Secret, X-Shopify-Hmac-Sha256, X-Shopify-Topic, X-Shopify-Shop-Domain",
     },
   });
 }
