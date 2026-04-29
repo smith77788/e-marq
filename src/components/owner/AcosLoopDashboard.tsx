@@ -127,6 +127,31 @@ export function AcosLoopDashboard({ tenantId }: { tenantId: string }) {
     setSelected(next);
   };
 
+  // Group counts for quick-select chips
+  const groups = useMemo(() => {
+    const byType = new Map<string, string[]>();
+    const byRisk = new Map<string, string[]>();
+    const byAgent = new Map<string, string[]>();
+    for (const p of pending) {
+      if (!byType.has(p.action_type)) byType.set(p.action_type, []);
+      byType.get(p.action_type)!.push(p.id);
+      if (!byRisk.has(p.risk_level)) byRisk.set(p.risk_level, []);
+      byRisk.get(p.risk_level)!.push(p.id);
+      if (!byAgent.has(p.agent_id)) byAgent.set(p.agent_id, []);
+      byAgent.get(p.agent_id)!.push(p.id);
+    }
+    return { byType, byRisk, byAgent };
+  }, [pending]);
+
+  const selectGroup = (ids: string[]) => {
+    // If all already selected from group, deselect them; else add them
+    const allIn = ids.every((id) => selected.has(id));
+    const next = new Set(selected);
+    if (allIn) ids.forEach((id) => next.delete(id));
+    else ids.forEach((id) => next.add(id));
+    setSelected(next);
+  };
+
   const approveSelected = async () => {
     if (selected.size === 0) return;
     setBusy(true);
@@ -260,6 +285,39 @@ export function AcosLoopDashboard({ tenantId }: { tenantId: string }) {
                 <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
                 <span>Обрати все</span>
               </div>
+              {/* Quick-select chips */}
+              {(groups.byRisk.size > 0 || groups.byType.size > 0) && (
+                <div className="flex flex-wrap gap-1.5 pb-1">
+                  {Array.from(groups.byRisk.entries()).map(([risk, ids]) => (
+                    <button
+                      key={`r-${risk}`}
+                      type="button"
+                      onClick={() => selectGroup(ids)}
+                      className={`rounded-full border px-2 py-0.5 text-[11px] transition-colors ${
+                        ids.every((id) => selected.has(id))
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      risk:{risk} ({ids.length})
+                    </button>
+                  ))}
+                  {Array.from(groups.byType.entries()).map(([t, ids]) => (
+                    <button
+                      key={`t-${t}`}
+                      type="button"
+                      onClick={() => selectGroup(ids)}
+                      className={`rounded-full border px-2 py-0.5 text-[11px] transition-colors ${
+                        ids.every((id) => selected.has(id))
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      {t} ({ids.length})
+                    </button>
+                  ))}
+                </div>
+              )}
               <ScrollArea className="h-[420px] pr-3">
                 <div className="space-y-2">
                   {pending.map((d) => (
