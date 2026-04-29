@@ -11,6 +11,7 @@ import { useTenantContext } from "@/hooks/useTenantContext";
 import { InsightsPanel } from "@/components/owner/InsightsPanel";
 import { AgentTimeline } from "@/components/owner/AgentTimeline";
 import { MemoryInspector } from "@/components/owner/MemoryInspector";
+import { ACOSStats } from "@/components/owner/ACOSStats";
 
 type Search = { tenant?: string };
 
