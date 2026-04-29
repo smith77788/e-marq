@@ -7080,6 +7080,7 @@ export type Database = {
         Args: { _kind: string; _source_id: string; _tenant_id: string }
         Returns: undefined
       }
+      owner_approve_decision: { Args: { _decision_id: string }; Returns: Json }
       owner_change_plan: {
         Args: { _plan_key: string; _reason?: string; _tenant_id: string }
         Returns: {
@@ -7102,6 +7103,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      owner_reject_decision: {
+        Args: { _decision_id: string; _reason?: string }
+        Returns: Json
       }
       owner_topup_ai_credits: {
         Args: { _amount: number; _reason?: string; _tenant_id: string }
