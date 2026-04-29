@@ -1,0 +1,1 @@
+SELECT cron.unschedule('self-heal-engine-tick');
