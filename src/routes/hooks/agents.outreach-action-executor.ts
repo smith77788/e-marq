@@ -119,7 +119,38 @@ export const Route = createFileRoute("/hooks/agents/outreach-action-executor")({
         if ("error" in auth) return jsonError(auth.error, auth.status);
 
         const action_id = body.action_id;
-        if (!action_id) return jsonError("no_action_id", 400);
+        // Cron fan-out: no action_id → pick a small batch of approved actions
+        // for the (optional) tenant and POST back to ourselves per action.
+        if (!action_id) {
+          const origin = new URL(request.url).origin;
+          const authHeader = request.headers.get("authorization") ?? "";
+          let q = supabaseAdmin
+            .from("outreach_actions")
+            .select("id, tenant_id")
+            .in("status", ["approved", "draft"])
+            .order("created_at", { ascending: true })
+            .limit(20);
+          if (body.tenant_id) q = q.eq("tenant_id", body.tenant_id);
+          const { data: queued, error: qErr } = await q;
+          if (qErr) return jsonError("queue_lookup_failed", 500, { details: qErr.message });
+          if (!queued || queued.length === 0) return jsonOk({ mode: "fan-out", picked: 0 });
+
+          const fan = await Promise.allSettled(
+            queued.map(async (a) => {
+              const r = await fetch(`${origin}/hooks/agents/outreach-action-executor`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: authHeader },
+                body: JSON.stringify({ tenant_id: a.tenant_id, action_id: a.id }),
+              });
+              const j = (await r.json().catch(() => ({}))) as Record<string, unknown>;
+              return { action_id: a.id, http: r.status, ...j };
+            }),
+          );
+          const summary = fan.map((r) =>
+            r.status === "fulfilled" ? r.value : { ok: false, error: String(r.reason) },
+          );
+          return jsonOk({ mode: "fan-out", picked: queued.length, results: summary });
+        }
 
         const { data: action, error: aErr } = await supabaseAdmin
           .from("outreach_actions")

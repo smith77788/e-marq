@@ -1,9 +1,15 @@
 /**
  * ACOS Orchestrator: runs all agents for a tenant in parallel.
- * Body: { tenant_id }
+ * Body: { tenant_id? }
+ *
+ * If `tenant_id` is omitted (cron-style invocation) we fan-out across every
+ * active tenant. This is what the `marq-agents-run-all-15min` pg_cron job
+ * does — it must NOT 400. Cron auth is required for fan-out mode.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { authorizeAgentRequest, jsonError, jsonOk } from "@/lib/acos/agentRuntime";
+import { isCronToken } from "@/lib/acos/cronAuth";
 
 const AGENTS = [
   // Original ACOS agents
@@ -113,12 +119,51 @@ export const Route = createFileRoute("/hooks/agents/run-all")({
         } catch {
           return jsonError("Invalid JSON body", 400);
         }
-        if (!tenantId) return jsonError("tenant_id required", 400);
+        const origin = new URL(request.url).origin;
+
+        // Cron fan-out: no tenant_id → require cron token, then per-tenant call.
+        if (!tenantId) {
+          if (!isCronToken(token)) return jsonError("Unauthorized", 401);
+          const { data: tenants, error: tErr } = await supabaseAdmin
+            .from("tenants")
+            .select("id, slug")
+            .eq("status", "active")
+            .limit(50);
+          if (tErr) return jsonError("tenant lookup failed", 500, { details: tErr.message });
+
+          const fan = await Promise.allSettled(
+            (tenants ?? []).map(async (t) => {
+              const r = await fetch(`${origin}/hooks/agents/run-all`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ tenant_id: t.id }),
+              });
+              const j = (await r.json().catch(() => ({}))) as Record<string, unknown>;
+              const ic = typeof j.insights_created === "number" ? j.insights_created : 0;
+              return { tenant: t.slug, ok: r.ok, insights_created: ic };
+            }),
+          );
+          const summary = fan.map((r) =>
+            r.status === "fulfilled" ? r.value : { tenant: "?", ok: false, error: String(r.reason) },
+          );
+          const total = summary.reduce(
+            (s, r) => s + (typeof (r as { insights_created?: number }).insights_created === "number" ? (r as { insights_created: number }).insights_created : 0),
+            0,
+          );
+          return jsonOk({
+            mode: "fan-out",
+            tenants_processed: tenants?.length ?? 0,
+            insights_created: total,
+            per_tenant: summary,
+          });
+        }
 
         const ctx = await authorizeAgentRequest(token, tenantId);
         if ("error" in ctx) return jsonError(ctx.error, ctx.status);
 
-        const origin = new URL(request.url).origin;
         const results = await Promise.allSettled(
           AGENTS.map(async (a) => {
             const res = await fetch(`${origin}/hooks/agents/${a}`, {
