@@ -347,7 +347,7 @@ async function pushAndUpdate(row: OutboxRow) {
 async function drainPending(limit = 30) {
   const { data: rows } = await supabaseAdmin
     .from("owner_telegram_outbox")
-    .select("id, tenant_id, source_kind, source_id, chat_id, status")
+    .select("id, tenant_id, source_kind, source_id, chat_id, status, payload")
     .eq("status", "pending")
     .order("created_at", { ascending: true })
     .limit(limit);
