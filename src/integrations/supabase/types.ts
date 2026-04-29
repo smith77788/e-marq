@@ -5479,6 +5479,20 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_list_cron_jobs: {
+        Args: never
+        Returns: {
+          active: boolean
+          command: string
+          jobid: number
+          jobname: string
+          last_run_started: string
+          last_run_status: string
+          runs_50: number
+          schedule: string
+          successes_50: number
+        }[]
+      }
       admin_list_pending_tenants: {
         Args: never
         Returns: {
@@ -5577,6 +5591,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      admin_repair_cron_auth: {
+        Args: { new_token: string }
+        Returns: {
+          changed: boolean
+          jobid: number
+          jobname: string
+          new_command: string
+        }[]
       }
       admin_revoke_capability: {
         Args: { _capability: string; _target_user: string }
