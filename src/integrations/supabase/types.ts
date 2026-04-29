@@ -3582,10 +3582,12 @@ export type Database = {
       }
       owner_telegram_outbox: {
         Row: {
+          attempts: number
           chat_id: string | null
           created_at: string
           error: string | null
           id: string
+          next_retry_at: string | null
           payload: Json
           sent_at: string | null
           source_id: string
@@ -3595,10 +3597,12 @@ export type Database = {
           tg_message_id: number | null
         }
         Insert: {
+          attempts?: number
           chat_id?: string | null
           created_at?: string
           error?: string | null
           id?: string
+          next_retry_at?: string | null
           payload?: Json
           sent_at?: string | null
           source_id: string
@@ -3608,10 +3612,12 @@ export type Database = {
           tg_message_id?: number | null
         }
         Update: {
+          attempts?: number
           chat_id?: string | null
           created_at?: string
           error?: string | null
           id?: string
+          next_retry_at?: string | null
           payload?: Json
           sent_at?: string | null
           source_id?: string
@@ -7154,6 +7160,13 @@ export type Database = {
       reject_decisions: {
         Args: { _ids: string[]; _reason?: string }
         Returns: Json
+      }
+      retry_failed_telegram_outbox: {
+        Args: never
+        Returns: {
+          dropped: number
+          requeued: number
+        }[]
       }
       run_pending_ai_actions: { Args: { _limit?: number }; Returns: Json }
       run_sql_loop_tick: { Args: never; Returns: Json }
