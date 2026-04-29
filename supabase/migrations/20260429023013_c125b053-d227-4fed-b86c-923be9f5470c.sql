@@ -1,0 +1,1 @@
+SELECT * FROM public.measure_pending_outcomes();
