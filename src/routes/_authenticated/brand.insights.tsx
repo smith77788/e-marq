@@ -75,6 +75,7 @@ function InsightsPage() {
         </p>
       </div>
 
+      <ACOSStats tenantId={tenantId} />
       <InsightsPanel tenantId={tenantId} />
       <AgentTimeline tenantId={tenantId} />
       <MemoryInspector tenantId={tenantId} />
