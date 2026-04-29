@@ -6398,6 +6398,18 @@ export type Database = {
         Args: { _insight_type: string }
         Returns: string
       }
+      _measurement_explain: {
+        Args: {
+          _actual_orders: number
+          _actual_rev: number
+          _attrib: number
+          _baseline_orders: number
+          _baseline_rev: number
+          _delta_rev: number
+          _share_denom: number
+        }
+        Returns: string
+      }
       accept_tenant_invitation: { Args: { _token: string }; Returns: Json }
       add_balance: {
         Args: {
