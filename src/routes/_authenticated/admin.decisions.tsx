@@ -131,28 +131,32 @@ function AdminDecisionsPage() {
       const tasks: Promise<void>[] = [];
       if (d.insight_id) {
         tasks.push(
-          supabase
-            .from("ai_insights")
-            .select(
-              "id, insight_type, title, description, expected_impact, confidence, risk_level, status, metrics, created_at",
-            )
-            .eq("id", d.insight_id)
-            .maybeSingle()
-            .then(({ data }) => setDetailInsight((data ?? null) as InsightRow | null)),
+          (async () => {
+            const { data } = await supabase
+              .from("ai_insights")
+              .select(
+                "id, insight_type, title, description, expected_impact, confidence, risk_level, status, metrics, created_at",
+              )
+              .eq("id", d.insight_id!)
+              .maybeSingle();
+            setDetailInsight((data ?? null) as InsightRow | null);
+          })(),
         );
       }
       tasks.push(
-        supabase
-          .from("action_outcomes")
-          .select(
-            "id, action_type, baseline, actual, delta, attributed_revenue_cents, success, measurement_window, measured_at, notes",
-          )
-          .eq("tenant_id", d.tenant_id)
-          .eq("decision_id", d.id)
-          .order("measured_at", { ascending: false })
-          .limit(1)
-          .maybeSingle()
-          .then(({ data }) => setDetailOutcome((data ?? null) as OutcomeRow | null)),
+        (async () => {
+          const { data } = await supabase
+            .from("action_outcomes")
+            .select(
+              "id, action_type, baseline, actual, delta, attributed_revenue_cents, success, measurement_window, measured_at, notes",
+            )
+            .eq("tenant_id", d.tenant_id)
+            .eq("decision_id", d.id)
+            .order("measured_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          setDetailOutcome((data ?? null) as OutcomeRow | null);
+        })(),
       );
       await Promise.all(tasks);
     } finally {
