@@ -182,6 +182,12 @@ const ADMIN_SYSTEM: NavGroup = {
       tone: "text-warning",
     },
     {
+      labelKey: "sb.adminDecisions" as TKey,
+      to: "/admin/decisions",
+      icon: Inbox,
+      tone: "text-warning",
+    },
+    {
       labelKey: "sb.missionControl",
       to: "/admin",
       icon: ShieldCheck,
