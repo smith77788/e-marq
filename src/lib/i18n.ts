@@ -62,6 +62,7 @@ const dict = {
     "sb.topupRequests": "Заявки на оплату",
     "sb.leadRadar": "Lead Radar",
     "sb.adminCommands": "⚡ Команди системи",
+    "sb.adminDecisions": "📥 Decision Inbox",
     "sb.liveRuns": "Запуски в ефірі",
     "sb.agentLibrary": "Бібліотека агентів",
     "sb.insightStream": "Потік інсайтів",
