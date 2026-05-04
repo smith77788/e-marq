@@ -14,6 +14,7 @@ import {
   IdCard,
   Layers,
   LayoutDashboard,
+  Inbox,
   Lightbulb,
   Mail,
   Package,
@@ -178,6 +179,12 @@ const ADMIN_SYSTEM: NavGroup = {
       labelKey: "sb.adminCommands" as TKey,
       to: "/admin/commands",
       icon: Zap,
+      tone: "text-warning",
+    },
+    {
+      labelKey: "sb.adminDecisions" as TKey,
+      to: "/admin/decisions",
+      icon: Inbox,
       tone: "text-warning",
     },
     {
