@@ -117,6 +117,48 @@ function AdminDecisionsPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [detail, setDetail] = useState<Decision | null>(null);
+  const [detailInsight, setDetailInsight] = useState<InsightRow | null>(null);
+  const [detailOutcome, setDetailOutcome] = useState<OutcomeRow | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  const openDetail = useCallback(async (d: Decision) => {
+    setDetail(d);
+    setDetailInsight(null);
+    setDetailOutcome(null);
+    setDetailLoading(true);
+    try {
+      const tasks: Promise<unknown>[] = [];
+      if (d.insight_id) {
+        tasks.push(
+          supabase
+            .from("ai_insights")
+            .select(
+              "id, insight_type, title, description, expected_impact, confidence, risk_level, status, metrics, created_at",
+            )
+            .eq("id", d.insight_id)
+            .maybeSingle()
+            .then(({ data }) => setDetailInsight((data ?? null) as InsightRow | null)),
+        );
+      }
+      tasks.push(
+        supabase
+          .from("action_outcomes")
+          .select(
+            "id, action_type, baseline, actual, delta, attributed_revenue_cents, success, measurement_window, measured_at, notes",
+          )
+          .eq("tenant_id", d.tenant_id)
+          .eq("decision_id", d.id)
+          .order("measured_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+          .then(({ data }) => setDetailOutcome((data ?? null) as OutcomeRow | null)),
+      );
+      await Promise.all(tasks);
+    } finally {
+      setDetailLoading(false);
+    }
+  }, []);
 
   // Load tenants for filter dropdown
   useEffect(() => {
