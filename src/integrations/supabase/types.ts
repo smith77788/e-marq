@@ -6431,6 +6431,15 @@ export type Database = {
         }
         Returns: string
       }
+      _diag_cron_jobs: {
+        Args: never
+        Returns: {
+          active: boolean
+          command: string
+          jobname: string
+          schedule: string
+        }[]
+      }
       _forecast_for_action: {
         Args: { _action_type: string; _tenant_id: string }
         Returns: Json
