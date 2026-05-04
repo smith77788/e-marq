@@ -302,6 +302,7 @@ export type Database = {
           insights_dismissed: number
           measured_on: string
           measured_revenue_lift_cents: number
+          metadata: Json
           runs_failed: number
           runs_total: number
           tenant_id: string
@@ -316,6 +317,7 @@ export type Database = {
           insights_dismissed?: number
           measured_on?: string
           measured_revenue_lift_cents?: number
+          metadata?: Json
           runs_failed?: number
           runs_total?: number
           tenant_id: string
@@ -330,6 +332,7 @@ export type Database = {
           insights_dismissed?: number
           measured_on?: string
           measured_revenue_lift_cents?: number
+          metadata?: Json
           runs_failed?: number
           runs_total?: number
           tenant_id?: string
