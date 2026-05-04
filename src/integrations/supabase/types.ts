@@ -305,7 +305,7 @@ export type Database = {
           metadata: Json
           runs_failed: number
           runs_total: number
-          tenant_id: string
+          tenant_id: string | null
         }
         Insert: {
           agent_id: string
@@ -320,7 +320,7 @@ export type Database = {
           metadata?: Json
           runs_failed?: number
           runs_total?: number
-          tenant_id: string
+          tenant_id?: string | null
         }
         Update: {
           agent_id?: string
@@ -335,7 +335,7 @@ export type Database = {
           metadata?: Json
           runs_failed?: number
           runs_total?: number
-          tenant_id?: string
+          tenant_id?: string | null
         }
         Relationships: [
           {

@@ -1,0 +1,1 @@
+ALTER TABLE public.agent_health ALTER COLUMN tenant_id DROP NOT NULL;
