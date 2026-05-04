@@ -443,6 +443,16 @@ function AdminDecisionsPage() {
                           {ageHours < 1 ? "<1г" : `${ageHours}г`}
                         </Badge>
                       </TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => void openDetail(d)}
+                          aria-label="Деталі"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
