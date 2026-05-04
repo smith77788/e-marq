@@ -1481,6 +1481,7 @@ const dict = {
     "sb.topupRequests": "Top-up requests",
     "sb.leadRadar": "Lead Radar",
     "sb.adminCommands": "⚡ System commands",
+    "sb.adminDecisions": "📥 Decision Inbox",
     "sb.liveRuns": "Live runs",
     "sb.agentLibrary": "Agent library",
     "sb.insightStream": "Insight stream",
