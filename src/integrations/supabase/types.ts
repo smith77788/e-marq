@@ -6781,6 +6781,7 @@ export type Database = {
         Args: { _feature: string; _tenant_id: string }
         Returns: boolean
       }
+      check_pipeline_health: { Args: never; Returns: Json }
       check_plan_limit: {
         Args: { _limit_key: string; _metric: string; _tenant_id: string }
         Returns: boolean
