@@ -14,6 +14,7 @@ import {
   IdCard,
   Layers,
   LayoutDashboard,
+  Inbox,
   Lightbulb,
   Mail,
   Package,
