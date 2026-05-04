@@ -128,7 +128,7 @@ function AdminDecisionsPage() {
     setDetailOutcome(null);
     setDetailLoading(true);
     try {
-      const tasks: Promise<unknown>[] = [];
+      const tasks: Promise<void>[] = [];
       if (d.insight_id) {
         tasks.push(
           supabase
