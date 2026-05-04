@@ -25,10 +25,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Check, X, RefreshCw, Filter } from "lucide-react";
+import { Check, X, RefreshCw, Filter, Eye } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/decisions")({
   head: () => ({
