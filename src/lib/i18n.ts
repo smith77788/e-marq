@@ -2824,6 +2824,7 @@ const dict = {
     "sb.topupRequests": "Заявки на оплату",
     "sb.leadRadar": "Lead Radar",
     "sb.adminCommands": "⚡ Команды системы",
+    "sb.adminDecisions": "📥 Decision Inbox",
     "sb.liveRuns": "Запуски в эфире",
     "sb.agentLibrary": "Библиотека агентов",
     "sb.insightStream": "Поток инсайтов",
