@@ -302,9 +302,10 @@ export type Database = {
           insights_dismissed: number
           measured_on: string
           measured_revenue_lift_cents: number
+          metadata: Json
           runs_failed: number
           runs_total: number
-          tenant_id: string
+          tenant_id: string | null
         }
         Insert: {
           agent_id: string
@@ -316,9 +317,10 @@ export type Database = {
           insights_dismissed?: number
           measured_on?: string
           measured_revenue_lift_cents?: number
+          metadata?: Json
           runs_failed?: number
           runs_total?: number
-          tenant_id: string
+          tenant_id?: string | null
         }
         Update: {
           agent_id?: string
@@ -330,9 +332,10 @@ export type Database = {
           insights_dismissed?: number
           measured_on?: string
           measured_revenue_lift_cents?: number
+          metadata?: Json
           runs_failed?: number
           runs_total?: number
-          tenant_id?: string
+          tenant_id?: string | null
         }
         Relationships: [
           {
@@ -6431,6 +6434,15 @@ export type Database = {
         }
         Returns: string
       }
+      _diag_cron_jobs: {
+        Args: never
+        Returns: {
+          active: boolean
+          command: string
+          jobname: string
+          schedule: string
+        }[]
+      }
       _forecast_for_action: {
         Args: { _action_type: string; _tenant_id: string }
         Returns: Json
@@ -6772,6 +6784,7 @@ export type Database = {
         Args: { _feature: string; _tenant_id: string }
         Returns: boolean
       }
+      check_pipeline_health: { Args: never; Returns: Json }
       check_plan_limit: {
         Args: { _limit_key: string; _metric: string; _tenant_id: string }
         Returns: boolean
