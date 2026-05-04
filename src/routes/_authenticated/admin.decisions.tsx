@@ -4,6 +4,7 @@
  * Фільтри: tenant_id, action_type (owner_setup_task / owner_review / flag_for_review та ін.).
  */
 import { createFileRoute, Navigate } from "@tanstack/react-router";
+import * as React from "react";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,10 +26,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Check, X, RefreshCw, Filter } from "lucide-react";
+import { Check, X, RefreshCw, Filter, Eye } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/decisions")({
   head: () => ({
@@ -55,12 +64,46 @@ const DEFAULT_TYPES = ["owner_setup_task", "owner_review", "flag_for_review"];
 type Decision = {
   id: string;
   tenant_id: string;
+  insight_id: string | null;
   agent_id: string;
   action_type: string;
   title: string | null;
   rationale: string | null;
+  payload: Record<string, unknown> | null;
+  expected_impact: Record<string, unknown> | null;
   confidence: number | null;
+  status: string;
+  requires_approval: boolean | null;
+  approved_by_auto: boolean | null;
+  executed_at: string | null;
+  executor_action_id: string | null;
   created_at: string;
+};
+
+type InsightRow = {
+  id: string;
+  insight_type: string;
+  title: string;
+  description: string | null;
+  expected_impact: string | null;
+  confidence: number | null;
+  risk_level: string | null;
+  status: string;
+  metrics: Record<string, unknown> | null;
+  created_at: string;
+};
+
+type OutcomeRow = {
+  id: string;
+  action_type: string;
+  baseline: Record<string, unknown> | null;
+  actual: Record<string, unknown> | null;
+  delta: Record<string, unknown> | null;
+  attributed_revenue_cents: number | null;
+  success: boolean | null;
+  measurement_window: string | null;
+  measured_at: string;
+  notes: string | null;
 };
 
 type TenantOpt = { id: string; name: string; slug: string | null };
@@ -75,6 +118,52 @@ function AdminDecisionsPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [detail, setDetail] = useState<Decision | null>(null);
+  const [detailInsight, setDetailInsight] = useState<InsightRow | null>(null);
+  const [detailOutcome, setDetailOutcome] = useState<OutcomeRow | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  const openDetail = useCallback(async (d: Decision) => {
+    setDetail(d);
+    setDetailInsight(null);
+    setDetailOutcome(null);
+    setDetailLoading(true);
+    try {
+      const tasks: Promise<void>[] = [];
+      if (d.insight_id) {
+        tasks.push(
+          (async () => {
+            const { data } = await supabase
+              .from("ai_insights")
+              .select(
+                "id, insight_type, title, description, expected_impact, confidence, risk_level, status, metrics, created_at",
+              )
+              .eq("id", d.insight_id!)
+              .maybeSingle();
+            setDetailInsight((data ?? null) as InsightRow | null);
+          })(),
+        );
+      }
+      tasks.push(
+        (async () => {
+          const { data } = await supabase
+            .from("action_outcomes")
+            .select(
+              "id, action_type, baseline, actual, delta, attributed_revenue_cents, success, measurement_window, measured_at, notes",
+            )
+            .eq("tenant_id", d.tenant_id)
+            .eq("decision_id", d.id)
+            .order("measured_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          setDetailOutcome((data ?? null) as OutcomeRow | null);
+        })(),
+      );
+      await Promise.all(tasks);
+    } finally {
+      setDetailLoading(false);
+    }
+  }, []);
 
   // Load tenants for filter dropdown
   useEffect(() => {
@@ -91,7 +180,9 @@ function AdminDecisionsPage() {
     setRefreshing(true);
     let q = supabase
       .from("decision_queue")
-      .select("id, tenant_id, agent_id, action_type, title, rationale, confidence, created_at")
+      .select(
+        "id, tenant_id, insight_id, agent_id, action_type, title, rationale, payload, expected_impact, confidence, status, requires_approval, approved_by_auto, executed_at, executor_action_id, created_at",
+      )
       .eq("status", "pending")
       .order("created_at", { ascending: false })
       .limit(500);
@@ -308,6 +399,7 @@ function AdminDecisionsPage() {
                   <TableHead>Agent</TableHead>
                   <TableHead className="text-right">Conf.</TableHead>
                   <TableHead className="text-right">Age</TableHead>
+                  <TableHead className="w-10"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -352,6 +444,16 @@ function AdminDecisionsPage() {
                           {ageHours < 1 ? "<1г" : `${ageHours}г`}
                         </Badge>
                       </TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => void openDetail(d)}
+                          aria-label="Деталі"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -360,6 +462,331 @@ function AdminDecisionsPage() {
           )}
         </CardContent>
       </Card>
+
+      <DecisionDetailDialog
+        decision={detail}
+        insight={detailInsight}
+        outcome={detailOutcome}
+        loading={detailLoading}
+        tenantName={detail ? (tenantNameById.get(detail.tenant_id) ?? null) : null}
+        onClose={() => setDetail(null)}
+        onApprove={async () => {
+          if (!detail) return;
+          const { data, error } = await supabase.rpc("owner_approve_decision", {
+            _decision_id: detail.id,
+          });
+          const r = data as { ok?: boolean } | null;
+          if (error || !r?.ok) toast.error("Не вдалося схвалити");
+          else {
+            toast.success("Схвалено");
+            setDetail(null);
+            void load();
+          }
+        }}
+        onReject={async () => {
+          if (!detail) return;
+          const { data, error } = await supabase.rpc("owner_reject_decision", {
+            _decision_id: detail.id,
+            _reason: "admin_dismiss_from_detail",
+          });
+          const r = data as { ok?: boolean } | null;
+          if (error || !r?.ok) toast.error("Не вдалося відхилити");
+          else {
+            toast.success("Відхилено");
+            setDetail(null);
+            void load();
+          }
+        }}
+      />
     </div>
+  );
+}
+
+/* ---------- Detail dialog ---------- */
+
+function fmtMoney(cents: number | null | undefined): string {
+  if (cents == null) return "—";
+  return `${(cents / 100).toFixed(2)} грн`;
+}
+
+function fmtDate(ts: string | null | undefined): string {
+  if (!ts) return "—";
+  return new Date(ts).toLocaleString("uk-UA");
+}
+
+function JsonBlock({ value }: { value: unknown }) {
+  if (value == null || (typeof value === "object" && Object.keys(value as object).length === 0)) {
+    return <p className="text-xs text-muted-foreground italic">Порожньо</p>;
+  }
+  return (
+    <pre className="max-h-60 overflow-auto rounded-md bg-muted/50 p-3 text-xs">
+      {JSON.stringify(value, null, 2)}
+    </pre>
+  );
+}
+
+function DecisionDetailDialog({
+  decision,
+  insight,
+  outcome,
+  loading,
+  tenantName,
+  onClose,
+  onApprove,
+  onReject,
+}: {
+  decision: Decision | null;
+  insight: InsightRow | null;
+  outcome: OutcomeRow | null;
+  loading: boolean;
+  tenantName: string | null;
+  onClose: () => void;
+  onApprove: () => Promise<void>;
+  onReject: () => Promise<void>;
+}) {
+  const [busy, setBusy] = useState(false);
+  if (!decision) return null;
+
+  const wrap = async (fn: () => Promise<void>) => {
+    setBusy(true);
+    try {
+      await fn();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Dialog open={!!decision} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="pr-6">
+            {decision.title ?? ACTION_TYPE_LABELS[decision.action_type] ?? decision.action_type}
+          </DialogTitle>
+          <DialogDescription className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline">
+              {ACTION_TYPE_LABELS[decision.action_type] ?? decision.action_type}
+            </Badge>
+            <span>· {tenantName ?? decision.tenant_id.slice(0, 8)}</span>
+            <span>· {decision.agent_id}</span>
+            <span>· {fmtDate(decision.created_at)}</span>
+            {decision.approved_by_auto && <Badge variant="secondary">auto-approved</Badge>}
+          </DialogDescription>
+        </DialogHeader>
+
+        <ScrollArea className="max-h-[65vh] pr-3">
+          <div className="space-y-5">
+            {/* Quick stats */}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <Stat
+                label="Confidence"
+                value={
+                  decision.confidence != null
+                    ? `${Math.round(Number(decision.confidence) * 100)}%`
+                    : "—"
+                }
+              />
+              <Stat label="Status" value={decision.status} />
+              <Stat
+                label="Approval"
+                value={decision.requires_approval ? "manual" : "auto"}
+              />
+              <Stat label="Executed" value={decision.executed_at ? "✓" : "—"} />
+            </div>
+
+            {/* Rationale */}
+            <Section title="Причина (rationale)">
+              {decision.rationale ? (
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                  {decision.rationale}
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground italic">
+                  Агент не залишив пояснення.
+                </p>
+              )}
+            </Section>
+
+            {/* Expected impact */}
+            <Section title="Очікуваний ефект">
+              <JsonBlock value={decision.expected_impact} />
+            </Section>
+
+            {/* Payload */}
+            <Section title="Payload (повні параметри дії)">
+              <JsonBlock value={decision.payload} />
+            </Section>
+
+            {/* Linked insight */}
+            <Section title="Пов'язаний insight">
+              {loading && !insight ? (
+                <Skeleton className="h-20 w-full" />
+              ) : insight ? (
+                <div className="space-y-2 rounded-md border p-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline">{insight.insight_type}</Badge>
+                    {insight.risk_level && (
+                      <Badge
+                        variant={
+                          insight.risk_level === "high"
+                            ? "destructive"
+                            : insight.risk_level === "medium"
+                              ? "default"
+                              : "secondary"
+                        }
+                      >
+                        {insight.risk_level}
+                      </Badge>
+                    )}
+                    <Badge variant="secondary">{insight.status}</Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {fmtDate(insight.created_at)}
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium">{insight.title}</p>
+                  {insight.description && (
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {insight.description}
+                    </p>
+                  )}
+                  {insight.expected_impact && (
+                    <p className="text-xs text-muted-foreground">
+                      Impact: {insight.expected_impact}
+                    </p>
+                  )}
+                  {insight.metrics && Object.keys(insight.metrics).length > 0 && (
+                    <details className="text-xs">
+                      <summary className="cursor-pointer text-muted-foreground">
+                        Metrics
+                      </summary>
+                      <JsonBlock value={insight.metrics} />
+                    </details>
+                  )}
+                </div>
+              ) : decision.insight_id ? (
+                <p className="text-xs text-muted-foreground italic">
+                  Insight {decision.insight_id.slice(0, 8)} не знайдений.
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground italic">
+                  Decision створено без insight (manual / SQL pipeline).
+                </p>
+              )}
+            </Section>
+
+            {/* Latest outcome */}
+            <Section title="Останній outcome">
+              {loading && !outcome ? (
+                <Skeleton className="h-20 w-full" />
+              ) : outcome ? (
+                <div className="space-y-2 rounded-md border p-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant={
+                        outcome.success === true
+                          ? "default"
+                          : outcome.success === false
+                            ? "destructive"
+                            : "secondary"
+                      }
+                    >
+                      {outcome.success === true
+                        ? "win"
+                        : outcome.success === false
+                          ? "loss"
+                          : "neutral"}
+                    </Badge>
+                    {outcome.measurement_window && (
+                      <Badge variant="outline">{outcome.measurement_window}</Badge>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {fmtDate(outcome.measured_at)}
+                    </span>
+                  </div>
+                  <p className="text-sm">
+                    Attributed revenue:{" "}
+                    <span className="font-medium">
+                      {fmtMoney(outcome.attributed_revenue_cents)}
+                    </span>
+                  </p>
+                  {outcome.notes && (
+                    <p className="text-xs text-muted-foreground">{outcome.notes}</p>
+                  )}
+                  <details className="text-xs">
+                    <summary className="cursor-pointer text-muted-foreground">
+                      Baseline / Actual / Delta
+                    </summary>
+                    <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                      <div>
+                        <p className="text-xs font-medium">Baseline</p>
+                        <JsonBlock value={outcome.baseline} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium">Actual</p>
+                        <JsonBlock value={outcome.actual} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium">Delta</p>
+                        <JsonBlock value={outcome.delta} />
+                      </div>
+                    </div>
+                  </details>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground italic">
+                  Outcome ще не виміряний (measurement_loop запускається кожні 6г, ≥24г після
+                  виконання).
+                </p>
+              )}
+            </Section>
+
+            <div className="text-xs text-muted-foreground">
+              ID: <code>{decision.id}</code>
+              {decision.executor_action_id && (
+                <>
+                  {" · "}executor_action: <code>{decision.executor_action_id}</code>
+                </>
+              )}
+            </div>
+          </div>
+        </ScrollArea>
+
+        {decision.status === "pending" && (
+          <div className="flex justify-end gap-2 border-t pt-4">
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={busy}
+              onClick={() => void wrap(onReject)}
+            >
+              <X className="mr-1 h-4 w-4" /> Відхилити
+            </Button>
+            <Button size="sm" disabled={busy} onClick={() => void wrap(onApprove)}>
+              <Check className="mr-1 h-4 w-4" /> Схвалити
+            </Button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border p-2">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="mt-0.5 text-sm font-medium truncate">{value}</div>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="space-y-2">
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </h3>
+      {children}
+    </section>
   );
 }
