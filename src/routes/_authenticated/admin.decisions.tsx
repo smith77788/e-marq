@@ -63,12 +63,46 @@ const DEFAULT_TYPES = ["owner_setup_task", "owner_review", "flag_for_review"];
 type Decision = {
   id: string;
   tenant_id: string;
+  insight_id: string | null;
   agent_id: string;
   action_type: string;
   title: string | null;
   rationale: string | null;
+  payload: Record<string, unknown> | null;
+  expected_impact: Record<string, unknown> | null;
   confidence: number | null;
+  status: string;
+  requires_approval: boolean | null;
+  approved_by_auto: boolean | null;
+  executed_at: string | null;
+  executor_action_id: string | null;
   created_at: string;
+};
+
+type InsightRow = {
+  id: string;
+  insight_type: string;
+  title: string;
+  description: string | null;
+  expected_impact: string | null;
+  confidence: number | null;
+  risk_level: string | null;
+  status: string;
+  metrics: Record<string, unknown> | null;
+  created_at: string;
+};
+
+type OutcomeRow = {
+  id: string;
+  action_type: string;
+  baseline: Record<string, unknown> | null;
+  actual: Record<string, unknown> | null;
+  delta: Record<string, unknown> | null;
+  attributed_revenue_cents: number | null;
+  success: boolean | null;
+  measurement_window: string | null;
+  measured_at: string;
+  notes: string | null;
 };
 
 type TenantOpt = { id: string; name: string; slug: string | null };
