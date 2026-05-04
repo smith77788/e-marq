@@ -4,6 +4,7 @@
  * Фільтри: tenant_id, action_type (owner_setup_task / owner_review / flag_for_review та ін.).
  */
 import { createFileRoute, Navigate } from "@tanstack/react-router";
+import * as React from "react";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
