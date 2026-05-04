@@ -179,7 +179,9 @@ function AdminDecisionsPage() {
     setRefreshing(true);
     let q = supabase
       .from("decision_queue")
-      .select("id, tenant_id, agent_id, action_type, title, rationale, confidence, created_at")
+      .select(
+        "id, tenant_id, insight_id, agent_id, action_type, title, rationale, payload, expected_impact, confidence, status, requires_approval, approved_by_auto, executed_at, executor_action_id, created_at",
+      )
       .eq("status", "pending")
       .order("created_at", { ascending: false })
       .limit(500);
