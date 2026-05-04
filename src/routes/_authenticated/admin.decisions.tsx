@@ -398,6 +398,7 @@ function AdminDecisionsPage() {
                   <TableHead>Agent</TableHead>
                   <TableHead className="text-right">Conf.</TableHead>
                   <TableHead className="text-right">Age</TableHead>
+                  <TableHead className="w-10"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
