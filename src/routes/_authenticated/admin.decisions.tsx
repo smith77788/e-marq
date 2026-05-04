@@ -461,6 +461,42 @@ function AdminDecisionsPage() {
           )}
         </CardContent>
       </Card>
+
+      <DecisionDetailDialog
+        decision={detail}
+        insight={detailInsight}
+        outcome={detailOutcome}
+        loading={detailLoading}
+        tenantName={detail ? (tenantNameById.get(detail.tenant_id) ?? null) : null}
+        onClose={() => setDetail(null)}
+        onApprove={async () => {
+          if (!detail) return;
+          const { data, error } = await supabase.rpc("owner_approve_decision", {
+            _decision_id: detail.id,
+          });
+          const r = data as { ok?: boolean } | null;
+          if (error || !r?.ok) toast.error("Не вдалося схвалити");
+          else {
+            toast.success("Схвалено");
+            setDetail(null);
+            void load();
+          }
+        }}
+        onReject={async () => {
+          if (!detail) return;
+          const { data, error } = await supabase.rpc("owner_reject_decision", {
+            _decision_id: detail.id,
+            _reason: "admin_dismiss_from_detail",
+          });
+          const r = data as { ok?: boolean } | null;
+          if (error || !r?.ok) toast.error("Не вдалося відхилити");
+          else {
+            toast.success("Відхилено");
+            setDetail(null);
+            void load();
+          }
+        }}
+      />
     </div>
   );
 }
