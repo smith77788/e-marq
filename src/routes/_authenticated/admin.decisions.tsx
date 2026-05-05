@@ -534,6 +534,7 @@ function DecisionDetailDialog({
   onClose,
   onApprove,
   onReject,
+  onOpenInsight,
 }: {
   decision: Decision | null;
   insight: InsightRow | null;
@@ -543,6 +544,7 @@ function DecisionDetailDialog({
   onClose: () => void;
   onApprove: () => Promise<void>;
   onReject: () => Promise<void>;
+  onOpenInsight: (i: InsightRow) => void;
 }) {
   const [busy, setBusy] = useState(false);
   if (!decision) return null;
