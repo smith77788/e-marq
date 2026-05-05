@@ -5,13 +5,14 @@
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
+import { isCronToken } from "@/lib/acos/cronAuth";
 
 export async function authorizeLeadAgent(
   request: Request,
 ): Promise<{ kind: "cron" | "super" } | { error: string; status: number }> {
   const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
   if (!token) return { error: "Missing bearer token", status: 401 };
-  if (token === process.env.SUPABASE_PUBLISHABLE_KEY) return { kind: "cron" };
+  if (isCronToken(token)) return { kind: "cron" };
 
   const url = process.env.SUPABASE_URL;
   const anon = process.env.SUPABASE_PUBLISHABLE_KEY;
