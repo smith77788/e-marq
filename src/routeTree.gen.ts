@@ -211,6 +211,7 @@ import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminDntradeHealthRouteImport } from './routes/_authenticated/admin.dntrade-health'
 import { Route as AuthenticatedAdminDecisionsRouteImport } from './routes/_authenticated/admin.decisions'
 import { Route as AuthenticatedAdminCommandsRouteImport } from './routes/_authenticated/admin.commands'
+import { Route as AuthenticatedAdminAuditLogRouteImport } from './routes/_authenticated/admin.audit-log'
 import { Route as AuthenticatedAdminAgentsIndexRouteImport } from './routes/_authenticated/admin.agents.index'
 import { Route as SSlugProductsProductIdRouteImport } from './routes/s.$slug.products.$productId'
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
@@ -1355,6 +1356,12 @@ const AuthenticatedAdminCommandsRoute =
     path: '/admin/commands',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAdminAuditLogRoute =
+  AuthenticatedAdminAuditLogRouteImport.update({
+    id: '/admin/audit-log',
+    path: '/admin/audit-log',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminAgentsIndexRoute =
   AuthenticatedAdminAgentsIndexRouteImport.update({
     id: '/admin/agents/',
@@ -1548,6 +1555,7 @@ export interface FileRoutesByFullPath {
   '/m/$slug': typeof MSlugRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/track/$slug.js': typeof TrackSlugDotjsRoute
+  '/admin/audit-log': typeof AuthenticatedAdminAuditLogRoute
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/admin/decisions': typeof AuthenticatedAdminDecisionsRoute
   '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
@@ -1779,6 +1787,7 @@ export interface FileRoutesByTo {
   '/hooks/ingest': typeof HooksIngestRoute
   '/m/$slug': typeof MSlugRoute
   '/track/$slug.js': typeof TrackSlugDotjsRoute
+  '/admin/audit-log': typeof AuthenticatedAdminAuditLogRoute
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/admin/decisions': typeof AuthenticatedAdminDecisionsRoute
   '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
@@ -2013,6 +2022,7 @@ export interface FileRoutesById {
   '/m/$slug': typeof MSlugRoute
   '/s/$slug': typeof SSlugRouteWithChildren
   '/track/$slug.js': typeof TrackSlugDotjsRoute
+  '/_authenticated/admin/audit-log': typeof AuthenticatedAdminAuditLogRoute
   '/_authenticated/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/_authenticated/admin/decisions': typeof AuthenticatedAdminDecisionsRoute
   '/_authenticated/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
@@ -2247,6 +2257,7 @@ export interface FileRouteTypes {
     | '/m/$slug'
     | '/s/$slug'
     | '/track/$slug.js'
+    | '/admin/audit-log'
     | '/admin/commands'
     | '/admin/decisions'
     | '/admin/dntrade-health'
@@ -2478,6 +2489,7 @@ export interface FileRouteTypes {
     | '/hooks/ingest'
     | '/m/$slug'
     | '/track/$slug.js'
+    | '/admin/audit-log'
     | '/admin/commands'
     | '/admin/decisions'
     | '/admin/dntrade-health'
@@ -2711,6 +2723,7 @@ export interface FileRouteTypes {
     | '/m/$slug'
     | '/s/$slug'
     | '/track/$slug.js'
+    | '/_authenticated/admin/audit-log'
     | '/_authenticated/admin/commands'
     | '/_authenticated/admin/decisions'
     | '/_authenticated/admin/dntrade-health'
@@ -4516,6 +4529,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCommandsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/audit-log': {
+      id: '/_authenticated/admin/audit-log'
+      path: '/admin/audit-log'
+      fullPath: '/admin/audit-log'
+      preLoaderRoute: typeof AuthenticatedAdminAuditLogRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/agents/': {
       id: '/_authenticated/admin/agents/'
       path: '/admin/agents'
@@ -4771,6 +4791,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedAdminAuditLogRoute: typeof AuthenticatedAdminAuditLogRoute
   AuthenticatedAdminCommandsRoute: typeof AuthenticatedAdminCommandsRoute
   AuthenticatedAdminDecisionsRoute: typeof AuthenticatedAdminDecisionsRoute
   AuthenticatedAdminDntradeHealthRoute: typeof AuthenticatedAdminDntradeHealthRouteWithChildren
@@ -4814,6 +4835,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedAdminAuditLogRoute: AuthenticatedAdminAuditLogRoute,
   AuthenticatedAdminCommandsRoute: AuthenticatedAdminCommandsRoute,
   AuthenticatedAdminDecisionsRoute: AuthenticatedAdminDecisionsRoute,
   AuthenticatedAdminDntradeHealthRoute:
@@ -5087,12 +5109,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

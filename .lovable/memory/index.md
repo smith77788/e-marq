@@ -45,3 +45,6 @@ v1.0 Roadmap: Phase 1-7 (DONE) → Phase 8 Pilot simulator with real lift (DONE)
 - [Pure-SQL agent health](mem://features/pure-sql-agent-health) — compute_agent_health_daily() UPSERT у agent_health з 2 partial UNIQUE indexes (NULL tenant_id), cron hourly
 - [pg_cron fan-out workaround](mem://architecture/cron-fanout-workaround) — обхід неопублікованих fan-out fix через SELECT FROM tenants у cron command; застосовано до run-all + engines/dispatch
 - [Shopify webhook receiver](mem://features/shopify-webhook) — HMAC-SHA256 inbound на /api/public/integrations/inbound/shopify; читає rawBody один раз для HMAC + JSON.parse; topic→entity mapping; payload-адаптер для single-entity Shopify payloads
+- [Audit log](mem://features/audit-log) — public.audit_log + DEFINER-тригери на decision_queue/integrations/memberships/user_roles; RLS super_admin + own-tenant; UI /admin/audit-log
+- Reality 2026-05-05: попередній "64/74 zombies" застарів. Cron audit показав: 54 jobs, всі succeed окрім compute-forecast-calibration-daily (FIXED — round() type cast); 401-rate ~2.5% від загального трафіку; pure-SQL і HTTP-cron гілки обидві живі.
+- Tests: vitest 2 + jsdom встановлено. Конфіг vitest.config.ts (alias @ → src). Перший smoke test src/lib/acos/cronAuth.test.ts. Запуск: bun test.
