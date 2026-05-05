@@ -30,6 +30,7 @@ import { ProductImagesPanel } from "@/components/admin/ProductImagesPanel";
 import { ProductVariantsPanel } from "@/components/admin/ProductVariantsPanel";
 import { ProductSeoPanel } from "@/components/admin/ProductSeoPanel";
 import { ProductAnalyticsPanel } from "@/components/admin/ProductAnalyticsPanel";
+import { ProductEconomicsPanel } from "@/components/admin/ProductEconomicsPanel";
 import { useTenantContext } from "@/hooks/useTenantContext";
 
 type ProductRecord = {
