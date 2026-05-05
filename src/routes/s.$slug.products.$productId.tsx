@@ -313,6 +313,8 @@ function ProductDetailPage() {
           )}
         </div>
       </div>
+
+      <FrequentlyBoughtTogether tenantId={cart.tenantId} productId={product.id} slug={slug} />
     </main>
   );
 }
