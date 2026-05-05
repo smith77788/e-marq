@@ -42,6 +42,7 @@ import { useT, tStatic } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { formatMoney } from "@/lib/money";
+import { CronHealthCard } from "@/components/admin/CronHealthCard";
 
 export const Route = createFileRoute("/_authenticated/admin/health")({
   head: () => ({
@@ -324,6 +325,8 @@ function HealthMonitorContent() {
             icon={XCircle}
           />
         </div>
+
+        <CronHealthCard />
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
