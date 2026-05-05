@@ -50,3 +50,4 @@ v1.0 Roadmap: Phase 1-7 (DONE) → Phase 8 Pilot simulator with real lift (DONE)
 - [Audit log](mem://features/audit-log) — public.audit_log + DEFINER-тригери на decision_queue/integrations/memberships/user_roles; RLS super_admin + own-tenant; UI /admin/audit-log
 - Reality 2026-05-05: попередній "64/74 zombies" застарів. Cron audit показав: 54 jobs, всі succeed окрім compute-forecast-calibration-daily (FIXED — round() type cast); 401-rate ~2.5% від загального трафіку; pure-SQL і HTTP-cron гілки обидві живі.
 - Tests: vitest 2 + jsdom встановлено. Конфіг vitest.config.ts (alias @ → src). Перший smoke test src/lib/acos/cronAuth.test.ts. Запуск: bun test.
+- [Realtime Revenue Pulse](mem://features/realtime-revenue-pulse) — 24h live sparkline на /brand під CockpitHero, Supabase Realtime subscribe orders postgres_changes, pulse-glow + liveDelta лічильник на новий paid order

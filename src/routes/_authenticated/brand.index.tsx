@@ -34,6 +34,7 @@ import { PlanUsageCard } from "@/components/owner/PlanUsageCard";
 import { OwnerTelegramBindCard } from "@/components/owner/OwnerTelegramBindCard";
 import { DnTradeIntegrationCard } from "@/components/owner/DnTradeIntegrationCard";
 import { ACOSStats } from "@/components/owner/ACOSStats";
+import { RealtimeRevenuePulse } from "@/components/owner/RealtimeRevenuePulse";
 
 type Search = { tenant?: string };
 
@@ -261,6 +262,8 @@ function BrandCockpitInner({
         <DnTradeIntegrationCardGuard tenantId={current.tenant_id} />
 
         <CockpitHero tenantId={current.tenant_id} />
+
+        <RealtimeRevenuePulse tenantId={current.tenant_id} />
 
         <ACOSStats tenantId={current.tenant_id} />
 
