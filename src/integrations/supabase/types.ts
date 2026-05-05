@@ -2718,6 +2718,48 @@ export type Database = {
           },
         ]
       }
+      inventory_velocity_forecasts: {
+        Row: {
+          computed_at: string
+          current_stock: number
+          days_until_stockout: number | null
+          id: string
+          product_id: string
+          projected_stockout_date: string | null
+          tenant_id: string
+          velocity_14d: number
+          velocity_30d: number
+          velocity_90d: number
+          weighted_velocity: number
+        }
+        Insert: {
+          computed_at?: string
+          current_stock: number
+          days_until_stockout?: number | null
+          id?: string
+          product_id: string
+          projected_stockout_date?: string | null
+          tenant_id: string
+          velocity_14d?: number
+          velocity_30d?: number
+          velocity_90d?: number
+          weighted_velocity?: number
+        }
+        Update: {
+          computed_at?: string
+          current_stock?: number
+          days_until_stockout?: number | null
+          id?: string
+          product_id?: string
+          projected_stockout_date?: string | null
+          tenant_id?: string
+          velocity_14d?: number
+          velocity_30d?: number
+          velocity_90d?: number
+          weighted_velocity?: number
+        }
+        Relationships: []
+      }
       lead_magnets: {
         Row: {
           body_md: string
@@ -6978,6 +7020,7 @@ export type Database = {
         }[]
       }
       compute_forecast_calibration: { Args: never; Returns: Json }
+      compute_inventory_velocity_forecasts: { Args: never; Returns: number }
       consume_ai_credits: {
         Args: {
           _amount: number
@@ -7042,6 +7085,7 @@ export type Database = {
       }
       detect_funnel_anomalies: { Args: never; Returns: Json }
       detect_rfm_signals: { Args: never; Returns: number }
+      detect_stockout_forecast_signals: { Args: never; Returns: number }
       dispatch_high_impact_all_tenants: { Args: never; Returns: Json }
       dispatch_high_impact_decisions: {
         Args: { _tenant_id: string }
