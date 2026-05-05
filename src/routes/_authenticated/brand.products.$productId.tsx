@@ -390,6 +390,16 @@ function ProductDetailEditor() {
           />
         </TabsContent>
 
+        {/* Tab — Economics */}
+        <TabsContent value="economics">
+          <ProductEconomicsPanel
+            tenantId={product.tenant_id}
+            productId={product.id}
+            priceCents={product.price_cents}
+            currency={product.currency}
+          />
+        </TabsContent>
+
         {/* Tab 4 — SEO */}
         <TabsContent value="seo">
           {tenant?.slug && (
