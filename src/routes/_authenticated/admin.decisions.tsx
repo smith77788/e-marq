@@ -796,7 +796,14 @@ function DecisionDetailDialog({
             </div>
 
             {/* Rationale */}
-            <Section title="Причина (rationale)">
+            <Section
+              title="Причина (rationale)"
+              action={
+                decision.rationale ? (
+                  <CopyButton value={decision.rationale} label="Rationale" />
+                ) : null
+              }
+            >
               {decision.rationale ? (
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">
                   {decision.rationale}
@@ -809,12 +816,26 @@ function DecisionDetailDialog({
             </Section>
 
             {/* Expected impact */}
-            <Section title="Очікуваний ефект">
+            <Section
+              title="Очікуваний ефект"
+              action={
+                decision.expected_impact ? (
+                  <CopyButton value={decision.expected_impact} label="Impact" />
+                ) : null
+              }
+            >
               <JsonBlock value={decision.expected_impact} />
             </Section>
 
             {/* Payload */}
-            <Section title="Payload (повні параметри дії)">
+            <Section
+              title="Payload (повні параметри дії)"
+              action={
+                decision.payload ? (
+                  <CopyButton value={decision.payload} label="Payload" />
+                ) : null
+              }
+            >
               <JsonBlock value={decision.payload} />
             </Section>
 
