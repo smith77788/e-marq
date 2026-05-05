@@ -210,6 +210,7 @@ import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminDntradeHealthRouteImport } from './routes/_authenticated/admin.dntrade-health'
 import { Route as AuthenticatedAdminDecisionsRouteImport } from './routes/_authenticated/admin.decisions'
 import { Route as AuthenticatedAdminCommandsRouteImport } from './routes/_authenticated/admin.commands'
+import { Route as AuthenticatedAdminAgentsIndexRouteImport } from './routes/_authenticated/admin.agents.index'
 import { Route as SSlugProductsProductIdRouteImport } from './routes/s.$slug.products.$productId'
 import { Route as SSlugOrdersOrderIdRouteImport } from './routes/s.$slug.orders.$orderId'
 import { Route as SSlugCollectionsHandleRouteImport } from './routes/s.$slug.collections.$handle'
@@ -1346,6 +1347,12 @@ const AuthenticatedAdminCommandsRoute =
     path: '/admin/commands',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAdminAgentsIndexRoute =
+  AuthenticatedAdminAgentsIndexRouteImport.update({
+    id: '/admin/agents/',
+    path: '/admin/agents/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const SSlugProductsProductIdRoute = SSlugProductsProductIdRouteImport.update({
   id: '/products/$productId',
   path: '/products/$productId',
@@ -1727,6 +1734,7 @@ export interface FileRoutesByFullPath {
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
   '/s/$slug/products/$productId': typeof SSlugProductsProductIdRoute
+  '/admin/agents/': typeof AuthenticatedAdminAgentsIndexRoute
   '/api/public/integrations/inbound/$provider': typeof ApiPublicIntegrationsInboundProviderRoute
 }
 export interface FileRoutesByTo {
@@ -1955,6 +1963,7 @@ export interface FileRoutesByTo {
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
   '/s/$slug/products/$productId': typeof SSlugProductsProductIdRoute
+  '/admin/agents': typeof AuthenticatedAdminAgentsIndexRoute
   '/api/public/integrations/inbound/$provider': typeof ApiPublicIntegrationsInboundProviderRoute
 }
 export interface FileRoutesById {
@@ -2186,6 +2195,7 @@ export interface FileRoutesById {
   '/s/$slug/collections/$handle': typeof SSlugCollectionsHandleRoute
   '/s/$slug/orders/$orderId': typeof SSlugOrdersOrderIdRoute
   '/s/$slug/products/$productId': typeof SSlugProductsProductIdRoute
+  '/_authenticated/admin/agents/': typeof AuthenticatedAdminAgentsIndexRoute
   '/api/public/integrations/inbound/$provider': typeof ApiPublicIntegrationsInboundProviderRoute
 }
 export interface FileRouteTypes {
@@ -2417,6 +2427,7 @@ export interface FileRouteTypes {
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
     | '/s/$slug/products/$productId'
+    | '/admin/agents/'
     | '/api/public/integrations/inbound/$provider'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -2645,6 +2656,7 @@ export interface FileRouteTypes {
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
     | '/s/$slug/products/$productId'
+    | '/admin/agents'
     | '/api/public/integrations/inbound/$provider'
   id:
     | '__root__'
@@ -2875,6 +2887,7 @@ export interface FileRouteTypes {
     | '/s/$slug/collections/$handle'
     | '/s/$slug/orders/$orderId'
     | '/s/$slug/products/$productId'
+    | '/_authenticated/admin/agents/'
     | '/api/public/integrations/inbound/$provider'
   fileRoutesById: FileRoutesById
 }
@@ -4470,6 +4483,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCommandsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/agents/': {
+      id: '/_authenticated/admin/agents/'
+      path: '/admin/agents'
+      fullPath: '/admin/agents/'
+      preLoaderRoute: typeof AuthenticatedAdminAgentsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/s/$slug/products/$productId': {
       id: '/s/$slug/products/$productId'
       path: '/products/$productId'
@@ -4745,6 +4765,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedBrandIndexRoute: typeof AuthenticatedBrandIndexRoute
+  AuthenticatedAdminAgentsIndexRoute: typeof AuthenticatedAdminAgentsIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -4786,6 +4807,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedBrandIndexRoute: AuthenticatedBrandIndexRoute,
+  AuthenticatedAdminAgentsIndexRoute: AuthenticatedAdminAgentsIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
