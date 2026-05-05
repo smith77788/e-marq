@@ -917,6 +917,57 @@ export type Database = {
           },
         ]
       }
+      causal_experiments: {
+        Row: {
+          action_type: string
+          causal_lift_cents: number
+          computed_at: string
+          confidence_label: string
+          control_mean_cents: number
+          control_n: number
+          control_stddev: number | null
+          id: string
+          t_statistic: number | null
+          tenant_id: string
+          treatment_mean_cents: number
+          treatment_n: number
+          treatment_stddev: number | null
+          window_days: number
+        }
+        Insert: {
+          action_type: string
+          causal_lift_cents: number
+          computed_at?: string
+          confidence_label: string
+          control_mean_cents: number
+          control_n: number
+          control_stddev?: number | null
+          id?: string
+          t_statistic?: number | null
+          tenant_id: string
+          treatment_mean_cents: number
+          treatment_n: number
+          treatment_stddev?: number | null
+          window_days?: number
+        }
+        Update: {
+          action_type?: string
+          causal_lift_cents?: number
+          computed_at?: string
+          confidence_label?: string
+          control_mean_cents?: number
+          control_n?: number
+          control_stddev?: number | null
+          id?: string
+          t_statistic?: number | null
+          tenant_id?: string
+          treatment_mean_cents?: number
+          treatment_n?: number
+          treatment_stddev?: number | null
+          window_days?: number
+        }
+        Relationships: []
+      }
       channel_attribution: {
         Row: {
           attributed_revenue: Json
@@ -6882,6 +6933,7 @@ export type Database = {
           rows_upserted: number
         }[]
       }
+      compute_causal_lift: { Args: never; Returns: number }
       compute_customer_rfm: {
         Args: never
         Returns: {
