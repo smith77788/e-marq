@@ -1186,7 +1186,22 @@ function InsightDetailDialog({
               </Section>
             )}
 
-            <Section title="Метрики (full payload)">
+            {trend && trend.data.length > 1 && (
+              <Section title={trend.label}>
+                <div className="rounded-md border bg-card p-3">
+                  <Sparkline data={trend.data} />
+                </div>
+              </Section>
+            )}
+
+            <Section
+              title="Метрики (full payload)"
+              action={
+                insight.metrics ? (
+                  <CopyButton value={insight.metrics} label="Metrics" />
+                ) : null
+              }
+            >
               <JsonBlock value={insight.metrics} />
             </Section>
 
@@ -1200,7 +1215,12 @@ function InsightDetailDialog({
               ) : (
                 <div className="space-y-2">
                   {decisions.map((d) => (
-                    <div key={d.id} className="rounded-md border p-2 text-xs">
+                    <button
+                      type="button"
+                      key={d.id}
+                      onClick={() => onOpenDecision(d)}
+                      className="w-full rounded-md border p-2 text-left text-xs transition-colors hover:bg-muted/50"
+                    >
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="outline">
                           {ACTION_TYPE_LABELS[d.action_type] ?? d.action_type}
@@ -1212,9 +1232,10 @@ function InsightDetailDialog({
                         <span className="text-muted-foreground">
                           {fmtDate(d.created_at)}
                         </span>
+                        <ArrowUpRight className="ml-auto h-3.5 w-3.5 text-muted-foreground" />
                       </div>
                       {d.title && <p className="mt-1 text-sm">{d.title}</p>}
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
