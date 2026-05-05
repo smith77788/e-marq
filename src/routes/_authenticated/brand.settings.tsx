@@ -22,7 +22,9 @@ import {
   Settings,
   Store,
   Link as LinkIcon,
+  TrendingUp,
 } from "lucide-react";
+import { MarketingSpendForm } from "@/components/owner/MarketingSpendForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
