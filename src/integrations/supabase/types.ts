@@ -658,6 +658,42 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_log: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          after: Json | null
+          before: Json | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: number
+          tenant_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: number
+          tenant_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: number
+          tenant_id?: string | null
+        }
+        Relationships: []
+      }
       auto_approval_policy: {
         Row: {
           action_type: string
