@@ -1078,6 +1078,14 @@ const dict = {
     "hm.warnCount": "{n} потребують уваги",
     "hm.failCount": "{n} критичних",
     "hm.lastChecked": "Оновлено {time}",
+    "hm.cron.title": "Здоров'я cron-агентів",
+    "hm.cron.subtitle": "Success rate за останні 50 запусків кожного job",
+    "hm.cron.jobs": "jobs",
+    "hm.cron.healthy": "Здорові",
+    "hm.cron.warn": "Увага",
+    "hm.cron.failing": "Падають",
+    "hm.cron.idle": "Без запусків",
+    "hm.cron.worst": "Топ найгірших jobs",
 
     // Global search (⌘K)
     "gs.openLabel": "Відкрити пошук",
@@ -2434,6 +2442,14 @@ const dict = {
     "hm.warnCount": "{n} need attention",
     "hm.failCount": "{n} critical",
     "hm.lastChecked": "Updated {time}",
+    "hm.cron.title": "Cron agent health",
+    "hm.cron.subtitle": "Success rate over last 50 runs of each job",
+    "hm.cron.jobs": "jobs",
+    "hm.cron.healthy": "Healthy",
+    "hm.cron.warn": "Warning",
+    "hm.cron.failing": "Failing",
+    "hm.cron.idle": "Idle",
+    "hm.cron.worst": "Top failing jobs",
 
     // Global search (⌘K)
     "gs.openLabel": "Open search",
