@@ -7201,6 +7201,7 @@ export type Database = {
       detect_funnel_anomalies: { Args: never; Returns: Json }
       detect_rfm_signals: { Args: never; Returns: number }
       detect_stockout_forecast_signals: { Args: never; Returns: number }
+      detect_trending_products: { Args: never; Returns: Json }
       dispatch_high_impact_all_tenants: { Args: never; Returns: Json }
       dispatch_high_impact_decisions: {
         Args: { _tenant_id: string }
