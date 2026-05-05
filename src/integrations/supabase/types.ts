@@ -7016,6 +7016,14 @@ export type Database = {
           by_action: Json
         }[]
       }
+      auto_pause_policies_on_quality_drop: {
+        Args: never
+        Returns: {
+          action_type: string
+          disabled: boolean
+          weeks_dropped: number
+        }[]
+      }
       backfill_decision_forecasts: { Args: never; Returns: number }
       can_auto_apply_action: {
         Args: {
