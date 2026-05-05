@@ -7122,8 +7122,8 @@ export type Database = {
       compute_customer_cohorts: {
         Args: never
         Returns: {
-          cohorts_written: number
-          tenant_id: string
+          out_cohorts_written: number
+          out_tenant_id: string
         }[]
       }
       compute_customer_ltv: {
