@@ -841,6 +841,75 @@ export type Database = {
           },
         ]
       }
+      bundle_suggestions: {
+        Row: {
+          avg_combined_revenue_cents: number
+          co_orders: number
+          confidence_a_to_b_pct: number
+          created_at: string
+          id: string
+          last_computed_at: string
+          lift: number
+          orders_a: number
+          orders_b: number
+          product_a_id: string
+          product_b_id: string
+          support_pct: number
+          tenant_id: string
+          total_orders: number
+          window_days: number
+        }
+        Insert: {
+          avg_combined_revenue_cents?: number
+          co_orders: number
+          confidence_a_to_b_pct: number
+          created_at?: string
+          id?: string
+          last_computed_at?: string
+          lift: number
+          orders_a: number
+          orders_b: number
+          product_a_id: string
+          product_b_id: string
+          support_pct: number
+          tenant_id: string
+          total_orders: number
+          window_days?: number
+        }
+        Update: {
+          avg_combined_revenue_cents?: number
+          co_orders?: number
+          confidence_a_to_b_pct?: number
+          created_at?: string
+          id?: string
+          last_computed_at?: string
+          lift?: number
+          orders_a?: number
+          orders_b?: number
+          product_a_id?: string
+          product_b_id?: string
+          support_pct?: number
+          tenant_id?: string
+          total_orders?: number
+          window_days?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bundle_suggestions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "bundle_suggestions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cart_recovery_attempts: {
         Row: {
           abandoned_at: string
@@ -7011,6 +7080,19 @@ export type Database = {
           rows_upserted: number
         }[]
       }
+      compute_bundle_suggestions: {
+        Args: {
+          _min_co_orders?: number
+          _min_lift?: number
+          _min_support_pct?: number
+          _window_days?: number
+        }
+        Returns: {
+          pairs_inserted: number
+          pairs_updated: number
+          processed_tenants: number
+        }[]
+      }
       compute_causal_lift: { Args: never; Returns: number }
       compute_customer_rfm: {
         Args: never
@@ -7081,6 +7163,12 @@ export type Database = {
         Returns: {
           measured_count: number
           success_count: number
+        }[]
+      }
+      detect_bundle_signals: {
+        Args: { _top_n?: number }
+        Returns: {
+          insights_created: number
         }[]
       }
       detect_funnel_anomalies: { Args: never; Returns: Json }
