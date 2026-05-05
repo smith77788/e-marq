@@ -359,7 +359,7 @@ function ForecastBlock({ payload }: { payload: Record<string, unknown> | null })
       )}
       {skipReason && (
         <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
-          ⏸ {SKIP_REASON_LABELS[skipReason] ?? skipReason}
+          ⏸ {FORECAST_SKIP_LABELS[skipReason] ?? SKIP_REASON_LABELS[skipReason]?.label ?? skipReason}
         </div>
       )}
     </div>
