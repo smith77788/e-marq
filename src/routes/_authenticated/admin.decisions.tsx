@@ -512,6 +512,32 @@ function AdminDecisionsPage() {
         </CardContent>
       </Card>
 
+      {decisions && decisions.length > 0 && (
+        <Collapsible>
+          <Card>
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer pb-3 hover:bg-muted/30">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Grid3x3 className="h-4 w-4" /> Auto-approval heatmap
+                  <ChevronDown className="ml-auto h-4 w-4 transition-transform data-[state=open]:rotate-180" />
+                </CardTitle>
+                <CardDescription>
+                  action_type × tenant. Зелений = переважно auto-approved, сірий = manual-only.
+                </CardDescription>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent>
+                <AutoApprovalHeatmap
+                  decisions={decisions}
+                  tenantNameById={tenantNameById}
+                />
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+      )}
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
           <div>
