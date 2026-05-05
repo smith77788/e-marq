@@ -7683,6 +7683,17 @@ export type Database = {
           revenue_cents: number
         }[]
       }
+      storefront_bundle_recommendations: {
+        Args: { _limit?: number; _product_id: string; _tenant_id: string }
+        Returns: {
+          co_orders: number
+          image_url: string
+          lift: number
+          name: string
+          price_cents: number
+          product_id: string
+        }[]
+      }
       subscribe_restock_notification: {
         Args: {
           _email: string
