@@ -250,6 +250,12 @@ const ADMIN_AGENTS: NavGroup = {
       tone: "text-warning",
     },
     {
+      labelKey: "sb.adminOutcomes" as TKey,
+      to: "/admin/outcomes",
+      icon: Activity,
+      tone: "text-success",
+    },
+    {
       labelKey: "sb.insightStream",
       to: "/admin/overview",
       hash: "stream",
