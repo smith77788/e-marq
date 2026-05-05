@@ -7199,6 +7199,7 @@ export type Database = {
           success_count: number
         }[]
       }
+      detect_action_quality_drops: { Args: never; Returns: number }
       detect_bundle_signals: {
         Args: { _top_n?: number }
         Returns: {
