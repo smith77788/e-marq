@@ -7207,6 +7207,7 @@ export type Database = {
       }
       detect_funnel_anomalies: { Args: never; Returns: Json }
       detect_high_ltv_at_risk: { Args: never; Returns: number }
+      detect_refund_risk_orders: { Args: never; Returns: number }
       detect_rfm_signals: { Args: never; Returns: number }
       detect_stockout_forecast_signals: { Args: never; Returns: number }
       detect_trending_products: { Args: never; Returns: Json }
@@ -7641,6 +7642,7 @@ export type Database = {
       }
       run_pending_ai_actions: { Args: { _limit?: number }; Returns: Json }
       run_sql_loop_tick: { Args: never; Returns: Json }
+      score_order_refund_risk: { Args: { _order_id: string }; Returns: number }
       self_heal_dismiss_action: {
         Args: { p_action_id: string; p_reason?: string }
         Returns: undefined
