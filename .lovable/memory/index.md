@@ -41,6 +41,7 @@ v1.0 Roadmap: Phase 1-7 (DONE) → Phase 8 Pilot simulator with real lift (DONE)
 - [SQL-driven insight pipeline](mem://architecture/sql-insight-pipeline) — generate_data_driven_insights(): stockout/low-stock/dead-stock/vip-silent, cron 1h, dedup_bucket=md5→bigint
 - [Pilot simulator](mem://architecture/pilot-simulator) — synthetic baseline + lift orders for pilot tenants, daily cron 02:17 UTC, payment_method='manual', filter on customer_email
 - [Auto-approval policy](mem://features/auto-approval) — whitelisted action_types + per-tenant success history → approved автоматично, cron 15min
+- [Auto-pause policy on quality drop](mem://features/auto-pause-policy) — SQL agent #17, daily 06:30, disable auto_approval_policy коли action_quality_drop фіксується ≥2 ISO-тижнів за 28d; owner notif Telegram, dedup 7d. Завершує self-correcting loop.
 - [SQL pipeline tick](mem://architecture/sql-loop-tick) — convert+approve+execute+measure cron 30min; semantic dedup + max_age_hours=24h роблять "стару чергу" нормою; check_pipeline_health() guard hourly
 - [Pure-SQL agent health](mem://features/pure-sql-agent-health) — compute_agent_health_daily() UPSERT у agent_health з 2 partial UNIQUE indexes (NULL tenant_id), cron hourly
 - [pg_cron fan-out workaround](mem://architecture/cron-fanout-workaround) — обхід неопублікованих fan-out fix через SELECT FROM tenants у cron command; застосовано до run-all + engines/dispatch
