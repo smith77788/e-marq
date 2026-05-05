@@ -7115,7 +7115,7 @@ export type Database = {
         Args: never
         Returns: {
           customers_scored: number
-          tenant_id: string
+          out_tenant_id: string
         }[]
       }
       compute_customer_rfm: {
