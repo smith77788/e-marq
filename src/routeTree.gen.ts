@@ -237,6 +237,7 @@ import { Route as ApiIntegrationsSyncProviderRouteImport } from './routes/api/in
 import { Route as AuthenticatedBrandProductsProductIdRouteImport } from './routes/_authenticated/brand.products.$productId'
 import { Route as AuthenticatedAdminTenantsTenantIdRouteImport } from './routes/_authenticated/admin.tenants.$tenantId'
 import { Route as AuthenticatedAdminDntradeHealthTenantIdRouteImport } from './routes/_authenticated/admin.dntrade-health.$tenantId'
+import { Route as AuthenticatedAdminAgentsAgentIdRouteImport } from './routes/_authenticated/admin.agents.$agentId'
 import { Route as ApiPublicIntegrationsInboundProviderRouteImport } from './routes/api/public/integrations.inbound.$provider'
 
 const TermsRoute = TermsRouteImport.update({
@@ -1500,6 +1501,12 @@ const AuthenticatedAdminDntradeHealthTenantIdRoute =
     path: '/$tenantId',
     getParentRoute: () => AuthenticatedAdminDntradeHealthRoute,
   } as any)
+const AuthenticatedAdminAgentsAgentIdRoute =
+  AuthenticatedAdminAgentsAgentIdRouteImport.update({
+    id: '/admin/agents/$agentId',
+    path: '/admin/agents/$agentId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const ApiPublicIntegrationsInboundProviderRoute =
   ApiPublicIntegrationsInboundProviderRouteImport.update({
     id: '/api/public/integrations/inbound/$provider',
@@ -1708,6 +1715,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/brand/': typeof AuthenticatedBrandIndexRoute
   '/s/$slug/': typeof SSlugIndexRoute
+  '/admin/agents/$agentId': typeof AuthenticatedAdminAgentsAgentIdRoute
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/brand/products/$productId': typeof AuthenticatedBrandProductsProductIdRoute
@@ -1937,6 +1945,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/brand': typeof AuthenticatedBrandIndexRoute
   '/s/$slug': typeof SSlugIndexRoute
+  '/admin/agents/$agentId': typeof AuthenticatedAdminAgentsAgentIdRoute
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/brand/products/$productId': typeof AuthenticatedBrandProductsProductIdRoute
@@ -2169,6 +2178,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/brand/': typeof AuthenticatedBrandIndexRoute
   '/s/$slug/': typeof SSlugIndexRoute
+  '/_authenticated/admin/agents/$agentId': typeof AuthenticatedAdminAgentsAgentIdRoute
   '/_authenticated/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
   '/_authenticated/admin/tenants/$tenantId': typeof AuthenticatedAdminTenantsTenantIdRoute
   '/_authenticated/brand/products/$productId': typeof AuthenticatedBrandProductsProductIdRoute
@@ -2401,6 +2411,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/brand/'
     | '/s/$slug/'
+    | '/admin/agents/$agentId'
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
     | '/brand/products/$productId'
@@ -2630,6 +2641,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/brand'
     | '/s/$slug'
+    | '/admin/agents/$agentId'
     | '/admin/dntrade-health/$tenantId'
     | '/admin/tenants/$tenantId'
     | '/brand/products/$productId'
@@ -2861,6 +2873,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/brand/'
     | '/s/$slug/'
+    | '/_authenticated/admin/agents/$agentId'
     | '/_authenticated/admin/dntrade-health/$tenantId'
     | '/_authenticated/admin/tenants/$tenantId'
     | '/_authenticated/brand/products/$productId'
@@ -4672,6 +4685,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDntradeHealthTenantIdRouteImport
       parentRoute: typeof AuthenticatedAdminDntradeHealthRoute
     }
+    '/_authenticated/admin/agents/$agentId': {
+      id: '/_authenticated/admin/agents/$agentId'
+      path: '/admin/agents/$agentId'
+      fullPath: '/admin/agents/$agentId'
+      preLoaderRoute: typeof AuthenticatedAdminAgentsAgentIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/api/public/integrations/inbound/$provider': {
       id: '/api/public/integrations/inbound/$provider'
       path: '/api/public/integrations/inbound/$provider'
@@ -4765,6 +4785,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedBrandIndexRoute: typeof AuthenticatedBrandIndexRoute
+  AuthenticatedAdminAgentsAgentIdRoute: typeof AuthenticatedAdminAgentsAgentIdRoute
   AuthenticatedAdminAgentsIndexRoute: typeof AuthenticatedAdminAgentsIndexRoute
 }
 
@@ -4807,6 +4828,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedBrandIndexRoute: AuthenticatedBrandIndexRoute,
+  AuthenticatedAdminAgentsAgentIdRoute: AuthenticatedAdminAgentsAgentIdRoute,
   AuthenticatedAdminAgentsIndexRoute: AuthenticatedAdminAgentsIndexRoute,
 }
 
