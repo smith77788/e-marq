@@ -7141,6 +7141,7 @@ export type Database = {
           weeks_dropped: number
         }[]
       }
+      auto_resume_policies_on_recovery: { Args: never; Returns: Json }
       backfill_decision_forecasts: { Args: never; Returns: number }
       can_auto_apply_action: {
         Args: {
@@ -7864,6 +7865,16 @@ export type Database = {
       }
       touch_tenant_api_key: { Args: { _key_id: string }; Returns: undefined }
       unstick_executing_decisions: { Args: never; Returns: number }
+      upsert_acquisition_cost: {
+        Args: {
+          p_channel: string
+          p_new_customers: number
+          p_period_month: string
+          p_spend_cents: number
+          p_tenant_id: string
+        }
+        Returns: string
+      }
       validate_discount_code: {
         Args: {
           _code: string
