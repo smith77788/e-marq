@@ -17,6 +17,7 @@ import {
 import { useStorefrontCart, track } from "@/lib/storefront/cartContext";
 import { formatMoneyExact } from "@/lib/money";
 import { RestockSubscribe } from "@/components/storefront/RestockSubscribe";
+import { FrequentlyBoughtTogether } from "@/components/storefront/FrequentlyBoughtTogether";
 import { canonicalUrl } from "@/lib/seo";
 import { productJsonLd, breadcrumbJsonLd } from "@/lib/storefront/jsonLd";
 import { tStatic } from "@/lib/i18n";
@@ -312,6 +313,8 @@ function ProductDetailPage() {
           )}
         </div>
       </div>
+
+      <FrequentlyBoughtTogether tenantId={cart.tenantId} productId={product.id} slug={slug} />
     </main>
   );
 }
