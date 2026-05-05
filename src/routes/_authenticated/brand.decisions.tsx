@@ -308,7 +308,7 @@ const BASIS_LABELS: Record<string, string> = {
   bootstrap: "початкова оцінка",
 };
 
-const SKIP_REASON_LABELS: Record<string, string> = {
+const FORECAST_SKIP_LABELS: Record<string, string> = {
   high_value_low_confidence: "Висока сума × низька впевненість — потрібен ручний апрув",
   forecast_uncalibrated: "Прогноз ще не відкалібрований — чекаємо більше вимірювань",
   margin_below_target: "Знижка пробиває мінімальну маржу",
