@@ -4423,6 +4423,42 @@ export type Database = {
           },
         ]
       }
+      product_economics: {
+        Row: {
+          cogs_cents: number
+          created_at: string
+          id: string
+          min_margin_pct: number
+          notes: string | null
+          product_id: string
+          target_margin_pct: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          cogs_cents: number
+          created_at?: string
+          id?: string
+          min_margin_pct?: number
+          notes?: string | null
+          product_id: string
+          target_margin_pct?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          cogs_cents?: number
+          created_at?: string
+          id?: string
+          min_margin_pct?: number
+          notes?: string | null
+          product_id?: string
+          target_margin_pct?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           alt: string | null
@@ -7022,6 +7058,10 @@ export type Database = {
       }
       dntrade_unhealthy_streak_minutes: {
         Args: { _tenant_id: string }
+        Returns: number
+      }
+      estimate_post_discount_margin_pct: {
+        Args: { _discount_pct: number; _product_id: string }
         Returns: number
       }
       execute_decisions_all_tenants: { Args: never; Returns: Json }
