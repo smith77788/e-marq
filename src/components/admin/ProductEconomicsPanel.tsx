@@ -90,7 +90,7 @@ export function ProductEconomicsPanel({ tenantId, productId, priceCents, currenc
             target_margin_pct: tgt,
             min_margin_pct: mn,
             notes: notes || null,
-          },
+          }],
           { onConflict: "tenant_id,product_id" },
         );
       if (error) throw error;
