@@ -1064,29 +1064,56 @@ function InsightDetailDialog({
       const customerId = typeof m.customer_id === "string" ? m.customer_id : null;
       const since = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10);
       try {
+        const sb = supabase as unknown as {
+          from: (t: string) => {
+            select: (cols: string) => {
+              eq: (
+                a: string,
+                b: string,
+              ) => {
+                eq: (
+                  a: string,
+                  b: string,
+                ) => {
+                  gte: (
+                    a: string,
+                    b: string,
+                  ) => {
+                    order: (
+                      a: string,
+                      o: { ascending: boolean },
+                    ) => Promise<{
+                      data: Array<{ revenue_cents: number | null }> | null;
+                    }>;
+                  };
+                };
+              };
+            };
+          };
+        };
         if (productId) {
-          const { data } = await supabase
+          const { data } = await sb
             .from("product_metrics_daily")
             .select("day, revenue_cents, units_sold")
             .eq("tenant_id", tenantId)
             .eq("product_id", productId)
             .gte("day", since)
             .order("day", { ascending: true });
-          const rows = (data ?? []) as Array<{ revenue_cents: number | null }>;
+          const rows = data ?? [];
           if (rows.length > 1)
             setTrend({
               label: "Revenue (7d)",
               data: rows.map((r) => Number(r.revenue_cents ?? 0) / 100),
             });
         } else if (customerId) {
-          const { data } = await supabase
+          const { data } = await sb
             .from("customer_metrics_daily")
             .select("day, revenue_cents")
             .eq("tenant_id", tenantId)
             .eq("customer_id", customerId)
             .gte("day", since)
             .order("day", { ascending: true });
-          const rows = (data ?? []) as Array<{ revenue_cents: number | null }>;
+          const rows = data ?? [];
           if (rows.length > 1)
             setTrend({
               label: "Customer revenue (7d)",
