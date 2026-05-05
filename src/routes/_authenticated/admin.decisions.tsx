@@ -34,10 +34,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Slider } from "@/components/ui/slider";
+import { CopyButton } from "@/components/admin/CopyButton";
+import { Sparkline } from "@/components/detail/Sparkline";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Check, X, RefreshCw, Filter, Eye, Sparkles } from "lucide-react";
+import { Check, X, RefreshCw, Filter, Eye, Sparkles, Download, ArrowUpRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/decisions")({
   head: () => ({
@@ -114,7 +117,10 @@ function AdminDecisionsPage() {
   const [tenants, setTenants] = useState<TenantOpt[]>([]);
   const [tenantFilter, setTenantFilter] = useState<string>("all");
   const [typesFilter, setTypesFilter] = useState<Set<string>>(new Set(DEFAULT_TYPES));
+  const [riskFilter, setRiskFilter] = useState<Set<string>>(new Set());
+  const [minConfidence, setMinConfidence] = useState<number>(0);
   const [decisions, setDecisions] = useState<Decision[] | null>(null);
+  const [riskByInsight, setRiskByInsight] = useState<Map<string, string>>(new Map());
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -195,8 +201,26 @@ function AdminDecisionsPage() {
       toast.error("Не вдалося завантажити: " + error.message);
       return;
     }
-    setDecisions((data ?? []) as Decision[]);
+    const list = (data ?? []) as Decision[];
+    setDecisions(list);
     setSelected(new Set());
+
+    const insightIds = Array.from(
+      new Set(list.map((d) => d.insight_id).filter((x): x is string => !!x)),
+    );
+    if (insightIds.length > 0) {
+      const { data: ins } = await supabase
+        .from("ai_insights")
+        .select("id, risk_level")
+        .in("id", insightIds);
+      const m = new Map<string, string>();
+      for (const r of (ins ?? []) as Array<{ id: string; risk_level: string | null }>) {
+        if (r.risk_level) m.set(r.id, r.risk_level);
+      }
+      setRiskByInsight(m);
+    } else {
+      setRiskByInsight(new Map());
+    }
   }, [tenantFilter, typesFilter]);
 
   useEffect(() => {
@@ -215,6 +239,21 @@ function AdminDecisionsPage() {
     return Array.from(set).sort();
   }, [decisions]);
 
+  const filteredDecisions = useMemo(() => {
+    const list = decisions ?? [];
+    return list.filter((d) => {
+      if (minConfidence > 0) {
+        const c = d.confidence != null ? Number(d.confidence) : 0;
+        if (c * 100 < minConfidence) return false;
+      }
+      if (riskFilter.size > 0) {
+        const r = d.insight_id ? (riskByInsight.get(d.insight_id) ?? "unknown") : "unknown";
+        if (!riskFilter.has(r)) return false;
+      }
+      return true;
+    });
+  }, [decisions, minConfidence, riskFilter, riskByInsight]);
+
   const toggleType = (t: string) => {
     setTypesFilter((prev) => {
       const next = new Set(prev);
@@ -224,10 +263,81 @@ function AdminDecisionsPage() {
     });
   };
 
+  const toggleRisk = (r: string) => {
+    setRiskFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(r)) next.delete(r);
+      else next.add(r);
+      return next;
+    });
+  };
+
   const toggleAll = () => {
-    if (!decisions) return;
-    if (selected.size === decisions.length) setSelected(new Set());
-    else setSelected(new Set(decisions.map((d) => d.id)));
+    if (filteredDecisions.length === 0) return;
+    if (selected.size === filteredDecisions.length) setSelected(new Set());
+    else setSelected(new Set(filteredDecisions.map((d) => d.id)));
+  };
+
+  const exportCsv = () => {
+    if (filteredDecisions.length === 0) {
+      toast.error("Нічого експортувати");
+      return;
+    }
+    const headers = [
+      "id",
+      "tenant_id",
+      "tenant_name",
+      "action_type",
+      "title",
+      "agent_id",
+      "status",
+      "confidence",
+      "risk_level",
+      "created_at",
+      "age_hours",
+      "rationale",
+    ];
+    const esc = (v: unknown): string => {
+      if (v == null) return "";
+      const s = typeof v === "string" ? v : String(v);
+      if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+      return s;
+    };
+    const lines = [headers.join(",")];
+    for (const d of filteredDecisions) {
+      const ageHours = Math.floor(
+        (Date.now() - new Date(d.created_at).getTime()) / 3_600_000,
+      );
+      const risk = d.insight_id ? (riskByInsight.get(d.insight_id) ?? "") : "";
+      lines.push(
+        [
+          d.id,
+          d.tenant_id,
+          tenantNameById.get(d.tenant_id) ?? "",
+          d.action_type,
+          d.title ?? "",
+          d.agent_id,
+          d.status,
+          d.confidence ?? "",
+          risk,
+          d.created_at,
+          ageHours,
+          d.rationale ?? "",
+        ]
+          .map(esc)
+          .join(","),
+      );
+    }
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `decisions-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`Експортовано ${filteredDecisions.length} рядків`);
   };
 
   const bulkApprove = async () => {
@@ -339,6 +449,49 @@ function AdminDecisionsPage() {
               </Button>
             </div>
           </div>
+
+          <div className="space-y-2">
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">
+              Risk level:
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {(["low", "medium", "high", "unknown"] as const).map((r) => {
+                const active = riskFilter.has(r);
+                return (
+                  <Button
+                    key={r}
+                    size="sm"
+                    variant={active ? "default" : "outline"}
+                    onClick={() => toggleRisk(r)}
+                  >
+                    {r}
+                  </Button>
+                );
+              })}
+              {riskFilter.size > 0 && (
+                <Button size="sm" variant="ghost" onClick={() => setRiskFilter(new Set())}>
+                  Скинути
+                </Button>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                Min confidence
+              </span>
+              <span className="text-xs font-medium">{minConfidence}%</span>
+            </div>
+            <Slider
+              value={[minConfidence]}
+              min={0}
+              max={100}
+              step={5}
+              onValueChange={(v) => setMinConfidence(v[0] ?? 0)}
+              className="max-w-md"
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -346,7 +499,12 @@ function AdminDecisionsPage() {
         <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
           <div>
             <CardTitle className="text-base">
-              Pending: {decisions?.length ?? 0}
+              Pending: {filteredDecisions.length}
+              {decisions && decisions.length !== filteredDecisions.length && (
+                <span className="ml-2 text-xs font-normal text-muted-foreground">
+                  / {decisions.length}
+                </span>
+              )}
               {selected.size > 0 && (
                 <span className="ml-2 text-sm font-normal text-muted-foreground">
                   · обрано {selected.size}
@@ -354,7 +512,15 @@ function AdminDecisionsPage() {
               )}
             </CardTitle>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={filteredDecisions.length === 0}
+              onClick={exportCsv}
+            >
+              <Download className="mr-1 h-4 w-4" /> CSV
+            </Button>
             <Button
               size="sm"
               disabled={busy || selected.size === 0}
@@ -377,7 +543,7 @@ function AdminDecisionsPage() {
             <div className="p-6">
               <Skeleton className="h-32 w-full" />
             </div>
-          ) : decisions.length === 0 ? (
+          ) : filteredDecisions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Check className="mb-3 h-10 w-10 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
@@ -390,7 +556,10 @@ function AdminDecisionsPage() {
                 <TableRow>
                   <TableHead className="w-10">
                     <Checkbox
-                      checked={selected.size === decisions.length && decisions.length > 0}
+                      checked={
+                        selected.size === filteredDecisions.length &&
+                        filteredDecisions.length > 0
+                      }
                       onCheckedChange={toggleAll}
                     />
                   </TableHead>
@@ -398,18 +567,22 @@ function AdminDecisionsPage() {
                   <TableHead>Action type</TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead>Agent</TableHead>
+                  <TableHead className="text-right">Risk</TableHead>
                   <TableHead className="text-right">Conf.</TableHead>
                   <TableHead className="text-right">Age</TableHead>
                   <TableHead className="w-10"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {decisions.map((d) => {
+                {filteredDecisions.map((d) => {
                   const ageHours = Math.floor(
                     (Date.now() - new Date(d.created_at).getTime()) / 3_600_000,
                   );
                   const stale = ageHours >= 24;
                   const isSel = selected.has(d.id);
+                  const risk = d.insight_id
+                    ? (riskByInsight.get(d.insight_id) ?? null)
+                    : null;
                   return (
                     <TableRow key={d.id} data-state={isSel ? "selected" : undefined}>
                       <TableCell>
@@ -437,6 +610,24 @@ function AdminDecisionsPage() {
                         {d.title ?? <span className="text-muted-foreground">—</span>}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">{d.agent_id}</TableCell>
+                      <TableCell className="text-right">
+                        {risk ? (
+                          <Badge
+                            variant={
+                              risk === "high"
+                                ? "destructive"
+                                : risk === "medium"
+                                  ? "default"
+                                  : "secondary"
+                            }
+                            className="text-[10px]"
+                          >
+                            {risk}
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-right text-xs text-muted-foreground">
                         {d.confidence != null ? `${Math.round(Number(d.confidence) * 100)}%` : "—"}
                       </TableCell>
@@ -505,6 +696,10 @@ function AdminDecisionsPage() {
         insight={insightView}
         tenantId={detail?.tenant_id ?? null}
         onClose={() => setInsightView(null)}
+        onOpenDecision={(d) => {
+          setInsightView(null);
+          void openDetail(d);
+        }}
       />
     </div>
   );
@@ -605,7 +800,14 @@ function DecisionDetailDialog({
             </div>
 
             {/* Rationale */}
-            <Section title="Причина (rationale)">
+            <Section
+              title="Причина (rationale)"
+              action={
+                decision.rationale ? (
+                  <CopyButton value={decision.rationale} label="Rationale" />
+                ) : null
+              }
+            >
               {decision.rationale ? (
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">
                   {decision.rationale}
@@ -618,12 +820,26 @@ function DecisionDetailDialog({
             </Section>
 
             {/* Expected impact */}
-            <Section title="Очікуваний ефект">
+            <Section
+              title="Очікуваний ефект"
+              action={
+                decision.expected_impact ? (
+                  <CopyButton value={decision.expected_impact} label="Impact" />
+                ) : null
+              }
+            >
               <JsonBlock value={decision.expected_impact} />
             </Section>
 
             {/* Payload */}
-            <Section title="Payload (повні параметри дії)">
+            <Section
+              title="Payload (повні параметри дії)"
+              action={
+                decision.payload ? (
+                  <CopyButton value={decision.payload} label="Payload" />
+                ) : null
+              }
+            >
               <JsonBlock value={decision.payload} />
             </Section>
 
@@ -798,14 +1014,17 @@ function InsightDetailDialog({
   insight,
   tenantId,
   onClose,
+  onOpenDecision,
 }: {
   insight: InsightRow | null;
   tenantId: string | null;
   onClose: () => void;
+  onOpenDecision: (d: Decision) => void;
 }) {
   const [loading, setLoading] = useState(false);
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [outcomes, setOutcomes] = useState<OutcomeRow[]>([]);
+  const [trend, setTrend] = useState<{ label: string; data: number[] } | null>(null);
 
   useEffect(() => {
     if (!insight || !tenantId) return;
@@ -835,6 +1054,75 @@ function InsightDetailDialog({
         setOutcomes([]);
       }
       setLoading(false);
+    })();
+
+    // 7d sparkline trend (best-effort, fails silently)
+    void (async () => {
+      setTrend(null);
+      const m = (insight.metrics ?? {}) as Record<string, unknown>;
+      const productId = typeof m.product_id === "string" ? m.product_id : null;
+      const customerId = typeof m.customer_id === "string" ? m.customer_id : null;
+      const since = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10);
+      try {
+        const sb = supabase as unknown as {
+          from: (t: string) => {
+            select: (cols: string) => {
+              eq: (
+                a: string,
+                b: string,
+              ) => {
+                eq: (
+                  a: string,
+                  b: string,
+                ) => {
+                  gte: (
+                    a: string,
+                    b: string,
+                  ) => {
+                    order: (
+                      a: string,
+                      o: { ascending: boolean },
+                    ) => Promise<{
+                      data: Array<{ revenue_cents: number | null }> | null;
+                    }>;
+                  };
+                };
+              };
+            };
+          };
+        };
+        if (productId) {
+          const { data } = await sb
+            .from("product_metrics_daily")
+            .select("day, revenue_cents, units_sold")
+            .eq("tenant_id", tenantId)
+            .eq("product_id", productId)
+            .gte("day", since)
+            .order("day", { ascending: true });
+          const rows = data ?? [];
+          if (rows.length > 1)
+            setTrend({
+              label: "Revenue (7d)",
+              data: rows.map((r) => Number(r.revenue_cents ?? 0) / 100),
+            });
+        } else if (customerId) {
+          const { data } = await sb
+            .from("customer_metrics_daily")
+            .select("day, revenue_cents")
+            .eq("tenant_id", tenantId)
+            .eq("customer_id", customerId)
+            .gte("day", since)
+            .order("day", { ascending: true });
+          const rows = data ?? [];
+          if (rows.length > 1)
+            setTrend({
+              label: "Customer revenue (7d)",
+              data: rows.map((r) => Number(r.revenue_cents ?? 0) / 100),
+            });
+        }
+      } catch {
+        /* ignore */
+      }
     })();
   }, [insight, tenantId]);
 
@@ -898,7 +1186,22 @@ function InsightDetailDialog({
               </Section>
             )}
 
-            <Section title="Метрики (full payload)">
+            {trend && trend.data.length > 1 && (
+              <Section title={trend.label}>
+                <div className="rounded-md border bg-card p-3">
+                  <Sparkline data={trend.data} />
+                </div>
+              </Section>
+            )}
+
+            <Section
+              title="Метрики (full payload)"
+              action={
+                insight.metrics ? (
+                  <CopyButton value={insight.metrics} label="Metrics" />
+                ) : null
+              }
+            >
               <JsonBlock value={insight.metrics} />
             </Section>
 
@@ -912,7 +1215,12 @@ function InsightDetailDialog({
               ) : (
                 <div className="space-y-2">
                   {decisions.map((d) => (
-                    <div key={d.id} className="rounded-md border p-2 text-xs">
+                    <button
+                      type="button"
+                      key={d.id}
+                      onClick={() => onOpenDecision(d)}
+                      className="w-full rounded-md border p-2 text-left text-xs transition-colors hover:bg-muted/50"
+                    >
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="outline">
                           {ACTION_TYPE_LABELS[d.action_type] ?? d.action_type}
@@ -924,9 +1232,10 @@ function InsightDetailDialog({
                         <span className="text-muted-foreground">
                           {fmtDate(d.created_at)}
                         </span>
+                        <ArrowUpRight className="ml-auto h-3.5 w-3.5 text-muted-foreground" />
                       </div>
                       {d.title && <p className="mt-1 text-sm">{d.title}</p>}
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
@@ -995,12 +1304,23 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+  action,
+}: {
+  title: string;
+  children: React.ReactNode;
+  action?: React.ReactNode;
+}) {
   return (
     <section className="space-y-2">
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        {title}
-      </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {title}
+        </h3>
+        {action}
+      </div>
       {children}
     </section>
   );
