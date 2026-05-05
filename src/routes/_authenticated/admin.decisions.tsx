@@ -239,6 +239,21 @@ function AdminDecisionsPage() {
     return Array.from(set).sort();
   }, [decisions]);
 
+  const filteredDecisions = useMemo(() => {
+    const list = decisions ?? [];
+    return list.filter((d) => {
+      if (minConfidence > 0) {
+        const c = d.confidence != null ? Number(d.confidence) : 0;
+        if (c * 100 < minConfidence) return false;
+      }
+      if (riskFilter.size > 0) {
+        const r = d.insight_id ? (riskByInsight.get(d.insight_id) ?? "unknown") : "unknown";
+        if (!riskFilter.has(r)) return false;
+      }
+      return true;
+    });
+  }, [decisions, minConfidence, riskFilter, riskByInsight]);
+
   const toggleType = (t: string) => {
     setTypesFilter((prev) => {
       const next = new Set(prev);
@@ -248,10 +263,81 @@ function AdminDecisionsPage() {
     });
   };
 
+  const toggleRisk = (r: string) => {
+    setRiskFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(r)) next.delete(r);
+      else next.add(r);
+      return next;
+    });
+  };
+
   const toggleAll = () => {
-    if (!decisions) return;
-    if (selected.size === decisions.length) setSelected(new Set());
-    else setSelected(new Set(decisions.map((d) => d.id)));
+    if (filteredDecisions.length === 0) return;
+    if (selected.size === filteredDecisions.length) setSelected(new Set());
+    else setSelected(new Set(filteredDecisions.map((d) => d.id)));
+  };
+
+  const exportCsv = () => {
+    if (filteredDecisions.length === 0) {
+      toast.error("Нічого експортувати");
+      return;
+    }
+    const headers = [
+      "id",
+      "tenant_id",
+      "tenant_name",
+      "action_type",
+      "title",
+      "agent_id",
+      "status",
+      "confidence",
+      "risk_level",
+      "created_at",
+      "age_hours",
+      "rationale",
+    ];
+    const esc = (v: unknown): string => {
+      if (v == null) return "";
+      const s = typeof v === "string" ? v : String(v);
+      if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+      return s;
+    };
+    const lines = [headers.join(",")];
+    for (const d of filteredDecisions) {
+      const ageHours = Math.floor(
+        (Date.now() - new Date(d.created_at).getTime()) / 3_600_000,
+      );
+      const risk = d.insight_id ? (riskByInsight.get(d.insight_id) ?? "") : "";
+      lines.push(
+        [
+          d.id,
+          d.tenant_id,
+          tenantNameById.get(d.tenant_id) ?? "",
+          d.action_type,
+          d.title ?? "",
+          d.agent_id,
+          d.status,
+          d.confidence ?? "",
+          risk,
+          d.created_at,
+          ageHours,
+          d.rationale ?? "",
+        ]
+          .map(esc)
+          .join(","),
+      );
+    }
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `decisions-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`Експортовано ${filteredDecisions.length} рядків`);
   };
 
   const bulkApprove = async () => {
