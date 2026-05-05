@@ -3289,6 +3289,60 @@ export type Database = {
           },
         ]
       }
+      ltv_forecasts: {
+        Row: {
+          cohort_month: string
+          computed_at: string
+          confidence: string
+          created_at: string
+          id: string
+          m30_avg_revenue_cents: number
+          multiplier: number
+          multiplier_source: string
+          predicted_ltv_12m_cents: number
+          tenant_id: string
+        }
+        Insert: {
+          cohort_month: string
+          computed_at?: string
+          confidence?: string
+          created_at?: string
+          id?: string
+          m30_avg_revenue_cents?: number
+          multiplier?: number
+          multiplier_source?: string
+          predicted_ltv_12m_cents?: number
+          tenant_id: string
+        }
+        Update: {
+          cohort_month?: string
+          computed_at?: string
+          confidence?: string
+          created_at?: string
+          id?: string
+          m30_avg_revenue_cents?: number
+          multiplier?: number
+          multiplier_source?: string
+          predicted_ltv_12m_cents?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ltv_forecasts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "ltv_forecasts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_fraud_signals: {
         Row: {
           created_at: string
@@ -7261,6 +7315,7 @@ export type Database = {
       }
       compute_forecast_calibration: { Args: never; Returns: Json }
       compute_inventory_velocity_forecasts: { Args: never; Returns: number }
+      compute_ltv_forecasts: { Args: never; Returns: Json }
       consume_ai_credits: {
         Args: {
           _amount: number
@@ -7343,6 +7398,7 @@ export type Database = {
       detect_cac_signals: { Args: never; Returns: number }
       detect_funnel_anomalies: { Args: never; Returns: Json }
       detect_high_ltv_at_risk: { Args: never; Returns: number }
+      detect_ltv_signals: { Args: never; Returns: Json }
       detect_refund_risk_orders: { Args: never; Returns: number }
       detect_rfm_signals: { Args: never; Returns: number }
       detect_stockout_forecast_signals: { Args: never; Returns: number }
