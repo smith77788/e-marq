@@ -696,6 +696,10 @@ function AdminDecisionsPage() {
         insight={insightView}
         tenantId={detail?.tenant_id ?? null}
         onClose={() => setInsightView(null)}
+        onOpenDecision={(d) => {
+          setInsightView(null);
+          void openDetail(d);
+        }}
       />
     </div>
   );
