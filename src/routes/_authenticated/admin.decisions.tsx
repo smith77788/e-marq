@@ -886,6 +886,22 @@ function DecisionDetailDialog({
               <JsonBlock value={decision.payload} />
             </Section>
 
+            {/* Semantic key (dedup hash) */}
+            {(() => {
+              const sk = (decision.payload as { semantic_key?: unknown } | null)?.semantic_key;
+              if (typeof sk !== "string" || !sk) return null;
+              return (
+                <Section
+                  title="Semantic key (dedup)"
+                  action={<CopyButton value={sk} label="Key" />}
+                >
+                  <code className="block break-all rounded bg-muted/40 p-2 font-mono text-xs">
+                    {sk}
+                  </code>
+                </Section>
+              );
+            })()}
+
             {/* Linked insight */}
             <Section title="Пов'язаний insight">
               {loading && !insight ? (
