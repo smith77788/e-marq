@@ -225,10 +225,11 @@ function ProductDetailEditor() {
       </div>
 
       <Tabs defaultValue="basic" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6">
           <TabsTrigger value="basic">Основне</TabsTrigger>
           <TabsTrigger value="images">Фото</TabsTrigger>
           <TabsTrigger value="variants">Варіанти</TabsTrigger>
+          <TabsTrigger value="economics">Економіка</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
           <TabsTrigger value="analytics">Аналітика</TabsTrigger>
         </TabsList>
