@@ -22,7 +22,9 @@ import {
   Settings,
   Store,
   Link as LinkIcon,
+  TrendingUp,
 } from "lucide-react";
+import { MarketingSpendForm } from "@/components/owner/MarketingSpendForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -247,6 +249,9 @@ function StoreSettingsPage() {
             </TabsTrigger>
             <TabsTrigger value="bot" className="gap-1.5">
               <Bot className="h-3.5 w-3.5" /> Бот-консультант
+            </TabsTrigger>
+            <TabsTrigger value="marketing" className="gap-1.5">
+              <TrendingUp className="h-3.5 w-3.5" /> Маркетинг
             </TabsTrigger>
             <TabsTrigger value="domain" className="gap-1.5">
               <LinkIcon className="h-3.5 w-3.5" /> Домен
@@ -491,6 +496,10 @@ function StoreSettingsPage() {
           </TabsContent>
 
           {/* DOMAIN */}
+          <TabsContent value="marketing" className="mt-4 space-y-4">
+            <MarketingSpendForm tenantId={tenantId} />
+          </TabsContent>
+
           <TabsContent value="domain" className="mt-4 space-y-4">
             <DomainsManager tenantId={tenantId} />
           </TabsContent>

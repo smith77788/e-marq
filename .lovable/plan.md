@@ -1,56 +1,67 @@
-# Наступні 2 кроки
+## Наступний крок: Auto-Resume Policy + Marketing Spend UI
 
-Беру два пов'язані покращення з top-3, які доповнюють одне одного:
+Беру №1 і №2 з top-3 минулого кроку — вони доповнюють CAC Payback Agent (закривають його loop) і знімають останнє тертя auto-pause системи.
 
-## 1. SQL Agent #20 — CAC Payback Agent
+---
 
-**Мета:** показати власнику, скільки часу займає окупити витрати на залучення клієнта (Customer Acquisition Cost), і виявити **збиткові канали/когорти**, де LTV < CAC після N місяців.
+### 1. Auto-Resume Policy (SQL Agent #18)
 
-**Логіка (pure-SQL, як решта SQL-агентів):**
-- Нова таблиця `acquisition_costs(tenant_id, period_month, channel, spend_cents, new_customers)` — owner вводить вручну або імпортує (Meta Ads, Google Ads).
-- Функція `compute_cac_payback()` (daily 04:35 UTC):
-  - Для кожної когорти `customer_cohorts` (вже існує) рахує cumulative revenue per customer на 1/3/6/12 month offsets.
-  - Joins з `acquisition_costs` по `period_month` → CAC = spend / new_customers.
-  - Payback month = перший offset де `cumulative_revenue_per_customer >= CAC`.
-  - Записує у нову таблицю `cac_payback_metrics(tenant_id, cohort_month, channel, cac_cents, payback_month, ltv_12m_cents, roi_pct)`.
-- Функція `detect_cac_signals()` (hourly :42):
-  - Якщо `payback_month > 6` АБО `ltv_12m < cac` → insight `cac_payback_slow` → action `owner_review` (manual, бо рішення про канал — стратегічне).
-  - Якщо `roi_pct > 200%` для каналу 3+ місяці поспіль → insight `cac_winner_channel` → action `owner_review` (натяк збільшити budget).
+**Проблема:** `auto_pause_policies_on_quality_drop()` (#17) виключає policy коли win-rate падає, але **немає зворотного шляху**. Owner мусить вручну re-enable, що ламає autonomous-loop.
 
-**UI:**
-- Новий tab "CAC & Payback" у `/brand/roi` з таблицею cohort × channel і кольоровою heatmap по payback month.
-- На `/brand/index` (CockpitHero) — мінімальний badge "Avg payback: 4.2 mo" якщо є дані.
+**Рішення — `auto_resume_policies_on_recovery()`:**
+- Daily 06:45 UTC (одразу після #17 о 06:30).
+- Сканує `auto_approval_policy WHERE enabled=false AND notes LIKE '%auto-paused%'`.
+- Для кожної paused policy перевіряє останні 14 днів `action_outcomes` для (tenant, action_type):
+  - n ≥ 5 done outcomes
+  - win-rate ≥ 50% (vs threshold 30% у #17)
+  - середній attributed_revenue_cents > 0
+- Якщо так → `UPDATE auto_approval_policy SET enabled=true`, додає note `auto-resumed YYYY-MM-DD: win=X% n=Y`.
+- Шле owner_notification (kind='auto_resumed_policy', severity=info, channel=telegram).
+- Dedup: ту ж policy не resume'ить повторно у 7-day window.
 
-## 2. Notification Digest dedup
+**Чому це безпечно:** quality_monitor (#16) і causal-disable (Welch t-test) лишаються активними. Якщо resume був передчасний, ці агенти знову paused його за 1-2 тижні.
 
-**Проблема:** користувач щойно скаржився на спам сповіщень. Pilot-guard вже додано, але **реальні tenants теж страждатимуть** від множинних сповіщень одного типу за годину.
+---
 
-**Рішення:**
-- Розширити trigger `tg_notify_owner_on_notification`:
-  - Перед INSERT у `owner_telegram_outbox` перевіряти: чи є вже pending row для (tenant, kind) у останні 60 хв?
-  - Якщо так → не створювати новий outbox row, а **оновити існуючий** з лічильником `payload.batched_count` і списком останніх 3 titles.
-- Telegram template для batched: `"🔔 {kind}: 5 нових подій за останню годину\n• ...\n• ...\n• ...\n[Відкрити Inbox]"`.
+### 2. Marketing Spend UI (`/brand/settings` → tab "Marketing")
 
-## Технічні деталі
+CAC Payback Agent має таблицю `acquisition_costs`, але owner ніяк її не заповнює. Без даних — порожня heatmap у `/brand/roi`.
 
-**Migrations (4):**
-1. `acquisition_costs` table + RLS (tenant_admin write, member read).
-2. `cac_payback_metrics` table + indexes (tenant_id, cohort_month, channel).
-3. `compute_cac_payback()` + `detect_cac_signals()` functions + 2 cron jobs з CRON_SECRET.
-4. Update `tg_notify_owner_on_notification` trigger для batching + add `batched_count` column to `owner_telegram_outbox.payload`.
+**`MarketingSpendForm.tsx`:**
+- Таблиця: рядок per (period_month, channel) з inline-edit полями `spend_cents` (UAH input), `new_customers`.
+- Auto-suggest channels з `customer_cohorts.acquisition_channel` distinct values + manual input.
+- Header: dropdown month picker (last 12 months), default = current month.
+- "Add row" → новий empty row, зберігає на blur.
+- "Imported from Meta Ads / Google Ads" — placeholder, поки manual.
+- RPC `upsert_acquisition_cost(tenant_id, period_month, channel, spend_cents, new_customers)` — UPSERT по (tenant_id, period_month, channel).
+
+**Інтеграція в settings:**
+- `brand.settings.tsx` має tabs structure → додати tab "Marketing".
+
+---
+
+### Технічні деталі
+
+**Migrations (2):**
+1. `auto_resume_policies_on_recovery()` SECURITY DEFINER функція + cron `auto-resume-policy-daily` (45 6 * * *) з CRON_SECRET.
+2. RPC `upsert_acquisition_cost()` SECURITY DEFINER (tenant_admin only check).
 
 **Frontend:**
-- `src/components/owner/CacPaybackTable.tsx` — heatmap cohort × channel.
-- `src/routes/_authenticated/brand.roi.tsx` — додати tab.
-- (опційно) UI для введення `acquisition_costs` — простий form у `/brand/settings` → "Marketing spend".
+- `src/components/owner/MarketingSpendForm.tsx` — таблиця з editable cells.
+- `src/routes/_authenticated/brand.settings.tsx` — додати tab.
 
 **Memory:**
-- `mem://features/cac-payback-agent.md`
-- `mem://features/notification-digest.md`
-- Update `mem://index.md`.
+- `mem://features/auto-resume-policy.md`
+- Update `mem://features/cac-payback-agent.md` (link на UI) і `mem://index.md`.
 
-## Чому ці два разом
+---
 
-CAC Payback — стратегічний insight (нова можливість), digest — тактичний QoL fix (зменшує тертя від п.5 минулого повідомлення). Разом ~30 хв роботи, обидва — pure-SQL + tiny UI, не блокують одне одного.
+### Чому ці два разом
+
+Обидва закривають loops з минулого кроку:
+- Auto-resume → завершує quality-drop pause cycle (decision system fully autonomous).
+- Marketing UI → активує CAC Payback Agent даними.
+
+~25 хв роботи, обидва — pure-SQL + tiny UI, не блокують одне одного.
 
 Кажи "ок" — починаю.
