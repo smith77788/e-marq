@@ -7252,6 +7252,7 @@ export type Database = {
       generate_insights_for_all_tenants: { Args: never; Returns: number }
       generate_owner_daily_briefing: { Args: never; Returns: number }
       generate_owner_weekly_digest: { Args: never; Returns: Json }
+      generate_owner_weekly_recap: { Args: never; Returns: number }
       get_acos_stats: { Args: { _tenant_id: string }; Returns: Json }
       get_agent_permission: {
         Args: { _agent_id: string; _tenant_id: string }
