@@ -1055,6 +1055,48 @@ function InsightDetailDialog({
       }
       setLoading(false);
     })();
+
+    // 7d sparkline trend (best-effort, fails silently)
+    void (async () => {
+      setTrend(null);
+      const m = (insight.metrics ?? {}) as Record<string, unknown>;
+      const productId = typeof m.product_id === "string" ? m.product_id : null;
+      const customerId = typeof m.customer_id === "string" ? m.customer_id : null;
+      const since = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10);
+      try {
+        if (productId) {
+          const { data } = await supabase
+            .from("product_metrics_daily")
+            .select("day, revenue_cents, units_sold")
+            .eq("tenant_id", tenantId)
+            .eq("product_id", productId)
+            .gte("day", since)
+            .order("day", { ascending: true });
+          const rows = (data ?? []) as Array<{ revenue_cents: number | null }>;
+          if (rows.length > 1)
+            setTrend({
+              label: "Revenue (7d)",
+              data: rows.map((r) => Number(r.revenue_cents ?? 0) / 100),
+            });
+        } else if (customerId) {
+          const { data } = await supabase
+            .from("customer_metrics_daily")
+            .select("day, revenue_cents")
+            .eq("tenant_id", tenantId)
+            .eq("customer_id", customerId)
+            .gte("day", since)
+            .order("day", { ascending: true });
+          const rows = (data ?? []) as Array<{ revenue_cents: number | null }>;
+          if (rows.length > 1)
+            setTrend({
+              label: "Customer revenue (7d)",
+              data: rows.map((r) => Number(r.revenue_cents ?? 0) / 100),
+            });
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
   }, [insight, tenantId]);
 
   if (!insight) return null;
