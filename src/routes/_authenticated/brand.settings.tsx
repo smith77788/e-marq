@@ -496,6 +496,10 @@ function StoreSettingsPage() {
           </TabsContent>
 
           {/* DOMAIN */}
+          <TabsContent value="marketing" className="mt-4 space-y-4">
+            <MarketingSpendForm tenantId={tenantId} />
+          </TabsContent>
+
           <TabsContent value="domain" className="mt-4 space-y-4">
             <DomainsManager tenantId={tenantId} />
           </TabsContent>
