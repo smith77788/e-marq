@@ -7119,6 +7119,13 @@ export type Database = {
         }[]
       }
       compute_causal_lift: { Args: never; Returns: number }
+      compute_customer_cohorts: {
+        Args: never
+        Returns: {
+          cohorts_written: number
+          tenant_id: string
+        }[]
+      }
       compute_customer_ltv: {
         Args: never
         Returns: {
