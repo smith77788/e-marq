@@ -128,6 +128,57 @@ export type Database = {
           },
         ]
       }
+      acquisition_costs: {
+        Row: {
+          channel: string
+          created_at: string
+          id: string
+          new_customers: number
+          notes: string | null
+          period_month: string
+          spend_cents: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          id?: string
+          new_customers?: number
+          notes?: string | null
+          period_month: string
+          spend_cents?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          id?: string
+          new_customers?: number
+          notes?: string | null
+          period_month?: string
+          spend_cents?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acquisition_costs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "acquisition_costs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       action_outcomes: {
         Row: {
           action_id: string | null
@@ -903,6 +954,72 @@ export type Database = {
           },
           {
             foreignKeyName: "bundle_suggestions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cac_payback_metrics: {
+        Row: {
+          cac_cents: number
+          channel: string
+          cohort_month: string
+          computed_at: string
+          customer_count: number
+          id: string
+          ltv_12m_cents: number
+          payback_month: number | null
+          revenue_m1_cents: number
+          revenue_m12_cents: number
+          revenue_m3_cents: number
+          revenue_m6_cents: number
+          roi_pct: number
+          tenant_id: string
+        }
+        Insert: {
+          cac_cents?: number
+          channel?: string
+          cohort_month: string
+          computed_at?: string
+          customer_count?: number
+          id?: string
+          ltv_12m_cents?: number
+          payback_month?: number | null
+          revenue_m1_cents?: number
+          revenue_m12_cents?: number
+          revenue_m3_cents?: number
+          revenue_m6_cents?: number
+          roi_pct?: number
+          tenant_id: string
+        }
+        Update: {
+          cac_cents?: number
+          channel?: string
+          cohort_month?: string
+          computed_at?: string
+          customer_count?: number
+          id?: string
+          ltv_12m_cents?: number
+          payback_month?: number | null
+          revenue_m1_cents?: number
+          revenue_m12_cents?: number
+          revenue_m3_cents?: number
+          revenue_m6_cents?: number
+          roi_pct?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cac_payback_metrics_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "cac_payback_metrics_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -7118,6 +7235,7 @@ export type Database = {
           processed_tenants: number
         }[]
       }
+      compute_cac_payback: { Args: never; Returns: number }
       compute_causal_lift: { Args: never; Returns: number }
       compute_customer_cohorts: {
         Args: never
@@ -7221,6 +7339,7 @@ export type Database = {
           insights_created: number
         }[]
       }
+      detect_cac_signals: { Args: never; Returns: number }
       detect_funnel_anomalies: { Args: never; Returns: Json }
       detect_high_ltv_at_risk: { Args: never; Returns: number }
       detect_refund_risk_orders: { Args: never; Returns: number }
