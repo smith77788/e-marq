@@ -6738,6 +6738,10 @@ export type Database = {
           schedule: string
         }[]
       }
+      _estimate_forecast: {
+        Args: { _action_type: string; _tenant: string }
+        Returns: Json
+      }
       _forecast_for_action: {
         Args: { _action_type: string; _tenant_id: string }
         Returns: Json
