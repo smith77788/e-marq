@@ -76,11 +76,13 @@ async function tgEditMessage(
 }
 
 function getInternalAgentAuthHeaders(): HeadersInit {
-  const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
-  return publishableKey
+  // Prefer CRON_SECRET so internal hook calls pass isCronToken() check.
+  // Falls back to anon key only if CRON_SECRET isn't configured.
+  const token = process.env.CRON_SECRET ?? process.env.SUPABASE_PUBLISHABLE_KEY;
+  return token
     ? {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${publishableKey}`,
+        Authorization: `Bearer ${token}`,
       }
     : {
         "Content-Type": "application/json",
