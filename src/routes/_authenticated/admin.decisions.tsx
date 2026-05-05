@@ -122,6 +122,7 @@ function AdminDecisionsPage() {
   const [detailInsight, setDetailInsight] = useState<InsightRow | null>(null);
   const [detailOutcome, setDetailOutcome] = useState<OutcomeRow | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [insightView, setInsightView] = useState<InsightRow | null>(null);
 
   const openDetail = useCallback(async (d: Decision) => {
     setDetail(d);
