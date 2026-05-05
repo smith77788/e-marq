@@ -7060,6 +7060,13 @@ export type Database = {
         Args: { _tenant_id: string }
         Returns: number
       }
+      enforce_causal_policy: {
+        Args: never
+        Returns: {
+          disabled_count: number
+          enabled_count: number
+        }[]
+      }
       estimate_post_discount_margin_pct: {
         Args: { _discount_pct: number; _product_id: string }
         Returns: number
