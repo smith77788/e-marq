@@ -1010,14 +1010,17 @@ function InsightDetailDialog({
   insight,
   tenantId,
   onClose,
+  onOpenDecision,
 }: {
   insight: InsightRow | null;
   tenantId: string | null;
   onClose: () => void;
+  onOpenDecision: (d: Decision) => void;
 }) {
   const [loading, setLoading] = useState(false);
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [outcomes, setOutcomes] = useState<OutcomeRow[]>([]);
+  const [trend, setTrend] = useState<{ label: string; data: number[] } | null>(null);
 
   useEffect(() => {
     if (!insight || !tenantId) return;
