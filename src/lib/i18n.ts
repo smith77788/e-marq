@@ -63,7 +63,7 @@ const dict = {
     "sb.leadRadar": "Lead Radar",
     "sb.adminCommands": "⚡ Команди системи",
     "sb.adminDecisions": "📥 Decision Inbox",
-    "sb.adminAgents": "🤖 Agents (admin)",
+    "sb.adminAgents": "🤖 Агенти (admin)",
     "sb.liveRuns": "Запуски в ефірі",
     "sb.agentLibrary": "Бібліотека агентів",
     "sb.insightStream": "Потік інсайтів",
