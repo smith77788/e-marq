@@ -6703,6 +6703,19 @@ export type Database = {
     }
     Functions: {
       _agent_slug_for: { Args: { _agent_id: string }; Returns: string }
+      _compute_bundle_suggestions_v1: {
+        Args: {
+          _min_co_orders?: number
+          _min_lift?: number
+          _min_support_pct?: number
+          _window_days?: number
+        }
+        Returns: {
+          pairs_inserted: number
+          pairs_updated: number
+          processed_tenants: number
+        }[]
+      }
       _decision_semantic_key: {
         Args: { _action_type: string; _insight_type: string; _payload: Json }
         Returns: string
