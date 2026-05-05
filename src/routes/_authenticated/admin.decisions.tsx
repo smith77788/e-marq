@@ -34,10 +34,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Slider } from "@/components/ui/slider";
+import { CopyButton } from "@/components/admin/CopyButton";
+import { Sparkline } from "@/components/detail/Sparkline";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Check, X, RefreshCw, Filter, Eye, Sparkles } from "lucide-react";
+import { Check, X, RefreshCw, Filter, Eye, Sparkles, Download, ArrowUpRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/decisions")({
   head: () => ({
