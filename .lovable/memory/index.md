@@ -51,3 +51,5 @@ v1.0 Roadmap: Phase 1-7 (DONE) → Phase 8 Pilot simulator with real lift (DONE)
 - Reality 2026-05-05: попередній "64/74 zombies" застарів. Cron audit показав: 54 jobs, всі succeed окрім compute-forecast-calibration-daily (FIXED — round() type cast); 401-rate ~2.5% від загального трафіку; pure-SQL і HTTP-cron гілки обидві живі.
 - Tests: vitest 2 + jsdom встановлено. Конфіг vitest.config.ts (alias @ → src). Перший smoke test src/lib/acos/cronAuth.test.ts. Запуск: bun test.
 - [Realtime Revenue Pulse](mem://features/realtime-revenue-pulse) — 24h live sparkline на /brand під CockpitHero, Supabase Realtime subscribe orders postgres_changes, pulse-glow + liveDelta лічильник на новий paid order
+- [CAC Payback Agent](mem://features/cac-payback-agent) — SQL agent #20, daily 04:35 + hourly :42; acquisition_costs × customer_cohorts → cac_payback_metrics; emits cac_payback_slow / cac_winner_channel; UI heatmap у /brand/roi
+- [Notification digest dedup](mem://features/notification-digest) — notify_owner_telegram() батчить notifications того ж kind у 60min-вікні (batched_count + last 3 titles)
