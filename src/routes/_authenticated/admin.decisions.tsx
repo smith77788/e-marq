@@ -499,7 +499,12 @@ function AdminDecisionsPage() {
         <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
           <div>
             <CardTitle className="text-base">
-              Pending: {decisions?.length ?? 0}
+              Pending: {filteredDecisions.length}
+              {decisions && decisions.length !== filteredDecisions.length && (
+                <span className="ml-2 text-xs font-normal text-muted-foreground">
+                  / {decisions.length}
+                </span>
+              )}
               {selected.size > 0 && (
                 <span className="ml-2 text-sm font-normal text-muted-foreground">
                   · обрано {selected.size}
@@ -507,7 +512,15 @@ function AdminDecisionsPage() {
               )}
             </CardTitle>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={filteredDecisions.length === 0}
+              onClick={exportCsv}
+            >
+              <Download className="mr-1 h-4 w-4" /> CSV
+            </Button>
             <Button
               size="sm"
               disabled={busy || selected.size === 0}
@@ -530,7 +543,7 @@ function AdminDecisionsPage() {
             <div className="p-6">
               <Skeleton className="h-32 w-full" />
             </div>
-          ) : decisions.length === 0 ? (
+          ) : filteredDecisions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Check className="mb-3 h-10 w-10 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
@@ -543,7 +556,10 @@ function AdminDecisionsPage() {
                 <TableRow>
                   <TableHead className="w-10">
                     <Checkbox
-                      checked={selected.size === decisions.length && decisions.length > 0}
+                      checked={
+                        selected.size === filteredDecisions.length &&
+                        filteredDecisions.length > 0
+                      }
                       onCheckedChange={toggleAll}
                     />
                   </TableHead>
@@ -551,18 +567,22 @@ function AdminDecisionsPage() {
                   <TableHead>Action type</TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead>Agent</TableHead>
+                  <TableHead className="text-right">Risk</TableHead>
                   <TableHead className="text-right">Conf.</TableHead>
                   <TableHead className="text-right">Age</TableHead>
                   <TableHead className="w-10"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {decisions.map((d) => {
+                {filteredDecisions.map((d) => {
                   const ageHours = Math.floor(
                     (Date.now() - new Date(d.created_at).getTime()) / 3_600_000,
                   );
                   const stale = ageHours >= 24;
                   const isSel = selected.has(d.id);
+                  const risk = d.insight_id
+                    ? (riskByInsight.get(d.insight_id) ?? null)
+                    : null;
                   return (
                     <TableRow key={d.id} data-state={isSel ? "selected" : undefined}>
                       <TableCell>
@@ -590,6 +610,24 @@ function AdminDecisionsPage() {
                         {d.title ?? <span className="text-muted-foreground">—</span>}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">{d.agent_id}</TableCell>
+                      <TableCell className="text-right">
+                        {risk ? (
+                          <Badge
+                            variant={
+                              risk === "high"
+                                ? "destructive"
+                                : risk === "medium"
+                                  ? "default"
+                                  : "secondary"
+                            }
+                            className="text-[10px]"
+                          >
+                            {risk}
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-right text-xs text-muted-foreground">
                         {d.confidence != null ? `${Math.round(Number(d.confidence) * 100)}%` : "—"}
                       </TableCell>
