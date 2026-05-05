@@ -68,7 +68,7 @@ function SignupPage() {
   const [password, setPassword] = useState("");
 
   const destination = postSignupDestination(search);
-  const planLabel = search.plan ? PLAN_LABEL[search.plan] : null;
+  const planLabel = search.plan ? PLAN_LABEL[search.plan as keyof typeof PLAN_LABEL] : null;
   const goingToCheckout = search.next === "checkout" && !!search.plan && search.plan !== "free";
 
   async function onEmailSubmit(e: FormEvent) {
