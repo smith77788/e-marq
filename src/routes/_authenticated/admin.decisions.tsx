@@ -117,7 +117,10 @@ function AdminDecisionsPage() {
   const [tenants, setTenants] = useState<TenantOpt[]>([]);
   const [tenantFilter, setTenantFilter] = useState<string>("all");
   const [typesFilter, setTypesFilter] = useState<Set<string>>(new Set(DEFAULT_TYPES));
+  const [riskFilter, setRiskFilter] = useState<Set<string>>(new Set());
+  const [minConfidence, setMinConfidence] = useState<number>(0);
   const [decisions, setDecisions] = useState<Decision[] | null>(null);
+  const [riskByInsight, setRiskByInsight] = useState<Map<string, string>>(new Map());
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
