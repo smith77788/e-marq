@@ -498,6 +498,13 @@ function AdminDecisionsPage() {
             void load();
           }
         }}
+        onOpenInsight={(i) => setInsightView(i)}
+      />
+
+      <InsightDetailDialog
+        insight={insightView}
+        tenantId={detail?.tenant_id ?? null}
+        onClose={() => setInsightView(null)}
       />
     </div>
   );
