@@ -1467,6 +1467,54 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_rfm: {
+        Row: {
+          avg_cycle_days: number | null
+          computed_at: string
+          customer_id: string
+          f_score: number
+          frequency: number
+          id: string
+          m_score: number
+          monetary_cents: number
+          r_score: number
+          recency_days: number
+          rfm_score: string
+          segment: string
+          tenant_id: string
+        }
+        Insert: {
+          avg_cycle_days?: number | null
+          computed_at?: string
+          customer_id: string
+          f_score: number
+          frequency: number
+          id?: string
+          m_score: number
+          monetary_cents: number
+          r_score: number
+          recency_days: number
+          rfm_score: string
+          segment: string
+          tenant_id: string
+        }
+        Update: {
+          avg_cycle_days?: number | null
+          computed_at?: string
+          customer_id?: string
+          f_score?: number
+          frequency?: number
+          id?: string
+          m_score?: number
+          monetary_cents?: number
+          r_score?: number
+          recency_days?: number
+          rfm_score?: string
+          segment?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       customer_segments: {
         Row: {
           avg_ltv_cents: number
@@ -6834,6 +6882,13 @@ export type Database = {
           rows_upserted: number
         }[]
       }
+      compute_customer_rfm: {
+        Args: never
+        Returns: {
+          out_processed: number
+          out_tenant_id: string
+        }[]
+      }
       compute_forecast_calibration: { Args: never; Returns: Json }
       consume_ai_credits: {
         Args: {
@@ -6898,6 +6953,7 @@ export type Database = {
         }[]
       }
       detect_funnel_anomalies: { Args: never; Returns: Json }
+      detect_rfm_signals: { Args: never; Returns: number }
       dispatch_high_impact_all_tenants: { Args: never; Returns: Json }
       dispatch_high_impact_decisions: {
         Args: { _tenant_id: string }
