@@ -234,6 +234,12 @@ const ADMIN_SYSTEM: NavGroup = {
       icon: HeartPulse,
       tone: "text-destructive",
     },
+    {
+      labelKey: "sb.adminAuditLog" as TKey,
+      to: "/admin/audit-log",
+      icon: ShieldCheck,
+      tone: "text-warning",
+    },
   ],
 };
 
