@@ -7111,6 +7111,13 @@ export type Database = {
         }[]
       }
       compute_causal_lift: { Args: never; Returns: number }
+      compute_customer_ltv: {
+        Args: never
+        Returns: {
+          customers_scored: number
+          tenant_id: string
+        }[]
+      }
       compute_customer_rfm: {
         Args: never
         Returns: {
@@ -7199,6 +7206,7 @@ export type Database = {
         }[]
       }
       detect_funnel_anomalies: { Args: never; Returns: Json }
+      detect_high_ltv_at_risk: { Args: never; Returns: number }
       detect_rfm_signals: { Args: never; Returns: number }
       detect_stockout_forecast_signals: { Args: never; Returns: number }
       detect_trending_products: { Args: never; Returns: Json }
