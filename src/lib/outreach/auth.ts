@@ -8,6 +8,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
+import { isCronToken } from "@/lib/acos/cronAuth";
 
 export type OutreachAuth =
   | { kind: "cron" }
