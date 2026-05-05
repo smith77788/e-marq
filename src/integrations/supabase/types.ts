@@ -6897,6 +6897,7 @@ export type Database = {
           success_count: number
         }[]
       }
+      detect_funnel_anomalies: { Args: never; Returns: Json }
       dispatch_high_impact_all_tenants: { Args: never; Returns: Json }
       dispatch_high_impact_decisions: {
         Args: { _tenant_id: string }
