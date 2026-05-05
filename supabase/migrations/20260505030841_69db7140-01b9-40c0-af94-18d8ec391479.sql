@@ -1,0 +1,1 @@
+ALTER TABLE public.product_economics ALTER COLUMN cogs_cents DROP NOT NULL;
