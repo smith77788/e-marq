@@ -4467,7 +4467,7 @@ export type Database = {
       }
       product_economics: {
         Row: {
-          cogs_cents: number
+          cogs_cents: number | null
           created_at: string
           id: string
           min_margin_pct: number
@@ -4478,7 +4478,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          cogs_cents: number
+          cogs_cents?: number | null
           created_at?: string
           id?: string
           min_margin_pct?: number
@@ -4489,7 +4489,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          cogs_cents?: number
+          cogs_cents?: number | null
           created_at?: string
           id?: string
           min_margin_pct?: number

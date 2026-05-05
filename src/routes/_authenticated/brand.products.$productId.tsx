@@ -30,6 +30,7 @@ import { ProductImagesPanel } from "@/components/admin/ProductImagesPanel";
 import { ProductVariantsPanel } from "@/components/admin/ProductVariantsPanel";
 import { ProductSeoPanel } from "@/components/admin/ProductSeoPanel";
 import { ProductAnalyticsPanel } from "@/components/admin/ProductAnalyticsPanel";
+import { ProductEconomicsPanel } from "@/components/admin/ProductEconomicsPanel";
 import { useTenantContext } from "@/hooks/useTenantContext";
 
 type ProductRecord = {
@@ -224,10 +225,11 @@ function ProductDetailEditor() {
       </div>
 
       <Tabs defaultValue="basic" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6">
           <TabsTrigger value="basic">Основне</TabsTrigger>
           <TabsTrigger value="images">Фото</TabsTrigger>
           <TabsTrigger value="variants">Варіанти</TabsTrigger>
+          <TabsTrigger value="economics">Економіка</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
           <TabsTrigger value="analytics">Аналітика</TabsTrigger>
         </TabsList>
@@ -385,6 +387,16 @@ function ProductDetailEditor() {
             tenantId={product.tenant_id}
             productId={product.id}
             hasVariants={product.has_variants}
+          />
+        </TabsContent>
+
+        {/* Tab — Economics */}
+        <TabsContent value="economics">
+          <ProductEconomicsPanel
+            tenantId={product.tenant_id}
+            productId={product.id}
+            priceCents={product.price_cents}
+            currency={product.currency}
           />
         </TabsContent>
 
