@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { ROIDashboard } from "@/components/owner/ROIDashboard";
+import { CacPaybackTable } from "@/components/owner/CacPaybackTable";
 
 type Search = { tenant?: string };
 
