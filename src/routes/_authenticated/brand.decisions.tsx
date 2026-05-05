@@ -302,32 +302,66 @@ const BASIS_LABELS: Record<string, string> = {
   tenant_history: "ваша історія",
   blended: "ваша історія + бенчмарк",
   global_prior: "бенчмарк індустрії",
+  global_history: "бенчмарк індустрії",
   heuristic: "початкова оцінка",
   prior: "початкова оцінка",
+  bootstrap: "початкова оцінка",
+};
+
+const FORECAST_SKIP_LABELS: Record<string, string> = {
+  high_value_low_confidence: "Висока сума × низька впевненість — потрібен ручний апрув",
+  forecast_uncalibrated: "Прогноз ще не відкалібрований — чекаємо більше вимірювань",
+  margin_below_target: "Знижка пробиває мінімальну маржу",
+  daily_cap_reached: "Денний ліміт авто-апрувів вичерпано",
 };
 
 function ForecastBlock({ payload }: { payload: Record<string, unknown> | null }) {
   const forecast = (payload?.forecast ?? null) as
-    | { expected_revenue_cents?: number; confidence?: number; basis?: string; tenant_samples?: number }
+    | {
+        expected_revenue_cents?: number;
+        confidence?: number;
+        basis?: string;
+        source?: string;
+        tenant_samples?: number;
+        sample_size?: number;
+      }
     | null;
-  if (!forecast || !forecast.expected_revenue_cents) return null;
-  const uah = (forecast.expected_revenue_cents / 100).toLocaleString("uk-UA", {
+  const skipReason = (payload?.auto_approval_skip_reason as string | undefined) ?? undefined;
+  if (!forecast && !skipReason) return null;
+
+  const cents = forecast?.expected_revenue_cents ?? 0;
+  const uah = (cents / 100).toLocaleString("uk-UA", {
     style: "currency",
     currency: "UAH",
     maximumFractionDigits: 0,
   });
-  const confPct = Math.round((forecast.confidence ?? 0) * 100);
-  const basisLabel = BASIS_LABELS[forecast.basis ?? "prior"] ?? forecast.basis;
+  const confPct = Math.round((forecast?.confidence ?? 0) * 100);
+  const basisKey = forecast?.basis ?? forecast?.source ?? "prior";
+  const basisLabel = BASIS_LABELS[basisKey] ?? basisKey;
+  const n = forecast?.tenant_samples ?? forecast?.sample_size;
+
   return (
-    <div className="rounded-md border border-primary/20 bg-primary/5 p-3 text-xs space-y-1">
-      <div className="flex items-baseline justify-between gap-2">
-        <span className="text-muted-foreground">Очікуваний дохід (30д)</span>
-        <span className="text-base font-semibold text-primary">{uah}</span>
-      </div>
-      <div className="flex items-center justify-between text-muted-foreground">
-        <span>Впевненість: {confPct}%</span>
-        <span>Базис: {basisLabel}{forecast.tenant_samples ? ` · n=${forecast.tenant_samples}` : ""}</span>
-      </div>
+    <div className="space-y-2">
+      {forecast && cents > 0 && (
+        <div className="rounded-md border border-primary/20 bg-primary/5 p-3 text-xs space-y-1">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-muted-foreground">Очікуваний дохід (30д)</span>
+            <span className="text-base font-semibold text-primary">{uah}</span>
+          </div>
+          <div className="flex items-center justify-between text-muted-foreground">
+            <span>Впевненість: {confPct}%</span>
+            <span>
+              Базис: {basisLabel}
+              {n ? ` · n=${n}` : ""}
+            </span>
+          </div>
+        </div>
+      )}
+      {skipReason && (
+        <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
+          ⏸ {FORECAST_SKIP_LABELS[skipReason] ?? SKIP_REASON_LABELS[skipReason]?.label ?? skipReason}
+        </div>
+      )}
     </div>
   );
 }
