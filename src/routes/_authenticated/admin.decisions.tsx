@@ -449,6 +449,49 @@ function AdminDecisionsPage() {
               </Button>
             </div>
           </div>
+
+          <div className="space-y-2">
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">
+              Risk level:
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {(["low", "medium", "high", "unknown"] as const).map((r) => {
+                const active = riskFilter.has(r);
+                return (
+                  <Button
+                    key={r}
+                    size="sm"
+                    variant={active ? "default" : "outline"}
+                    onClick={() => toggleRisk(r)}
+                  >
+                    {r}
+                  </Button>
+                );
+              })}
+              {riskFilter.size > 0 && (
+                <Button size="sm" variant="ghost" onClick={() => setRiskFilter(new Set())}>
+                  Скинути
+                </Button>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                Min confidence
+              </span>
+              <span className="text-xs font-medium">{minConfidence}%</span>
+            </div>
+            <Slider
+              value={[minConfidence]}
+              min={0}
+              max={100}
+              step={5}
+              onValueChange={(v) => setMinConfidence(v[0] ?? 0)}
+              className="max-w-md"
+            />
+          </div>
         </CardContent>
       </Card>
 
