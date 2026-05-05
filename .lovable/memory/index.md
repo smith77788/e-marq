@@ -54,3 +54,4 @@ v1.0 Roadmap: Phase 1-7 (DONE) → Phase 8 Pilot simulator with real lift (DONE)
 - [CAC Payback Agent](mem://features/cac-payback-agent) — SQL agent #20, daily 04:35 + hourly :42; acquisition_costs × customer_cohorts → cac_payback_metrics; emits cac_payback_slow / cac_winner_channel; UI heatmap у /brand/roi
 - [Notification digest dedup](mem://features/notification-digest) — notify_owner_telegram() батчить notifications того ж kind у 60min-вікні (batched_count + last 3 titles)
 - [Auto-Resume Policy](mem://features/auto-resume-policy) — SQL agent #18, daily 06:45, re-enable auto-paused policy коли 14d win-rate≥50%, n≥5, avg attributed_revenue>0; 7d dedup; закриває loop після #17
+- [LTV Forecasting Agent](mem://features/ltv-forecasting-agent) — SQL agent #19, daily 03:45 compute + 04:00 detect; multiplier-based 12m LTV від m30; emits ltv_below_cac_floor (vs CAC×1.2) + ltv_breakout_cohort (≥1.5× медіани попередніх 6)
