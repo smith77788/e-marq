@@ -37,7 +37,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Check, X, RefreshCw, Filter, Eye } from "lucide-react";
+import { Check, X, RefreshCw, Filter, Eye, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/decisions")({
   head: () => ({
@@ -122,6 +122,7 @@ function AdminDecisionsPage() {
   const [detailInsight, setDetailInsight] = useState<InsightRow | null>(null);
   const [detailOutcome, setDetailOutcome] = useState<OutcomeRow | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [insightView, setInsightView] = useState<InsightRow | null>(null);
 
   const openDetail = useCallback(async (d: Decision) => {
     setDetail(d);
@@ -497,6 +498,13 @@ function AdminDecisionsPage() {
             void load();
           }
         }}
+        onOpenInsight={(i) => setInsightView(i)}
+      />
+
+      <InsightDetailDialog
+        insight={insightView}
+        tenantId={detail?.tenant_id ?? null}
+        onClose={() => setInsightView(null)}
       />
     </div>
   );
@@ -534,6 +542,7 @@ function DecisionDetailDialog({
   onClose,
   onApprove,
   onReject,
+  onOpenInsight,
 }: {
   decision: Decision | null;
   insight: InsightRow | null;
@@ -543,6 +552,7 @@ function DecisionDetailDialog({
   onClose: () => void;
   onApprove: () => Promise<void>;
   onReject: () => Promise<void>;
+  onOpenInsight: (i: InsightRow) => void;
 }) {
   const [busy, setBusy] = useState(false);
   if (!decision) return null;
@@ -751,21 +761,226 @@ function DecisionDetailDialog({
           </div>
         </ScrollArea>
 
-        {decision.status === "pending" && (
-          <div className="flex justify-end gap-2 border-t pt-4">
+        <div className="flex flex-wrap justify-end gap-2 border-t pt-4">
+          {insight && (
             <Button
-              variant="destructive"
+              variant="outline"
               size="sm"
-              disabled={busy}
-              onClick={() => void wrap(onReject)}
+              onClick={() => onOpenInsight(insight)}
             >
-              <X className="mr-1 h-4 w-4" /> Відхилити
+              <Sparkles className="mr-1 h-4 w-4" /> Переглянути insight
             </Button>
-            <Button size="sm" disabled={busy} onClick={() => void wrap(onApprove)}>
-              <Check className="mr-1 h-4 w-4" /> Схвалити
-            </Button>
+          )}
+          {decision.status === "pending" && (
+            <>
+              <Button
+                variant="destructive"
+                size="sm"
+                disabled={busy}
+                onClick={() => void wrap(onReject)}
+              >
+                <X className="mr-1 h-4 w-4" /> Відхилити
+              </Button>
+              <Button size="sm" disabled={busy} onClick={() => void wrap(onApprove)}>
+                <Check className="mr-1 h-4 w-4" /> Схвалити
+              </Button>
+            </>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ---------- Insight detail dialog ---------- */
+
+function InsightDetailDialog({
+  insight,
+  tenantId,
+  onClose,
+}: {
+  insight: InsightRow | null;
+  tenantId: string | null;
+  onClose: () => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [decisions, setDecisions] = useState<Decision[]>([]);
+  const [outcomes, setOutcomes] = useState<OutcomeRow[]>([]);
+
+  useEffect(() => {
+    if (!insight || !tenantId) return;
+    setLoading(true);
+    void (async () => {
+      const { data: decs } = await supabase
+        .from("decision_queue")
+        .select(
+          "id, tenant_id, insight_id, agent_id, action_type, title, rationale, payload, expected_impact, confidence, status, requires_approval, approved_by_auto, executed_at, executor_action_id, created_at",
+        )
+        .eq("insight_id", insight.id)
+        .order("created_at", { ascending: false });
+      const decList = (decs ?? []) as Decision[];
+      setDecisions(decList);
+
+      const decIds = decList.map((d) => d.id);
+      if (decIds.length > 0) {
+        const { data: outs } = await supabase
+          .from("action_outcomes")
+          .select(
+            "id, action_type, baseline, actual, delta, attributed_revenue_cents, success, measurement_window, measured_at, notes",
+          )
+          .in("decision_id", decIds)
+          .order("measured_at", { ascending: false });
+        setOutcomes((outs ?? []) as OutcomeRow[]);
+      } else {
+        setOutcomes([]);
+      }
+      setLoading(false);
+    })();
+  }, [insight, tenantId]);
+
+  if (!insight) return null;
+
+  return (
+    <Dialog open={!!insight} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="pr-6 flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            {insight.title}
+          </DialogTitle>
+          <DialogDescription className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline">{insight.insight_type}</Badge>
+            {insight.risk_level && (
+              <Badge
+                variant={
+                  insight.risk_level === "high"
+                    ? "destructive"
+                    : insight.risk_level === "medium"
+                      ? "default"
+                      : "secondary"
+                }
+              >
+                risk: {insight.risk_level}
+              </Badge>
+            )}
+            <Badge variant="secondary">{insight.status}</Badge>
+            <span>· {fmtDate(insight.created_at)}</span>
+          </DialogDescription>
+        </DialogHeader>
+
+        <ScrollArea className="max-h-[65vh] pr-3">
+          <div className="space-y-5">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <Stat
+                label="Confidence"
+                value={
+                  insight.confidence != null
+                    ? `${Math.round(Number(insight.confidence) * 100)}%`
+                    : "—"
+                }
+              />
+              <Stat label="Type" value={insight.insight_type} />
+              <Stat label="Risk" value={insight.risk_level ?? "—"} />
+              <Stat label="Decisions" value={String(decisions.length)} />
+            </div>
+
+            {insight.description && (
+              <Section title="Опис">
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                  {insight.description}
+                </p>
+              </Section>
+            )}
+
+            {insight.expected_impact && (
+              <Section title="Очікуваний ефект">
+                <p className="text-sm">{insight.expected_impact}</p>
+              </Section>
+            )}
+
+            <Section title="Метрики (full payload)">
+              <JsonBlock value={insight.metrics} />
+            </Section>
+
+            <Section title={`Породжені decisions (${decisions.length})`}>
+              {loading ? (
+                <Skeleton className="h-16 w-full" />
+              ) : decisions.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic">
+                  Жодного decision на основі цього insight.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {decisions.map((d) => (
+                    <div key={d.id} className="rounded-md border p-2 text-xs">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="outline">
+                          {ACTION_TYPE_LABELS[d.action_type] ?? d.action_type}
+                        </Badge>
+                        <Badge variant="secondary">{d.status}</Badge>
+                        {d.approved_by_auto && (
+                          <Badge variant="default">auto</Badge>
+                        )}
+                        <span className="text-muted-foreground">
+                          {fmtDate(d.created_at)}
+                        </span>
+                      </div>
+                      {d.title && <p className="mt-1 text-sm">{d.title}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Section>
+
+            <Section title={`Пов'язані outcomes (${outcomes.length})`}>
+              {loading ? (
+                <Skeleton className="h-16 w-full" />
+              ) : outcomes.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic">
+                  Outcomes ще не виміряні.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {outcomes.map((o) => (
+                    <div key={o.id} className="rounded-md border p-2 text-xs">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge
+                          variant={
+                            o.success === true
+                              ? "default"
+                              : o.success === false
+                                ? "destructive"
+                                : "secondary"
+                          }
+                        >
+                          {o.success === true
+                            ? "win"
+                            : o.success === false
+                              ? "loss"
+                              : "neutral"}
+                        </Badge>
+                        {o.measurement_window && (
+                          <Badge variant="outline">{o.measurement_window}</Badge>
+                        )}
+                        <span className="text-muted-foreground">
+                          {fmtDate(o.measured_at)}
+                        </span>
+                        <span>· {fmtMoney(o.attributed_revenue_cents)}</span>
+                      </div>
+                      {o.notes && (
+                        <p className="mt-1 text-muted-foreground">{o.notes}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Section>
+
+            <div className="text-xs text-muted-foreground">
+              ID: <code>{insight.id}</code>
+            </div>
           </div>
-        )}
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
