@@ -83,7 +83,7 @@ export function ProductEconomicsPanel({ tenantId, productId, priceCents, currenc
       const { error } = await supabase
         .from("product_economics")
         .upsert(
-          {
+          [{
             tenant_id: tenantId,
             product_id: productId,
             cogs_cents: cogsCents,
