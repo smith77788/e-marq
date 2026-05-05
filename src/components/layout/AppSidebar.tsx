@@ -244,6 +244,12 @@ const ADMIN_AGENTS: NavGroup = {
     { labelKey: "sb.liveRuns", to: "/agents/live", icon: Activity, tone: "text-success" },
     { labelKey: "sb.agentLibrary", to: "/agents/library", icon: Cpu, tone: "text-accent" },
     {
+      labelKey: "sb.adminAgents" as TKey,
+      to: "/admin/agents",
+      icon: Bot,
+      tone: "text-warning",
+    },
+    {
       labelKey: "sb.insightStream",
       to: "/admin/overview",
       hash: "stream",

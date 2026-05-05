@@ -35,12 +35,29 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { CopyButton } from "@/components/admin/CopyButton";
+import { AutoApprovalHeatmap } from "@/components/admin/AutoApprovalHeatmap";
 import { Sparkline } from "@/components/detail/Sparkline";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Check, X, RefreshCw, Filter, Eye, Sparkles, Download, ArrowUpRight } from "lucide-react";
+import {
+  Check,
+  X,
+  RefreshCw,
+  Filter,
+  Eye,
+  Sparkles,
+  Download,
+  ArrowUpRight,
+  ChevronDown,
+  Grid3x3,
+} from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/decisions")({
   head: () => ({
@@ -495,6 +512,32 @@ function AdminDecisionsPage() {
         </CardContent>
       </Card>
 
+      {decisions && decisions.length > 0 && (
+        <Collapsible>
+          <Card>
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer pb-3 hover:bg-muted/30">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Grid3x3 className="h-4 w-4" /> Auto-approval heatmap
+                  <ChevronDown className="ml-auto h-4 w-4 transition-transform data-[state=open]:rotate-180" />
+                </CardTitle>
+                <CardDescription>
+                  action_type × tenant. Зелений = переважно auto-approved, сірий = manual-only.
+                </CardDescription>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent>
+                <AutoApprovalHeatmap
+                  decisions={decisions}
+                  tenantNameById={tenantNameById}
+                />
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+      )}
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
           <div>
@@ -842,6 +885,22 @@ function DecisionDetailDialog({
             >
               <JsonBlock value={decision.payload} />
             </Section>
+
+            {/* Semantic key (dedup hash) */}
+            {(() => {
+              const sk = (decision.payload as { semantic_key?: unknown } | null)?.semantic_key;
+              if (typeof sk !== "string" || !sk) return null;
+              return (
+                <Section
+                  title="Semantic key (dedup)"
+                  action={<CopyButton value={sk} label="Key" />}
+                >
+                  <code className="block break-all rounded bg-muted/40 p-2 font-mono text-xs">
+                    {sk}
+                  </code>
+                </Section>
+              );
+            })()}
 
             {/* Linked insight */}
             <Section title="Пов'язаний insight">
