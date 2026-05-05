@@ -201,8 +201,26 @@ function AdminDecisionsPage() {
       toast.error("Не вдалося завантажити: " + error.message);
       return;
     }
-    setDecisions((data ?? []) as Decision[]);
+    const list = (data ?? []) as Decision[];
+    setDecisions(list);
     setSelected(new Set());
+
+    const insightIds = Array.from(
+      new Set(list.map((d) => d.insight_id).filter((x): x is string => !!x)),
+    );
+    if (insightIds.length > 0) {
+      const { data: ins } = await supabase
+        .from("ai_insights")
+        .select("id, risk_level")
+        .in("id", insightIds);
+      const m = new Map<string, string>();
+      for (const r of (ins ?? []) as Array<{ id: string; risk_level: string | null }>) {
+        if (r.risk_level) m.set(r.id, r.risk_level);
+      }
+      setRiskByInsight(m);
+    } else {
+      setRiskByInsight(new Map());
+    }
   }, [tenantFilter, typesFilter]);
 
   useEffect(() => {
