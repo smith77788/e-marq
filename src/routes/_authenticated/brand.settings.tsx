@@ -250,6 +250,9 @@ function StoreSettingsPage() {
             <TabsTrigger value="bot" className="gap-1.5">
               <Bot className="h-3.5 w-3.5" /> Бот-консультант
             </TabsTrigger>
+            <TabsTrigger value="marketing" className="gap-1.5">
+              <TrendingUp className="h-3.5 w-3.5" /> Маркетинг
+            </TabsTrigger>
             <TabsTrigger value="domain" className="gap-1.5">
               <LinkIcon className="h-3.5 w-3.5" /> Домен
             </TabsTrigger>
