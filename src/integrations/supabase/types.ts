@@ -7157,7 +7157,17 @@ export type Database = {
         Args: { _email: string; _role?: string; _tenant_id: string }
         Returns: Json
       }
-      daily_pilot_simulator: { Args: never; Returns: Json }
+      daily_pilot_simulator: {
+        Args: never
+        Returns: {
+          baseline_revenue_cents: number
+          items_created: number
+          lift_revenue_cents: number
+          orders_created: number
+          revenue_cents: number
+          tenant_id: string
+        }[]
+      }
       demo_measure_recent_outcomes: {
         Args: never
         Returns: {
@@ -7622,6 +7632,18 @@ export type Database = {
         Args: { _tenant_id: string }
         Returns: {
           decisions_lifted: number
+          orders_created: number
+          revenue_cents: number
+        }[]
+      }
+      simulate_pilot_bundle_orders: {
+        Args: {
+          _days_back?: number
+          _orders_per_day?: number
+          _tenant_id: string
+        }
+        Returns: {
+          items_created: number
           orders_created: number
           revenue_cents: number
         }[]
