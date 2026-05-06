@@ -7476,6 +7476,7 @@ export type Database = {
         }[]
       }
       detect_cac_signals: { Args: never; Returns: number }
+      detect_cohort_retention_drops: { Args: never; Returns: number }
       detect_funnel_anomalies: { Args: never; Returns: Json }
       detect_high_ltv_at_risk: { Args: never; Returns: number }
       detect_ltv_signals: { Args: never; Returns: Json }
