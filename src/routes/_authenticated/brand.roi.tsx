@@ -45,6 +45,7 @@ function ROIPage() {
       </Card>
       <ROIDashboard tenantId={currentTenantId} />
       <CacPaybackTable tenantId={currentTenantId} />
+      <BudgetRecommendationsTable tenantId={currentTenantId} />
     </div>
   );
 }
