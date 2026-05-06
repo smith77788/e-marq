@@ -7,7 +7,7 @@ import { sendTelegramText } from "@/lib/acos/channels";
 import { handleOwnerCommand, sendOwnerMessage } from "@/lib/telegram/ownerMenu";
 
 export const TG_GATEWAY = "https://connector-gateway.lovable.dev/telegram";
-export const MAX_RUNTIME_MS = 55_000;
+export const MAX_RUNTIME_MS = 25_000;
 export const MIN_REMAINING_MS = 5_000;
 
 const YES_PATTERNS =
