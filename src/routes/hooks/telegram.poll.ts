@@ -61,7 +61,7 @@ export const Route = createFileRoute("/hooks/telegram/poll")({
         while (true) {
           const remaining = MAX_RUNTIME_MS - (Date.now() - start);
           if (remaining < MIN_REMAINING_MS) break;
-          const timeout = Math.min(50, Math.max(1, Math.floor(remaining / 1000) - 5));
+          const timeout = Math.min(20, Math.max(1, Math.floor(remaining / 1000) - 5));
 
           const res = await fetch(`${TG_GATEWAY}/getUpdates`, {
             method: "POST",
