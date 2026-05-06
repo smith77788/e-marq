@@ -1,67 +1,60 @@
-## Наступний крок: Auto-Resume Policy + Marketing Spend UI
+## Наступний крок: Auto-scaling Budget Recommender (SQL Agent #22)
 
-Беру №1 і №2 з top-3 минулого кроку — вони доповнюють CAC Payback Agent (закривають його loop) і знімають останнє тертя auto-pause системи.
-
----
-
-### 1. Auto-Resume Policy (SQL Agent #18)
-
-**Проблема:** `auto_pause_policies_on_quality_drop()` (#17) виключає policy коли win-rate падає, але **немає зворотного шляху**. Owner мусить вручну re-enable, що ламає autonomous-loop.
-
-**Рішення — `auto_resume_policies_on_recovery()`:**
-- Daily 06:45 UTC (одразу після #17 о 06:30).
-- Сканує `auto_approval_policy WHERE enabled=false AND notes LIKE '%auto-paused%'`.
-- Для кожної paused policy перевіряє останні 14 днів `action_outcomes` для (tenant, action_type):
-  - n ≥ 5 done outcomes
-  - win-rate ≥ 50% (vs threshold 30% у #17)
-  - середній attributed_revenue_cents > 0
-- Якщо так → `UPDATE auto_approval_policy SET enabled=true`, додає note `auto-resumed YYYY-MM-DD: win=X% n=Y`.
-- Шле owner_notification (kind='auto_resumed_policy', severity=info, channel=telegram).
-- Dedup: ту ж policy не resume'ить повторно у 7-day window.
-
-**Чому це безпечно:** quality_monitor (#16) і causal-disable (Welch t-test) лишаються активними. Якщо resume був передчасний, ці агенти знову paused його за 1-2 тижні.
+Беру №2 з минулого top-3 — він природно сідає поверх CAC Payback (#20) + LTV Forecaster (#19), які вже працюють. Без нього CAC-сигнали залишаються "passive read-only heatmap".
 
 ---
 
-### 2. Marketing Spend UI (`/brand/settings` → tab "Marketing")
+### Проблема
 
-CAC Payback Agent має таблицю `acquisition_costs`, але owner ніяк її не заповнює. Без даних — порожня heatmap у `/brand/roi`.
+CAC Payback Agent уже знає:
+- `cac_winner_channel` (швидкий payback, < 30 днів)
+- `cac_payback_slow` (> 90 днів, токсичні канали)
 
-**`MarketingSpendForm.tsx`:**
-- Таблиця: рядок per (period_month, channel) з inline-edit полями `spend_cents` (UAH input), `new_customers`.
-- Auto-suggest channels з `customer_cohorts.acquisition_channel` distinct values + manual input.
-- Header: dropdown month picker (last 12 months), default = current month.
-- "Add row" → новий empty row, зберігає на blur.
-- "Imported from Meta Ads / Google Ads" — placeholder, поки manual.
-- RPC `upsert_acquisition_cost(tenant_id, period_month, channel, spend_cents, new_customers)` — UPSERT по (tenant_id, period_month, channel).
+LTV Forecaster знає predicted 12m LTV. Але **жодна дія не пропонується** — owner мусить сам інтерпретувати heatmap у `/brand/roi`.
 
-**Інтеграція в settings:**
-- `brand.settings.tsx` має tabs structure → додати tab "Marketing".
+### Рішення — `compute_budget_recommendations()` + `detect_budget_signals()`
 
----
+**Pure-SQL, daily 05:15 UTC** (після CAC compute о 04:35 і LTV detect о 04:00):
+
+1. **`budget_recommendations` таблиця** (UPSERT key: `tenant_id, period_month, channel`):
+   - `current_spend_cents`, `recommended_spend_cents`, `delta_pct`, `rationale jsonb`, `confidence text`, `created_at`.
+
+2. **`compute_budget_recommendations(p_tenant_id)`** для кожного активного `(tenant, channel)` за останні 60 днів:
+   - Score = `(predicted_ltv_12m / cac) × (1 / max(payback_months, 0.5))`.
+   - Channels ranked. Recommend:
+     - score ≥ 3.0 і payback ≤ 45d → **scale +25%** (cap +50% від current).
+     - score ≤ 1.0 або payback > 120d → **cut −30%**.
+     - 1.0–3.0 → hold.
+   - Confidence: `high` якщо n_orders ≥ 30, `medium` 10–29, `low` < 10 (тоді тільки рекомендуємо hold).
+
+3. **`detect_budget_signals()`** emit insights:
+   - `budget_scale_winner` (medium severity, action `owner_review` — manual за дизайном, бо це гроші) — для каналів з recommend +25%.
+   - `budget_cut_loser` (high severity, action `owner_review`) — для каналів з recommend −30% при spend ≥ 5k UAH/міс.
+   - Dedup per `(tenant, channel, current ISO week)` через semantic key.
+
+### UI — `/brand/roi` нова секція "Budget Recommendations"
+
+Компонент `BudgetRecommendationsTable.tsx`:
+- Колонки: Channel · Current spend · Recommended · Δ% (badge зелений/червоний) · Predicted LTV · Payback · Rationale tooltip · Confidence.
+- Sort by absolute delta_cents desc.
+- Без mutation buttons — рекомендації приземляються в Decision Inbox через `owner_review`, owner approves там.
+
+### Memory
+
+- `mem://features/budget-recommender.md` — формула, schedule, dedup window, manual-by-design.
+- Update `mem://index.md` (новий запис під CAC/LTV).
 
 ### Технічні деталі
 
-**Migrations (2):**
-1. `auto_resume_policies_on_recovery()` SECURITY DEFINER функція + cron `auto-resume-policy-daily` (45 6 * * *) з CRON_SECRET.
-2. RPC `upsert_acquisition_cost()` SECURITY DEFINER (tenant_admin only check).
+**Migration 1:** `budget_recommendations` table + RLS (tenant own + super_admin).
+**Migration 2:** `compute_budget_recommendations()` + `detect_budget_signals()` SECURITY DEFINER + cron `budget-recommender-daily` `15 5 * * *` (pure-SQL виклик через `cron.schedule` з `SELECT compute_budget_recommendations(t.tenant_id) FROM tenants t WHERE status IN ('active','pending')`).
+**Frontend:** `src/components/owner/BudgetRecommendationsTable.tsx`, hook у `brand.roi.tsx` під CAC heatmap.
 
-**Frontend:**
-- `src/components/owner/MarketingSpendForm.tsx` — таблиця з editable cells.
-- `src/routes/_authenticated/brand.settings.tsx` — додати tab.
+### Чому це безпечно
 
-**Memory:**
-- `mem://features/auto-resume-policy.md`
-- Update `mem://features/cac-payback-agent.md` (link на UI) і `mem://index.md`.
+- Action type — `owner_review` (manual-by-design), НЕ потрапляє до executor whitelist. Гроші ніколи не списуються автоматично.
+- Low-confidence (< 10 orders/channel) → завжди hold, ніяких сигналів.
+- Cut-сигнал тільки при spend ≥ 5k UAH/міс — щоб не спамити малими каналами.
+- Skip pilot tenants у `detect_budget_signals` (synthetic дані ввели б в оману).
 
----
-
-### Чому ці два разом
-
-Обидва закривають loops з минулого кроку:
-- Auto-resume → завершує quality-drop pause cycle (decision system fully autonomous).
-- Marketing UI → активує CAC Payback Agent даними.
-
-~25 хв роботи, обидва — pure-SQL + tiny UI, не блокують одне одного.
-
-Кажи "ок" — починаю.
+~30 хв роботи. Кажи "ок" — починаю.
