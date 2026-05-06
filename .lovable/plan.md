@@ -1,60 +1,40 @@
-## Наступний крок: Auto-scaling Budget Recommender (SQL Agent #22)
+## Швидкий фікс затримок Telegram-бота (Варіант A)
 
-Беру №2 з минулого top-3 — він природно сідає поверх CAC Payback (#20) + LTV Forecaster (#19), які вже працюють. Без нього CAC-сигнали залишаються "passive read-only heatmap".
+Робимо мінімальну зміну: бот опитує Telegram **щохвилини** замість раз на 2 хв, і не "висить" даремно після того, як cron уже відрубав з'єднання.
 
----
+### Що міняємо
 
-### Проблема
+**1. Cron job** — `marq-telegram-poll-2min` → `marq-telegram-poll-1min`
+- Розклад: `* * * * *` (щохвилини)
+- `timeout_milliseconds := 35000` (давати pg_net 35с замість дефолтних 30с)
+- Auth: `Bearer CRON_SECRET` (як усі інші cron jobs)
 
-CAC Payback Agent уже знає:
-- `cac_winner_channel` (швидкий payback, < 30 днів)
-- `cac_payback_slow` (> 90 днів, токсичні канали)
+**2. `src/lib/telegram/pollHelpers.ts`**
+- `MAX_RUNTIME_MS = 25_000` (було 55_000) — щоб route завершувався ДО того, як pg_net вб'є з'єднання
+- `MIN_REMAINING_MS = 5_000` (без змін)
 
-LTV Forecaster знає predicted 12m LTV. Але **жодна дія не пропонується** — owner мусить сам інтерпретувати heatmap у `/brand/roi`.
+**3. `src/routes/hooks/telegram.poll.ts`**
+- `getUpdates timeout` обмежити до 20с: `Math.min(20, ...)` замість `Math.min(50, ...)`
+- Це дозволяє циклу робити 1 виклик за прохід і коректно завершуватись у вікно 25с
 
-### Рішення — `compute_budget_recommendations()` + `detect_budget_signals()`
+**4. Memory** — оновити `mem://index.md` (рядок про polling) + створити `mem://features/telegram-polling.md`
 
-**Pure-SQL, daily 05:15 UTC** (після CAC compute о 04:35 і LTV detect о 04:00):
+### Чому це допоможе
 
-1. **`budget_recommendations` таблиця** (UPSERT key: `tenant_id, period_month, channel`):
-   - `current_spend_cents`, `recommended_spend_cents`, `delta_pct`, `rationale jsonb`, `confidence text`, `created_at`.
+```text
+БУЛО:                              СТАЛО:
+cron 2 хв ──┐                       cron 1 хв ──┐
+            ▼ (30с timeout)                     ▼ (35с timeout)
+route 55с ──X (kill on 30с)         route 25с ──✓ (finishes cleanly)
+            └── 25с роботи          └── update_offset persisted
+                втрачається             правильно
+1 поллінг / 2 хв = max 2 хв lag    1 поллінг / 1 хв = max 1 хв lag
+```
 
-2. **`compute_budget_recommendations(p_tenant_id)`** для кожного активного `(tenant, channel)` за останні 60 днів:
-   - Score = `(predicted_ltv_12m / cac) × (1 / max(payback_months, 0.5))`.
-   - Channels ranked. Recommend:
-     - score ≥ 3.0 і payback ≤ 45d → **scale +25%** (cap +50% від current).
-     - score ≤ 1.0 або payback > 120d → **cut −30%**.
-     - 1.0–3.0 → hold.
-   - Confidence: `high` якщо n_orders ≥ 30, `medium` 10–29, `low` < 10 (тоді тільки рекомендуємо hold).
+Реальна затримка відповіді бота впаде з 1-2 хв до 0-60с.
 
-3. **`detect_budget_signals()`** emit insights:
-   - `budget_scale_winner` (medium severity, action `owner_review` — manual за дизайном, бо це гроші) — для каналів з recommend +25%.
-   - `budget_cut_loser` (high severity, action `owner_review`) — для каналів з recommend −30% при spend ≥ 5k UAH/міс.
-   - Dedup per `(tenant, channel, current ISO week)` через semantic key.
+### Що НЕ робимо у цьому варіанті
 
-### UI — `/brand/roi` нова секція "Budget Recommendations"
+- Webhook-режим (Варіант B) — потребує більшого рефакторингу: новий публічний endpoint, видалення `deleteWebhook` у polling-циклі, тестування через connector gateway. Лишаємо на потім, якщо 1 хв все ще буде замало.
 
-Компонент `BudgetRecommendationsTable.tsx`:
-- Колонки: Channel · Current spend · Recommended · Δ% (badge зелений/червоний) · Predicted LTV · Payback · Rationale tooltip · Confidence.
-- Sort by absolute delta_cents desc.
-- Без mutation buttons — рекомендації приземляються в Decision Inbox через `owner_review`, owner approves там.
-
-### Memory
-
-- `mem://features/budget-recommender.md` — формула, schedule, dedup window, manual-by-design.
-- Update `mem://index.md` (новий запис під CAC/LTV).
-
-### Технічні деталі
-
-**Migration 1:** `budget_recommendations` table + RLS (tenant own + super_admin).
-**Migration 2:** `compute_budget_recommendations()` + `detect_budget_signals()` SECURITY DEFINER + cron `budget-recommender-daily` `15 5 * * *` (pure-SQL виклик через `cron.schedule` з `SELECT compute_budget_recommendations(t.tenant_id) FROM tenants t WHERE status IN ('active','pending')`).
-**Frontend:** `src/components/owner/BudgetRecommendationsTable.tsx`, hook у `brand.roi.tsx` під CAC heatmap.
-
-### Чому це безпечно
-
-- Action type — `owner_review` (manual-by-design), НЕ потрапляє до executor whitelist. Гроші ніколи не списуються автоматично.
-- Low-confidence (< 10 orders/channel) → завжди hold, ніяких сигналів.
-- Cut-сигнал тільки при spend ≥ 5k UAH/міс — щоб не спамити малими каналами.
-- Skip pilot tenants у `detect_budget_signals` (synthetic дані ввели б в оману).
-
-~30 хв роботи. Кажи "ок" — починаю.
+Скажи "ок" — застосую.
