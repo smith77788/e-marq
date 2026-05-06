@@ -55,3 +55,4 @@ v1.0 Roadmap: Phase 1-7 (DONE) → Phase 8 Pilot simulator with real lift (DONE)
 - [Notification digest dedup](mem://features/notification-digest) — notify_owner_telegram() батчить notifications того ж kind у 60min-вікні (batched_count + last 3 titles)
 - [Auto-Resume Policy](mem://features/auto-resume-policy) — SQL agent #18, daily 06:45, re-enable auto-paused policy коли 14d win-rate≥50%, n≥5, avg attributed_revenue>0; 7d dedup; закриває loop після #17
 - [LTV Forecasting Agent](mem://features/ltv-forecasting-agent) — SQL agent #19, daily 03:45 compute + 04:00 detect; multiplier-based 12m LTV від m30; emits ltv_below_cac_floor (vs CAC×1.2) + ltv_breakout_cohort (≥1.5× медіани попередніх 6)
+- [Budget Recommender](mem://features/budget-recommender) — SQL agent #22, daily 05:15, LTV/CAC × payback score per channel, scale +25% / cut −30% сигнали як owner_review (manual-by-design); UI у /brand/roi

@@ -8,6 +8,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { ROIDashboard } from "@/components/owner/ROIDashboard";
 import { CacPaybackTable } from "@/components/owner/CacPaybackTable";
+import { BudgetRecommendationsTable } from "@/components/owner/BudgetRecommendationsTable";
 
 type Search = { tenant?: string };
 
@@ -44,6 +45,7 @@ function ROIPage() {
       </Card>
       <ROIDashboard tenantId={currentTenantId} />
       <CacPaybackTable tenantId={currentTenantId} />
+      <BudgetRecommendationsTable tenantId={currentTenantId} />
     </div>
   );
 }

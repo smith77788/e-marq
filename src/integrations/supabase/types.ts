@@ -892,6 +892,81 @@ export type Database = {
           },
         ]
       }
+      budget_recommendations: {
+        Row: {
+          cac_cents: number
+          channel: string
+          computed_at: string
+          confidence: string
+          created_at: string
+          current_spend_cents: number
+          delta_pct: number
+          id: string
+          n_orders: number
+          payback_months: number | null
+          period_month: string
+          predicted_ltv_cents: number
+          rationale: Json
+          recommendation: string
+          recommended_spend_cents: number
+          score: number
+          tenant_id: string
+        }
+        Insert: {
+          cac_cents?: number
+          channel: string
+          computed_at?: string
+          confidence?: string
+          created_at?: string
+          current_spend_cents?: number
+          delta_pct?: number
+          id?: string
+          n_orders?: number
+          payback_months?: number | null
+          period_month: string
+          predicted_ltv_cents?: number
+          rationale?: Json
+          recommendation?: string
+          recommended_spend_cents?: number
+          score?: number
+          tenant_id: string
+        }
+        Update: {
+          cac_cents?: number
+          channel?: string
+          computed_at?: string
+          confidence?: string
+          created_at?: string
+          current_spend_cents?: number
+          delta_pct?: number
+          id?: string
+          n_orders?: number
+          payback_months?: number | null
+          period_month?: string
+          predicted_ltv_cents?: number
+          rationale?: Json
+          recommendation?: string
+          recommended_spend_cents?: number
+          score?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_recommendations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "budget_recommendations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bundle_suggestions: {
         Row: {
           avg_combined_revenue_cents: number
@@ -7277,6 +7352,10 @@ export type Database = {
           rows_upserted: number
         }[]
       }
+      compute_budget_recommendations: {
+        Args: { p_tenant_id: string }
+        Returns: number
+      }
       compute_bundle_suggestions: {
         Args: {
           _min_co_orders?: number
@@ -7389,6 +7468,7 @@ export type Database = {
         }[]
       }
       detect_action_quality_drops: { Args: never; Returns: number }
+      detect_budget_signals: { Args: never; Returns: number }
       detect_bundle_signals: {
         Args: { _top_n?: number }
         Returns: {
