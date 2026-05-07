@@ -205,17 +205,34 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
   const saveConn = useMutation({
     mutationFn: async () => {
       if (!integration) throw new Error("integration missing");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Сесія не знайдена. Увійдіть ще раз і повторіть дію.");
       const config: Record<string, unknown> = {};
       if (domain) config.domain = domain;
       if (restUrl) config.url = restUrl;
       const webhookSecret = isWebhook ? crypto.randomUUID().replace(/-/g, "") : null;
+      const verification =
+        isApiKey || isRest
+          ? {
+              status: verifyResult?.ok ? "verified" : verifyResult ? "failed" : "not_checked",
+              checked_at: verifyResult ? new Date().toISOString() : null,
+              message: verifyResult?.message ?? null,
+            }
+          : null;
 
       const payload: IntegrationInsert = {
         tenant_id: tenantId,
         provider: integration.id,
         is_active: true,
         credentials_encrypted: apiKey || null,
-        config: config as IntegrationInsert["config"],
+        config: {
+          ...config,
+          ...(verification ? { verification } : {}),
+        } as IntegrationInsert["config"],
+        last_sync_status: verification?.status === "verified" ? "verified" : "saved_unverified",
+        last_sync_error: verification?.status === "failed" ? verification.message : null,
         webhook_secret: webhookSecret,
       };
 
@@ -255,6 +272,10 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
     const providerId = integration.id;
     setImporting(true);
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Сесія не знайдена. Увійдіть ще раз і повторіть імпорт.");
       const res = await runImport({
         tenantId,
         sourceProvider: providerId,
@@ -262,6 +283,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
         entityKind,
         rows: parsedFile.rows,
         mapping,
+        userId: user.id,
       });
       setResult(res);
       setStep(3);
@@ -294,11 +316,8 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
       integration.id === "poster_pos" ||
       integration.id === "woocommerce");
   const canVerifyConn = credsFilled && (!domainRequired || domain.trim().length > 0);
-  // Для apiKey/rest вимагаємо успішну перевірку перед збереженням,
-  // щоб не записувати в БД свідомо зламані ключі.
-  const requiresVerify = isApiKey || isRest;
   const verified = verifyResult?.ok === true;
-  const canSaveConn = isWebhook || (credsFilled && (!requiresVerify || verified));
+  const canSaveConn = isWebhook || credsFilled;
 
   return (
     <Dialog open={!!integration} onOpenChange={(o) => !o && (onClose(), reset())}>
@@ -446,9 +465,9 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                       }}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Ключ зберігається у захищеному вигляді. Спочатку натисніть{" "}
-                      <strong>«Перевірити»</strong> — після успішної перевірки зʼявиться кнопка
-                      «Створити підключення».
+                      Ключ зберігається у захищеному вигляді. Перевірка рекомендована, але якщо
+                      зовнішній сервіс тимчасово недоступний — підключення можна зберегти й
+                      запустити перший синк пізніше.
                     </p>
                   </div>
                 </div>
@@ -717,6 +736,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                 disabled={!canSaveConn || saveConn.isPending}
                 onClick={() => saveConn.mutate()}
                 className="gap-1"
+                title={verified ? "Перевірено — можна зберігати" : "Зберегти підключення навіть без успішної перевірки"}
               >
                 {saveConn.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
