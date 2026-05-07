@@ -30,6 +30,7 @@ import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 import { IntegrationGuide } from "@/components/owner/IntegrationGuide";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTenantContext } from "@/hooks/useTenantContext";
 import { useT, type TKey, type Lang } from "@/lib/i18n";
 
 type Search = { tenant?: string; slug?: string };
@@ -1160,6 +1161,7 @@ function CreateFirstTenant({
   navigate: ReturnType<typeof useNavigate>;
 }) {
   const { user } = useAuth();
+  const { setCurrentTenantId } = useTenantContext();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [touched, setTouched] = useState(false);
@@ -1197,6 +1199,7 @@ function CreateFirstTenant({
     },
     onSuccess: (data) => {
       toast.success(lang === "ua" ? "Бізнес створено ✓" : "Business created ✓");
+      setCurrentTenantId(data.id);
       try {
         window.localStorage.setItem("marq.activeTenantId", data.id);
       } catch {
