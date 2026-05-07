@@ -288,6 +288,12 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
 
   const credsFilled =
     (isApiKey && apiKey.trim().length > 0) || (isRest && restUrl.trim().length > 0);
+  const domainRequired =
+    isApiKey &&
+    (integration.id === "shopify" ||
+      integration.id === "poster_pos" ||
+      integration.id === "woocommerce");
+  const canVerifyConn = credsFilled && (!domainRequired || domain.trim().length > 0);
   // Для apiKey/rest вимагаємо успішну перевірку перед збереженням,
   // щоб не записувати в БД свідомо зламані ключі.
   const requiresVerify = isApiKey || isRest;
@@ -693,7 +699,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
             {step === 1 && (isApiKey || isRest) && (
               <Button
                 variant="outline"
-                disabled={!canSaveConn || verifying}
+                disabled={!canVerifyConn || verifying}
                 onClick={verifyCredentials}
                 className="gap-1"
                 title="Зробити пробний виклик до зовнішнього API без збереження"
