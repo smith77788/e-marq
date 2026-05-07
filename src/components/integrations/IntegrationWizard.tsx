@@ -209,13 +209,26 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
       if (domain) config.domain = domain;
       if (restUrl) config.url = restUrl;
       const webhookSecret = isWebhook ? crypto.randomUUID().replace(/-/g, "") : null;
+      const verification =
+        isApiKey || isRest
+          ? {
+              status: verifyResult?.ok ? "verified" : verifyResult ? "failed" : "not_checked",
+              checked_at: verifyResult ? new Date().toISOString() : null,
+              message: verifyResult?.message ?? null,
+            }
+          : null;
 
       const payload: IntegrationInsert = {
         tenant_id: tenantId,
         provider: integration.id,
         is_active: true,
         credentials_encrypted: apiKey || null,
-        config: config as IntegrationInsert["config"],
+        config: {
+          ...config,
+          ...(verification ? { verification } : {}),
+        } as IntegrationInsert["config"],
+        last_sync_status: verification?.status === "verified" ? "verified" : "saved_unverified",
+        last_sync_error: verification?.status === "failed" ? verification.message : null,
         webhook_secret: webhookSecret,
       };
 
@@ -294,11 +307,8 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
       integration.id === "poster_pos" ||
       integration.id === "woocommerce");
   const canVerifyConn = credsFilled && (!domainRequired || domain.trim().length > 0);
-  // Для apiKey/rest вимагаємо успішну перевірку перед збереженням,
-  // щоб не записувати в БД свідомо зламані ключі.
-  const requiresVerify = isApiKey || isRest;
   const verified = verifyResult?.ok === true;
-  const canSaveConn = isWebhook || (credsFilled && (!requiresVerify || verified));
+  const canSaveConn = isWebhook || credsFilled;
 
   return (
     <Dialog open={!!integration} onOpenChange={(o) => !o && (onClose(), reset())}>
