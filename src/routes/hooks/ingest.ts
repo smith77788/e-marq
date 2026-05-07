@@ -506,6 +506,18 @@ export const Route = createFileRoute("/hooks/ingest")({
         });
         if (evtErr) {
           console.error("[ingest] event insert failed", evtErr);
+          await logIngestError({
+            tenant_id: tenantId,
+            tenant_slug_attempted: body.tenant_slug ?? null,
+            status_code: 500,
+            error_code: "event_insert_failed",
+            error_message: evtErr.message,
+            request_body: body,
+            request_ip: meta.ip,
+            user_agent: meta.ua,
+            origin: meta.origin,
+            event_type_attempted: (body.type ?? null) as string | null,
+          });
           return jsonError("Failed to log event", 500, { details: evtErr.message });
         }
 
