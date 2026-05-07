@@ -393,6 +393,13 @@ function OnboardingPage() {
 
 type QC = ReturnType<typeof useQueryClient>;
 
+function generateTelegramPairingCode(): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
+}
+
 function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
   const { t } = useT();
   const { data: tenant } = useQuery({
