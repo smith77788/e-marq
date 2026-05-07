@@ -237,16 +237,15 @@ function IntegrationsHubPage() {
       </header>
 
       {!isTenantActive && (
-        <Card className="border-warning/40 bg-warning/5">
+        <Card className="border-destructive/40 bg-destructive/5">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base text-warning">
-              <Clock className="h-4 w-4" />
-              Бренд очікує верифікації
+            <CardTitle className="flex items-center gap-2 text-base text-destructive">
+              <AlertCircle className="h-4 w-4" />
+              Бренд заблоковано
             </CardTitle>
             <CardDescription>
-              Підключення зовнішніх джерел даних стане доступним після того, як супер-адмін
-              підтвердить ваш бренд. Поки що ви можете переглядати каталог інтеграцій, але кнопки
-              «Підключити» та «Синхронізувати» заблоковані.
+              Підключення джерел даних недоступне для заблокованого або архівного бренду. Зверніться
+              в підтримку, якщо це сталось помилково.
             </CardDescription>
           </CardHeader>
         </Card>
