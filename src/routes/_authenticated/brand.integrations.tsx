@@ -69,6 +69,9 @@ function IntegrationsHubPage() {
   const [syncEntity, setSyncEntity] = useState<"products" | "customers" | "orders">("products");
   const [syncing, setSyncing] = useState<string | null>(null);
 
+  // Self-serve: tenant статус не блокує підключення інтеграцій. Власник
+  // повинен мати змогу імпортувати дані з першої секунди. Тільки suspended
+  // (явно заблокований адміном) бренд блокується.
   const { data: tenantStatus } = useQuery({
     queryKey: ["tenant-status", currentTenantId],
     enabled: !!currentTenantId,
@@ -82,7 +85,7 @@ function IntegrationsHubPage() {
       return data?.status as string | undefined;
     },
   });
-  const isTenantActive = !tenantStatus || tenantStatus === "active";
+  const isTenantActive = tenantStatus !== "suspended" && tenantStatus !== "archived";
 
   const { data: connected } = useQuery({
     queryKey: ["tenant-integrations", currentTenantId],
