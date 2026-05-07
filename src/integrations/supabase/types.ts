@@ -5862,6 +5862,21 @@ export type Database = {
           },
         ]
       }
+      telegram_processed_updates: {
+        Row: {
+          processed_at: string
+          update_id: number
+        }
+        Insert: {
+          processed_at?: string
+          update_id: number
+        }
+        Update: {
+          processed_at?: string
+          update_id?: number
+        }
+        Relationships: []
+      }
       tenant_api_keys: {
         Row: {
           created_at: string
@@ -7346,6 +7361,7 @@ export type Database = {
       }
       cleanup_anon_rate_limit: { Args: never; Returns: undefined }
       cleanup_restock_rate_limit: { Args: never; Returns: undefined }
+      cleanup_telegram_processed_updates: { Args: never; Returns: undefined }
       compute_agent_health_daily: {
         Args: never
         Returns: {
