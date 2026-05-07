@@ -727,6 +727,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                 disabled={!canSaveConn || saveConn.isPending}
                 onClick={() => saveConn.mutate()}
                 className="gap-1"
+                title={verified ? "Перевірено — можна зберігати" : "Зберегти підключення навіть без успішної перевірки"}
               >
                 {saveConn.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
