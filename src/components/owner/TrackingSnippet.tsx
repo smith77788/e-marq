@@ -10,7 +10,7 @@ type Props = { tenantSlug: string };
 export function TrackingSnippet({ tenantSlug }: Props) {
   const [copied, setCopied] = useState(false);
   const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const snippet = `<!-- MARQ — лічильник подій. Встав перед </body> -->\n<script async src="${origin}/track/${tenantSlug}/js"></script>`;
+  const snippet = `<!-- MARQ — лічильник подій. Встав перед </body> -->\n<script async src="${origin}/track/${tenantSlug}.js"></script>`;
 
   const copy = async () => {
     try {
