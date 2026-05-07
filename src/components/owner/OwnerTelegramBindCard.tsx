@@ -238,23 +238,46 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
         ) : (
           <>
             <ol className="list-decimal space-y-1 pl-5 text-xs text-muted-foreground">
-              <li>Відкрийте того ж Telegram-бота, яким користуються ваші клієнти.</li>
+              <li>Створіть одноразовий код для безпечної привʼязки власника.</li>
               <li>
-                Надішліть цю команду:{" "}
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className="font-mono text-foreground underline decoration-dotted hover:text-primary"
-                >
-                  {startCommand}
-                </button>{" "}
-                (натисніть, щоб скопіювати).
+                Відкрийте @Oauther_bot кнопкою нижче або надішліть команду вручну.
               </li>
               <li>Бот відповість, і ваш чат автоматично прив'яжеться тут.</li>
             </ol>
-            <Button size="sm" variant="outline" onClick={() => refetch()}>
-              <RefreshCw className="mr-1.5 h-3.5 w-3.5" />Я надіслав команду — перевірте зараз
-            </Button>
+            {activePairingCode ? (
+              <div className="rounded-md border border-border bg-muted/20 p-3 text-xs">
+                <div className="mb-2 text-muted-foreground">Команда для Telegram</div>
+                <div className="flex items-center gap-2">
+                  <code className="min-w-0 flex-1 truncate font-mono text-foreground">
+                    {startCommand}
+                  </code>
+                  <Button size="icon" variant="outline" className="h-7 w-7" onClick={handleCopy}>
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+            <div className="flex flex-wrap gap-2">
+              {botLink ? (
+                <Button size="sm" asChild>
+                  <a href={botLink} target="_blank" rel="noreferrer">
+                    <Send className="mr-1.5 h-3.5 w-3.5" />Відкрити бота
+                  </a>
+                </Button>
+              ) : (
+                <Button size="sm" onClick={handleCreatePairing} disabled={busy}>
+                  {busy ? (
+                    <RefreshCw className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Send className="mr-1.5 h-3.5 w-3.5" />
+                  )}
+                  Створити код
+                </Button>
+              )}
+              <Button size="sm" variant="outline" onClick={() => refetch()} disabled={busy}>
+                <RefreshCw className="mr-1.5 h-3.5 w-3.5" />Перевірити підключення
+              </Button>
+            </div>
           </>
         )}
       </CardContent>
