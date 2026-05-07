@@ -23,7 +23,7 @@ type Props = { tenantSlug: string };
 export function IntegrationGuide({ tenantSlug }: Props) {
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const ingestUrl = `${origin}/hooks/ingest`;
-  const scriptSrc = `${origin}/track/${tenantSlug}/js`;
+  const scriptSrc = `${origin}/track/${tenantSlug}.js`;
 
   const universalSnippet = `<!-- MARQ tracking — paste before </body> -->\n<script async src="${scriptSrc}"></script>`;
 
