@@ -24,7 +24,7 @@ function generatePairingCode(): string {
   return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
 }
 
-export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
+export function OwnerTelegramBindCard({ tenantId }: Props) {
   const qc = useQueryClient();
   const { user } = useAuth();
   const [busy, setBusy] = useState(false);
