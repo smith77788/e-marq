@@ -188,6 +188,7 @@ import { Route as AuthenticatedBrandProductsRouteImport } from './routes/_authen
 import { Route as AuthenticatedBrandOrdersRouteImport } from './routes/_authenticated/brand.orders'
 import { Route as AuthenticatedBrandIntegrationsRouteImport } from './routes/_authenticated/brand.integrations'
 import { Route as AuthenticatedBrandInsightsRouteImport } from './routes/_authenticated/brand.insights'
+import { Route as AuthenticatedBrandIngestLogsRouteImport } from './routes/_authenticated/brand.ingest-logs'
 import { Route as AuthenticatedBrandEmailRouteImport } from './routes/_authenticated/brand.email'
 import { Route as AuthenticatedBrandDecisionsRouteImport } from './routes/_authenticated/brand.decisions'
 import { Route as AuthenticatedBrandCustomersRouteImport } from './routes/_authenticated/brand.customers'
@@ -207,6 +208,7 @@ import { Route as AuthenticatedAdminPermissionsRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminOverviewRouteImport } from './routes/_authenticated/admin.overview'
 import { Route as AuthenticatedAdminOutcomesRouteImport } from './routes/_authenticated/admin.outcomes'
 import { Route as AuthenticatedAdminLeadRadarRouteImport } from './routes/_authenticated/admin.lead-radar'
+import { Route as AuthenticatedAdminIngestLogsRouteImport } from './routes/_authenticated/admin.ingest-logs'
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin.health'
 import { Route as AuthenticatedAdminDntradeHealthRouteImport } from './routes/_authenticated/admin.dntrade-health'
 import { Route as AuthenticatedAdminDecisionsRouteImport } from './routes/_authenticated/admin.decisions'
@@ -1223,6 +1225,12 @@ const AuthenticatedBrandInsightsRoute =
     path: '/brand/insights',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedBrandIngestLogsRoute =
+  AuthenticatedBrandIngestLogsRouteImport.update({
+    id: '/brand/ingest-logs',
+    path: '/brand/ingest-logs',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedBrandEmailRoute = AuthenticatedBrandEmailRouteImport.update({
   id: '/brand/email',
   path: '/brand/email',
@@ -1331,6 +1339,12 @@ const AuthenticatedAdminLeadRadarRoute =
   AuthenticatedAdminLeadRadarRouteImport.update({
     id: '/admin/lead-radar',
     path: '/admin/lead-radar',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAdminIngestLogsRoute =
+  AuthenticatedAdminIngestLogsRouteImport.update({
+    id: '/admin/ingest-logs',
+    path: '/admin/ingest-logs',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedAdminHealthRoute =
@@ -1567,6 +1581,7 @@ export interface FileRoutesByFullPath {
   '/admin/decisions': typeof AuthenticatedAdminDecisionsRoute
   '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   '/admin/health': typeof AuthenticatedAdminHealthRoute
+  '/admin/ingest-logs': typeof AuthenticatedAdminIngestLogsRoute
   '/admin/lead-radar': typeof AuthenticatedAdminLeadRadarRoute
   '/admin/outcomes': typeof AuthenticatedAdminOutcomesRoute
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
@@ -1586,6 +1601,7 @@ export interface FileRoutesByFullPath {
   '/brand/customers': typeof AuthenticatedBrandCustomersRoute
   '/brand/decisions': typeof AuthenticatedBrandDecisionsRoute
   '/brand/email': typeof AuthenticatedBrandEmailRoute
+  '/brand/ingest-logs': typeof AuthenticatedBrandIngestLogsRoute
   '/brand/insights': typeof AuthenticatedBrandInsightsRoute
   '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/brand/orders': typeof AuthenticatedBrandOrdersRoute
@@ -1800,6 +1816,7 @@ export interface FileRoutesByTo {
   '/admin/decisions': typeof AuthenticatedAdminDecisionsRoute
   '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   '/admin/health': typeof AuthenticatedAdminHealthRoute
+  '/admin/ingest-logs': typeof AuthenticatedAdminIngestLogsRoute
   '/admin/lead-radar': typeof AuthenticatedAdminLeadRadarRoute
   '/admin/outcomes': typeof AuthenticatedAdminOutcomesRoute
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
@@ -1819,6 +1836,7 @@ export interface FileRoutesByTo {
   '/brand/customers': typeof AuthenticatedBrandCustomersRoute
   '/brand/decisions': typeof AuthenticatedBrandDecisionsRoute
   '/brand/email': typeof AuthenticatedBrandEmailRoute
+  '/brand/ingest-logs': typeof AuthenticatedBrandIngestLogsRoute
   '/brand/insights': typeof AuthenticatedBrandInsightsRoute
   '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/brand/orders': typeof AuthenticatedBrandOrdersRoute
@@ -2036,6 +2054,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/decisions': typeof AuthenticatedAdminDecisionsRoute
   '/_authenticated/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   '/_authenticated/admin/health': typeof AuthenticatedAdminHealthRoute
+  '/_authenticated/admin/ingest-logs': typeof AuthenticatedAdminIngestLogsRoute
   '/_authenticated/admin/lead-radar': typeof AuthenticatedAdminLeadRadarRoute
   '/_authenticated/admin/outcomes': typeof AuthenticatedAdminOutcomesRoute
   '/_authenticated/admin/overview': typeof AuthenticatedAdminOverviewRoute
@@ -2055,6 +2074,7 @@ export interface FileRoutesById {
   '/_authenticated/brand/customers': typeof AuthenticatedBrandCustomersRoute
   '/_authenticated/brand/decisions': typeof AuthenticatedBrandDecisionsRoute
   '/_authenticated/brand/email': typeof AuthenticatedBrandEmailRoute
+  '/_authenticated/brand/ingest-logs': typeof AuthenticatedBrandIngestLogsRoute
   '/_authenticated/brand/insights': typeof AuthenticatedBrandInsightsRoute
   '/_authenticated/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/_authenticated/brand/orders': typeof AuthenticatedBrandOrdersRoute
@@ -2272,6 +2292,7 @@ export interface FileRouteTypes {
     | '/admin/decisions'
     | '/admin/dntrade-health'
     | '/admin/health'
+    | '/admin/ingest-logs'
     | '/admin/lead-radar'
     | '/admin/outcomes'
     | '/admin/overview'
@@ -2291,6 +2312,7 @@ export interface FileRouteTypes {
     | '/brand/customers'
     | '/brand/decisions'
     | '/brand/email'
+    | '/brand/ingest-logs'
     | '/brand/insights'
     | '/brand/integrations'
     | '/brand/orders'
@@ -2505,6 +2527,7 @@ export interface FileRouteTypes {
     | '/admin/decisions'
     | '/admin/dntrade-health'
     | '/admin/health'
+    | '/admin/ingest-logs'
     | '/admin/lead-radar'
     | '/admin/outcomes'
     | '/admin/overview'
@@ -2524,6 +2547,7 @@ export interface FileRouteTypes {
     | '/brand/customers'
     | '/brand/decisions'
     | '/brand/email'
+    | '/brand/ingest-logs'
     | '/brand/insights'
     | '/brand/integrations'
     | '/brand/orders'
@@ -2740,6 +2764,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/decisions'
     | '/_authenticated/admin/dntrade-health'
     | '/_authenticated/admin/health'
+    | '/_authenticated/admin/ingest-logs'
     | '/_authenticated/admin/lead-radar'
     | '/_authenticated/admin/outcomes'
     | '/_authenticated/admin/overview'
@@ -2759,6 +2784,7 @@ export interface FileRouteTypes {
     | '/_authenticated/brand/customers'
     | '/_authenticated/brand/decisions'
     | '/_authenticated/brand/email'
+    | '/_authenticated/brand/ingest-logs'
     | '/_authenticated/brand/insights'
     | '/_authenticated/brand/integrations'
     | '/_authenticated/brand/orders'
@@ -4382,6 +4408,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBrandInsightsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/brand/ingest-logs': {
+      id: '/_authenticated/brand/ingest-logs'
+      path: '/brand/ingest-logs'
+      fullPath: '/brand/ingest-logs'
+      preLoaderRoute: typeof AuthenticatedBrandIngestLogsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/brand/email': {
       id: '/_authenticated/brand/email'
       path: '/brand/email'
@@ -4513,6 +4546,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/lead-radar'
       fullPath: '/admin/lead-radar'
       preLoaderRoute: typeof AuthenticatedAdminLeadRadarRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin/ingest-logs': {
+      id: '/_authenticated/admin/ingest-logs'
+      path: '/admin/ingest-logs'
+      fullPath: '/admin/ingest-logs'
+      preLoaderRoute: typeof AuthenticatedAdminIngestLogsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin/health': {
@@ -4817,6 +4857,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminDecisionsRoute: typeof AuthenticatedAdminDecisionsRoute
   AuthenticatedAdminDntradeHealthRoute: typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
+  AuthenticatedAdminIngestLogsRoute: typeof AuthenticatedAdminIngestLogsRoute
   AuthenticatedAdminLeadRadarRoute: typeof AuthenticatedAdminLeadRadarRoute
   AuthenticatedAdminOutcomesRoute: typeof AuthenticatedAdminOutcomesRoute
   AuthenticatedAdminOverviewRoute: typeof AuthenticatedAdminOverviewRoute
@@ -4836,6 +4877,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedBrandCustomersRoute: typeof AuthenticatedBrandCustomersRoute
   AuthenticatedBrandDecisionsRoute: typeof AuthenticatedBrandDecisionsRoute
   AuthenticatedBrandEmailRoute: typeof AuthenticatedBrandEmailRoute
+  AuthenticatedBrandIngestLogsRoute: typeof AuthenticatedBrandIngestLogsRoute
   AuthenticatedBrandInsightsRoute: typeof AuthenticatedBrandInsightsRoute
   AuthenticatedBrandIntegrationsRoute: typeof AuthenticatedBrandIntegrationsRoute
   AuthenticatedBrandOrdersRoute: typeof AuthenticatedBrandOrdersRoute
@@ -4862,6 +4904,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminDntradeHealthRoute:
     AuthenticatedAdminDntradeHealthRouteWithChildren,
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
+  AuthenticatedAdminIngestLogsRoute: AuthenticatedAdminIngestLogsRoute,
   AuthenticatedAdminLeadRadarRoute: AuthenticatedAdminLeadRadarRoute,
   AuthenticatedAdminOutcomesRoute: AuthenticatedAdminOutcomesRoute,
   AuthenticatedAdminOverviewRoute: AuthenticatedAdminOverviewRoute,
@@ -4881,6 +4924,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedBrandCustomersRoute: AuthenticatedBrandCustomersRoute,
   AuthenticatedBrandDecisionsRoute: AuthenticatedBrandDecisionsRoute,
   AuthenticatedBrandEmailRoute: AuthenticatedBrandEmailRoute,
+  AuthenticatedBrandIngestLogsRoute: AuthenticatedBrandIngestLogsRoute,
   AuthenticatedBrandInsightsRoute: AuthenticatedBrandInsightsRoute,
   AuthenticatedBrandIntegrationsRoute: AuthenticatedBrandIntegrationsRoute,
   AuthenticatedBrandOrdersRoute: AuthenticatedBrandOrdersRoute,
@@ -5131,12 +5175,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

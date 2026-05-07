@@ -143,15 +143,82 @@ const okJson = (body: Record<string, unknown>) =>
     headers: { "Content-Type": "application/json", ...corsHeaders() },
   });
 
+/**
+ * Best-effort write to ingest_error_logs. Never throws — failures only logged
+ * to console so they can never break the actual ingest response.
+ */
+async function logIngestError(args: {
+  tenant_id: string | null;
+  tenant_slug_attempted: string | null;
+  status_code: number;
+  error_code: string;
+  error_message: string;
+  request_body: unknown;
+  request_ip: string | null;
+  user_agent: string | null;
+  origin: string | null;
+  event_type_attempted: string | null;
+}) {
+  try {
+    let bodyJson: unknown = args.request_body ?? null;
+    // Truncate oversized payloads to keep the table sane.
+    const stringified = JSON.stringify(bodyJson ?? null);
+    if (stringified && stringified.length > 8000) {
+      bodyJson = { _truncated: true, preview: stringified.slice(0, 8000) };
+    }
+    await supabaseAdmin.from("ingest_error_logs").insert({
+      tenant_id: args.tenant_id,
+      tenant_slug_attempted: args.tenant_slug_attempted,
+      status_code: args.status_code,
+      error_code: args.error_code,
+      error_message: args.error_message,
+      request_body: bodyJson as never,
+      request_ip: args.request_ip,
+      user_agent: args.user_agent,
+      origin: args.origin,
+      event_type_attempted: args.event_type_attempted,
+    });
+  } catch (err) {
+    console.error("[ingest] failed to write ingest_error_logs", err);
+  }
+}
+
+function pickRequestMeta(request: Request) {
+  const h = request.headers;
+  return {
+    ip:
+      h.get("cf-connecting-ip") ||
+      (h.get("x-forwarded-for") || "").split(",")[0].trim() ||
+      h.get("x-real-ip") ||
+      null,
+    ua: h.get("user-agent"),
+    origin: h.get("origin") || h.get("referer") || null,
+  };
+}
+
 export const Route = createFileRoute("/hooks/ingest")({
   server: {
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: corsHeaders() }),
       POST: async ({ request }) => {
+        const meta = pickRequestMeta(request);
+        const rawText = await request.text();
         let body: IngestBody;
         try {
-          body = (await request.json()) as IngestBody;
+          body = JSON.parse(rawText) as IngestBody;
         } catch {
+          await logIngestError({
+            tenant_id: null,
+            tenant_slug_attempted: null,
+            status_code: 400,
+            error_code: "invalid_json",
+            error_message: "Request body is not valid JSON",
+            request_body: { _raw: rawText.slice(0, 8000) },
+            request_ip: meta.ip,
+            user_agent: meta.ua,
+            origin: meta.origin,
+            event_type_attempted: null,
+          });
           return jsonError("Invalid JSON", 400);
         }
 
@@ -163,10 +230,40 @@ export const Route = createFileRoute("/hooks/ingest")({
             .select("id, status")
             .eq("slug", body.tenant_slug)
             .maybeSingle();
-          if (!t || t.status !== "active") return jsonError("Unknown or inactive tenant", 404);
+          if (!t || t.status !== "active") {
+            await logIngestError({
+              tenant_id: null,
+              tenant_slug_attempted: body.tenant_slug ?? null,
+              status_code: 404,
+              error_code: t ? "inactive_tenant" : "unknown_tenant",
+              error_message: t
+                ? `Tenant exists but status is '${t.status}'`
+                : "No tenant matches the provided slug",
+              request_body: body,
+              request_ip: meta.ip,
+              user_agent: meta.ua,
+              origin: meta.origin,
+              event_type_attempted: (body.type ?? null) as string | null,
+            });
+            return jsonError("Unknown or inactive tenant", 404);
+          }
           tenantId = t.id;
         }
-        if (!tenantId) return jsonError("Unknown tenant", 404);
+        if (!tenantId) {
+          await logIngestError({
+            tenant_id: null,
+            tenant_slug_attempted: body.tenant_slug ?? null,
+            status_code: 404,
+            error_code: "missing_tenant",
+            error_message: "Neither tenant_id nor tenant_slug provided",
+            request_body: body,
+            request_ip: meta.ip,
+            user_agent: meta.ua,
+            origin: meta.origin,
+            event_type_attempted: (body.type ?? null) as string | null,
+          });
+          return jsonError("Unknown tenant", 404);
+        }
 
         // Adaptive event-type fallback: unknown types become content_viewed
         // with the original type preserved in payload.original_type. Keeps
@@ -409,6 +506,18 @@ export const Route = createFileRoute("/hooks/ingest")({
         });
         if (evtErr) {
           console.error("[ingest] event insert failed", evtErr);
+          await logIngestError({
+            tenant_id: tenantId,
+            tenant_slug_attempted: body.tenant_slug ?? null,
+            status_code: 500,
+            error_code: "event_insert_failed",
+            error_message: evtErr.message,
+            request_body: body,
+            request_ip: meta.ip,
+            user_agent: meta.ua,
+            origin: meta.origin,
+            event_type_attempted: (body.type ?? null) as string | null,
+          });
           return jsonError("Failed to log event", 500, { details: evtErr.message });
         }
 

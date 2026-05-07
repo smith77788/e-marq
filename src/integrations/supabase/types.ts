@@ -2876,6 +2876,66 @@ export type Database = {
           },
         ]
       }
+      ingest_error_logs: {
+        Row: {
+          created_at: string
+          error_code: string
+          error_message: string | null
+          event_type_attempted: string | null
+          id: string
+          origin: string | null
+          request_body: Json | null
+          request_ip: string | null
+          status_code: number
+          tenant_id: string | null
+          tenant_slug_attempted: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_code: string
+          error_message?: string | null
+          event_type_attempted?: string | null
+          id?: string
+          origin?: string | null
+          request_body?: Json | null
+          request_ip?: string | null
+          status_code: number
+          tenant_id?: string | null
+          tenant_slug_attempted?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_code?: string
+          error_message?: string | null
+          event_type_attempted?: string | null
+          id?: string
+          origin?: string | null
+          request_body?: Json | null
+          request_ip?: string | null
+          status_code?: number
+          tenant_id?: string | null
+          tenant_slug_attempted?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ingest_error_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "acos_loop_overview"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "ingest_error_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_rate_limits: {
         Row: {
           bucket_minute: string
