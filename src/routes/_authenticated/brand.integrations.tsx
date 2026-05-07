@@ -309,19 +309,17 @@ function IntegrationsHubPage() {
                     lastSyncStatus={connRow?.last_sync_status ?? null}
                     onSelect={(i) => {
                       if (!isTenantActive && !connectedSet.has(i.id)) {
-                        toast.warning("Бренд ще не верифіковано", {
-                          description: "Підключення стане доступним після підтвердження адміном.",
+                        toast.warning("Бренд заблоковано", {
+                          description: "Зверніться в підтримку, щоб розблокувати.",
                         });
                         return;
                       }
-                      // Якщо вже підключено — відкриваємо панель керування,
-                      // інакше — wizard підключення.
                       if (connectedSet.has(i.id)) setManage(i);
                       else setActive(i);
                     }}
                     onSync={(i) => {
                       if (!isTenantActive) {
-                        toast.warning("Бренд ще не верифіковано");
+                        toast.warning("Бренд заблоковано");
                         return;
                       }
                       setSyncTarget(i);
