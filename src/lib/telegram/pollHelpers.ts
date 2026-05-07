@@ -307,10 +307,19 @@ export async function processMessage(u: TgUpdate, appOrigin: string): Promise<vo
       .eq("tenant_id", tenant.id)
       .maybeSingle();
     const brand = cfg?.brand_name ?? tenant.name;
-    await sendTelegramText(
+    const welcome = await sendTelegramText(
       chatId,
       `👋 Вітаємо в <b>${brand}</b>! Запитайте, що завгодно — покажу товари, допоможу замовити або повідомлю про новинки.`,
     );
+    if (!welcome.ok) {
+      console.error("[telegram] /start welcome failed", {
+        chatId,
+        slug,
+        tenantId: tenant.id,
+        error: welcome.error,
+      });
+    }
+    return;
   }
 
   const { data: ownerCfg } = await supabaseAdmin
