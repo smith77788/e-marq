@@ -1,71 +1,61 @@
-## Що будуємо
+## Що болить
 
-Дві сторінки для дебагу вхідного трафіку на `/hooks/ingest`:
-- `/admin/ingest-logs` — super_admin бачить усіх tenant-ів
-- `/brand/ingest-logs` — owner бачить лише свого tenant-а
+1. **Новий бренд = `pending`** → `/brand/integrations` ховає всі кнопки «Підключити» і «Синхронізувати» поки супер-адмін не клікне «Approve». На практиці перші 24 години людина не може ні CSV завантажити, ні Shopify підключити. Це і є «не може легко під'єднати свій бізнес».
+2. **DN Trade всюди в UI**, навіть у тих, хто про неї ніколи не чув: посилання в лівому сайдбарі (`/admin/dntrade-health`), картка-плашка на дашборді бренду коли інтеграції немає (зараз guard повертає `null`, але імпорт компонента + назва провайдера-«першокласника» лишилися), варіанти у вікні підключення.
+3. **Onboarding wizard** проводить через 7 кроків, але крок 5 (Tracking) і крок 4 (Customers CSV) не показують одного цілісного шляху «імпортуйте товари + клієнтів + замовлення зі своєї системи». Користувачу не зрозуміло, що головна цінність — синхронізація.
+4. **Каталог інтеграцій** показує 25+ карток, з яких реально працюють лише 8 (Shopify/Woo/Stripe/Bitrix24/Poster/Sheets/REST/DN Trade). Решта — «comingSoon». Це створює відчуття «нічого не працює». Treба піднімати ready-картки нагору і чесно групувати.
+5. **Перший «success moment»** після створення бренду — порожньо. Немає preset-демо, немає «імпортуй демо-каталог щоб побачити як виглядає магазин».
 
-Гібридне джерело: успішні події з `events`, помилки/відхилені — з нової таблиці `ingest_error_logs`. Без авто-очистки.
+## План (тільки реальні зміни, без рефакторингу заради рефакторингу)
 
-## Кроки
+### Phase 1 — Розблокувати новий бренд одразу (найважливіше)
 
-### 1. Міграція БД
-Створити таблицю `public.ingest_error_logs`:
-- `tenant_id` (nullable — бо помилка може бути «unknown tenant»)
-- `tenant_slug_attempted` (text, nullable)
-- `status_code` (int)
-- `error_code` (text — наприклад `unknown_tenant`, `invalid_json`, `event_insert_failed`)
-- `error_message` (text)
-- `request_body` (jsonb, truncated до ~8KB)
-- `request_ip` (text), `user_agent` (text), `origin` (text)
-- `event_type_attempted` (text)
-- `created_at` (timestamptz default now())
+**Migration:**
+- Поміняти `create_my_tenant`: новий tenant — одразу `status='active'`, але з прапорцем `verification_requested_at`. Супер-адмін може потім «verify» для розширених фіч (вищі ліміти, кастомний домен), але імпорт/Telegram/CSV — доступні з першої секунди.
+- Оновити `_authenticated/brand.integrations.tsx`: прибрати `isTenantActive`-gate (або лишити лише для платних інтеграцій типу custom domain). Дозволити Connect/Sync для всіх ready-провайдерів.
+- На `/brand` залишити м'який банер «Бренд новий — деякі ліміти знижені поки не верифікований», без блокувань.
 
-Indexes: `(tenant_id, created_at desc)`, `(created_at desc)`, `(status_code, created_at desc)`.
+### Phase 2 — Убрати DN Trade-«першокласний» статус
 
-RLS:
-- super_admin → SELECT all
-- owner → SELECT тільки `tenant_id IN (SELECT tenant_id FROM tenant_members WHERE user_id = auth.uid())` (або який паттерн уже використовується)
-- INSERT тільки service_role
+- `AppSidebar.tsx` → пункт «DN Trade Health» показувати тільки якщо у tenant є `tenant_integrations.provider='dntrade'` (або super-admin). Зараз він у всіх адмінів навіть без DN.
+- `brand.index.tsx` → DnTradeIntegrationCardGuard вже умовний; залишити, але видалити безумовний `import` (опційний import не виконується тільки якщо є дані → import все одно є). Залишити як є — guard працює, прибрати лише якщо помітно впливає на bundle.
+- `IntegrationsHubPage`: пересортувати — спершу `status='ready'`, потім `beta`, в кінці `comingSoon`. Додати фільтр `Tabs` ще одну вкладку «Готові зараз».
 
-### 2. Інструментація `/hooks/ingest`
-У `src/routes/hooks/ingest.ts` додати запис у `ingest_error_logs` для всіх failure-шляхів:
-- Invalid JSON (400)
-- Unknown / inactive tenant (404) — зберегти `tenant_slug_attempted`
-- Event insert failed (500)
-- Unknown event_type → НЕ помилка (це fallback на `content_viewed`), але додати `payload.original_type` до events (вже є)
+### Phase 3 — Один цілісний «Connect your store» крок в onboarding
 
-Із request брати IP (`x-forwarded-for`), user-agent, origin. Body truncate до 8KB перед записом.
+Замість поточних окремих Steps 3 (товари вручну) + 4 (CSV клієнтів):
+- Об'єднати в один крок «Підключіть джерело даних» з трьома великими опціями:
+  1. **«У мене є магазин Shopify/WooCommerce/REST»** → відкриває `IntegrationWizard` з відповідним провайдером.
+  2. **«Імпортую CSV/Excel»** → відкриває file-based wizard, мапить products+customers+orders.
+  3. **«Додам товари вручну»** → теперішня форма Step3.
+- Step 3 (старий) лишити як fallback всередині опції 3.
 
-### 3. Server function для UI
-`src/lib/admin/ingestLogs.functions.ts`:
-- `getIngestLogs({ tenant_id?, scope: 'admin'|'brand', limit, before_cursor, status_filter: 'all'|'errors'|'success' })`
-- Захищена `requireSupabaseAuth`. Перевіряє super_admin (для admin scope) або membership tenant-а (для brand scope).
-- Повертає merged feed:
-  - errors: select з `ingest_error_logs`
-  - success: select з `events` (фільтр по тих, що мають `payload.source = 'pixel'` або через окрему мітку — обговоримо у коді; найпростіше — всі events за останні N годин з обмеженням)
-- Сортує по `created_at desc`, пагінація через cursor.
+### Phase 4 — Demo data на 1 клік
 
-### 4. UI сторінки
-`src/routes/_authenticated/admin.ingest-logs.tsx` і `src/routes/_authenticated/brand.ingest-logs.tsx`:
-- Фільтри: tenant (тільки в admin), статус (Усі / Помилки / Успіх), event_type, діапазон часу.
-- Таблиця: timestamp · status badge (200 зелений, 4xx жовтий, 5xx червоний) · tenant slug · event_type · error_code · короткий preview body.
-- Клік по рядку → drawer з повним JSON body, response, headers (IP, UA, origin).
-- Auto-refresh кнопка + «остання година» quick filter.
-- Лінк зі сторінки в сайдбар: під «Admin» і «Brand → Settings».
+- Додати RPC `seed_demo_catalog(_tenant_id)` (SECURITY DEFINER, owner-only), що створює 6 демо-товарів + 3 клієнтів + 5 замовлень за останні 14 днів. На дашборді бренду коли `products.count=0` показати CTA «Заповнити демо-каталогом, щоб побачити як працює система».
+- Демо-дані позначені `payload->>'demo'='true'` щоб потім легко прибрати кнопкою «Очистити демо».
 
-### 5. Навігація
-- `src/components/layout/AppSidebar.tsx`: додати пункти «Ingest logs» у відповідні секції з гейтами по ролі.
+### Phase 5 — Verify & ship
 
-## Технічні деталі
+1. Створити дві тестові сесії (через існуючі tenants Coffe shops, Кавовий рай) — переконатися, що в обох усі фічі working. 
+2. Прогнати `cron.job_run_details` + `acos_agent_runs` 2h після Publish.
+3. Оновити mem://core про нову політику «новий бренд = active».
 
-- Логування вставляти через `supabaseAdmin` у hook (bypass RLS).
-- Не блокувати відповідь клієнту: `await` запис у logs ОК (важливіше не втратити лог, ніж 5мс затримки), але якщо log-insert падає — лише `console.error`, не змінювати статус відповіді.
-- `request_body` зберігати як `jsonb` коли валідний JSON, інакше `{ "_raw": "<string>" }`.
-- Truncation: якщо stringify > 8000 chars → `{ "_truncated": true, "preview": <first 8000 chars> }`.
-- Для success-feed на UI — використовуємо `events` з останніх 24h з умовою `payload->>'source' = 'pixel'` АБО `session_id LIKE 'sess_%'` (підлаштуємо під поточний tracker).
+## Файли, які точно змінюються
 
-## Поза скоупом
+- `supabase/migrations/<ts>_unblock_new_tenants_and_demo_seed.sql` (нова)
+- `src/routes/_authenticated/brand.integrations.tsx`
+- `src/components/layout/AppSidebar.tsx`
+- `src/routes/_authenticated/brand.index.tsx` (легенький rewording банера)
+- `src/routes/_authenticated/onboarding.tsx` (новий Step3 «Connect store»)
+- `src/lib/integrations/catalog.ts` (поле `priority` для сортування)
+- `src/components/owner/SeedDemoButton.tsx` (нова)
+- `mem://index.md` + `mem://features/easy-onboarding` (нова memory)
 
-- Авто-очистка / TTL (за вашим вибором).
-- Алерти/нотифікації на сплески помилок (можна додати окремо як signal-агента).
-- Експорт у CSV (легко додати пізніше).
+## Чого НЕ робимо
+
+- Не чіпаємо storefront, checkout, бот-pipeline, ACOS-агентів, pure-SQL гілку, pricing, billing — вони працюють.
+- Не реалізуємо нові API-конектори (Etsy/Amazon/QuickBooks тощо) — це окремий великий ескоп.
+- Не міняємо Cron / CRON_SECRET / engines.
+
+Готовий запустити Phase 1+2+3+4+5 в одному заході. Чи затверджуєш план?

@@ -7422,6 +7422,7 @@ export type Database = {
       cleanup_anon_rate_limit: { Args: never; Returns: undefined }
       cleanup_restock_rate_limit: { Args: never; Returns: undefined }
       cleanup_telegram_processed_updates: { Args: never; Returns: undefined }
+      clear_demo_data: { Args: { _tenant_id: string }; Returns: Json }
       compute_agent_health_daily: {
         Args: never
         Returns: {
@@ -8000,6 +8001,7 @@ export type Database = {
       run_pending_ai_actions: { Args: { _limit?: number }; Returns: Json }
       run_sql_loop_tick: { Args: never; Returns: Json }
       score_order_refund_risk: { Args: { _order_id: string }; Returns: number }
+      seed_demo_catalog: { Args: { _tenant_id: string }; Returns: Json }
       self_heal_dismiss_action: {
         Args: { p_action_id: string; p_reason?: string }
         Returns: undefined

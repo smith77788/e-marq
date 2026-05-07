@@ -33,6 +33,7 @@ import { LifecycleDistribution } from "@/components/owner/LifecycleDistribution"
 import { PlanUsageCard } from "@/components/owner/PlanUsageCard";
 import { OwnerTelegramBindCard } from "@/components/owner/OwnerTelegramBindCard";
 import { DnTradeIntegrationCard } from "@/components/owner/DnTradeIntegrationCard";
+import { SeedDemoButton } from "@/components/owner/SeedDemoButton";
 import { ACOSStats } from "@/components/owner/ACOSStats";
 import { RealtimeRevenuePulse } from "@/components/owner/RealtimeRevenuePulse";
 
@@ -143,31 +144,23 @@ function BrandCockpit({
   return (
     <div className="reveal-stagger space-y-6">
       {isPending && (
-        <Card className="border-warning/50 bg-warning/5">
+        <Card className="border-primary/30 bg-primary/5">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Clock className="h-4 w-4 text-warning" />
-              Бренд очікує верифікації
+              <Clock className="h-4 w-4 text-primary" />
+              Бренд активний — верифікацію можна пройти пізніше
             </CardTitle>
             <CardDescription>
-              Зазвичай це займає <strong className="text-foreground">до 24 годин</strong>. Ми
-              надішлемо лист на вашу пошту, щойно бренд активують. Поки що можна підготувати
-              каталог, канали та інтеграції — все збережеться автоматично.
+              Усі функції доступні з першої секунди: підключайте Shopify, CSV, Telegram, додавайте
+              товари. Бейдж «Перевірено» від нашої команди потім підніме ліміти й активує
+              кастомний домен.
             </CardDescription>
           </CardHeader>
           <div className="flex flex-wrap gap-2 px-6 pb-6">
             <Button asChild size="sm" variant="outline">
-              <Link to="/brand/products" search={{ tenant: currentTenantId }}>
-                Додати товари
-              </Link>
-            </Button>
-            <Button asChild size="sm" variant="outline">
               <Link to="/brand/integrations" search={{ tenant: currentTenantId }}>
-                Підключити інтеграції
+                Підключити джерело даних
               </Link>
-            </Button>
-            <Button asChild size="sm" variant="ghost">
-              <Link to="/contact">Написати в підтримку</Link>
             </Button>
           </div>
         </Card>
@@ -252,6 +245,8 @@ function BrandCockpitInner({
         </div>
 
         <SetupChecklist tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
+
+        <SeedDemoButton tenantId={current.tenant_id} />
 
         <SetupReadinessCard tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
 

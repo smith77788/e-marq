@@ -69,6 +69,9 @@ function IntegrationsHubPage() {
   const [syncEntity, setSyncEntity] = useState<"products" | "customers" | "orders">("products");
   const [syncing, setSyncing] = useState<string | null>(null);
 
+  // Self-serve: tenant статус не блокує підключення інтеграцій. Власник
+  // повинен мати змогу імпортувати дані з першої секунди. Тільки suspended
+  // (явно заблокований адміном) бренд блокується.
   const { data: tenantStatus } = useQuery({
     queryKey: ["tenant-status", currentTenantId],
     enabled: !!currentTenantId,
@@ -82,7 +85,7 @@ function IntegrationsHubPage() {
       return data?.status as string | undefined;
     },
   });
-  const isTenantActive = !tenantStatus || tenantStatus === "active";
+  const isTenantActive = tenantStatus !== "suspended" && tenantStatus !== "archived";
 
   const { data: connected } = useQuery({
     queryKey: ["tenant-integrations", currentTenantId],
@@ -163,6 +166,13 @@ function IntegrationsHubPage() {
   }
 
   const filtered = useMemo(() => {
+    const statusOrder: Record<string, number> = {
+      ready: 0,
+      beta: 1,
+      webhookOnly: 2,
+      manualOnly: 3,
+      comingSoon: 4,
+    };
     return INTEGRATIONS.filter((i) => {
       if (tab !== "all" && i.category !== tab) return false;
       if (query.trim()) {
@@ -174,7 +184,7 @@ function IntegrationsHubPage() {
         );
       }
       return true;
-    });
+    }).sort((a, b) => (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9));
   }, [tab, query]);
 
   if (loading) {
@@ -234,16 +244,15 @@ function IntegrationsHubPage() {
       </header>
 
       {!isTenantActive && (
-        <Card className="border-warning/40 bg-warning/5">
+        <Card className="border-destructive/40 bg-destructive/5">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base text-warning">
-              <Clock className="h-4 w-4" />
-              Бренд очікує верифікації
+            <CardTitle className="flex items-center gap-2 text-base text-destructive">
+              <AlertCircle className="h-4 w-4" />
+              Бренд заблоковано
             </CardTitle>
             <CardDescription>
-              Підключення зовнішніх джерел даних стане доступним після того, як супер-адмін
-              підтвердить ваш бренд. Поки що ви можете переглядати каталог інтеграцій, але кнопки
-              «Підключити» та «Синхронізувати» заблоковані.
+              Підключення джерел даних недоступне для заблокованого або архівного бренду. Зверніться
+              в підтримку, якщо це сталось помилково.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -307,19 +316,17 @@ function IntegrationsHubPage() {
                     lastSyncStatus={connRow?.last_sync_status ?? null}
                     onSelect={(i) => {
                       if (!isTenantActive && !connectedSet.has(i.id)) {
-                        toast.warning("Бренд ще не верифіковано", {
-                          description: "Підключення стане доступним після підтвердження адміном.",
+                        toast.warning("Бренд заблоковано", {
+                          description: "Зверніться в підтримку, щоб розблокувати.",
                         });
                         return;
                       }
-                      // Якщо вже підключено — відкриваємо панель керування,
-                      // інакше — wizard підключення.
                       if (connectedSet.has(i.id)) setManage(i);
                       else setActive(i);
                     }}
                     onSync={(i) => {
                       if (!isTenantActive) {
-                        toast.warning("Бренд ще не верифіковано");
+                        toast.warning("Бренд заблоковано");
                         return;
                       }
                       setSyncTarget(i);
