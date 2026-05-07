@@ -41,22 +41,9 @@ export const Route = createFileRoute("/hooks/telegram/poll")({
           .maybeSingle();
         let offset = state?.update_offset ?? 0;
 
-        // Ensure no webhook is set — otherwise getUpdates will always return 409
-        // ("Conflict: terminated by other getUpdates request"). This is a safe
-        // no-op if the bot has no webhook configured.
-        try {
-          await fetch(`${TG_GATEWAY}/deleteWebhook`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${lovableKey}`,
-              "X-Connection-Api-Key": tgKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ drop_pending_updates: false }),
-          });
-        } catch (err) {
-          console.warn("[telegram.poll] deleteWebhook failed (non-fatal)", err);
-        }
+        // NOTE: deleteWebhook removed — primary mode is webhook
+        // (/api/public/telegram/webhook). To use polling as fallback,
+        // first call deleteWebhook manually via the connector gateway.
 
         while (true) {
           const remaining = MAX_RUNTIME_MS - (Date.now() - start);
