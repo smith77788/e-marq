@@ -212,6 +212,12 @@ const ADMIN_SYSTEM: NavGroup = {
       icon: Sparkles,
       tone: "text-success",
     },
+    {
+      labelKey: "Ingest logs" as TKey,
+      to: "/admin/ingest-logs",
+      icon: Activity,
+      tone: "text-warning",
+    },
     { labelKey: "sb.crossTenant" as TKey, to: "/admin/overview", icon: Layers, tone: "text-info" },
     { labelKey: "sb.allTenants", to: "/admin/tenants", icon: Building2, tone: "text-primary" },
     { labelKey: "sb.plansCatalog" as TKey, to: "/admin/plans", icon: Coins, tone: "text-warning" },
