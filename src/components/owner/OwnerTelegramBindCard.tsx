@@ -1,50 +1,102 @@
 /**
  * Owner-side card: bind your personal Telegram chat to receive insight/action
  * notifications with Apply/Dismiss buttons. Tells the owner to message the
- * shared bot with `/start owner <slug>` — the poll loop will save chat_id.
+ * shared bot with a one-time `/start owner <code>` command — the poll loop will save chat_id.
  *
  * Also lets owner unbind (clear chat_id) if they want to stop notifications.
  */
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Bell, BellOff, Send, RefreshCw } from "lucide-react";
+import { Bell, BellOff, Copy, Send, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 type Props = { tenantId: string; tenantSlug: string };
 
-export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
+function generatePairingCode(): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
+}
+
+export function OwnerTelegramBindCard({ tenantId }: Props) {
   const qc = useQueryClient();
+  const { user } = useAuth();
   const [busy, setBusy] = useState(false);
+  const [pairingCode, setPairingCode] = useState<string | null>(null);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["owner-tg-binding", tenantId],
     queryFn: async () => {
-      const { data: cfg } = await supabase
-        .from("tenant_configs")
-        .select("owner_telegram_chat_id")
-        .eq("tenant_id", tenantId)
-        .maybeSingle();
-      const { data: recent } = await supabase
-        .from("owner_telegram_outbox")
-        .select("source_kind, status, sent_at, error, created_at")
-        .eq("tenant_id", tenantId)
-        .order("created_at", { ascending: false })
-        .limit(5);
+      const [{ data: cfg }, { data: recent }, { data: pairing }] = await Promise.all([
+        supabase
+          .from("tenant_configs")
+          .select("owner_telegram_chat_id")
+          .eq("tenant_id", tenantId)
+          .maybeSingle(),
+        supabase
+          .from("owner_telegram_outbox")
+          .select("source_kind, status, sent_at, error, created_at")
+          .eq("tenant_id", tenantId)
+          .order("created_at", { ascending: false })
+          .limit(5),
+        supabase
+          .from("telegram_owner_pairings")
+          .select("pairing_code, expires_at")
+          .eq("tenant_id", tenantId)
+          .is("consumed_at", null)
+          .gt("expires_at", new Date().toISOString())
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
       return {
         chatId: cfg?.owner_telegram_chat_id ?? null,
         recent: recent ?? [],
+        pairing: pairing ?? null,
       };
     },
   });
 
   const isBound = !!data?.chatId;
-  const startCommand = `/start owner ${tenantSlug}`;
+  const activePairingCode = pairingCode ?? data?.pairing?.pairing_code ?? null;
+  const startCommand = activePairingCode ? `/start owner ${activePairingCode}` : "";
+  const botLink = activePairingCode
+    ? `https://t.me/Oauther_bot?start=owner_${activePairingCode}`
+    : null;
+
+  const handleCreatePairing = async () => {
+    if (!user) {
+      toast.error("Сесія не знайдена. Оновіть сторінку і спробуйте ще раз.");
+      return;
+    }
+    setBusy(true);
+    const code = generatePairingCode();
+    const { error } = await supabase.from("telegram_owner_pairings").insert({
+      tenant_id: tenantId,
+      pairing_code: code,
+      created_by: user.id,
+    });
+    setBusy(false);
+    if (error) {
+      toast.error("Не вдалося створити код Telegram", { description: error.message });
+      return;
+    }
+    setPairingCode(code);
+    toast.success("Код створено. Відкрийте бота або скопіюйте команду.");
+    qc.invalidateQueries({ queryKey: ["owner-tg-binding", tenantId] });
+  };
 
   const handleCopy = async () => {
+    if (!startCommand) {
+      await handleCreatePairing();
+      return;
+    }
     await navigator.clipboard.writeText(startCommand);
     toast.success("Скопійовано — вставте в чат із ботом");
   };
@@ -186,23 +238,46 @@ export function OwnerTelegramBindCard({ tenantId, tenantSlug }: Props) {
         ) : (
           <>
             <ol className="list-decimal space-y-1 pl-5 text-xs text-muted-foreground">
-              <li>Відкрийте того ж Telegram-бота, яким користуються ваші клієнти.</li>
+              <li>Створіть одноразовий код для безпечної привʼязки власника.</li>
               <li>
-                Надішліть цю команду:{" "}
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className="font-mono text-foreground underline decoration-dotted hover:text-primary"
-                >
-                  {startCommand}
-                </button>{" "}
-                (натисніть, щоб скопіювати).
+                Відкрийте @Oauther_bot кнопкою нижче або надішліть команду вручну.
               </li>
               <li>Бот відповість, і ваш чат автоматично прив'яжеться тут.</li>
             </ol>
-            <Button size="sm" variant="outline" onClick={() => refetch()}>
-              <RefreshCw className="mr-1.5 h-3.5 w-3.5" />Я надіслав команду — перевірте зараз
-            </Button>
+            {activePairingCode ? (
+              <div className="rounded-md border border-border bg-muted/20 p-3 text-xs">
+                <div className="mb-2 text-muted-foreground">Команда для Telegram</div>
+                <div className="flex items-center gap-2">
+                  <code className="min-w-0 flex-1 truncate font-mono text-foreground">
+                    {startCommand}
+                  </code>
+                  <Button size="icon" variant="outline" className="h-7 w-7" onClick={handleCopy}>
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+            <div className="flex flex-wrap gap-2">
+              {botLink ? (
+                <Button size="sm" asChild>
+                  <a href={botLink} target="_blank" rel="noreferrer">
+                    <Send className="mr-1.5 h-3.5 w-3.5" />Відкрити бота
+                  </a>
+                </Button>
+              ) : (
+                <Button size="sm" onClick={handleCreatePairing} disabled={busy}>
+                  {busy ? (
+                    <RefreshCw className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Send className="mr-1.5 h-3.5 w-3.5" />
+                  )}
+                  Створити код
+                </Button>
+              )}
+              <Button size="sm" variant="outline" onClick={() => refetch()} disabled={busy}>
+                <RefreshCw className="mr-1.5 h-3.5 w-3.5" />Перевірити підключення
+              </Button>
+            </div>
           </>
         )}
       </CardContent>

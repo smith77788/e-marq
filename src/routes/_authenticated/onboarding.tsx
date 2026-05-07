@@ -30,6 +30,7 @@ import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 import { IntegrationGuide } from "@/components/owner/IntegrationGuide";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTenantContext } from "@/hooks/useTenantContext";
 import { useT, type TKey, type Lang } from "@/lib/i18n";
 
 type Search = { tenant?: string; slug?: string };
@@ -393,6 +394,13 @@ function OnboardingPage() {
 
 type QC = ReturnType<typeof useQueryClient>;
 
+function generateTelegramPairingCode(): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
+}
+
 function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
   const { t } = useT();
   const { data: tenant } = useQuery({
@@ -420,6 +428,7 @@ function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
       toast.success(t("common.save") + " ✓");
       qc.invalidateQueries({ queryKey: ["tenant", tenantId] });
       qc.invalidateQueries({ queryKey: ["my-tenants"] });
+      qc.invalidateQueries({ queryKey: ["my-tenants-rpc"] });
       qc.invalidateQueries({ queryKey: ["onboarding-status", tenantId] });
       qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
     },
@@ -442,7 +451,9 @@ function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
   );
 }
 
-function Step2Channel({ tenantId, qc: _qc }: { tenantId: string; qc: QC }) {
+function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
+  const { user } = useAuth();
+  const [ownerPairingCode, setOwnerPairingCode] = useState<string | null>(null);
   const { data: tenant } = useQuery({
     queryKey: ["tenant-slug", tenantId],
     queryFn: async () => {
@@ -456,6 +467,52 @@ function Step2Channel({ tenantId, qc: _qc }: { tenantId: string; qc: QC }) {
   });
   const slug = tenant?.slug ?? "";
   const deepLink = slug ? `https://t.me/Oauther_bot?start=${slug}` : "";
+  const { data: ownerBinding } = useQuery({
+    queryKey: ["onboarding-owner-tg-binding", tenantId],
+    queryFn: async () => {
+      const [{ data: cfg }, { data: pairing }] = await Promise.all([
+        supabase
+          .from("tenant_configs")
+          .select("owner_telegram_chat_id")
+          .eq("tenant_id", tenantId)
+          .maybeSingle(),
+        supabase
+          .from("telegram_owner_pairings")
+          .select("pairing_code, expires_at")
+          .eq("tenant_id", tenantId)
+          .is("consumed_at", null)
+          .gt("expires_at", new Date().toISOString())
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
+      return { chatId: cfg?.owner_telegram_chat_id ?? null, pairing: pairing ?? null };
+    },
+  });
+  const createOwnerPairing = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error("Сесія не знайдена. Оновіть сторінку.");
+      const code = generateTelegramPairingCode();
+      const { error } = await supabase.from("telegram_owner_pairings").insert({
+        tenant_id: tenantId,
+        pairing_code: code,
+        created_by: user.id,
+      });
+      if (error) throw error;
+      return code;
+    },
+    onSuccess: (code) => {
+      setOwnerPairingCode(code);
+      toast.success("Код створено — відкрийте бота або скопіюйте команду.");
+      qc.invalidateQueries({ queryKey: ["onboarding-owner-tg-binding", tenantId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const activeOwnerCode = ownerPairingCode ?? ownerBinding?.pairing?.pairing_code ?? null;
+  const ownerCommand = activeOwnerCode ? `/start owner ${activeOwnerCode}` : "";
+  const ownerDeepLink = activeOwnerCode
+    ? `https://t.me/Oauther_bot?start=owner_${activeOwnerCode}`
+    : "";
 
   return (
     <div className="space-y-3">
@@ -486,6 +543,65 @@ function Step2Channel({ tenantId, qc: _qc }: { tenantId: string; qc: QC }) {
           </a>
         </Button>
       )}
+      <div className="rounded-md border border-border bg-muted/20 p-3 text-xs text-muted-foreground">
+        {ownerBinding?.chatId ? (
+          <div className="text-success">✅ Telegram власника підключено.</div>
+        ) : (
+          <div className="space-y-2">
+            <div>
+              Для сповіщень власника створіть одноразовий код і відкрийте @Oauther_bot. Старий
+              формат <code>/start owner slug</code> більше не працює з міркувань безпеки.
+            </div>
+            {ownerCommand && (
+              <div className="flex items-center gap-2 rounded-md border border-border bg-background px-2 py-1">
+                <code className="min-w-0 flex-1 truncate font-mono text-foreground">
+                  {ownerCommand}
+                </code>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7"
+                  onClick={() =>
+                    navigator.clipboard
+                      .writeText(ownerCommand)
+                      .then(() => toast.success("Скопійовано"))
+                  }
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2">
+              {ownerDeepLink ? (
+                <Button size="sm" asChild>
+                  <a href={ownerDeepLink} target="_blank" rel="noreferrer">
+                    Відкрити бота як власник →
+                  </a>
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={() => createOwnerPairing.mutate()}
+                  disabled={createOwnerPairing.isPending}
+                >
+                  {createOwnerPairing.isPending && (
+                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                  )}
+                  Створити код власника
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => qc.invalidateQueries({ queryKey: ["onboarding-owner-tg-binding", tenantId] })}
+              >
+                Перевірити підключення
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -1045,6 +1161,7 @@ function CreateFirstTenant({
   navigate: ReturnType<typeof useNavigate>;
 }) {
   const { user } = useAuth();
+  const { setCurrentTenantId } = useTenantContext();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [touched, setTouched] = useState(false);
@@ -1082,7 +1199,14 @@ function CreateFirstTenant({
     },
     onSuccess: (data) => {
       toast.success(lang === "ua" ? "Бізнес створено ✓" : "Business created ✓");
+      setCurrentTenantId(data.id);
+      try {
+        window.localStorage.setItem("marq.activeTenantId", data.id);
+      } catch {
+        /* ignore */
+      }
       qc.invalidateQueries({ queryKey: ["my-tenants"] });
+      qc.invalidateQueries({ queryKey: ["my-tenants-rpc"] });
       navigate({
         to: "/onboarding",
         search: { tenant: data.id, slug: data.slug },
