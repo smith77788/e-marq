@@ -188,6 +188,7 @@ import { Route as AuthenticatedBrandProductsRouteImport } from './routes/_authen
 import { Route as AuthenticatedBrandOrdersRouteImport } from './routes/_authenticated/brand.orders'
 import { Route as AuthenticatedBrandIntegrationsRouteImport } from './routes/_authenticated/brand.integrations'
 import { Route as AuthenticatedBrandInsightsRouteImport } from './routes/_authenticated/brand.insights'
+import { Route as AuthenticatedBrandIngestLogsRouteImport } from './routes/_authenticated/brand.ingest-logs'
 import { Route as AuthenticatedBrandEmailRouteImport } from './routes/_authenticated/brand.email'
 import { Route as AuthenticatedBrandDecisionsRouteImport } from './routes/_authenticated/brand.decisions'
 import { Route as AuthenticatedBrandCustomersRouteImport } from './routes/_authenticated/brand.customers'
@@ -1224,6 +1225,12 @@ const AuthenticatedBrandInsightsRoute =
     path: '/brand/insights',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedBrandIngestLogsRoute =
+  AuthenticatedBrandIngestLogsRouteImport.update({
+    id: '/brand/ingest-logs',
+    path: '/brand/ingest-logs',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedBrandEmailRoute = AuthenticatedBrandEmailRouteImport.update({
   id: '/brand/email',
   path: '/brand/email',
@@ -1594,6 +1601,7 @@ export interface FileRoutesByFullPath {
   '/brand/customers': typeof AuthenticatedBrandCustomersRoute
   '/brand/decisions': typeof AuthenticatedBrandDecisionsRoute
   '/brand/email': typeof AuthenticatedBrandEmailRoute
+  '/brand/ingest-logs': typeof AuthenticatedBrandIngestLogsRoute
   '/brand/insights': typeof AuthenticatedBrandInsightsRoute
   '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/brand/orders': typeof AuthenticatedBrandOrdersRoute
@@ -1828,6 +1836,7 @@ export interface FileRoutesByTo {
   '/brand/customers': typeof AuthenticatedBrandCustomersRoute
   '/brand/decisions': typeof AuthenticatedBrandDecisionsRoute
   '/brand/email': typeof AuthenticatedBrandEmailRoute
+  '/brand/ingest-logs': typeof AuthenticatedBrandIngestLogsRoute
   '/brand/insights': typeof AuthenticatedBrandInsightsRoute
   '/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/brand/orders': typeof AuthenticatedBrandOrdersRoute
@@ -2065,6 +2074,7 @@ export interface FileRoutesById {
   '/_authenticated/brand/customers': typeof AuthenticatedBrandCustomersRoute
   '/_authenticated/brand/decisions': typeof AuthenticatedBrandDecisionsRoute
   '/_authenticated/brand/email': typeof AuthenticatedBrandEmailRoute
+  '/_authenticated/brand/ingest-logs': typeof AuthenticatedBrandIngestLogsRoute
   '/_authenticated/brand/insights': typeof AuthenticatedBrandInsightsRoute
   '/_authenticated/brand/integrations': typeof AuthenticatedBrandIntegrationsRoute
   '/_authenticated/brand/orders': typeof AuthenticatedBrandOrdersRoute
@@ -2302,6 +2312,7 @@ export interface FileRouteTypes {
     | '/brand/customers'
     | '/brand/decisions'
     | '/brand/email'
+    | '/brand/ingest-logs'
     | '/brand/insights'
     | '/brand/integrations'
     | '/brand/orders'
@@ -2536,6 +2547,7 @@ export interface FileRouteTypes {
     | '/brand/customers'
     | '/brand/decisions'
     | '/brand/email'
+    | '/brand/ingest-logs'
     | '/brand/insights'
     | '/brand/integrations'
     | '/brand/orders'
@@ -2772,6 +2784,7 @@ export interface FileRouteTypes {
     | '/_authenticated/brand/customers'
     | '/_authenticated/brand/decisions'
     | '/_authenticated/brand/email'
+    | '/_authenticated/brand/ingest-logs'
     | '/_authenticated/brand/insights'
     | '/_authenticated/brand/integrations'
     | '/_authenticated/brand/orders'
@@ -4395,6 +4408,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBrandInsightsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/brand/ingest-logs': {
+      id: '/_authenticated/brand/ingest-logs'
+      path: '/brand/ingest-logs'
+      fullPath: '/brand/ingest-logs'
+      preLoaderRoute: typeof AuthenticatedBrandIngestLogsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/brand/email': {
       id: '/_authenticated/brand/email'
       path: '/brand/email'
@@ -4857,6 +4877,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedBrandCustomersRoute: typeof AuthenticatedBrandCustomersRoute
   AuthenticatedBrandDecisionsRoute: typeof AuthenticatedBrandDecisionsRoute
   AuthenticatedBrandEmailRoute: typeof AuthenticatedBrandEmailRoute
+  AuthenticatedBrandIngestLogsRoute: typeof AuthenticatedBrandIngestLogsRoute
   AuthenticatedBrandInsightsRoute: typeof AuthenticatedBrandInsightsRoute
   AuthenticatedBrandIntegrationsRoute: typeof AuthenticatedBrandIntegrationsRoute
   AuthenticatedBrandOrdersRoute: typeof AuthenticatedBrandOrdersRoute
@@ -4903,6 +4924,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedBrandCustomersRoute: AuthenticatedBrandCustomersRoute,
   AuthenticatedBrandDecisionsRoute: AuthenticatedBrandDecisionsRoute,
   AuthenticatedBrandEmailRoute: AuthenticatedBrandEmailRoute,
+  AuthenticatedBrandIngestLogsRoute: AuthenticatedBrandIngestLogsRoute,
   AuthenticatedBrandInsightsRoute: AuthenticatedBrandInsightsRoute,
   AuthenticatedBrandIntegrationsRoute: AuthenticatedBrandIntegrationsRoute,
   AuthenticatedBrandOrdersRoute: AuthenticatedBrandOrdersRoute,
