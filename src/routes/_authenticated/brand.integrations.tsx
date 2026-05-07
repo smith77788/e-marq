@@ -166,6 +166,13 @@ function IntegrationsHubPage() {
   }
 
   const filtered = useMemo(() => {
+    const statusOrder: Record<string, number> = {
+      ready: 0,
+      beta: 1,
+      webhookOnly: 2,
+      manualOnly: 3,
+      comingSoon: 4,
+    };
     return INTEGRATIONS.filter((i) => {
       if (tab !== "all" && i.category !== tab) return false;
       if (query.trim()) {
@@ -177,7 +184,7 @@ function IntegrationsHubPage() {
         );
       }
       return true;
-    });
+    }).sort((a, b) => (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9));
   }, [tab, query]);
 
   if (loading) {
