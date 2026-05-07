@@ -205,6 +205,10 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
   const saveConn = useMutation({
     mutationFn: async () => {
       if (!integration) throw new Error("integration missing");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Сесія не знайдена. Увійдіть ще раз і повторіть дію.");
       const config: Record<string, unknown> = {};
       if (domain) config.domain = domain;
       if (restUrl) config.url = restUrl;
@@ -268,6 +272,10 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
     const providerId = integration.id;
     setImporting(true);
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Сесія не знайдена. Увійдіть ще раз і повторіть імпорт.");
       const res = await runImport({
         tenantId,
         sourceProvider: providerId,
@@ -275,6 +283,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
         entityKind,
         rows: parsedFile.rows,
         mapping,
+        userId: user.id,
       });
       setResult(res);
       setStep(3);
