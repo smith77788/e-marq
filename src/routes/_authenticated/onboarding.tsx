@@ -427,6 +427,7 @@ function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
       toast.success(t("common.save") + " ✓");
       qc.invalidateQueries({ queryKey: ["tenant", tenantId] });
       qc.invalidateQueries({ queryKey: ["my-tenants"] });
+      qc.invalidateQueries({ queryKey: ["my-tenants-rpc"] });
       qc.invalidateQueries({ queryKey: ["onboarding-status", tenantId] });
       qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
     },
@@ -1196,7 +1197,13 @@ function CreateFirstTenant({
     },
     onSuccess: (data) => {
       toast.success(lang === "ua" ? "Бізнес створено ✓" : "Business created ✓");
+      try {
+        window.localStorage.setItem("marq.activeTenantId", data.id);
+      } catch {
+        /* ignore */
+      }
       qc.invalidateQueries({ queryKey: ["my-tenants"] });
+      qc.invalidateQueries({ queryKey: ["my-tenants-rpc"] });
       navigate({
         to: "/onboarding",
         search: { tenant: data.id, slug: data.slug },
