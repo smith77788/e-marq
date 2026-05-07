@@ -148,15 +148,24 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
     mutationFn: async (key: string) => {
       const trimmed = key.trim();
       if (!trimmed) throw new Error("Введіть ключ доступу DN Trade");
-      const verifyRes = await fetch("/hooks/integrations/dntrade-verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...(await authHeader()) },
-        body: JSON.stringify({ tenant_id: tenantId, api_key: trimmed }),
-      });
-      const verifyJson = await verifyRes.json();
-      if (!verifyRes.ok) throw new Error(verifyJson.error ?? "Не вдалося перевірити ключ");
-      if (!verifyJson.valid) {
-        throw new Error(`DN Trade відхилив ключ: ${verifyJson.message ?? "невірний ключ"}`);
+      let verifyStatus: "verified" | "failed" | "not_checked" = "not_checked";
+      let verifyMessage: string | null = null;
+      try {
+        const verifyRes = await fetch("/hooks/integrations/dntrade-verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...(await authHeader()) },
+          body: JSON.stringify({ tenant_id: tenantId, api_key: trimmed }),
+        });
+        const verifyJson = await verifyRes.json();
+        if (verifyRes.ok && verifyJson.valid) {
+          verifyStatus = "verified";
+        } else {
+          verifyStatus = "failed";
+          verifyMessage = verifyJson.message ?? verifyJson.error ?? "DN Trade не підтвердив ключ";
+        }
+      } catch (e) {
+        verifyStatus = "failed";
+        verifyMessage = e instanceof Error ? e.message : String(e);
       }
       const { error } = await supabase.from("tenant_integrations").upsert(
         {
@@ -164,13 +173,31 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
           provider: "dntrade",
           credentials_encrypted: trimmed,
           is_active: true,
+          config: {
+            verification: {
+              status: verifyStatus,
+              checked_at: new Date().toISOString(),
+              message: verifyMessage,
+            },
+          },
+          last_sync_status: verifyStatus === "verified" ? "verified" : "saved_unverified",
+          last_sync_error: verifyStatus === "failed" ? verifyMessage : null,
         },
         { onConflict: "tenant_id,provider" },
       );
       if (error) throw error;
+      return { verifyStatus, verifyMessage };
     },
-    onSuccess: () => {
-      toast.success("Готово · DN Trade підключено");
+    onSuccess: (res) => {
+      if (res.verifyStatus === "verified") {
+        toast.success("Готово · DN Trade підключено і перевірено");
+      } else {
+        toast.success("DN Trade збережено", {
+          description: res.verifyMessage
+            ? `Перевірка не пройшла: ${res.verifyMessage}`
+            : "Запустіть синхронізацію пізніше, коли сервіс буде доступний.",
+        });
+      }
       void qc.invalidateQueries({ queryKey: ["dntrade-integration", tenantId] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : MSG.errSave),
@@ -347,7 +374,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
             disabled={saveKey.isPending || !apiKey.trim()}
           >
             {saveKey.isPending && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
-            Перевірити та зберегти
+            Зберегти підключення
           </Button>
         </div>
 
