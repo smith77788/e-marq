@@ -214,7 +214,7 @@ export async function processMessage(u: TgUpdate, appOrigin: string): Promise<vo
   // authenticated dashboard. The legacy form `/start owner <slug>` is now
   // rejected because it let any Telegram user claim ownership of any brand
   // by reading the public storefront slug.
-  const ownerStart = text.match(/^\/start\s+owner(?:\s+(\S+))?/i);
+  const ownerStart = text.match(/^\/start\s+owner(?:[\s_-]+(\S+))?/i);
   if (ownerStart) {
     const code = (ownerStart[1] ?? "").trim();
     if (!code) {
@@ -335,7 +335,7 @@ export async function processMessage(u: TgUpdate, appOrigin: string): Promise<vo
   if (text === "/start") {
     await sendTelegramText(
       chatId,
-      `Привіт! Клієнтам: <code>/start &lt;slug-бренду&gt;</code>. Власникам: <code>/start owner &lt;slug-бренду&gt;</code>.`,
+      `Привіт! Клієнтам: <code>/start &lt;slug-бренду&gt;</code>. Власникам: створіть одноразовий код у MARQ → Налаштування → Telegram і надішліть <code>/start owner КОД</code>.`,
     );
     return;
   }
