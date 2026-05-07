@@ -254,6 +254,8 @@ function BrandCockpitInner({
 
         <SetupChecklist tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
 
+        <SeedDemoButton tenantId={current.tenant_id} />
+
         <SetupReadinessCard tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
 
         <PlanUsageCard tenantId={current.tenant_id} />
