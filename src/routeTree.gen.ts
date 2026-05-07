@@ -207,6 +207,7 @@ import { Route as AuthenticatedAdminPermissionsRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminOverviewRouteImport } from './routes/_authenticated/admin.overview'
 import { Route as AuthenticatedAdminOutcomesRouteImport } from './routes/_authenticated/admin.outcomes'
 import { Route as AuthenticatedAdminLeadRadarRouteImport } from './routes/_authenticated/admin.lead-radar'
+import { Route as AuthenticatedAdminIngestLogsRouteImport } from './routes/_authenticated/admin.ingest-logs'
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin.health'
 import { Route as AuthenticatedAdminDntradeHealthRouteImport } from './routes/_authenticated/admin.dntrade-health'
 import { Route as AuthenticatedAdminDecisionsRouteImport } from './routes/_authenticated/admin.decisions'
@@ -1333,6 +1334,12 @@ const AuthenticatedAdminLeadRadarRoute =
     path: '/admin/lead-radar',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAdminIngestLogsRoute =
+  AuthenticatedAdminIngestLogsRouteImport.update({
+    id: '/admin/ingest-logs',
+    path: '/admin/ingest-logs',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminHealthRoute =
   AuthenticatedAdminHealthRouteImport.update({
     id: '/admin/health',
@@ -1567,6 +1574,7 @@ export interface FileRoutesByFullPath {
   '/admin/decisions': typeof AuthenticatedAdminDecisionsRoute
   '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   '/admin/health': typeof AuthenticatedAdminHealthRoute
+  '/admin/ingest-logs': typeof AuthenticatedAdminIngestLogsRoute
   '/admin/lead-radar': typeof AuthenticatedAdminLeadRadarRoute
   '/admin/outcomes': typeof AuthenticatedAdminOutcomesRoute
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
@@ -1800,6 +1808,7 @@ export interface FileRoutesByTo {
   '/admin/decisions': typeof AuthenticatedAdminDecisionsRoute
   '/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   '/admin/health': typeof AuthenticatedAdminHealthRoute
+  '/admin/ingest-logs': typeof AuthenticatedAdminIngestLogsRoute
   '/admin/lead-radar': typeof AuthenticatedAdminLeadRadarRoute
   '/admin/outcomes': typeof AuthenticatedAdminOutcomesRoute
   '/admin/overview': typeof AuthenticatedAdminOverviewRoute
@@ -2036,6 +2045,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/decisions': typeof AuthenticatedAdminDecisionsRoute
   '/_authenticated/admin/dntrade-health': typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   '/_authenticated/admin/health': typeof AuthenticatedAdminHealthRoute
+  '/_authenticated/admin/ingest-logs': typeof AuthenticatedAdminIngestLogsRoute
   '/_authenticated/admin/lead-radar': typeof AuthenticatedAdminLeadRadarRoute
   '/_authenticated/admin/outcomes': typeof AuthenticatedAdminOutcomesRoute
   '/_authenticated/admin/overview': typeof AuthenticatedAdminOverviewRoute
@@ -2272,6 +2282,7 @@ export interface FileRouteTypes {
     | '/admin/decisions'
     | '/admin/dntrade-health'
     | '/admin/health'
+    | '/admin/ingest-logs'
     | '/admin/lead-radar'
     | '/admin/outcomes'
     | '/admin/overview'
@@ -2505,6 +2516,7 @@ export interface FileRouteTypes {
     | '/admin/decisions'
     | '/admin/dntrade-health'
     | '/admin/health'
+    | '/admin/ingest-logs'
     | '/admin/lead-radar'
     | '/admin/outcomes'
     | '/admin/overview'
@@ -2740,6 +2752,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/decisions'
     | '/_authenticated/admin/dntrade-health'
     | '/_authenticated/admin/health'
+    | '/_authenticated/admin/ingest-logs'
     | '/_authenticated/admin/lead-radar'
     | '/_authenticated/admin/outcomes'
     | '/_authenticated/admin/overview'
@@ -4515,6 +4528,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminLeadRadarRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/ingest-logs': {
+      id: '/_authenticated/admin/ingest-logs'
+      path: '/admin/ingest-logs'
+      fullPath: '/admin/ingest-logs'
+      preLoaderRoute: typeof AuthenticatedAdminIngestLogsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/health': {
       id: '/_authenticated/admin/health'
       path: '/admin/health'
@@ -4817,6 +4837,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminDecisionsRoute: typeof AuthenticatedAdminDecisionsRoute
   AuthenticatedAdminDntradeHealthRoute: typeof AuthenticatedAdminDntradeHealthRouteWithChildren
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
+  AuthenticatedAdminIngestLogsRoute: typeof AuthenticatedAdminIngestLogsRoute
   AuthenticatedAdminLeadRadarRoute: typeof AuthenticatedAdminLeadRadarRoute
   AuthenticatedAdminOutcomesRoute: typeof AuthenticatedAdminOutcomesRoute
   AuthenticatedAdminOverviewRoute: typeof AuthenticatedAdminOverviewRoute
@@ -4862,6 +4883,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminDntradeHealthRoute:
     AuthenticatedAdminDntradeHealthRouteWithChildren,
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
+  AuthenticatedAdminIngestLogsRoute: AuthenticatedAdminIngestLogsRoute,
   AuthenticatedAdminLeadRadarRoute: AuthenticatedAdminLeadRadarRoute,
   AuthenticatedAdminOutcomesRoute: AuthenticatedAdminOutcomesRoute,
   AuthenticatedAdminOverviewRoute: AuthenticatedAdminOverviewRoute,
