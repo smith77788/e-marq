@@ -101,6 +101,11 @@ function getImportableEntities(integration: IntegrationDef): SyncEntity[] {
   return SYNC_ENTITIES.filter((entity) => integration.imports.includes(entity));
 }
 
+function getDefaultEntity(data: IntegRow | null | undefined): SyncEntity | null {
+  const value = data?.config?.default_entity_kind;
+  return value === "products" || value === "customers" || value === "orders" ? value : null;
+}
+
 const STATUS_TONE: Record<string, string> = {
   success: "bg-success/15 text-success border-success/40",
   verified: "bg-success/15 text-success border-success/40",
@@ -181,7 +186,12 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
     mutationFn: async (target: SyncTarget) => {
       if (!integration) return;
       setSyncEntity(target);
-      const entities = target === "all" ? getImportableEntities(integration) : [target];
+      const defaultEntity = getDefaultEntity(integ.data);
+      const entities = target === "all"
+        ? defaultEntity
+          ? [defaultEntity]
+          : getImportableEntities(integration)
+        : [target];
       const totals = { imported: 0, failed: 0, skipped: 0, queued: false };
 
       // DN Trade має власний повноцінний sync-pipeline
@@ -375,6 +385,8 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
   if (!integration) return null;
   const Icon = integration.icon;
   const data = integ.data;
+  const defaultEntity = getDefaultEntity(data);
+  const importableEntities = defaultEntity ? [defaultEntity] : getImportableEntities(integration);
 
   const webhookUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/api/public/integrations/inbound/${integration.id}?tenant=${tenantId}`;
 
@@ -506,7 +518,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
                     <div className="space-y-0.5">
                       <div className="text-sm font-medium">Запустити перший імпорт</div>
                       <p className="text-xs text-muted-foreground">
-                        Підтягнемо все, що є в {integration.name}: товари, клієнтів, замовлення.
+                        Підтягнемо {defaultEntity ? ENTITY_LABELS[defaultEntity].toLowerCase() : "всі доступні дані"} з {integration.name}.
                       </p>
                     </div>
                     <Button
@@ -532,7 +544,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
                     Запустити синхронізацію зараз
                   </Label>
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                    {getImportableEntities(integration).length > 1 && (
+                    {!defaultEntity && importableEntities.length > 1 && (
                       <Button
                         variant="outline"
                         onClick={() => sync.mutate("all")}
@@ -547,7 +559,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
                         Все одразу
                       </Button>
                     )}
-                    {getImportableEntities(integration).map((entity) => {
+                    {importableEntities.map((entity) => {
                       const supportsThis = integration.imports.includes(entity);
                       if (!supportsThis) return null;
                       const isThisSyncing = syncEntity === entity && sync.isPending;
