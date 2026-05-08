@@ -42,9 +42,9 @@ async function authUser(
   const sb = createClient<Database>(url, anon, {
     auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
   });
-  const { data, error } = await sb.auth.getClaims(token);
-  if (error || !data?.claims?.sub) return { ok: false, status: 401, error: "invalid_token" };
-  return { ok: true, userId: String(data.claims.sub) };
+  const { data, error } = await sb.auth.getUser(token);
+  if (error || !data?.user?.id) return { ok: false, status: 401, error: "invalid_token" };
+  return { ok: true, userId: data.user.id };
 }
 
 async function userCanManageTenant(userId: string, tenantId: string): Promise<boolean> {
