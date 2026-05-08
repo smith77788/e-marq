@@ -215,12 +215,16 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
   const toggleActive = useMutation({
     mutationFn: async () => {
       if (!integ.data) return;
-      await ensureAuthenticatedSession();
-      const { error } = await (supabase.rpc as any)("set_tenant_integration_active", {
-        _tenant_id: tenantId,
-        _provider: integration?.id,
-        _is_active: !integ.data.is_active,
-      });
+      await withTimeout(ensureAuthenticatedSession(), 10_000, "Сесія відновлюється занадто довго.");
+      const { error } = await withTimeout<{ error: Error | null }>(
+        (supabase.rpc as any)("set_tenant_integration_active", {
+          _tenant_id: tenantId,
+          _provider: integration?.id,
+          _is_active: !integ.data.is_active,
+        }),
+        MANAGE_ACTION_TIMEOUT_MS,
+        "Зміна статусу підключення триває занадто довго. Спробуйте ще раз.",
+      );
       if (error) throw error;
     },
     onSuccess: () => {
@@ -236,11 +240,15 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
   const disconnect = useMutation({
     mutationFn: async () => {
       if (!integ.data) return;
-      await ensureAuthenticatedSession();
-      const { error } = await (supabase.rpc as any)("delete_tenant_integration", {
-        _tenant_id: tenantId,
-        _provider: integration?.id,
-      });
+      await withTimeout(ensureAuthenticatedSession(), 10_000, "Сесія відновлюється занадто довго.");
+      const { error } = await withTimeout<{ error: Error | null }>(
+        (supabase.rpc as any)("delete_tenant_integration", {
+          _tenant_id: tenantId,
+          _provider: integration?.id,
+        }),
+        MANAGE_ACTION_TIMEOUT_MS,
+        "Видалення підключення триває занадто довго. Спробуйте ще раз.",
+      );
       if (error) throw error;
     },
     onSuccess: () => {
@@ -254,14 +262,18 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
   const generateSecret = useMutation({
     mutationFn: async () => {
       if (!integration || !tenantId) return;
-      await ensureAuthenticatedSession();
+      await withTimeout(ensureAuthenticatedSession(), 10_000, "Сесія відновлюється занадто довго.");
       // Якщо рядка інтеграції ще немає — створюємо мінімальний (тільки для webhook-методів).
       const secret = crypto.randomUUID().replace(/-/g, "");
-      const { error } = await (supabase.rpc as any)("set_tenant_integration_webhook_secret", {
-        _tenant_id: tenantId,
-        _provider: integration.id,
-        _webhook_secret: secret,
-      });
+      const { error } = await withTimeout<{ error: Error | null }>(
+        (supabase.rpc as any)("set_tenant_integration_webhook_secret", {
+          _tenant_id: tenantId,
+          _provider: integration.id,
+          _webhook_secret: secret,
+        }),
+        MANAGE_ACTION_TIMEOUT_MS,
+        "Генерація webhook secret триває занадто довго. Спробуйте ще раз.",
+      );
       if (error) throw error;
     },
     onSuccess: () => {
