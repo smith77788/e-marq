@@ -62,6 +62,14 @@ import { fetchWithTimeout, parseJsonResponse, withTimeout } from "@/lib/async/wi
 type IntegrationInsert = Database["public"]["Tables"]["tenant_integrations"]["Insert"];
 const INTEGRATION_UI_TIMEOUT_MS = 12_000;
 
+function normalizeExternalUrl(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  if (/^https:\/\//i.test(trimmed)) return trimmed;
+  if (/^http:\/\//i.test(trimmed)) return trimmed.replace(/^http:\/\//i, "https://");
+  return `https://${trimmed}`;
+}
+
 function timeoutMessage(action: string) {
   return `${action} триває занадто довго. Спробуйте ще раз або збережіть підключення без перевірки.`;
 }
@@ -119,8 +127,8 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
   async function verifyCredentials() {
     if (!integration) return;
     const config: Record<string, unknown> = {};
-    if (domain) config.domain = domain;
-    if (restUrl) config.url = restUrl;
+    if (domain) config.domain = normalizeExternalUrl(domain);
+    if (restUrl) config.url = normalizeExternalUrl(restUrl);
     setVerifying(true);
     setVerifyResult(null);
     try {
@@ -226,8 +234,8 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
       if (!integration) throw new Error("integration missing");
       await withTimeout(ensureAuthenticatedSession(), 10_000, timeoutMessage("Відновлення сесії"));
       const config: Record<string, unknown> = {};
-      if (domain) config.domain = domain;
-      if (restUrl) config.url = restUrl;
+      if (domain) config.domain = normalizeExternalUrl(domain);
+      if (restUrl) config.url = normalizeExternalUrl(restUrl);
       const webhookSecret = isWebhook ? crypto.randomUUID().replace(/-/g, "") : null;
       const verification =
         isApiKey || isRest || isSheets
