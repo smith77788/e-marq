@@ -97,7 +97,8 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
   const [verifying, setVerifying] = useState(false);
   const [verifyResult, setVerifyResult] = useState<{ ok: boolean; message: string } | null>(null);
 
-  const isFileBased = integration?.method === "csv" || integration?.method === "sheets";
+  const isSheets = integration?.method === "sheets";
+  const isFileBased = integration?.method === "csv";
   const isApiKey = integration?.method === "apiKey";
   const isWebhook = integration?.method === "webhook";
   const isRest = integration?.method === "rest";
@@ -229,7 +230,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
       if (restUrl) config.url = restUrl;
       const webhookSecret = isWebhook ? crypto.randomUUID().replace(/-/g, "") : null;
       const verification =
-        isApiKey || isRest
+        isApiKey || isRest || isSheets
           ? {
               status: verifyResult?.ok ? "verified" : verifyResult ? "failed" : "not_checked",
               checked_at: verifyResult ? new Date().toISOString() : null,
@@ -272,7 +273,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
       toast.success(MSG.saved);
       // For credential-based providers we hand off to the manage dialog
       // (overview + first-import CTA) instead of showing "Готово".
-      if (integration && (isApiKey || isRest) && onSaved) {
+      if (integration && (isApiKey || isRest || isSheets) && onSaved) {
         onSaved(integration.id);
         reset();
         return;
@@ -337,7 +338,8 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
   }
 
   const credsFilled =
-    (isApiKey && apiKey.trim().length > 0) || (isRest && restUrl.trim().length > 0);
+    (isApiKey && apiKey.trim().length > 0) ||
+    ((isRest || isSheets) && restUrl.trim().length > 0);
   const domainRequired =
     isApiKey &&
     (integration.id === "shopify" ||
@@ -501,14 +503,20 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                 </div>
               )}
 
-              {/* REST */}
-              {isRest && (
+              {/* REST / Google Sheets */}
+              {(isRest || isSheets) && (
                 <div className="space-y-3">
                   <div className="space-y-1">
-                    <Label htmlFor="resturl">URL вашого endpoint</Label>
+                    <Label htmlFor="resturl">
+                      {isSheets ? "URL Google Sheets" : "URL вашого endpoint"}
+                    </Label>
                     <Input
                       id="resturl"
-                      placeholder="https://api.example.com/data.json"
+                      placeholder={
+                        isSheets
+                          ? "https://docs.google.com/spreadsheets/d/.../edit#gid=0"
+                          : "https://api.example.com/data.json"
+                      }
                       value={restUrl}
                       onChange={(e) => {
                         setRestUrl(e.target.value);
@@ -516,21 +524,25 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                       }}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Має бути публічний https URL. Локальні / приватні адреси заблоковані.
+                      {isSheets
+                        ? "Таблиця має бути доступна для перегляду за посиланням. Після збереження запустіть імпорт у меню інтеграції."
+                        : "Має бути публічний https URL. Локальні / приватні адреси заблоковані."}
                     </p>
                   </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="restkey">Заголовок Authorization (необовʼязково)</Label>
-                    <Input
-                      id="restkey"
-                      placeholder="Bearer ваш-токен"
-                      value={apiKey}
-                      onChange={(e) => {
-                        setApiKey(e.target.value);
-                        setVerifyResult(null);
-                      }}
-                    />
-                  </div>
+                  {isRest && (
+                    <div className="space-y-1">
+                      <Label htmlFor="restkey">Заголовок Authorization (необовʼязково)</Label>
+                      <Input
+                        id="restkey"
+                        placeholder="Bearer ваш-токен"
+                        value={apiKey}
+                        onChange={(e) => {
+                          setApiKey(e.target.value);
+                          setVerifyResult(null);
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -548,7 +560,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
               )}
 
               {/* Verify result */}
-              {verifyResult && (isApiKey || isRest) && (
+              {verifyResult && (isApiKey || isRest || isSheets) && (
                 <Alert
                   variant={verifyResult.ok ? "default" : "destructive"}
                   className={verifyResult.ok ? "border-success/40 bg-success/5" : ""}
@@ -705,7 +717,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
               )}
 
               {/* API key збережено */}
-              {(isApiKey || isRest) && saveConn.data && !result && (
+              {(isApiKey || isRest || isSheets) && saveConn.data && !result && (
                 <Alert className="border-success/40 bg-success/5">
                   <CheckCircle2 className="h-4 w-4 text-success" />
                   <AlertDescription>
@@ -743,7 +755,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
           </Button>
 
           <div className="flex gap-2">
-            {step === 1 && (isApiKey || isRest) && (
+            {step === 1 && (isApiKey || isRest || isSheets) && (
               <Button
                 variant="outline"
                 disabled={!canVerifyConn || verifying}
@@ -759,7 +771,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                 Перевірити
               </Button>
             )}
-            {step === 1 && (isApiKey || isRest || isWebhook) && (
+            {step === 1 && (isApiKey || isRest || isSheets || isWebhook) && (
               <Button
                 disabled={!canSaveConn || saveConn.isPending}
                 onClick={() => saveConn.mutate()}

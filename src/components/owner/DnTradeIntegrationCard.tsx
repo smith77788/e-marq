@@ -89,6 +89,10 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
 
   const integ = useQuery({
     queryKey: ["dntrade-integration", tenantId],
+    refetchInterval: (q) => {
+      const status = q.state.data?.last_sync_status;
+      return status === "queued" || status === "running" ? 3_000 : 60_000;
+    },
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tenant_integrations")
@@ -203,21 +207,43 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
   const sync = useMutation({
     mutationFn: async (full: boolean) => {
       await ensureAuthenticatedSession();
+      const headers = { "Content-Type": "application/json", ...(await authHeader()) };
       const res = await fetch("/hooks/integrations/dntrade-sync", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...(await authHeader()) },
-        body: JSON.stringify({ tenant_id: tenantId, full }),
+        headers,
+        body: JSON.stringify({ tenant_id: tenantId, full, async: true }),
       });
-      const json = await res.json();
+      const json = (await res.json()) as { queued?: boolean; jobId?: string; error?: string; summary?: DryRunSummary };
       if (!res.ok) throw new Error(json.error ?? MSG.errSync);
+      if (json.queued && json.jobId) {
+        void fetch("/hooks/integrations/dntrade-sync", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ tenant_id: tenantId, full, jobId: json.jobId }),
+        }).finally(() => {
+          void qc.invalidateQueries({ queryKey: ["dntrade-integration", tenantId] });
+          void qc.invalidateQueries({ queryKey: ["dntrade-mapping-errors", tenantId] });
+          void qc.invalidateQueries({ queryKey: ["import-jobs", tenantId] });
+        });
+        return { queued: true } as const;
+      }
       return json.summary as DryRunSummary;
     },
     onSuccess: (s) => {
+      if ((s as { queued?: boolean }).queued) {
+        toast.success("Імпорт DN Trade запущено у фоні", {
+          description: "Стан оновиться автоматично після завершення.",
+        });
+        void qc.invalidateQueries({ queryKey: ["dntrade-integration", tenantId] });
+        void qc.invalidateQueries({ queryKey: ["import-jobs", tenantId] });
+        return;
+      }
+      const summary = s as DryRunSummary;
       toast.success(
-        `Готово · товари: ${s.products.upserted}, клієнти: ${s.customers.upserted}, замовлення: ${s.orders.inserted}`,
+        `Готово · товари: ${summary.products.upserted}, клієнти: ${summary.customers.upserted}, замовлення: ${summary.orders.inserted}`,
       );
-      if (s.mapping_errors?.length) {
-        toast.warning(`${s.mapping_errors.length} невідповідностей — перегляньте нижче`);
+      if (summary.mapping_errors?.length) {
+        toast.warning(`${summary.mapping_errors.length} невідповідностей — перегляньте нижче`);
       }
       void qc.invalidateQueries({ queryKey: ["dntrade-integration", tenantId] });
       void qc.invalidateQueries({ queryKey: ["dntrade-mapping-errors", tenantId] });
