@@ -57,10 +57,35 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
   const tenantsQuery = useQuery({
     queryKey: ["my-tenants-rpc", user?.id],
     enabled: !!user,
+    retry: 2,
+    staleTime: 15_000,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_my_tenants");
       if (error) throw error;
       return (data ?? []) as MyTenant[];
+    },
+  });
+
+  const tenantRowsFallbackQuery = useQuery({
+    queryKey: ["my-tenants-direct-fallback", user?.id],
+    enabled: !!user && (tenantsQuery.isError || (tenantsQuery.isSuccess && (tenantsQuery.data?.length ?? 0) === 0)),
+    retry: 2,
+    staleTime: 15_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tenants")
+        .select("id, name, slug, status")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map<MyTenant>((t) => ({
+        tenant_id: t.id,
+        tenant_name: t.name,
+        tenant_slug: t.slug,
+        membership_role: "owner",
+        plan_key: "free",
+        plan_name: "Free",
+        status: t.status,
+      }));
     },
   });
 
@@ -88,7 +113,10 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const baseTenants = useMemo(() => tenantsQuery.data ?? [], [tenantsQuery.data]);
+  const baseTenants = useMemo(() => {
+    if ((tenantsQuery.data?.length ?? 0) > 0) return tenantsQuery.data ?? [];
+    return tenantRowsFallbackQuery.data ?? [];
+  }, [tenantRowsFallbackQuery.data, tenantsQuery.data]);
   const currentTenantKnown = !!currentTenantId && baseTenants.some((t) => t.tenant_id === currentTenantId);
 
   // New-business safety net: right after create_my_tenant(), the direct tenant row
