@@ -7554,6 +7554,10 @@ export type Database = {
           tenant_id: string
         }[]
       }
+      delete_tenant_integration: {
+        Args: { _provider: string; _tenant_id: string }
+        Returns: boolean
+      }
       demo_measure_recent_outcomes: {
         Args: never
         Returns: {
@@ -8069,6 +8073,10 @@ export type Database = {
       set_owner_telegram_chat: {
         Args: { _chat_id: string; _tenant_id: string }
         Returns: undefined
+      }
+      set_tenant_integration_active: {
+        Args: { _is_active: boolean; _provider: string; _tenant_id: string }
+        Returns: boolean
       }
       set_tenant_integration_webhook_secret: {
         Args: { _provider: string; _tenant_id: string; _webhook_secret: string }
