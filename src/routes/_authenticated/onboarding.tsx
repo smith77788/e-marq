@@ -73,22 +73,23 @@ function OnboardingPage() {
   const tenants = tenantsQuery.data;
 
   // Auto-select tenant from URL or first one
-  const tenantId = search.tenant ?? tenants?.[0]?.id;
-  const tenantSlug = search.slug ?? tenants?.find((t) => t.id === tenantId)?.slug;
+  const urlTenantIsMine = !!search.tenant && !!tenants?.some((t) => t.id === search.tenant);
+  const tenantId = urlTenantIsMine ? search.tenant : tenants?.[0]?.id;
+  const tenantSlug = tenants?.find((t) => t.id === tenantId)?.slug;
 
   useEffect(() => {
     if (tenantId) setCurrentTenantId(tenantId);
   }, [setCurrentTenantId, tenantId]);
 
   useEffect(() => {
-    if (!search.tenant && tenants && tenants[0]) {
+    if ((!search.tenant || !urlTenantIsMine) && tenantId && tenantSlug) {
       navigate({
         to: "/onboarding",
-        search: { tenant: tenants[0].id, slug: tenants[0].slug },
+        search: { tenant: tenantId, slug: tenantSlug },
         replace: true,
       });
     }
-  }, [search.tenant, tenants, navigate]);
+  }, [search.tenant, tenantId, tenantSlug, urlTenantIsMine, navigate]);
 
   const [step, setStep] = useState(0);
 
