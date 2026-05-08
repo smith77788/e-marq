@@ -59,6 +59,19 @@ function asString(v: unknown): string {
   return JSON.stringify(v);
 }
 
+function normalizeGoogleSheetsCsvUrl(rawUrl: string): string {
+  const url = new URL(rawUrl);
+  const idMatch = url.pathname.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  if (idMatch) {
+    const gid = url.searchParams.get("gid") ?? url.hash.match(/gid=(\d+)/)?.[1] ?? "0";
+    return `https://docs.google.com/spreadsheets/d/${idMatch[1]}/export?format=csv&gid=${gid}`;
+  }
+  if (url.hostname === "docs.google.com" && url.pathname.includes("/spreadsheets/d/e/") && url.searchParams.get("output") === "csv") {
+    return url.toString();
+  }
+  throw new Error("Не вдалось розпізнати URL Google Sheets. Вставте посилання з /spreadsheets/d/... або Published CSV link.");
+}
+
 function centsFromMajor(amount: unknown): number {
   const n = typeof amount === "number" ? amount : parseFloat(String(amount ?? "0"));
   return Number.isFinite(n) ? Math.round(n * 100) : 0;
@@ -387,18 +400,18 @@ async function pullGoogleSheets(input: ConnectorPullInput): Promise<ConnectorPul
     (input.config.url as string) ?? input.credentials ?? "",
     "URL Google-таблиці",
   );
-  // Витягуємо /spreadsheets/d/{ID}/...
-  const m = sheetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
-  if (!m) throw new Error("Не вдалось розпізнати ID таблиці у URL");
-  const sheetId = m[1];
-  const gidMatch = sheetUrl.match(/[#&?]gid=(\d+)/);
-  const gid = gidMatch ? gidMatch[1] : "0";
-  const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+  const csvUrl = normalizeGoogleSheetsCsvUrl(sheetUrl);
 
   const res = await safeFetch(csvUrl);
   if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    if (res.status === 401 || res.status === 403 || body.includes("ServiceLogin")) {
+      throw new Error(
+        "Google Sheet не відкритий для імпорту. Увімкніть доступ «будь-хто з посиланням може переглядати» або використайте File → Share → Publish to web → CSV.",
+      );
+    }
     throw new Error(
-      `Не вдалось завантажити Google Sheet (${res.status}). Перевірте, що доступ "будь-хто з посиланням".`,
+      `Не вдалось завантажити Google Sheet (${res.status}). Перевірте URL, gid аркуша і доступ за посиланням.`,
     );
   }
   const text = await res.text();
