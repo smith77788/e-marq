@@ -7,7 +7,7 @@
  *  - історія імпортів (import_jobs) знизу — щоб людина бачила, що відбувалось,
  *  - кнопка «Підключити» відкриває IntegrationWizard.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -72,13 +72,13 @@ function IntegrationsHubPage() {
   const [syncing, setSyncing] = useState<string | null>(null);
 
   const urlTenant = search.tenant;
-  useMemo(() => {
+  useEffect(() => {
     if (!loading && urlTenant && urlTenant !== currentTenantId) {
       setCurrentTenantId(urlTenant);
     }
   }, [currentTenantId, loading, setCurrentTenantId, urlTenant]);
 
-  useMemo(() => {
+  useEffect(() => {
     if (!loading && !urlTenant && currentTenantId) {
       navigate({
         to: "/brand/integrations",
@@ -145,7 +145,7 @@ function IntegrationsHubPage() {
   );
 
   async function runSync(provider: string, entity: "products" | "customers" | "orders") {
-    if (!currentTenantId) return;
+    if (!effectiveTenantId) return;
     setSyncing(provider);
     try {
       const {
@@ -157,8 +157,8 @@ function IntegrationsHubPage() {
       const isDn = provider === "dntrade";
       const url = isDn ? `/hooks/integrations/dntrade-sync` : `/api/integrations/sync/${provider}`;
       const body = isDn
-        ? { tenant_id: currentTenantId, kinds: [entity] }
-        : { entityKind: entity, tenantId: currentTenantId };
+        ? { tenant_id: effectiveTenantId, kinds: [entity] }
+        : { entityKind: entity, tenantId: effectiveTenantId };
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -175,8 +175,8 @@ function IntegrationsHubPage() {
       toast.success(`Синхронізовано: ${importedCount} рядків`, {
         description: failedCount > 0 ? `Помилок: ${failedCount}` : undefined,
       });
-      qc.invalidateQueries({ queryKey: ["import-jobs", currentTenantId] });
-      qc.invalidateQueries({ queryKey: ["tenant-integrations", currentTenantId] });
+      qc.invalidateQueries({ queryKey: ["import-jobs", effectiveTenantId] });
+      qc.invalidateQueries({ queryKey: ["tenant-integrations", effectiveTenantId] });
     } catch (e) {
       toast.error("Не вдалось синхронізувати", {
         description: e instanceof Error ? e.message : String(e),
