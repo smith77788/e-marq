@@ -178,7 +178,7 @@ function IntegrationsHubPage() {
       const url = isDn ? `/hooks/integrations/dntrade-sync` : `/api/integrations/sync/${provider}`;
       const body = isDn
         ? { tenant_id: effectiveTenantId, kinds: [entity] }
-        : { entityKind: entity, tenantId: effectiveTenantId };
+        : { entityKind: entity, tenantId: effectiveTenantId, async: true };
       const res = await fetchWithTimeout(
         url,
         {
@@ -193,6 +193,8 @@ function IntegrationsHubPage() {
         imported?: number;
         failed?: number;
         error?: string;
+        queued?: boolean;
+        jobId?: string;
         summary?: {
           products?: { upserted?: number };
           customers?: { upserted?: number };
@@ -201,6 +203,22 @@ function IntegrationsHubPage() {
         };
       }>(res);
       if (!res.ok) throw new Error(json.error ?? `Помилка синку (${res.status})`);
+      if (!isDn && json.queued && json.jobId) {
+        toast.success("Імпорт запущено у фоні", {
+          description: "Журнал нижче оновиться автоматично після завершення.",
+        });
+        qc.invalidateQueries({ queryKey: ["import-jobs", effectiveTenantId] });
+        qc.invalidateQueries({ queryKey: ["tenant-integrations", effectiveTenantId] });
+        void fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ entityKind: entity, tenantId: effectiveTenantId, jobId: json.jobId }),
+        }).finally(() => {
+          qc.invalidateQueries({ queryKey: ["import-jobs", effectiveTenantId] });
+          qc.invalidateQueries({ queryKey: ["tenant-integrations", effectiveTenantId] });
+        });
+        return;
+      }
       const importedCount = isDn
         ? (json.summary?.products?.upserted ?? 0) +
           (json.summary?.customers?.upserted ?? 0) +

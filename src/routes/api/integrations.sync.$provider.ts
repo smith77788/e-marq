@@ -155,6 +155,7 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
               .eq("id", integ.id);
             return jsonResponse({ ok: true, queued: true, jobId: job.id }, 202);
           }
+          if (!job) return jsonResponse({ error: "job error" }, 500);
 
           // 4. Тягнемо дані з зовнішнього API.
           let pulled;
