@@ -68,16 +68,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    void supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      if (data.session?.user) {
-        void checkSuperAdmin(data.session.user.id);
-      }
-      setLoading(false);
-    });
+    // Safety net: if getSession() hangs (slow network / Supabase outage), the
+    // whole UI gets stuck on a "loading auth" spinner forever. Force-resolve
+    // after 8s — onAuthStateChange will still update state when it eventually
+    // arrives, so users can at least see the login screen instead of a frozen app.
+    const failsafe = setTimeout(() => setLoading(false), 8_000);
 
-    return () => subscription.unsubscribe();
+    void supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+        if (data.session?.user) {
+          void checkSuperAdmin(data.session.user.id);
+        }
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.warn("[auth] getSession failed", err);
+      })
+      .finally(() => {
+        clearTimeout(failsafe);
+        setLoading(false);
+      });
+
+    return () => {
+      clearTimeout(failsafe);
+      subscription.unsubscribe();
+    };
   }, []);
 
   async function checkSuperAdmin(userId: string) {

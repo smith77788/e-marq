@@ -147,20 +147,19 @@ function OnboardingPage() {
           .eq("tenant_id", tenantId)
           .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
       ]);
-      const firstErr = [
-        tn.error,
-        prod.error,
-        cust.error,
-        cfg.error,
-        tg.error,
-        mem.error,
-        ev.error,
-      ].find(Boolean);
-      if (firstErr) throw firstErr;
+      // Tolerate partial failures: a brand-new tenant may have RLS races where
+      // one of these helper tables hasn't yet been seeded with rows the user can
+      // see. We log unexpected errors but never block the wizard — a missing
+      // count just means "this step isn't done yet", not "loading failed".
+      const errs = [tn.error, prod.error, cust.error, cfg.error, tg.error, mem.error, ev.error]
+        .filter(Boolean)
+        .map((e) => e!.message);
+      if (errs.length > 0) {
+        // eslint-disable-next-line no-console
+        console.warn("[onboarding-status] partial errors:", errs);
+      }
       const features = (cfg.data?.features ?? {}) as Record<string, unknown>;
       const ownerTelegramBound = !!cfg.data?.owner_telegram_chat_id;
-      // s5 (tracking) — рахуємо як готовий, якщо є хоч 1 подія за останні 7 днів
-      // АБО якщо власник явно поставив прапорець tracking_installed.
       const trackingDone = !!features.tracking_installed || (ev.count ?? 0) > 0;
       return {
         s1: !!(tn.data?.name && tn.data.name.trim().length > 1),
