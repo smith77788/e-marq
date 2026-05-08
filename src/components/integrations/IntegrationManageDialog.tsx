@@ -204,10 +204,11 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
   const toggleActive = useMutation({
     mutationFn: async () => {
       if (!integ.data) return;
-      const { error } = await supabase
-        .from("tenant_integrations")
-        .update({ is_active: !integ.data.is_active })
-        .eq("id", integ.data.id);
+      const { error } = await (supabase.rpc as any)("set_tenant_integration_active", {
+        _tenant_id: tenantId,
+        _provider: integration?.id,
+        _is_active: !integ.data.is_active,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -223,7 +224,10 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
   const disconnect = useMutation({
     mutationFn: async () => {
       if (!integ.data) return;
-      const { error } = await supabase.from("tenant_integrations").delete().eq("id", integ.data.id);
+      const { error } = await (supabase.rpc as any)("delete_tenant_integration", {
+        _tenant_id: tenantId,
+        _provider: integration?.id,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
