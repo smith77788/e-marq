@@ -75,7 +75,7 @@ function OnboardingPage() {
   // Auto-select tenant from URL or first one
   const urlTenantIsMine = !!search.tenant && !!tenants?.some((t) => t.id === search.tenant);
   const tenantId = urlTenantIsMine ? search.tenant : tenants?.[0]?.id;
-  const tenantSlug = search.slug ?? tenants?.find((t) => t.id === tenantId)?.slug;
+  const tenantSlug = tenants?.find((t) => t.id === tenantId)?.slug;
 
   useEffect(() => {
     if (tenantId) setCurrentTenantId(tenantId);
