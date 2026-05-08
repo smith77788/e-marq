@@ -170,7 +170,7 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
       currentTenantId,
       current,
       setCurrentTenantId,
-      loading: tenantsQuery.isLoading,
+      loading: tenantsQuery.isLoading || currentTenantFallbackQuery.isLoading,
     }),
     [
       tenants,
@@ -179,6 +179,7 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
       current,
       setCurrentTenantId,
       tenantsQuery.isLoading,
+      currentTenantFallbackQuery.isLoading,
     ],
   );
 
