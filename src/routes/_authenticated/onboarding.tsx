@@ -33,8 +33,15 @@ import { ensureAuthenticatedSession } from "@/lib/auth/ensureSession";
 import { useAuth } from "@/hooks/useAuth";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { useT, type TKey, type Lang } from "@/lib/i18n";
+import { withTimeout } from "@/lib/async/withTimeout";
 
 type Search = { tenant?: string; slug?: string };
+const UI_QUERY_TIMEOUT_MS = 10_000;
+const UI_MUTATION_TIMEOUT_MS = 12_000;
+
+function actionTimeoutMessage(action: string) {
+  return `${action} триває занадто довго. Перевірте інтернет і натисніть кнопку ще раз.`;
+}
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -429,8 +436,16 @@ function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   const save = useMutation({
     mutationFn: async () => {
-      await ensureAuthenticatedSession();
-      const { error } = await supabase.from("tenants").update({ name }).eq("id", tenantId);
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
+      const { error } = await withTimeout(
+        supabase.from("tenants").update({ name }).eq("id", tenantId),
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Збереження назви бізнесу"),
+      );
       if (error) throw error;
     },
     onSuccess: () => {
@@ -499,10 +514,16 @@ function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
   });
   const createOwnerPairing = useMutation({
     mutationFn: async () => {
-      await ensureAuthenticatedSession();
-      const { data, error } = await (supabase.rpc as any)("create_telegram_owner_pairing", {
-        _tenant_id: tenantId,
-      });
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
+      const { data, error } = await withTimeout<{ data: any; error: Error | null }>(
+        (supabase.rpc as any)("create_telegram_owner_pairing", { _tenant_id: tenantId }),
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Створення Telegram-коду"),
+      );
       if (error) throw error;
       return String(data?.pairing_code ?? "");
     },
@@ -510,6 +531,7 @@ function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
       setOwnerPairingCode(code);
       toast.success("Код створено — відкрийте бота або скопіюйте команду.");
       qc.invalidateQueries({ queryKey: ["onboarding-owner-tg-binding", tenantId] });
+      qc.invalidateQueries({ queryKey: ["onboarding-status", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -619,17 +641,25 @@ function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   const create = useMutation({
     mutationFn: async () => {
-      await ensureAuthenticatedSession();
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
       const priceCents = parseLocalizedPriceCents(price);
       const stockNum = Math.max(0, parseInt(stock || "0", 10));
       if (!name || !Number.isFinite(priceCents) || priceCents <= 0)
         throw new Error("Заповніть назву та ціну");
-      const { error } = await (supabase.rpc as any)("create_onboarding_product", {
-        _tenant_id: tenantId,
-        _name: name,
-        _price_cents: priceCents,
-        _stock: stockNum,
-      });
+      const { error } = await withTimeout<{ error: Error | null }>(
+        (supabase.rpc as any)("create_onboarding_product", {
+          _tenant_id: tenantId,
+          _name: name,
+          _price_cents: priceCents,
+          _stock: stockNum,
+        }),
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Створення товару"),
+      );
       if (error) throw error;
     },
     onSuccess: () => {
@@ -681,13 +711,21 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   const importCsv = useMutation({
     mutationFn: async () => {
-      await ensureAuthenticatedSession();
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
       const rows = parseCustomerCsv(csv);
       if (rows.length === 0) throw new Error("Не знайдено жодного рядка з email");
-      const { data, error } = await (supabase.rpc as any)("import_onboarding_customers", {
-        _tenant_id: tenantId,
-        _customers: rows,
-      });
+      const { data, error } = await withTimeout<{ data: unknown; error: Error | null }>(
+        (supabase.rpc as any)("import_onboarding_customers", {
+          _tenant_id: tenantId,
+          _customers: rows,
+        }),
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Імпорт клієнтів"),
+      );
       if (error) throw error;
       return Number(data ?? rows.length);
     },
@@ -751,11 +789,19 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   const setMethod = useMutation({
     mutationFn: async (method: "manual" | "stripe") => {
-      await ensureAuthenticatedSession();
-      const { error } = await (supabase.rpc as any)("set_tenant_payment_method", {
-        _tenant_id: tenantId,
-        _method: method,
-      });
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
+      const { error } = await withTimeout<{ error: Error | null }>(
+        (supabase.rpc as any)("set_tenant_payment_method", {
+          _tenant_id: tenantId,
+          _method: method,
+        }),
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Збереження способу оплати"),
+      );
       if (error) throw error;
     },
     onSuccess: () => {
@@ -832,18 +878,26 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
 
   const create = useMutation({
     mutationFn: async () => {
-      await ensureAuthenticatedSession();
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
       const trimmed = email.trim().toLowerCase();
       if (!/\S+@\S+\.\S+/.test(trimmed)) {
         throw new Error(
           lang === "ua" ? "Перевірте email — здається, він некоректний." : "Email looks invalid.",
         );
       }
-      const { data, error } = await supabase.rpc("create_tenant_invitation", {
-        _tenant_id: tenantId,
-        _email: trimmed,
-        _role: "admin",
-      });
+      const { data, error } = await withTimeout(
+        supabase.rpc("create_tenant_invitation", {
+          _tenant_id: tenantId,
+          _email: trimmed,
+          _role: "admin",
+        }),
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Створення інвайту"),
+      );
       if (error) throw error;
       return data as { token: string; email: string };
     },
@@ -872,8 +926,16 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
 
   const revoke = useMutation({
     mutationFn: async (id: string) => {
-      await ensureAuthenticatedSession();
-      const { error } = await supabase.from("tenant_invitations").delete().eq("id", id);
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
+      const { error } = await withTimeout(
+        supabase.from("tenant_invitations").delete().eq("id", id),
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Скасування інвайту"),
+      );
       if (error) throw error;
     },
     onSuccess: () => {
@@ -1220,7 +1282,11 @@ function CreateFirstTenant({
 
   const create = useMutation({
     mutationFn: async () => {
-      await ensureAuthenticatedSession();
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
       const cleanName = name.trim();
       if (cleanName.length < 2) {
         throw new Error(lang === "ua" ? "Назва занадто коротка" : "Name too short");
@@ -1231,10 +1297,14 @@ function CreateFirstTenant({
       for (let i = 0; i < 4; i++) {
         // Use SECURITY DEFINER RPC so RLS edge cases (auth.uid mismatches,
         // trigger ordering) cannot block creation. Function lives in DB.
-        const { data, error } = await supabase.rpc("create_my_tenant", {
-          _name: cleanName,
-          _slug: attempt,
-        });
+        const { data, error } = await withTimeout(
+          supabase.rpc("create_my_tenant", {
+            _name: cleanName,
+            _slug: attempt,
+          }),
+          UI_MUTATION_TIMEOUT_MS,
+          actionTimeoutMessage("Створення бізнесу"),
+        );
         if (!error && data) {
           const row = Array.isArray(data) ? data[0] : data;
           return { id: row.id as string, slug: row.slug as string };

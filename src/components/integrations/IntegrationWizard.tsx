@@ -57,8 +57,14 @@ import {
 import { runImport, type ImportResult } from "@/lib/integrations/importer";
 import { METHOD_LABELS, type IntegrationDef } from "@/lib/integrations/catalog";
 import { MSG } from "@/lib/glossary";
+import { withTimeout } from "@/lib/async/withTimeout";
 
 type IntegrationInsert = Database["public"]["Tables"]["tenant_integrations"]["Insert"];
+const INTEGRATION_UI_TIMEOUT_MS = 12_000;
+
+function timeoutMessage(action: string) {
+  return `${action} триває занадто довго. Спробуйте ще раз або збережіть підключення без перевірки.`;
+}
 
 type Props = {
   integration: IntegrationDef | null;
@@ -117,16 +123,24 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
     setVerifying(true);
     setVerifyResult(null);
     try {
-      const { session } = await ensureAuthenticatedSession();
+      const { session } = await withTimeout(
+        ensureAuthenticatedSession(),
+        10_000,
+        timeoutMessage("Відновлення сесії"),
+      );
       const token = session.access_token;
 
       // DN Trade — окремий легкий verify через спецроут /hooks/integrations/dntrade-verify.
       if (integration.id === "dntrade") {
-        const res = await fetch(`/hooks/integrations/dntrade-verify`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ tenant_id: tenantId, api_key: apiKey }),
-        });
+        const res = await withTimeout(
+          fetch(`/hooks/integrations/dntrade-verify`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ tenant_id: tenantId, api_key: apiKey }),
+          }),
+          INTEGRATION_UI_TIMEOUT_MS,
+          timeoutMessage("Перевірка DN Trade"),
+        );
         const json = (await res.json()) as {
           valid?: boolean;
           message?: string;
@@ -153,16 +167,20 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
       // Підбираємо найбільш безпечний entityKind для тестового pull:
       const entity =
         integration.id === "bitrix24" || integration.id === "stripe" ? "customers" : "products";
-      const res = await fetch(`/api/integrations/verify/${integration.id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          tenantId,
-          credentials: apiKey || undefined,
-          config,
-          entityKind: entity,
+      const res = await withTimeout(
+        fetch(`/api/integrations/verify/${integration.id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            tenantId,
+            credentials: apiKey || undefined,
+            config,
+            entityKind: entity,
+          }),
         }),
-      });
+        INTEGRATION_UI_TIMEOUT_MS,
+        timeoutMessage("Перевірка підключення"),
+      );
       const json = (await res.json()) as { ok: boolean; error?: string; sample?: number };
       if (json.ok) {
         setVerifyResult({
@@ -203,7 +221,11 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
   const saveConn = useMutation({
     mutationFn: async () => {
       if (!integration) throw new Error("integration missing");
-      await ensureAuthenticatedSession();
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        10_000,
+        timeoutMessage("Відновлення сесії"),
+      );
       const config: Record<string, unknown> = {};
       if (domain) config.domain = domain;
       if (restUrl) config.url = restUrl;
@@ -231,15 +253,19 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
         webhook_secret: webhookSecret,
       };
 
-      const { data, error } = await (supabase.rpc as any)("save_tenant_integration", {
-        _tenant_id: payload.tenant_id,
-        _provider: payload.provider,
-        _credentials: payload.credentials_encrypted,
-        _config: payload.config,
-        _last_sync_status: payload.last_sync_status,
-        _last_sync_error: payload.last_sync_error,
-        _webhook_secret: payload.webhook_secret,
-      });
+      const { data, error } = await withTimeout<{ data: any; error: Error | null }>(
+        (supabase.rpc as any)("save_tenant_integration", {
+          _tenant_id: payload.tenant_id,
+          _provider: payload.provider,
+          _credentials: payload.credentials_encrypted,
+          _config: payload.config,
+          _last_sync_status: payload.last_sync_status,
+          _last_sync_error: payload.last_sync_error,
+          _webhook_secret: payload.webhook_secret,
+        }),
+        INTEGRATION_UI_TIMEOUT_MS,
+        timeoutMessage("Збереження підключення"),
+      );
       if (error) throw error;
       return data;
     },
@@ -271,16 +297,24 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
     const providerId = integration.id;
     setImporting(true);
     try {
-      const { user } = await ensureAuthenticatedSession();
-      const res = await runImport({
-        tenantId,
-        sourceProvider: providerId,
-        sourceKind: "manual",
-        entityKind,
-        rows: parsedFile.rows,
-        mapping,
-        userId: user.id,
-      });
+      const { user } = await withTimeout(
+        ensureAuthenticatedSession(),
+        10_000,
+        timeoutMessage("Відновлення сесії"),
+      );
+      const res = await withTimeout(
+        runImport({
+          tenantId,
+          sourceProvider: providerId,
+          sourceKind: "manual",
+          entityKind,
+          rows: parsedFile.rows,
+          mapping,
+          userId: user.id,
+        }),
+        15_000,
+        "Імпорт триває занадто довго. Спробуйте менший файл або повторіть дію.",
+      );
       setResult(res);
       setStep(3);
       qc.invalidateQueries({ queryKey: ["tenant-integrations", tenantId] });
