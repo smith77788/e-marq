@@ -2,7 +2,7 @@
  * POST /hooks/integrations/dntrade-sync
  *
  * Запускає синхронізацію DN Trade ↔ нашого tenant.
- * Body: { tenant_id: string, kinds?: ("products"|"customers"|"orders")[], full?: boolean }
+ * Body: { tenant_id: string, kinds?: ("products"|"customers"|"orders")[], full?: boolean, async?: boolean, jobId?: string }
  *
  * Авторизація: bearer token = SUPABASE_PUBLISHABLE_KEY (cron) АБО JWT super-admin / member тенанта.
  *
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-sync")({
           .replace(/^Bearer\s+/i, "")
           .trim();
 
-        let body: { tenant_id?: string; kinds?: string[]; full?: boolean };
+        let body: { tenant_id?: string; kinds?: string[]; full?: boolean; async?: boolean; jobId?: string };
         try {
           body = (await request.json()) as typeof body;
         } catch {
@@ -61,12 +61,64 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-sync")({
         if (!integ.is_active) return jsonError("Integration is disabled", 409);
         if (!integ.credentials_encrypted) return jsonError("Missing API key", 409);
 
-        const apiKey = integ.credentials_encrypted;
         const kinds = (
           body.kinds && body.kinds.length > 0 ? body.kinds : ["products", "customers", "orders"]
         ).filter((k): k is "products" | "customers" | "orders" =>
           ["products", "customers", "orders"].includes(k),
         );
+        const entityKind = kinds.length === 1 ? kinds[0] : "all";
+        const queueOnly = body.async === true && !body.jobId;
+
+        let job: { id: string } | null = null;
+        if (body.jobId) {
+          const { data: existingJob, error: jobErr } = await supabaseAdmin
+            .from("import_jobs")
+            .select("id")
+            .eq("id", body.jobId)
+            .eq("tenant_id", tenantId)
+            .eq("integration_id", integ.id)
+            .eq("source_provider", "dntrade")
+            .maybeSingle();
+          if (jobErr) return jsonError(`DB error: ${jobErr.message}`, 500);
+          if (!existingJob) return jsonError("Імпорт DN Trade не знайдено.", 404);
+          job = existingJob;
+          await supabaseAdmin
+            .from("import_jobs")
+            .update({ status: "running", started_at: new Date().toISOString() })
+            .eq("id", job.id);
+        } else {
+          const { data: createdJob, error: jobErr } = await supabaseAdmin
+            .from("import_jobs")
+            .insert({
+              tenant_id: tenantId,
+              integration_id: integ.id,
+              source_provider: "dntrade",
+              source_kind: "manual",
+              entity_kind: entityKind,
+              status: queueOnly ? "queued" : "running",
+              rows_total: 0,
+              created_by: ctx.kind === "user" ? ctx.userId : null,
+              started_at: queueOnly ? null : new Date().toISOString(),
+              metadata: { kinds, full: body.full === true },
+            })
+            .select("id")
+            .single();
+          if (jobErr || !createdJob) return jsonError(jobErr?.message ?? "job error", 500);
+          job = createdJob;
+        }
+
+        if (queueOnly) {
+          await supabaseAdmin
+            .from("tenant_integrations")
+            .update({ last_sync_status: "queued", last_sync_error: null })
+            .eq("id", integ.id);
+          return new Response(JSON.stringify({ success: true, queued: true, jobId: job.id }), {
+            status: 202,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
+        const apiKey = integ.credentials_encrypted;
         const modifiedFromIso = body.full === true ? undefined : (integ.last_sync_at ?? undefined);
 
         // Mark started
