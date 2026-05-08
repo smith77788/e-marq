@@ -487,7 +487,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
                       variant="outline"
                       className={STATUS_TONE[data.last_sync_status] ?? "text-muted-foreground"}
                     >
-                      {data.last_sync_status}
+                      {STATUS_LABELS[data.last_sync_status] ?? data.last_sync_status}
                     </Badge>
                   </div>
                 )}
@@ -510,15 +510,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
                       </p>
                     </div>
                     <Button
-                      onClick={() => {
-                        const first =
-                          (integration.imports[0] as
-                            | "products"
-                            | "customers"
-                            | "orders"
-                            | undefined) ?? "products";
-                        sync.mutate(first);
-                      }}
+                      onClick={() => sync.mutate("all")}
                       disabled={sync.isPending}
                       className="shrink-0 gap-1"
                     >
@@ -540,7 +532,22 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
                     Запустити синхронізацію зараз
                   </Label>
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                    {(["products", "customers", "orders"] as const).map((entity) => {
+                    {getImportableEntities(integration).length > 1 && (
+                      <Button
+                        variant="outline"
+                        onClick={() => sync.mutate("all")}
+                        disabled={sync.isPending}
+                        className="gap-1"
+                      >
+                        {syncEntity === "all" && sync.isPending ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-3 w-3" />
+                        )}
+                        Все одразу
+                      </Button>
+                    )}
+                    {getImportableEntities(integration).map((entity) => {
                       const supportsThis = integration.imports.includes(entity);
                       if (!supportsThis) return null;
                       const isThisSyncing = syncEntity === entity && sync.isPending;
@@ -557,11 +564,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
                           ) : (
                             <RefreshCw className="h-3 w-3" />
                           )}
-                          {entity === "products"
-                            ? "Товари"
-                            : entity === "customers"
-                              ? "Клієнти"
-                              : "Замовлення"}
+                          {ENTITY_LABELS[entity]}
                         </Button>
                       );
                     })}
