@@ -155,7 +155,6 @@ function OnboardingPage() {
         .filter(Boolean)
         .map((e) => e!.message);
       if (errs.length > 0) {
-        // eslint-disable-next-line no-console
         console.warn("[onboarding-status] partial errors:", errs);
       }
       const features = (cfg.data?.features ?? {}) as Record<string, unknown>;
@@ -1344,6 +1343,33 @@ function CreateFirstTenant({
           return [{ id: data.id, name: name.trim(), slug: data.slug }, ...next];
         },
       );
+      qc.setQueriesData<
+        | Array<{
+            tenant_id: string;
+            tenant_name: string;
+            tenant_slug: string;
+            membership_role: string;
+            plan_key: string;
+            plan_name: string;
+            status: string;
+          }>
+        | undefined
+      >({ queryKey: ["my-tenants-rpc"] }, (prev) => {
+        const next = prev ?? [];
+        if (next.some((t) => t.tenant_id === data.id)) return next;
+        return [
+          {
+            tenant_id: data.id,
+            tenant_name: name.trim(),
+            tenant_slug: data.slug,
+            membership_role: "owner",
+            plan_key: "free",
+            plan_name: "Free",
+            status: "active",
+          },
+          ...next,
+        ];
+      });
       qc.invalidateQueries({ queryKey: ["my-tenants"] });
       qc.invalidateQueries({ queryKey: ["my-tenants-rpc"] });
       navigate({

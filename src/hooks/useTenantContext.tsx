@@ -21,6 +21,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { withTimeout } from "@/lib/async/withTimeout";
 
 export type MyTenant = {
   tenant_id: string;
@@ -45,6 +46,7 @@ type Ctx = {
 
 const TenantCtx = createContext<Ctx | null>(null);
 const STORAGE_KEY = "marq.activeTenantId";
+const TENANT_CONTEXT_TIMEOUT_MS = 10_000;
 
 export function TenantContextProvider({ children }: { children: ReactNode }) {
   const { user, isSuperAdmin } = useAuth();
@@ -57,10 +59,46 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
   const tenantsQuery = useQuery({
     queryKey: ["my-tenants-rpc", user?.id],
     enabled: !!user,
+    retry: 2,
+    staleTime: 15_000,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_my_tenants");
+      const { data, error } = await withTimeout(
+        supabase.rpc("get_my_tenants"),
+        TENANT_CONTEXT_TIMEOUT_MS,
+        "Список бізнесів завантажується занадто довго.",
+      );
       if (error) throw error;
       return (data ?? []) as MyTenant[];
+    },
+  });
+
+  const tenantRowsFallbackQuery = useQuery({
+    queryKey: ["my-tenants-direct-fallback", user?.id],
+    enabled:
+      !!user &&
+      (tenantsQuery.isError || (tenantsQuery.isSuccess && (tenantsQuery.data?.length ?? 0) === 0)),
+    retry: 2,
+    staleTime: 15_000,
+    queryFn: async () => {
+      const { data, error } = await withTimeout(
+        supabase
+          .from("tenants")
+          .select("id, name, slug, status")
+          .eq("owner_user_id", user!.id)
+          .order("created_at", { ascending: false }),
+        TENANT_CONTEXT_TIMEOUT_MS,
+        "Список бізнесів завантажується занадто довго.",
+      );
+      if (error) throw error;
+      return (data ?? []).map<MyTenant>((t) => ({
+        tenant_id: t.id,
+        tenant_name: t.name,
+        tenant_slug: t.slug,
+        membership_role: "owner",
+        plan_key: "free",
+        plan_name: "Free",
+        status: t.status,
+      }));
     },
   });
 
@@ -88,7 +126,52 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const tenants = useMemo(() => tenantsQuery.data ?? [], [tenantsQuery.data]);
+  const baseTenants = useMemo(() => {
+    if ((tenantsQuery.data?.length ?? 0) > 0) return tenantsQuery.data ?? [];
+    return tenantRowsFallbackQuery.data ?? [];
+  }, [tenantRowsFallbackQuery.data, tenantsQuery.data]);
+  const currentTenantKnown =
+    !!currentTenantId && baseTenants.some((t) => t.tenant_id === currentTenantId);
+
+  // New-business safety net: right after create_my_tenant(), the direct tenant row
+  // can be visible before get_my_tenants() has caught up in the query cache. Keep
+  // the chosen business usable instead of falling back to an empty/stale switcher.
+  const currentTenantFallbackQuery = useQuery({
+    queryKey: ["tenant-context-fallback", currentTenantId, user?.id],
+    enabled: !!user && !!currentTenantId && !currentTenantKnown,
+    retry: 2,
+    staleTime: 15_000,
+    queryFn: async () => {
+      const { data, error } = await withTimeout(
+        supabase
+          .from("tenants")
+          .select("id, name, slug, status")
+          .eq("id", currentTenantId!)
+          .eq("owner_user_id", user!.id)
+          .maybeSingle(),
+        TENANT_CONTEXT_TIMEOUT_MS,
+        "Поточний бізнес завантажується занадто довго.",
+      );
+      if (error) throw error;
+      if (!data) return null;
+      return {
+        tenant_id: data.id,
+        tenant_name: data.name,
+        tenant_slug: data.slug,
+        membership_role: "owner",
+        plan_key: "free",
+        plan_name: "Free",
+        status: data.status,
+      } satisfies MyTenant;
+    },
+  });
+
+  const tenants = useMemo(() => {
+    const fallback = currentTenantFallbackQuery.data;
+    if (!fallback || baseTenants.some((t) => t.tenant_id === fallback.tenant_id))
+      return baseTenants;
+    return [fallback, ...baseTenants];
+  }, [baseTenants, currentTenantFallbackQuery.data]);
   const allTenantsForAdmin = useMemo(
     () => adminAllTenantsQuery.data ?? [],
     [adminAllTenantsQuery.data],
@@ -98,7 +181,8 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
   // Важливо: після створення нового бізнесу query cache ще може містити старий список.
   // Не перезаписуємо щойно вибраний tenant, доки refetch не встиг підтягнути membership.
   useEffect(() => {
-    if (tenantsQuery.isLoading || tenantsQuery.isFetching) return;
+    if (tenantsQuery.isLoading || tenantsQuery.isFetching || tenantRowsFallbackQuery.isFetching)
+      return;
     if (tenants.length === 0) return;
     const manualSelectionIsFresh = Date.now() - manualTenantSetAt < 15_000;
     if (!currentTenantId || !tenants.find((t) => t.tenant_id === currentTenantId)) {
@@ -111,7 +195,14 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
         /* ignore */
       }
     }
-  }, [tenants, currentTenantId, manualTenantSetAt, tenantsQuery.isFetching, tenantsQuery.isLoading]);
+  }, [
+    tenants,
+    currentTenantId,
+    manualTenantSetAt,
+    tenantsQuery.isFetching,
+    tenantsQuery.isLoading,
+    tenantRowsFallbackQuery.isFetching,
+  ]);
 
   const setCurrentTenantId = useCallback((id: string) => {
     setManualTenantSetAt(Date.now());
@@ -135,7 +226,10 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
       currentTenantId,
       current,
       setCurrentTenantId,
-      loading: tenantsQuery.isLoading,
+      loading:
+        tenantsQuery.isLoading ||
+        tenantRowsFallbackQuery.isLoading ||
+        currentTenantFallbackQuery.isLoading,
     }),
     [
       tenants,
@@ -144,6 +238,8 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
       current,
       setCurrentTenantId,
       tenantsQuery.isLoading,
+      tenantRowsFallbackQuery.isLoading,
+      currentTenantFallbackQuery.isLoading,
     ],
   );
 
