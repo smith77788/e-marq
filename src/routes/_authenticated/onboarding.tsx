@@ -47,6 +47,7 @@ function OnboardingPage() {
   const search = useSearch({ from: "/_authenticated/onboarding" });
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { setCurrentTenantId } = useTenantContext();
   const { t, lang } = useT();
   const qc = useQueryClient();
 
@@ -73,6 +74,10 @@ function OnboardingPage() {
   // Auto-select tenant from URL or first one
   const tenantId = search.tenant ?? tenants?.[0]?.id;
   const tenantSlug = search.slug ?? tenants?.find((t) => t.id === tenantId)?.slug;
+
+  useEffect(() => {
+    if (tenantId) setCurrentTenantId(tenantId);
+  }, [setCurrentTenantId, tenantId]);
 
   useEffect(() => {
     if (!search.tenant && tenants && tenants[0]) {
