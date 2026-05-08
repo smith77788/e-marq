@@ -21,6 +21,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { withTimeout } from "@/lib/async/withTimeout";
 
 export type MyTenant = {
   tenant_id: string;
@@ -45,6 +46,7 @@ type Ctx = {
 
 const TenantCtx = createContext<Ctx | null>(null);
 const STORAGE_KEY = "marq.activeTenantId";
+const TENANT_CONTEXT_TIMEOUT_MS = 10_000;
 
 export function TenantContextProvider({ children }: { children: ReactNode }) {
   const { user, isSuperAdmin } = useAuth();
@@ -60,7 +62,11 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
     retry: 2,
     staleTime: 15_000,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_my_tenants");
+      const { data, error } = await withTimeout(
+        supabase.rpc("get_my_tenants"),
+        TENANT_CONTEXT_TIMEOUT_MS,
+        "Список бізнесів завантажується занадто довго.",
+      );
       if (error) throw error;
       return (data ?? []) as MyTenant[];
     },
