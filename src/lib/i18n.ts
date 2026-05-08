@@ -177,9 +177,9 @@ const dict = {
     "onb.s5.copied": "Скопійовано ✓",
     "onb.s6.title": "Метод оплати",
     "onb.s6.desc":
-      "Як покупці платитимуть. Поки можна обрати ручну оплату — пізніше підключимо Stripe.",
+      "Як покупці платитимуть. Ручна оплата працює одразу; онлайн-оплату можна підключити після запуску.",
     "onb.s6.manual": "Ручна оплата (банк / готівка)",
-    "onb.s6.stripe": "Stripe (підключимо пізніше)",
+    "onb.s6.stripe": "Онлайн-оплата (після запуску)",
     "onb.s7.title": "Запросити команду",
     "onb.s7.desc":
       "Email колег, які допомагатимуть з брендом. Ми надішлемо їм запрошення (можна пропустити).",
@@ -1597,9 +1597,9 @@ const dict = {
     "onb.s5.copy": "Copy snippet",
     "onb.s5.copied": "Copied ✓",
     "onb.s6.title": "Payment method",
-    "onb.s6.desc": "How customers pay. Manual is fine to start — Stripe can be wired later.",
+    "onb.s6.desc": "How customers pay. Manual works immediately; online payments can be connected after launch.",
     "onb.s6.manual": "Manual (bank / cash)",
-    "onb.s6.stripe": "Stripe (connect later)",
+    "onb.s6.stripe": "Online payment (after launch)",
     "onb.s7.title": "Invite teammates",
     "onb.s7.desc": "Emails of people who'll help run the brand. We'll send invites (skip is fine).",
     "onb.s7.emailPh": "colleague@example.com",
@@ -2963,9 +2963,9 @@ const dict = {
     "onb.s5.copied": "Скопировано ✓",
     "onb.s6.title": "Способ оплаты",
     "onb.s6.desc":
-      "Как покупатели будут платить. Пока можно выбрать ручную оплату — позже подключим Stripe.",
+      "Как покупатели будут платить. Ручная оплата работает сразу; онлайн-оплату можно подключить после запуска.",
     "onb.s6.manual": "Ручная оплата (банк / наличные)",
-    "onb.s6.stripe": "Stripe (подключим позже)",
+    "onb.s6.stripe": "Онлайн-оплата (после запуска)",
     "onb.s7.title": "Пригласить команду",
     "onb.s7.desc":
       "Email коллег, которые будут помогать с брендом. Мы отправим им приглашение (можно пропустить).",

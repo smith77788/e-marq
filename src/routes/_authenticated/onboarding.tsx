@@ -885,7 +885,7 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
     | undefined;
 
   const setMethod = useMutation({
-    mutationFn: async (method: "manual" | "stripe") => {
+    mutationFn: async () => {
       await withTimeout(
         ensureAuthenticatedSession(),
         UI_QUERY_TIMEOUT_MS,
@@ -894,12 +894,37 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
       const { error } = await withTimeout(
         supabase.rpc("set_tenant_payment_method", {
           _tenant_id: tenantId,
-          _method: method,
+          _method: "manual",
         }),
         UI_MUTATION_TIMEOUT_MS,
         actionTimeoutMessage("Збереження способу оплати"),
       );
       if (error) throw error;
+
+      const features = (cfg?.features ?? {}) as Record<string, unknown>;
+      const payments =
+        features.payments && typeof features.payments === "object" && !Array.isArray(features.payments)
+          ? (features.payments as Record<string, unknown>)
+          : {};
+      const { error: configError } = await withTimeout(
+        supabase
+          .from("tenant_configs")
+          .update({
+            features: {
+              ...features,
+              payment_method: "manual",
+              payments: {
+                ...payments,
+                manual_enabled: true,
+                currency: typeof payments.currency === "string" ? payments.currency : "UAH",
+              },
+            },
+          })
+          .eq("tenant_id", tenantId),
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Збереження налаштувань оплати"),
+      );
+      if (configError) throw configError;
     },
     onSuccess: () => {
       toast.success(t("common.save") + " ✓");
@@ -912,20 +937,25 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   return (
     <div className="grid gap-2">
-      {(["manual", "stripe"] as const).map((m) => (
-        <button
-          key={m}
-          type="button"
-          onClick={() => setMethod.mutate(m)}
-          className={`rounded-md border p-3 text-left text-sm transition-colors ${
-            current === m ? "border-primary bg-primary/5" : "border-border hover:bg-muted/30"
-          }`}
-        >
-          <div className="font-medium">
-            {m === "manual" ? t("onb.s6.manual") : t("onb.s6.stripe")}
-          </div>
-        </button>
-      ))}
+      <button
+        type="button"
+        onClick={() => setMethod.mutate()}
+        disabled={setMethod.isPending}
+        className={`rounded-md border p-3 text-left text-sm transition-colors ${
+          current === "manual" ? "border-primary bg-primary/5" : "border-border hover:bg-muted/30"
+        }`}
+      >
+        <div className="font-medium">{t("onb.s6.manual")}</div>
+        <div className="mt-1 text-xs text-muted-foreground">
+          Працює одразу: клієнт бачить інструкцію з оплати після оформлення замовлення.
+        </div>
+      </button>
+      <div className="rounded-md border border-border/60 bg-muted/20 p-3 text-sm opacity-80">
+        <div className="font-medium">Онлайн-оплата карткою</div>
+        <div className="mt-1 text-xs text-muted-foreground">
+          LiqPay, WayForPay або monobank підключаються в налаштуваннях бренду після базового запуску.
+        </div>
+      </div>
     </div>
   );
 }
