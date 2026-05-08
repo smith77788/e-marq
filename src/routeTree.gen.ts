@@ -26,7 +26,7 @@ import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as TrackSlugDotjsRouteImport } from './routes/track.$slug[.]js'
+import { Route as TrackSplatRouteImport } from './routes/track.$'
 import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as MSlugRouteImport } from './routes/m.$slug'
 import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
@@ -329,9 +329,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TrackSlugDotjsRoute = TrackSlugDotjsRouteImport.update({
-  id: '/track/$slug.js',
-  path: '/track/$slug.js',
+const TrackSplatRoute = TrackSplatRouteImport.update({
+  id: '/track/$',
+  path: '/track/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SSlugRoute = SSlugRouteImport.update({
@@ -1575,7 +1575,7 @@ export interface FileRoutesByFullPath {
   '/hooks/ingest': typeof HooksIngestRoute
   '/m/$slug': typeof MSlugRoute
   '/s/$slug': typeof SSlugRouteWithChildren
-  '/track/$slug.js': typeof TrackSlugDotjsRoute
+  '/track/$': typeof TrackSplatRoute
   '/admin/audit-log': typeof AuthenticatedAdminAuditLogRoute
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/admin/decisions': typeof AuthenticatedAdminDecisionsRoute
@@ -1810,7 +1810,7 @@ export interface FileRoutesByTo {
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
   '/m/$slug': typeof MSlugRoute
-  '/track/$slug.js': typeof TrackSlugDotjsRoute
+  '/track/$': typeof TrackSplatRoute
   '/admin/audit-log': typeof AuthenticatedAdminAuditLogRoute
   '/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/admin/decisions': typeof AuthenticatedAdminDecisionsRoute
@@ -2048,7 +2048,7 @@ export interface FileRoutesById {
   '/hooks/ingest': typeof HooksIngestRoute
   '/m/$slug': typeof MSlugRoute
   '/s/$slug': typeof SSlugRouteWithChildren
-  '/track/$slug.js': typeof TrackSlugDotjsRoute
+  '/track/$': typeof TrackSplatRoute
   '/_authenticated/admin/audit-log': typeof AuthenticatedAdminAuditLogRoute
   '/_authenticated/admin/commands': typeof AuthenticatedAdminCommandsRoute
   '/_authenticated/admin/decisions': typeof AuthenticatedAdminDecisionsRoute
@@ -2286,7 +2286,7 @@ export interface FileRouteTypes {
     | '/hooks/ingest'
     | '/m/$slug'
     | '/s/$slug'
-    | '/track/$slug.js'
+    | '/track/$'
     | '/admin/audit-log'
     | '/admin/commands'
     | '/admin/decisions'
@@ -2521,7 +2521,7 @@ export interface FileRouteTypes {
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
     | '/m/$slug'
-    | '/track/$slug.js'
+    | '/track/$'
     | '/admin/audit-log'
     | '/admin/commands'
     | '/admin/decisions'
@@ -2758,7 +2758,7 @@ export interface FileRouteTypes {
     | '/hooks/ingest'
     | '/m/$slug'
     | '/s/$slug'
-    | '/track/$slug.js'
+    | '/track/$'
     | '/_authenticated/admin/audit-log'
     | '/_authenticated/admin/commands'
     | '/_authenticated/admin/decisions'
@@ -2992,7 +2992,7 @@ export interface RootRouteChildren {
   HooksIngestRoute: typeof HooksIngestRoute
   MSlugRoute: typeof MSlugRoute
   SSlugRoute: typeof SSlugRouteWithChildren
-  TrackSlugDotjsRoute: typeof TrackSlugDotjsRoute
+  TrackSplatRoute: typeof TrackSplatRoute
   ApiAiAskRoute: typeof ApiAiAskRoute
   ApiDomainsVerifyRoute: typeof ApiDomainsVerifyRoute
   ApiEmailCampaignSendRoute: typeof ApiEmailCampaignSendRoute
@@ -3274,11 +3274,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/track/$slug.js': {
-      id: '/track/$slug.js'
-      path: '/track/$slug.js'
-      fullPath: '/track/$slug.js'
-      preLoaderRoute: typeof TrackSlugDotjsRouteImport
+    '/track/$': {
+      id: '/track/$'
+      path: '/track/$'
+      fullPath: '/track/$'
+      preLoaderRoute: typeof TrackSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/s/$slug': {
@@ -5002,7 +5002,7 @@ const rootRouteChildren: RootRouteChildren = {
   HooksIngestRoute: HooksIngestRoute,
   MSlugRoute: MSlugRoute,
   SSlugRoute: SSlugRouteWithChildren,
-  TrackSlugDotjsRoute: TrackSlugDotjsRoute,
+  TrackSplatRoute: TrackSplatRoute,
   ApiAiAskRoute: ApiAiAskRoute,
   ApiDomainsVerifyRoute: ApiDomainsVerifyRoute,
   ApiEmailCampaignSendRoute: ApiEmailCampaignSendRoute,
@@ -5175,3 +5175,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
