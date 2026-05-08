@@ -223,11 +223,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
   const saveConn = useMutation({
     mutationFn: async () => {
       if (!integration) throw new Error("integration missing");
-      await withTimeout(
-        ensureAuthenticatedSession(),
-        10_000,
-        timeoutMessage("Відновлення сесії"),
-      );
+      await withTimeout(ensureAuthenticatedSession(), 10_000, timeoutMessage("Відновлення сесії"));
       const config: Record<string, unknown> = {};
       if (domain) config.domain = domain;
       if (restUrl) config.url = restUrl;
@@ -255,8 +251,8 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
         webhook_secret: webhookSecret,
       };
 
-      const { data, error } = await withTimeout<{ data: any; error: Error | null }>(
-        (supabase.rpc as any)("save_tenant_integration", {
+      const { data, error } = await withTimeout(
+        supabase.rpc("save_tenant_integration", {
           _tenant_id: payload.tenant_id,
           _provider: payload.provider,
           _credentials: payload.credentials_encrypted,
