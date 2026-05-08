@@ -72,10 +72,15 @@ function OnboardingPage() {
   });
   const tenants = tenantsQuery.data;
 
-  // Auto-select tenant from URL or first one
+  // Auto-select tenant from URL or first one.
+  // Поки tenants ще fetching після щойно створеного бізнесу — не падаємо
+  // у CreateFirstTenant. Перевіряємо search.tenant без вимоги, щоб він був
+  // у вже завантаженому списку: якщо userʼу повернеться 0 рядків (RLS не
+  // встиг побачити membership), наступний refetch усе підтягне.
   const urlTenantIsMine = !!search.tenant && !!tenants?.some((t) => t.id === search.tenant);
-  const tenantId = urlTenantIsMine ? search.tenant : tenants?.[0]?.id;
-  const tenantSlug = tenants?.find((t) => t.id === tenantId)?.slug;
+  const tenantId = urlTenantIsMine ? search.tenant : (search.tenant ?? tenants?.[0]?.id);
+  const tenantSlug =
+    tenants?.find((t) => t.id === tenantId)?.slug ?? (urlTenantIsMine ? undefined : search.slug);
 
   useEffect(() => {
     if (tenantId) setCurrentTenantId(tenantId);
