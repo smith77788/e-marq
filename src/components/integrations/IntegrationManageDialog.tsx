@@ -49,6 +49,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { authHeaders, ensureAuthenticatedSession } from "@/lib/auth/ensureSession";
 import type { IntegrationDef } from "@/lib/integrations/catalog";
 import { isConnectorSupported } from "@/lib/integrations/connectors";
 import { MSG } from "@/lib/glossary";
@@ -94,9 +95,7 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 async function authHeader(): Promise<Record<string, string>> {
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return authHeaders();
 }
 
 export function IntegrationManageDialog({ integration, tenantId, onClose }: Props) {
@@ -204,6 +203,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
   const toggleActive = useMutation({
     mutationFn: async () => {
       if (!integ.data) return;
+      await ensureAuthenticatedSession();
       const { error } = await (supabase.rpc as any)("set_tenant_integration_active", {
         _tenant_id: tenantId,
         _provider: integration?.id,
@@ -224,6 +224,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
   const disconnect = useMutation({
     mutationFn: async () => {
       if (!integ.data) return;
+      await ensureAuthenticatedSession();
       const { error } = await (supabase.rpc as any)("delete_tenant_integration", {
         _tenant_id: tenantId,
         _provider: integration?.id,
@@ -241,6 +242,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
   const generateSecret = useMutation({
     mutationFn: async () => {
       if (!integration || !tenantId) return;
+      await ensureAuthenticatedSession();
       // Якщо рядка інтеграції ще немає — створюємо мінімальний (тільки для webhook-методів).
       const secret = crypto.randomUUID().replace(/-/g, "");
       const { error } = await (supabase.rpc as any)("set_tenant_integration_webhook_secret", {
