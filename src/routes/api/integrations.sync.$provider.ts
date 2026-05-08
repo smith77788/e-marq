@@ -20,7 +20,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { CORS_HEADERS, withCors } from "@/lib/http/cors";
 import { isConnectorSupported, runConnectorPull } from "@/lib/integrations/connectors";
-import { autoMap, parsePriceToCents, type EntityKind } from "@/lib/integrations/parser";
+import { autoMap, parsePriceToCents, validateImportData, type EntityKind } from "@/lib/integrations/parser";
 
 type ProductInsert = Database["public"]["Tables"]["products"]["Insert"];
 type CustomerInsert = Database["public"]["Tables"]["customers"]["Insert"];
@@ -204,6 +204,45 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
           const firstRow = (pulled.rows[0] ?? {}) as Record<string, unknown>;
           const detectedMapping = autoMap(Object.keys(firstRow), entityKind as EntityKind);
           const effectiveMapping = { ...detectedMapping, ...pulled.mapping };
+          if (pulled.rows.length > 0) {
+            const validation = validateImportData(
+              pulled.rows as Array<Record<string, unknown>>,
+              effectiveMapping,
+              entityKind as EntityKind,
+            );
+            if (!validation.valid) {
+              const validationErrors = validation.errors.map((message) => ({ row: 0, message }));
+              await supabaseAdmin
+                .from("import_jobs")
+                .update({
+                  status: "failed",
+                  rows_failed: pulled.rows.length,
+                  error_summary: validationErrors,
+                  finished_at: new Date().toISOString(),
+                })
+                .eq("id", job.id);
+              await supabaseAdmin
+                .from("tenant_integrations")
+                .update({
+                  last_sync_at: new Date().toISOString(),
+                  last_sync_status: "failed",
+                  last_sync_error:
+                    validation.errors[0] ??
+                    "Не вдалося перевірити колонки перед імпортом. Перевірте тип даних і назви колонок.",
+                })
+                .eq("id", integ.id);
+              return jsonResponse(
+                {
+                  error:
+                    validation.errors[0] ??
+                    "Не вдалося перевірити колонки перед імпортом. Перевірте тип даних і назви колонок.",
+                  jobId: job.id,
+                  validation,
+                },
+                422,
+              );
+            }
+          }
           const get = (row: Record<string, unknown>, canonical: string) => {
             const col = effectiveMapping[canonical] ?? canonical;
             const v = row[col];
