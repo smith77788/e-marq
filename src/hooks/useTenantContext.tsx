@@ -78,11 +78,15 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
     retry: 2,
     staleTime: 15_000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tenants")
-        .select("id, name, slug, status")
-        .eq("owner_user_id", user!.id)
-        .order("created_at", { ascending: false });
+      const { data, error } = await withTimeout(
+        supabase
+          .from("tenants")
+          .select("id, name, slug, status")
+          .eq("owner_user_id", user!.id)
+          .order("created_at", { ascending: false }),
+        TENANT_CONTEXT_TIMEOUT_MS,
+        "Список бізнесів завантажується занадто довго.",
+      );
       if (error) throw error;
       return (data ?? []).map<MyTenant>((t) => ({
         tenant_id: t.id,
@@ -135,12 +139,16 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
     retry: 2,
     staleTime: 15_000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tenants")
-        .select("id, name, slug, status")
-        .eq("id", currentTenantId!)
-        .eq("owner_user_id", user!.id)
-        .maybeSingle();
+      const { data, error } = await withTimeout(
+        supabase
+          .from("tenants")
+          .select("id, name, slug, status")
+          .eq("id", currentTenantId!)
+          .eq("owner_user_id", user!.id)
+          .maybeSingle(),
+        TENANT_CONTEXT_TIMEOUT_MS,
+        "Поточний бізнес завантажується занадто довго.",
+      );
       if (error) throw error;
       if (!data) return null;
       return {
