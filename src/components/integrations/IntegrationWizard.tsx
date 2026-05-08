@@ -46,6 +46,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { ensureAuthenticatedSession } from "@/lib/auth/ensureSession";
 import {
   CANONICAL_FIELDS,
   autoMap,
@@ -116,11 +117,8 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
     setVerifying(true);
     setVerifyResult(null);
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const token = session?.access_token;
-      if (!token) throw new Error("Сесія не знайдена. Перезавантажте сторінку.");
+      const { session } = await ensureAuthenticatedSession();
+      const token = session.access_token;
 
       // DN Trade — окремий легкий verify через спецроут /hooks/integrations/dntrade-verify.
       if (integration.id === "dntrade") {
@@ -205,10 +203,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
   const saveConn = useMutation({
     mutationFn: async () => {
       if (!integration) throw new Error("integration missing");
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Сесія не знайдена. Увійдіть ще раз і повторіть дію.");
+      await ensureAuthenticatedSession();
       const config: Record<string, unknown> = {};
       if (domain) config.domain = domain;
       if (restUrl) config.url = restUrl;
@@ -276,10 +271,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
     const providerId = integration.id;
     setImporting(true);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Сесія не знайдена. Увійдіть ще раз і повторіть імпорт.");
+      const { user } = await ensureAuthenticatedSession();
       const res = await runImport({
         tenantId,
         sourceProvider: providerId,

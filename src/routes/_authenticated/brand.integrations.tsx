@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureAuthenticatedSession } from "@/lib/auth/ensureSession";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { IntegrationCard } from "@/components/integrations/IntegrationCard";
 import { IntegrationWizard } from "@/components/integrations/IntegrationWizard";
@@ -149,11 +150,8 @@ function IntegrationsHubPage() {
     if (!effectiveTenantId) return;
     setSyncing(provider);
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const token = session?.access_token;
-      if (!token) throw new Error("Сесія не знайдена");
+      const { session } = await ensureAuthenticatedSession();
+      const token = session.access_token;
       // DN Trade — повноцінний pipeline (incremental, mapping_errors).
       const isDn = provider === "dntrade";
       const url = isDn ? `/hooks/integrations/dntrade-sync` : `/api/integrations/sync/${provider}`;

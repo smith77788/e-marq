@@ -34,6 +34,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { authHeaders, ensureAuthenticatedSession } from "@/lib/auth/ensureSession";
 import { MSG } from "@/lib/glossary";
 
 type Props = { tenantId: string };
@@ -69,9 +70,7 @@ type DryRunSummary = {
 };
 
 async function authHeader(): Promise<Record<string, string>> {
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return authHeaders();
 }
 
 function randomSecret() {
@@ -146,6 +145,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
 
   const saveKey = useMutation({
     mutationFn: async (key: string) => {
+      await ensureAuthenticatedSession();
       const trimmed = key.trim();
       if (!trimmed) throw new Error("Введіть ключ доступу DN Trade");
       let verifyStatus: "verified" | "failed" | "not_checked" = "not_checked";
@@ -202,6 +202,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
 
   const sync = useMutation({
     mutationFn: async (full: boolean) => {
+      await ensureAuthenticatedSession();
       const res = await fetch("/hooks/integrations/dntrade-sync", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await authHeader()) },
@@ -226,6 +227,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
 
   const dryRun = useMutation({
     mutationFn: async () => {
+      await ensureAuthenticatedSession();
       const res = await fetch("/hooks/integrations/dntrade-dry-run", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await authHeader()) },
@@ -246,6 +248,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
 
   const generateWebhookSecret = useMutation({
     mutationFn: async () => {
+      await ensureAuthenticatedSession();
       const secret = randomSecret();
       const { error } = await (supabase.rpc as any)("set_tenant_integration_webhook_secret", {
         _tenant_id: tenantId,

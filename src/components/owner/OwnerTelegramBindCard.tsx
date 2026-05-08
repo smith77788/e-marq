@@ -13,13 +13,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useAuth } from "@/hooks/useAuth";
+import { ensureAuthenticatedSession } from "@/lib/auth/ensureSession";
 
 type Props = { tenantId: string; tenantSlug: string };
 
 export function OwnerTelegramBindCard({ tenantId }: Props) {
   const qc = useQueryClient();
-  const { user } = useAuth();
   const [busy, setBusy] = useState(false);
   const [pairingCode, setPairingCode] = useState<string | null>(null);
 
@@ -64,11 +63,14 @@ export function OwnerTelegramBindCard({ tenantId }: Props) {
     : null;
 
   const handleCreatePairing = async () => {
-    if (!user) {
-      toast.error("Сесія не знайдена. Оновіть сторінку і спробуйте ще раз.");
+    setBusy(true);
+    try {
+      await ensureAuthenticatedSession();
+    } catch (e) {
+      setBusy(false);
+      toast.error(e instanceof Error ? e.message : "Сесія не знайдена");
       return;
     }
-    setBusy(true);
     const { data, error } = await (supabase.rpc as any)("create_telegram_owner_pairing", {
       _tenant_id: tenantId,
     });
@@ -94,6 +96,13 @@ export function OwnerTelegramBindCard({ tenantId }: Props) {
   const handleUnbind = async () => {
     if (!confirm("Перестати отримувати сповіщення в Telegram для цього магазину?")) return;
     setBusy(true);
+    try {
+      await ensureAuthenticatedSession();
+    } catch (e) {
+      setBusy(false);
+      toast.error(e instanceof Error ? e.message : "Сесія не знайдена");
+      return;
+    }
     const { error } = await supabase.rpc("set_owner_telegram_chat", {
       _tenant_id: tenantId,
       _chat_id: "",
@@ -109,6 +118,13 @@ export function OwnerTelegramBindCard({ tenantId }: Props) {
 
   const handleTest = async () => {
     setBusy(true);
+    try {
+      await ensureAuthenticatedSession();
+    } catch (e) {
+      setBusy(false);
+      toast.error(e instanceof Error ? e.message : "Сесія не знайдена");
+      return;
+    }
     const { error } = await (supabase.rpc as any)("create_owner_test_notification", {
       _tenant_id: tenantId,
     });
