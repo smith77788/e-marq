@@ -521,23 +521,31 @@ function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
   const deepLink = slug ? `https://t.me/Oauther_bot?start=${slug}` : "";
   const { data: ownerBinding } = useQuery({
     queryKey: ["onboarding-owner-tg-binding", tenantId],
+    retry: 2,
+    staleTime: 5_000,
     queryFn: async () => {
-      const [{ data: cfg }, { data: pairing }] = await Promise.all([
-        supabase
-          .from("tenant_configs")
-          .select("owner_telegram_chat_id")
-          .eq("tenant_id", tenantId)
-          .maybeSingle(),
-        supabase
-          .from("telegram_owner_pairings")
-          .select("pairing_code, expires_at")
-          .eq("tenant_id", tenantId)
-          .is("consumed_at", null)
-          .gt("expires_at", new Date().toISOString())
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-      ]);
+      const [cfgRes, pairingRes] = await withTimeout(
+        Promise.allSettled([
+          supabase
+            .from("tenant_configs")
+            .select("owner_telegram_chat_id")
+            .eq("tenant_id", tenantId)
+            .maybeSingle(),
+          supabase
+            .from("telegram_owner_pairings")
+            .select("pairing_code, expires_at")
+            .eq("tenant_id", tenantId)
+            .is("consumed_at", null)
+            .gt("expires_at", new Date().toISOString())
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+        ]),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Перевірка Telegram-підключення"),
+      );
+      const cfg = cfgRes.status === "fulfilled" ? cfgRes.value.data : null;
+      const pairing = pairingRes.status === "fulfilled" ? pairingRes.value.data : null;
       return { chatId: cfg?.owner_telegram_chat_id ?? null, pairing: pairing ?? null };
     },
   });
