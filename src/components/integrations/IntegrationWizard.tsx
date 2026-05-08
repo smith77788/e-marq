@@ -57,7 +57,7 @@ import {
 import { runImport, type ImportResult } from "@/lib/integrations/importer";
 import { METHOD_LABELS, type IntegrationDef } from "@/lib/integrations/catalog";
 import { MSG } from "@/lib/glossary";
-import { withTimeout } from "@/lib/async/withTimeout";
+import { fetchWithTimeout, parseJsonResponse, withTimeout } from "@/lib/async/withTimeout";
 
 type IntegrationInsert = Database["public"]["Tables"]["tenant_integrations"]["Insert"];
 const INTEGRATION_UI_TIMEOUT_MS = 12_000;
@@ -132,20 +132,21 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
 
       // DN Trade — окремий легкий verify через спецроут /hooks/integrations/dntrade-verify.
       if (integration.id === "dntrade") {
-        const res = await withTimeout(
-          fetch(`/hooks/integrations/dntrade-verify`, {
+        const res = await fetchWithTimeout(
+          `/hooks/integrations/dntrade-verify`,
+          {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
             body: JSON.stringify({ tenant_id: tenantId, api_key: apiKey }),
-          }),
+          },
           INTEGRATION_UI_TIMEOUT_MS,
           timeoutMessage("Перевірка DN Trade"),
         );
-        const json = (await res.json()) as {
+        const json = await parseJsonResponse<{
           valid?: boolean;
           message?: string;
           error?: string;
-        };
+        }>(res);
         if (!res.ok) {
           const msg = json.error ?? "Не вдалось перевірити";
           setVerifyResult({ ok: false, message: msg });
@@ -167,8 +168,9 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
       // Підбираємо найбільш безпечний entityKind для тестового pull:
       const entity =
         integration.id === "bitrix24" || integration.id === "stripe" ? "customers" : "products";
-      const res = await withTimeout(
-        fetch(`/api/integrations/verify/${integration.id}`, {
+      const res = await fetchWithTimeout(
+        `/api/integrations/verify/${integration.id}`,
+        {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({
@@ -177,11 +179,11 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
             config,
             entityKind: entity,
           }),
-        }),
+        },
         INTEGRATION_UI_TIMEOUT_MS,
         timeoutMessage("Перевірка підключення"),
       );
-      const json = (await res.json()) as { ok: boolean; error?: string; sample?: number };
+      const json = await parseJsonResponse<{ ok: boolean; error?: string; sample?: number }>(res);
       if (json.ok) {
         setVerifyResult({
           ok: true,
