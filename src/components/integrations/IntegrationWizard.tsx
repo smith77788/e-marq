@@ -221,7 +221,11 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
   const saveConn = useMutation({
     mutationFn: async () => {
       if (!integration) throw new Error("integration missing");
-      await ensureAuthenticatedSession();
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        10_000,
+        timeoutMessage("Відновлення сесії"),
+      );
       const config: Record<string, unknown> = {};
       if (domain) config.domain = domain;
       if (restUrl) config.url = restUrl;
@@ -249,15 +253,19 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
         webhook_secret: webhookSecret,
       };
 
-      const { data, error } = await (supabase.rpc as any)("save_tenant_integration", {
-        _tenant_id: payload.tenant_id,
-        _provider: payload.provider,
-        _credentials: payload.credentials_encrypted,
-        _config: payload.config,
-        _last_sync_status: payload.last_sync_status,
-        _last_sync_error: payload.last_sync_error,
-        _webhook_secret: payload.webhook_secret,
-      });
+      const { data, error } = await withTimeout<{ data: any; error: Error | null }>(
+        (supabase.rpc as any)("save_tenant_integration", {
+          _tenant_id: payload.tenant_id,
+          _provider: payload.provider,
+          _credentials: payload.credentials_encrypted,
+          _config: payload.config,
+          _last_sync_status: payload.last_sync_status,
+          _last_sync_error: payload.last_sync_error,
+          _webhook_secret: payload.webhook_secret,
+        }),
+        INTEGRATION_UI_TIMEOUT_MS,
+        timeoutMessage("Збереження підключення"),
+      );
       if (error) throw error;
       return data;
     },
@@ -289,16 +297,24 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
     const providerId = integration.id;
     setImporting(true);
     try {
-      const { user } = await ensureAuthenticatedSession();
-      const res = await runImport({
-        tenantId,
-        sourceProvider: providerId,
-        sourceKind: "manual",
-        entityKind,
-        rows: parsedFile.rows,
-        mapping,
-        userId: user.id,
-      });
+      const { user } = await withTimeout(
+        ensureAuthenticatedSession(),
+        10_000,
+        timeoutMessage("Відновлення сесії"),
+      );
+      const res = await withTimeout(
+        runImport({
+          tenantId,
+          sourceProvider: providerId,
+          sourceKind: "manual",
+          entityKind,
+          rows: parsedFile.rows,
+          mapping,
+          userId: user.id,
+        }),
+        15_000,
+        "Імпорт триває занадто довго. Спробуйте менший файл або повторіть дію.",
+      );
       setResult(res);
       setStep(3);
       qc.invalidateQueries({ queryKey: ["tenant-integrations", tenantId] });
