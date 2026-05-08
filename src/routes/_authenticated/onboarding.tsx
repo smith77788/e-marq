@@ -703,13 +703,21 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   const importCsv = useMutation({
     mutationFn: async () => {
-      await ensureAuthenticatedSession();
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
       const rows = parseCustomerCsv(csv);
       if (rows.length === 0) throw new Error("Не знайдено жодного рядка з email");
-      const { data, error } = await (supabase.rpc as any)("import_onboarding_customers", {
-        _tenant_id: tenantId,
-        _customers: rows,
-      });
+      const { data, error } = await withTimeout<{ data: unknown; error: Error | null }>(
+        (supabase.rpc as any)("import_onboarding_customers", {
+          _tenant_id: tenantId,
+          _customers: rows,
+        }),
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Імпорт клієнтів"),
+      );
       if (error) throw error;
       return Number(data ?? rows.length);
     },
@@ -773,11 +781,19 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   const setMethod = useMutation({
     mutationFn: async (method: "manual" | "stripe") => {
-      await ensureAuthenticatedSession();
-      const { error } = await (supabase.rpc as any)("set_tenant_payment_method", {
-        _tenant_id: tenantId,
-        _method: method,
-      });
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
+      const { error } = await withTimeout<{ error: Error | null }>(
+        (supabase.rpc as any)("set_tenant_payment_method", {
+          _tenant_id: tenantId,
+          _method: method,
+        }),
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Збереження способу оплати"),
+      );
       if (error) throw error;
     },
     onSuccess: () => {
