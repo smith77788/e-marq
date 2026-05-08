@@ -236,11 +236,15 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
         webhook_secret: webhookSecret,
       };
 
-      const { data, error } = await supabase
-        .from("tenant_integrations")
-        .upsert(payload, { onConflict: "tenant_id,provider" })
-        .select()
-        .single();
+      const { data, error } = await (supabase.rpc as any)("save_tenant_integration", {
+        _tenant_id: payload.tenant_id,
+        _provider: payload.provider,
+        _credentials: payload.credentials_encrypted,
+        _config: payload.config,
+        _last_sync_status: payload.last_sync_status,
+        _last_sync_error: payload.last_sync_error,
+        _webhook_secret: payload.webhook_secret,
+      });
       if (error) throw error;
       return data;
     },
