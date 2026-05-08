@@ -49,8 +49,10 @@ import {
   type IntegrationDef,
 } from "@/lib/integrations/catalog";
 import { isConnectorSupported } from "@/lib/integrations/connectors";
+import { fetchWithTimeout, parseJsonResponse, withTimeout } from "@/lib/async/withTimeout";
 
 type Search = { tenant?: string };
+const INTEGRATION_SYNC_TIMEOUT_MS = 15_000;
 
 export const Route = createFileRoute("/_authenticated/brand/integrations")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -74,7 +76,8 @@ function IntegrationsHubPage() {
 
   const urlTenant = search.tenant;
   const urlTenantIsMine = !!urlTenant && tenants.some((t) => t.tenant_id === urlTenant);
-  const currentTenantIsMine = !!currentTenantId && tenants.some((t) => t.tenant_id === currentTenantId);
+  const currentTenantIsMine =
+    !!currentTenantId && tenants.some((t) => t.tenant_id === currentTenantId);
   const safeTenantId = urlTenantIsMine
     ? urlTenant
     : currentTenantIsMine
@@ -87,7 +90,11 @@ function IntegrationsHubPage() {
   }, [currentTenantId, loading, setCurrentTenantId, urlTenant, urlTenantIsMine]);
 
   useEffect(() => {
-    if (!loading && safeTenantId && (!urlTenant || !urlTenantIsMine || urlTenant !== safeTenantId)) {
+    if (
+      !loading &&
+      safeTenantId &&
+      (!urlTenant || !urlTenantIsMine || urlTenant !== safeTenantId)
+    ) {
       navigate({
         to: "/brand/integrations",
         search: { tenant: safeTenantId },
@@ -156,7 +163,11 @@ function IntegrationsHubPage() {
     if (!effectiveTenantId) return;
     setSyncing(provider);
     try {
-      const { session } = await ensureAuthenticatedSession();
+      const { session } = await withTimeout(
+        ensureAuthenticatedSession(),
+        10_000,
+        "Сесія відновлюється занадто довго. Оновіть сторінку і спробуйте ще раз.",
+      );
       const token = session.access_token;
       // DN Trade — повноцінний pipeline (incremental, mapping_errors).
       const isDn = provider === "dntrade";
@@ -164,13 +175,28 @@ function IntegrationsHubPage() {
       const body = isDn
         ? { tenant_id: effectiveTenantId, kinds: [entity] }
         : { entityKind: entity, tenantId: effectiveTenantId };
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify(body),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Помилка синку");
+      const res = await fetchWithTimeout(
+        url,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify(body),
+        },
+        INTEGRATION_SYNC_TIMEOUT_MS,
+        "Синхронізація триває занадто довго. Спробуйте ще раз — імпорт не зависне у фоні.",
+      );
+      const json = await parseJsonResponse<{
+        imported?: number;
+        failed?: number;
+        error?: string;
+        summary?: {
+          products?: { upserted?: number };
+          customers?: { upserted?: number };
+          orders?: { inserted?: number };
+          errors?: string[];
+        };
+      }>(res);
+      if (!res.ok) throw new Error(json.error ?? `Помилка синку (${res.status})`);
       const importedCount = isDn
         ? (json.summary?.products?.upserted ?? 0) +
           (json.summary?.customers?.upserted ?? 0) +

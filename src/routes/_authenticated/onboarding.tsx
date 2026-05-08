@@ -519,13 +519,14 @@ function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
         UI_QUERY_TIMEOUT_MS,
         actionTimeoutMessage("Відновлення сесії"),
       );
-      const { data, error } = await withTimeout<{ data: any; error: Error | null }>(
-        (supabase.rpc as any)("create_telegram_owner_pairing", { _tenant_id: tenantId }),
+      const { data, error } = await withTimeout(
+        supabase.rpc("create_telegram_owner_pairing", { _tenant_id: tenantId }),
         UI_MUTATION_TIMEOUT_MS,
         actionTimeoutMessage("Створення Telegram-коду"),
       );
       if (error) throw error;
-      return String(data?.pairing_code ?? "");
+      const pairing = data as { pairing_code?: string } | null;
+      return String(pairing?.pairing_code ?? "");
     },
     onSuccess: (code) => {
       setOwnerPairingCode(code);
@@ -621,7 +622,9 @@ function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => qc.invalidateQueries({ queryKey: ["onboarding-owner-tg-binding", tenantId] })}
+                onClick={() =>
+                  qc.invalidateQueries({ queryKey: ["onboarding-owner-tg-binding", tenantId] })
+                }
               >
                 Перевірити підключення
               </Button>
@@ -650,8 +653,8 @@ function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
       const stockNum = Math.max(0, parseInt(stock || "0", 10));
       if (!name || !Number.isFinite(priceCents) || priceCents <= 0)
         throw new Error("Заповніть назву та ціну");
-      const { error } = await withTimeout<{ error: Error | null }>(
-        (supabase.rpc as any)("create_onboarding_product", {
+      const { error } = await withTimeout(
+        supabase.rpc("create_onboarding_product", {
           _tenant_id: tenantId,
           _name: name,
           _price_cents: priceCents,
@@ -718,8 +721,8 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
       );
       const rows = parseCustomerCsv(csv);
       if (rows.length === 0) throw new Error("Не знайдено жодного рядка з email");
-      const { data, error } = await withTimeout<{ data: unknown; error: Error | null }>(
-        (supabase.rpc as any)("import_onboarding_customers", {
+      const { data, error } = await withTimeout(
+        supabase.rpc("import_onboarding_customers", {
           _tenant_id: tenantId,
           _customers: rows,
         }),
@@ -794,8 +797,8 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
         UI_QUERY_TIMEOUT_MS,
         actionTimeoutMessage("Відновлення сесії"),
       );
-      const { error } = await withTimeout<{ error: Error | null }>(
-        (supabase.rpc as any)("set_tenant_payment_method", {
+      const { error } = await withTimeout(
+        supabase.rpc("set_tenant_payment_method", {
           _tenant_id: tenantId,
           _method: method,
         }),
@@ -1201,8 +1204,13 @@ function parseCustomerCsv(csv: string): { email: string; name: string | null }[]
   if (lines.length === 0) return [];
   const delimiter = lines[0].includes(";") && !lines[0].includes(",") ? ";" : ",";
   const header = splitCsvLine(lines[0], delimiter).map((h) => h.toLowerCase());
-  const emailIdx = Math.max(header.findIndex((h) => h.includes("email") || h.includes("e-mail")), 0);
-  const nameIdx = header.findIndex((h) => ["name", "імʼя", "ім'я", "імя", "піб", "customer"].some((k) => h.includes(k)));
+  const emailIdx = Math.max(
+    header.findIndex((h) => h.includes("email") || h.includes("e-mail")),
+    0,
+  );
+  const nameIdx = header.findIndex((h) =>
+    ["name", "імʼя", "ім'я", "імя", "піб", "customer"].some((k) => h.includes(k)),
+  );
   return lines
     .slice(1)
     .map((line) => {

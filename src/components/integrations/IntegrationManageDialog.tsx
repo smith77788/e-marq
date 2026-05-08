@@ -53,6 +53,7 @@ import { authHeaders, ensureAuthenticatedSession } from "@/lib/auth/ensureSessio
 import type { IntegrationDef } from "@/lib/integrations/catalog";
 import { isConnectorSupported } from "@/lib/integrations/connectors";
 import { MSG } from "@/lib/glossary";
+import { fetchWithTimeout, parseJsonResponse, withTimeout } from "@/lib/async/withTimeout";
 
 type Props = {
   integration: IntegrationDef | null;
@@ -93,6 +94,7 @@ const STATUS_TONE: Record<string, string> = {
   running: "bg-primary/15 text-primary border-primary/40",
   failed: "bg-destructive/15 text-destructive border-destructive/40",
 };
+const MANAGE_ACTION_TIMEOUT_MS = 12_000;
 
 async function authHeader(): Promise<Record<string, string>> {
   return authHeaders();
@@ -156,12 +158,22 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
       const body = isDn
         ? { tenant_id: tenantId, kinds: [entity] }
         : { entityKind: entity, tenantId };
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...(await authHeader()) },
-        body: JSON.stringify(body),
-      });
-      const json = (await res.json()) as {
+      const headers = await withTimeout(
+        authHeader(),
+        10_000,
+        "Сесія відновлюється занадто довго. Оновіть сторінку і спробуйте ще раз.",
+      );
+      const res = await fetchWithTimeout(
+        url,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...headers },
+          body: JSON.stringify(body),
+        },
+        15_000,
+        "Синхронізація триває занадто довго. Спробуйте ще раз.",
+      );
+      const json = await parseJsonResponse<{
         ok?: boolean;
         imported?: number;
         failed?: number;
@@ -173,8 +185,8 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
           orders?: { inserted?: number };
           errors?: string[];
         };
-      };
-      if (!res.ok) throw new Error(json.error ?? "Помилка синку");
+      }>(res);
+      if (!res.ok) throw new Error(json.error ?? `Помилка синку (${res.status})`);
       // Нормалізуємо DN Trade summary до спільного формату
       if (isDn && json.summary) {
         const s = json.summary;
@@ -203,12 +215,16 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
   const toggleActive = useMutation({
     mutationFn: async () => {
       if (!integ.data) return;
-      await ensureAuthenticatedSession();
-      const { error } = await (supabase.rpc as any)("set_tenant_integration_active", {
-        _tenant_id: tenantId,
-        _provider: integration?.id,
-        _is_active: !integ.data.is_active,
-      });
+      await withTimeout(ensureAuthenticatedSession(), 10_000, "Сесія відновлюється занадто довго.");
+      const { error } = await withTimeout(
+        supabase.rpc("set_tenant_integration_active", {
+          _tenant_id: tenantId,
+          _provider: integration?.id ?? "",
+          _is_active: !integ.data.is_active,
+        }),
+        MANAGE_ACTION_TIMEOUT_MS,
+        "Зміна статусу підключення триває занадто довго. Спробуйте ще раз.",
+      );
       if (error) throw error;
     },
     onSuccess: () => {
@@ -224,11 +240,15 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
   const disconnect = useMutation({
     mutationFn: async () => {
       if (!integ.data) return;
-      await ensureAuthenticatedSession();
-      const { error } = await (supabase.rpc as any)("delete_tenant_integration", {
-        _tenant_id: tenantId,
-        _provider: integration?.id,
-      });
+      await withTimeout(ensureAuthenticatedSession(), 10_000, "Сесія відновлюється занадто довго.");
+      const { error } = await withTimeout(
+        supabase.rpc("delete_tenant_integration", {
+          _tenant_id: tenantId,
+          _provider: integration?.id ?? "",
+        }),
+        MANAGE_ACTION_TIMEOUT_MS,
+        "Видалення підключення триває занадто довго. Спробуйте ще раз.",
+      );
       if (error) throw error;
     },
     onSuccess: () => {
@@ -242,14 +262,18 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
   const generateSecret = useMutation({
     mutationFn: async () => {
       if (!integration || !tenantId) return;
-      await ensureAuthenticatedSession();
+      await withTimeout(ensureAuthenticatedSession(), 10_000, "Сесія відновлюється занадто довго.");
       // Якщо рядка інтеграції ще немає — створюємо мінімальний (тільки для webhook-методів).
       const secret = crypto.randomUUID().replace(/-/g, "");
-      const { error } = await (supabase.rpc as any)("set_tenant_integration_webhook_secret", {
-        _tenant_id: tenantId,
-        _provider: integration.id,
-        _webhook_secret: secret,
-      });
+      const { error } = await withTimeout(
+        supabase.rpc("set_tenant_integration_webhook_secret", {
+          _tenant_id: tenantId,
+          _provider: integration.id,
+          _webhook_secret: secret,
+        }),
+        MANAGE_ACTION_TIMEOUT_MS,
+        "Генерація webhook secret триває занадто довго. Спробуйте ще раз.",
+      );
       if (error) throw error;
     },
     onSuccess: () => {
