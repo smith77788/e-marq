@@ -620,7 +620,7 @@ function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
   const create = useMutation({
     mutationFn: async () => {
       await ensureAuthenticatedSession();
-      const priceCents = Math.round(Number(price) * 100);
+      const priceCents = parseLocalizedPriceCents(price);
       const stockNum = Math.max(0, parseInt(stock || "0", 10));
       if (!name || !Number.isFinite(priceCents) || priceCents <= 0)
         throw new Error("Заповніть назву та ціну");
@@ -682,14 +682,7 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
   const importCsv = useMutation({
     mutationFn: async () => {
       await ensureAuthenticatedSession();
-      const lines = csv.trim().split(/\r?\n/);
-      const rows = lines
-        .slice(1) // skip header
-        .map((l) => {
-          const [email, name] = l.split(",").map((s) => s.trim());
-          return email ? { email, name: name || null } : null;
-        })
-        .filter(Boolean) as { email: string; name: string | null }[];
+      const rows = parseCustomerCsv(csv);
       if (rows.length === 0) throw new Error("Не знайдено жодного рядка з email");
       const { data, error } = await (supabase.rpc as any)("import_onboarding_customers", {
         _tenant_id: tenantId,
