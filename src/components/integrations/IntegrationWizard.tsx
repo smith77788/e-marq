@@ -255,7 +255,12 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
           ...config,
           ...(verification ? { verification } : {}),
         } as IntegrationInsert["config"],
-        last_sync_status: verification?.status === "verified" ? "verified" : "saved_unverified",
+        last_sync_status:
+          verification?.status === "verified"
+            ? "verified"
+            : verification?.status === "failed"
+              ? "verify_failed"
+              : "saved_unverified",
         last_sync_error: verification?.status === "failed" ? verification.message : null,
         webhook_secret: webhookSecret,
       };
