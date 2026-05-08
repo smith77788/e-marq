@@ -23,6 +23,7 @@ import { TenantContextProvider, useTenantContext } from "@/hooks/useTenantContex
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
+import { withTimeout } from "@/lib/async/withTimeout";
 
 export const Route = createFileRoute("/_authenticated")({
   head: () => ({
@@ -30,7 +31,14 @@ export const Route = createFileRoute("/_authenticated")({
   }),
   beforeLoad: async ({ location }) => {
     if (typeof window === "undefined") return;
-    const { data, error } = await supabase.auth.getUser();
+    const { data, error } = await withTimeout(
+      supabase.auth.getUser(),
+      8_000,
+      "Auth check timed out",
+    ).catch((err) => {
+      console.warn("[auth-route] getUser failed", err);
+      return { data: { user: null }, error: err };
+    });
     if (!error && data.user) return;
 
     try {
