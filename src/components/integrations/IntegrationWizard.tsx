@@ -242,6 +242,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
       const config: Record<string, unknown> = {};
       if (domain) config.domain = normalizeExternalUrl(domain);
       if (restUrl) config.url = normalizeExternalUrl(restUrl);
+      if (isRest || isSheets) config.default_entity_kind = entityKind;
       const webhookSecret = isWebhook ? crypto.randomUUID().replace(/-/g, "") : null;
       const verification =
         isApiKey || isRest || isSheets
@@ -541,6 +542,19 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
               {/* REST / Google Sheets */}
               {(isRest || isSheets) && (
                 <div className="space-y-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="sheet-entity-kind">Що лежить у цій таблиці</Label>
+                    <Select value={entityKind} onValueChange={(v) => setEntityKind(v as EntityKind)}>
+                      <SelectTrigger id="sheet-entity-kind">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="products">{ENTITY_LABELS.products}</SelectItem>
+                        <SelectItem value="customers">{ENTITY_LABELS.customers}</SelectItem>
+                        <SelectItem value="orders">{ENTITY_LABELS.orders}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="space-y-1">
                     <Label htmlFor="resturl">
                       {isSheets ? "URL Google Sheets" : "URL вашого endpoint"}
