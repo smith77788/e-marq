@@ -1161,7 +1161,6 @@ function CreateFirstTenant({
   qc: QC;
   navigate: ReturnType<typeof useNavigate>;
 }) {
-  const { user } = useAuth();
   const { setCurrentTenantId } = useTenantContext();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
