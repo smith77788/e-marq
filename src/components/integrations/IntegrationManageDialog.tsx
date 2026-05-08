@@ -216,10 +216,10 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
     mutationFn: async () => {
       if (!integ.data) return;
       await withTimeout(ensureAuthenticatedSession(), 10_000, "Сесія відновлюється занадто довго.");
-      const { error } = await withTimeout<{ error: Error | null }>(
-        (supabase.rpc as any)("set_tenant_integration_active", {
+      const { error } = await withTimeout(
+        supabase.rpc("set_tenant_integration_active", {
           _tenant_id: tenantId,
-          _provider: integration?.id,
+          _provider: integration?.id ?? "",
           _is_active: !integ.data.is_active,
         }),
         MANAGE_ACTION_TIMEOUT_MS,
@@ -241,10 +241,10 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
     mutationFn: async () => {
       if (!integ.data) return;
       await withTimeout(ensureAuthenticatedSession(), 10_000, "Сесія відновлюється занадто довго.");
-      const { error } = await withTimeout<{ error: Error | null }>(
-        (supabase.rpc as any)("delete_tenant_integration", {
+      const { error } = await withTimeout(
+        supabase.rpc("delete_tenant_integration", {
           _tenant_id: tenantId,
-          _provider: integration?.id,
+          _provider: integration?.id ?? "",
         }),
         MANAGE_ACTION_TIMEOUT_MS,
         "Видалення підключення триває занадто довго. Спробуйте ще раз.",
@@ -265,8 +265,8 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
       await withTimeout(ensureAuthenticatedSession(), 10_000, "Сесія відновлюється занадто довго.");
       // Якщо рядка інтеграції ще немає — створюємо мінімальний (тільки для webhook-методів).
       const secret = crypto.randomUUID().replace(/-/g, "");
-      const { error } = await withTimeout<{ error: Error | null }>(
-        (supabase.rpc as any)("set_tenant_integration_webhook_secret", {
+      const { error } = await withTimeout(
+        supabase.rpc("set_tenant_integration_webhook_secret", {
           _tenant_id: tenantId,
           _provider: integration.id,
           _webhook_secret: secret,
