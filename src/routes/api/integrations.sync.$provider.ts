@@ -111,7 +111,7 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
               tenant_id: tenantId,
               integration_id: integ.id,
               source_provider: provider,
-              source_kind: "scheduled",
+              source_kind: "manual",
               entity_kind: entityKind,
               status: "running",
               rows_total: 0,

@@ -140,6 +140,10 @@ function IntegrationsHubPage() {
   const { data: jobs } = useQuery({
     queryKey: ["import-jobs", effectiveTenantId],
     enabled: !!effectiveTenantId,
+    refetchInterval: (query) => {
+      const data = query.state.data as Array<{ status: string }> | undefined;
+      return data?.some((j) => j.status === "queued" || j.status === "running") ? 3_000 : false;
+    },
     queryFn: async () => {
       const { data, error } = await supabase
         .from("import_jobs")
@@ -209,8 +213,17 @@ function IntegrationsHubPage() {
       qc.invalidateQueries({ queryKey: ["import-jobs", effectiveTenantId] });
       qc.invalidateQueries({ queryKey: ["tenant-integrations", effectiveTenantId] });
     } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      if (message.includes("Синхронізація триває занадто довго")) {
+        toast.success("Імпорт запущено у фоні", {
+          description: "Журнал нижче оновиться автоматично, щойно зовнішня система відповість.",
+        });
+        qc.invalidateQueries({ queryKey: ["import-jobs", effectiveTenantId] });
+        qc.invalidateQueries({ queryKey: ["tenant-integrations", effectiveTenantId] });
+        return;
+      }
       toast.error("Не вдалось синхронізувати", {
-        description: e instanceof Error ? e.message : String(e),
+        description: message,
       });
     } finally {
       setSyncing(null);
