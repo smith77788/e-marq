@@ -157,47 +157,84 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
         : `/api/integrations/sync/${integration.id}`;
       const body = isDn
         ? { tenant_id: tenantId, kinds: [entity] }
-        : { entityKind: entity, tenantId };
+        : { entityKind: entity, tenantId, async: true };
       const headers = await withTimeout(
         authHeader(),
         10_000,
         "Сесія відновлюється занадто довго. Оновіть сторінку і спробуйте ще раз.",
       );
-      const res = await fetchWithTimeout(
-        url,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", ...headers },
-          body: JSON.stringify(body),
-        },
-        15_000,
-        "Синхронізація триває занадто довго. Спробуйте ще раз.",
-      );
-      const json = await parseJsonResponse<{
-        ok?: boolean;
-        imported?: number;
-        failed?: number;
-        skipped?: number;
-        error?: string;
-        summary?: {
-          products?: { upserted?: number };
-          customers?: { upserted?: number };
-          orders?: { inserted?: number };
-          errors?: string[];
-        };
-      }>(res);
-      if (!res.ok) throw new Error(json.error ?? `Помилка синку (${res.status})`);
-      // Нормалізуємо DN Trade summary до спільного формату
-      if (isDn && json.summary) {
-        const s = json.summary;
-        const importedCount =
-          (s.products?.upserted ?? 0) + (s.customers?.upserted ?? 0) + (s.orders?.inserted ?? 0);
-        return { imported: importedCount, failed: s.errors?.length ?? 0, skipped: 0 };
+      try {
+        const res = await fetchWithTimeout(
+          url,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...headers },
+            body: JSON.stringify(body),
+          },
+          12_000,
+          "Синхронізація триває занадто довго. Імпорт продовжиться у фоні.",
+        );
+        const json = await parseJsonResponse<{
+          ok?: boolean;
+          imported?: number;
+          failed?: number;
+          skipped?: number;
+          queued?: boolean;
+          jobId?: string;
+          error?: string;
+          summary?: {
+            products?: { upserted?: number };
+            customers?: { upserted?: number };
+            orders?: { inserted?: number };
+            errors?: string[];
+          };
+        }>(res);
+        if (!res.ok) throw new Error(json.error ?? `Помилка синку (${res.status})`);
+        // Async: ендпоінт повернув 202 → fire-and-forget наступний виклик з jobId,
+        // щоб реальний pull відбувся у фоні без блокування UI.
+        if (!isDn && json.queued && json.jobId) {
+          void fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...headers },
+            body: JSON.stringify({ entityKind: entity, tenantId, jobId: json.jobId }),
+          }).finally(() => {
+            void qc.invalidateQueries({ queryKey: ["integration-jobs", tenantId, integration?.id] });
+            void qc.invalidateQueries({ queryKey: ["import-jobs", tenantId] });
+            void qc.invalidateQueries({
+              queryKey: ["tenant-integration-detail", tenantId, integration?.id],
+            });
+          });
+          return { queued: true } as const;
+        }
+        // Нормалізуємо DN Trade summary до спільного формату
+        if (isDn && json.summary) {
+          const s = json.summary;
+          const importedCount =
+            (s.products?.upserted ?? 0) + (s.customers?.upserted ?? 0) + (s.orders?.inserted ?? 0);
+          return { imported: importedCount, failed: s.errors?.length ?? 0, skipped: 0 };
+        }
+        return json;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        if (msg.includes("Імпорт продовжиться у фоні") || msg.includes("занадто довго")) {
+          return { queued: true } as const;
+        }
+        throw e;
       }
-      return json;
     },
     onSuccess: (json) => {
       if (!json) return;
+      if ("queued" in json && json.queued) {
+        toast.success("Імпорт запущено у фоні", {
+          description: "Журнал нижче оновиться автоматично після завершення.",
+        });
+        void qc.invalidateQueries({ queryKey: ["integration-jobs", tenantId, integration?.id] });
+        void qc.invalidateQueries({ queryKey: ["import-jobs", tenantId] });
+        void qc.invalidateQueries({
+          queryKey: ["tenant-integration-detail", tenantId, integration?.id],
+        });
+        return;
+      }
       toast.success(`Синхронізовано: ${json.imported ?? 0} рядків`, {
         description: json.failed ? `Помилок: ${json.failed}` : undefined,
       });
