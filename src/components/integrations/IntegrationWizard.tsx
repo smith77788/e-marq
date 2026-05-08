@@ -717,7 +717,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
               )}
 
               {/* API key збережено */}
-              {(isApiKey || isRest) && saveConn.data && !result && (
+              {(isApiKey || isRest || isSheets) && saveConn.data && !result && (
                 <Alert className="border-success/40 bg-success/5">
                   <CheckCircle2 className="h-4 w-4 text-success" />
                   <AlertDescription>
@@ -755,7 +755,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
           </Button>
 
           <div className="flex gap-2">
-            {step === 1 && (isApiKey || isRest) && (
+            {step === 1 && (isApiKey || isRest || isSheets) && (
               <Button
                 variant="outline"
                 disabled={!canVerifyConn || verifying}
@@ -771,7 +771,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                 Перевірити
               </Button>
             )}
-            {step === 1 && (isApiKey || isRest || isWebhook) && (
+            {step === 1 && (isApiKey || isRest || isSheets || isWebhook) && (
               <Button
                 disabled={!canSaveConn || saveConn.isPending}
                 onClick={() => saveConn.mutate()}
