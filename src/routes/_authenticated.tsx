@@ -22,17 +22,18 @@ import { MfaChallengeGate } from "@/components/layout/MfaChallengeGate";
 import { TenantContextProvider, useTenantContext } from "@/hooks/useTenantContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated")({
   head: () => ({
     meta: [{ name: "robots", content: "noindex, nofollow" }],
   }),
-  beforeLoad: ({ location }) => {
+  beforeLoad: async ({ location }) => {
     if (typeof window === "undefined") return;
+    const { data, error } = await supabase.auth.getUser();
+    if (!error && data.user) return;
+
     try {
-      const raw = window.localStorage.getItem("sb-igzcukhnarwezxwdyonn-auth-token");
-      const session = raw ? JSON.parse(raw) : null;
-      if (session?.access_token) return;
       const here = location.href;
       if (here && here !== "/login") {
         window.sessionStorage.setItem("marq.postAuthDest", here);
