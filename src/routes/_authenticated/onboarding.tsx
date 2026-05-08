@@ -1211,6 +1211,16 @@ function CreateFirstTenant({
       } catch {
         /* ignore */
       }
+      // Optimistically inject the new tenant into both caches so the wizard
+      // can render Step 1 immediately without waiting for refetch.
+      qc.setQueriesData<{ id: string; name: string; slug: string }[] | undefined>(
+        { queryKey: ["my-tenants"] },
+        (prev) => {
+          const next = prev ?? [];
+          if (next.some((t) => t.id === data.id)) return next;
+          return [{ id: data.id, name: name.trim(), slug: data.slug }, ...next];
+        },
+      );
       qc.invalidateQueries({ queryKey: ["my-tenants"] });
       qc.invalidateQueries({ queryKey: ["my-tenants-rpc"] });
       navigate({
