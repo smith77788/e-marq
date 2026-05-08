@@ -511,7 +511,7 @@ function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
         UI_QUERY_TIMEOUT_MS,
         actionTimeoutMessage("Відновлення сесії"),
       );
-      const { data, error } = await withTimeout(
+      const { data, error } = await withTimeout<{ data: any; error: Error | null }>(
         (supabase.rpc as any)("create_telegram_owner_pairing", { _tenant_id: tenantId }),
         UI_MUTATION_TIMEOUT_MS,
         actionTimeoutMessage("Створення Telegram-коду"),
@@ -642,7 +642,7 @@ function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
       const stockNum = Math.max(0, parseInt(stock || "0", 10));
       if (!name || !Number.isFinite(priceCents) || priceCents <= 0)
         throw new Error("Заповніть назву та ціну");
-      const { error } = await withTimeout(
+      const { error } = await withTimeout<{ error: Error | null }>(
         (supabase.rpc as any)("create_onboarding_product", {
           _tenant_id: tenantId,
           _name: name,
