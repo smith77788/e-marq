@@ -142,6 +142,25 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-sync")({
           const hasErrors = summary.errors.length > 0 || summary.mapping_errors.length > 0;
 
           await supabaseAdmin
+            .from("import_jobs")
+            .update({
+              status: hasErrors ? "completed_with_errors" : "completed",
+              rows_total: summary.products.fetched + summary.customers.fetched + summary.orders.fetched,
+              rows_imported: totalProducts + totalCustomers + totalOrders,
+              rows_skipped: summary.orders.skipped,
+              rows_failed: summary.errors.length + summary.mapping_errors.length,
+              error_summary: [
+                ...summary.errors.map((message) => ({ row: 0, message })),
+                ...summary.mapping_errors.slice(0, 50).map((e) => ({
+                  row: 0,
+                  message: `${e.kind}#${e.external_id ?? "?"}: ${e.message}`,
+                })),
+              ],
+              finished_at: new Date().toISOString(),
+            })
+            .eq("id", job.id);
+
+          await supabaseAdmin
             .from("tenant_integrations")
             .update({
               last_sync_at: new Date().toISOString(),
@@ -163,6 +182,14 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-sync")({
           return jsonOk({ summary });
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
+          await supabaseAdmin
+            .from("import_jobs")
+            .update({
+              status: "failed",
+              error_summary: [{ row: 0, message }],
+              finished_at: new Date().toISOString(),
+            })
+            .eq("id", job.id);
           await supabaseAdmin
             .from("tenant_integrations")
             .update({
