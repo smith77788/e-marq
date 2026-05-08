@@ -230,7 +230,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
       return json.summary as DryRunSummary;
     },
     onSuccess: (s) => {
-      if ("queued" in s && s.queued) {
+      if ((s as { queued?: boolean }).queued) {
         toast.success("Імпорт DN Trade запущено у фоні", {
           description: "Стан оновиться автоматично після завершення.",
         });
@@ -238,11 +238,12 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
         void qc.invalidateQueries({ queryKey: ["import-jobs", tenantId] });
         return;
       }
+      const summary = s as DryRunSummary;
       toast.success(
-        `Готово · товари: ${s.products.upserted}, клієнти: ${s.customers.upserted}, замовлення: ${s.orders.inserted}`,
+        `Готово · товари: ${summary.products.upserted}, клієнти: ${summary.customers.upserted}, замовлення: ${summary.orders.inserted}`,
       );
-      if (s.mapping_errors?.length) {
-        toast.warning(`${s.mapping_errors.length} невідповідностей — перегляньте нижче`);
+      if (summary.mapping_errors?.length) {
+        toast.warning(`${summary.mapping_errors.length} невідповідностей — перегляньте нижче`);
       }
       void qc.invalidateQueries({ queryKey: ["dntrade-integration", tenantId] });
       void qc.invalidateQueries({ queryKey: ["dntrade-mapping-errors", tenantId] });
