@@ -16,12 +16,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-export const Route = createFileRoute("/track/$slug.js")({
+export const Route = createFileRoute("/track/$")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        // Param key is literally "slug.js" because of the [.]js suffix in the
-        // file name, so we extract the slug from the URL path directly.
+        // The route is a splat because TanStack route params cannot contain
+        // an escaped ".js" suffix. We extract the brand slug from the URL.
         const url = new URL(request.url);
         const match = url.pathname.match(/\/track\/([^/]+?)\.js$/);
         const slug = match?.[1] ?? "";
