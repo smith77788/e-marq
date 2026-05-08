@@ -86,13 +86,45 @@ type ImportJob = {
   error_summary: unknown;
 };
 
+type SyncEntity = "products" | "customers" | "orders";
+type SyncTarget = SyncEntity | "all";
+
+const SYNC_ENTITIES: SyncEntity[] = ["products", "customers", "orders"];
+
+const ENTITY_LABELS: Record<SyncEntity, string> = {
+  products: "Товари",
+  customers: "Клієнти",
+  orders: "Замовлення",
+};
+
+function getImportableEntities(integration: IntegrationDef): SyncEntity[] {
+  return SYNC_ENTITIES.filter((entity) => integration.imports.includes(entity));
+}
+
 const STATUS_TONE: Record<string, string> = {
   success: "bg-success/15 text-success border-success/40",
+  verified: "bg-success/15 text-success border-success/40",
   completed: "bg-success/15 text-success border-success/40",
   partial: "bg-warning/15 text-warning border-warning/40",
   completed_with_errors: "bg-warning/15 text-warning border-warning/40",
   running: "bg-primary/15 text-primary border-primary/40",
+  queued: "bg-primary/15 text-primary border-primary/40",
+  saved_unverified: "bg-warning/15 text-warning border-warning/40",
   failed: "bg-destructive/15 text-destructive border-destructive/40",
+  verify_failed: "bg-destructive/15 text-destructive border-destructive/40",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  success: "успішно",
+  verified: "перевірено",
+  completed: "завершено",
+  partial: "частково",
+  completed_with_errors: "з помилками",
+  running: "виконується",
+  queued: "у черзі",
+  saved_unverified: "збережено без перевірки",
+  failed: "помилка",
+  verify_failed: "перевірка не пройдена",
 };
 const MANAGE_ACTION_TIMEOUT_MS = 12_000;
 
@@ -102,7 +134,7 @@ async function authHeader(): Promise<Record<string, string>> {
 
 export function IntegrationManageDialog({ integration, tenantId, onClose }: Props) {
   const qc = useQueryClient();
-  const [syncEntity, setSyncEntity] = useState<"products" | "customers" | "orders" | null>(null);
+  const [syncEntity, setSyncEntity] = useState<SyncTarget | null>(null);
 
   const integ = useQuery<IntegRow | null>({
     queryKey: ["tenant-integration-detail", tenantId, integration?.id],
@@ -146,78 +178,91 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
   const isWebhook = integration?.method === "webhook";
 
   const sync = useMutation({
-    mutationFn: async (entity: "products" | "customers" | "orders") => {
+    mutationFn: async (target: SyncTarget) => {
       if (!integration) return;
-      setSyncEntity(entity);
+      setSyncEntity(target);
+      const entities = target === "all" ? getImportableEntities(integration) : [target];
+      const totals = { imported: 0, failed: 0, skipped: 0, queued: false };
+
       // DN Trade має власний повноцінний sync-pipeline
       // (incremental, mapping_errors, dntrade_sync_errors).
       const isDn = integration.id === "dntrade";
       const url = isDn
         ? `/hooks/integrations/dntrade-sync`
         : `/api/integrations/sync/${integration.id}`;
-      const body = isDn
-        ? { tenant_id: tenantId, kinds: [entity], async: true }
-        : { entityKind: entity, tenantId, async: true };
       const headers = await withTimeout(
         authHeader(),
         10_000,
         "Сесія відновлюється занадто довго. Оновіть сторінку і спробуйте ще раз.",
       );
+
       try {
-        const res = await fetchWithTimeout(
-          url,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json", ...headers },
-            body: JSON.stringify(body),
-          },
-          12_000,
-          "Синхронізація триває занадто довго. Імпорт продовжиться у фоні.",
-        );
-        const json = await parseJsonResponse<{
-          ok?: boolean;
-          imported?: number;
-          failed?: number;
-          skipped?: number;
-          queued?: boolean;
-          jobId?: string;
-          error?: string;
-          summary?: {
-            products?: { upserted?: number };
-            customers?: { upserted?: number };
-            orders?: { inserted?: number };
-            errors?: string[];
-          };
-        }>(res);
-        if (!res.ok) throw new Error(json.error ?? `Помилка синку (${res.status})`);
-        // Async: ендпоінт повернув 202 → fire-and-forget наступний виклик з jobId,
-        // щоб реальний pull відбувся у фоні без блокування UI.
-        if (json.queued && json.jobId) {
-          void fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", ...headers },
-            body: JSON.stringify(
-              isDn
-                ? { tenant_id: tenantId, kinds: [entity], jobId: json.jobId }
-                : { entityKind: entity, tenantId, jobId: json.jobId },
-            ),
-          }).finally(() => {
-            void qc.invalidateQueries({ queryKey: ["integration-jobs", tenantId, integration?.id] });
-            void qc.invalidateQueries({ queryKey: ["import-jobs", tenantId] });
-            void qc.invalidateQueries({
-              queryKey: ["tenant-integration-detail", tenantId, integration?.id],
+        for (const entity of entities) {
+          const body = isDn
+            ? { tenant_id: tenantId, kinds: [entity], async: true }
+            : { entityKind: entity, tenantId, async: true };
+          const res = await fetchWithTimeout(
+            url,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json", ...headers },
+              body: JSON.stringify(body),
+            },
+            12_000,
+            "Синхронізація триває занадто довго. Імпорт продовжиться у фоні.",
+          );
+          const json = await parseJsonResponse<{
+            ok?: boolean;
+            imported?: number;
+            failed?: number;
+            skipped?: number;
+            queued?: boolean;
+            jobId?: string;
+            error?: string;
+            summary?: {
+              products?: { upserted?: number };
+              customers?: { upserted?: number };
+              orders?: { inserted?: number };
+              errors?: string[];
+            };
+          }>(res);
+          if (!res.ok) throw new Error(json.error ?? `Помилка синку (${res.status})`);
+          // Async: ендпоінт повернув 202 → fire-and-forget наступний виклик з jobId,
+          // щоб реальний pull відбувся у фоні без блокування UI.
+          if (json.queued && json.jobId) {
+            totals.queued = true;
+            void fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", ...headers },
+              body: JSON.stringify(
+                isDn
+                  ? { tenant_id: tenantId, kinds: [entity], jobId: json.jobId }
+                  : { entityKind: entity, tenantId, jobId: json.jobId },
+              ),
+            }).finally(() => {
+              void qc.invalidateQueries({ queryKey: ["integration-jobs", tenantId, integration?.id] });
+              void qc.invalidateQueries({ queryKey: ["import-jobs", tenantId] });
+              void qc.invalidateQueries({
+                queryKey: ["tenant-integration-detail", tenantId, integration?.id],
+              });
             });
-          });
-          return { queued: true } as const;
+            continue;
+          }
+          // Нормалізуємо DN Trade summary до спільного формату
+          if (isDn && json.summary) {
+            const s = json.summary;
+            totals.imported +=
+              (s.products?.upserted ?? 0) +
+              (s.customers?.upserted ?? 0) +
+              (s.orders?.inserted ?? 0);
+            totals.failed += s.errors?.length ?? 0;
+          } else {
+            totals.imported += json.imported ?? 0;
+            totals.failed += json.failed ?? 0;
+            totals.skipped += json.skipped ?? 0;
+          }
         }
-        // Нормалізуємо DN Trade summary до спільного формату
-        if (isDn && json.summary) {
-          const s = json.summary;
-          const importedCount =
-            (s.products?.upserted ?? 0) + (s.customers?.upserted ?? 0) + (s.orders?.inserted ?? 0);
-          return { imported: importedCount, failed: s.errors?.length ?? 0, skipped: 0 };
-        }
-        return json;
+        return totals;
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         if (msg.includes("Імпорт продовжиться у фоні") || msg.includes("занадто довго")) {
