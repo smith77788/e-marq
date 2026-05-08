@@ -680,13 +680,16 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
         .slice(1) // skip header
         .map((l) => {
           const [email, name] = l.split(",").map((s) => s.trim());
-          return email ? { tenant_id: tenantId, email, name: name || null } : null;
+          return email ? { email, name: name || null } : null;
         })
-        .filter(Boolean) as { tenant_id: string; email: string; name: string | null }[];
+        .filter(Boolean) as { email: string; name: string | null }[];
       if (rows.length === 0) throw new Error("Не знайдено жодного рядка з email");
-      const { error } = await supabase.from("customers").insert(rows as never);
+      const { data, error } = await (supabase.rpc as any)("import_onboarding_customers", {
+        _tenant_id: tenantId,
+        _customers: rows,
+      });
       if (error) throw error;
-      return rows.length;
+      return Number(data ?? rows.length);
     },
     onSuccess: (n) => {
       toast.success(`Готово · додано клієнтів: ${n}`);
@@ -748,14 +751,10 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   const setMethod = useMutation({
     mutationFn: async (method: "manual" | "stripe") => {
-      const features = {
-        ...((cfg?.features ?? {}) as Record<string, unknown>),
-        payment_method: method,
-      };
-      const { error } = await supabase
-        .from("tenant_configs")
-        .update({ features: features as never })
-        .eq("tenant_id", tenantId);
+      const { error } = await (supabase.rpc as any)("set_tenant_payment_method", {
+        _tenant_id: tenantId,
+        _method: method,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
