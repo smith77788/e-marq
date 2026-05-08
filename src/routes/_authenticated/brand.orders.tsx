@@ -96,8 +96,15 @@ const STATUS_VARIANT: Record<OrderStatus, "default" | "secondary" | "outline" | 
 
 function BrandOrdersPage() {
   const { tenant: tenantId } = useSearch({ from: "/_authenticated/brand/orders" });
-  const { user, loading } = useAuth();
-  const { tenants, current, currentTenantId, setCurrentTenantId } = useTenantContext();
+  const { user, loading: authLoading } = useAuth();
+  const {
+    tenants,
+    current,
+    currentTenantId,
+    setCurrentTenantId,
+    loading: tenantsLoading,
+  } = useTenantContext();
+  const loading = authLoading || tenantsLoading;
   const { t } = useT();
   const navigate = useNavigate();
   const qc = useQueryClient();
