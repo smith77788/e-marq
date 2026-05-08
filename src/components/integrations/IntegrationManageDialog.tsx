@@ -53,6 +53,7 @@ import { authHeaders, ensureAuthenticatedSession } from "@/lib/auth/ensureSessio
 import type { IntegrationDef } from "@/lib/integrations/catalog";
 import { isConnectorSupported } from "@/lib/integrations/connectors";
 import { MSG } from "@/lib/glossary";
+import { fetchWithTimeout, parseJsonResponse, withTimeout } from "@/lib/async/withTimeout";
 
 type Props = {
   integration: IntegrationDef | null;
@@ -93,6 +94,7 @@ const STATUS_TONE: Record<string, string> = {
   running: "bg-primary/15 text-primary border-primary/40",
   failed: "bg-destructive/15 text-destructive border-destructive/40",
 };
+const MANAGE_ACTION_TIMEOUT_MS = 12_000;
 
 async function authHeader(): Promise<Record<string, string>> {
   return authHeaders();
@@ -156,12 +158,22 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
       const body = isDn
         ? { tenant_id: tenantId, kinds: [entity] }
         : { entityKind: entity, tenantId };
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...(await authHeader()) },
-        body: JSON.stringify(body),
-      });
-      const json = (await res.json()) as {
+      const headers = await withTimeout(
+        authHeader(),
+        10_000,
+        "Сесія відновлюється занадто довго. Оновіть сторінку і спробуйте ще раз.",
+      );
+      const res = await fetchWithTimeout(
+        url,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...headers },
+          body: JSON.stringify(body),
+        },
+        15_000,
+        "Синхронізація триває занадто довго. Спробуйте ще раз.",
+      );
+      const json = await parseJsonResponse<{
         ok?: boolean;
         imported?: number;
         failed?: number;
@@ -173,8 +185,8 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
           orders?: { inserted?: number };
           errors?: string[];
         };
-      };
-      if (!res.ok) throw new Error(json.error ?? "Помилка синку");
+      }>(res);
+      if (!res.ok) throw new Error(json.error ?? `Помилка синку (${res.status})`);
       // Нормалізуємо DN Trade summary до спільного формату
       if (isDn && json.summary) {
         const s = json.summary;
