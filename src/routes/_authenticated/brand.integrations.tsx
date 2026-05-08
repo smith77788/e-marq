@@ -8,7 +8,7 @@
  *  - кнопка «Підключити» відкриває IntegrationWizard.
  */
 import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AlertCircle, ArrowLeft, CheckCircle2, Clock, Search, XCircle } from "lucide-react";
@@ -59,7 +59,9 @@ export const Route = createFileRoute("/_authenticated/brand/integrations")({
 });
 
 function IntegrationsHubPage() {
-  const { current, currentTenantId, loading } = useTenantContext();
+  const search = useSearch({ from: "/_authenticated/brand/integrations" });
+  const navigate = useNavigate();
+  const { current, currentTenantId, loading, setCurrentTenantId, tenants } = useTenantContext();
   const qc = useQueryClient();
   const [active, setActive] = useState<IntegrationDef | null>(null);
   const [manage, setManage] = useState<IntegrationDef | null>(null);
@@ -69,17 +71,37 @@ function IntegrationsHubPage() {
   const [syncEntity, setSyncEntity] = useState<"products" | "customers" | "orders">("products");
   const [syncing, setSyncing] = useState<string | null>(null);
 
+  const urlTenant = search.tenant;
+  useMemo(() => {
+    if (!loading && urlTenant && urlTenant !== currentTenantId) {
+      setCurrentTenantId(urlTenant);
+    }
+  }, [currentTenantId, loading, setCurrentTenantId, urlTenant]);
+
+  useMemo(() => {
+    if (!loading && !urlTenant && currentTenantId) {
+      navigate({
+        to: "/brand/integrations",
+        search: { tenant: currentTenantId },
+        replace: true,
+      });
+    }
+  }, [currentTenantId, loading, navigate, urlTenant]);
+
+  const effectiveTenantId = urlTenant ?? currentTenantId;
+  const effectiveTenant = tenants.find((t) => t.tenant_id === effectiveTenantId) ?? current;
+
   // Self-serve: tenant статус не блокує підключення інтеграцій. Власник
   // повинен мати змогу імпортувати дані з першої секунди. Тільки suspended
   // (явно заблокований адміном) бренд блокується.
   const { data: tenantStatus } = useQuery({
-    queryKey: ["tenant-status", currentTenantId],
-    enabled: !!currentTenantId,
+    queryKey: ["tenant-status", effectiveTenantId],
+    enabled: !!effectiveTenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tenants")
         .select("status")
-        .eq("id", currentTenantId!)
+        .eq("id", effectiveTenantId!)
         .maybeSingle();
       if (error) throw error;
       return data?.status as string | undefined;
@@ -88,28 +110,28 @@ function IntegrationsHubPage() {
   const isTenantActive = tenantStatus !== "suspended" && tenantStatus !== "archived";
 
   const { data: connected } = useQuery({
-    queryKey: ["tenant-integrations", currentTenantId],
-    enabled: !!currentTenantId,
+    queryKey: ["tenant-integrations", effectiveTenantId],
+    enabled: !!effectiveTenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tenant_integrations")
         .select("provider, is_active, last_sync_at, last_sync_status")
-        .eq("tenant_id", currentTenantId!);
+        .eq("tenant_id", effectiveTenantId!);
       if (error) throw error;
       return data ?? [];
     },
   });
 
   const { data: jobs } = useQuery({
-    queryKey: ["import-jobs", currentTenantId],
-    enabled: !!currentTenantId,
+    queryKey: ["import-jobs", effectiveTenantId],
+    enabled: !!effectiveTenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("import_jobs")
         .select(
           "id, source_provider, entity_kind, status, rows_total, rows_imported, rows_failed, created_at, finished_at",
         )
-        .eq("tenant_id", currentTenantId!)
+        .eq("tenant_id", effectiveTenantId!)
         .order("created_at", { ascending: false })
         .limit(15);
       if (error) throw error;
