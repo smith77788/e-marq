@@ -137,12 +137,13 @@ function OnboardingPage() {
       ].find(Boolean);
       if (firstErr) throw firstErr;
       const features = (cfg.data?.features ?? {}) as Record<string, unknown>;
+      const ownerTelegramBound = !!cfg.data?.owner_telegram_chat_id;
       // s5 (tracking) — рахуємо як готовий, якщо є хоч 1 подія за останні 7 днів
       // АБО якщо власник явно поставив прапорець tracking_installed.
       const trackingDone = !!features.tracking_installed || (ev.count ?? 0) > 0;
       return {
         s1: !!(tn.data?.name && tn.data.name.trim().length > 1),
-        s2: (tg.count ?? 0) > 0,
+        s2: ownerTelegramBound || (tg.count ?? 0) > 0,
         s3: (prod.count ?? 0) > 0,
         s4: (cust.count ?? 0) > 0,
         s5: trackingDone,
