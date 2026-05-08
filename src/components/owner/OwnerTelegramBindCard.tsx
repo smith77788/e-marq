@@ -17,13 +17,6 @@ import { useAuth } from "@/hooks/useAuth";
 
 type Props = { tenantId: string; tenantSlug: string };
 
-function generatePairingCode(): string {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const bytes = new Uint8Array(8);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
-}
-
 export function OwnerTelegramBindCard({ tenantId }: Props) {
   const qc = useQueryClient();
   const { user } = useAuth();
@@ -76,18 +69,15 @@ export function OwnerTelegramBindCard({ tenantId }: Props) {
       return;
     }
     setBusy(true);
-    const code = generatePairingCode();
-    const { error } = await supabase.from("telegram_owner_pairings").insert({
-      tenant_id: tenantId,
-      pairing_code: code,
-      created_by: user.id,
+    const { data, error } = await (supabase.rpc as any)("create_telegram_owner_pairing", {
+      _tenant_id: tenantId,
     });
     setBusy(false);
     if (error) {
       toast.error("Не вдалося створити код Telegram", { description: error.message });
       return;
     }
-    setPairingCode(code);
+    setPairingCode(String(data?.pairing_code ?? ""));
     toast.success("Код створено. Відкрийте бота або скопіюйте команду.");
     qc.invalidateQueries({ queryKey: ["owner-tg-binding", tenantId] });
   };
@@ -119,12 +109,8 @@ export function OwnerTelegramBindCard({ tenantId }: Props) {
 
   const handleTest = async () => {
     setBusy(true);
-    const { error } = await supabase.from("owner_notifications").insert({
-      tenant_id: tenantId,
-      kind: "test_ping",
-      title: "Тестове сповіщення з кабінету",
-      body: "Якщо ви бачите це в Telegram із кнопками — інтеграція працює ✅",
-      severity: "high",
+    const { error } = await (supabase.rpc as any)("create_owner_test_notification", {
+      _tenant_id: tenantId,
     });
     setBusy(false);
     if (error) {
