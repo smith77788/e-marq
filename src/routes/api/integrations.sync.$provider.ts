@@ -30,6 +30,8 @@ const BodySchema = z.object({
   entityKind: z.enum(["products", "customers", "orders"]),
   tenantId: z.string().uuid(),
   limit: z.number().int().min(1).max(1000).optional(),
+  async: z.boolean().optional(),
+  jobId: z.string().uuid().optional(),
 });
 
 function jsonResponse(body: unknown, status = 200) {
@@ -74,7 +76,8 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
           if (!parsed.success) {
             return jsonResponse({ error: "Invalid payload", details: parsed.error.format() }, 400);
           }
-          const { entityKind, tenantId, limit } = parsed.data;
+          const { entityKind, tenantId, limit, jobId } = parsed.data;
+          const queueOnly = parsed.data.async === true && !jobId;
 
           // Guard: self-serve tenants may be pending immediately after onboarding.
           const { data: tenant } = await supabaseAdmin
@@ -104,23 +107,55 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
             return jsonResponse({ error: "Інтеграцію не знайдено або немає доступу." }, 404);
           if (!integ.is_active) return jsonResponse({ error: "Інтеграція деактивована." }, 400);
 
-          // 3.5 Створюємо import_job ОДРАЗУ (status=running), щоб журнал завжди мав запис.
-          const { data: job, error: jobErr } = await supabaseAdmin
-            .from("import_jobs")
-            .insert({
-              tenant_id: tenantId,
-              integration_id: integ.id,
-              source_provider: provider,
-              source_kind: "scheduled",
-              entity_kind: entityKind,
-              status: "running",
-              rows_total: 0,
-              created_by: userId,
-              started_at: new Date().toISOString(),
-            })
-            .select("id")
-            .single();
-          if (jobErr || !job) return jsonResponse({ error: jobErr?.message ?? "job error" }, 500);
+          // 3.5 Створюємо/підхоплюємо import_job ОДРАЗУ, щоб UI не чекав зовнішній API.
+          let job: { id: string } | null = null;
+          if (jobId) {
+            const { data: existingJob, error: loadJobErr } = await supabaseAdmin
+              .from("import_jobs")
+              .select("id")
+              .eq("id", jobId)
+              .eq("tenant_id", tenantId)
+              .eq("integration_id", integ.id)
+              .eq("source_provider", provider)
+              .eq("entity_kind", entityKind)
+              .maybeSingle();
+            if (loadJobErr) return jsonResponse({ error: loadJobErr.message }, 500);
+            if (!existingJob) return jsonResponse({ error: "Імпорт не знайдено." }, 404);
+            job = existingJob;
+            await supabaseAdmin
+              .from("import_jobs")
+              .update({ status: "running", started_at: new Date().toISOString() })
+              .eq("id", job.id);
+          } else {
+            const { data: createdJob, error: jobErr } = await supabaseAdmin
+              .from("import_jobs")
+              .insert({
+                tenant_id: tenantId,
+                integration_id: integ.id,
+                source_provider: provider,
+                source_kind: "manual",
+                entity_kind: entityKind,
+                status: queueOnly ? "queued" : "running",
+                rows_total: 0,
+                created_by: userId,
+                started_at: queueOnly ? null : new Date().toISOString(),
+                metadata: { requested_limit: limit ?? null },
+              })
+              .select("id")
+              .single();
+            if (jobErr || !createdJob)
+              return jsonResponse({ error: jobErr?.message ?? "job error" }, 500);
+            job = createdJob;
+          }
+
+          if (!job) return jsonResponse({ error: "job error" }, 500);
+          if (queueOnly) {
+            await supabaseAdmin
+              .from("tenant_integrations")
+              .update({ last_sync_status: "queued", last_sync_error: null })
+              .eq("id", integ.id);
+            return jsonResponse({ ok: true, queued: true, jobId: job.id }, 202);
+          }
 
           // 4. Тягнемо дані з зовнішнього API.
           let pulled;
