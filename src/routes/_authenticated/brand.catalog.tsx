@@ -89,8 +89,15 @@ function slugify(s: string): string {
 
 function BrandCollectionsPage() {
   const { tenant: tenantId } = useSearch({ from: "/_authenticated/brand/catalog" });
-  const { user, loading } = useAuth();
-  const { tenants, current, currentTenantId, setCurrentTenantId } = useTenantContext();
+  const { user, loading: authLoading } = useAuth();
+  const {
+    tenants,
+    current,
+    currentTenantId,
+    setCurrentTenantId,
+    loading: tenantsLoading,
+  } = useTenantContext();
+  const loading = authLoading || tenantsLoading;
   const { t } = useT();
   const navigate = useNavigate();
   const qc = useQueryClient();
