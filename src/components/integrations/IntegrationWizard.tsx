@@ -51,7 +51,9 @@ import {
   CANONICAL_FIELDS,
   autoMap,
   parseFile,
+  validateImportData,
   type EntityKind,
+  type ImportValidationResult,
   type ParseResult,
 } from "@/lib/integrations/parser";
 import { runImport, type ImportResult } from "@/lib/integrations/importer";
@@ -102,6 +104,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
+  const [validation, setValidation] = useState<ImportValidationResult | null>(null);
   const [verifying, setVerifying] = useState(false);
   const [verifyResult, setVerifyResult] = useState<{ ok: boolean; message: string } | null>(null);
 
@@ -121,6 +124,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
     setMapping({});
     setResult(null);
     setParseError(null);
+    setValidation(null);
     setVerifyResult(null);
   }
 
@@ -221,7 +225,9 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
         return;
       }
       setParsedFile(parsed);
-      setMapping(autoMap(parsed.headers, entityKind));
+      const nextMapping = autoMap(parsed.headers, entityKind);
+      setMapping(nextMapping);
+      setValidation(validateImportData(parsed.rows, nextMapping, entityKind));
       setStep(2);
     } catch (e) {
       setParseError(e instanceof Error ? e.message : "Не вдалось прочитати файл");
@@ -306,6 +312,14 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
 
   async function runImportNow() {
     if (!parsedFile || !integration) return;
+    const nextValidation = validateImportData(parsedFile.rows, mapping, entityKind);
+    setValidation(nextValidation);
+    if (!nextValidation.valid) {
+      toast.error("Перевірте колонки перед імпортом", {
+        description: nextValidation.errors[0] ?? "Є критичні помилки у файлі.",
+      });
+      return;
+    }
     const providerId = integration.id;
     setImporting(true);
     try {
