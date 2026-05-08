@@ -147,6 +147,11 @@ function OnboardingPage() {
             .select("id", { count: "exact", head: true })
             .eq("tenant_id", tenantId)
             .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+          supabase
+            .from("tenant_invitations")
+            .select("id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId)
+            .eq("status", "pending"),
         ]),
         UI_QUERY_TIMEOUT_MS,
         actionTimeoutMessage("Оновлення статусів onboarding"),
@@ -163,11 +168,21 @@ function OnboardingPage() {
       const tg = pick<{ count: number | null; error: Error | null }>(4);
       const mem = pick<{ count: number | null; error: Error | null }>(5);
       const ev = pick<{ count: number | null; error: Error | null }>(6);
+      const inv = pick<{ count: number | null; error: Error | null }>(7);
       // Tolerate partial failures: a brand-new tenant may have RLS races where
       // one of these helper tables hasn't yet been seeded with rows the user can
       // see. We log unexpected errors but never block the wizard — a missing
       // count just means "this step isn't done yet", not "loading failed".
-      const errs = [tn?.error, prod?.error, cust?.error, cfg?.error, tg?.error, mem?.error, ev?.error]
+      const errs = [
+        tn?.error,
+        prod?.error,
+        cust?.error,
+        cfg?.error,
+        tg?.error,
+        mem?.error,
+        ev?.error,
+        inv?.error,
+      ]
         .filter(Boolean)
         .map((e) => e!.message);
       if (errs.length > 0) {
@@ -183,7 +198,7 @@ function OnboardingPage() {
         s4: (cust?.count ?? 0) > 0,
         s5: trackingDone,
         s6: typeof features.payment_method === "string",
-        s7: (mem?.count ?? 0) > 1,
+        s7: (mem?.count ?? 0) > 1 || (inv?.count ?? 0) > 0,
       };
     },
   });
