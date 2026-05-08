@@ -156,7 +156,7 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
         ? `/hooks/integrations/dntrade-sync`
         : `/api/integrations/sync/${integration.id}`;
       const body = isDn
-        ? { tenant_id: tenantId, kinds: [entity] }
+        ? { tenant_id: tenantId, kinds: [entity], async: true }
         : { entityKind: entity, tenantId, async: true };
       const headers = await withTimeout(
         authHeader(),
@@ -192,11 +192,15 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
         if (!res.ok) throw new Error(json.error ?? `Помилка синку (${res.status})`);
         // Async: ендпоінт повернув 202 → fire-and-forget наступний виклик з jobId,
         // щоб реальний pull відбувся у фоні без блокування UI.
-        if (!isDn && json.queued && json.jobId) {
+        if (json.queued && json.jobId) {
           void fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json", ...headers },
-            body: JSON.stringify({ entityKind: entity, tenantId, jobId: json.jobId }),
+            body: JSON.stringify(
+              isDn
+                ? { tenant_id: tenantId, kinds: [entity], jobId: json.jobId }
+                : { entityKind: entity, tenantId, jobId: json.jobId },
+            ),
           }).finally(() => {
             void qc.invalidateQueries({ queryKey: ["integration-jobs", tenantId, integration?.id] });
             void qc.invalidateQueries({ queryKey: ["import-jobs", tenantId] });
