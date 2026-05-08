@@ -277,7 +277,7 @@ function OnboardingPage() {
     {
       titleKey: "onb.s5.title",
       descKey: "onb.s5.desc",
-      render: () => <Step5Tracking tenantSlug={tenantSlug} />,
+      render: () => <Step5Tracking tenantId={tenantId} tenantSlug={tenantSlug} qc={qc} />,
     },
     {
       titleKey: "onb.s6.title",
@@ -806,8 +806,65 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
   );
 }
 
-function Step5Tracking({ tenantSlug }: { tenantSlug: string }) {
-  return <IntegrationGuide tenantSlug={tenantSlug} />;
+function Step5Tracking({ tenantId, tenantSlug, qc }: { tenantId: string; tenantSlug: string; qc: QC }) {
+  const markInstalled = useMutation({
+    mutationFn: async () => {
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
+      const [cfgRes, tenantRes] = await withTimeout(
+        Promise.all([
+          supabase.from("tenant_configs").select("features").eq("tenant_id", tenantId).maybeSingle(),
+          supabase.from("tenants").select("name").eq("id", tenantId).maybeSingle(),
+        ]),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Перевірка налаштувань бренду"),
+      );
+      if (cfgRes.error) throw cfgRes.error;
+      if (tenantRes.error) throw tenantRes.error;
+      const features = {
+        ...(((cfgRes.data?.features ?? {}) as Record<string, unknown>) || {}),
+        tracking_installed: true,
+        tracking_confirmed_at: new Date().toISOString(),
+      };
+      const query = cfgRes.data
+        ? supabase.from("tenant_configs").update({ features }).eq("tenant_id", tenantId)
+        : supabase.from("tenant_configs").insert({
+            tenant_id: tenantId,
+            brand_name: tenantRes.data?.name ?? "Brand",
+            features,
+          } as never);
+      const { error } = await withTimeout(
+        query,
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Збереження статусу tracking"),
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Tracking відмічено як встановлений");
+      qc.invalidateQueries({ queryKey: ["onboarding-status", tenantId] });
+      qc.invalidateQueries({ queryKey: ["setup-checklist", tenantId] });
+      qc.invalidateQueries({ queryKey: ["tenant-config", tenantId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-3">
+      <IntegrationGuide tenantSlug={tenantSlug} />
+      <Button
+        size="sm"
+        onClick={() => markInstalled.mutate()}
+        disabled={markInstalled.isPending}
+      >
+        {markInstalled.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+        Я вставив код на сайт
+      </Button>
+    </div>
+  );
 }
 
 function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
