@@ -506,10 +506,16 @@ function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
   });
   const createOwnerPairing = useMutation({
     mutationFn: async () => {
-      await ensureAuthenticatedSession();
-      const { data, error } = await (supabase.rpc as any)("create_telegram_owner_pairing", {
-        _tenant_id: tenantId,
-      });
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
+      const { data, error } = await withTimeout(
+        (supabase.rpc as any)("create_telegram_owner_pairing", { _tenant_id: tenantId }),
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Створення Telegram-коду"),
+      );
       if (error) throw error;
       return String(data?.pairing_code ?? "");
     },
@@ -517,6 +523,7 @@ function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
       setOwnerPairingCode(code);
       toast.success("Код створено — відкрийте бота або скопіюйте команду.");
       qc.invalidateQueries({ queryKey: ["onboarding-owner-tg-binding", tenantId] });
+      qc.invalidateQueries({ queryKey: ["onboarding-status", tenantId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -626,17 +633,25 @@ function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   const create = useMutation({
     mutationFn: async () => {
-      await ensureAuthenticatedSession();
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
       const priceCents = parseLocalizedPriceCents(price);
       const stockNum = Math.max(0, parseInt(stock || "0", 10));
       if (!name || !Number.isFinite(priceCents) || priceCents <= 0)
         throw new Error("Заповніть назву та ціну");
-      const { error } = await (supabase.rpc as any)("create_onboarding_product", {
-        _tenant_id: tenantId,
-        _name: name,
-        _price_cents: priceCents,
-        _stock: stockNum,
-      });
+      const { error } = await withTimeout(
+        (supabase.rpc as any)("create_onboarding_product", {
+          _tenant_id: tenantId,
+          _name: name,
+          _price_cents: priceCents,
+          _stock: stockNum,
+        }),
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Створення товару"),
+      );
       if (error) throw error;
     },
     onSuccess: () => {
