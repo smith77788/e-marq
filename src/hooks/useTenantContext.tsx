@@ -161,7 +161,7 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
   // Важливо: після створення нового бізнесу query cache ще може містити старий список.
   // Не перезаписуємо щойно вибраний tenant, доки refetch не встиг підтягнути membership.
   useEffect(() => {
-    if (tenantsQuery.isLoading || tenantsQuery.isFetching) return;
+    if (tenantsQuery.isLoading || tenantsQuery.isFetching || tenantRowsFallbackQuery.isFetching) return;
     if (tenants.length === 0) return;
     const manualSelectionIsFresh = Date.now() - manualTenantSetAt < 15_000;
     if (!currentTenantId || !tenants.find((t) => t.tenant_id === currentTenantId)) {
@@ -174,7 +174,14 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
         /* ignore */
       }
     }
-  }, [tenants, currentTenantId, manualTenantSetAt, tenantsQuery.isFetching, tenantsQuery.isLoading]);
+  }, [
+    tenants,
+    currentTenantId,
+    manualTenantSetAt,
+    tenantsQuery.isFetching,
+    tenantsQuery.isLoading,
+    tenantRowsFallbackQuery.isFetching,
+  ]);
 
   const setCurrentTenantId = useCallback((id: string) => {
     setManualTenantSetAt(Date.now());
@@ -198,7 +205,10 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
       currentTenantId,
       current,
       setCurrentTenantId,
-      loading: tenantsQuery.isLoading || currentTenantFallbackQuery.isLoading,
+      loading:
+        tenantsQuery.isLoading ||
+        tenantRowsFallbackQuery.isLoading ||
+        currentTenantFallbackQuery.isLoading,
     }),
     [
       tenants,
@@ -207,6 +217,7 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
       current,
       setCurrentTenantId,
       tenantsQuery.isLoading,
+      tenantRowsFallbackQuery.isLoading,
       currentTenantFallbackQuery.isLoading,
     ],
   );
