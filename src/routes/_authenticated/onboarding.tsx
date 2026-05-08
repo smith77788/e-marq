@@ -622,7 +622,9 @@ function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => qc.invalidateQueries({ queryKey: ["onboarding-owner-tg-binding", tenantId] })}
+                onClick={() =>
+                  qc.invalidateQueries({ queryKey: ["onboarding-owner-tg-binding", tenantId] })
+                }
               >
                 Перевірити підключення
               </Button>
@@ -1202,8 +1204,13 @@ function parseCustomerCsv(csv: string): { email: string; name: string | null }[]
   if (lines.length === 0) return [];
   const delimiter = lines[0].includes(";") && !lines[0].includes(",") ? ";" : ",";
   const header = splitCsvLine(lines[0], delimiter).map((h) => h.toLowerCase());
-  const emailIdx = Math.max(header.findIndex((h) => h.includes("email") || h.includes("e-mail")), 0);
-  const nameIdx = header.findIndex((h) => ["name", "імʼя", "ім'я", "імя", "піб", "customer"].some((k) => h.includes(k)));
+  const emailIdx = Math.max(
+    header.findIndex((h) => h.includes("email") || h.includes("e-mail")),
+    0,
+  );
+  const nameIdx = header.findIndex((h) =>
+    ["name", "імʼя", "ім'я", "імя", "піб", "customer"].some((k) => h.includes(k)),
+  );
   return lines
     .slice(1)
     .map((line) => {

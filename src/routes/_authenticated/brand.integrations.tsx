@@ -76,7 +76,8 @@ function IntegrationsHubPage() {
 
   const urlTenant = search.tenant;
   const urlTenantIsMine = !!urlTenant && tenants.some((t) => t.tenant_id === urlTenant);
-  const currentTenantIsMine = !!currentTenantId && tenants.some((t) => t.tenant_id === currentTenantId);
+  const currentTenantIsMine =
+    !!currentTenantId && tenants.some((t) => t.tenant_id === currentTenantId);
   const safeTenantId = urlTenantIsMine
     ? urlTenant
     : currentTenantIsMine
@@ -89,7 +90,11 @@ function IntegrationsHubPage() {
   }, [currentTenantId, loading, setCurrentTenantId, urlTenant, urlTenantIsMine]);
 
   useEffect(() => {
-    if (!loading && safeTenantId && (!urlTenant || !urlTenantIsMine || urlTenant !== safeTenantId)) {
+    if (
+      !loading &&
+      safeTenantId &&
+      (!urlTenant || !urlTenantIsMine || urlTenant !== safeTenantId)
+    ) {
       navigate({
         to: "/brand/integrations",
         search: { tenant: safeTenantId },
