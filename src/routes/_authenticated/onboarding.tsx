@@ -870,18 +870,26 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
 
   const create = useMutation({
     mutationFn: async () => {
-      await ensureAuthenticatedSession();
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
       const trimmed = email.trim().toLowerCase();
       if (!/\S+@\S+\.\S+/.test(trimmed)) {
         throw new Error(
           lang === "ua" ? "Перевірте email — здається, він некоректний." : "Email looks invalid.",
         );
       }
-      const { data, error } = await supabase.rpc("create_tenant_invitation", {
-        _tenant_id: tenantId,
-        _email: trimmed,
-        _role: "admin",
-      });
+      const { data, error } = await withTimeout(
+        supabase.rpc("create_tenant_invitation", {
+          _tenant_id: tenantId,
+          _email: trimmed,
+          _role: "admin",
+        }),
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Створення інвайту"),
+      );
       if (error) throw error;
       return data as { token: string; email: string };
     },
@@ -910,8 +918,16 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
 
   const revoke = useMutation({
     mutationFn: async (id: string) => {
-      await ensureAuthenticatedSession();
-      const { error } = await supabase.from("tenant_invitations").delete().eq("id", id);
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
+      const { error } = await withTimeout(
+        supabase.from("tenant_invitations").delete().eq("id", id),
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Скасування інвайту"),
+      );
       if (error) throw error;
     },
     onSuccess: () => {
