@@ -20,7 +20,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { CORS_HEADERS, withCors } from "@/lib/http/cors";
 import { isConnectorSupported, runConnectorPull } from "@/lib/integrations/connectors";
-import { parsePriceToCents, type EntityKind } from "@/lib/integrations/parser";
+import { autoMap, parsePriceToCents, type EntityKind } from "@/lib/integrations/parser";
 
 type ProductInsert = Database["public"]["Tables"]["products"]["Insert"];
 type CustomerInsert = Database["public"]["Tables"]["customers"]["Insert"];
@@ -201,8 +201,11 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
             failed = 0,
             skipped = 0;
           const errors: Array<{ row: number; message: string }> = [];
+          const firstRow = (pulled.rows[0] ?? {}) as Record<string, unknown>;
+          const detectedMapping = autoMap(Object.keys(firstRow), entityKind as EntityKind);
+          const effectiveMapping = { ...detectedMapping, ...pulled.mapping };
           const get = (row: Record<string, unknown>, canonical: string) => {
-            const col = pulled.mapping[canonical] ?? canonical;
+            const col = effectiveMapping[canonical] ?? canonical;
             const v = row[col];
             return v == null ? "" : String(v).trim();
           };
@@ -348,6 +351,18 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
               failed++;
               errors.push({ row: i + 1, message: e instanceof Error ? e.message : String(e) });
             }
+          }
+
+          const nothingImportedBecauseMappingFailed =
+            pulled.rows.length > 0 && imported === 0 && failed === 0 && skipped === pulled.rows.length;
+          if (nothingImportedBecauseMappingFailed) {
+            failed = pulled.rows.length;
+            skipped = 0;
+            errors.push({
+              row: 0,
+              message:
+                "Не вдалося розпізнати обовʼязкові колонки. Перейменуйте колонки під шаблон або виберіть правильний тип даних.",
+            });
           }
 
           await supabaseAdmin
