@@ -789,8 +789,8 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
           {t("onb.s4.csv")}
         </Button>
         <Button size="sm" variant="outline" asChild>
-          <Link to="/admin/tenants/$tenantId" params={{ tenantId }}>
-            {lang === "ua" ? "Адмін-панель тенанта" : "Tenant admin"}
+          <Link to="/brand/customers" search={{ tenant: tenantId }}>
+            {lang === "ua" ? "Всі клієнти" : "All customers"}
           </Link>
         </Button>
       </div>
