@@ -248,6 +248,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
 
   const generateWebhookSecret = useMutation({
     mutationFn: async () => {
+      await ensureAuthenticatedSession();
       const secret = randomSecret();
       const { error } = await (supabase.rpc as any)("set_tenant_integration_webhook_secret", {
         _tenant_id: tenantId,
