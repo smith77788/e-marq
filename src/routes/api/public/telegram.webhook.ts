@@ -14,7 +14,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHash, timingSafeEqual } from "crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { CORS_HEADERS, withCors } from "@/lib/http/cors";
 import { processCallback, processMessage, type TgUpdate } from "@/lib/telegram/pollHelpers";
+
+function jsonResponse(body: unknown, status = 200) {
+  return withCors(
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { "Content-Type": "application/json" },
+    }),
+  );
+}
 
 function deriveSecret(apiKey: string): string {
   return createHash("sha256").update(`telegram-webhook:${apiKey}`).digest("base64url");
@@ -29,36 +39,28 @@ function safeEqual(a: string, b: string): boolean {
 export const Route = createFileRoute("/api/public/telegram/webhook")({
   server: {
     handlers: {
+      OPTIONS: async () => new Response(null, { status: 204, headers: CORS_HEADERS }),
       POST: async ({ request }) => {
         const tgKey = process.env.TELEGRAM_API_KEY;
         if (!tgKey) {
-          return new Response(JSON.stringify({ ok: false, error: "not_configured" }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return jsonResponse({ ok: false, error: "not_configured" });
         }
 
         const expected = deriveSecret(tgKey);
         const actual = request.headers.get("X-Telegram-Bot-Api-Secret-Token") ?? "";
         if (!safeEqual(actual, expected)) {
-          return new Response("Unauthorized", { status: 401 });
+          return withCors(new Response("Unauthorized", { status: 401 }));
         }
 
         let update: TgUpdate;
         try {
           update = (await request.json()) as TgUpdate;
         } catch {
-          return new Response(JSON.stringify({ ok: true, ignored: "bad_json" }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return jsonResponse({ ok: true, ignored: "bad_json" });
         }
 
         if (typeof update.update_id !== "number") {
-          return new Response(JSON.stringify({ ok: true, ignored: "no_update_id" }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return jsonResponse({ ok: true, ignored: "no_update_id" });
         }
 
         // Idempotency: if insert fails on PK conflict → already processed.
@@ -67,10 +69,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           .insert({ update_id: update.update_id });
         if (dupErr) {
           // duplicate or other error — return 200 so Telegram stops retrying
-          return new Response(JSON.stringify({ ok: true, duplicate: true }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return jsonResponse({ ok: true, duplicate: true });
         }
 
         const appOrigin = new URL(request.url).origin;
@@ -85,16 +84,10 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           // still return 200 so Telegram doesn't retry
         }
 
-        return new Response(JSON.stringify({ ok: true }), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        });
+        return jsonResponse({ ok: true });
       },
       GET: async () =>
-        new Response(JSON.stringify({ ok: true, hint: "Telegram webhook endpoint" }), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        }),
+        jsonResponse({ ok: true, hint: "Telegram webhook endpoint" }),
     },
   },
 });
