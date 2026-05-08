@@ -1169,7 +1169,7 @@ function CreateFirstTenant({
 
   const create = useMutation({
     mutationFn: async () => {
-      if (!user) throw new Error("not_authenticated");
+      await ensureAuthenticatedSession();
       const cleanName = name.trim();
       if (cleanName.length < 2) {
         throw new Error(lang === "ua" ? "Назва занадто коротка" : "Name too short");
