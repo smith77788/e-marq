@@ -14,6 +14,7 @@ import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { CORS_HEADERS, withCors } from "@/lib/http/cors";
 import {
   isConnectorSupported,
   runConnectorPull,
@@ -28,15 +29,16 @@ const BodySchema = z.object({
 });
 
 function jsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
+  return withCors(new Response(JSON.stringify(body), {
     status,
     headers: { "Content-Type": "application/json" },
-  });
+  }));
 }
 
 export const Route = createFileRoute("/api/integrations/verify/$provider")({
   server: {
     handlers: {
+      OPTIONS: async () => new Response(null, { status: 204, headers: CORS_HEADERS }),
       POST: async ({ request, params }) => {
         try {
           const provider = String(params.provider).slice(0, 64);
