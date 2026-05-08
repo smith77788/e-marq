@@ -51,7 +51,9 @@ import {
   CANONICAL_FIELDS,
   autoMap,
   parseFile,
+  validateImportData,
   type EntityKind,
+  type ImportValidationResult,
   type ParseResult,
 } from "@/lib/integrations/parser";
 import { runImport, type ImportResult } from "@/lib/integrations/importer";
@@ -102,6 +104,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
+  const [validation, setValidation] = useState<ImportValidationResult | null>(null);
   const [verifying, setVerifying] = useState(false);
   const [verifyResult, setVerifyResult] = useState<{ ok: boolean; message: string } | null>(null);
 
@@ -121,6 +124,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
     setMapping({});
     setResult(null);
     setParseError(null);
+    setValidation(null);
     setVerifyResult(null);
   }
 
@@ -221,7 +225,9 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
         return;
       }
       setParsedFile(parsed);
-      setMapping(autoMap(parsed.headers, entityKind));
+      const nextMapping = autoMap(parsed.headers, entityKind);
+      setMapping(nextMapping);
+      setValidation(validateImportData(parsed.rows, nextMapping, entityKind));
       setStep(2);
     } catch (e) {
       setParseError(e instanceof Error ? e.message : "Не вдалось прочитати файл");
@@ -306,6 +312,14 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
 
   async function runImportNow() {
     if (!parsedFile || !integration) return;
+    const nextValidation = validateImportData(parsedFile.rows, mapping, entityKind);
+    setValidation(nextValidation);
+    if (!nextValidation.valid) {
+      toast.error("Перевірте колонки перед імпортом", {
+        description: nextValidation.errors[0] ?? "Є критичні помилки у файлі.",
+      });
+      return;
+    }
     const providerId = integration.id;
     setImporting(true);
     try {
@@ -432,7 +446,15 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                     </Label>
                     <Select
                       value={entityKind}
-                      onValueChange={(v) => setEntityKind(v as EntityKind)}
+                      onValueChange={(v) => {
+                        const nextKind = v as EntityKind;
+                        setEntityKind(nextKind);
+                        if (parsedFile) {
+                          const nextMapping = autoMap(parsedFile.headers, nextKind);
+                          setMapping(nextMapping);
+                          setValidation(validateImportData(parsedFile.rows, nextMapping, nextKind));
+                        }
+                      }}
                     >
                       <SelectTrigger className="mx-auto mt-1 max-w-xs">
                         <SelectValue />
@@ -609,9 +631,11 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                     </Label>
                     <Select
                       value={mapping[field.id] ?? "__none__"}
-                      onValueChange={(v) =>
-                        setMapping((m) => ({ ...m, [field.id]: v === "__none__" ? "" : v }))
-                      }
+                      onValueChange={(v) => {
+                        const nextMapping = { ...mapping, [field.id]: v === "__none__" ? "" : v };
+                        setMapping(nextMapping);
+                        setValidation(validateImportData(parsedFile.rows, nextMapping, entityKind));
+                      }}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="— не імпортувати —" />
@@ -628,6 +652,42 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                   </div>
                 ))}
               </div>
+
+              {validation && (
+                <Alert
+                  variant={validation.valid ? "default" : "destructive"}
+                  className={validation.valid ? "border-success/40 bg-success/5" : ""}
+                >
+                  {validation.valid ? (
+                    <CheckCircle2 className="h-4 w-4 text-success" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4" />
+                  )}
+                  <AlertDescription className="space-y-2 text-xs">
+                    <div>
+                      Готово до імпорту: <strong>{validation.stats.validRows}</strong> з{" "}
+                      <strong>{validation.stats.totalRows}</strong> рядків · обовʼязкові поля:{" "}
+                      <strong>
+                        {validation.stats.mappedRequired}/{validation.stats.requiredFields}
+                      </strong>
+                    </div>
+                    {validation.errors.length > 0 && (
+                      <ul className="list-disc space-y-0.5 pl-4">
+                        {validation.errors.map((error, i) => (
+                          <li key={i}>{error}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {validation.warnings.length > 0 && (
+                      <ul className="list-disc space-y-0.5 pl-4 text-muted-foreground">
+                        {validation.warnings.map((warning, i) => (
+                          <li key={i}>{warning}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              )}
 
               <div className="rounded-lg border border-border/40 bg-card/40 p-3">
                 <div className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">
@@ -804,7 +864,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
               </Button>
             )}
             {step === 2 && (
-              <Button onClick={runImportNow} disabled={importing} className="gap-1">
+              <Button onClick={runImportNow} disabled={importing || validation?.valid === false} className="gap-1">
                 {importing ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />

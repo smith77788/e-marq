@@ -18,6 +18,18 @@ export type ParseResult = {
   totalRows: number;
 };
 
+export type ImportValidationResult = {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+  stats: {
+    totalRows: number;
+    validRows: number;
+    mappedRequired: number;
+    requiredFields: number;
+  };
+};
+
 /** Канонічні поля цільових сутностей. */
 export const CANONICAL_FIELDS: Record<
   EntityKind,
@@ -138,6 +150,70 @@ export function autoMap(headers: string[], entityKind: EntityKind): Record<strin
     if (found) result[canonical] = found;
   }
   return result;
+}
+
+export function validateImportData(
+  rows: Array<Record<string, unknown>>,
+  mapping: Record<string, string>,
+  entityKind: EntityKind,
+): ImportValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const required = CANONICAL_FIELDS[entityKind].filter((field) => field.required);
+  const mappedRequired = required.filter((field) => mapping[field.id]).length;
+
+  const usedColumns = Object.values(mapping).filter(Boolean);
+  const duplicatedColumns = usedColumns.filter((col, index) => usedColumns.indexOf(col) !== index);
+  if (duplicatedColumns.length > 0) {
+    errors.push(`Одна колонка вибрана для кількох полів: ${[...new Set(duplicatedColumns)].join(", ")}.`);
+  }
+
+  for (const field of required) {
+    if (!mapping[field.id]) errors.push(`Не вибрано обовʼязкове поле: ${field.label}.`);
+  }
+
+  let validRows = 0;
+  let emptyRequiredRows = 0;
+  let invalidMoneyRows = 0;
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const hasAllRequired = required.every((field) => {
+      const col = mapping[field.id];
+      return col && String(row[col] ?? "").trim().length > 0;
+    });
+    if (!hasAllRequired) {
+      emptyRequiredRows++;
+      if (emptyRequiredRows <= 5) errors.push(`Рядок ${i + 2}: порожнє обовʼязкове поле.`);
+      continue;
+    }
+
+    const moneyField = entityKind === "orders" ? "total_cents" : entityKind === "products" ? "price_cents" : null;
+    if (moneyField) {
+      const col = mapping[moneyField];
+      const raw = col ? row[col] : null;
+      const cents = parsePriceToCents(raw);
+      const rawText = String(raw ?? "").trim();
+      if (rawText && cents <= 0 && !/^0+([.,]0+)?$/.test(rawText.replace(/\s/g, ""))) invalidMoneyRows++;
+      if (cents > 100_000_000) warnings.push(`Рядок ${i + 2}: незвично велика сума ${rawText}.`);
+    }
+    validRows++;
+  }
+
+  if (rows.length > 0 && validRows === 0) {
+    errors.push("Жоден рядок не проходить перевірку. Ймовірно, вибрано не ті колонки або тип даних.");
+  }
+  if (invalidMoneyRows > Math.max(3, rows.length * 0.25)) {
+    errors.push("Занадто багато нерозпізнаних цін/сум. Перевірте, що поле ціни не вказує на кількість або текстову колонку.");
+  } else if (invalidMoneyRows > 0) {
+    warnings.push(`Є рядки з нерозпізнаною ціною/сумою: ${invalidMoneyRows}.`);
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors: errors.slice(0, 12),
+    warnings: warnings.slice(0, 12),
+    stats: { totalRows: rows.length, validRows, mappedRequired, requiredFields: required.length },
+  };
 }
 
 /** Перетворити рядок у вартість в копійках (підтримує "12,50", "12.50 UAH", "1 200,00"). */
