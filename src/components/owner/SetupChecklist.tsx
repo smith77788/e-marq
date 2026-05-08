@@ -29,52 +29,66 @@ export function SetupChecklist({ tenantId, tenantSlug }: Props) {
   const { data: status } = useQuery({
     queryKey: ["setup-checklist", tenantId],
     enabled: !!tenantId,
+    retry: 2,
+    staleTime: 5_000,
     queryFn: async (): Promise<Status> => {
-      const [tenantRes, configRes, productsRes, customersRes, eventsRes, membersRes, routingRes] =
-        await Promise.all([
-          supabase.from("tenants").select("id, name").eq("id", tenantId).maybeSingle(),
-          supabase
-            .from("tenant_configs")
-            .select("bot, features")
-            .eq("tenant_id", tenantId)
-            .maybeSingle(),
-          supabase
-            .from("products")
-            .select("id", { count: "exact", head: true })
-            .eq("tenant_id", tenantId)
-            .limit(1),
-          supabase
-            .from("customers")
-            .select("id", { count: "exact", head: true })
-            .eq("tenant_id", tenantId)
-            .limit(1),
-          supabase
-            .from("events")
-            .select("id", { count: "exact", head: true })
-            .eq("tenant_id", tenantId)
-            .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-            .limit(1),
-          supabase
-            .from("tenant_memberships")
-            .select("id", { count: "exact", head: true })
-            .eq("tenant_id", tenantId)
-            .limit(1),
-          supabase
-            .from("telegram_chat_routing")
-            .select("chat_id", { count: "exact", head: true })
-            .eq("tenant_id", tenantId)
-            .limit(1),
-        ]);
-      const features = (configRes.data?.features ?? {}) as Record<string, unknown>;
+      // Each row is wrapped so a single failing RLS check (e.g. on a fresh
+      // tenant where one helper table isn't yet visible) doesn't crash the
+      // whole checklist — a missing count is interpreted as "step not done".
+      const settled = await Promise.allSettled([
+        supabase.from("tenants").select("id, name").eq("id", tenantId).maybeSingle(),
+        supabase
+          .from("tenant_configs")
+          .select("bot, features")
+          .eq("tenant_id", tenantId)
+          .maybeSingle(),
+        supabase
+          .from("products")
+          .select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId)
+          .limit(1),
+        supabase
+          .from("customers")
+          .select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId)
+          .limit(1),
+        supabase
+          .from("events")
+          .select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId)
+          .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+          .limit(1),
+        supabase
+          .from("tenant_memberships")
+          .select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId)
+          .limit(1),
+        supabase
+          .from("telegram_chat_routing")
+          .select("chat_id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId)
+          .limit(1),
+      ]);
+      type AnyRes = { data?: unknown; count?: number | null };
+      const pick = <T = AnyRes,>(i: number): T | null =>
+        settled[i].status === "fulfilled" ? ((settled[i] as PromiseFulfilledResult<T>).value) : null;
+      const tenantRes = pick<{ data: { id: string; name: string } | null }>(0);
+      const configRes = pick<{ data: { bot?: unknown; features?: unknown } | null }>(1);
+      const productsRes = pick<{ count: number | null }>(2);
+      const customersRes = pick<{ count: number | null }>(3);
+      const eventsRes = pick<{ count: number | null }>(4);
+      const membersRes = pick<{ count: number | null }>(5);
+      const routingRes = pick<{ count: number | null }>(6);
+
+      const features = (configRes?.data?.features ?? {}) as Record<string, unknown>;
       return {
-        brand: !!tenantRes.data,
-        // Channel = at least one Telegram chat bound to this tenant via shared bot
-        channel: (routingRes.count ?? 0) > 0,
-        product: (productsRes.count ?? 0) > 0,
-        customers: (customersRes.count ?? 0) > 0,
-        tracking: (eventsRes.count ?? 0) > 0,
+        brand: !!tenantRes?.data,
+        channel: (routingRes?.count ?? 0) > 0,
+        product: (productsRes?.count ?? 0) > 0,
+        customers: (customersRes?.count ?? 0) > 0,
+        tracking: (eventsRes?.count ?? 0) > 0,
         payment: typeof features.payment_method === "string",
-        team: (membersRes.count ?? 0) > 1,
+        team: (membersRes?.count ?? 0) > 1,
       };
     },
   });
