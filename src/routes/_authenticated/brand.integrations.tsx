@@ -72,23 +72,24 @@ function IntegrationsHubPage() {
   const [syncing, setSyncing] = useState<string | null>(null);
 
   const urlTenant = search.tenant;
+  const urlTenantIsMine = !!urlTenant && tenants.some((t) => t.tenant_id === urlTenant);
   useEffect(() => {
-    if (!loading && urlTenant && urlTenant !== currentTenantId) {
+    if (!loading && urlTenantIsMine && urlTenant !== currentTenantId) {
       setCurrentTenantId(urlTenant);
     }
-  }, [currentTenantId, loading, setCurrentTenantId, urlTenant]);
+  }, [currentTenantId, loading, setCurrentTenantId, urlTenant, urlTenantIsMine]);
 
   useEffect(() => {
-    if (!loading && !urlTenant && currentTenantId) {
+    if (!loading && currentTenantId && (!urlTenant || (urlTenant && !urlTenantIsMine))) {
       navigate({
         to: "/brand/integrations",
         search: { tenant: currentTenantId },
         replace: true,
       });
     }
-  }, [currentTenantId, loading, navigate, urlTenant]);
+  }, [currentTenantId, loading, navigate, urlTenant, urlTenantIsMine]);
 
-  const effectiveTenantId = urlTenant ?? currentTenantId;
+  const effectiveTenantId = urlTenantIsMine ? urlTenant : currentTenantId;
   const effectiveTenant = tenants.find((t) => t.tenant_id === effectiveTenantId) ?? current;
 
   // Self-serve: tenant статус не блокує підключення інтеграцій. Власник
