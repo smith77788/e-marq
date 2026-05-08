@@ -503,14 +503,20 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                 </div>
               )}
 
-              {/* REST */}
-              {isRest && (
+              {/* REST / Google Sheets */}
+              {(isRest || isSheets) && (
                 <div className="space-y-3">
                   <div className="space-y-1">
-                    <Label htmlFor="resturl">URL вашого endpoint</Label>
+                    <Label htmlFor="resturl">
+                      {isSheets ? "URL Google Sheets" : "URL вашого endpoint"}
+                    </Label>
                     <Input
                       id="resturl"
-                      placeholder="https://api.example.com/data.json"
+                      placeholder={
+                        isSheets
+                          ? "https://docs.google.com/spreadsheets/d/.../edit#gid=0"
+                          : "https://api.example.com/data.json"
+                      }
                       value={restUrl}
                       onChange={(e) => {
                         setRestUrl(e.target.value);
@@ -518,21 +524,25 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                       }}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Має бути публічний https URL. Локальні / приватні адреси заблоковані.
+                      {isSheets
+                        ? "Таблиця має бути доступна для перегляду за посиланням. Після збереження запустіть імпорт у меню інтеграції."
+                        : "Має бути публічний https URL. Локальні / приватні адреси заблоковані."}
                     </p>
                   </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="restkey">Заголовок Authorization (необовʼязково)</Label>
-                    <Input
-                      id="restkey"
-                      placeholder="Bearer ваш-токен"
-                      value={apiKey}
-                      onChange={(e) => {
-                        setApiKey(e.target.value);
-                        setVerifyResult(null);
-                      }}
-                    />
-                  </div>
+                  {isRest && (
+                    <div className="space-y-1">
+                      <Label htmlFor="restkey">Заголовок Authorization (необовʼязково)</Label>
+                      <Input
+                        id="restkey"
+                        placeholder="Bearer ваш-токен"
+                        value={apiKey}
+                        onChange={(e) => {
+                          setApiKey(e.target.value);
+                          setVerifyResult(null);
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -550,7 +560,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
               )}
 
               {/* Verify result */}
-              {verifyResult && (isApiKey || isRest) && (
+              {verifyResult && (isApiKey || isRest || isSheets) && (
                 <Alert
                   variant={verifyResult.ok ? "default" : "destructive"}
                   className={verifyResult.ok ? "border-success/40 bg-success/5" : ""}
