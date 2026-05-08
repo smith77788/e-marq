@@ -243,23 +243,12 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
       if (!integration || !tenantId) return;
       // Якщо рядка інтеграції ще немає — створюємо мінімальний (тільки для webhook-методів).
       const secret = crypto.randomUUID().replace(/-/g, "");
-      if (!integ.data) {
-        const { error } = await supabase.from("tenant_integrations").insert({
-          tenant_id: tenantId,
-          provider: integration.id,
-          is_active: true,
-          webhook_secret: secret,
-          credentials_encrypted: null,
-          config: {},
-        });
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("tenant_integrations")
-          .update({ webhook_secret: secret })
-          .eq("id", integ.data.id);
-        if (error) throw error;
-      }
+      const { error } = await (supabase.rpc as any)("set_tenant_integration_webhook_secret", {
+        _tenant_id: tenantId,
+        _provider: integration.id,
+        _webhook_secret: secret,
+      });
+      if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Webhook secret згенеровано");
