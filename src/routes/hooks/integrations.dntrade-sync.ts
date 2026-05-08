@@ -80,6 +80,8 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-sync")({
             kinds,
             modifiedFromIso,
             integrationId: integ.id,
+            maxPages: body.full === true ? 10 : 5,
+            requestTimeoutMs: 6_000,
           });
 
           const totalProducts = summary.products.upserted;

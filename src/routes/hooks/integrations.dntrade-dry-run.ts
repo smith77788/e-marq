@@ -53,7 +53,7 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-dry-run")({
             supabaseAdmin,
             tenantId,
             integ.credentials_encrypted,
-            { kinds, dryRun: true },
+            { kinds, dryRun: true, maxPages: 1, requestTimeoutMs: 5_000 },
           );
           return jsonOk({ dry_run: true, summary });
         } catch (e) {

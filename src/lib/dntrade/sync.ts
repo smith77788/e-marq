@@ -21,7 +21,7 @@ import {
 
 type SB = SupabaseClient<Database>;
 
-const PAGE_CAP = 50;
+const PAGE_CAP = 20;
 const SAMPLE_LIMIT = 5;
 
 function priceToCents(p: unknown): number {
@@ -54,6 +54,9 @@ export type SyncSummary = {
 export type SyncOptions = {
   kinds?: Array<"products" | "customers" | "orders">;
   modifiedFromIso?: string;
+  /** Hard caps keep first-run imports responsive in the onboarding UI. */
+  maxPages?: number;
+  requestTimeoutMs?: number;
   /** Якщо true — НЕ писати в БД, повернути sample мапінгу. */
   dryRun?: boolean;
   /** Інтеграція для прив'язки помилок у dntrade_sync_errors. */
@@ -112,11 +115,13 @@ export async function syncDnTradeProducts(
   let upserted = 0;
   const limit = 100;
 
-  for (let page = 0; page < PAGE_CAP; page++) {
+  const pageCap = Math.min(opts.maxPages ?? PAGE_CAP, PAGE_CAP);
+  for (let page = 0; page < pageCap; page++) {
     const resp = await listProducts(apiKey, {
       limit,
       offset,
       modified_from: opts.modifiedFromIso ? toDnDate(opts.modifiedFromIso) : undefined,
+      timeoutMs: opts.requestTimeoutMs,
     });
     const items = unwrapList<DnProduct>(resp, "products");
     if (items.length === 0) break;
@@ -188,8 +193,9 @@ export async function syncDnTradeCustomers(
   let upserted = 0;
   const limit = 100;
 
-  for (let page = 0; page < PAGE_CAP; page++) {
-    const resp = await listPartners(apiKey, { limit, offset });
+  const pageCap = Math.min(opts.maxPages ?? PAGE_CAP, PAGE_CAP);
+  for (let page = 0; page < pageCap; page++) {
+    const resp = await listPartners(apiKey, { limit, offset, timeoutMs: opts.requestTimeoutMs });
     const items = unwrapList<DnPartner>(resp, "partners");
     if (items.length === 0) break;
     fetched += items.length;
@@ -279,11 +285,13 @@ export async function syncDnTradeOrders(
     return null;
   }
 
-  for (let page = 0; page < PAGE_CAP; page++) {
+  const pageCap = Math.min(opts.maxPages ?? PAGE_CAP, PAGE_CAP);
+  for (let page = 0; page < pageCap; page++) {
     const resp = await listOrders(apiKey, {
       limit,
       offset,
       modified_from: opts.modifiedFromIso ? toDnDate(opts.modifiedFromIso) : undefined,
+      timeoutMs: opts.requestTimeoutMs,
     });
     const items = unwrapList<DnOrder>(resp, "orders");
     if (items.length === 0) break;

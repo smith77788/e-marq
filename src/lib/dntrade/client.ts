@@ -80,6 +80,7 @@ async function request<T>(
   path: string,
   query?: Record<string, string | number | undefined>,
   body?: unknown,
+  opts: { timeoutMs?: number } = {},
 ): Promise<T> {
   const url = new URL(BASE_URL + path);
   if (query) {
@@ -91,15 +92,29 @@ async function request<T>(
   let attempt = 0;
 
   while (true) {
-    const res = await fetch(url.toString(), {
-      method,
-      headers: {
-        ApiKey: apiKey,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
+    const controller = new AbortController();
+    const timeoutMs = Math.min(Math.max(opts.timeoutMs ?? 8_000, 1_000), 12_000);
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    let res: Response;
+    try {
+      res = await fetch(url.toString(), {
+        method,
+        headers: {
+          ApiKey: apiKey,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: body ? JSON.stringify(body) : undefined,
+        signal: controller.signal,
+      });
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") {
+        throw new DnTradeError(`DN Trade ${method} ${path} timed out after ${timeoutMs}ms`, 408);
+      }
+      throw e;
+    } finally {
+      clearTimeout(timer);
+    }
 
     if (res.status === 429 && attempt < MAX_RETRIES_ON_429) {
       const retryAfter = Number(res.headers.get("Retry-After") ?? "5");
@@ -132,7 +147,9 @@ export async function verifyApiKey(
   apiKey: string,
 ): Promise<{ ok: true } | { ok: false; status: number; message: string }> {
   try {
-    await request<unknown>(apiKey, "GET", "/products/stores");
+    await request<unknown>(apiKey, "GET", "/products/stores", undefined, undefined, {
+      timeoutMs: 6_000,
+    });
     return { ok: true };
   } catch (e) {
     if (e instanceof DnTradeError) {
@@ -144,36 +161,63 @@ export async function verifyApiKey(
 
 export async function listProducts(
   apiKey: string,
-  opts: { limit?: number; offset?: number; modified_from?: string } = {},
+  opts: { limit?: number; offset?: number; modified_from?: string; timeoutMs?: number } = {},
 ): Promise<{ status?: number; products?: DnProduct[] } | DnProduct[]> {
   // /products/list is POST; uses query params for filtering
-  return request(apiKey, "POST", "/products/list", {
-    limit: opts.limit ?? 100,
-    offset: opts.offset ?? 0,
-    modified_from: opts.modified_from,
-  });
+  return request(
+    apiKey,
+    "POST",
+    "/products/list",
+    {
+      limit: opts.limit ?? 100,
+      offset: opts.offset ?? 0,
+      modified_from: opts.modified_from,
+    },
+    undefined,
+    { timeoutMs: opts.timeoutMs },
+  );
 }
 
 export async function listPartners(
   apiKey: string,
-  opts: { limit?: number; offset?: number } = {},
+  opts: { limit?: number; offset?: number; timeoutMs?: number } = {},
 ): Promise<{ status?: number; partners?: DnPartner[] }> {
-  return request(apiKey, "GET", "/partners/list", {
-    limit: opts.limit ?? 100,
-    offset: opts.offset ?? 0,
-  });
+  return request(
+    apiKey,
+    "GET",
+    "/partners/list",
+    {
+      limit: opts.limit ?? 100,
+      offset: opts.offset ?? 0,
+    },
+    undefined,
+    { timeoutMs: opts.timeoutMs },
+  );
 }
 
 export async function listOrders(
   apiKey: string,
-  opts: { limit?: number; offset?: number; modified_from?: string; from_date?: string } = {},
+  opts: {
+    limit?: number;
+    offset?: number;
+    modified_from?: string;
+    from_date?: string;
+    timeoutMs?: number;
+  } = {},
 ): Promise<{ status?: number; orders?: DnOrder[] }> {
-  return request(apiKey, "GET", "/orders/list", {
-    limit: opts.limit ?? 50,
-    offset: opts.offset ?? 0,
-    modified_from: opts.modified_from,
-    from_date: opts.from_date,
-  });
+  return request(
+    apiKey,
+    "GET",
+    "/orders/list",
+    {
+      limit: opts.limit ?? 50,
+      offset: opts.offset ?? 0,
+      modified_from: opts.modified_from,
+      from_date: opts.from_date,
+    },
+    undefined,
+    { timeoutMs: opts.timeoutMs },
+  );
 }
 
 /** Normalise a possibly-array or {products:[]} response to a flat array. */
