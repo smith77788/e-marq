@@ -72,15 +72,13 @@ function OnboardingPage() {
   });
   const tenants = tenantsQuery.data;
 
-  // Auto-select tenant from URL or first one.
-  // Поки tenants ще fetching після щойно створеного бізнесу — не падаємо
-  // у CreateFirstTenant. Перевіряємо search.tenant без вимоги, щоб він був
-  // у вже завантаженому списку: якщо userʼу повернеться 0 рядків (RLS не
-  // встиг побачити membership), наступний refetch усе підтягне.
+  // Auto-select only a tenant the current user can actually see.
+  // Після створення бізнес одразу інжектиться в cache нижче, тому тут більше
+  // не треба довіряти tenant з URL/localStorage. Інакше stale/foreign tenant_id
+  // веде до not_authorized на кожному наступному кроці wizard-а.
   const urlTenantIsMine = !!search.tenant && !!tenants?.some((t) => t.id === search.tenant);
-  const tenantId = urlTenantIsMine ? search.tenant : (search.tenant ?? tenants?.[0]?.id);
-  const tenantSlug =
-    tenants?.find((t) => t.id === tenantId)?.slug ?? (urlTenantIsMine ? undefined : search.slug);
+  const tenantId = urlTenantIsMine ? search.tenant : tenants?.[0]?.id;
+  const tenantSlug = tenants?.find((t) => t.id === tenantId)?.slug;
 
   useEffect(() => {
     if (tenantId) setCurrentTenantId(tenantId);
@@ -431,6 +429,7 @@ function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   const save = useMutation({
     mutationFn: async () => {
+      await ensureAuthenticatedSession();
       const { error } = await supabase.from("tenants").update({ name }).eq("id", tenantId);
       if (error) throw error;
     },
@@ -621,7 +620,7 @@ function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
   const create = useMutation({
     mutationFn: async () => {
       await ensureAuthenticatedSession();
-      const priceCents = Math.round(Number(price) * 100);
+      const priceCents = parseLocalizedPriceCents(price);
       const stockNum = Math.max(0, parseInt(stock || "0", 10));
       if (!name || !Number.isFinite(priceCents) || priceCents <= 0)
         throw new Error("Заповніть назву та ціну");
@@ -683,14 +682,7 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
   const importCsv = useMutation({
     mutationFn: async () => {
       await ensureAuthenticatedSession();
-      const lines = csv.trim().split(/\r?\n/);
-      const rows = lines
-        .slice(1) // skip header
-        .map((l) => {
-          const [email, name] = l.split(",").map((s) => s.trim());
-          return email ? { email, name: name || null } : null;
-        })
-        .filter(Boolean) as { email: string; name: string | null }[];
+      const rows = parseCustomerCsv(csv);
       if (rows.length === 0) throw new Error("Не знайдено жодного рядка з email");
       const { data, error } = await (supabase.rpc as any)("import_onboarding_customers", {
         _tenant_id: tenantId,
@@ -840,6 +832,7 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
 
   const create = useMutation({
     mutationFn: async () => {
+      await ensureAuthenticatedSession();
       const trimmed = email.trim().toLowerCase();
       if (!/\S+@\S+\.\S+/.test(trimmed)) {
         throw new Error(
@@ -879,6 +872,7 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
 
   const revoke = useMutation({
     mutationFn: async (id: string) => {
+      await ensureAuthenticatedSession();
       const { error } = await supabase.from("tenant_invitations").delete().eq("id", id);
       if (error) throw error;
     },
@@ -1105,6 +1099,58 @@ function OnboardingError({
       </CardContent>
     </Card>
   );
+}
+
+function parseLocalizedPriceCents(value: string): number {
+  const normalized = value.trim().replace(/\s/g, "").replace(",", ".");
+  return Math.round(Number(normalized) * 100);
+}
+
+function splitCsvLine(line: string, delimiter: string): string[] {
+  const cells: string[] = [];
+  let current = "";
+  let quoted = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (quoted && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (ch === delimiter && !quoted) {
+      cells.push(current.trim());
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  cells.push(current.trim());
+  return cells.map((cell) => cell.replace(/^"|"$/g, "").trim());
+}
+
+function parseCustomerCsv(csv: string): { email: string; name: string | null }[] {
+  const lines = csv
+    .trim()
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (lines.length === 0) return [];
+  const delimiter = lines[0].includes(";") && !lines[0].includes(",") ? ";" : ",";
+  const header = splitCsvLine(lines[0], delimiter).map((h) => h.toLowerCase());
+  const emailIdx = Math.max(header.findIndex((h) => h.includes("email") || h.includes("e-mail")), 0);
+  const nameIdx = header.findIndex((h) => ["name", "імʼя", "ім'я", "імя", "піб", "customer"].some((k) => h.includes(k)));
+  return lines
+    .slice(1)
+    .map((line) => {
+      const cells = splitCsvLine(line, delimiter);
+      const email = (cells[emailIdx] ?? "").trim().toLowerCase();
+      if (!email) return null;
+      const name = nameIdx >= 0 ? (cells[nameIdx] ?? "").trim() : "";
+      return { email, name: name || null };
+    })
+    .filter(Boolean) as { email: string; name: string | null }[];
 }
 
 function slugify(input: string): string {
