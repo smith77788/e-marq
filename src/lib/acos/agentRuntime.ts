@@ -49,9 +49,13 @@ export async function authorizeAgentRequest(
     global: { headers: { Authorization: `Bearer ${token}` } },
     auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
   });
-  const { data, error } = await sb.auth.getClaims(token);
-  if (error || !data?.claims?.sub) return { error: "Invalid token", status: 401 };
-  const userId = data.claims.sub;
+  // `getClaims()` can fail in the Worker runtime depending on JWT/JWKS cache
+  // state, even when the user's bearer token is valid. `getUser(token)` asks
+  // the auth service directly and is the stable path for owner-triggered
+  // integration actions such as DN Trade verify/sync/dry-run.
+  const { data, error } = await sb.auth.getUser(token);
+  if (error || !data?.user?.id) return { error: "Invalid token", status: 401 };
+  const userId = data.user.id;
   const [roleRes, memberRes] = await Promise.all([
     supabaseAdmin.from("user_roles").select("role").eq("user_id", userId).eq("role", "super_admin"),
     supabaseAdmin
