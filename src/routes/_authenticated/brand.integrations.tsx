@@ -7,8 +7,8 @@
  *  - історія імпортів (import_jobs) знизу — щоб людина бачила, що відбувалось,
  *  - кнопка «Підключити» відкриває IntegrationWizard.
  */
-import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AlertCircle, ArrowLeft, CheckCircle2, Clock, Search, XCircle } from "lucide-react";
@@ -59,7 +59,9 @@ export const Route = createFileRoute("/_authenticated/brand/integrations")({
 });
 
 function IntegrationsHubPage() {
-  const { current, currentTenantId, loading } = useTenantContext();
+  const search = useSearch({ from: "/_authenticated/brand/integrations" });
+  const navigate = useNavigate();
+  const { current, currentTenantId, loading, setCurrentTenantId, tenants } = useTenantContext();
   const qc = useQueryClient();
   const [active, setActive] = useState<IntegrationDef | null>(null);
   const [manage, setManage] = useState<IntegrationDef | null>(null);
@@ -69,17 +71,38 @@ function IntegrationsHubPage() {
   const [syncEntity, setSyncEntity] = useState<"products" | "customers" | "orders">("products");
   const [syncing, setSyncing] = useState<string | null>(null);
 
+  const urlTenant = search.tenant;
+  const urlTenantIsMine = !!urlTenant && tenants.some((t) => t.tenant_id === urlTenant);
+  useEffect(() => {
+    if (!loading && urlTenantIsMine && urlTenant !== currentTenantId) {
+      setCurrentTenantId(urlTenant);
+    }
+  }, [currentTenantId, loading, setCurrentTenantId, urlTenant, urlTenantIsMine]);
+
+  useEffect(() => {
+    if (!loading && currentTenantId && (!urlTenant || (urlTenant && !urlTenantIsMine))) {
+      navigate({
+        to: "/brand/integrations",
+        search: { tenant: currentTenantId },
+        replace: true,
+      });
+    }
+  }, [currentTenantId, loading, navigate, urlTenant, urlTenantIsMine]);
+
+  const effectiveTenantId = urlTenantIsMine ? urlTenant : currentTenantId;
+  const effectiveTenant = tenants.find((t) => t.tenant_id === effectiveTenantId) ?? current;
+
   // Self-serve: tenant статус не блокує підключення інтеграцій. Власник
   // повинен мати змогу імпортувати дані з першої секунди. Тільки suspended
   // (явно заблокований адміном) бренд блокується.
   const { data: tenantStatus } = useQuery({
-    queryKey: ["tenant-status", currentTenantId],
-    enabled: !!currentTenantId,
+    queryKey: ["tenant-status", effectiveTenantId],
+    enabled: !!effectiveTenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tenants")
         .select("status")
-        .eq("id", currentTenantId!)
+        .eq("id", effectiveTenantId!)
         .maybeSingle();
       if (error) throw error;
       return data?.status as string | undefined;
@@ -88,28 +111,28 @@ function IntegrationsHubPage() {
   const isTenantActive = tenantStatus !== "suspended" && tenantStatus !== "archived";
 
   const { data: connected } = useQuery({
-    queryKey: ["tenant-integrations", currentTenantId],
-    enabled: !!currentTenantId,
+    queryKey: ["tenant-integrations", effectiveTenantId],
+    enabled: !!effectiveTenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tenant_integrations")
         .select("provider, is_active, last_sync_at, last_sync_status")
-        .eq("tenant_id", currentTenantId!);
+        .eq("tenant_id", effectiveTenantId!);
       if (error) throw error;
       return data ?? [];
     },
   });
 
   const { data: jobs } = useQuery({
-    queryKey: ["import-jobs", currentTenantId],
-    enabled: !!currentTenantId,
+    queryKey: ["import-jobs", effectiveTenantId],
+    enabled: !!effectiveTenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("import_jobs")
         .select(
           "id, source_provider, entity_kind, status, rows_total, rows_imported, rows_failed, created_at, finished_at",
         )
-        .eq("tenant_id", currentTenantId!)
+        .eq("tenant_id", effectiveTenantId!)
         .order("created_at", { ascending: false })
         .limit(15);
       if (error) throw error;
@@ -123,7 +146,7 @@ function IntegrationsHubPage() {
   );
 
   async function runSync(provider: string, entity: "products" | "customers" | "orders") {
-    if (!currentTenantId) return;
+    if (!effectiveTenantId) return;
     setSyncing(provider);
     try {
       const {
@@ -135,8 +158,8 @@ function IntegrationsHubPage() {
       const isDn = provider === "dntrade";
       const url = isDn ? `/hooks/integrations/dntrade-sync` : `/api/integrations/sync/${provider}`;
       const body = isDn
-        ? { tenant_id: currentTenantId, kinds: [entity] }
-        : { entityKind: entity, tenantId: currentTenantId };
+        ? { tenant_id: effectiveTenantId, kinds: [entity] }
+        : { entityKind: entity, tenantId: effectiveTenantId };
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -153,8 +176,8 @@ function IntegrationsHubPage() {
       toast.success(`Синхронізовано: ${importedCount} рядків`, {
         description: failedCount > 0 ? `Помилок: ${failedCount}` : undefined,
       });
-      qc.invalidateQueries({ queryKey: ["import-jobs", currentTenantId] });
-      qc.invalidateQueries({ queryKey: ["tenant-integrations", currentTenantId] });
+      qc.invalidateQueries({ queryKey: ["import-jobs", effectiveTenantId] });
+      qc.invalidateQueries({ queryKey: ["tenant-integrations", effectiveTenantId] });
     } catch (e) {
       toast.error("Не вдалось синхронізувати", {
         description: e instanceof Error ? e.message : String(e),
@@ -200,7 +223,7 @@ function IntegrationsHubPage() {
     );
   }
 
-  if (!currentTenantId) {
+  if (!effectiveTenantId) {
     return (
       <div className="mx-auto max-w-xl p-6">
         <Card>
@@ -229,7 +252,7 @@ function IntegrationsHubPage() {
       <header className="space-y-2">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Link to="/brand" className="hover:text-foreground">
-            ← {current?.tenant_name ?? "Бренд"}
+            ← {effectiveTenant?.tenant_name ?? "Бренд"}
           </Link>
           <span>·</span>
           <span>Інтеграції та імпорт</span>
@@ -399,20 +422,20 @@ function IntegrationsHubPage() {
 
       <IntegrationWizard
         integration={active}
-        tenantId={currentTenantId}
+        tenantId={effectiveTenantId}
         onClose={() => setActive(null)}
         onSaved={(integrationId) => {
           // Open the manage dialog with first-import CTA right after a successful save.
           const def = INTEGRATIONS.find((i) => i.id === integrationId) ?? null;
           setActive(null);
           if (def) setManage(def);
-          qc.invalidateQueries({ queryKey: ["tenant-integrations", currentTenantId] });
+          qc.invalidateQueries({ queryKey: ["tenant-integrations", effectiveTenantId] });
         }}
       />
 
       <IntegrationManageDialog
         integration={manage}
-        tenantId={currentTenantId}
+        tenantId={effectiveTenantId}
         onClose={() => setManage(null)}
       />
 
