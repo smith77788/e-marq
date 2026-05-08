@@ -72,15 +72,13 @@ function OnboardingPage() {
   });
   const tenants = tenantsQuery.data;
 
-  // Auto-select tenant from URL or first one.
-  // Поки tenants ще fetching після щойно створеного бізнесу — не падаємо
-  // у CreateFirstTenant. Перевіряємо search.tenant без вимоги, щоб він був
-  // у вже завантаженому списку: якщо userʼу повернеться 0 рядків (RLS не
-  // встиг побачити membership), наступний refetch усе підтягне.
+  // Auto-select only a tenant the current user can actually see.
+  // Після створення бізнес одразу інжектиться в cache нижче, тому тут більше
+  // не треба довіряти tenant з URL/localStorage. Інакше stale/foreign tenant_id
+  // веде до not_authorized на кожному наступному кроці wizard-а.
   const urlTenantIsMine = !!search.tenant && !!tenants?.some((t) => t.id === search.tenant);
-  const tenantId = urlTenantIsMine ? search.tenant : (search.tenant ?? tenants?.[0]?.id);
-  const tenantSlug =
-    tenants?.find((t) => t.id === tenantId)?.slug ?? (urlTenantIsMine ? undefined : search.slug);
+  const tenantId = urlTenantIsMine ? search.tenant : tenants?.[0]?.id;
+  const tenantSlug = tenants?.find((t) => t.id === tenantId)?.slug;
 
   useEffect(() => {
     if (tenantId) setCurrentTenantId(tenantId);
@@ -431,6 +429,7 @@ function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   const save = useMutation({
     mutationFn: async () => {
+      await ensureAuthenticatedSession();
       const { error } = await supabase.from("tenants").update({ name }).eq("id", tenantId);
       if (error) throw error;
     },
@@ -840,6 +839,7 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
 
   const create = useMutation({
     mutationFn: async () => {
+      await ensureAuthenticatedSession();
       const trimmed = email.trim().toLowerCase();
       if (!/\S+@\S+\.\S+/.test(trimmed)) {
         throw new Error(
@@ -879,6 +879,7 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
 
   const revoke = useMutation({
     mutationFn: async (id: string) => {
+      await ensureAuthenticatedSession();
       const { error } = await supabase.from("tenant_invitations").delete().eq("id", id);
       if (error) throw error;
     },
