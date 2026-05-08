@@ -88,7 +88,42 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const tenants = useMemo(() => tenantsQuery.data ?? [], [tenantsQuery.data]);
+  const baseTenants = useMemo(() => tenantsQuery.data ?? [], [tenantsQuery.data]);
+  const currentTenantKnown = !!currentTenantId && baseTenants.some((t) => t.tenant_id === currentTenantId);
+
+  // New-business safety net: right after create_my_tenant(), the direct tenant row
+  // can be visible before get_my_tenants() has caught up in the query cache. Keep
+  // the chosen business usable instead of falling back to an empty/stale switcher.
+  const currentTenantFallbackQuery = useQuery({
+    queryKey: ["tenant-context-fallback", currentTenantId, user?.id],
+    enabled: !!user && !!currentTenantId && !currentTenantKnown,
+    retry: 2,
+    staleTime: 15_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tenants")
+        .select("id, name, slug, status")
+        .eq("id", currentTenantId!)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      return {
+        tenant_id: data.id,
+        tenant_name: data.name,
+        tenant_slug: data.slug,
+        membership_role: "owner",
+        plan_key: "free",
+        plan_name: "Free",
+        status: data.status,
+      } satisfies MyTenant;
+    },
+  });
+
+  const tenants = useMemo(() => {
+    const fallback = currentTenantFallbackQuery.data;
+    if (!fallback || baseTenants.some((t) => t.tenant_id === fallback.tenant_id)) return baseTenants;
+    return [fallback, ...baseTenants];
+  }, [baseTenants, currentTenantFallbackQuery.data]);
   const allTenantsForAdmin = useMemo(
     () => adminAllTenantsQuery.data ?? [],
     [adminAllTenantsQuery.data],
