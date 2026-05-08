@@ -178,7 +178,7 @@ function OnboardingPage() {
       const trackingDone = !!features.tracking_installed || (ev?.count ?? 0) > 0;
       return {
         s1: !!(tn?.data?.name && tn.data.name.trim().length > 1),
-        s2: ownerTelegramBound || (tg.count ?? 0) > 0,
+        s2: ownerTelegramBound || (tg?.count ?? 0) > 0,
         s3: (prod?.count ?? 0) > 0,
         s4: (cust?.count ?? 0) > 0,
         s5: trackingDone,
