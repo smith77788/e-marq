@@ -1101,6 +1101,58 @@ function OnboardingError({
   );
 }
 
+function parseLocalizedPriceCents(value: string): number {
+  const normalized = value.trim().replace(/\s/g, "").replace(",", ".");
+  return Math.round(Number(normalized) * 100);
+}
+
+function splitCsvLine(line: string, delimiter: string): string[] {
+  const cells: string[] = [];
+  let current = "";
+  let quoted = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (quoted && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (ch === delimiter && !quoted) {
+      cells.push(current.trim());
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  cells.push(current.trim());
+  return cells.map((cell) => cell.replace(/^"|"$/g, "").trim());
+}
+
+function parseCustomerCsv(csv: string): { email: string; name: string | null }[] {
+  const lines = csv
+    .trim()
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (lines.length === 0) return [];
+  const delimiter = lines[0].includes(";") && !lines[0].includes(",") ? ";" : ",";
+  const header = splitCsvLine(lines[0], delimiter).map((h) => h.toLowerCase());
+  const emailIdx = Math.max(header.findIndex((h) => h.includes("email") || h.includes("e-mail")), 0);
+  const nameIdx = header.findIndex((h) => ["name", "імʼя", "ім'я", "імя", "піб", "customer"].some((k) => h.includes(k)));
+  return lines
+    .slice(1)
+    .map((line) => {
+      const cells = splitCsvLine(line, delimiter);
+      const email = (cells[emailIdx] ?? "").trim().toLowerCase();
+      if (!email) return null;
+      const name = nameIdx >= 0 ? (cells[nameIdx] ?? "").trim() : "";
+      return { email, name: name || null };
+    })
+    .filter(Boolean) as { email: string; name: string | null }[];
+}
+
 function slugify(input: string): string {
   const map: Record<string, string> = {
     а: "a",
