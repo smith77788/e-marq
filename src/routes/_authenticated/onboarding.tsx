@@ -111,7 +111,11 @@ function OnboardingPage() {
           .from("customers")
           .select("id", { count: "exact", head: true })
           .eq("tenant_id", tenantId),
-        supabase.from("tenant_configs").select("features").eq("tenant_id", tenantId).maybeSingle(),
+        supabase
+          .from("tenant_configs")
+          .select("features, owner_telegram_chat_id")
+          .eq("tenant_id", tenantId)
+          .maybeSingle(),
         supabase
           .from("telegram_chat_routing")
           .select("chat_id", { count: "exact", head: true })
