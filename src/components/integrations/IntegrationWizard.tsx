@@ -97,7 +97,8 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
   const [verifying, setVerifying] = useState(false);
   const [verifyResult, setVerifyResult] = useState<{ ok: boolean; message: string } | null>(null);
 
-  const isFileBased = integration?.method === "csv" || integration?.method === "sheets";
+  const isSheets = integration?.method === "sheets";
+  const isFileBased = integration?.method === "csv";
   const isApiKey = integration?.method === "apiKey";
   const isWebhook = integration?.method === "webhook";
   const isRest = integration?.method === "rest";
@@ -229,7 +230,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
       if (restUrl) config.url = restUrl;
       const webhookSecret = isWebhook ? crypto.randomUUID().replace(/-/g, "") : null;
       const verification =
-        isApiKey || isRest
+        isApiKey || isRest || isSheets
           ? {
               status: verifyResult?.ok ? "verified" : verifyResult ? "failed" : "not_checked",
               checked_at: verifyResult ? new Date().toISOString() : null,
@@ -272,7 +273,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
       toast.success(MSG.saved);
       // For credential-based providers we hand off to the manage dialog
       // (overview + first-import CTA) instead of showing "Готово".
-      if (integration && (isApiKey || isRest) && onSaved) {
+      if (integration && (isApiKey || isRest || isSheets) && onSaved) {
         onSaved(integration.id);
         reset();
         return;
@@ -337,7 +338,8 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
   }
 
   const credsFilled =
-    (isApiKey && apiKey.trim().length > 0) || (isRest && restUrl.trim().length > 0);
+    (isApiKey && apiKey.trim().length > 0) ||
+    ((isRest || isSheets) && restUrl.trim().length > 0);
   const domainRequired =
     isApiKey &&
     (integration.id === "shopify" ||
