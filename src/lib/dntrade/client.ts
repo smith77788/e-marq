@@ -109,10 +109,7 @@ async function request<T>(
       });
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") {
-        throw new DnTradeError(
-          `DN Trade ${method} ${path} timed out after ${timeoutMs}ms`,
-          408,
-        );
+        throw new DnTradeError(`DN Trade ${method} ${path} timed out after ${timeoutMs}ms`, 408);
       }
       throw e;
     } finally {
@@ -200,7 +197,13 @@ export async function listPartners(
 
 export async function listOrders(
   apiKey: string,
-  opts: { limit?: number; offset?: number; modified_from?: string; from_date?: string; timeoutMs?: number } = {},
+  opts: {
+    limit?: number;
+    offset?: number;
+    modified_from?: string;
+    from_date?: string;
+    timeoutMs?: number;
+  } = {},
 ): Promise<{ status?: number; orders?: DnOrder[] }> {
   return request(
     apiKey,
