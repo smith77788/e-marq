@@ -222,7 +222,7 @@ function IntegrationsHubPage() {
     );
   }
 
-  if (!currentTenantId) {
+  if (!effectiveTenantId) {
     return (
       <div className="mx-auto max-w-xl p-6">
         <Card>
@@ -251,7 +251,7 @@ function IntegrationsHubPage() {
       <header className="space-y-2">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Link to="/brand" className="hover:text-foreground">
-            ← {current?.tenant_name ?? "Бренд"}
+            ← {effectiveTenant?.tenant_name ?? "Бренд"}
           </Link>
           <span>·</span>
           <span>Інтеграції та імпорт</span>
@@ -421,20 +421,20 @@ function IntegrationsHubPage() {
 
       <IntegrationWizard
         integration={active}
-        tenantId={currentTenantId}
+        tenantId={effectiveTenantId}
         onClose={() => setActive(null)}
         onSaved={(integrationId) => {
           // Open the manage dialog with first-import CTA right after a successful save.
           const def = INTEGRATIONS.find((i) => i.id === integrationId) ?? null;
           setActive(null);
           if (def) setManage(def);
-          qc.invalidateQueries({ queryKey: ["tenant-integrations", currentTenantId] });
+          qc.invalidateQueries({ queryKey: ["tenant-integrations", effectiveTenantId] });
         }}
       />
 
       <IntegrationManageDialog
         integration={manage}
-        tenantId={currentTenantId}
+        tenantId={effectiveTenantId}
         onClose={() => setManage(null)}
       />
 
