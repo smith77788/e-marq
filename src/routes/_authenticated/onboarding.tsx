@@ -29,6 +29,7 @@ import { Progress } from "@/components/ui/progress";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 import { IntegrationGuide } from "@/components/owner/IntegrationGuide";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureAuthenticatedSession } from "@/lib/auth/ensureSession";
 import { useAuth } from "@/hooks/useAuth";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { useT, type TKey, type Lang } from "@/lib/i18n";
@@ -455,7 +456,6 @@ function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
 }
 
 function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
-  const { user } = useAuth();
   const [ownerPairingCode, setOwnerPairingCode] = useState<string | null>(null);
   const { data: tenant } = useQuery({
     queryKey: ["tenant-slug", tenantId],
@@ -494,7 +494,7 @@ function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
   });
   const createOwnerPairing = useMutation({
     mutationFn: async () => {
-      if (!user) throw new Error("Сесія не знайдена. Оновіть сторінку.");
+      await ensureAuthenticatedSession();
       const { data, error } = await (supabase.rpc as any)("create_telegram_owner_pairing", {
         _tenant_id: tenantId,
       });
@@ -614,6 +614,7 @@ function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   const create = useMutation({
     mutationFn: async () => {
+      await ensureAuthenticatedSession();
       const priceCents = Math.round(Number(price) * 100);
       const stockNum = Math.max(0, parseInt(stock || "0", 10));
       if (!name || !Number.isFinite(priceCents) || priceCents <= 0)
@@ -675,6 +676,7 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   const importCsv = useMutation({
     mutationFn: async () => {
+      await ensureAuthenticatedSession();
       const lines = csv.trim().split(/\r?\n/);
       const rows = lines
         .slice(1) // skip header
@@ -751,6 +753,7 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   const setMethod = useMutation({
     mutationFn: async (method: "manual" | "stripe") => {
+      await ensureAuthenticatedSession();
       const { error } = await (supabase.rpc as any)("set_tenant_payment_method", {
         _tenant_id: tenantId,
         _method: method,
