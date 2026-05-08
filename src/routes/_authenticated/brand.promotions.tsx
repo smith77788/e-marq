@@ -111,8 +111,15 @@ function fromLocalInput(s: string): string | null {
 
 function BrandPromotionsPage() {
   const { tenant: tenantId } = useSearch({ from: "/_authenticated/brand/promotions" });
-  const { user, loading } = useAuth();
-  const { tenants, current, currentTenantId, setCurrentTenantId } = useTenantContext();
+  const { user, loading: authLoading } = useAuth();
+  const {
+    tenants,
+    current,
+    currentTenantId,
+    setCurrentTenantId,
+    loading: tenantsLoading,
+  } = useTenantContext();
+  const loading = authLoading || tenantsLoading;
   const { t } = useT();
   const navigate = useNavigate();
   const qc = useQueryClient();
