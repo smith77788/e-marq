@@ -7513,6 +7513,19 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      create_onboarding_product: {
+        Args: {
+          _name: string
+          _price_cents: number
+          _stock?: number
+          _tenant_id: string
+        }
+        Returns: string
+      }
+      create_owner_test_notification: {
+        Args: { _tenant_id: string }
+        Returns: string
+      }
       create_payment_intent: {
         Args: {
           _amount_cents: number
@@ -7521,6 +7534,10 @@ export type Database = {
           _redirect_url?: string
         }
         Returns: string
+      }
+      create_telegram_owner_pairing: {
+        Args: { _tenant_id: string }
+        Returns: Json
       }
       create_tenant_invitation: {
         Args: { _email: string; _role?: string; _tenant_id: string }
@@ -7808,6 +7825,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      import_onboarding_customers: {
+        Args: { _customers: Json; _tenant_id: string }
+        Returns: number
+      }
       increment_integration_rate_limit: {
         Args: {
           _max_per_minute?: number
@@ -8000,6 +8021,40 @@ export type Database = {
       }
       run_pending_ai_actions: { Args: { _limit?: number }; Returns: Json }
       run_sql_loop_tick: { Args: never; Returns: Json }
+      save_tenant_integration: {
+        Args: {
+          _config?: Json
+          _credentials?: string
+          _last_sync_error?: string
+          _last_sync_status?: string
+          _provider: string
+          _tenant_id: string
+          _webhook_secret?: string
+        }
+        Returns: {
+          config: Json
+          created_at: string
+          credentials_encrypted: string | null
+          id: string
+          is_active: boolean
+          last_sync_at: string | null
+          last_sync_error: string | null
+          last_sync_status: string | null
+          provider: string
+          synced_customers_count: number
+          synced_orders_count: number
+          synced_products_count: number
+          tenant_id: string
+          updated_at: string
+          webhook_secret: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tenant_integrations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       score_order_refund_risk: { Args: { _order_id: string }; Returns: number }
       seed_demo_catalog: { Args: { _tenant_id: string }; Returns: Json }
       self_heal_dismiss_action: {
@@ -8014,6 +8069,14 @@ export type Database = {
       set_owner_telegram_chat: {
         Args: { _chat_id: string; _tenant_id: string }
         Returns: undefined
+      }
+      set_tenant_integration_webhook_secret: {
+        Args: { _provider: string; _tenant_id: string; _webhook_secret: string }
+        Returns: string
+      }
+      set_tenant_payment_method: {
+        Args: { _method: string; _tenant_id: string }
+        Returns: boolean
       }
       simulate_lift_for_recent_decisions: {
         Args: { _tenant_id: string }
