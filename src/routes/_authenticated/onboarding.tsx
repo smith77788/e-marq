@@ -117,57 +117,73 @@ function OnboardingPage() {
     staleTime: 5_000,
     queryFn: async () => {
       if (!tenantId) return null;
-      const [tn, prod, cust, cfg, tg, mem, ev] = await Promise.all([
-        supabase.from("tenants").select("name").eq("id", tenantId).maybeSingle(),
-        supabase
-          .from("products")
-          .select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId)
-          .eq("is_active", true),
-        supabase
-          .from("customers")
-          .select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId),
-        supabase
-          .from("tenant_configs")
-          .select("features, owner_telegram_chat_id")
-          .eq("tenant_id", tenantId)
-          .maybeSingle(),
-        supabase
-          .from("telegram_chat_routing")
-          .select("chat_id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId),
-        supabase
-          .from("tenant_memberships")
-          .select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId),
-        supabase
-          .from("events")
-          .select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId)
-          .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
-      ]);
+      const settled = await withTimeout(
+        Promise.allSettled([
+          supabase.from("tenants").select("name").eq("id", tenantId).maybeSingle(),
+          supabase
+            .from("products")
+            .select("id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId)
+            .eq("is_active", true),
+          supabase
+            .from("customers")
+            .select("id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId),
+          supabase
+            .from("tenant_configs")
+            .select("features, owner_telegram_chat_id")
+            .eq("tenant_id", tenantId)
+            .maybeSingle(),
+          supabase
+            .from("telegram_chat_routing")
+            .select("chat_id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId),
+          supabase
+            .from("tenant_memberships")
+            .select("id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId),
+          supabase
+            .from("events")
+            .select("id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId)
+            .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+        ]),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Оновлення статусів onboarding"),
+      );
+      const pick = <T,>(i: number): T | null =>
+        settled[i]?.status === "fulfilled" ? ((settled[i] as PromiseFulfilledResult<T>).value) : null;
+      const tn = pick<{ data: { name: string } | null; error: Error | null }>(0);
+      const prod = pick<{ count: number | null; error: Error | null }>(1);
+      const cust = pick<{ count: number | null; error: Error | null }>(2);
+      const cfg = pick<{
+        data: { features?: unknown; owner_telegram_chat_id?: string | null } | null;
+        error: Error | null;
+      }>(3);
+      const tg = pick<{ count: number | null; error: Error | null }>(4);
+      const mem = pick<{ count: number | null; error: Error | null }>(5);
+      const ev = pick<{ count: number | null; error: Error | null }>(6);
       // Tolerate partial failures: a brand-new tenant may have RLS races where
       // one of these helper tables hasn't yet been seeded with rows the user can
       // see. We log unexpected errors but never block the wizard — a missing
       // count just means "this step isn't done yet", not "loading failed".
-      const errs = [tn.error, prod.error, cust.error, cfg.error, tg.error, mem.error, ev.error]
+      const errs = [tn?.error, prod?.error, cust?.error, cfg?.error, tg?.error, mem?.error, ev?.error]
         .filter(Boolean)
         .map((e) => e!.message);
       if (errs.length > 0) {
         console.warn("[onboarding-status] partial errors:", errs);
       }
-      const features = (cfg.data?.features ?? {}) as Record<string, unknown>;
-      const ownerTelegramBound = !!cfg.data?.owner_telegram_chat_id;
-      const trackingDone = !!features.tracking_installed || (ev.count ?? 0) > 0;
+      const features = (cfg?.data?.features ?? {}) as Record<string, unknown>;
+      const ownerTelegramBound = !!cfg?.data?.owner_telegram_chat_id;
+      const trackingDone = !!features.tracking_installed || (ev?.count ?? 0) > 0;
       return {
-        s1: !!(tn.data?.name && tn.data.name.trim().length > 1),
+        s1: !!(tn?.data?.name && tn.data.name.trim().length > 1),
         s2: ownerTelegramBound || (tg.count ?? 0) > 0,
-        s3: (prod.count ?? 0) > 0,
-        s4: (cust.count ?? 0) > 0,
+        s3: (prod?.count ?? 0) > 0,
+        s4: (cust?.count ?? 0) > 0,
         s5: trackingDone,
         s6: typeof features.payment_method === "string",
-        s7: (mem.count ?? 0) > 1,
+        s7: (mem?.count ?? 0) > 1,
       };
     },
   });
