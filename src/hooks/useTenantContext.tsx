@@ -74,7 +74,9 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
 
   const tenantRowsFallbackQuery = useQuery({
     queryKey: ["my-tenants-direct-fallback", user?.id],
-    enabled: !!user && (tenantsQuery.isError || (tenantsQuery.isSuccess && (tenantsQuery.data?.length ?? 0) === 0)),
+    enabled:
+      !!user &&
+      (tenantsQuery.isError || (tenantsQuery.isSuccess && (tenantsQuery.data?.length ?? 0) === 0)),
     retry: 2,
     staleTime: 15_000,
     queryFn: async () => {
@@ -128,7 +130,8 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
     if ((tenantsQuery.data?.length ?? 0) > 0) return tenantsQuery.data ?? [];
     return tenantRowsFallbackQuery.data ?? [];
   }, [tenantRowsFallbackQuery.data, tenantsQuery.data]);
-  const currentTenantKnown = !!currentTenantId && baseTenants.some((t) => t.tenant_id === currentTenantId);
+  const currentTenantKnown =
+    !!currentTenantId && baseTenants.some((t) => t.tenant_id === currentTenantId);
 
   // New-business safety net: right after create_my_tenant(), the direct tenant row
   // can be visible before get_my_tenants() has caught up in the query cache. Keep
@@ -165,7 +168,8 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
 
   const tenants = useMemo(() => {
     const fallback = currentTenantFallbackQuery.data;
-    if (!fallback || baseTenants.some((t) => t.tenant_id === fallback.tenant_id)) return baseTenants;
+    if (!fallback || baseTenants.some((t) => t.tenant_id === fallback.tenant_id))
+      return baseTenants;
     return [fallback, ...baseTenants];
   }, [baseTenants, currentTenantFallbackQuery.data]);
   const allTenantsForAdmin = useMemo(
@@ -177,7 +181,8 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
   // Важливо: після створення нового бізнесу query cache ще може містити старий список.
   // Не перезаписуємо щойно вибраний tenant, доки refetch не встиг підтягнути membership.
   useEffect(() => {
-    if (tenantsQuery.isLoading || tenantsQuery.isFetching || tenantRowsFallbackQuery.isFetching) return;
+    if (tenantsQuery.isLoading || tenantsQuery.isFetching || tenantRowsFallbackQuery.isFetching)
+      return;
     if (tenants.length === 0) return;
     const manualSelectionIsFresh = Date.now() - manualTenantSetAt < 15_000;
     if (!currentTenantId || !tenants.find((t) => t.tenant_id === currentTenantId)) {

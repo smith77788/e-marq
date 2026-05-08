@@ -155,7 +155,6 @@ function OnboardingPage() {
         .filter(Boolean)
         .map((e) => e!.message);
       if (errs.length > 0) {
-        // eslint-disable-next-line no-console
         console.warn("[onboarding-status] partial errors:", errs);
       }
       const features = (cfg.data?.features ?? {}) as Record<string, unknown>;
