@@ -446,7 +446,15 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                     </Label>
                     <Select
                       value={entityKind}
-                      onValueChange={(v) => setEntityKind(v as EntityKind)}
+                      onValueChange={(v) => {
+                        const nextKind = v as EntityKind;
+                        setEntityKind(nextKind);
+                        if (parsedFile) {
+                          const nextMapping = autoMap(parsedFile.headers, nextKind);
+                          setMapping(nextMapping);
+                          setValidation(validateImportData(parsedFile.rows, nextMapping, nextKind));
+                        }
+                      }}
                     >
                       <SelectTrigger className="mx-auto mt-1 max-w-xs">
                         <SelectValue />
@@ -623,9 +631,11 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                     </Label>
                     <Select
                       value={mapping[field.id] ?? "__none__"}
-                      onValueChange={(v) =>
-                        setMapping((m) => ({ ...m, [field.id]: v === "__none__" ? "" : v }))
-                      }
+                      onValueChange={(v) => {
+                        const nextMapping = { ...mapping, [field.id]: v === "__none__" ? "" : v };
+                        setMapping(nextMapping);
+                        setValidation(validateImportData(parsedFile.rows, nextMapping, entityKind));
+                      }}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="— не імпортувати —" />
@@ -642,6 +652,42 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                   </div>
                 ))}
               </div>
+
+              {validation && (
+                <Alert
+                  variant={validation.valid ? "default" : "destructive"}
+                  className={validation.valid ? "border-success/40 bg-success/5" : ""}
+                >
+                  {validation.valid ? (
+                    <CheckCircle2 className="h-4 w-4 text-success" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4" />
+                  )}
+                  <AlertDescription className="space-y-2 text-xs">
+                    <div>
+                      Готово до імпорту: <strong>{validation.stats.validRows}</strong> з{" "}
+                      <strong>{validation.stats.totalRows}</strong> рядків · обовʼязкові поля:{" "}
+                      <strong>
+                        {validation.stats.mappedRequired}/{validation.stats.requiredFields}
+                      </strong>
+                    </div>
+                    {validation.errors.length > 0 && (
+                      <ul className="list-disc space-y-0.5 pl-4">
+                        {validation.errors.map((error, i) => (
+                          <li key={i}>{error}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {validation.warnings.length > 0 && (
+                      <ul className="list-disc space-y-0.5 pl-4 text-muted-foreground">
+                        {validation.warnings.map((warning, i) => (
+                          <li key={i}>{warning}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              )}
 
               <div className="rounded-lg border border-border/40 bg-card/40 p-3">
                 <div className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">
@@ -818,7 +864,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
               </Button>
             )}
             {step === 2 && (
-              <Button onClick={runImportNow} disabled={importing} className="gap-1">
+              <Button onClick={runImportNow} disabled={importing || validation?.valid === false} className="gap-1">
                 {importing ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
