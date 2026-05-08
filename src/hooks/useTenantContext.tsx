@@ -52,6 +52,7 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
     if (typeof window === "undefined") return null;
     return window.localStorage.getItem(STORAGE_KEY);
   });
+  const [manualTenantSetAt, setManualTenantSetAt] = useState(0);
 
   const tenantsQuery = useQuery({
     queryKey: ["my-tenants-rpc", user?.id],
@@ -93,11 +94,15 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
     [adminAllTenantsQuery.data],
   );
 
-  // Auto-select first tenant if nothing chosen yet, or if stored id is not in list.
+  // Auto-select first tenant if nothing chosen yet, or if stored id is truly stale.
+  // Важливо: після створення нового бізнесу query cache ще може містити старий список.
+  // Не перезаписуємо щойно вибраний tenant, доки refetch не встиг підтягнути membership.
   useEffect(() => {
-    if (tenantsQuery.isLoading) return;
+    if (tenantsQuery.isLoading || tenantsQuery.isFetching) return;
     if (tenants.length === 0) return;
+    const manualSelectionIsFresh = Date.now() - manualTenantSetAt < 15_000;
     if (!currentTenantId || !tenants.find((t) => t.tenant_id === currentTenantId)) {
+      if (currentTenantId && manualSelectionIsFresh) return;
       const next = tenants[0].tenant_id;
       _setCurrent(next);
       try {
@@ -106,9 +111,10 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
         /* ignore */
       }
     }
-  }, [tenants, currentTenantId, tenantsQuery.isLoading]);
+  }, [tenants, currentTenantId, manualTenantSetAt, tenantsQuery.isFetching, tenantsQuery.isLoading]);
 
   const setCurrentTenantId = useCallback((id: string) => {
+    setManualTenantSetAt(Date.now());
     _setCurrent(id);
     try {
       window.localStorage.setItem(STORAGE_KEY, id);
