@@ -436,8 +436,16 @@ function Step1Brand({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   const save = useMutation({
     mutationFn: async () => {
-      await ensureAuthenticatedSession();
-      const { error } = await supabase.from("tenants").update({ name }).eq("id", tenantId);
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
+      const { error } = await withTimeout(
+        supabase.from("tenants").update({ name }).eq("id", tenantId),
+        UI_MUTATION_TIMEOUT_MS,
+        actionTimeoutMessage("Збереження назви бізнесу"),
+      );
       if (error) throw error;
     },
     onSuccess: () => {
@@ -1274,7 +1282,11 @@ function CreateFirstTenant({
 
   const create = useMutation({
     mutationFn: async () => {
-      await ensureAuthenticatedSession();
+      await withTimeout(
+        ensureAuthenticatedSession(),
+        UI_QUERY_TIMEOUT_MS,
+        actionTimeoutMessage("Відновлення сесії"),
+      );
       const cleanName = name.trim();
       if (cleanName.length < 2) {
         throw new Error(lang === "ua" ? "Назва занадто коротка" : "Name too short");
@@ -1285,10 +1297,14 @@ function CreateFirstTenant({
       for (let i = 0; i < 4; i++) {
         // Use SECURITY DEFINER RPC so RLS edge cases (auth.uid mismatches,
         // trigger ordering) cannot block creation. Function lives in DB.
-        const { data, error } = await supabase.rpc("create_my_tenant", {
-          _name: cleanName,
-          _slug: attempt,
-        });
+        const { data, error } = await withTimeout(
+          supabase.rpc("create_my_tenant", {
+            _name: cleanName,
+            _slug: attempt,
+          }),
+          UI_MUTATION_TIMEOUT_MS,
+          actionTimeoutMessage("Створення бізнесу"),
+        );
         if (!error && data) {
           const row = Array.isArray(data) ? data[0] : data;
           return { id: row.id as string, slug: row.slug as string };
