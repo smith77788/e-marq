@@ -33,8 +33,15 @@ import { ensureAuthenticatedSession } from "@/lib/auth/ensureSession";
 import { useAuth } from "@/hooks/useAuth";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { useT, type TKey, type Lang } from "@/lib/i18n";
+import { withTimeout } from "@/lib/async/withTimeout";
 
 type Search = { tenant?: string; slug?: string };
+const UI_QUERY_TIMEOUT_MS = 10_000;
+const UI_MUTATION_TIMEOUT_MS = 12_000;
+
+function actionTimeoutMessage(action: string) {
+  return `${action} триває занадто довго. Перевірте інтернет і натисніть кнопку ще раз.`;
+}
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   validateSearch: (s: Record<string, unknown>): Search => ({
