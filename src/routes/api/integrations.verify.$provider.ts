@@ -60,8 +60,8 @@ export const Route = createFileRoute("/api/integrations/verify/$provider")({
             global: { headers: { Authorization: `Bearer ${token}` } },
             auth: { persistSession: false, autoRefreshToken: false },
           });
-          const { data: claimsData, error: claimsErr } = await userClient.auth.getClaims(token);
-          if (claimsErr || !claimsData?.claims?.sub) {
+          const { data: userData, error: userErr } = await userClient.auth.getUser(token);
+          if (userErr || !userData?.user?.id) {
             return jsonResponse({ ok: false, error: "Invalid token" }, 401);
           }
 
@@ -73,18 +73,18 @@ export const Route = createFileRoute("/api/integrations/verify/$provider")({
           const { tenantId, entityKind } = parsed.data;
           let { credentials, config } = parsed.data;
 
-          // Guard: tenant must be active
+          // Guard: self-serve tenants may be pending immediately after onboarding.
           const { data: tenant } = await supabaseAdmin
             .from("tenants")
             .select("status")
             .eq("id", tenantId)
             .maybeSingle();
-          if (tenant && tenant.status !== "active") {
+          if (tenant && !["active", "pending"].includes(tenant.status)) {
             return jsonResponse(
               {
                 ok: false,
                 error:
-                  "Бренд ще не верифіковано адміністратором. Підключення стане доступним після підтвердження.",
+                  "Бренд заблоковано або архівовано. Підключення недоступне для цього статусу.",
               },
               403,
             );

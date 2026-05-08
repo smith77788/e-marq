@@ -62,11 +62,11 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
             global: { headers: { Authorization: `Bearer ${token}` } },
             auth: { persistSession: false, autoRefreshToken: false },
           });
-          const { data: claimsData, error: claimsErr } = await userClient.auth.getClaims(token);
-          if (claimsErr || !claimsData?.claims?.sub) {
+          const { data: userData, error: userErr } = await userClient.auth.getUser(token);
+          if (userErr || !userData?.user?.id) {
             return jsonResponse({ error: "Invalid token" }, 401);
           }
-          const userId = claimsData.claims.sub;
+          const userId = userData.user.id;
 
           // 2. Парсимо body.
           const raw = await request.json().catch(() => null);
@@ -76,17 +76,17 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
           }
           const { entityKind, tenantId, limit } = parsed.data;
 
-          // Guard: tenant must be active
+          // Guard: self-serve tenants may be pending immediately after onboarding.
           const { data: tenant } = await supabaseAdmin
             .from("tenants")
             .select("status")
             .eq("id", tenantId)
             .maybeSingle();
-          if (tenant && tenant.status !== "active") {
+          if (tenant && !["active", "pending"].includes(tenant.status)) {
             return jsonResponse(
               {
                 error:
-                  "Бренд ще не верифіковано адміністратором. Синхронізація стане доступною після підтвердження.",
+                  "Бренд заблоковано або архівовано. Синхронізація недоступна для цього статусу.",
               },
               403,
             );

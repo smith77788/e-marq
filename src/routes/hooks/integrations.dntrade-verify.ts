@@ -31,15 +31,15 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-verify")({
         const ctx = await authorizeAgentRequest(token, tenantId);
         if ("error" in ctx) return jsonError(ctx.error, ctx.status);
 
-        // Guard: tenant must be active
+        // Guard: self-serve tenants may be pending immediately after onboarding.
         const { data: tenant } = await supabaseAdmin
           .from("tenants")
           .select("status")
           .eq("id", tenantId)
           .maybeSingle();
-        if (tenant && tenant.status !== "active") {
+        if (tenant && !["active", "pending"].includes(tenant.status)) {
           return jsonError(
-            "Бренд ще не верифіковано адміністратором. Підключення стане доступним після підтвердження.",
+            "Бренд заблоковано або архівовано. Підключення недоступне для цього статусу.",
             403,
           );
         }
