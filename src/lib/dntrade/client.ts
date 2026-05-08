@@ -167,33 +167,54 @@ export async function listProducts(
   opts: { limit?: number; offset?: number; modified_from?: string; timeoutMs?: number } = {},
 ): Promise<{ status?: number; products?: DnProduct[] } | DnProduct[]> {
   // /products/list is POST; uses query params for filtering
-  return request(apiKey, "POST", "/products/list", {
-    limit: opts.limit ?? 100,
-    offset: opts.offset ?? 0,
-    modified_from: opts.modified_from,
-  }, undefined, { timeoutMs: opts.timeoutMs });
+  return request(
+    apiKey,
+    "POST",
+    "/products/list",
+    {
+      limit: opts.limit ?? 100,
+      offset: opts.offset ?? 0,
+      modified_from: opts.modified_from,
+    },
+    undefined,
+    { timeoutMs: opts.timeoutMs },
+  );
 }
 
 export async function listPartners(
   apiKey: string,
   opts: { limit?: number; offset?: number; timeoutMs?: number } = {},
 ): Promise<{ status?: number; partners?: DnPartner[] }> {
-  return request(apiKey, "GET", "/partners/list", {
-    limit: opts.limit ?? 100,
-    offset: opts.offset ?? 0,
-  }, undefined, { timeoutMs: opts.timeoutMs });
+  return request(
+    apiKey,
+    "GET",
+    "/partners/list",
+    {
+      limit: opts.limit ?? 100,
+      offset: opts.offset ?? 0,
+    },
+    undefined,
+    { timeoutMs: opts.timeoutMs },
+  );
 }
 
 export async function listOrders(
   apiKey: string,
   opts: { limit?: number; offset?: number; modified_from?: string; from_date?: string; timeoutMs?: number } = {},
 ): Promise<{ status?: number; orders?: DnOrder[] }> {
-  return request(apiKey, "GET", "/orders/list", {
-    limit: opts.limit ?? 50,
-    offset: opts.offset ?? 0,
-    modified_from: opts.modified_from,
-    from_date: opts.from_date,
-  }, undefined, { timeoutMs: opts.timeoutMs });
+  return request(
+    apiKey,
+    "GET",
+    "/orders/list",
+    {
+      limit: opts.limit ?? 50,
+      offset: opts.offset ?? 0,
+      modified_from: opts.modified_from,
+      from_date: opts.from_date,
+    },
+    undefined,
+    { timeoutMs: opts.timeoutMs },
+  );
 }
 
 /** Normalise a possibly-array or {products:[]} response to a flat array. */
