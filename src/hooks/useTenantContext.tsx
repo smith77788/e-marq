@@ -75,6 +75,7 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase
         .from("tenants")
         .select("id, name, slug, status")
+        .eq("owner_user_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []).map<MyTenant>((t) => ({
@@ -132,6 +133,7 @@ export function TenantContextProvider({ children }: { children: ReactNode }) {
         .from("tenants")
         .select("id, name, slug, status")
         .eq("id", currentTenantId!)
+        .eq("owner_user_id", user!.id)
         .maybeSingle();
       if (error) throw error;
       if (!data) return null;
