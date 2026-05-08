@@ -50,7 +50,12 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-cron")({
               supabaseAdmin,
               integ.tenant_id,
               integ.credentials_encrypted,
-              { modifiedFromIso: integ.last_sync_at ?? undefined, integrationId: integ.id },
+              {
+                modifiedFromIso: integ.last_sync_at ?? undefined,
+                integrationId: integ.id,
+                maxPages: 5,
+                requestTimeoutMs: 6_000,
+              },
             );
             const hasErrors = summary.errors.length > 0 || summary.mapping_errors.length > 0;
             await supabaseAdmin
