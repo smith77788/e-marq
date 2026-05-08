@@ -167,24 +167,21 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
         verifyStatus = "failed";
         verifyMessage = e instanceof Error ? e.message : String(e);
       }
-      const { error } = await supabase.from("tenant_integrations").upsert(
-        {
-          tenant_id: tenantId,
-          provider: "dntrade",
-          credentials_encrypted: trimmed,
-          is_active: true,
-          config: {
-            verification: {
-              status: verifyStatus,
-              checked_at: new Date().toISOString(),
-              message: verifyMessage,
-            },
+      const { error } = await (supabase.rpc as any)("save_tenant_integration", {
+        _tenant_id: tenantId,
+        _provider: "dntrade",
+        _credentials: trimmed,
+        _config: {
+          verification: {
+            status: verifyStatus,
+            checked_at: new Date().toISOString(),
+            message: verifyMessage,
           },
-          last_sync_status: verifyStatus === "verified" ? "verified" : "saved_unverified",
-          last_sync_error: verifyStatus === "failed" ? verifyMessage : null,
         },
-        { onConflict: "tenant_id,provider" },
-      );
+        _last_sync_status: verifyStatus === "verified" ? "verified" : "saved_unverified",
+        _last_sync_error: verifyStatus === "failed" ? verifyMessage : null,
+        _webhook_secret: null,
+      });
       if (error) throw error;
       return { verifyStatus, verifyMessage };
     },
@@ -250,11 +247,11 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
   const generateWebhookSecret = useMutation({
     mutationFn: async () => {
       const secret = randomSecret();
-      const { error } = await supabase
-        .from("tenant_integrations")
-        .update({ webhook_secret: secret })
-        .eq("tenant_id", tenantId)
-        .eq("provider", "dntrade");
+      const { error } = await (supabase.rpc as any)("set_tenant_integration_webhook_secret", {
+        _tenant_id: tenantId,
+        _provider: "dntrade",
+        _webhook_secret: secret,
+      });
       if (error) throw error;
       return secret;
     },
