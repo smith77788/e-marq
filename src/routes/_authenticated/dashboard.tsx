@@ -15,6 +15,16 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function DashboardPage() {
   const { isSuperAdmin } = useAuth();
   const { tenants, current, setCurrentTenantId, loading } = useTenantContext();
+  const navigate = useNavigate();
+
+  // New-user safety net: if you have zero businesses and you're not a super-admin,
+  // skip the empty dashboard and go straight to onboarding where the first
+  // business can be created.
+  useEffect(() => {
+    if (!loading && tenants.length === 0 && !isSuperAdmin) {
+      navigate({ to: "/onboarding", replace: true });
+    }
+  }, [loading, tenants.length, isSuperAdmin, navigate]);
 
   return (
     <div className="space-y-6">
