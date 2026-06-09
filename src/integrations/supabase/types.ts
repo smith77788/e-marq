@@ -3547,7 +3547,9 @@ export type Database = {
           product_id: string | null
           product_name: string
           quantity: number
+          sku: string | null
           tenant_id: string
+          total_cents: number
           unit_price_cents: number
           variant_id: string | null
         }
@@ -3558,7 +3560,9 @@ export type Database = {
           product_id?: string | null
           product_name: string
           quantity: number
+          sku?: string | null
           tenant_id: string
+          total_cents?: number
           unit_price_cents: number
           variant_id?: string | null
         }
@@ -3569,7 +3573,9 @@ export type Database = {
           product_id?: string | null
           product_name?: string
           quantity?: number
+          sku?: string | null
           tenant_id?: string
+          total_cents?: number
           unit_price_cents?: number
           variant_id?: string | null
         }
@@ -3618,6 +3624,7 @@ export type Database = {
           customer_email: string | null
           customer_name: string | null
           customer_user_id: string | null
+          discount_cents: number
           fulfilled_at: string | null
           id: string
           metadata: Json
@@ -3625,10 +3632,13 @@ export type Database = {
           paid_at: string | null
           payment_method: string
           payment_ref: string | null
+          payment_status: string
+          promo_code: string | null
           shipping_address: Json | null
           shipping_cost_cents: number
           shipping_method: string | null
           status: Database["public"]["Enums"]["order_status"]
+          subtotal_cents: number
           tenant_id: string
           total_cents: number
           tracking_number: string | null
@@ -3641,6 +3651,7 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_user_id?: string | null
+          discount_cents?: number
           fulfilled_at?: string | null
           id?: string
           metadata?: Json
@@ -3648,10 +3659,13 @@ export type Database = {
           paid_at?: string | null
           payment_method?: string
           payment_ref?: string | null
+          payment_status?: string
+          promo_code?: string | null
           shipping_address?: Json | null
           shipping_cost_cents?: number
           shipping_method?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          subtotal_cents?: number
           tenant_id: string
           total_cents?: number
           tracking_number?: string | null
@@ -3664,6 +3678,7 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_user_id?: string | null
+          discount_cents?: number
           fulfilled_at?: string | null
           id?: string
           metadata?: Json
@@ -3671,10 +3686,13 @@ export type Database = {
           paid_at?: string | null
           payment_method?: string
           payment_ref?: string | null
+          payment_status?: string
+          promo_code?: string | null
           shipping_address?: Json | null
           shipping_cost_cents?: number
           shipping_method?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          subtotal_cents?: number
           tenant_id?: string
           total_cents?: number
           tracking_number?: string | null
