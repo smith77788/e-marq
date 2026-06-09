@@ -116,7 +116,7 @@ export const Route = createFileRoute("/api/site-builder/build")({
         // 6. Build archive.
         try {
           const ctx = await loadSafeBrandContext(body.tenant_id, body.template_id);
-          if (!ctx) throw new Error("Brand profile not found — save the form first.");
+          if (!ctx) throw new Error("Профіль бренду не знайдено — спочатку збережіть форму.");
 
           const errors = validateBrandContext(ctx);
           if (errors.length > 0) {

@@ -411,7 +411,7 @@ function BrandPromotionsPage() {
                         variant="ghost"
                         className="h-8 w-8"
                         onClick={() => setEditing(p)}
-                        aria-label="Edit"
+                        aria-label="Редагувати"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
@@ -420,7 +420,7 @@ function BrandPromotionsPage() {
                         variant="ghost"
                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
                         onClick={() => setDeleting(p)}
-                        aria-label="Delete"
+                        aria-label="Видалити"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
