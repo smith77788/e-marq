@@ -10,7 +10,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, notFound, Outlet, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ShoppingCart, Search, Loader2, Plus, Minus, Trash2, Heart } from "lucide-react";
+import { ShoppingCart, Search, Loader2, Plus, Minus, Trash2, Heart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -279,6 +279,14 @@ function StorefrontHeader({
             className={wishlist.count > 0 ? "h-4 w-4 fill-destructive text-destructive" : "h-4 w-4"}
           />
           {wishlist.count > 0 && <span className="tabular-nums">{wishlist.count}</span>}
+        </Link>
+        <Link
+          to="/s/$slug/account"
+          params={{ slug }}
+          aria-label="Мої замовлення"
+          className="inline-flex h-9 shrink-0 items-center rounded-md border border-input bg-background px-2 text-sm hover:bg-accent"
+        >
+          <User className="h-4 w-4" />
         </Link>
         <Button
           size="sm"

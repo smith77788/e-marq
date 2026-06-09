@@ -29,13 +29,25 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendEmailViaGateway } from "@/lib/email/resendGateway";
 
-const BATCH_SIZE = 50;
-const BATCH_DELAY_MS = 250;
 const MAX_RECIPIENTS = 5000;
+// Resend gateway limit: 10 req/s. We throttle to 8/s (125ms between sends)
+// to stay safely under with some slack. No batching needed — sequential is correct.
+const SEND_INTERVAL_MS = 125;
+const MAX_RETRIES = 3;
+
+const BodySchema = z.object({
+  tenantId: z.string().uuid(),
+  name: z.string().trim().min(1).max(200),
+  subject: z.string().trim().min(1).max(200),
+  html: z.string().min(20).max(200_000),
+  segment: z.enum(["all", "active", "vip", "lapsed"]).default("all"),
+  testEmail: z.string().email().optional(),
+});
 
 type Segment = "all" | "active" | "vip" | "lapsed";
 
@@ -152,6 +164,26 @@ function delay(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+async function sendWithRetry(
+  input: Parameters<typeof sendEmailViaGateway>[0],
+  maxRetries = MAX_RETRIES,
+): ReturnType<typeof sendEmailViaGateway> {
+  let attempt = 0;
+  while (attempt <= maxRetries) {
+    const result = await sendEmailViaGateway(input);
+    if (result.ok) return result;
+    // Retry on rate-limit (429) with exponential backoff; fail fast on other errors.
+    if (result.error.includes("429") || result.error.toLowerCase().includes("rate")) {
+      attempt++;
+      if (attempt > maxRetries) return result;
+      await delay(Math.pow(2, attempt) * 500);
+    } else {
+      return result;
+    }
+  }
+  return { ok: false, error: "max_retries_exceeded" };
+}
+
 export const Route = createFileRoute("/api/email/campaign-send")({
   server: {
     handlers: {
@@ -159,40 +191,19 @@ export const Route = createFileRoute("/api/email/campaign-send")({
         const auth = await authUser(request);
         if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
 
-        let body: {
-          tenantId?: unknown;
-          name?: unknown;
-          subject?: unknown;
-          html?: unknown;
-          segment?: unknown;
-          testEmail?: unknown;
-        };
+        let parsed: z.infer<typeof BodySchema>;
         try {
-          body = (await request.json()) as typeof body;
-        } catch {
-          return jsonResponse({ error: "invalid_json" }, 400);
+          const raw = await request.json().catch(() => null);
+          if (!raw) return jsonResponse({ error: "invalid_json" }, 400);
+          parsed = BodySchema.parse(raw);
+        } catch (err) {
+          const msg = err instanceof z.ZodError
+            ? err.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join("; ")
+            : "invalid_body";
+          return jsonResponse({ error: msg }, 400);
         }
 
-        const tenantId = typeof body.tenantId === "string" ? body.tenantId.trim() : "";
-        if (!/^[0-9a-f-]{36}$/i.test(tenantId)) {
-          return jsonResponse({ error: "invalid_tenant" }, 400);
-        }
-        const name = typeof body.name === "string" ? body.name.trim().slice(0, 200) : "";
-        const subject = typeof body.subject === "string" ? body.subject.trim().slice(0, 200) : "";
-        const html = typeof body.html === "string" ? body.html : "";
-        if (!subject) return jsonResponse({ error: "subject_required" }, 400);
-        if (!html.trim() || html.length < 20) return jsonResponse({ error: "html_required" }, 400);
-        if (html.length > 200_000) return jsonResponse({ error: "html_too_large" }, 413);
-
-        const segment: Segment =
-          body.segment === "active" || body.segment === "vip" || body.segment === "lapsed"
-            ? body.segment
-            : "all";
-
-        const testEmail =
-          typeof body.testEmail === "string" && body.testEmail.trim()
-            ? body.testEmail.trim()
-            : null;
+        const { tenantId, name, subject, html, segment, testEmail = null } = parsed;
 
         if (!(await userCanManageTenant(auth.userId, tenantId))) {
           return jsonResponse({ error: "forbidden" }, 403);
@@ -207,10 +218,6 @@ export const Route = createFileRoute("/api/email/campaign-send")({
 
         // ---- TEST MODE ----
         if (testEmail) {
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(testEmail)) {
-            return jsonResponse({ error: "invalid_test_email" }, 400);
-          }
-          if (!name) return jsonResponse({ error: "name_required" }, 400);
           const previewHtml = injectUnsubscribeFooter(
             html,
             "https://example.com/preview-unsubscribe",
@@ -232,8 +239,6 @@ export const Route = createFileRoute("/api/email/campaign-send")({
         }
 
         // ---- REAL MODE ----
-        if (!name) return jsonResponse({ error: "name_required" }, 400);
-
         const customers = await loadSegment(tenantId, segment);
         if (customers.length === 0) {
           return jsonResponse({ ok: false, error: "no_recipients" }, 400);
@@ -287,75 +292,68 @@ export const Route = createFileRoute("/api/email/campaign-send")({
         let sent = 0;
         let failed = 0;
 
-        for (let i = 0; i < eligible.length; i += BATCH_SIZE) {
-          const batch = eligible.slice(i, i + BATCH_SIZE);
-          const results = await Promise.all(
-            batch.map(async (c) => {
-              const unsubUrl = `${
-                process.env.PUBLIC_APP_URL ||
-                process.env.VITE_PUBLIC_APP_URL ||
-                "https://e-marq.lovable.app"
-              }/api/public/email/unsubscribe?t=${encodeURIComponent(c.unsubscribe_token)}`;
-              const personalizedHtml = injectUnsubscribeFooter(html, unsubUrl, brandName);
+        const appUrl = (
+          process.env.PUBLIC_APP_URL ||
+          process.env.VITE_PUBLIC_APP_URL ||
+          "https://e-marq.lovable.app"
+        ).replace(/\/+$/, "");
 
-              const r = await sendEmailViaGateway({
-                to: c.email,
-                subject,
-                html: personalizedHtml,
-                tenantId,
-                category: "marketing",
-                unsubscribeToken: c.unsubscribe_token,
-                tags: [
-                  { name: "campaign", value: campaignId.slice(0, 16) },
-                  { name: "tenant", value: tenantId.slice(0, 16) },
-                ],
-              });
-              return { customer: c, result: r };
-            }),
-          );
+        for (let i = 0; i < eligible.length; i++) {
+          const c = eligible[i];
+          const unsubUrl = `${appUrl}/api/public/email/unsubscribe?t=${encodeURIComponent(c.unsubscribe_token)}`;
+          const personalizedHtml = injectUnsubscribeFooter(html, unsubUrl, brandName);
 
-          // Update recipient rows + email_sends ledger
-          for (const { customer, result } of results) {
-            if (result.ok) {
-              sent++;
-              await Promise.all([
-                supabaseAdmin
-                  .from("email_campaign_recipients")
-                  .update({
-                    status: "sent",
-                    sent_at: new Date().toISOString(),
-                    resend_message_id: result.id,
-                  })
-                  .eq("campaign_id", campaignId)
-                  .eq("customer_id", customer.id),
-                supabaseAdmin.from("email_sends").insert({
-                  tenant_id: tenantId,
-                  to_email: customer.email,
-                  template: "broadcast",
-                  subject,
-                  status: "sent",
-                  resend_message_id: result.id,
-                  campaign_id: campaignId,
-                }),
-              ]);
-            } else {
-              failed++;
-              const errorMsg = (result.error ?? "unknown").slice(0, 500);
-              const skipped = "suppressed" in result && result.suppressed;
-              await supabaseAdmin
+          const result = await sendWithRetry({
+            to: c.email,
+            subject,
+            html: personalizedHtml,
+            tenantId,
+            category: "marketing",
+            unsubscribeToken: c.unsubscribe_token,
+            tags: [
+              { name: "campaign", value: campaignId.slice(0, 16) },
+              { name: "tenant", value: tenantId.slice(0, 16) },
+            ],
+          });
+
+          if (result.ok) {
+            sent++;
+            await Promise.all([
+              supabaseAdmin
                 .from("email_campaign_recipients")
                 .update({
-                  status: skipped ? "skipped_suppressed" : "failed",
-                  error: errorMsg,
+                  status: "sent",
+                  sent_at: new Date().toISOString(),
+                  resend_message_id: result.id,
                 })
                 .eq("campaign_id", campaignId)
-                .eq("customer_id", customer.id);
-            }
+                .eq("customer_id", c.id),
+              supabaseAdmin.from("email_sends").insert({
+                tenant_id: tenantId,
+                to_email: c.email,
+                template: "broadcast",
+                subject,
+                status: "sent",
+                resend_message_id: result.id,
+                campaign_id: campaignId,
+              }),
+            ]);
+          } else {
+            failed++;
+            const errorMsg = (result.error ?? "unknown").slice(0, 500);
+            const skipped = "suppressed" in result && result.suppressed;
+            await supabaseAdmin
+              .from("email_campaign_recipients")
+              .update({
+                status: skipped ? "skipped_suppressed" : "failed",
+                error: errorMsg,
+              })
+              .eq("campaign_id", campaignId)
+              .eq("customer_id", c.id);
           }
 
-          if (i + BATCH_SIZE < eligible.length) {
-            await delay(BATCH_DELAY_MS);
-          }
+          // Throttle to stay under Resend's 10 req/s limit.
+          if (i < eligible.length - 1) await delay(SEND_INTERVAL_MS);
         }
 
         await supabaseAdmin
