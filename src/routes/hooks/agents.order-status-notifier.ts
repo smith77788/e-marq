@@ -85,6 +85,10 @@ export const Route = createFileRoute("/hooks/agents/order-status-notifier")({
           let sent = 0;
           let skipped = 0;
           for (const o of orders) {
+            if (!(TRACKED as readonly string[]).includes(o.status)) {
+              skipped++;
+              continue;
+            }
             const status = o.status as Tracked;
             const template = `order_status_${status}`;
             if (sentSet.has(`${o.id}::${template}`)) {

@@ -142,7 +142,7 @@ export const Route = createFileRoute("/hooks/agents/broadcast-composer")({
                 draft_en: `Hey! We've been working on some new things — and thought of you. Take a peek 👀`,
                 suggested_action: "send_broadcast",
               },
-              dedup_key: `broadcast::dormant::${Math.floor(Date.now() / (7 * 86_400_000))}`,
+              dedup_key: `broadcast::dormant::${Math.floor(Date.now() / (7 * 86_400_000))}::${dormantCount}`,
             });
           }
 

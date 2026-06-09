@@ -69,7 +69,7 @@ export const Route = createFileRoute("/hooks/agents/churn-risk")({
           const insights: AgentInsightInput[] = [];
           let vipCount = 0;
           for (const [email, list] of byCustomer.entries()) {
-            if (list.length < 4) continue;
+            if (list.length < 2) continue;
             vipCount++;
             list.sort(
               (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
