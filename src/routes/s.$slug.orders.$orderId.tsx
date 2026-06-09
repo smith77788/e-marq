@@ -63,25 +63,25 @@ async function loadOrder(slug: string, orderId: string) {
 export const Route = createFileRoute("/s/$slug/orders/$orderId")({
   loader: ({ params }) => loadOrder(params.slug, params.orderId),
   head: ({ loaderData }) => {
-    const brand = loaderData?.brand ?? "Store";
+    const brand = loaderData?.brand ?? "Магазин";
     const orderShort = loaderData?.order.id.slice(0, 8) ?? "";
     return {
-      meta: [{ title: `Order #${orderShort} — ${brand}` }, { name: "robots", content: "noindex" }],
+      meta: [{ title: `Замовлення #${orderShort} — ${brand}` }, { name: "robots", content: "noindex" }],
     };
   },
   notFoundComponent: () => (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-2xl font-bold text-foreground">Order not found</h1>
+        <h1 className="text-2xl font-bold text-foreground">Замовлення не знайдено</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          This order does not exist or has been removed.
+          Це замовлення не існує або було видалено.
         </p>
       </div>
     </div>
   ),
   errorComponent: ({ error }: { error: Error }) => (
     <div className="flex min-h-screen items-center justify-center px-4">
-      <p className="text-sm text-destructive">Failed to load order: {error.message}</p>
+      <p className="text-sm text-destructive">Помилка завантаження: {error.message}</p>
     </div>
   ),
   component: OrderStatusPage,
@@ -115,7 +115,7 @@ function OrderStatusPage() {
             className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-3 w-3" />
-            Continue shopping
+            Продовжити покупки
           </Link>
         </div>
       </header>
@@ -124,9 +124,9 @@ function OrderStatusPage() {
         <Card>
           <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
             <div>
-              <CardTitle className="text-xl">Order #{order.id.slice(0, 8)}</CardTitle>
+              <CardTitle className="text-xl">Замовлення #{order.id.slice(0, 8)}</CardTitle>
               <p className="mt-1 text-xs text-muted-foreground">
-                Placed {new Date(order.created_at).toLocaleString()}
+                Оформлено {new Date(order.created_at).toLocaleString("uk-UA")}
               </p>
             </div>
             <StatusBadge status={order.status} />
@@ -145,11 +145,11 @@ function OrderStatusPage() {
               <div className="flex items-start gap-3 rounded-md border border-primary/20 bg-primary/5 p-3 text-sm">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <div>
-                  <p className="font-medium text-foreground">Payment confirmed</p>
+                  <p className="font-medium text-foreground">Оплату підтверджено</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {order.paid_at
-                      ? `Confirmed on ${new Date(order.paid_at).toLocaleString()}`
-                      : "Your order is being processed."}
+                      ? `Підтверджено ${new Date(order.paid_at).toLocaleString("uk-UA")}`
+                      : "Ваше замовлення обробляється."}
                   </p>
                 </div>
               </div>
@@ -158,9 +158,11 @@ function OrderStatusPage() {
               <div className="flex items-start gap-3 rounded-md border border-destructive/20 bg-destructive/5 p-3 text-sm">
                 <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
                 <div>
-                  <p className="font-medium text-foreground">Order {order.status}</p>
+                  <p className="font-medium text-foreground">
+                    {order.status === "refunded" ? "Кошти повернуто" : "Замовлення скасовано"}
+                  </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Contact the merchant if you have questions.
+                    Зверніться до продавця, якщо є питання.
                   </p>
                 </div>
               </div>
@@ -169,7 +171,7 @@ function OrderStatusPage() {
             <Separator />
 
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-foreground">Items</h3>
+              <h3 className="text-sm font-semibold text-foreground">Товари</h3>
               <ul className="space-y-1 text-sm">
                 {items.map((item) => (
                   <li key={item.id} className="flex justify-between gap-3">
@@ -183,7 +185,7 @@ function OrderStatusPage() {
                 ))}
               </ul>
               <div className="flex justify-between border-t pt-2 text-sm font-semibold">
-                <span>Total</span>
+                <span>Разом</span>
                 <span>
                   {(order.total_cents / 100).toFixed(2)} {order.currency}
                 </span>
@@ -197,17 +199,17 @@ function OrderStatusPage() {
               <dd className="text-foreground">{order.customer_email ?? "—"}</dd>
               {order.customer_name && (
                 <>
-                  <dt className="text-muted-foreground">Name</dt>
+                  <dt className="text-muted-foreground">Імʼя</dt>
                   <dd className="text-foreground">{order.customer_name}</dd>
                 </>
               )}
-              <dt className="text-muted-foreground">Payment</dt>
+              <dt className="text-muted-foreground">Оплата</dt>
               <dd className="text-foreground">
-                {order.payment_method === "manual" ? "Manual (bank transfer)" : "Card (Stripe)"}
+                {PAYMENT_METHOD_LABEL[order.payment_method] ?? order.payment_method}
               </dd>
               {order.payment_ref && (
                 <>
-                  <dt className="text-muted-foreground">Reference</dt>
+                  <dt className="text-muted-foreground">Референс</dt>
                   <dd className="font-mono text-foreground">{order.payment_ref}</dd>
                 </>
               )}
@@ -216,23 +218,31 @@ function OrderStatusPage() {
         </Card>
 
         <p className="text-center text-xs text-muted-foreground">
-          Powered by ACOS · /{tenant.slug}
+          Powered by MARQ · /{tenant.slug}
         </p>
       </main>
     </div>
   );
 }
 
+const PAYMENT_METHOD_LABEL: Record<string, string> = {
+  manual: "Банківський переказ",
+  stripe_card: "Картка (Stripe)",
+  liqpay: "LiqPay · картка",
+  wayforpay: "WayForPay · картка",
+  monobank: "Monobank",
+};
+
 function StatusBadge({ status }: { status: OrderRow["status"] }) {
   const map: Record<
     OrderRow["status"],
     { label: string; variant: "default" | "outline" | "secondary" | "destructive" }
   > = {
-    pending: { label: "Awaiting payment", variant: "secondary" },
-    paid: { label: "Paid", variant: "default" },
-    fulfilled: { label: "Fulfilled", variant: "default" },
-    cancelled: { label: "Cancelled", variant: "destructive" },
-    refunded: { label: "Refunded", variant: "destructive" },
+    pending: { label: "Очікує оплати", variant: "secondary" },
+    paid: { label: "Оплачено", variant: "default" },
+    fulfilled: { label: "Відправлено", variant: "default" },
+    cancelled: { label: "Скасовано", variant: "destructive" },
+    refunded: { label: "Повернено", variant: "destructive" },
   };
   const { label, variant } = map[status];
   return <Badge variant={variant}>{label}</Badge>;
@@ -256,11 +266,11 @@ function ManualPaymentInstructions({
       <div className="flex items-start gap-3">
         <Clock className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
         <div>
-          <p className="text-sm font-semibold text-foreground">Awaiting payment</p>
+          <p className="text-sm font-semibold text-foreground">Очікує оплати</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Pay {(totalCents / 100).toFixed(2)} {currency} using the instructions below. Reference
-            order ID <span className="font-mono font-medium">{orderId.slice(0, 8)}</span> in your
-            transfer.
+            Сплатіть {(totalCents / 100).toFixed(2)} {currency} за реквізитами нижче. Вкажіть
+            номер замовлення <span className="font-mono font-medium">{orderId.slice(0, 8)}</span> у
+            призначенні платежу.
           </p>
         </div>
       </div>
@@ -273,13 +283,13 @@ function ManualPaymentInstructions({
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Mail className="h-3 w-3" />
           <span>
-            Questions? Contact: <span className="font-medium text-foreground">{contact}</span>
+            Питання? Звертайтесь:{" "}
+            <span className="font-medium text-foreground">{contact}</span>
           </span>
         </div>
       )}
       <p className="text-xs text-muted-foreground">
-        After payment, the merchant will manually confirm your order. This page refreshes
-        automatically.
+        Після оплати продавець підтвердить замовлення вручну. Сторінка оновлюється автоматично.
       </p>
     </div>
   );

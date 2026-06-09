@@ -94,6 +94,14 @@ const STATUS_VARIANT: Record<OrderStatus, "default" | "secondary" | "outline" | 
   refunded: "destructive",
 };
 
+const PAYMENT_METHOD_LABEL: Record<string, string> = {
+  manual: "Банківський переказ",
+  stripe_card: "Stripe",
+  liqpay: "LiqPay",
+  wayforpay: "WayForPay",
+  monobank: "Monobank",
+};
+
 function BrandOrdersPage() {
   const { tenant: tenantId } = useSearch({ from: "/_authenticated/brand/orders" });
   const { user, loading: authLoading } = useAuth();
@@ -350,7 +358,7 @@ function BrandOrdersPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
-                        {o.payment_method}
+                        {PAYMENT_METHOD_LABEL[o.payment_method] ?? o.payment_method}
                       </TableCell>
                       <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
                         {format(new Date(o.created_at), "dd MMM, HH:mm")}
@@ -483,7 +491,9 @@ function BrandOrdersPage() {
                   <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     {t("bo.detail.payment")}
                   </h4>
-                  <p className="mt-1 text-sm text-foreground">{opened.payment_method}</p>
+                  <p className="mt-1 text-sm text-foreground">
+                    {PAYMENT_METHOD_LABEL[opened.payment_method] ?? opened.payment_method}
+                  </p>
                   {opened.payment_ref && (
                     <p className="text-xs text-muted-foreground">{opened.payment_ref}</p>
                   )}
