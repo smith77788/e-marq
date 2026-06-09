@@ -159,14 +159,14 @@ export const Route = createFileRoute("/api/public/payments/liqpay-callback")({
         const amountCents = Math.round(Number(parsed.amount) * 100);
 
         if (isLiqPaySuccess(parsed.status)) {
-          try {
-            await supabaseAdmin.rpc("mark_order_paid_by_gateway", {
-              _order_id: orderId,
-              _provider: "liqpay",
-              _external_id: externalId,
-              _amount_cents: amountCents,
-              _payload: parsed as never,
-            });
+          const { error: rpcErr } = await supabaseAdmin.rpc("mark_order_paid_by_gateway", {
+            _order_id: orderId,
+            _provider: "liqpay",
+            _external_id: externalId,
+            _amount_cents: amountCents,
+            _payload: parsed as never,
+          });
+          if (rpcErr) {
             await logCallback({
               provider: "liqpay",
               orderId,
@@ -174,35 +174,35 @@ export const Route = createFileRoute("/api/public/payments/liqpay-callback")({
               externalId,
               signatureValid: true,
               rawBody,
-              parsed,
-              httpStatus: 200,
-              ip,
-            });
-            return new Response("ok", { status: 200 });
-          } catch (e) {
-            await logCallback({
-              provider: "liqpay",
-              orderId,
-              tenantId: order.tenant_id,
-              externalId,
-              signatureValid: true,
-              rawBody,
-              parsed: { ...parsed, error: e instanceof Error ? e.message : "unknown" },
+              parsed: { ...parsed, error: rpcErr.message },
               httpStatus: 500,
               ip,
             });
             return new Response("rpc_failed", { status: 500 });
           }
+          await logCallback({
+            provider: "liqpay",
+            orderId,
+            tenantId: order.tenant_id,
+            externalId,
+            signatureValid: true,
+            rawBody,
+            parsed,
+            httpStatus: 200,
+            ip,
+          });
+          return new Response("ok", { status: 200 });
         }
 
         // Failure / other
-        await supabaseAdmin.rpc("mark_payment_failed", {
+        const { error: failErr } = await supabaseAdmin.rpc("mark_payment_failed", {
           _order_id: orderId,
           _provider: "liqpay",
           _external_id: externalId,
           _error: `${parsed.status}: ${parsed.err_description || parsed.err_code || ""}`,
           _payload: parsed as never,
         });
+        if (failErr) console.error("[liqpay-callback] mark_payment_failed:", failErr.message);
         await logCallback({
           provider: "liqpay",
           orderId,

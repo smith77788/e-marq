@@ -156,22 +156,21 @@ export const Route = createFileRoute("/api/public/payments/monobank-callback")({
         const enriched = { ...parsed, verified_status: status };
 
         if (isMonoSuccess(status.status)) {
-          try {
-            await supabaseAdmin.rpc("mark_order_paid_by_gateway", {
-              _order_id: orderId,
-              _provider: "monobank",
-              _external_id: invoiceId,
-              _amount_cents: status.amount,
-              _payload: enriched as never,
-            });
-          } catch (e) {
+          const { error: rpcErr } = await supabaseAdmin.rpc("mark_order_paid_by_gateway", {
+            _order_id: orderId,
+            _provider: "monobank",
+            _external_id: invoiceId,
+            _amount_cents: status.amount,
+            _payload: enriched as never,
+          });
+          if (rpcErr) {
             await logCallback({
               orderId,
               tenantId: order.tenant_id,
               externalId: invoiceId,
               signatureValid: true,
               rawBody,
-              parsed: { ...enriched, error: e instanceof Error ? e.message : "unknown" },
+              parsed: { ...enriched, error: rpcErr.message },
               httpStatus: 500,
               ip,
             });
@@ -182,13 +181,14 @@ export const Route = createFileRoute("/api/public/payments/monobank-callback")({
           status.status === "expired" ||
           status.status === "reversed"
         ) {
-          await supabaseAdmin.rpc("mark_payment_failed", {
+          const { error: failErr } = await supabaseAdmin.rpc("mark_payment_failed", {
             _order_id: orderId,
             _provider: "monobank",
             _external_id: invoiceId,
             _error: `${status.status}: ${status.failureReason ?? ""}`,
             _payload: enriched as never,
           });
+          if (failErr) console.error("[monobank-callback] mark_payment_failed:", failErr.message);
         }
 
         await logCallback({
