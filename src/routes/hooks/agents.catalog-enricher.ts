@@ -153,7 +153,7 @@ export const Route = createFileRoute("/hooks/agents/catalog-enricher")({
               tenant_id: tenantId,
               insight_type: "bootstrap_catalog_missing_cost",
               affected_layer: "catalog",
-              title: `${missingCost} product${missingCost === 1 ? "" : "s"} have no cost price`,
+              title: `${missingCost} ${missingCost === 1 ? "товар не має" : "товарів не мають"} собівартості`,
               description:
                 "Без собівартості margin-optimizer та promo-portfolio працюють наосліп. Додайте cost у metadata кожного SKU.",
               expected_impact: "Активує margin-агентів і захищає від збиткових промо",
@@ -168,7 +168,7 @@ export const Route = createFileRoute("/hooks/agents/catalog-enricher")({
               tenant_id: tenantId,
               insight_type: "bootstrap_catalog_missing_image",
               affected_layer: "catalog",
-              title: `${missingImage} product${missingImage === 1 ? "" : "s"} have no image`,
+              title: `${missingImage} ${missingImage === 1 ? "товар без" : "товарів без"} фото`,
               description: "Картка товару без фото конвертить у 3-4 рази гірше.",
               expected_impact: "Підіймає CTR картки на ~2-3×",
               confidence: 0.85,
