@@ -59,13 +59,10 @@ export const Route = createFileRoute("/hooks/agents/inventory-rebalance")({
             .select("product_id, orders!inner(status, created_at)")
             .eq("tenant_id", tenantId)
             .in("product_id", productIds)
-            .in("orders.status", ["paid", "fulfilled"])
-            .gte("orders.created_at", since);
+            .gte("orders.created_at", since)
+            .limit(5000);
 
-          const sold = new Set<string>();
-          for (const r of recentSales ?? []) {
-            if (r.product_id) sold.add(r.product_id);
-          }
+          const sold = new Set((recentSales ?? []).filter(r => ["paid", "fulfilled"].includes((r.orders as Record<string, string>)?.status ?? "")).map(r => r.product_id));
 
           const insights: AgentInsightInput[] = [];
           let totalDeadCapital = 0;

@@ -47,7 +47,8 @@ export const Route = createFileRoute("/hooks/agents/promo-portfolio")({
             .from("promotions")
             .select("id, name, applies_to_segment, applies_to_product_ids, value, promo_type")
             .eq("tenant_id", tenantId)
-            .eq("is_active", true);
+            .eq("is_active", true)
+            .limit(5000);
 
           if (!promos?.length) {
             await finishAgentRun(handle, 0, { reason: "no_active_promos" });
@@ -121,7 +122,7 @@ export const Route = createFileRoute("/hooks/agents/promo-portfolio")({
               confidence: 0.7,
               risk_level: "medium" as const,
               metrics: { active_promos: promos.length, recommended_max: 4 },
-              dedup_key: `promo_too_many::${promos.length}`,
+              dedup_key: `promo_too_many::${new Date().toISOString().slice(0, 7)}`,
             });
           }
 

@@ -86,7 +86,7 @@ export const Route = createFileRoute("/hooks/agents/email-abandoned-cart")({
             .select("id, customer_id, cart_value_cents, cart_items, abandoned_at")
             .eq("tenant_id", tenantId)
             .eq("recovered", false)
-            .gte("created_at", since)
+            .gte("abandoned_at", since)
             .not("customer_id", "is", null)
             .limit(200);
 
@@ -187,7 +187,7 @@ export const Route = createFileRoute("/hooks/agents/email-abandoned-cart")({
               ],
             });
 
-            await supabaseAdmin.from("email_sends").insert({
+            const { error: sendLogErr } = await supabaseAdmin.from("email_sends").insert({
               tenant_id: tenantId,
               to_email: customer.email,
               template: TEMPLATE,
@@ -197,6 +197,7 @@ export const Route = createFileRoute("/hooks/agents/email-abandoned-cart")({
               error: result.ok ? null : result.error,
               metadata: { attempt_id: a.id, cart_value_cents: a.cart_value_cents },
             });
+            if (sendLogErr) console.error("[email-abandoned-cart] email_sends insert failed:", sendLogErr.message);
 
             // Локально зафіксувати щоб не дублювати в межах одного прогону
             sentSet.add(customer.email.toLowerCase());

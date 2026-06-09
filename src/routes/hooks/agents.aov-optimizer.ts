@@ -59,13 +59,15 @@ export const Route = createFileRoute("/hooks/agents/aov-optimizer")({
             .select("product_id")
             .eq("tenant_id", tenantId)
             .eq("type", "product_viewed")
-            .gte("created_at", since);
+            .gte("created_at", since)
+            .limit(100000);
           const { data: cartEvents } = await supabaseAdmin
             .from("events")
             .select("product_id")
             .eq("tenant_id", tenantId)
             .eq("type", "add_to_cart")
-            .gte("created_at", since);
+            .gte("created_at", since)
+            .limit(100000);
 
           const viewCount: Record<string, number> = {};
           const cartCount: Record<string, number> = {};
@@ -78,7 +80,7 @@ export const Route = createFileRoute("/hooks/agents/aov-optimizer")({
             .from("order_items")
             .select("product_id, quantity, orders!inner(status, created_at)")
             .eq("tenant_id", tenantId)
-            .eq("orders.status", "paid")
+            .in("orders.status", ["paid", "fulfilled"])
             .gte("orders.created_at", since);
           const purchaseCount: Record<string, number> = {};
           for (const it of items ?? []) {
@@ -121,7 +123,7 @@ export const Route = createFileRoute("/hooks/agents/aov-optimizer")({
                 affected_layer: "checkout",
                 title: `"${p.name}": часто покидають кошик`,
                 description: `${c} додавань до кошика → лише ${pu} покупок (${((pu / Math.max(c, 1)) * 100).toFixed(1)}%). Тертя при оформленні, шок від вартості доставки або брак довіри.`,
-                expected_impact: `Повернення 30% кошиків = ~${Math.round((c * 0.3 - pu) * (p.price_cents / 100))} ₴ додаткового виторгу`,
+                expected_impact: `Повернення 30% кошиків = ~${Math.max(0, Math.round((c * 0.3 - pu) * (p.price_cents / 100)))} ₴ додаткового виторгу`,
                 confidence: 0.75,
                 risk_level: "medium",
                 metrics: {

@@ -51,7 +51,8 @@ export const Route = createFileRoute("/hooks/agents/restock-alert")({
             .select("product_id, predicted_stockout_at, recommended_reorder_qty, computed_at")
             .eq("tenant_id", tenantId)
             .gte("computed_at", since)
-            .order("computed_at", { ascending: false });
+            .order("computed_at", { ascending: false })
+            .limit(5000);
           if (fErr) throw fErr;
 
           // Keep most recent per product
@@ -76,11 +77,12 @@ export const Route = createFileRoute("/hooks/agents/restock-alert")({
 
           // Pull product info
           const productIds = Array.from(latestPerProduct.keys());
-          const { data: products } = await supabaseAdmin
+          const { data: products, error: pErr } = await supabaseAdmin
             .from("products")
             .select("id, name, stock, price_cents")
             .eq("tenant_id", tenantId)
             .in("id", productIds);
+          if (pErr) throw pErr;
 
           const insights: AgentInsightInput[] = [];
           const now = Date.now();

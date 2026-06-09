@@ -108,11 +108,12 @@ export const Route = createFileRoute("/hooks/agents/restock-notifier")({
 
             if (!subs?.length) {
               // Все одно скидаємо прапорець, щоб не повторювати
-              await supabaseAdmin
+              const { error: resetErr1 } = await supabaseAdmin
                 .from("products")
                 .update({ was_out_of_stock: false })
                 .eq("id", p.id)
                 .eq("tenant_id", tenantId);
+              if (resetErr1) throw resetErr1;
               continue;
             }
 
@@ -165,7 +166,7 @@ export const Route = createFileRoute("/hooks/agents/restock-notifier")({
                 ],
               });
 
-              await supabaseAdmin.from("email_sends").insert({
+              const { error: insertErr } = await supabaseAdmin.from("email_sends").insert({
                 tenant_id: tenantId,
                 to_email: sub.customer_email,
                 template: TEMPLATE,
@@ -175,6 +176,7 @@ export const Route = createFileRoute("/hooks/agents/restock-notifier")({
                 error: result.ok ? null : result.error,
                 metadata: { product_id: p.id, subscription_id: sub.id },
               });
+              if (insertErr) console.error("[restock-notifier] email_sends insert error:", insertErr);
 
               if (result.ok) {
                 totalSent++;
@@ -186,18 +188,20 @@ export const Route = createFileRoute("/hooks/agents/restock-notifier")({
 
             // Помічаємо успішно повідомлених
             if (notifiedIds.length) {
-              await supabaseAdmin
+              const { error: updErr } = await supabaseAdmin
                 .from("restock_notifications")
                 .update({ status: "notified", notified_at: new Date().toISOString() })
                 .in("id", notifiedIds);
+              if (updErr) throw updErr;
             }
 
             // Скидаємо прапорець, щоб агент не дублював у наступний прогін
-            await supabaseAdmin
+            const { error: resetErr2 } = await supabaseAdmin
               .from("products")
               .update({ was_out_of_stock: false })
               .eq("id", p.id)
               .eq("tenant_id", tenantId);
+            if (resetErr2) throw resetErr2;
           }
 
           await finishAgentRun(handle, 0, {

@@ -44,7 +44,7 @@ export const Route = createFileRoute("/hooks/agents/refund-risk")({
             .from("orders")
             .select("id, total_cents, customer_email, customer_user_id, created_at, customer_name")
             .eq("tenant_id", tenantId)
-            .eq("status", "paid")
+            .in("status", ["paid", "fulfilled"])
             .gte("created_at", since)
             .limit(200);
 
@@ -66,12 +66,13 @@ export const Route = createFileRoute("/hooks/agents/refund-risk")({
             }
             // (3) New customer (no prior orders)
             if (o.customer_email) {
-              const { count } = await supabaseAdmin
+              const { count, error: cntErr } = await supabaseAdmin
                 .from("orders")
                 .select("id", { count: "exact", head: true })
                 .eq("tenant_id", tenantId)
                 .eq("customer_email", o.customer_email)
                 .lt("created_at", o.created_at);
+              if (cntErr) throw cntErr;
               if ((count ?? 0) === 0) {
                 score += 0.3;
                 reasons.push("first_time_buyer");

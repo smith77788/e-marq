@@ -71,18 +71,21 @@ export const Route = createFileRoute("/hooks/agents/morning-brief")({
               .select("id, total_cents, status")
               .eq("tenant_id", tenantId)
               .gte("created_at", yesterday.toISOString())
-              .lt("created_at", today.toISOString()),
+              .lt("created_at", today.toISOString())
+              .in("status", ["paid", "fulfilled"]),
             supabaseAdmin
               .from("orders")
               .select("id, total_cents, status")
               .eq("tenant_id", tenantId)
               .gte("created_at", dayBefore.toISOString())
-              .lt("created_at", yesterday.toISOString()),
+              .lt("created_at", yesterday.toISOString())
+              .in("status", ["paid", "fulfilled"]),
             supabaseAdmin
               .from("events")
               .select("type, session_id, created_at")
               .eq("tenant_id", tenantId)
-              .gte("created_at", weekAgo.toISOString()),
+              .gte("created_at", weekAgo.toISOString())
+              .limit(5000),
             supabaseAdmin
               .from("ai_insights")
               .select("id, title, insight_type, risk_level, expected_impact")
@@ -97,8 +100,8 @@ export const Route = createFileRoute("/hooks/agents/morning-brief")({
               .gte("churn_probability", 0.7),
           ]);
 
-          const yPaid = (yOrders.data ?? []).filter((o) => o.status === "paid");
-          const dPaid = (dOrders.data ?? []).filter((o) => o.status === "paid");
+          const yPaid = (yOrders.data ?? []).filter((o) => ["paid", "fulfilled"].includes(o.status));
+          const dPaid = (dOrders.data ?? []).filter((o) => ["paid", "fulfilled"].includes(o.status));
           const yRevenue = yPaid.reduce((s, o) => s + o.total_cents, 0);
           const dRevenue = dPaid.reduce((s, o) => s + o.total_cents, 0);
           const revenueDelta = dRevenue > 0 ? (yRevenue - dRevenue) / dRevenue : 0;
@@ -188,7 +191,7 @@ export const Route = createFileRoute("/hooks/agents/morning-brief")({
           const summary = lines.join("\n");
 
           // Insert digest
-          await supabaseAdmin.from("daily_digests").insert({
+          const { error: digestErr } = await supabaseAdmin.from("daily_digests").insert({
             tenant_id: tenantId,
             digest_date: digestDate,
             summary,
@@ -206,9 +209,10 @@ export const Route = createFileRoute("/hooks/agents/morning-brief")({
             },
             recommended_actions: topActions,
           });
+          if (digestErr) throw digestErr;
 
           // Also push to owner_notifications feed
-          await supabaseAdmin.from("owner_notifications").insert({
+          const { error: notifErr } = await supabaseAdmin.from("owner_notifications").insert({
             tenant_id: tenantId,
             kind: "daily_digest",
             severity: revenueDelta < -0.2 ? "warning" : "info",
@@ -217,6 +221,7 @@ export const Route = createFileRoute("/hooks/agents/morning-brief")({
             link: "/brand",
             metadata: { digest_date: digestDate },
           });
+          if (notifErr) throw notifErr;
 
           await finishAgentRun(handle, 1, { digest_date: digestDate });
           return jsonOk({ insights_created: 1, digest_date: digestDate });

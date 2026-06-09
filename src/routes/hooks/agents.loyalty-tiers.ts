@@ -42,7 +42,8 @@ export const Route = createFileRoute("/hooks/agents/loyalty-tiers")({
             .from("customers")
             .select("total_spent_cents")
             .eq("tenant_id", tenantId)
-            .gt("total_spent_cents", 0);
+            .gt("total_spent_cents", 0)
+            .limit(10000);
 
           if (!customers || customers.length < 20) {
             await finishAgentRun(handle, 0, {
