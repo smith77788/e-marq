@@ -135,19 +135,25 @@ export const Route = createFileRoute("/api/public/payments/wayforpay-init")({
           returnUrl: `${baseUrl}/s/${tenant.slug}/orders/${order.id}`,
         });
 
-        const { data: intentId } = await supabaseAdmin.rpc("create_payment_intent", {
-          _order_id: order.id,
-          _provider: "wayforpay",
-          _amount_cents: order.total_cents,
-          _redirect_url: out.action,
-        });
+        const { data: intentId, error: intentErr } = await supabaseAdmin.rpc(
+          "create_payment_intent",
+          {
+            _order_id: order.id,
+            _provider: "wayforpay",
+            _amount_cents: order.total_cents,
+            _redirect_url: out.action,
+          },
+        );
+        if (intentErr) {
+          console.error("[wayforpay-init] create_payment_intent failed:", intentErr.message);
+        }
 
         return Response.json({
           ok: true,
           provider: "wayforpay",
           action: out.action,
           formFields: out.fields,
-          intentId,
+          intentId: intentId ?? null,
         });
       },
     },
