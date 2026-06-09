@@ -107,7 +107,7 @@ export const Route = createFileRoute("/hooks/agents/geo-demand")({
           const created = await insertInsightsDedup(insights);
           await finishAgentRun(handle, created, {
             regions: byRegion.size,
-            geo: summarizeGeo(geo, "en"),
+            geo: summarizeGeo(geo, "uk"),
             orders_in_scope: orders.length,
           });
           return jsonOk({ insights_created: created });

@@ -108,7 +108,7 @@ export const Route = createFileRoute("/hooks/agents/time-of-day-pricer")({
           await finishAgentRun(handle, created, {
             avg_cr: avgCr,
             low_hours_count: lowHours.length,
-            geo: summarizeGeo(geo, "en"),
+            geo: summarizeGeo(geo, "uk"),
             views_in_scope: views.length,
             orders_in_scope: paid.length,
           });
