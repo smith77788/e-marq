@@ -5,7 +5,7 @@ import { IngestLogsView } from "@/components/admin/IngestLogsView";
 export const Route = createFileRoute("/_authenticated/admin/ingest-logs")({
   head: () => ({
     meta: [
-      { title: "Ingest logs · Admin" },
+      { title: "Журнал запитів · Адмін" },
       { name: "description", content: "Усі POST на /hooks/ingest з усіх tenant-ів" },
     ],
   }),
@@ -16,5 +16,5 @@ function AdminIngestLogsRoute() {
   const { isSuperAdmin, loading } = useAuth();
   if (loading) return null;
   if (!isSuperAdmin) return <Navigate to="/brand" />;
-  return <IngestLogsView title="Ingest logs (всі tenant-и)" />;
+  return <IngestLogsView title="Журнал запитів (всі tenant-и)" />;
 }

@@ -88,7 +88,7 @@ async function runForTenant(tenantId: string) {
             tenant_id: tenantId,
             key: settingKey,
             value: false as never,
-            description: `Auto-paused by self-heal (${f} failed / ${p} posted in 24h)`,
+            description: `Автопауза self-heal (${f} невдалих / ${p} опубліковано за 24 год)`,
           } as never,
           { onConflict: "tenant_id,key" },
         );

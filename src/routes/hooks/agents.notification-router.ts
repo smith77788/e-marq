@@ -110,7 +110,7 @@ export const Route = createFileRoute("/hooks/agents/notification-router")({
                 title: `Notification "${kind}" шумить (${c} штук за 24 год)`,
                 description:
                   "Власник не розгрібає шум — або підвищ severity threshold, або згрупуй у дайджест.",
-                expected_impact: "Знизити noise → fewer ignored notifications, owner trust ↑.",
+                expected_impact: "Знизити noise → менше ігнорованих нотифікацій, довіра власника ↑.",
                 confidence: 0.85,
                 risk_level: "medium",
                 metrics: {

@@ -352,7 +352,7 @@ function MissionControlContent() {
               />
               <AttentionCard
                 label="Здоров'я агентів"
-                value={fleetHealthy ? "OK" : `${failedRuns} fail`}
+                value={fleetHealthy ? "OK" : `${failedRuns} помилок`}
                 icon={fleetHealthy ? CheckCircle2 : AlertTriangle}
                 tone={fleetHealthy ? "success" : "destructive"}
                 href="/admin/health"
@@ -372,7 +372,7 @@ function MissionControlContent() {
       <section className="space-y-4">
         <SectionHeader
           eyebrow="03 · аналітика"
-          title="Cross-tenant pulse"
+          title="Пульс мережі"
           hint={detailReady ? `${insightsLoad} відкритих сигналів` : undefined}
           icon={Sparkles}
         />

@@ -147,7 +147,7 @@ export const Route = createFileRoute("/hooks/agents/margin-estimator")({
               tenant_id: tenantId,
               insight_type: "bootstrap_margin_unknown",
               affected_layer: "finance",
-              title: "Margins are estimated, not measured",
+              title: "Маржа розраховується приблизно, не виміряна",
               description: `Жоден з ${estimatedCount} активних SKU не має cost_cents у metadata. Margin-агенти зараз оцінюють маржу за галузевим середнім (${(fallbackMargin * 100).toFixed(0)}% для tier="${tier}"). Додайте реальну собівартість, щоб промо/discount-агенти не зробили збиткову акцію.`,
               expected_impact: "Виключає ризик збиткових промо-акцій",
               confidence: 0.9,

@@ -96,7 +96,7 @@ export async function finishAgentRun(
   insightsCreated: number,
   extra: Record<string, unknown> = {},
 ) {
-  await supabaseAdmin
+  const { error } = await supabaseAdmin
     .from("acos_agent_runs")
     .update({
       status: "success",
@@ -105,6 +105,7 @@ export async function finishAgentRun(
       metadata: { trigger: handle.trigger, ...extra },
     })
     .eq("id", handle.runId);
+  if (error) console.error("finishAgentRun update failed:", error.message);
 }
 
 export async function failAgentRun(handle: RunHandle, err: unknown) {

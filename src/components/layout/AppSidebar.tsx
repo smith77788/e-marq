@@ -146,7 +146,7 @@ const SETUP: NavGroup = {
     },
     { labelKey: "sb.team" as TKey, to: "/brand/team", icon: UsersRound, tone: "text-accent" },
     {
-      labelKey: "Ingest logs" as TKey,
+      labelKey: "sb.ingestLogs" as TKey,
       to: "/brand/ingest-logs",
       icon: Activity,
       tone: "text-warning",
@@ -213,7 +213,7 @@ const ADMIN_SYSTEM: NavGroup = {
       tone: "text-success",
     },
     {
-      labelKey: "Ingest logs" as TKey,
+      labelKey: "sb.ingestLogs" as TKey,
       to: "/admin/ingest-logs",
       icon: Activity,
       tone: "text-warning",

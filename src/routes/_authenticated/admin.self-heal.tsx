@@ -44,8 +44,8 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/admin/self-heal")({
   head: () => ({
     meta: [
-      { title: "Self-Heal Engine" },
-      { name: "description", content: "Autonomous production resilience cockpit" },
+      { title: "Самовідновлення — MARQ" },
+      { name: "description", content: "Автономне відновлення продакшну" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -219,7 +219,7 @@ function SelfHealContent() {
       const { data: session } = await supabase.auth.getSession();
       const token = session.session?.access_token;
       if (!token) {
-        toast.error("Not authenticated");
+        toast.error("Не авторизовано");
         return;
       }
       const res = await fetch("/hooks/agents/self-heal-engine", {
@@ -232,19 +232,19 @@ function SelfHealContent() {
       });
       const json = (await res.json()) as { ok?: boolean; summary?: Record<string, unknown>; error?: string };
       if (!res.ok || !json.ok) {
-        toast.error(json.error ?? "Cycle failed");
+        toast.error(json.error ?? "Цикл завершився помилкою");
         return;
       }
       const s = json.summary ?? {};
       toast.success(
-        `Cycle done: ${s.incidents_created ?? 0} new, ${s.actions_applied ?? 0} applied`,
+        `Цикл завершено: ${s.incidents_created ?? 0} нових, ${s.actions_applied ?? 0} виконано`,
       );
       await Promise.all([
         qc.invalidateQueries({ queryKey: ["self-heal-incidents"] }),
         qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
       ]);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Cycle failed");
+      toast.error(e instanceof Error ? e.message : "Цикл завершився помилкою");
     } finally {
       setRunning(false);
     }
@@ -253,7 +253,7 @@ function SelfHealContent() {
   const callAction = async (path: string, actionId: string, label: string) => {
     const { data: session } = await supabase.auth.getSession();
     const token = session.session?.access_token;
-    if (!token) return toast.error("Not authenticated");
+    if (!token) return toast.error("Не авторизовано");
     const res = await fetch(path, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -267,7 +267,7 @@ function SelfHealContent() {
         qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
       ]);
     } else {
-      toast.error(json.error ?? json.message ?? "Failed");
+      toast.error(json.error ?? json.message ?? "Помилка");
     }
   };
 
@@ -278,7 +278,7 @@ function SelfHealContent() {
   ) => {
     const { data: session } = await supabase.auth.getSession();
     const token = session.session?.access_token;
-    if (!token) return toast.error("Not authenticated");
+    if (!token) return toast.error("Не авторизовано");
     const res = await fetch("/hooks/agents/self-heal-dismiss", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -286,13 +286,13 @@ function SelfHealContent() {
     });
     const json = (await res.json()) as { ok?: boolean; message?: string; error?: string };
     if (res.ok && json.ok) {
-      toast.success(json.message ?? "Dismissed");
+      toast.success(json.message ?? "Відхилено");
       await Promise.all([
         qc.invalidateQueries({ queryKey: ["self-heal-incidents"] }),
         qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
       ]);
     } else {
-      toast.error(json.error ?? "Failed");
+      toast.error(json.error ?? "Помилка");
     }
   };
 
@@ -305,7 +305,7 @@ function SelfHealContent() {
       toast.error(error.message);
       return;
     }
-    toast.success(`Auto-heal ${next ? "enabled" : "disabled"}`);
+    toast.success(`Авто-виправлення ${next ? "ввімкнено" : "вимкнено"}`);
     await qc.invalidateQueries({ queryKey: ["self-heal-settings"] });
   };
 
@@ -315,17 +315,17 @@ function SelfHealContent() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            🛡 Self-Healing Engine
+            🛡 Самовідновлення системи
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Autonomous production resilience — detect, isolate, heal, and guard.
+            Автономне відновлення продакшну — виявлення, ізоляція, виправлення та захист.
           </p>
         </div>
         <div className="flex items-center gap-3">
           {settings && (
             <div className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2">
               <Label htmlFor="auto-heal" className="text-xs">
-                Auto-heal
+                Авто-виправлення
               </Label>
               <Switch
                 id="auto-heal"
@@ -340,7 +340,7 @@ function SelfHealContent() {
             ) : (
               <PlayCircle className="mr-2 h-4 w-4" />
             )}
-            Run cycle now
+            Запустити цикл
           </Button>
         </div>
       </div>
@@ -349,31 +349,31 @@ function SelfHealContent() {
       <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
         <ModuleCard
           icon={Activity}
-          title="Detector"
+          title="Детектор"
           status={moduleStatus(counts.open, 5)}
-          metric={`${counts.open} open`}
+          metric={`${counts.open} відкритих`}
         />
         <ModuleCard
           icon={Sparkles}
-          title="Root Cause"
+          title="Аналіз причини"
           status={incidents.length > 0 ? "ok" : "ok"}
-          metric={`${incidents.length} analyzed`}
+          metric={`${incidents.length} проаналізовано`}
         />
         <ModuleCard
           icon={ShieldCheck}
-          title="Isolation"
+          title="Ізоляція"
           status={moduleStatus(counts.blocked, 1)}
-          metric={`${counts.blocked} blocked`}
+          metric={`${counts.blocked} заблоковано`}
         />
         <ModuleCard
           icon={Zap}
-          title="Auto-Fix"
+          title="Авто-виправлення"
           status={settings?.auto_heal_enabled ? "ok" : "warn"}
-          metric={settings?.auto_heal_enabled ? "armed" : "disarmed"}
+          metric={settings?.auto_heal_enabled ? "ввімкнено" : "вимкнено"}
         />
         <ModuleCard
           icon={CheckCircle2}
-          title="Regression Guard"
+          title="Захист від регресій"
           status={counts.p0p1 === 0 ? "ok" : "warn"}
           metric={`${counts.p0p1} P0/P1`}
         />
@@ -385,7 +385,7 @@ function SelfHealContent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-warning" />
-              Pending actions ({pendingProposals.length})
+              Очікуючі дії ({pendingProposals.length})
             </CardTitle>
             <CardDescription>
               Дії, що чекають на ручне рішення (BLOCK = ризикові, PROPOSE = запропоновані, MONITOR = лише спостереження).
@@ -395,10 +395,10 @@ function SelfHealContent() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Kind</TableHead>
-                  <TableHead className="w-24">Decision</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Тип</TableHead>
+                  <TableHead className="w-24">Рішення</TableHead>
+                  <TableHead>Створено</TableHead>
+                  <TableHead className="text-right">Дії</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -427,20 +427,20 @@ function SelfHealContent() {
                           size="sm"
                           type="button"
                           onClick={() =>
-                            callAction("/hooks/agents/self-heal-apply", a.id, "Applied")
+                            callAction("/hooks/agents/self-heal-apply", a.id, "Виконано")
                           }
                         >
-                          {a.decision === "block" ? "Force apply" : "Apply"}
+                          {a.decision === "block" ? "Примусово виконати" : "Виконати"}
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           type="button"
                           onClick={() =>
-                            callDismiss("action", a.id, "Dismissed by admin")
+                            callDismiss("action", a.id, "Відхилено адміном")
                           }
                         >
-                          Dismiss
+                          Відхилити
                         </Button>
                       </div>
                     </TableCell>
@@ -455,9 +455,9 @@ function SelfHealContent() {
       {/* INCIDENTS QUEUE */}
       <Card>
         <CardHeader>
-          <CardTitle>Active incidents ({incidents.length})</CardTitle>
+          <CardTitle>Активні інциденти ({incidents.length})</CardTitle>
           <CardDescription>
-            Real-time queue from all detectors. Auto-refresh every 30s.
+            Черга в реальному часі від усіх детекторів. Оновлення кожні 30с.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -466,7 +466,7 @@ function SelfHealContent() {
           ) : incidents.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-12 text-center text-sm text-muted-foreground">
               <CheckCircle2 className="h-8 w-8 text-success" />
-              No active incidents — all systems healthy.
+              Немає активних інцидентів — всі системи в нормі.
             </div>
           ) : (
             <Table>
@@ -505,9 +505,9 @@ function SelfHealContent() {
                         size="sm"
                         variant="outline"
                         type="button"
-                        onClick={() => callDismiss("incident", i.id, "Dismissed by admin")}
+                        onClick={() => callDismiss("incident", i.id, "Відхилено адміном")}
                       >
-                        Dismiss
+                        Відхилити
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -521,25 +521,25 @@ function SelfHealContent() {
       {/* AUTO-HEAL LOG */}
       <Card>
         <CardHeader>
-          <CardTitle>Auto-heal log</CardTitle>
-          <CardDescription>Last applied/reverted actions (max 50).</CardDescription>
+          <CardTitle>Журнал авто-виправлень</CardTitle>
+          <CardDescription>Останні застосовані/відкочені дії (макс. 50).</CardDescription>
         </CardHeader>
         <CardContent>
           {actionsQ.isLoading ? (
             <Skeleton className="h-40 w-full" />
           ) : recentApplied.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
-              No actions applied yet.
+              Поки не застосовано жодних дій.
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Kind</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Result</TableHead>
-                  <TableHead>When</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead>Тип</TableHead>
+                  <TableHead>Статус</TableHead>
+                  <TableHead>Результат</TableHead>
+                  <TableHead>Коли</TableHead>
+                  <TableHead className="text-right">Дія</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -567,10 +567,10 @@ function SelfHealContent() {
                           variant="outline"
                           type="button"
                           onClick={() =>
-                            callAction("/hooks/agents/self-heal-revert", a.id, "Reverted")
+                            callAction("/hooks/agents/self-heal-revert", a.id, "Відкочено")
                           }
                         >
-                          <RotateCcw className="mr-1 h-3 w-3" /> Revert
+                          <RotateCcw className="mr-1 h-3 w-3" /> Відкотити
                         </Button>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>

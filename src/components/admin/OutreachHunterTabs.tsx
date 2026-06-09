@@ -105,9 +105,9 @@ const HUNTERS = [
 
 const PIPELINE = [
   { id: "outreach-composer", label: "Composer (драфти)", icon: Wand2 },
-  { id: "outreach-quality-scorer", label: "Quality scorer", icon: Sparkles },
-  { id: "outreach-roi-collector", label: "ROI collector", icon: CheckCircle2 },
-  { id: "outreach-self-heal", label: "Self-heal", icon: Shield },
+  { id: "outreach-quality-scorer", label: "Оцінка якості", icon: Sparkles },
+  { id: "outreach-roi-collector", label: "Збір ROI", icon: CheckCircle2 },
+  { id: "outreach-self-heal", label: "Авто-відновлення", icon: Shield },
 ] as const;
 
 const LEAD_STATUSES = [
