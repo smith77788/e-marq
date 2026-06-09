@@ -84,9 +84,9 @@ export const Route = createFileRoute("/hooks/agents/search-gap")({
               tenant_id: tenantId,
               insight_type: "search_gap",
               affected_layer: "search",
-              title: `"${term}" — ${t.misses} searches, no results`,
-              description: `Visitors searched for "${term}" ${total} times in the last 30 days; ${t.misses} got zero results (${(missRate * 100).toFixed(0)}% miss rate). Consider adding a product, redirecting to a related category, or creating a SEO landing page targeting this query.`,
-              expected_impact: `Capture intent from ~${t.misses}/mo qualified visitors`,
+              title: `"${term}" — ${t.misses} пошуків без результату`,
+              description: `Відвідувачі шукали "${term}" ${total} разів за 30 днів; ${t.misses} запитів не дали результату (${(missRate * 100).toFixed(0)}% miss rate). Розгляньте додавання товару, редірект на пов'язану категорію або SEO-лендінг під цей запит.`,
+              expected_impact: `Перехопити попит від ~${t.misses}/міс кваліфікованих відвідувачів`,
               confidence,
               risk_level: risk,
               metrics: {
