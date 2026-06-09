@@ -75,6 +75,7 @@ export const Route = createFileRoute("/hooks/agents/stockout")({
             const units = sold.get(p.id) ?? 0;
             const velocity = units / WINDOW_DAYS;
             if (velocity <= 0.3) continue; // skip slow movers
+            if (p.stock === null || p.stock === undefined) continue;
             const dos = velocity > 0 ? p.stock / velocity : Infinity;
             if (dos >= 7) continue;
             const lostRevenueCents = Math.round(

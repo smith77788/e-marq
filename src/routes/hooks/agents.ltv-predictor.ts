@@ -62,8 +62,8 @@ export const Route = createFileRoute("/hooks/agents/ltv-predictor")({
           for (const c of customers) {
             const cycle = c.avg_cycle_days ?? 60; // assume 60d default if unknown
             const predictedOrders12m = cycle > 0 ? Math.round(365 / Math.max(cycle, 7)) : 1;
-            const predictedLtv =
-              (c.avg_order_cents || c.total_spent_cents) * Math.max(predictedOrders12m, 1);
+            const avgOrderCents = c.avg_order_cents || (c.total_orders > 0 ? Math.round(c.total_spent_cents / c.total_orders) : 0);
+            const predictedLtv = avgOrderCents * Math.max(predictedOrders12m, 1);
 
             // Churn: how many cycles since last order
             const daysSinceLast = c.last_order_at

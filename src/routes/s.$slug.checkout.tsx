@@ -337,6 +337,7 @@ function CheckoutPage() {
         _payment_method: method,
         _shipping: shippingPayload,
         _promo_code: discount?.valid ? promoCode.trim().toUpperCase() : null,
+        _promo_discount_cents: discount?.valid ? promoDiscountCents : null,
         _loyalty_redeem_points: redeemApplied?.points ?? null,
       });
       if (rpcErr) throw rpcErr;
@@ -362,10 +363,10 @@ function CheckoutPage() {
         cart.clear();
         navigate({ to: "/s/$slug/orders/$orderId", params: { slug, orderId } });
       } else {
-        // Кошик очищаємо ПЕРЕД редіректом; email прийде з webhook'у після оплати
-        cart.clear();
+        // Кошик очищаємо ПІСЛЯ успішного запуску платежу; email прийде з webhook'у після оплати
         toast.success("Перенаправляємо на оплату…");
         await startGatewayPayment(method, orderId);
+        cart.clear();
       }
     } catch (e) {
       const raw = e instanceof Error ? e.message : "Невідома помилка";

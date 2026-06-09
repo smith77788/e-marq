@@ -204,7 +204,7 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
             if (views >= 80 && v2c < 0.04) {
               const newPrice = Math.round(p.price_cents * 0.9);
               // assume conversion doubles at 10% lower
-              const projectedMonthlyUnits = carts * 2 * (30 / WINDOW_DAYS) * 0.5;
+              const projectedMonthlyUnits = carts * 2 * (30 / WINDOW_DAYS);
               const projectedRev = projectedMonthlyUnits * newPrice;
               const upliftMonthly = Math.round(projectedRev - monthlyRev);
               insights.push({
