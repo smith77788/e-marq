@@ -133,7 +133,7 @@ export const Route = createFileRoute("/hooks/agents/customer-churn-predictor")({
               insight_type: "high_value_churn_risk",
               affected_layer: "lifecycle",
               title: `Високий ризик: ${r.name} (LTV ${(r.ltv / 100).toFixed(0)} ₴)`,
-              description: `Churn-probability ${(r.prob * 100).toFixed(0)}% — причина: ${r.reason}.`,
+              description: `Ймовірність відтоку ${(r.prob * 100).toFixed(0)}% — причина: ${r.reason}.`,
               expected_impact: `Win-back з знижкою 15-20% повертає ~25-35% таких клієнтів.`,
               confidence: r.prob,
               risk_level: r.ltv >= 20000 ? "high" : "medium",
