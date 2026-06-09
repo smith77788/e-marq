@@ -133,35 +133,35 @@ export const Route = createFileRoute("/api/public/payments/wayforpay-callback")(
         }
 
         if (isWayForPaySuccess(parsed.transactionStatus)) {
-          try {
-            await supabaseAdmin.rpc("mark_order_paid_by_gateway", {
-              _order_id: orderId,
-              _provider: "wayforpay",
-              _external_id: externalId,
-              _amount_cents: amountCents,
-              _payload: parsed as never,
-            });
-          } catch (e) {
+          const { error: rpcErr } = await supabaseAdmin.rpc("mark_order_paid_by_gateway", {
+            _order_id: orderId,
+            _provider: "wayforpay",
+            _external_id: externalId,
+            _amount_cents: amountCents,
+            _payload: parsed as never,
+          });
+          if (rpcErr) {
             await logCallback({
               orderId,
               tenantId: order.tenant_id,
               externalId,
               signatureValid: true,
               rawBody,
-              parsed: { ...parsed, error: e instanceof Error ? e.message : "unknown" },
+              parsed: { ...parsed, error: rpcErr.message },
               httpStatus: 500,
               ip,
             });
             return new Response("rpc_failed", { status: 500 });
           }
         } else {
-          await supabaseAdmin.rpc("mark_payment_failed", {
+          const { error: failErr } = await supabaseAdmin.rpc("mark_payment_failed", {
             _order_id: orderId,
             _provider: "wayforpay",
             _external_id: externalId,
             _error: `${parsed.transactionStatus}: ${parsed.reasonCode ?? ""}`,
             _payload: parsed as never,
           });
+          if (failErr) console.error("[wayforpay-callback] mark_payment_failed:", failErr.message);
         }
 
         await logCallback({
