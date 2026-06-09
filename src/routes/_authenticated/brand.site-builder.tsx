@@ -288,7 +288,7 @@ function BrandSiteBuilderPage() {
       if (!tenantId || !template) throw new Error("missing tenant/template");
       const session = await supabase.auth.getSession();
       const accessToken = session.data.session?.access_token;
-      if (!accessToken) throw new Error("Not authenticated");
+      if (!accessToken) throw new Error("Не авторизовано");
       const res = await fetch("/api/site-builder/build", {
         method: "POST",
         headers: {
@@ -640,10 +640,10 @@ function ThemeTab({ draft, setDraft }: FieldProps) {
               className="mb-3 inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-white"
               style={{ background: draft.primary_color }}
             >
-              {draft.brand_name || "Brand"}
+              {draft.brand_name || "Бренд"}
             </div>
             <h3 className="text-2xl font-bold" style={{ color: draft.primary_color }}>
-              {draft.tagline || "Your tagline"}
+              {draft.tagline || "Ваш слоган"}
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">
               {draft.description ||
@@ -736,7 +736,7 @@ function BuildRow({ build }: { build: SiteBuild }) {
     try {
       const session = await supabase.auth.getSession();
       const accessToken = session.data.session?.access_token;
-      if (!accessToken) throw new Error("Not authenticated");
+      if (!accessToken) throw new Error("Не авторизовано");
       const res = await fetch(`/api/site-builder/download/${build.id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });

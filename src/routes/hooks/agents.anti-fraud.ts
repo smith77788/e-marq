@@ -183,7 +183,7 @@ export const Route = createFileRoute("/hooks/agents/anti-fraud")({
                 insight_type: "fraud_risk_high",
                 affected_layer: "ops",
                 title: `⚠️ Order ${o.id.slice(0, 8)}: підозра на fraud (score ${score.toFixed(2)})`,
-                description: `${signals.length} red flags: ${signals.map((s) => s.kind).join(", ")}.`,
+                description: `${signals.length} тривожних сигналів: ${signals.map((s) => s.kind).join(", ")}.`,
                 expected_impact:
                   "Перегляньте замовлення вручну до виконання — можливий chargeback.",
                 confidence: Math.min(1, 0.5 + score / 2),

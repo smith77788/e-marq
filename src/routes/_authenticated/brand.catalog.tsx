@@ -417,7 +417,7 @@ function BrandCollectionsPage() {
                           variant="ghost"
                           className="h-8 w-8"
                           onClick={() => setEditing(c)}
-                          aria-label="Edit"
+                          aria-label="Редагувати"
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
@@ -426,7 +426,7 @@ function BrandCollectionsPage() {
                           variant="ghost"
                           className="h-8 w-8 text-muted-foreground hover:text-destructive"
                           onClick={() => setDeleting(c)}
-                          aria-label="Delete"
+                          aria-label="Видалити"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -480,7 +480,7 @@ function BrandCollectionsPage() {
                   setHandleManual(true);
                   setHandle(slugify(e.target.value));
                 }}
-                placeholder="hits"
+                placeholder="наприклад: хіти"
                 maxLength={64}
                 required
               />

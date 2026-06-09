@@ -221,7 +221,7 @@ export function NotificationCenter() {
         qc.invalidateQueries({ queryKey: ["nc-unread"] }),
       ]);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed");
+      toast.error(e instanceof Error ? e.message : "Помилка");
     } finally {
       setMarking(false);
     }

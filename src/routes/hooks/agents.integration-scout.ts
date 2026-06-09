@@ -143,7 +143,7 @@ export const Route = createFileRoute("/hooks/agents/integration-scout")({
             tenant_id: tenantId,
             insight_type: `bootstrap_recommend_${r.kind}`,
             affected_layer: "integrations",
-            title: `Recommended: ${r.kind.replace("_", " ")}`,
+            title: `Рекомендація: ${r.kind.replace(/_/g, " ")}`,
             description: `${r.reason} ${r.action}`,
             expected_impact: "Розблоковує точніші дані для усіх агентів",
             confidence: 0.8,
