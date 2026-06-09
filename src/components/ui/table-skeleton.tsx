@@ -20,7 +20,7 @@ export function TableSkeleton({ rows = 5, columns = 5, className }: TableSkeleto
   return (
     <div
       role="status"
-      aria-label="Loading…"
+      aria-label="Завантаження…"
       aria-busy="true"
       className={cn("divide-y divide-border", className)}
     >

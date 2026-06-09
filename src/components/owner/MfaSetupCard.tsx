@@ -73,7 +73,7 @@ export function MfaSetupCard() {
         friendlyName,
       });
       if (error) throw error;
-      if (!data) throw new Error("No enrollment payload");
+      if (!data) throw new Error("Не отримано дані для реєстрації");
       setEnroll({
         phase: "enrolling",
         factorId: data.id,
@@ -83,7 +83,7 @@ export function MfaSetupCard() {
         verifying: false,
       });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Enroll failed");
+      toast.error(e instanceof Error ? e.message : "Помилка активації");
     }
   }
 
@@ -131,7 +131,7 @@ export function MfaSetupCard() {
       toast.success(t("mfa.removeSuccess"));
       await qc.invalidateQueries({ queryKey: ["mfa-factors"] });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed");
+      toast.error(e instanceof Error ? e.message : "Помилка");
     } finally {
       setRemoving(false);
     }

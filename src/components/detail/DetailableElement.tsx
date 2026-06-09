@@ -145,7 +145,7 @@ export function DetailableElement({
     <div
       role="button"
       tabIndex={0}
-      aria-label={ariaLabel ?? drawerTitle ?? "Open details"}
+      aria-label={ariaLabel ?? drawerTitle ?? "Відкрити деталі"}
       aria-haspopup="dialog"
       onClick={onClick}
       onKeyDown={onKeyDown}

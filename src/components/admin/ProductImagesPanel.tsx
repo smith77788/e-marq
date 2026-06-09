@@ -297,7 +297,7 @@ export function ProductImagesPanel({ tenantId, productId, productName }: Props) 
           <div
             role="status"
             aria-busy="true"
-            aria-label="Loading images…"
+            aria-label="Завантаження зображень…"
             className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"
           >
             {Array.from({ length: 4 }).map((_, i) => (
