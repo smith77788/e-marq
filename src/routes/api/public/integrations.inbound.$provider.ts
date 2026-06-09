@@ -106,7 +106,8 @@ function timingSafeEqualString(a: string, b: string): boolean {
   const ab = Buffer.from(a, "utf8");
   const bb = Buffer.from(b, "utf8");
   if (ab.length !== bb.length) {
-    timingSafeEqual(Buffer.alloc(ab.length), Buffer.alloc(ab.length));
+    // Run comparison against real secret length to avoid leaking length via timing
+    timingSafeEqual(Buffer.alloc(bb.length), Buffer.alloc(bb.length));
     return false;
   }
   return timingSafeEqual(ab, bb);
