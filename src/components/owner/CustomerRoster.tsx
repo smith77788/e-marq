@@ -32,7 +32,7 @@ const STAGE_STYLE: Record<string, string> = {
 };
 
 export function CustomerRoster({ tenantId }: Props) {
-  const { data: customers = [], isLoading } = useQuery({
+  const { data: customers = [], isLoading, isError, error } = useQuery({
     queryKey: ["customer-roster", tenantId],
     enabled: !!tenantId,
     queryFn: async () => {
@@ -78,6 +78,10 @@ export function CustomerRoster({ tenantId }: Props) {
       <CardContent>
         {isLoading ? (
           <ListSkeleton rows={6} />
+        ) : isError ? (
+          <p className="py-6 text-center text-sm text-destructive">
+            {error instanceof Error ? error.message : "Помилка завантаження"}
+          </p>
         ) : customers.length === 0 ? (
           <div className="rounded-md border border-dashed border-border bg-muted/20 p-6 text-center">
             <Users className="mx-auto h-8 w-8 text-muted-foreground/60" />
