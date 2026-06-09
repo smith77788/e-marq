@@ -161,11 +161,9 @@ export const Route = createFileRoute("/api/public/shipping/np")({
             headers: { "Content-Type": "application/json" },
           });
         } catch (e) {
+          console.error("[shipping.np] upstream error", e instanceof Error ? e.message : e);
           return new Response(
-            JSON.stringify({
-              error: "np_error",
-              message: e instanceof Error ? e.message : "unknown",
-            }),
+            JSON.stringify({ error: "external_api_error" }),
             { status: 502, headers: { "Content-Type": "application/json" } },
           );
         }

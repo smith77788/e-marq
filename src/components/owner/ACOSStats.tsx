@@ -49,15 +49,22 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     let mounted = true;
     setLoading(true);
+    setError(null);
     supabase
       .rpc("get_acos_stats", { _tenant_id: tenantId })
-      .then(({ data, error }) => {
+      .then(({ data, error: rpcError }) => {
         if (!mounted) return;
-        if (!error && data && (data as { ok?: boolean }).ok) {
+        if (rpcError) {
+          setError(rpcError.message);
+        } else if (data && (data as { ok?: boolean }).ok) {
           setStats(data as unknown as Stats);
+        } else {
+          setError("Немає даних");
         }
         setLoading(false);
       });
@@ -69,8 +76,20 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
   if (loading) {
     return <Skeleton className="h-48 w-full" />;
   }
-  if (!stats) {
-    return null;
+  if (error || !stats) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="h-5 w-5" />
+            AI Activity Summary
+          </CardTitle>
+          <CardDescription className="text-destructive">
+            {error ?? "Немає даних"}
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
   }
 
   const winRate =
