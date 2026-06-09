@@ -31,9 +31,9 @@ const ACTION_LABELS: Record<string, string> = {
   owner_review: "Потребує перегляду",
   flag_for_review: "Помічено",
   feature_product: "Виділити товар",
-  cross_sell_recommend: "Cross-sell",
+  cross_sell_recommend: "Крос-продаж",
   request_review: "Запит відгуку",
-  outreach_send: "Outreach",
+  outreach_send: "Аутріч",
   promo_apply: "Промо-знижка",
   restock_alert: "Поповнення складу",
 };
@@ -82,7 +82,7 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
-            AI Activity Summary
+            Активність AI-агентів
           </CardTitle>
           <CardDescription className="text-destructive">
             {error ?? "Немає даних"}
@@ -107,7 +107,7 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Activity className="h-5 w-5" />
-          AI Activity Summary
+          Активність AI-агентів
         </CardTitle>
         <CardDescription>
           Що автономна система зробила для вашого бізнесу
@@ -130,7 +130,7 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
           />
           <KPI
             icon={<Target className="h-4 w-4" />}
-            label="Win-rate"
+            label="Відсоток успіху"
             value={winRate !== null ? `${winRate}%` : "—"}
             sub={
               stats.outcomes.measured > 0
@@ -140,9 +140,9 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
           />
           <KPI
             icon={<Inbox className="h-4 w-4" />}
-            label="Pending Inbox"
+            label="Черга підтверджень"
             value={String(stats.pending_inbox)}
-            sub={`Auto: ${autoPct}% / Manual: ${100 - autoPct}%`}
+            sub={`Авто: ${autoPct}% / Вручну: ${100 - autoPct}%`}
           />
         </div>
 
