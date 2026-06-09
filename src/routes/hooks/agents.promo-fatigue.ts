@@ -41,13 +41,15 @@ export const Route = createFileRoute("/hooks/agents/promo-fatigue")({
 
         const handle = await startAgentRun("promo-fatigue", tenantId, ctx);
         try {
-          const { data: promos } = await supabaseAdmin
+          const { data: promos, error: promosErr } = await supabaseAdmin
             .from("promotions")
             .select(
               "id, name, code, times_used, usage_limit, revenue_cents, cost_cents, starts_at, fatigue_score",
             )
             .eq("tenant_id", tenantId)
-            .eq("is_active", true);
+            .eq("is_active", true)
+            .limit(1000);
+          if (promosErr) throw promosErr;
 
           if (!promos?.length) {
             await finishAgentRun(handle, 0, { reason: "no_active_promos" });
@@ -76,10 +78,13 @@ export const Route = createFileRoute("/hooks/agents/promo-fatigue")({
             fatigue = Math.min(1, fatigue);
 
             // Update score regardless
-            await supabaseAdmin
+            const { error: scoreErr } = await supabaseAdmin
               .from("promotions")
               .update({ fatigue_score: fatigue })
-              .eq("id", p.id);
+              .eq("id", p.id)
+              .eq("tenant_id", tenantId);
+            if (scoreErr)
+              console.error("[promo-fatigue] fatigue_score update failed:", scoreErr.message);
 
             if (fatigue >= 0.7) {
               insights.push({

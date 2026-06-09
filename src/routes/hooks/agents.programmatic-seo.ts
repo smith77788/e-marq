@@ -38,20 +38,31 @@ export const Route = createFileRoute("/hooks/agents/programmatic-seo")({
 
         const handle = await startAgentRun("programmatic-seo", tenantId, ctx);
         try {
-          const [{ data: products }, { data: pages }, { data: queries }] = await Promise.all([
+          const [productsRes, pagesRes, queriesRes] = await Promise.all([
             supabaseAdmin
               .from("products")
               .select("id, name")
               .eq("tenant_id", tenantId)
               .eq("is_active", true)
               .limit(50),
-            supabaseAdmin.from("content_pages").select("slug").eq("tenant_id", tenantId),
+            supabaseAdmin
+              .from("content_pages")
+              .select("slug")
+              .eq("tenant_id", tenantId)
+              .limit(10_000),
             supabaseAdmin
               .from("search_queries")
               .select("query")
               .eq("tenant_id", tenantId)
-              .gte("occurred_at", new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString()),
+              .gte("occurred_at", new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString())
+              .limit(20_000),
           ]);
+          if (productsRes.error) throw productsRes.error;
+          if (pagesRes.error) throw pagesRes.error;
+          if (queriesRes.error) throw queriesRes.error;
+          const products = productsRes.data;
+          const pages = pagesRes.data;
+          const queries = queriesRes.data;
 
           if (!products?.length) {
             await finishAgentRun(handle, 0, { reason: "no_products" });

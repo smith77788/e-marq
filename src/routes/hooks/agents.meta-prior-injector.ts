@@ -89,6 +89,7 @@ export const Route = createFileRoute("/hooks/agents/meta-prior-injector")({
               .eq("agent", agent)
               .eq("pattern_key", patternKey)
               .maybeSingle();
+            if (existing.error) throw existing.error;
 
             const rule = `Use policy "${p.policy_key}" as default (win-rate ${(winRate * 100).toFixed(0)}% on ${p.trial_count} trials).`;
             if (existing.data) {

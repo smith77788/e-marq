@@ -57,6 +57,7 @@ async function runForTenant(tenantId: string) {
     const { data: m } = await supabaseAdmin
       .from("outreach_metrics")
       .select("action_id, clicks, orders_count, revenue")
+      .eq("tenant_id", tenantId)
       .in("action_id", ids);
     metrics = Object.fromEntries(((m ?? []) as MetricRow[]).map((r) => [r.action_id, r]));
   }

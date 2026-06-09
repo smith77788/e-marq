@@ -47,7 +47,10 @@ function limitsFor(quota: QuotaRow, actionType: string): Limits {
     case "join_channel":
       return { perHour: 999, perDay: quota.max_join_per_day };
     default:
-      return { perHour: quota.agent_max_per_day, perDay: quota.agent_max_per_day };
+      return {
+        perHour: Math.max(1, Math.ceil(quota.agent_max_per_day / 24)),
+        perDay: quota.agent_max_per_day,
+      };
   }
 }
 
@@ -176,12 +179,13 @@ export const Route = createFileRoute("/hooks/agents/tg-user-action-executor")({
         );
         const tenantFilter = url.searchParams.get("tenant");
 
+        // NULL scheduled_for means "run ASAP" — must be picked up alongside due rows
         let q = supabaseAdmin
           .from("tg_user_actions")
           .select("id,tenant_id,action_type,payload,target,scheduled_for")
           .eq("status", "queued")
-          .lte("scheduled_for", new Date().toISOString())
-          .order("scheduled_for", { ascending: true })
+          .or(`scheduled_for.is.null,scheduled_for.lte.${new Date().toISOString()}`)
+          .order("scheduled_for", { ascending: true, nullsFirst: true })
           .limit(limit);
         if (tenantFilter) q = q.eq("tenant_id", tenantFilter);
 
@@ -195,6 +199,7 @@ export const Route = createFileRoute("/hooks/agents/tg-user-action-executor")({
         let failed = 0;
 
         for (const row of queue) {
+          processed += 1;
           const sessionEnc = await getActiveSessionEnc(row.tenant_id);
           if (!sessionEnc) {
             await supabaseAdmin
@@ -260,10 +265,16 @@ export const Route = createFileRoute("/hooks/agents/tg-user-action-executor")({
             continue;
           }
 
-          await supabaseAdmin
+          const { error: claimErr } = await supabaseAdmin
             .from("tg_user_actions")
             .update({ status: "in_progress" } as never)
-            .eq("id", row.id);
+            .eq("id", row.id)
+            .eq("status", "queued");
+          if (claimErr) {
+            console.error("[tg-executor] claim failed:", claimErr.message);
+            failed += 1;
+            continue;
+          }
 
           const startedAt = Date.now();
           const result = await executeAction({
@@ -274,7 +285,7 @@ export const Route = createFileRoute("/hooks/agents/tg-user-action-executor")({
           const durationMs = Date.now() - startedAt;
 
           if (result.ok) {
-            await supabaseAdmin
+            const { error: postErr } = await supabaseAdmin
               .from("tg_user_actions")
               .update({
                 status: "posted",
@@ -287,6 +298,7 @@ export const Route = createFileRoute("/hooks/agents/tg-user-action-executor")({
                 last_error: null,
               } as never)
               .eq("id", row.id);
+            if (postErr) console.error("[tg-executor] posted update failed:", postErr.message);
             await supabaseAdmin.from("tg_user_action_log").insert({
               tenant_id: row.tenant_id,
               action_id: row.id,
@@ -305,7 +317,7 @@ export const Route = createFileRoute("/hooks/agents/tg-user-action-executor")({
             const isFlood = result.code === "flood_wait";
             const isExpired = result.code === "session_expired";
             const errMsg = `${result.code}: ${result.message}`;
-            await supabaseAdmin
+            const { error: failUpdErr } = await supabaseAdmin
               .from("tg_user_actions")
               .update({
                 status: isFlood ? "queued" : "failed",
@@ -316,6 +328,8 @@ export const Route = createFileRoute("/hooks/agents/tg-user-action-executor")({
                   : new Date().toISOString(),
               } as never)
               .eq("id", row.id);
+            if (failUpdErr)
+              console.error("[tg-executor] failure update failed:", failUpdErr.message);
             if (isExpired) {
               await supabaseAdmin
                 .from("tg_user_sessions")
@@ -334,7 +348,6 @@ export const Route = createFileRoute("/hooks/agents/tg-user-action-executor")({
             failed += 1;
           }
 
-          processed += 1;
           // невелика затримка між діями в межах однієї пачки (cap ~5s)
           const delayMs =
             1000 *

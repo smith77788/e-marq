@@ -138,10 +138,14 @@ export const Route = createFileRoute("/hooks/agents/social-engager")({
           if (!error) {
             created += 1;
             perBrand[source.profile.brand_name] = (perBrand[source.profile.brand_name] ?? 0) + 1;
-            await supabaseAdmin
+            const { error: statusErr } = await supabaseAdmin
               .from("lead_prospects")
               .update({ status: "engaging", last_contacted_at: new Date().toISOString() })
               .eq("id", p.id);
+            if (statusErr)
+              console.error("[social-engager] prospect status update failed:", statusErr.message);
+          } else {
+            console.error("[social-engager] lead_outreach insert failed:", error.message);
           }
         }
 

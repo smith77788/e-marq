@@ -78,7 +78,7 @@ export const Route = createFileRoute("/hooks/agents/onboarding")({
               .from("orders")
               .select("id", { count: "exact", head: true })
               .eq("tenant_id", tenantId)
-              .eq("status", "paid"),
+              .in("status", ["paid", "fulfilled"]),
             supabaseAdmin
               .from("customers")
               .select("id", { count: "exact", head: true })

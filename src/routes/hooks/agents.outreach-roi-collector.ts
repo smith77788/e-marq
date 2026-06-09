@@ -13,7 +13,7 @@ async function runForTenant(tenantId: string) {
     .select("id, lead_id, channel, utm_campaign, promo_code, posted_at")
     .eq("tenant_id", tenantId)
     .in("status", ["posted", "approved"])
-    .limit(1000);
+    .limit(5000);
   if (error) throw new Error(error.message);
 
   const stats = { actions: 0, metrics_upserted: 0 };
@@ -44,7 +44,8 @@ async function runForTenant(tenantId: string) {
         .from("orders")
         .select("total_cents, status")
         .eq("tenant_id", tenantId)
-        .neq("status", "cancelled");
+        .neq("status", "cancelled")
+        .limit(10000);
       // фільтруємо вручну за metadata.promo_code (бо в orders немає прямого FK)
       // у MARQ promo прив'язується через promotions, тому шукаємо в metadata
       const matching = (ord ?? []).filter((o) => {
@@ -59,11 +60,11 @@ async function runForTenant(tenantId: string) {
       revenue = matching.reduce((s, o) => s + (Number(o.total_cents) || 0), 0) / 100;
     }
 
-    const ctr = visits > 0 ? +(orders_count / visits).toFixed(4) : 0;
-    const conversion_rate = ctr;
+    const conversion_rate = visits > 0 ? +(orders_count / visits).toFixed(4) : 0;
+    const ctr = conversion_rate;
     const roi_per_action = revenue;
 
-    await supabaseAdmin.from("outreach_metrics").upsert(
+    const { error: upsertErr } = await supabaseAdmin.from("outreach_metrics").upsert(
       {
         tenant_id: tenantId,
         action_id: a.id,
@@ -83,7 +84,7 @@ async function runForTenant(tenantId: string) {
       } as never,
       { onConflict: "action_id" },
     );
-    stats.metrics_upserted++;
+    if (!upsertErr) stats.metrics_upserted++;
   }
   return stats;
 }

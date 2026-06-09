@@ -40,13 +40,14 @@ export const Route = createFileRoute("/hooks/agents/shipping-optimizer")({
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
           const since = new Date(Date.now() - 30 * 86_400_000).toISOString();
-          const { data: orders } = await supabaseAdmin
+          const { data: orders, error: ordersErr } = await supabaseAdmin
             .from("orders")
             .select("id, total_cents, metadata, created_at, paid_at")
             .eq("tenant_id", tenantId)
-            .eq("status", "paid")
+            .in("status", ["paid", "fulfilled"])
             .gte("created_at", since)
-            .limit(1000);
+            .limit(5000);
+          if (ordersErr) throw ordersErr;
 
           // Aggregate by region/method from metadata.shipping
           const buckets = new Map<

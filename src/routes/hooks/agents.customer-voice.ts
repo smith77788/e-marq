@@ -94,6 +94,8 @@ export const Route = createFileRoute("/hooks/agents/customer-voice")({
               .gte("created_at", since)
               .limit(500),
           ]);
+          if (convRes.error) throw convRes.error;
+          if (proofRes.error) throw proofRes.error;
 
           const allTexts: string[] = [];
           for (const c of convRes.data ?? []) if (c.body) allTexts.push(c.body);

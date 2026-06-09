@@ -41,12 +41,14 @@ export const Route = createFileRoute("/hooks/agents/content-velocity")({
           const since30 = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
           const since90 = new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString();
 
-          const { data: pages } = await supabaseAdmin
+          const { data: pages, error: pagesErr } = await supabaseAdmin
             .from("content_pages")
             .select("id, slug, title, published_at, content_type")
             .eq("tenant_id", tenantId)
             .eq("is_published", true)
-            .order("published_at", { ascending: false });
+            .order("published_at", { ascending: false })
+            .limit(10_000);
+          if (pagesErr) throw pagesErr;
 
           const total = pages?.length ?? 0;
           const last30 = (pages ?? []).filter(
@@ -81,14 +83,16 @@ export const Route = createFileRoute("/hooks/agents/content-velocity")({
           }
 
           // Stale: top by perf is older than 90d
-          const { data: perf } = await supabaseAdmin
+          const { data: perf, error: perfErr } = await supabaseAdmin
             .from("content_performance")
             .select("page_id, views")
             .eq("tenant_id", tenantId)
             .gte(
               "measured_on",
               new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString().slice(0, 10),
-            );
+            )
+            .limit(50_000);
+          if (perfErr) throw perfErr;
 
           const viewsByPage = new Map<string, number>();
           for (const p of perf ?? []) {
