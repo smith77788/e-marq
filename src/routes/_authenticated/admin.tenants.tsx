@@ -111,7 +111,7 @@ function AdminTenantsPage() {
 
   const createTenant = useMutation({
     mutationFn: async (input: { name: string; slug: string }) => {
-      if (!user) throw new Error("Not authenticated");
+      if (!user) throw new Error("Не авторизовано");
       const { data, error } = await supabase
         .from("tenants")
         .insert({ name: input.name, slug: input.slug, owner_user_id: user.id })
