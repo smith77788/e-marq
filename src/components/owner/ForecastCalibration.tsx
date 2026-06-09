@@ -24,14 +24,14 @@ type CalibrationRow = {
 };
 
 const ACTION_LABELS: Record<string, string> = {
-  cross_sell_recommend: "Cross-sell",
-  repeat_purchase_nudge: "Repeat purchase",
+  cross_sell_recommend: "Крос-продаж",
+  repeat_purchase_nudge: "Повторна покупка",
   winback_outreach: "Winback",
-  feature_product: "Feature product",
+  feature_product: "Виділити товар",
   request_review: "Запит відгуку",
-  request_ugc: "UGC request",
-  discount_dead_stock: "Dead stock discount",
-  price_adjust: "Price adjust",
+  request_ugc: "UGC-запит",
+  discount_dead_stock: "Знижка на залишки",
+  price_adjust: "Коригування ціни",
 };
 
 function fmtUah(cents: number): string {
