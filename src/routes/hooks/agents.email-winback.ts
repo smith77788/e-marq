@@ -215,7 +215,7 @@ export const Route = createFileRoute("/hooks/agents/email-winback")({
               ],
             });
 
-            await supabaseAdmin.from("email_sends").insert({
+            const { error: sendLogErr } = await supabaseAdmin.from("email_sends").insert({
               tenant_id: tenantId,
               to_email: c.email!,
               template: TEMPLATE,
@@ -225,6 +225,7 @@ export const Route = createFileRoute("/hooks/agents/email-winback")({
               error: result.ok ? null : result.error,
               metadata: { promo_id: promoId, promo_code: code, customer_id: c.id },
             });
+            if (sendLogErr) console.error("[email-winback] email_sends insert failed:", sendLogErr.message);
 
             recentAnySet.add(email);
             recentWbSet.add(email);

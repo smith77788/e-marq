@@ -48,7 +48,8 @@ export const Route = createFileRoute("/hooks/agents/review-velocity")({
             .select("product_id, product_name, quantity, orders!inner(status, created_at)")
             .eq("tenant_id", tenantId)
             .in("orders.status", ["paid", "fulfilled"])
-            .gte("orders.created_at", prev7);
+            .gte("orders.created_at", prev7)
+            .limit(5000);
 
           const recent = new Map<string, { name: string; qty: number }>();
           const previous = new Map<string, number>();

@@ -54,7 +54,7 @@ export const Route = createFileRoute("/hooks/agents/return-predictor")({
             .select("product_id, quantity, orders!inner(status, created_at)")
             .eq("tenant_id", tenantId)
             .gte("orders.created_at", since)
-            .in("orders.status", ["paid", "fulfilled", "refunded"]);
+            .in("orders.status", ["paid", "fulfilled"]);
 
           const refundsByProduct = new Map<string, { name: string; qty: number; cents: number }>();
           for (const r of refundedItems ?? []) {

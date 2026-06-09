@@ -39,10 +39,12 @@ export const Route = createFileRoute("/hooks/agents/ugc-harvester")({
         const handle = await startAgentRun("ugc-harvester", tenantId, ctx);
         try {
           // Existing UGC authors
-          const { data: ugc } = await supabaseAdmin
+          const { data: ugc, error: ugcErr } = await supabaseAdmin
             .from("ugc_items")
             .select("customer_id, product_id, rating")
-            .eq("tenant_id", tenantId);
+            .eq("tenant_id", tenantId)
+            .limit(5000);
+          if (ugcErr) throw ugcErr;
           const ugcByCustomer = new Set<string>();
           const ugcRatings: number[] = [];
           for (const u of ugc ?? []) {

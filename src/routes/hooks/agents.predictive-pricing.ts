@@ -63,7 +63,8 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
             .select("product_id, quantity, unit_price_cents, created_at, orders!inner(metadata)")
             .eq("tenant_id", tenantId)
             .gte("created_at", since)
-            .not("product_id", "is", null);
+            .not("product_id", "is", null)
+            .limit(50000);
 
           const items = (itemsRaw ?? []).filter((r) => {
             const ord = (r as unknown as { orders?: { metadata?: Record<string, unknown> | null } })
@@ -142,7 +143,7 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
             const confidence = Math.min(0.9, 0.3 + totalSamples / 30);
 
             // Upsert price_elasticity row
-            await supabaseAdmin.from("price_elasticity").upsert(
+            const { error: upsertErr } = await supabaseAdmin.from("price_elasticity").upsert(
               {
                 tenant_id: tenantId,
                 product_id: p.id,
@@ -155,6 +156,7 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
               },
               { onConflict: "tenant_id,product_id", ignoreDuplicates: false },
             );
+            if (upsertErr) throw upsertErr;
 
             // Insight only if optimal differs from current by >=5%
             const diffPct = (best.price - p.price_cents) / p.price_cents;

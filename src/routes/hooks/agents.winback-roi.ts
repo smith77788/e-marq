@@ -116,7 +116,7 @@ export const Route = createFileRoute("/hooks/agents/winback-roi")({
               },
               dedup_key: `winback_high::${new Date().toISOString().slice(0, 7)}`,
             });
-          } else if (winbackRoi < baselineRoi * 0.5 || winbackConv < 0.005) {
+          } else if (winbackRoi < baselineRoi * 0.5 || winbackConv < 0.02) {
             insights.push({
               tenant_id: tenantId,
               insight_type: "winback_low_roi",

@@ -110,6 +110,7 @@ export const Route = createFileRoute("/hooks/agents/email-post-purchase")({
           const { data: allItems } = await supabaseAdmin
             .from("order_items")
             .select("order_id, product_name")
+            .eq("tenant_id", tenantId)
             .in("order_id", orderIds);
           const itemsByOrder = new Map<string, string[]>();
           for (const it of allItems ?? []) {
@@ -181,7 +182,7 @@ export const Route = createFileRoute("/hooks/agents/email-post-purchase")({
               ],
             });
 
-            await supabaseAdmin.from("email_sends").insert({
+            const { error: sendLogErr } = await supabaseAdmin.from("email_sends").insert({
               tenant_id: tenantId,
               order_id: o.id,
               to_email: email,
@@ -191,6 +192,7 @@ export const Route = createFileRoute("/hooks/agents/email-post-purchase")({
               resend_message_id: result.ok ? result.id : null,
               error: result.ok ? null : result.error,
             });
+            if (sendLogErr) console.error("[email-post-purchase] email_sends insert failed:", sendLogErr.message);
 
             if (result.ok) sent++;
           }

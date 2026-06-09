@@ -47,7 +47,7 @@ export const Route = createFileRoute("/hooks/agents/geo-demand")({
             .from("orders")
             .select("total_cents, metadata, created_at")
             .eq("tenant_id", tenantId)
-            .eq("status", "paid")
+            .in("status", ["paid", "fulfilled"])
             .gte("created_at", since)
             .limit(2000);
 

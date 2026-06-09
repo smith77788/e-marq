@@ -67,9 +67,11 @@ export const Route = createFileRoute("/hooks/agents/margin-optimizer")({
           const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
           const { data: items } = await supabaseAdmin
             .from("order_items")
-            .select("product_id, quantity, unit_price_cents, created_at")
+            .select("product_id, quantity, unit_price_cents, created_at, orders!inner(status)")
             .eq("tenant_id", tenantId)
-            .gte("created_at", since);
+            .in("orders.status", ["paid", "fulfilled"])
+            .gte("created_at", since)
+            .limit(50000);
 
           const volumeByProduct = new Map<string, number>();
           for (const it of items ?? []) {
@@ -103,7 +105,7 @@ export const Route = createFileRoute("/hooks/agents/margin-optimizer")({
                 affected_layer: "pricing",
                 title: `${p.name}: ціна нижче собівартості`,
                 description: `Продукт продається у збиток. Втрата ${formatCents(Math.abs(marginCents))} на одиниці.`,
-                expected_impact: `Підняття ціни до ${formatCents(suggested)} зупинить збитки і дасть ~25% маржі.`,
+                expected_impact: `Підняття ціни до ${formatCents(suggested)} зупинить збитки і дасть ~17% маржі.`,
                 confidence: 0.95,
                 risk_level: "high" as const,
                 metrics: {

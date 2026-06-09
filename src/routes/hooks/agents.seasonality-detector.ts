@@ -50,7 +50,7 @@ export const Route = createFileRoute("/hooks/agents/seasonality-detector")({
             .from("orders")
             .select("created_at, total_cents, status")
             .eq("tenant_id", tenantId)
-            .eq("status", "paid")
+            .in("status", ["paid", "fulfilled"])
             .gte("created_at", since)
             .limit(5000);
           if (error) throw error;
@@ -82,10 +82,10 @@ export const Route = createFileRoute("/hooks/agents/seasonality-detector")({
           const firstHalf = days.slice(0, half).reduce((s, [, v]) => s + v, 0);
           const secondHalf = days.slice(half).reduce((s, [, v]) => s + v, 0);
           let trend: "growing" | "declining" | "stable" = "stable";
-          if (firstHalf > 0 && secondHalf > 0) {
-            const change = (secondHalf - firstHalf) / firstHalf;
-            if (change > 0.15) trend = "growing";
-            else if (change < -0.15) trend = "declining";
+          if (secondHalf > firstHalf * 1.15) {
+            trend = "growing";
+          } else if (firstHalf > secondHalf * 1.15) {
+            trend = "declining";
           }
 
           const sortedRev = days.map(([, v]) => v).sort((a, b) => b - a);

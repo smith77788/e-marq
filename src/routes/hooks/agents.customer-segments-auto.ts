@@ -57,12 +57,14 @@ export const Route = createFileRoute("/hooks/agents/customer-segments-auto")({
 
         const handle = await startAgentRun("customer-segments-auto", tenantId, ctx);
         try {
-          const { data: customers } = await supabaseAdmin
+          const { data: customers, error: custErr } = await supabaseAdmin
             .from("customers")
             .select(
               "id, total_orders, total_spent_cents, avg_order_cents, last_order_at, first_order_at",
             )
-            .eq("tenant_id", tenantId);
+            .eq("tenant_id", tenantId)
+            .limit(10000);
+          if (custErr) throw custErr;
 
           if (!customers?.length) {
             await finishAgentRun(handle, 0, { reason: "no_customers" });
@@ -99,7 +101,7 @@ export const Route = createFileRoute("/hooks/agents/customer-segments-auto")({
               name: "At-Risk",
               description: "Активний клієнт без замовлення 60-120 днів",
               rules: { min_orders: 2, days_since_last_min: 60, days_since_last_max: 120 },
-              match: (c) => c.total_orders >= 2 && c.daysSinceLast >= 60 && c.daysSinceLast <= 120,
+              match: (c) => c.total_orders >= 2 && c.daysSinceLast > 60 && c.daysSinceLast <= 120,
             },
             {
               key: "dormant",
