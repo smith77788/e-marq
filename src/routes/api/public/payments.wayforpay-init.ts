@@ -109,13 +109,13 @@ export const Route = createFileRoute("/api/public/payments/wayforpay-init")({
         const products =
           items && items.length > 0
             ? items.map((i) => ({
-                name: (i.product_name || "Item").slice(0, 100),
+                name: (i.product_name || "Товар").slice(0, 100),
                 price: i.unit_price_cents / 100,
                 count: i.quantity,
               }))
             : [
                 {
-                  name: `${cfg?.brand_name || "Order"} #${order.id.slice(0, 8)}`,
+                  name: `${cfg?.brand_name || "Замовлення"} #${order.id.slice(0, 8)}`,
                   price: order.total_cents / 100,
                   count: 1,
                 },
