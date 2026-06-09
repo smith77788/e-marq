@@ -103,10 +103,13 @@ const BodySchema = z.object({
 });
 
 function timingSafeEqualString(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let r = 0;
-  for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return r === 0;
+  const ab = Buffer.from(a, "utf8");
+  const bb = Buffer.from(b, "utf8");
+  if (ab.length !== bb.length) {
+    timingSafeEqual(Buffer.alloc(ab.length), Buffer.alloc(ab.length));
+    return false;
+  }
+  return timingSafeEqual(ab, bb);
 }
 
 function jsonResponse(body: unknown, status = 200) {

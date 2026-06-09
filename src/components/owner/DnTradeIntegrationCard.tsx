@@ -171,7 +171,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
         verifyStatus = "failed";
         verifyMessage = e instanceof Error ? e.message : String(e);
       }
-      const { error } = await (supabase.rpc as any)("save_tenant_integration", {
+      const { error } = await supabase.rpc("save_tenant_integration", {
         _tenant_id: tenantId,
         _provider: "dntrade",
         _credentials: trimmed,
@@ -276,7 +276,7 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
     mutationFn: async () => {
       await ensureAuthenticatedSession();
       const secret = randomSecret();
-      const { error } = await (supabase.rpc as any)("set_tenant_integration_webhook_secret", {
+      const { error } = await supabase.rpc("set_tenant_integration_webhook_secret", {
         _tenant_id: tenantId,
         _provider: "dntrade",
         _webhook_secret: secret,

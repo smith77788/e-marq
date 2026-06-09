@@ -12,13 +12,30 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import type { Database } from "@/integrations/supabase/types";
 import { authorizeMarqApiKey, jsonResponse, preflight } from "@/lib/marq-public-api/auth";
 
-type EventType = Database["public"]["Enums"]["event_type"];
+const EVENT_TYPES = [
+  "product_viewed", "add_to_cart", "checkout_started", "purchase_completed",
+  "reorder_clicked", "bot_interaction", "content_viewed", "inactivity_detected",
+  "message_sent", "message_received", "session_start", "reorder_triggered",
+  "page_viewed", "product_clicked", "remove_from_cart", "cart_viewed",
+  "begin_checkout", "checkout_clicked", "checkout_viewed", "checkout_abandoned",
+  "checkout_failed", "offer_shown", "offer_skipped", "upsell_accepted",
+  "upsell_dismissed", "exit_intent_shown", "exit_intent_dismissed",
+  "exit_intent_converted", "bot_started", "search_performed", "wishlist_added",
+  "wishlist_removed", "review_submitted", "promo_applied", "promo_failed",
+  "share_clicked", "phone_call_clicked", "telegram_link_clicked", "chat_opened",
+  "chat_message_sent", "newsletter_signup", "ai_chat_product_click",
+  "ai_chat_product_recommended", "reorder_completed", "app_opened",
+  "deep_link_opened", "push_received", "push_opened", "oauth_callback_success",
+  "apk_install_prompt_shown", "apk_install_prompt_clicked",
+  "apk_install_prompt_dismissed", "bot_reorder_reminder_sent",
+  "referral_link_copied", "referral_link_shared", "referral_clicked",
+  "referral_rewarded",
+] as const;
 
 const BodySchema = z.object({
-  type: z.string().min(1).max(64),
+  type: z.enum(EVENT_TYPES),
   session_id: z.string().min(1).max(128).optional(),
   product_id: z.string().uuid().optional(),
   order_id: z.string().uuid().optional(),
@@ -78,7 +95,7 @@ export const Route = createFileRoute("/api/public/marq/events")({
 
         const { error } = await supabaseAdmin.from("events").insert({
           tenant_id: auth.tenantId,
-          type: body.type as EventType,
+          type: body.type,
           session_id: body.session_id ?? null,
           product_id: body.product_id ?? null,
           order_id: body.order_id ?? null,
