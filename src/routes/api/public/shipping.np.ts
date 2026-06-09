@@ -104,6 +104,12 @@ export const Route = createFileRoute("/api/public/shipping/np")({
               CityName: q,
               Limit: 20,
             });
+            if (!json.success) {
+              return new Response(JSON.stringify({ data: [] }), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              });
+            }
             // searchSettlements повертає [{ Addresses: [...] }]
             const addresses =
               (json.data?.[0] as { Addresses?: unknown[] } | undefined)?.Addresses ?? [];
@@ -139,6 +145,12 @@ export const Route = createFileRoute("/api/public/shipping/np")({
             if (q && q.length <= 50) props.FindByString = q;
 
             const json = await callNP(apiKey, "Address", "getWarehouses", props);
+            if (!json.success) {
+              return new Response(JSON.stringify({ data: [] }), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              });
+            }
             const warehouses = (json.data as Array<Record<string, unknown>>).map((w) => ({
               ref: String(w.Ref ?? ""),
               number: String(w.Number ?? ""),
