@@ -86,7 +86,7 @@ export const Route = createFileRoute("/hooks/agents/memory-feedback")({
             impact_cents: result.impact_cents,
           });
 
-          await supabaseAdmin
+          const { error: markErr } = await supabaseAdmin
             .from("ai_actions")
             .update({
               measured_at: new Date().toISOString(),
@@ -97,6 +97,10 @@ export const Route = createFileRoute("/hooks/agents/memory-feedback")({
               } as never,
             })
             .eq("id", a.id);
+          if (markErr) {
+            console.error("[memory-feedback] ai_actions mark measured failed:", markErr.message);
+            continue;
+          }
         }
 
         // Aggregate updates by pattern
@@ -156,7 +160,7 @@ export const Route = createFileRoute("/hooks/agents/memory-feedback")({
               : 0;
 
           if (existing?.id) {
-            await supabaseAdmin
+            const { error: updErr } = await supabaseAdmin
               .from("ai_memory")
               .update({
                 success_count: newSucc,
@@ -168,8 +172,9 @@ export const Route = createFileRoute("/hooks/agents/memory-feedback")({
                 learned_rule: deriveRule(g.category, confidence, newSucc, newFail),
               })
               .eq("id", existing.id);
+            if (updErr) console.error("[memory-feedback] ai_memory update failed:", updErr.message);
           } else {
-            await supabaseAdmin.from("ai_memory").insert({
+            const { error: insErr } = await supabaseAdmin.from("ai_memory").insert({
               tenant_id: tenantId,
               agent: g.agent,
               category: g.category,
@@ -181,6 +186,7 @@ export const Route = createFileRoute("/hooks/agents/memory-feedback")({
               learned_rule: deriveRule(g.category, confidence, newSucc, newFail),
               evidence: { last_batch: g } as never,
             });
+            if (insErr) console.error("[memory-feedback] ai_memory insert failed:", insErr.message);
           }
         }
 
@@ -217,8 +223,6 @@ async function evaluateAction(a: ActionRow): Promise<EvalResult | null> {
   if (a.action_type === "winback_touch") {
     const email = typeof m.email === "string" ? m.email : null;
     if (!email) return null;
-    const horizon = new Date(Date.now() - 0).toISOString();
-    void horizon;
     const cutoff = new Date(new Date(a.applied_at).getTime() + 30 * 86400000).toISOString();
     const { data } = await supabaseAdmin
       .from("orders")
@@ -259,7 +263,7 @@ async function evaluateAction(a: ActionRow): Promise<EvalResult | null> {
       (s, i) => s + (i.quantity ?? 0) * (i.unit_price_cents ?? 0),
       0,
     );
-    const success = items.length >= 2;
+    const success = items.length >= 1;
     return {
       success,
       impact_cents: recoveredRev,
@@ -278,6 +282,7 @@ async function evaluateAction(a: ActionRow): Promise<EvalResult | null> {
       .from("products")
       .select("stock, name")
       .eq("id", productId)
+      .eq("tenant_id", a.tenant_id)
       .single();
     const stock = prod?.stock ?? 0;
     const success = stock > 5; // restock occurred

@@ -44,13 +44,13 @@ export const Route = createFileRoute("/hooks/agents/notification-router")({
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
           const since24h = new Date(Date.now() - 24 * 3600_000).toISOString();
-          const since7d = new Date(Date.now() - 7 * 86_400_000).toISOString();
+          const since14d = new Date(Date.now() - 14 * 86_400_000).toISOString();
 
           const { data, error } = await supabaseAdmin
             .from("owner_notifications")
             .select("id, kind, severity, is_read, created_at, title")
             .eq("tenant_id", tenantId)
-            .gte("created_at", since7d)
+            .gte("created_at", since14d)
             .order("created_at", { ascending: false })
             .limit(5000);
           if (error) throw error;
@@ -69,14 +69,13 @@ export const Route = createFileRoute("/hooks/agents/notification-router")({
             }
           }
 
-          // 2. Dedupe within 24h: keep newest per kind
+          // 2. Dedupe within 24h: keep newest per kind (read or unread)
           const seen = new Set<string>();
           const dupesToMarkRead: string[] = [];
           for (const n of notifs) {
             if (new Date(n.created_at).toISOString() < since24h) continue;
-            if (n.is_read) continue;
             if (seen.has(n.kind)) {
-              dupesToMarkRead.push(n.id);
+              if (!n.is_read) dupesToMarkRead.push(n.id);
             } else {
               seen.add(n.kind);
             }
