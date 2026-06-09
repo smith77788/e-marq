@@ -128,7 +128,7 @@ export const Route = createFileRoute("/hooks/agents/promo-portfolio")({
           const created = await insertInsightsDedup(insights);
           await finishAgentRun(handle, created, {
             promos_total: promos.length,
-            geo: summarizeGeo(geo, "en"),
+            geo: summarizeGeo(geo, "uk"),
           });
           return jsonOk({ insights_created: created });
         } catch (err) {
