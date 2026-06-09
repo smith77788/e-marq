@@ -40,14 +40,16 @@ export const Route = createFileRoute("/hooks/agents/lifecycle-trigger-tuner")({
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
           const since = new Date(Date.now() - 30 * 86_400_000).toISOString();
-          const { data: messages } = await supabaseAdmin
+          const { data: messages, error: msgErr } = await supabaseAdmin
             .from("outbound_messages")
             .select(
               "trigger_kind, status, actual_revenue_cents, expected_impact_cents, converted_at",
             )
             .eq("tenant_id", tenantId)
+            .in("status", ["sent", "delivered", "converted"])
             .gte("created_at", since)
-            .limit(2000);
+            .limit(10_000);
+          if (msgErr) throw msgErr;
 
           const byTrigger = new Map<string, { sent: number; converted: number; revenue: number }>();
           for (const m of messages ?? []) {

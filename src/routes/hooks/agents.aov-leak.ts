@@ -103,11 +103,12 @@ export const Route = createFileRoute("/hooks/agents/aov-leak")({
             });
           }
 
-          const { data: products } = await supabaseAdmin
+          const { data: products, error: productsErr } = await supabaseAdmin
             .from("products")
             .select("id, name, sku, price_cents, stock")
             .eq("tenant_id", tenantId)
             .in("id", productIds);
+          if (productsErr) throw productsErr;
           const byId = new Map<
             string,
             { name: string; sku: string | null; price_cents: number; stock: number }
@@ -121,19 +122,14 @@ export const Route = createFileRoute("/hooks/agents/aov-leak")({
             });
           }
 
-          // Aggregate totals to compute funnel-wide leak
-          let totalCarts = 0;
-          let totalCheckouts = 0;
-          for (const k of productIds) {
-            totalCarts += abandoned[k].carts;
-            totalCheckouts += abandoned[k].checkouts;
-          }
-          const totalPurchasedCarts = (events ?? []).filter(
-            (e) => e.type === "purchase_completed",
-          ).length;
+          // Compare sessions, not raw event counts: one session can fire many events
+          const purchasedCount = purchasedSessions.size;
+          const abandonedSessionCount = new Set(
+            productIds.flatMap((k) => [...abandoned[k].sessions]),
+          ).size;
           const conversionRate =
-            totalCarts + totalPurchasedCarts > 0
-              ? totalPurchasedCarts / (totalCarts + totalPurchasedCarts)
+            abandonedSessionCount + purchasedCount > 0
+              ? purchasedCount / (abandonedSessionCount + purchasedCount)
               : 0;
 
           const insights: AgentInsightInput[] = [];

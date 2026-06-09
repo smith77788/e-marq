@@ -82,6 +82,7 @@ export const Route = createFileRoute("/hooks/agents/margin-estimator")({
           let estimatedCount = 0;
           let totalMarginPct = 0;
           let weightedTotal = 0;
+          let pricedTotal = 0;
           const facts: BootstrapFactInput[] = [];
 
           for (const r of rows) {
@@ -101,6 +102,7 @@ export const Route = createFileRoute("/hooks/agents/margin-estimator")({
             }
             totalMarginPct += marginPct;
             weightedTotal += marginPct * r.price_cents;
+            pricedTotal += r.price_cents;
             facts.push({
               tenant_id: tenantId,
               fact_kind: "margin_estimate",
@@ -120,10 +122,7 @@ export const Route = createFileRoute("/hooks/agents/margin-estimator")({
 
           const totalProducts = measuredCount + estimatedCount;
           const avgMarginPct = totalProducts > 0 ? totalMarginPct / totalProducts : 0;
-          const weightedAvgMarginPct =
-            totalProducts > 0
-              ? weightedTotal / rows.reduce((s, r) => s + (r.price_cents ?? 0), 0)
-              : 0;
+          const weightedAvgMarginPct = pricedTotal > 0 ? weightedTotal / pricedTotal : 0;
 
           facts.push({
             tenant_id: tenantId,

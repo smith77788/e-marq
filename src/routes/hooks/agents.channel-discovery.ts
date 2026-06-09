@@ -63,6 +63,13 @@ export const Route = createFileRoute("/hooks/agents/channel-discovery")({
               .from("events")
               .select("id", { count: "exact", head: true })
               .eq("tenant_id", tenantId)
+              .in("type", [
+                "page_view",
+                "product_viewed",
+                "add_to_cart",
+                "checkout_started",
+                "purchase_completed",
+              ])
               .gte("created_at", since7),
             supabaseAdmin
               .from("telegram_chat_routing")
@@ -88,7 +95,8 @@ export const Route = createFileRoute("/hooks/agents/channel-discovery")({
             supabaseAdmin
               .from("tenant_integrations")
               .select("provider, is_active, last_sync_status")
-              .eq("tenant_id", tenantId),
+              .eq("tenant_id", tenantId)
+              .limit(100),
           ]);
 
           const slug = tenantRes.data?.slug ?? "";

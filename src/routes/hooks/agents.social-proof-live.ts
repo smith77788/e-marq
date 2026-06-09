@@ -62,8 +62,9 @@ export const Route = createFileRoute("/hooks/agents/social-proof-live")({
               .limit(20_000),
             supabaseAdmin
               .from("order_items")
-              .select("product_id, quantity, created_at")
+              .select("product_id, quantity, created_at, orders!inner(status)")
               .eq("tenant_id", tenantId)
+              .in("orders.status", ["paid", "fulfilled"])
               .gte("created_at", since)
               .not("product_id", "is", null)
               .limit(20_000),
@@ -138,7 +139,7 @@ export const Route = createFileRoute("/hooks/agents/social-proof-live")({
                 top_products: top,
                 suggested_action: "add_social_proof_widget",
               },
-              dedup_key: `trust_gap::${trustGapItems.length}`,
+              dedup_key: `trust_gap::${new Date().toISOString().slice(0, 10)}`,
             });
           }
 
@@ -159,7 +160,7 @@ export const Route = createFileRoute("/hooks/agents/social-proof-live")({
                 top_products: top,
                 suggested_action: "promote_hidden_gems",
               },
-              dedup_key: `hidden_gem::${hiddenGems.length}`,
+              dedup_key: `hidden_gem::${new Date().toISOString().slice(0, 10)}`,
             });
           }
 

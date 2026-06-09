@@ -103,13 +103,19 @@ export const Route = createFileRoute("/hooks/agents/catalog-enricher")({
 
           worst.sort((a, b) => b.missing.length - a.missing.length);
 
+          // shortDesc counts as half a problem: description exists but is too thin
           const completeness =
             rows.length === 0
               ? 0
               : Math.max(
                   0,
                   1 -
-                    (missingDesc + missingImage + missingCategory + missingCost + missingPrice) /
+                    (missingDesc +
+                      shortDesc * 0.5 +
+                      missingImage +
+                      missingCategory +
+                      missingCost +
+                      missingPrice) /
                       (rows.length * 5),
                 );
 

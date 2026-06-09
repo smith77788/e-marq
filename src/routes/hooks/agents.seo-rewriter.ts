@@ -40,11 +40,13 @@ export const Route = createFileRoute("/hooks/agents/seo-rewriter")({
         try {
           // Pull last 30d performance per page
           const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString().slice(0, 10);
-          const { data: perf } = await supabaseAdmin
+          const { data: perf, error: perfErr } = await supabaseAdmin
             .from("content_performance")
             .select("page_id, search_impressions, search_clicks")
             .eq("tenant_id", tenantId)
-            .gte("measured_on", since);
+            .gte("measured_on", since)
+            .limit(50_000);
+          if (perfErr) throw perfErr;
 
           const agg = new Map<string, { impr: number; clicks: number }>();
           for (const p of perf ?? []) {
@@ -55,11 +57,13 @@ export const Route = createFileRoute("/hooks/agents/seo-rewriter")({
             agg.set(p.page_id, cur);
           }
 
-          const { data: pages } = await supabaseAdmin
+          const { data: pages, error: pagesErr } = await supabaseAdmin
             .from("content_pages")
             .select("id, slug, title, seo_title, seo_description, content_type")
             .eq("tenant_id", tenantId)
-            .eq("is_published", true);
+            .eq("is_published", true)
+            .limit(10_000);
+          if (pagesErr) throw pagesErr;
 
           const candidates: {
             id: string;

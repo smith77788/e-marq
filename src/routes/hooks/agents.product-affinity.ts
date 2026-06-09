@@ -41,13 +41,15 @@ export const Route = createFileRoute("/hooks/agents/product-affinity")({
           const since = new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString();
 
           // Pull paid orders per customer, ordered by paid_at
-          const { data: orders } = await supabaseAdmin
+          const { data: orders, error: ordersErr } = await supabaseAdmin
             .from("orders")
             .select("id, customer_user_id, customer_email, paid_at")
             .eq("tenant_id", tenantId)
-            .eq("status", "paid")
+            .in("status", ["paid", "fulfilled"])
             .gte("paid_at", since)
-            .order("paid_at", { ascending: true });
+            .order("paid_at", { ascending: true })
+            .limit(20_000);
+          if (ordersErr) throw ordersErr;
 
           if (!orders?.length) {
             await finishAgentRun(handle, 0, { reason: "no_orders" });
@@ -55,11 +57,14 @@ export const Route = createFileRoute("/hooks/agents/product-affinity")({
           }
 
           const orderIds = orders.map((o) => o.id);
-          const { data: items } = await supabaseAdmin
+          const { data: items, error: itemsErr } = await supabaseAdmin
             .from("order_items")
             .select("order_id, product_id, product_name")
+            .eq("tenant_id", tenantId)
             .in("order_id", orderIds)
-            .not("product_id", "is", null);
+            .not("product_id", "is", null)
+            .limit(50_000);
+          if (itemsErr) throw itemsErr;
 
           const itemsByOrder = new Map<string, { id: string; name: string }[]>();
           for (const it of items ?? []) {

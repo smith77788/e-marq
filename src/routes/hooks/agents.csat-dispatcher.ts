@@ -55,10 +55,10 @@ export const Route = createFileRoute("/hooks/agents/csat-dispatcher")({
             .from("orders")
             .select("id, customer_email, customer_name, total_cents, paid_at")
             .eq("tenant_id", tenantId)
-            .eq("status", "paid")
+            .in("status", ["paid", "fulfilled"])
             .gte("paid_at", min)
             .lte("paid_at", max)
-            .limit(500);
+            .limit(2000);
           if (error) throw error;
           const candidates = (orders ?? []) as OrderRow[];
           if (candidates.length === 0) {

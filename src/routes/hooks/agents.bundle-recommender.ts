@@ -40,13 +40,16 @@ export const Route = createFileRoute("/hooks/agents/bundle-recommender")({
         try {
           const since = new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString();
 
-          // Load order_items grouped by order
-          const { data: items } = await supabaseAdmin
+          // Load order_items grouped by order (only paid/fulfilled orders)
+          const { data: items, error: itemsErr } = await supabaseAdmin
             .from("order_items")
-            .select("order_id, product_id, product_name, unit_price_cents")
+            .select("order_id, product_id, product_name, unit_price_cents, orders!inner(status)")
             .eq("tenant_id", tenantId)
+            .in("orders.status", ["paid", "fulfilled"])
             .gte("created_at", since)
-            .not("product_id", "is", null);
+            .not("product_id", "is", null)
+            .limit(50_000);
+          if (itemsErr) throw itemsErr;
 
           if (!items?.length) {
             await finishAgentRun(handle, 0, { reason: "no_items" });
@@ -122,7 +125,7 @@ export const Route = createFileRoute("/hooks/agents/bundle-recommender")({
 
           // Upsert product_affinity for top-20
           for (const c of candidates.slice(0, 20)) {
-            await supabaseAdmin.from("product_affinity").upsert(
+            const { error: affErr } = await supabaseAdmin.from("product_affinity").upsert(
               {
                 tenant_id: tenantId,
                 product_a_id: c.a,
@@ -133,6 +136,7 @@ export const Route = createFileRoute("/hooks/agents/bundle-recommender")({
               },
               { onConflict: "tenant_id,product_a_id,product_b_id", ignoreDuplicates: false },
             );
+            if (affErr) throw affErr;
           }
 
           // Insights for top-3 pairs that have no active bundle
