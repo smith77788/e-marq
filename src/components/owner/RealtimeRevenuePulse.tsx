@@ -141,14 +141,14 @@ export function RealtimeRevenuePulse({ tenantId }: Props) {
             <Zap
               className={`h-4 w-4 ${isLive ? "text-primary animate-pulse" : "text-muted-foreground"}`}
             />
-            Live Revenue Pulse · 24h
+            Пульс доходу · 24 год
           </CardTitle>
           <Badge
             variant="outline"
             className="text-[10px] border-primary/40 text-primary"
           >
             <Activity className="mr-1 h-2.5 w-2.5 animate-pulse" />
-            REALTIME
+            В ЕФІРІ
           </Badge>
         </div>
         <CardDescription className="text-xs">

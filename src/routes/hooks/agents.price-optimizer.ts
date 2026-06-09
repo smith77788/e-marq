@@ -53,8 +53,8 @@ type ProductRow = {
   stock: number;
 };
 
-function fmtUsd(cents: number) {
-  return `${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })} ₴`;
+function fmtUah(cents: number) {
+  return `${(cents / 100).toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`;
 }
 
 export const Route = createFileRoute("/hooks/agents/price-optimizer")({
@@ -175,9 +175,9 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
                 tenant_id: tenantId,
                 insight_type: "price_optimization",
                 affected_layer: "pricing",
-                title: `${p.name}: raise price by 10% (high demand)`,
-                description: `Last ${WINDOW_DAYS}d: ${views} views, ${carts} carts (${(v2c * 100).toFixed(0)}% v→c), ${purchases} sold (${(c2b * 100).toFixed(0)}% c→b), ${fmtUsd(monthlyRev)}/mo. Demand is hot — test ${fmtUsd(p.price_cents)} → ${fmtUsd(newPrice)}.`,
-                expected_impact: `+${fmtUsd(upliftMonthly)}/mo if conversion holds`,
+                title: `${p.name}: підняти ціну на 10% (висока конверсія)`,
+                description: `За ${WINDOW_DAYS}д: ${views} переглядів, ${carts} кошиків (${(v2c * 100).toFixed(0)}% v→c), ${purchases} продажів (${(c2b * 100).toFixed(0)}% c→b), ${fmtUah(monthlyRev)}/міс. Попит сильний — тест ${fmtUah(p.price_cents)} → ${fmtUah(newPrice)}.`,
+                expected_impact: `+${fmtUah(upliftMonthly)}/міс при збереженні конверсії`,
                 confidence: 0.7,
                 risk_level: "medium",
                 metrics: {
@@ -211,12 +211,12 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
                 tenant_id: tenantId,
                 insight_type: "price_optimization",
                 affected_layer: "pricing",
-                title: `${p.name}: lower price by 10% (low engagement)`,
-                description: `Last ${WINDOW_DAYS}d: ${views} views but only ${carts} carts (${(v2c * 100).toFixed(1)}% v→c). Price may be the friction. Test ${fmtUsd(p.price_cents)} → ${fmtUsd(newPrice)}.`,
+                title: `${p.name}: знизити ціну на 10% (низька конверсія)`,
+                description: `За ${WINDOW_DAYS}д: ${views} переглядів, але лише ${carts} кошиків (${(v2c * 100).toFixed(1)}% v→c). Ціна може бути бар'єром. Тест ${fmtUah(p.price_cents)} → ${fmtUah(newPrice)}.`,
                 expected_impact:
                   upliftMonthly > 0
-                    ? `+${fmtUsd(upliftMonthly)}/mo at 2x conversion`
-                    : `breakeven at 2x conversion`,
+                    ? `+${fmtUah(upliftMonthly)}/міс при 2x конверсії`
+                    : `беззбитковість при 2x конверсії`,
                 confidence: 0.55,
                 risk_level: "medium",
                 metrics: {
@@ -244,7 +244,7 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
           await finishAgentRun(handle, inserted, {
             products_evaluated: products.length,
             candidates: insights.length,
-            geo: summarizeGeo(geo, "en"),
+            geo: summarizeGeo(geo, "uk"),
             views_in_scope: filteredViews.length,
             sold_in_scope: filteredSold.length,
           });

@@ -155,9 +155,9 @@ export const Route = createFileRoute("/hooks/agents/aov-leak")({
               tenant_id: tenantId,
               insight_type: "aov_leak",
               affected_layer: "recovery",
-              title: `${p.name}: ${a.sessions.size} carts abandoned in ${WINDOW_DAYS}d`,
-              description: `Of ${a.sessions.size} sessions that added "${p.name}" to cart, none completed checkout. ${a.checkouts} reached the checkout step but didn't pay. Trigger an abandoned-cart email with a soft 10% reminder — typical recovery rate ~25%.`,
-              expected_impact: `Recover ~${(recoverableRevCents / 100).toFixed(2)} ₴ (~${recoverableSessions} orders)`,
+              title: `${p.name}: ${a.sessions.size} покинутих кошиків за ${WINDOW_DAYS}д`,
+              description: `З ${a.sessions.size} сесій, де "${p.name}" додали до кошика, жодна не завершила оплату. ${a.checkouts} дійшли до оформлення, але не оплатили. Надішліть листа про покинутий кошик зі знижкою 10% — типовий відсоток повернення ~25%.`,
+              expected_impact: `Повернути ~${(recoverableRevCents / 100).toFixed(2)} ₴ (~${recoverableSessions} замовлень)`,
               confidence,
               risk_level: risk,
               metrics: {

@@ -96,9 +96,9 @@ export const Route = createFileRoute("/hooks/agents/churn-risk")({
                 tenant_id: tenantId,
                 insight_type: "churn_risk",
                 affected_layer: "crm",
-                title: `${name ?? email} likely to churn — ${recency.toFixed(0)}d silent vs ${avg.toFixed(0)}d avg`,
-                description: `VIP customer with ${list.length} orders (lifetime ${(totalSpent / 100).toFixed(2)} ₴) hasn't ordered in ${recency.toFixed(0)} days. Typical interval ${avg.toFixed(0)}d — drift ${drift.toFixed(2)}×. Recommend a 15% winback touch.`,
-                expected_impact: `Recover ~${(expectedRevenueCents / 100).toFixed(2)} ₴ of next order revenue`,
+                title: `${name ?? email}: ризик відтоку — ${recency.toFixed(0)}д мовчання (норма ${avg.toFixed(0)}д)`,
+                description: `VIP-клієнт, ${list.length} замовлень (lifetime ${(totalSpent / 100).toFixed(2)} ₴), не купував ${recency.toFixed(0)} дн. Типовий інтервал ${avg.toFixed(0)}д — drift ${drift.toFixed(2)}×. Рекомендовано winback зі знижкою 15%.`,
+                expected_impact: `Повернути ~${(expectedRevenueCents / 100).toFixed(2)} ₴ наступного замовлення`,
                 confidence,
                 risk_level: risk,
                 metrics: {
