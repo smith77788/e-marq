@@ -83,8 +83,8 @@ export const Route = createFileRoute("/hooks/agents/attribution")({
               "id, customer_user_id, customer_email, total_cents, paid_at, created_at, metadata",
             )
             .eq("tenant_id", tenantId)
-            .eq("status", "paid")
-            .gte("created_at", since)
+            .in("status", ["paid", "fulfilled"])
+            .gte("paid_at", since)
             .limit(2_000);
           if (orderErr) throw orderErr;
           const orders = (orderData ?? []) as OrderRow[];
@@ -171,14 +171,15 @@ export const Route = createFileRoute("/hooks/agents/attribution")({
             const { error } = await supabaseAdmin
               .from("channel_attribution")
               .insert(chunk as never);
-            if (!error) inserted += chunk.length;
+            if (error) throw error;
+            inserted += chunk.length;
           }
 
           // Insight: channel concentration risk
           const totalRev = Array.from(channelRevenue.values()).reduce((s, x) => s + x, 0);
           const insights: AgentInsightInput[] = [];
+          if (totalRev >= 100_000) {
           for (const [ch, rev] of channelRevenue) {
-            if (totalRev < 100_000) continue; // <$1000 — too small
             const share = rev / totalRev;
             if (share >= 0.6 && ch !== "direct") {
               insights.push({
@@ -202,6 +203,7 @@ export const Route = createFileRoute("/hooks/agents/attribution")({
               });
               break;
             }
+          }
           }
 
           const created = await insertInsightsDedup(insights);

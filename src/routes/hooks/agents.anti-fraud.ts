@@ -69,7 +69,8 @@ export const Route = createFileRoute("/hooks/agents/anti-fraud")({
               )
               .eq("tenant_id", tenantId)
               .gte("created_at", since)
-              .eq("status", "paid"),
+              .in("status", ["paid", "fulfilled"])
+              .limit(5000),
             supabaseAdmin
               .from("orders")
               .select("total_cents")
@@ -131,6 +132,7 @@ export const Route = createFileRoute("/hooks/agents/anti-fraud")({
                 .select("*", { count: "exact", head: true })
                 .eq("tenant_id", tenantId)
                 .eq("customer_email", o.customer_email ?? "")
+                .in("status", ["paid", "fulfilled"])
                 .lt("created_at", o.created_at);
               if ((count ?? 0) === 0) {
                 const w = 0.3;
@@ -193,7 +195,7 @@ export const Route = createFileRoute("/hooks/agents/anti-fraud")({
                   total_cents: o.total_cents,
                   customer_email: o.customer_email,
                   signals,
-                  risk_score: score,
+                  risk_score: Math.min(1, score),
                   suggested_action: "manual_review",
                 },
                 dedup_key: `fraud::${o.id}`,
