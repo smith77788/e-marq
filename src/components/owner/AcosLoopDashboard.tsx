@@ -213,9 +213,9 @@ export function AcosLoopDashboard({ tenantId }: { tenantId: string }) {
     <div className="space-y-6">
       {/* KPI strip */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-        <KpiCard label="Insights 30д" value={overview?.insights_30d ?? 0} />
+        <KpiCard label="Інсайтів 30д" value={overview?.insights_30d ?? 0} />
         <KpiCard
-          label="Pending approval"
+          label="Очікує підтвердження"
           value={overview?.decisions_pending ?? 0}
           tone={
             (overview?.decisions_pending ?? 0) > 0
@@ -223,10 +223,10 @@ export function AcosLoopDashboard({ tenantId }: { tenantId: string }) {
               : "text-muted-foreground"
           }
         />
-        <KpiCard label="Approved" value={overview?.decisions_approved ?? 0} />
-        <KpiCard label="Done" value={overview?.decisions_done ?? 0} />
+        <KpiCard label="Схвалено" value={overview?.decisions_approved ?? 0} />
+        <KpiCard label="Виконано" value={overview?.decisions_done ?? 0} />
         <KpiCard
-          label="Attributed revenue"
+          label="Атрибутований дохід"
           value={fmtMoney(overview?.attributed_revenue_cents ?? 0)}
           tone="text-primary"
           icon={<TrendingUp className="h-4 w-4" />}

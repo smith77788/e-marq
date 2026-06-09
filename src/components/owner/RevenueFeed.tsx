@@ -86,7 +86,7 @@ const ENGINES: EngineButton[] = [
 async function authedFetch(path: string, body: unknown) {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
-  if (!token) throw new Error("Not signed in");
+  if (!token) throw new Error("Не авторизовано");
   const res = await fetch(path, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },

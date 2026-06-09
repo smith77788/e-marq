@@ -338,7 +338,7 @@ export function EmailDomainCard({ tenantId }: { tenantId: string }) {
                 <Label htmlFor="d-from-name">Імʼя відправника</Label>
                 <Input
                   id="d-from-name"
-                  placeholder="Your Brand"
+                  placeholder="Назва вашого бренду"
                   value={fromName}
                   onChange={(e) => setFromName(e.target.value)}
                   maxLength={80}

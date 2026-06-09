@@ -55,7 +55,7 @@ export function SetupReadinessCard({ tenantId, tenantSlug, compact = false }: Pr
     mutationFn: async () => {
       const { data: sess } = await supabase.auth.getSession();
       const token = sess.session?.access_token;
-      if (!token) throw new Error("Not authenticated");
+      if (!token) throw new Error("Не авторизовано");
       const scouts = [
         "brand-profile",
         "catalog-enricher",
