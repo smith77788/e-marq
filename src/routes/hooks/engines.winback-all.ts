@@ -44,7 +44,8 @@ export const Route = createFileRoute("/hooks/engines/winback-all")({
         const { data: tenants, error } = await supabaseAdmin
           .from("tenants")
           .select("id, slug")
-          .eq("status", "active");
+          .eq("status", "active")
+          .limit(500);
         if (error) return jsonError("Failed to load tenants", 500, { details: error.message });
 
         const outcomes: Array<Record<string, unknown>> = [];
