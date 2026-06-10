@@ -43,12 +43,13 @@ export const Route = createFileRoute("/hooks/agents/promo-portfolio")({
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
           const geo = await loadEffectiveGeoTargets(tenantId, AGENT_ID);
-          const { data: promos } = await supabaseAdmin
+          const { data: promos, error: promosErr } = await supabaseAdmin
             .from("promotions")
             .select("id, name, applies_to_segment, applies_to_product_ids, value, promo_type")
             .eq("tenant_id", tenantId)
             .eq("is_active", true)
             .limit(5000);
+          if (promosErr) throw promosErr;
 
           if (!promos?.length) {
             await finishAgentRun(handle, 0, { reason: "no_active_promos" });

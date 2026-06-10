@@ -50,12 +50,13 @@ export const Route = createFileRoute("/hooks/agents/morning-brief")({
           const digestDate = yesterday.toISOString().slice(0, 10);
 
           // Skip if already exists
-          const { data: existing } = await supabaseAdmin
+          const { data: existing, error: existErr } = await supabaseAdmin
             .from("daily_digests")
             .select("id")
             .eq("tenant_id", tenantId)
             .eq("digest_date", digestDate)
             .maybeSingle();
+          if (existErr) throw existErr;
           if (existing) {
             await finishAgentRun(handle, 0, {
               reason: "already_generated",

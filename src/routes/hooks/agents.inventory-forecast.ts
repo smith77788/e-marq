@@ -59,6 +59,8 @@ export const Route = createFileRoute("/hooks/agents/inventory-forecast")({
               .gte("created_at", since)
               .limit(50000),
           ]);
+          if (productsRes.error) throw productsRes.error;
+          if (itemsRes.error) throw itemsRes.error;
 
           const products = productsRes.data ?? [];
           if (products.length === 0) {

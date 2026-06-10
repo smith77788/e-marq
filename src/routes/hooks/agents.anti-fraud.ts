@@ -76,7 +76,7 @@ export const Route = createFileRoute("/hooks/agents/anti-fraud")({
               .select("total_cents")
               .eq("tenant_id", tenantId)
               .gte("created_at", baselineSince)
-              .eq("status", "paid")
+              .in("status", ["paid", "fulfilled"])
               .limit(2000),
             supabaseAdmin
               .from("order_fraud_signals")

@@ -55,7 +55,7 @@ export const Route = createFileRoute("/hooks/agents/stockout")({
               )
               .eq("tenant_id", tenantId)
               .gte("orders.created_at", since)
-              .eq("orders.status", "paid")
+              .in("orders.status", ["paid", "fulfilled"])
               .eq("orders.tenant_id", tenantId)
               .limit(20000),
           ]);

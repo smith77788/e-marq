@@ -75,14 +75,16 @@ export const Route = createFileRoute("/hooks/agents/daily-digest-v2")({
               .eq("tenant_id", tenantId)
               .gte("created_at", weekStart.toISOString())
               .lt("created_at", today.toISOString())
-              .in("status", ["paid", "fulfilled"]),
+              .in("status", ["paid", "fulfilled"])
+              .limit(5000),
             supabaseAdmin
               .from("orders")
               .select("total_cents, status")
               .eq("tenant_id", tenantId)
               .gte("created_at", prevWeekStart.toISOString())
               .lt("created_at", weekStart.toISOString())
-              .in("status", ["paid", "fulfilled"]),
+              .in("status", ["paid", "fulfilled"])
+              .limit(5000),
             supabaseAdmin
               .from("ai_insights")
               .select("id, title, risk_level, status, expected_impact")

@@ -52,7 +52,7 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop")({
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
           const cutoff = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
-          const { data: rows } = await supabaseAdmin
+          const { data: rows, error: rowsErr } = await supabaseAdmin
             .from("outbound_messages")
             .select("id, tenant_id, customer_id, trigger_kind, sent_at, expected_impact_cents")
             .eq("tenant_id", tenantId)
@@ -61,6 +61,7 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop")({
             .is("converted_at", null)
             .lte("sent_at", cutoff)
             .limit(200);
+          if (rowsErr) throw rowsErr;
 
           let measured = 0,
             conversions = 0,

@@ -51,7 +51,7 @@ export const Route = createFileRoute("/hooks/agents/churn-risk")({
             .from("orders")
             .select("id, customer_email, customer_name, total_cents, created_at, metadata")
             .eq("tenant_id", tenantId)
-            .eq("status", "paid")
+            .in("status", ["paid", "fulfilled"])
             .gte("created_at", since)
             .order("created_at", { ascending: true })
             .limit(5000);

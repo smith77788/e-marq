@@ -38,13 +38,14 @@ export const Route = createFileRoute("/hooks/agents/customer-churn-predictor")({
 
         const handle = await startAgentRun("customer-churn-predictor", tenantId, ctx);
         try {
-          const { data: customers } = await supabaseAdmin
+          const { data: customers, error: customersErr } = await supabaseAdmin
             .from("customers")
             .select(
               "id, name, email, total_orders, total_spent_cents, last_order_at, avg_cycle_days, predicted_next_order_at",
             )
             .eq("tenant_id", tenantId)
             .gte("total_orders", 1);
+          if (customersErr) throw customersErr;
 
           if (!customers?.length) {
             await finishAgentRun(handle, 0, { reason: "no_customers" });
