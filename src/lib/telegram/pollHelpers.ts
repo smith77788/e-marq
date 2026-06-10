@@ -480,7 +480,7 @@ async function autoCreateReorder(
     .from("orders")
     .select("id, customer_email, customer_name, customer_user_id")
     .eq("tenant_id", tenantId)
-    .eq("status", "paid")
+    .in("status", ["paid", "fulfilled"])
     .ilike("customer_email", customer.email)
     .order("paid_at", { ascending: false })
     .limit(1)

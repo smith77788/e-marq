@@ -71,7 +71,7 @@ export function TenantAnalytics({ tenantId }: Props) {
         .from("orders")
         .select("created_at, total_cents, status")
         .eq("tenant_id", tenantId)
-        .eq("status", "paid")
+        .in("status", ["paid", "fulfilled"])
         .gte("created_at", fromIso)
         .order("created_at", { ascending: true })
         .limit(5000);

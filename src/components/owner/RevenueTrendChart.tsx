@@ -51,8 +51,9 @@ export function RevenueTrendChart({ tenantId }: Props) {
           .from("orders")
           .select("total_cents, paid_at")
           .eq("tenant_id", tenantId)
-          .eq("status", "paid")
-          .gte("paid_at", sinceIso),
+          .in("status", ["paid", "fulfilled"])
+          .gte("paid_at", sinceIso)
+          .limit(5000),
         supabase
           .from("outbound_messages")
           .select("actual_revenue_cents, converted_at")
