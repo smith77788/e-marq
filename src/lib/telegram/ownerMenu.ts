@@ -105,7 +105,8 @@ async function buildMetrics(tenantId: string, appOrigin: string): Promise<string
       .from("acos_agent_runs")
       .select("status")
       .eq("tenant_id", tenantId)
-      .gte("started_at", since24h),
+      .gte("started_at", since24h)
+      .limit(500),
   ]);
 
   const sum24 = (paid24.data ?? []).reduce((s, o) => s + (o.total_cents ?? 0), 0);
