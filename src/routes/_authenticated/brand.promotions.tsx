@@ -172,7 +172,8 @@ function BrandPromotionsPage() {
           "id, code, name, promo_type, value, min_order_cents, usage_limit, usage_per_customer, times_used, starts_at, ends_at, is_active",
         )
         .eq("tenant_id", effectiveTenantId!)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(500);
       if (error) throw error;
       return (data ?? []) as PromoRow[];
     },
