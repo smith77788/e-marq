@@ -141,11 +141,12 @@ function MissionControlContent() {
     queryKey: ["mc-critical", sinceIso],
     queryFn: async () => {
       const [tenants, orders] = await Promise.all([
-        supabase.from("tenants").select("id, name, slug, status, created_at"),
+        supabase.from("tenants").select("id, name, slug, status, created_at").limit(1000),
         supabase
           .from("orders")
           .select("tenant_id, total_cents, status, created_at")
-          .gte("created_at", sinceIso),
+          .gte("created_at", sinceIso)
+          .limit(10000),
       ]);
       return {
         tenants: tenants.data ?? [],
@@ -164,16 +165,19 @@ function MissionControlContent() {
         supabase
           .from("ai_insights")
           .select("tenant_id, status, created_at, risk_level")
-          .gte("created_at", sinceIso),
+          .gte("created_at", sinceIso)
+          .limit(5000),
         supabase
           .from("acos_agent_runs")
           .select("tenant_id, agent_id, status, insights_created, started_at")
-          .gte("started_at", since24hIso),
-        supabase.from("customers").select("tenant_id, id"),
+          .gte("started_at", since24hIso)
+          .limit(5000),
+        supabase.from("customers").select("tenant_id, id").limit(20000),
         supabase
           .from("ai_actions")
           .select("tenant_id, status, created_at")
-          .gte("created_at", sinceIso),
+          .gte("created_at", sinceIso)
+          .limit(5000),
       ]);
       return {
         insights: insights.data ?? [],
