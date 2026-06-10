@@ -50,7 +50,8 @@ export const Route = createFileRoute("/hooks/agents/cart-recovery")({
             .eq("tenant_id", tenantId)
             .eq("type", "add_to_cart")
             .gte("created_at", since)
-            .not("session_id", "is", null);
+            .not("session_id", "is", null)
+            .limit(5000);
 
           if (!cartEvents?.length) {
             await finishAgentRun(handle, 0, { reason: "no_cart_events" });

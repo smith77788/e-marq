@@ -49,7 +49,8 @@ export const Route = createFileRoute("/hooks/agents/ltv-predictor")({
               "id, name, email, total_orders, total_spent_cents, avg_order_cents, avg_cycle_days, last_order_at, lifecycle_stage",
             )
             .eq("tenant_id", tenantId)
-            .gte("total_orders", 1);
+            .gte("total_orders", 1)
+            .limit(5000);
           if (!customers?.length) {
             await finishAgentRun(handle, 0, { reason: "no_customers" });
             return jsonOk({ insights_created: 0, scored: 0 });

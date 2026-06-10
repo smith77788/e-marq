@@ -44,7 +44,8 @@ export const Route = createFileRoute("/hooks/agents/customer-churn-predictor")({
               "id, name, email, total_orders, total_spent_cents, last_order_at, avg_cycle_days, predicted_next_order_at",
             )
             .eq("tenant_id", tenantId)
-            .gte("total_orders", 1);
+            .gte("total_orders", 1)
+            .limit(5000);
           if (customersErr) throw customersErr;
 
           if (!customers?.length) {
