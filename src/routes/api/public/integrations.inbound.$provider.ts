@@ -14,6 +14,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createHmac, timingSafeEqual } from "crypto";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { queuePostImportAgents } from "@/lib/integrations/postImport";
 import { parsePriceToCents } from "@/lib/integrations/parser";
 
 /**
@@ -63,16 +64,16 @@ function shopifyEntityToRow(
       sku: asString(v.sku),
       price: asString(v.price),
       stock: asString(v.inventory_quantity ?? 0),
-      description: asString(it.body_html).replace(/<[^>]+>/g, "").slice(0, 2000),
+      description: asString(it.body_html)
+        .replace(/<[^>]+>/g, "")
+        .slice(0, 2000),
       image_url: asString((images[0] as { src?: string } | undefined)?.src),
       currency: "UAH",
     };
   }
   if (entity === "customers") {
     return {
-      name:
-        `${asString(it.first_name)} ${asString(it.last_name)}`.trim() ||
-        asString(it.email),
+      name: `${asString(it.first_name)} ${asString(it.last_name)}`.trim() || asString(it.email),
       email: asString(it.email),
       phone: asString(it.phone),
     };
@@ -204,7 +205,10 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
             }
             const parsed = BodySchema.safeParse(raw);
             if (!parsed.success) {
-              return jsonResponse({ error: "invalid payload", details: parsed.error.format() }, 400);
+              return jsonResponse(
+                { error: "invalid payload", details: parsed.error.format() },
+                400,
+              );
             }
             entity = parsed.data.entity;
             rows = parsed.data.rows as Array<Record<string, unknown>>;
@@ -401,6 +405,11 @@ export const Route = createFileRoute("/api/public/integrations/inbound/$provider
               last_sync_error: failed > 0 ? `${failed} rows failed` : null,
             })
             .eq("id", integ.id);
+
+          queuePostImportAgents({
+            tenantId,
+            requestOrigin: new URL(request.url).origin,
+          });
 
           return jsonResponse({
             ok: true,

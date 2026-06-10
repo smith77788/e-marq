@@ -6,7 +6,6 @@
  * - Автомапінг: ми знаємо синоніми ("Назва", "Name", "Title", "Найменування" → name).
  */
 import Papa from "papaparse";
-import * as XLSX from "xlsx";
 
 export type EntityKind = "products" | "customers" | "orders";
 
@@ -29,6 +28,8 @@ export type ImportValidationResult = {
     requiredFields: number;
   };
 };
+
+const MAX_IMPORT_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 /** Канонічні поля цільових сутностей. */
 export const CANONICAL_FIELDS: Record<
@@ -90,6 +91,9 @@ const SYNONYMS: Record<EntityKind, Record<string, string[]>> = {
 };
 
 export async function parseFile(file: File): Promise<ParseResult> {
+  if (file.size > MAX_IMPORT_FILE_SIZE_BYTES) {
+    throw new Error("Файл завеликий. Підтримується імпорт файлів до 10 МБ.");
+  }
   const ext = file.name.toLowerCase().split(".").pop();
   if (ext === "xlsx" || ext === "xls") return parseXlsx(file);
   return parseCsv(file);
@@ -128,6 +132,7 @@ async function parseCsv(file: File): Promise<ParseResult> {
 }
 
 async function parseXlsx(file: File): Promise<ParseResult> {
+  const XLSX = await import("xlsx");
   const buf = await file.arrayBuffer();
   const wb = XLSX.read(buf, { type: "array" });
   const firstSheet = wb.SheetNames[0];
@@ -165,7 +170,9 @@ export function validateImportData(
   const usedColumns = Object.values(mapping).filter(Boolean);
   const duplicatedColumns = usedColumns.filter((col, index) => usedColumns.indexOf(col) !== index);
   if (duplicatedColumns.length > 0) {
-    errors.push(`Одна колонка вибрана для кількох полів: ${[...new Set(duplicatedColumns)].join(", ")}.`);
+    errors.push(
+      `Одна колонка вибрана для кількох полів: ${[...new Set(duplicatedColumns)].join(", ")}.`,
+    );
   }
 
   for (const field of required) {
@@ -187,23 +194,29 @@ export function validateImportData(
       continue;
     }
 
-    const moneyField = entityKind === "orders" ? "total_cents" : entityKind === "products" ? "price_cents" : null;
+    const moneyField =
+      entityKind === "orders" ? "total_cents" : entityKind === "products" ? "price_cents" : null;
     if (moneyField) {
       const col = mapping[moneyField];
       const raw = col ? row[col] : null;
       const cents = parsePriceToCents(raw);
       const rawText = String(raw ?? "").trim();
-      if (rawText && cents <= 0 && !/^0+([.,]0+)?$/.test(rawText.replace(/\s/g, ""))) invalidMoneyRows++;
+      if (rawText && cents <= 0 && !/^0+([.,]0+)?$/.test(rawText.replace(/\s/g, "")))
+        invalidMoneyRows++;
       if (cents > 100_000_000) warnings.push(`Рядок ${i + 2}: незвично велика сума ${rawText}.`);
     }
     validRows++;
   }
 
   if (rows.length > 0 && validRows === 0) {
-    errors.push("Жоден рядок не проходить перевірку. Ймовірно, вибрано не ті колонки або тип даних.");
+    errors.push(
+      "Жоден рядок не проходить перевірку. Ймовірно, вибрано не ті колонки або тип даних.",
+    );
   }
   if (invalidMoneyRows > Math.max(3, rows.length * 0.25)) {
-    errors.push("Занадто багато нерозпізнаних цін/сум. Перевірте, що поле ціни не вказує на кількість або текстову колонку.");
+    errors.push(
+      "Занадто багато нерозпізнаних цін/сум. Перевірте, що поле ціни не вказує на кількість або текстову колонку.",
+    );
   } else if (invalidMoneyRows > 0) {
     warnings.push(`Є рядки з нерозпізнаною ціною/сумою: ${invalidMoneyRows}.`);
   }

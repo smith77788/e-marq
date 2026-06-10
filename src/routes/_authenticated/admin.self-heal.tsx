@@ -40,6 +40,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { WHITELIST_AUTO_APPLY, type ActionKind } from "@/lib/self-heal/types";
 
 export const Route = createFileRoute("/_authenticated/admin/self-heal")({
   head: () => ({
@@ -91,6 +92,33 @@ type Settings = {
   severity_threshold: Severity;
 };
 
+const DEFAULT_ALLOWED_KINDS = [...WHITELIST_AUTO_APPLY] as ActionKind[];
+
+async function getAdminToken(): Promise<string> {
+  const { data: session } = await supabase.auth.getSession();
+  const token = session.session?.access_token;
+  if (!token) throw new Error("Not authenticated");
+  return token;
+}
+
+async function postAdminJson<T>(path: string, body: Record<string, unknown>): Promise<T> {
+  const token = await getAdminToken();
+  const res = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(body),
+  });
+  const json = (await res.json().catch(() => ({}))) as T & {
+    ok?: boolean;
+    error?: string;
+    message?: string;
+  };
+  if (!res.ok || json.ok === false) {
+    throw new Error(json.error ?? json.message ?? `HTTP ${res.status}`);
+  }
+  return json;
+}
+
 function SelfHealRoute() {
   const { isSuperAdmin, loading } = useAuth();
   if (loading) {
@@ -120,15 +148,11 @@ function SelfHealContent() {
   useEffect(() => {
     const channel = supabase
       .channel("self-heal-stream")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "self_heal_incidents" },
-        () => qc.invalidateQueries({ queryKey: ["self-heal-incidents"] }),
+      .on("postgres_changes", { event: "*", schema: "public", table: "self_heal_incidents" }, () =>
+        qc.invalidateQueries({ queryKey: ["self-heal-incidents"] }),
       )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "self_heal_actions" },
-        () => qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
+      .on("postgres_changes", { event: "*", schema: "public", table: "self_heal_actions" }, () =>
+        qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
       )
       .subscribe();
     return () => {
@@ -167,39 +191,38 @@ function SelfHealContent() {
   const settingsQ = useQuery({
     queryKey: ["self-heal-settings"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("self_heal_settings")
-        .select("key, value");
+      const { data, error } = await supabase.from("self_heal_settings").select("key, value");
       if (error) throw error;
       const map = new Map((data ?? []).map((r) => [r.key, r.value]));
       return {
         auto_heal_enabled: (map.get("auto_heal_enabled") as boolean) ?? true,
-        allowed_kinds: (map.get("allowed_kinds") as string[]) ?? [],
-        severity_threshold: ((map.get("severity_threshold") as Severity) ?? "p2"),
+        allowed_kinds: (map.get("allowed_kinds") as string[]) ?? DEFAULT_ALLOWED_KINDS,
+        severity_threshold: (map.get("severity_threshold") as Severity) ?? "p2",
       } as Settings;
     },
   });
 
-  const incidentsAll = incidentsQ.data ?? [];
-  const actions = actionsQ.data ?? [];
   const settings = settingsQ.data;
 
   const incidents = useMemo(
-    () => incidentsAll.filter((i) => ["open", "fixing", "monitoring", "blocked"].includes(i.status)),
-    [incidentsAll],
+    () =>
+      (incidentsQ.data ?? []).filter((i) =>
+        ["open", "fixing", "monitoring", "blocked"].includes(i.status),
+      ),
+    [incidentsQ.data],
   );
 
   // ANY skipped action with a decision other than "apply" is something the admin can act on.
   const pendingProposals = useMemo(
-    () => actions.filter((a) => a.status === "skipped" && a.decision !== "apply"),
-    [actions],
+    () => (actionsQ.data ?? []).filter((a) => a.status === "skipped" && a.decision !== "apply"),
+    [actionsQ.data],
   );
   const recentApplied = useMemo(
     () =>
-      actions
+      (actionsQ.data ?? [])
         .filter((a) => a.status === "applied" || a.status === "reverted" || a.status === "failed")
         .slice(0, 50),
-    [actions],
+    [actionsQ.data],
   );
 
   const counts = useMemo(() => {
@@ -216,25 +239,10 @@ function SelfHealContent() {
   const runCycle = async () => {
     setRunning(true);
     try {
-      const { data: session } = await supabase.auth.getSession();
-      const token = session.session?.access_token;
-      if (!token) {
-        toast.error("Not authenticated");
-        return;
-      }
-      const res = await fetch("/hooks/agents/self-heal-engine", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({}),
-      });
-      const json = (await res.json()) as { ok?: boolean; summary?: Record<string, unknown>; error?: string };
-      if (!res.ok || !json.ok) {
-        toast.error(json.error ?? "Cycle failed");
-        return;
-      }
+      const json = await postAdminJson<{
+        ok?: boolean;
+        summary?: Record<string, unknown>;
+      }>("/hooks/agents/self-heal-engine", {});
       const s = json.summary ?? {};
       toast.success(
         `Cycle done: ${s.incidents_created ?? 0} new, ${s.actions_applied ?? 0} applied`,
@@ -251,62 +259,51 @@ function SelfHealContent() {
   };
 
   const callAction = async (path: string, actionId: string, label: string) => {
-    const { data: session } = await supabase.auth.getSession();
-    const token = session.session?.access_token;
-    if (!token) return toast.error("Not authenticated");
-    const res = await fetch(path, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ action_id: actionId }),
-    });
-    const json = (await res.json()) as { ok?: boolean; message?: string; error?: string };
-    if (res.ok && json.ok) {
+    try {
+      const json = await postAdminJson<{ ok?: boolean; message?: string }>(path, {
+        action_id: actionId,
+      });
       toast.success(`${label}: ${json.message ?? "done"}`);
       await Promise.all([
         qc.invalidateQueries({ queryKey: ["self-heal-incidents"] }),
         qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
       ]);
-    } else {
-      toast.error(json.error ?? json.message ?? "Failed");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
     }
   };
 
-  const callDismiss = async (
-    kind: "incident" | "action",
-    id: string,
-    reason: string,
-  ) => {
-    const { data: session } = await supabase.auth.getSession();
-    const token = session.session?.access_token;
-    if (!token) return toast.error("Not authenticated");
-    const res = await fetch("/hooks/agents/self-heal-dismiss", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ kind, id, reason }),
-    });
-    const json = (await res.json()) as { ok?: boolean; message?: string; error?: string };
-    if (res.ok && json.ok) {
+  const callDismiss = async (kind: "incident" | "action", id: string, reason: string) => {
+    try {
+      const json = await postAdminJson<{ ok?: boolean; message?: string }>(
+        "/hooks/agents/self-heal-dismiss",
+        { kind, id, reason },
+      );
       toast.success(json.message ?? "Dismissed");
       await Promise.all([
         qc.invalidateQueries({ queryKey: ["self-heal-incidents"] }),
         qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
       ]);
-    } else {
-      toast.error(json.error ?? "Failed");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
     }
   };
 
   const toggleAutoHeal = async (next: boolean) => {
-    const { error } = await supabase
-      .from("self_heal_settings")
-      .update({ value: next as unknown as never })
-      .eq("key", "auto_heal_enabled");
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const { error } = await supabase.from("self_heal_settings").upsert(
+        {
+          key: "auto_heal_enabled",
+          value: next as unknown as never,
+        },
+        { onConflict: "key" },
+      );
+      if (error) throw error;
+      toast.success(`Auto-heal ${next ? "enabled" : "disabled"}`);
+      await qc.invalidateQueries({ queryKey: ["self-heal-settings"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to save auto-heal setting");
     }
-    toast.success(`Auto-heal ${next ? "enabled" : "disabled"}`);
-    await qc.invalidateQueries({ queryKey: ["self-heal-settings"] });
   };
 
   return (
@@ -388,7 +385,8 @@ function SelfHealContent() {
               Pending actions ({pendingProposals.length})
             </CardTitle>
             <CardDescription>
-              Дії, що чекають на ручне рішення (BLOCK = ризикові, PROPOSE = запропоновані, MONITOR = лише спостереження).
+              Дії, що чекають на ручне рішення (BLOCK = ризикові, PROPOSE = запропоновані, MONITOR =
+              лише спостереження).
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -436,9 +434,7 @@ function SelfHealContent() {
                           size="sm"
                           variant="outline"
                           type="button"
-                          onClick={() =>
-                            callDismiss("action", a.id, "Dismissed by admin")
-                          }
+                          onClick={() => callDismiss("action", a.id, "Dismissed by admin")}
                         >
                           Dismiss
                         </Button>
@@ -491,9 +487,7 @@ function SelfHealContent() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm">{i.title}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {i.root_cause}
-                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{i.root_cause}</TableCell>
                     <TableCell className="text-xs uppercase">{i.regression_risk}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-xs">
