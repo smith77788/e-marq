@@ -40,12 +40,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { WHITELIST_AUTO_APPLY, type ActionKind } from "@/lib/self-heal/types";
 
 export const Route = createFileRoute("/_authenticated/admin/self-heal")({
   head: () => ({
     meta: [
-      { title: "Самовідновлення — MARQ" },
-      { name: "description", content: "Автономне відновлення продакшну" },
+      { title: "Self-Heal Engine" },
+      { name: "description", content: "Autonomous production resilience cockpit" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -91,6 +92,33 @@ type Settings = {
   severity_threshold: Severity;
 };
 
+const DEFAULT_ALLOWED_KINDS = [...WHITELIST_AUTO_APPLY] as ActionKind[];
+
+async function getAdminToken(): Promise<string> {
+  const { data: session } = await supabase.auth.getSession();
+  const token = session.session?.access_token;
+  if (!token) throw new Error("Not authenticated");
+  return token;
+}
+
+async function postAdminJson<T>(path: string, body: Record<string, unknown>): Promise<T> {
+  const token = await getAdminToken();
+  const res = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(body),
+  });
+  const json = (await res.json().catch(() => ({}))) as T & {
+    ok?: boolean;
+    error?: string;
+    message?: string;
+  };
+  if (!res.ok || json.ok === false) {
+    throw new Error(json.error ?? json.message ?? `HTTP ${res.status}`);
+  }
+  return json;
+}
+
 function SelfHealRoute() {
   const { isSuperAdmin, loading } = useAuth();
   if (loading) {
@@ -120,15 +148,11 @@ function SelfHealContent() {
   useEffect(() => {
     const channel = supabase
       .channel("self-heal-stream")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "self_heal_incidents" },
-        () => qc.invalidateQueries({ queryKey: ["self-heal-incidents"] }),
+      .on("postgres_changes", { event: "*", schema: "public", table: "self_heal_incidents" }, () =>
+        qc.invalidateQueries({ queryKey: ["self-heal-incidents"] }),
       )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "self_heal_actions" },
-        () => qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
+      .on("postgres_changes", { event: "*", schema: "public", table: "self_heal_actions" }, () =>
+        qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
       )
       .subscribe();
     return () => {
@@ -167,39 +191,38 @@ function SelfHealContent() {
   const settingsQ = useQuery({
     queryKey: ["self-heal-settings"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("self_heal_settings")
-        .select("key, value");
+      const { data, error } = await supabase.from("self_heal_settings").select("key, value");
       if (error) throw error;
       const map = new Map((data ?? []).map((r) => [r.key, r.value]));
       return {
         auto_heal_enabled: (map.get("auto_heal_enabled") as boolean) ?? true,
-        allowed_kinds: (map.get("allowed_kinds") as string[]) ?? [],
-        severity_threshold: ((map.get("severity_threshold") as Severity) ?? "p2"),
+        allowed_kinds: (map.get("allowed_kinds") as string[]) ?? DEFAULT_ALLOWED_KINDS,
+        severity_threshold: (map.get("severity_threshold") as Severity) ?? "p2",
       } as Settings;
     },
   });
 
-  const incidentsAll = incidentsQ.data ?? [];
-  const actions = actionsQ.data ?? [];
   const settings = settingsQ.data;
 
   const incidents = useMemo(
-    () => incidentsAll.filter((i) => ["open", "fixing", "monitoring", "blocked"].includes(i.status)),
-    [incidentsAll],
+    () =>
+      (incidentsQ.data ?? []).filter((i) =>
+        ["open", "fixing", "monitoring", "blocked"].includes(i.status),
+      ),
+    [incidentsQ.data],
   );
 
   // ANY skipped action with a decision other than "apply" is something the admin can act on.
   const pendingProposals = useMemo(
-    () => actions.filter((a) => a.status === "skipped" && a.decision !== "apply"),
-    [actions],
+    () => (actionsQ.data ?? []).filter((a) => a.status === "skipped" && a.decision !== "apply"),
+    [actionsQ.data],
   );
   const recentApplied = useMemo(
     () =>
-      actions
+      (actionsQ.data ?? [])
         .filter((a) => a.status === "applied" || a.status === "reverted" || a.status === "failed")
         .slice(0, 50),
-    [actions],
+    [actionsQ.data],
   );
 
   const counts = useMemo(() => {
@@ -216,97 +239,71 @@ function SelfHealContent() {
   const runCycle = async () => {
     setRunning(true);
     try {
-      const { data: session } = await supabase.auth.getSession();
-      const token = session.session?.access_token;
-      if (!token) {
-        toast.error("Не авторизовано");
-        return;
-      }
-      const res = await fetch("/hooks/agents/self-heal-engine", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({}),
-      });
-      const json = (await res.json()) as { ok?: boolean; summary?: Record<string, unknown>; error?: string };
-      if (!res.ok || !json.ok) {
-        toast.error(json.error ?? "Цикл завершився помилкою");
-        return;
-      }
+      const json = await postAdminJson<{
+        ok?: boolean;
+        summary?: Record<string, unknown>;
+      }>("/hooks/agents/self-heal-engine", {});
       const s = json.summary ?? {};
       toast.success(
-        `Цикл завершено: ${s.incidents_created ?? 0} нових, ${s.actions_applied ?? 0} виконано`,
+        `Cycle done: ${s.incidents_created ?? 0} new, ${s.actions_applied ?? 0} applied`,
       );
       await Promise.all([
         qc.invalidateQueries({ queryKey: ["self-heal-incidents"] }),
         qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
       ]);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Цикл завершився помилкою");
+      toast.error(e instanceof Error ? e.message : "Cycle failed");
     } finally {
       setRunning(false);
     }
   };
 
   const callAction = async (path: string, actionId: string, label: string) => {
-    const { data: session } = await supabase.auth.getSession();
-    const token = session.session?.access_token;
-    if (!token) return toast.error("Не авторизовано");
-    const res = await fetch(path, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ action_id: actionId }),
-    });
-    const json = (await res.json()) as { ok?: boolean; message?: string; error?: string };
-    if (res.ok && json.ok) {
+    try {
+      const json = await postAdminJson<{ ok?: boolean; message?: string }>(path, {
+        action_id: actionId,
+      });
       toast.success(`${label}: ${json.message ?? "done"}`);
       await Promise.all([
         qc.invalidateQueries({ queryKey: ["self-heal-incidents"] }),
         qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
       ]);
-    } else {
-      toast.error(json.error ?? json.message ?? "Помилка");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
     }
   };
 
-  const callDismiss = async (
-    kind: "incident" | "action",
-    id: string,
-    reason: string,
-  ) => {
-    const { data: session } = await supabase.auth.getSession();
-    const token = session.session?.access_token;
-    if (!token) return toast.error("Не авторизовано");
-    const res = await fetch("/hooks/agents/self-heal-dismiss", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ kind, id, reason }),
-    });
-    const json = (await res.json()) as { ok?: boolean; message?: string; error?: string };
-    if (res.ok && json.ok) {
-      toast.success(json.message ?? "Відхилено");
+  const callDismiss = async (kind: "incident" | "action", id: string, reason: string) => {
+    try {
+      const json = await postAdminJson<{ ok?: boolean; message?: string }>(
+        "/hooks/agents/self-heal-dismiss",
+        { kind, id, reason },
+      );
+      toast.success(json.message ?? "Dismissed");
       await Promise.all([
         qc.invalidateQueries({ queryKey: ["self-heal-incidents"] }),
         qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
       ]);
-    } else {
-      toast.error(json.error ?? "Помилка");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
     }
   };
 
   const toggleAutoHeal = async (next: boolean) => {
-    const { error } = await supabase
-      .from("self_heal_settings")
-      .update({ value: next as unknown as never })
-      .eq("key", "auto_heal_enabled");
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const { error } = await supabase.from("self_heal_settings").upsert(
+        {
+          key: "auto_heal_enabled",
+          value: next as unknown as never,
+        },
+        { onConflict: "key" },
+      );
+      if (error) throw error;
+      toast.success(`Auto-heal ${next ? "enabled" : "disabled"}`);
+      await qc.invalidateQueries({ queryKey: ["self-heal-settings"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to save auto-heal setting");
     }
-    toast.success(`Авто-виправлення ${next ? "ввімкнено" : "вимкнено"}`);
-    await qc.invalidateQueries({ queryKey: ["self-heal-settings"] });
   };
 
   return (
@@ -315,17 +312,17 @@ function SelfHealContent() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            🛡 Самовідновлення системи
+            🛡 Self-Healing Engine
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Автономне відновлення продакшну — виявлення, ізоляція, виправлення та захист.
+            Autonomous production resilience — detect, isolate, heal, and guard.
           </p>
         </div>
         <div className="flex items-center gap-3">
           {settings && (
             <div className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2">
               <Label htmlFor="auto-heal" className="text-xs">
-                Авто-виправлення
+                Auto-heal
               </Label>
               <Switch
                 id="auto-heal"
@@ -340,7 +337,7 @@ function SelfHealContent() {
             ) : (
               <PlayCircle className="mr-2 h-4 w-4" />
             )}
-            Запустити цикл
+            Run cycle now
           </Button>
         </div>
       </div>
@@ -349,31 +346,31 @@ function SelfHealContent() {
       <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
         <ModuleCard
           icon={Activity}
-          title="Детектор"
+          title="Detector"
           status={moduleStatus(counts.open, 5)}
-          metric={`${counts.open} відкритих`}
+          metric={`${counts.open} open`}
         />
         <ModuleCard
           icon={Sparkles}
-          title="Аналіз причини"
+          title="Root Cause"
           status={incidents.length > 0 ? "ok" : "ok"}
-          metric={`${incidents.length} проаналізовано`}
+          metric={`${incidents.length} analyzed`}
         />
         <ModuleCard
           icon={ShieldCheck}
-          title="Ізоляція"
+          title="Isolation"
           status={moduleStatus(counts.blocked, 1)}
-          metric={`${counts.blocked} заблоковано`}
+          metric={`${counts.blocked} blocked`}
         />
         <ModuleCard
           icon={Zap}
-          title="Авто-виправлення"
+          title="Auto-Fix"
           status={settings?.auto_heal_enabled ? "ok" : "warn"}
-          metric={settings?.auto_heal_enabled ? "ввімкнено" : "вимкнено"}
+          metric={settings?.auto_heal_enabled ? "armed" : "disarmed"}
         />
         <ModuleCard
           icon={CheckCircle2}
-          title="Захист від регресій"
+          title="Regression Guard"
           status={counts.p0p1 === 0 ? "ok" : "warn"}
           metric={`${counts.p0p1} P0/P1`}
         />
@@ -385,20 +382,21 @@ function SelfHealContent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-warning" />
-              Очікуючі дії ({pendingProposals.length})
+              Pending actions ({pendingProposals.length})
             </CardTitle>
             <CardDescription>
-              Дії, що чекають на ручне рішення (BLOCK = ризикові, PROPOSE = запропоновані, MONITOR = лише спостереження).
+              Дії, що чекають на ручне рішення (BLOCK = ризикові, PROPOSE = запропоновані, MONITOR =
+              лише спостереження).
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Тип</TableHead>
-                  <TableHead className="w-24">Рішення</TableHead>
-                  <TableHead>Створено</TableHead>
-                  <TableHead className="text-right">Дії</TableHead>
+                  <TableHead>Kind</TableHead>
+                  <TableHead className="w-24">Decision</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -427,20 +425,18 @@ function SelfHealContent() {
                           size="sm"
                           type="button"
                           onClick={() =>
-                            callAction("/hooks/agents/self-heal-apply", a.id, "Виконано")
+                            callAction("/hooks/agents/self-heal-apply", a.id, "Applied")
                           }
                         >
-                          {a.decision === "block" ? "Примусово виконати" : "Виконати"}
+                          {a.decision === "block" ? "Force apply" : "Apply"}
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           type="button"
-                          onClick={() =>
-                            callDismiss("action", a.id, "Відхилено адміном")
-                          }
+                          onClick={() => callDismiss("action", a.id, "Dismissed by admin")}
                         >
-                          Відхилити
+                          Dismiss
                         </Button>
                       </div>
                     </TableCell>
@@ -455,9 +451,9 @@ function SelfHealContent() {
       {/* INCIDENTS QUEUE */}
       <Card>
         <CardHeader>
-          <CardTitle>Активні інциденти ({incidents.length})</CardTitle>
+          <CardTitle>Active incidents ({incidents.length})</CardTitle>
           <CardDescription>
-            Черга в реальному часі від усіх детекторів. Оновлення кожні 30с.
+            Real-time queue from all detectors. Auto-refresh every 30s.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -466,7 +462,7 @@ function SelfHealContent() {
           ) : incidents.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-12 text-center text-sm text-muted-foreground">
               <CheckCircle2 className="h-8 w-8 text-success" />
-              Немає активних інцидентів — всі системи в нормі.
+              No active incidents — all systems healthy.
             </div>
           ) : (
             <Table>
@@ -491,9 +487,7 @@ function SelfHealContent() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm">{i.title}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {i.root_cause}
-                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{i.root_cause}</TableCell>
                     <TableCell className="text-xs uppercase">{i.regression_risk}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-xs">
@@ -505,9 +499,9 @@ function SelfHealContent() {
                         size="sm"
                         variant="outline"
                         type="button"
-                        onClick={() => callDismiss("incident", i.id, "Відхилено адміном")}
+                        onClick={() => callDismiss("incident", i.id, "Dismissed by admin")}
                       >
-                        Відхилити
+                        Dismiss
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -521,25 +515,25 @@ function SelfHealContent() {
       {/* AUTO-HEAL LOG */}
       <Card>
         <CardHeader>
-          <CardTitle>Журнал авто-виправлень</CardTitle>
-          <CardDescription>Останні застосовані/відкочені дії (макс. 50).</CardDescription>
+          <CardTitle>Auto-heal log</CardTitle>
+          <CardDescription>Last applied/reverted actions (max 50).</CardDescription>
         </CardHeader>
         <CardContent>
           {actionsQ.isLoading ? (
             <Skeleton className="h-40 w-full" />
           ) : recentApplied.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
-              Поки не застосовано жодних дій.
+              No actions applied yet.
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Тип</TableHead>
-                  <TableHead>Статус</TableHead>
-                  <TableHead>Результат</TableHead>
-                  <TableHead>Коли</TableHead>
-                  <TableHead className="text-right">Дія</TableHead>
+                  <TableHead>Kind</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Result</TableHead>
+                  <TableHead>When</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -567,10 +561,10 @@ function SelfHealContent() {
                           variant="outline"
                           type="button"
                           onClick={() =>
-                            callAction("/hooks/agents/self-heal-revert", a.id, "Відкочено")
+                            callAction("/hooks/agents/self-heal-revert", a.id, "Reverted")
                           }
                         >
-                          <RotateCcw className="mr-1 h-3 w-3" /> Відкотити
+                          <RotateCcw className="mr-1 h-3 w-3" /> Revert
                         </Button>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>

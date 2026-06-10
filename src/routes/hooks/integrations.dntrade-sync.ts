@@ -14,6 +14,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { authorizeAgentRequest, jsonError, jsonOk } from "@/lib/acos/agentRuntime";
 import { runFullDnTradeSync } from "@/lib/dntrade/sync";
 import { verifyApiKey } from "@/lib/dntrade/client";
+import { queuePostImportAgents } from "@/lib/integrations/postImport";
 
 export const Route = createFileRoute("/hooks/integrations/dntrade-sync")({
   server: {
@@ -23,7 +24,13 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-sync")({
           .replace(/^Bearer\s+/i, "")
           .trim();
 
-        let body: { tenant_id?: string; kinds?: string[]; full?: boolean; async?: boolean; jobId?: string };
+        let body: {
+          tenant_id?: string;
+          kinds?: string[];
+          full?: boolean;
+          async?: boolean;
+          jobId?: string;
+        };
         try {
           body = (await request.json()) as typeof body;
         } catch {
@@ -145,7 +152,8 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-sync")({
             .from("import_jobs")
             .update({
               status: hasErrors ? "completed_with_errors" : "completed",
-              rows_total: summary.products.fetched + summary.customers.fetched + summary.orders.fetched,
+              rows_total:
+                summary.products.fetched + summary.customers.fetched + summary.orders.fetched,
               rows_imported: totalProducts + totalCustomers + totalOrders,
               rows_skipped: summary.orders.skipped,
               rows_failed: summary.errors.length + summary.mapping_errors.length,
@@ -178,6 +186,11 @@ export const Route = createFileRoute("/hooks/integrations/dntrade-sync")({
               synced_orders_count: totalOrders,
             })
             .eq("id", integ.id);
+
+          queuePostImportAgents({
+            tenantId,
+            requestOrigin: new URL(request.url).origin,
+          });
 
           return jsonOk({ summary });
         } catch (e) {

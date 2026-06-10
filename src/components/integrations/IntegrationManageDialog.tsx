@@ -12,7 +12,7 @@
  * DN Trade має свій спеціалізований UI з health-check + dry-run +
  * mapping_errors — для нього показуємо CTA "Відкрити повну панель DN Trade".
  */
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -59,6 +59,7 @@ type Props = {
   integration: IntegrationDef | null;
   tenantId: string;
   onClose: () => void;
+  autoStartSync?: boolean;
 };
 
 type IntegRow = {
@@ -137,9 +138,15 @@ async function authHeader(): Promise<Record<string, string>> {
   return authHeaders();
 }
 
-export function IntegrationManageDialog({ integration, tenantId, onClose }: Props) {
+export function IntegrationManageDialog({
+  integration,
+  tenantId,
+  onClose,
+  autoStartSync = false,
+}: Props) {
   const qc = useQueryClient();
   const [syncEntity, setSyncEntity] = useState<SyncTarget | null>(null);
+  const autoSyncKeyRef = useRef<string | null>(null);
 
   const integ = useQuery<IntegRow | null>({
     queryKey: ["tenant-integration-detail", tenantId, integration?.id],
@@ -181,17 +188,25 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
   const isDnTrade = integration?.id === "dntrade";
   const supported = integration ? isConnectorSupported(integration.id) : false;
   const isWebhook = integration?.method === "webhook";
+  const data = integ.data;
+  const defaultEntity = getDefaultEntity(data);
+  const importableEntities = integration
+    ? defaultEntity
+      ? [defaultEntity]
+      : getImportableEntities(integration)
+    : [];
 
   const sync = useMutation({
     mutationFn: async (target: SyncTarget) => {
       if (!integration) return;
       setSyncEntity(target);
       const defaultEntity = getDefaultEntity(integ.data);
-      const entities = target === "all"
-        ? defaultEntity
-          ? [defaultEntity]
-          : getImportableEntities(integration)
-        : [target];
+      const entities =
+        target === "all"
+          ? defaultEntity
+            ? [defaultEntity]
+            : getImportableEntities(integration)
+          : [target];
       const totals = { imported: 0, failed: 0, skipped: 0, queued: false };
 
       // DN Trade має власний повноцінний sync-pipeline
@@ -250,7 +265,9 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
                   : { entityKind: entity, tenantId, jobId: json.jobId },
               ),
             }).finally(() => {
-              void qc.invalidateQueries({ queryKey: ["integration-jobs", tenantId, integration?.id] });
+              void qc.invalidateQueries({
+                queryKey: ["integration-jobs", tenantId, integration?.id],
+              });
               void qc.invalidateQueries({ queryKey: ["import-jobs", tenantId] });
               void qc.invalidateQueries({
                 queryKey: ["tenant-integration-detail", tenantId, integration?.id],
@@ -382,11 +399,20 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
     onError: (e: Error) => toast.error(MSG.errSave, { description: e.message }),
   });
 
+  useEffect(() => {
+    if (!integration || !autoStartSync) {
+      autoSyncKeyRef.current = null;
+      return;
+    }
+    if (!supported || !data?.is_active || data.last_sync_at || sync.isPending) return;
+    const key = `${tenantId}:${integration.id}:${data.id}`;
+    if (autoSyncKeyRef.current === key) return;
+    autoSyncKeyRef.current = key;
+    sync.mutate("all");
+  }, [autoStartSync, data, integration, supported, sync, tenantId]);
+
   if (!integration) return null;
   const Icon = integration.icon;
-  const data = integ.data;
-  const defaultEntity = getDefaultEntity(data);
-  const importableEntities = defaultEntity ? [defaultEntity] : getImportableEntities(integration);
 
   const webhookUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/api/public/integrations/inbound/${integration.id}?tenant=${tenantId}`;
 
@@ -518,7 +544,11 @@ export function IntegrationManageDialog({ integration, tenantId, onClose }: Prop
                     <div className="space-y-0.5">
                       <div className="text-sm font-medium">Запустити перший імпорт</div>
                       <p className="text-xs text-muted-foreground">
-                        Підтягнемо {defaultEntity ? ENTITY_LABELS[defaultEntity].toLowerCase() : "всі доступні дані"} з {integration.name}.
+                        Підтягнемо{" "}
+                        {defaultEntity
+                          ? ENTITY_LABELS[defaultEntity].toLowerCase()
+                          : "всі доступні дані"}{" "}
+                        з {integration.name}.
                       </p>
                     </div>
                     <Button

@@ -20,7 +20,13 @@ import type { Database } from "@/integrations/supabase/types";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { CORS_HEADERS, withCors } from "@/lib/http/cors";
 import { isConnectorSupported, runConnectorPull } from "@/lib/integrations/connectors";
-import { autoMap, parsePriceToCents, validateImportData, type EntityKind } from "@/lib/integrations/parser";
+import { queuePostImportAgents } from "@/lib/integrations/postImport";
+import {
+  autoMap,
+  parsePriceToCents,
+  validateImportData,
+  type EntityKind,
+} from "@/lib/integrations/parser";
 
 type ProductInsert = Database["public"]["Tables"]["products"]["Insert"];
 type CustomerInsert = Database["public"]["Tables"]["customers"]["Insert"];
@@ -35,10 +41,12 @@ const BodySchema = z.object({
 });
 
 function jsonResponse(body: unknown, status = 200) {
-  return withCors(new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  }));
+  return withCors(
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { "Content-Type": "application/json" },
+    }),
+  );
 }
 
 export const Route = createFileRoute("/api/integrations/sync/$provider")({
@@ -393,7 +401,10 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
           }
 
           const nothingImportedBecauseMappingFailed =
-            pulled.rows.length > 0 && imported === 0 && failed === 0 && skipped === pulled.rows.length;
+            pulled.rows.length > 0 &&
+            imported === 0 &&
+            failed === 0 &&
+            skipped === pulled.rows.length;
           if (nothingImportedBecauseMappingFailed) {
             failed = pulled.rows.length;
             skipped = 0;
@@ -424,6 +435,11 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
               last_sync_error: failed > 0 ? `${failed} рядків з помилками` : null,
             })
             .eq("id", integ.id);
+
+          queuePostImportAgents({
+            tenantId,
+            requestOrigin: new URL(request.url).origin,
+          });
 
           return jsonResponse({
             ok: true,

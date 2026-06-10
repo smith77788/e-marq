@@ -76,6 +76,19 @@ function timeoutMessage(action: string) {
   return `${action} триває занадто довго. Спробуйте ще раз або збережіть підключення без перевірки.`;
 }
 
+function buildCredentials(
+  providerId: string | undefined,
+  primaryValue: string,
+  secondaryValue: string,
+): string {
+  const primary = primaryValue.trim();
+  const secondary = secondaryValue.trim();
+  if (providerId === "woocommerce" && primary && secondary) {
+    return `${primary}:${secondary}`;
+  }
+  return primary;
+}
+
 type Props = {
   integration: IntegrationDef | null;
   tenantId: string;
@@ -97,6 +110,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
   const [step, setStep] = useState<Step>(1);
   const [entityKind, setEntityKind] = useState<EntityKind>("products");
   const [apiKey, setApiKey] = useState("");
+  const [apiSecret, setApiSecret] = useState("");
   const [domain, setDomain] = useState("");
   const [restUrl, setRestUrl] = useState("");
   const [parsedFile, setParsedFile] = useState<ParseResult | null>(null);
@@ -118,6 +132,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
   function reset() {
     setStep(1);
     setApiKey("");
+    setApiSecret("");
     setDomain("");
     setRestUrl("");
     setParsedFile(null);
@@ -133,6 +148,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
     const config: Record<string, unknown> = {};
     if (domain) config.domain = normalizeExternalUrl(domain);
     if (restUrl) config.url = normalizeExternalUrl(restUrl);
+    const credentials = buildCredentials(integration.id, apiKey, apiSecret);
     setVerifying(true);
     setVerifyResult(null);
     try {
@@ -150,7 +166,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
           {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ tenant_id: tenantId, api_key: apiKey }),
+            body: JSON.stringify({ tenant_id: tenantId, api_key: credentials }),
           },
           INTEGRATION_UI_TIMEOUT_MS,
           timeoutMessage("Перевірка DN Trade"),
@@ -188,7 +204,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             tenantId,
-            credentials: apiKey || undefined,
+            credentials: credentials || undefined,
             config,
             entityKind: entity,
           }),
@@ -242,6 +258,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
       const config: Record<string, unknown> = {};
       if (domain) config.domain = normalizeExternalUrl(domain);
       if (restUrl) config.url = normalizeExternalUrl(restUrl);
+      const credentials = buildCredentials(integration.id, apiKey, apiSecret);
       if (isRest || isSheets) config.default_entity_kind = entityKind;
       const webhookSecret = isWebhook ? crypto.randomUUID().replace(/-/g, "") : null;
       const verification =
@@ -257,7 +274,7 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
         tenant_id: tenantId,
         provider: integration.id,
         is_active: true,
-        credentials_encrypted: apiKey || null,
+        credentials_encrypted: credentials || null,
         config: {
           ...config,
           ...(verification ? { verification } : {}),
@@ -365,8 +382,11 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
     navigator.clipboard.writeText(text).then(() => toast.success(MSG.copied));
   }
 
+  const needsSecondarySecret = integration.id === "woocommerce";
   const credsFilled =
-    (isApiKey && apiKey.trim().length > 0) ||
+    (isApiKey &&
+      apiKey.trim().length > 0 &&
+      (!needsSecondarySecret || apiSecret.trim().length > 0)) ||
     ((isRest || isSheets) && restUrl.trim().length > 0);
   const domainRequired =
     isApiKey &&
@@ -530,6 +550,21 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                         setVerifyResult(null);
                       }}
                     />
+                    {integration.id === "woocommerce" && (
+                      <div className="mt-3 space-y-1">
+                        <Label htmlFor="apiSecret">WooCommerce Consumer Secret</Label>
+                        <Input
+                          id="apiSecret"
+                          type="password"
+                          placeholder="cs_..."
+                          value={apiSecret}
+                          onChange={(e) => {
+                            setApiSecret(e.target.value);
+                            setVerifyResult(null);
+                          }}
+                        />
+                      </div>
+                    )}
                     <p className="text-xs text-muted-foreground">
                       Ключ зберігається у захищеному вигляді. Перевірка рекомендована, але якщо
                       зовнішній сервіс тимчасово недоступний — підключення можна зберегти й
@@ -544,7 +579,10 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
                 <div className="space-y-3">
                   <div className="space-y-1">
                     <Label htmlFor="sheet-entity-kind">Що лежить у цій таблиці</Label>
-                    <Select value={entityKind} onValueChange={(v) => setEntityKind(v as EntityKind)}>
+                    <Select
+                      value={entityKind}
+                      onValueChange={(v) => setEntityKind(v as EntityKind)}
+                    >
                       <SelectTrigger id="sheet-entity-kind">
                         <SelectValue />
                       </SelectTrigger>
@@ -878,7 +916,11 @@ export function IntegrationWizard({ integration, tenantId, onClose, onSaved }: P
               </Button>
             )}
             {step === 2 && (
-              <Button onClick={runImportNow} disabled={importing || validation?.valid === false} className="gap-1">
+              <Button
+                onClick={runImportNow}
+                disabled={importing || validation?.valid === false}
+                className="gap-1"
+              >
                 {importing ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />

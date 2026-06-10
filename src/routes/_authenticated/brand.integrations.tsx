@@ -68,6 +68,7 @@ function IntegrationsHubPage() {
   const qc = useQueryClient();
   const [active, setActive] = useState<IntegrationDef | null>(null);
   const [manage, setManage] = useState<IntegrationDef | null>(null);
+  const [manageAutoSync, setManageAutoSync] = useState(false);
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<IntegrationCategory | "all">("all");
   const [syncTarget, setSyncTarget] = useState<IntegrationDef | null>(null);
@@ -409,8 +410,12 @@ function IntegrationsHubPage() {
                         });
                         return;
                       }
-                      if (connectedSet.has(i.id)) setManage(i);
-                      else setActive(i);
+                      if (connectedSet.has(i.id)) {
+                        setManageAutoSync(false);
+                        setManage(i);
+                      } else {
+                        setActive(i);
+                      }
                     }}
                     onSync={(i) => {
                       if (!isTenantActive) {
@@ -493,6 +498,7 @@ function IntegrationsHubPage() {
           // Open the manage dialog with first-import CTA right after a successful save.
           const def = INTEGRATIONS.find((i) => i.id === integrationId) ?? null;
           setActive(null);
+          setManageAutoSync(!!def && isConnectorSupported(def.id));
           if (def) setManage(def);
           qc.invalidateQueries({ queryKey: ["tenant-integrations", effectiveTenantId] });
         }}
@@ -501,7 +507,11 @@ function IntegrationsHubPage() {
       <IntegrationManageDialog
         integration={manage}
         tenantId={effectiveTenantId}
-        onClose={() => setManage(null)}
+        autoStartSync={manageAutoSync}
+        onClose={() => {
+          setManage(null);
+          setManageAutoSync(false);
+        }}
       />
 
       <Dialog open={!!syncTarget} onOpenChange={(o) => !o && setSyncTarget(null)}>
