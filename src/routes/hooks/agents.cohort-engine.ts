@@ -71,7 +71,7 @@ export const Route = createFileRoute("/hooks/agents/cohort-engine")({
             .from("orders")
             .select("customer_email, customer_user_id, total_cents, paid_at, created_at")
             .eq("tenant_id", tenantId)
-            .eq("status", "paid")
+            .in("status", ["paid", "fulfilled"])
             .gte("created_at", since.toISOString())
             .limit(50_000);
           if (error) throw error;

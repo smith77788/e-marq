@@ -39,7 +39,7 @@ export const Route = createFileRoute("/hooks/agents/vip-concierge")({
 
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
-          const { data: vips } = await supabaseAdmin
+          const { data: vips, error: vipsErr } = await supabaseAdmin
             .from("customers")
             .select(
               "id, name, email, total_spent_cents, total_orders, last_order_at, avg_cycle_days",
@@ -48,6 +48,7 @@ export const Route = createFileRoute("/hooks/agents/vip-concierge")({
             .eq("lifecycle_stage", "vip")
             .order("total_spent_cents", { ascending: false })
             .limit(20);
+          if (vipsErr) throw vipsErr;
 
           const insights: AgentInsightInput[] = [];
           const now = Date.now();

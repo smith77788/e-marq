@@ -54,7 +54,7 @@ export const Route = createFileRoute("/hooks/agents/ugc-harvester")({
 
           // Eligible customers: 2+ orders, last order in last 60 days
           const since = new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString();
-          const { data: customers } = await supabaseAdmin
+          const { data: customers, error: customersErr } = await supabaseAdmin
             .from("customers")
             .select("id, name, email, total_orders, last_order_at, consent_marketing")
             .eq("tenant_id", tenantId)
@@ -62,6 +62,7 @@ export const Route = createFileRoute("/hooks/agents/ugc-harvester")({
             .gte("last_order_at", since)
             .order("total_orders", { ascending: false })
             .limit(200);
+          if (customersErr) throw customersErr;
 
           const eligible = (customers ?? []).filter(
             (c) => !ugcByCustomer.has(c.id) && c.consent_marketing !== false,

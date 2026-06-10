@@ -83,8 +83,8 @@ export const Route = createFileRoute("/hooks/agents/anomaly-detector")({
             throw new Error(`DB query failed: ${(todayOrdersRes.error || baseOrdersRes.error || todayEventsRes.error || baseEventsRes.error)?.message}`);
           }
 
-          const todayPaid = (todayOrdersRes.data ?? []).filter((o) => o.status === "paid");
-          const basePaid = (baseOrdersRes.data ?? []).filter((o) => o.status === "paid");
+          const todayPaid = (todayOrdersRes.data ?? []).filter((o) => o.status === "paid" || o.status === "fulfilled");
+          const basePaid = (baseOrdersRes.data ?? []).filter((o) => o.status === "paid" || o.status === "fulfilled");
           const todayRevenue = todayPaid.reduce((s, o) => s + o.total_cents, 0);
           const baseRevenuePerDay = basePaid.reduce((s, o) => s + o.total_cents, 0) / 7;
           const todayOrderCount = todayPaid.length;

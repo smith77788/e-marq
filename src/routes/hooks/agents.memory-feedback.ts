@@ -229,7 +229,7 @@ async function evaluateAction(a: ActionRow): Promise<EvalResult | null> {
       .select("id, total_cents, created_at")
       .eq("tenant_id", a.tenant_id)
       .eq("customer_email", email)
-      .eq("status", "paid")
+      .in("status", ["paid", "fulfilled"])
       .gte("created_at", appliedAt)
       .lte("created_at", cutoff)
       .limit(5);

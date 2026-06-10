@@ -75,7 +75,7 @@ export const Route = createFileRoute("/hooks/agents/second-order-nurture")({
           }
 
           // Need to fetch via orders + order_items
-          const { data: orders } = await supabaseAdmin
+          const { data: orders, error: ordersErr } = await supabaseAdmin
             .from("orders")
             .select("id, customer_email, customer_user_id, total_cents, paid_at")
             .eq("tenant_id", tenantId)
@@ -85,6 +85,7 @@ export const Route = createFileRoute("/hooks/agents/second-order-nurture")({
               targets.map((t) => t.email).filter((e): e is string => !!e),
             )
             .limit(2_000);
+          if (ordersErr) throw ordersErr;
           const orderToCust = new Map<string, CustRow>();
           for (const o of orders ?? []) {
             const c = targets.find(

@@ -81,11 +81,12 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
           const since = new Date(Date.now() - WINDOW_DAYS * 24 * 3600 * 1000).toISOString();
           const geo = await loadEffectiveGeoTargets(tenantId, AGENT_ID);
 
-          const { data: products } = await supabaseAdmin
+          const { data: products, error: productsErr } = await supabaseAdmin
             .from("products")
             .select("id, name, price_cents, is_active, stock")
             .eq("tenant_id", tenantId)
             .eq("is_active", true);
+          if (productsErr) throw productsErr;
 
           if (!products || products.length === 0) {
             await finishAgentRun(handle, 0, { skipped: "no_products" });
@@ -116,11 +117,14 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
                 "product_id, quantity, unit_price_cents, orders!inner(status, paid_at, tenant_id, metadata)",
               )
               .eq("tenant_id", tenantId)
-              .eq("orders.status", "paid")
+              .in("orders.status", ["paid", "fulfilled"])
               .gte("orders.paid_at", since)
               .not("product_id", "is", null)
               .limit(50_000),
           ]);
+          if (viewsRes.error) throw viewsRes.error;
+          if (cartsRes.error) throw cartsRes.error;
+          if (soldRes.error) throw soldRes.error;
 
           const filteredViews = (viewsRes.data ?? []).filter((r) =>
             rowMatchesGeo({ metadata: (r.payload ?? null) as Record<string, unknown> | null }, geo),

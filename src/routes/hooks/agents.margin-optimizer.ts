@@ -40,21 +40,23 @@ export const Route = createFileRoute("/hooks/agents/margin-optimizer")({
         const handle = await startAgentRun("margin-optimizer", tenantId, ctx);
         try {
           // Step 1: load products + costs
-          const { data: products } = await supabaseAdmin
+          const { data: products, error: productsErr } = await supabaseAdmin
             .from("products")
             .select("id, name, price_cents")
             .eq("tenant_id", tenantId)
             .eq("is_active", true);
+          if (productsErr) throw productsErr;
           if (!products?.length) {
             await finishAgentRun(handle, 0, { reason: "no_products" });
             return jsonOk({ insights_created: 0 });
           }
 
-          const { data: costs } = await supabaseAdmin
+          const { data: costs, error: costsErr } = await supabaseAdmin
             .from("product_costs")
             .select("product_id, cost_cents, shipping_cost_cents, fulfillment_cost_cents")
             .eq("tenant_id", tenantId)
             .is("effective_to", null);
+          if (costsErr) throw costsErr;
           const costByProduct = new Map<string, number>();
           for (const c of costs ?? []) {
             costByProduct.set(
@@ -65,13 +67,14 @@ export const Route = createFileRoute("/hooks/agents/margin-optimizer")({
 
           // Step 2: load 30d order_items to compute volume per product
           const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
-          const { data: items } = await supabaseAdmin
+          const { data: items, error: itemsErr } = await supabaseAdmin
             .from("order_items")
             .select("product_id, quantity, unit_price_cents, created_at, orders!inner(status)")
             .eq("tenant_id", tenantId)
             .in("orders.status", ["paid", "fulfilled"])
             .gte("created_at", since)
             .limit(50000);
+          if (itemsErr) throw itemsErr;
 
           const volumeByProduct = new Map<string, number>();
           for (const it of items ?? []) {

@@ -48,11 +48,12 @@ export const Route = createFileRoute("/hooks/agents/aov-optimizer")({
         try {
           const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
 
-          const { data: products } = await supabaseAdmin
+          const { data: products, error: productsErr } = await supabaseAdmin
             .from("products")
             .select("id, name, price_cents, stock, is_active")
             .eq("tenant_id", tenantId)
             .eq("is_active", true);
+          if (productsErr) throw productsErr;
 
           const { data: viewEvents } = await supabaseAdmin
             .from("events")
