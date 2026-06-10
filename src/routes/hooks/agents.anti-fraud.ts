@@ -101,6 +101,31 @@ export const Route = createFileRoute("/hooks/agents/anti-fraud")({
             emailHourCounts.set(k, (emailHourCounts.get(k) ?? 0) + 1);
           }
 
+          // Batch-check prior order history for high-value emails (avoid N+1)
+          const highValueEmails = [
+            ...new Set(
+              recent
+                .filter((o) => o.total_cents >= 20_000 && o.customer_email)
+                .map((o) => o.customer_email!.toLowerCase()),
+            ),
+          ];
+          const priorOrdersByEmail = new Map<string, number>();
+          if (highValueEmails.length > 0) {
+            const { data: priorOrders } = await supabaseAdmin
+              .from("orders")
+              .select("customer_email")
+              .eq("tenant_id", tenantId)
+              .in("customer_email", highValueEmails)
+              .in("status", ["paid", "fulfilled"])
+              .lt("created_at", since)
+              .limit(5000);
+            for (const p of priorOrders ?? []) {
+              if (!p.customer_email) continue;
+              const k = p.customer_email.toLowerCase();
+              priorOrdersByEmail.set(k, (priorOrdersByEmail.get(k) ?? 0) + 1);
+            }
+          }
+
           const fraudRows: Array<{
             tenant_id: string;
             order_id: string;
@@ -125,20 +150,11 @@ export const Route = createFileRoute("/hooks/agents/anti-fraud")({
               score += w;
             }
 
-            // Signal 2: high-value first order from email
-            if (o.total_cents >= 20_000) {
-              const { count } = await supabaseAdmin
-                .from("orders")
-                .select("*", { count: "exact", head: true })
-                .eq("tenant_id", tenantId)
-                .eq("customer_email", o.customer_email ?? "")
-                .in("status", ["paid", "fulfilled"])
-                .lt("created_at", o.created_at);
-              if ((count ?? 0) === 0) {
-                const w = 0.3;
-                signals.push({ kind: "first_order_high_value", weight: w });
-                score += w;
-              }
+            // Signal 2: high-value first order from email (uses pre-loaded batch data)
+            if (o.total_cents >= 20_000 && (priorOrdersByEmail.get(email) ?? 0) === 0) {
+              const w = 0.3;
+              signals.push({ kind: "first_order_high_value", weight: w });
+              score += w;
             }
 
             // Signal 3: burst — 3+ orders in 1h from same email

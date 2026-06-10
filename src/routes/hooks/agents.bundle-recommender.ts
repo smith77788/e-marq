@@ -123,19 +123,22 @@ export const Route = createFileRoute("/hooks/agents/bundle-recommender")({
           }
           candidates.sort((x, y) => y.lift * y.count - x.lift * x.count);
 
-          // Upsert product_affinity for top-20
-          for (const c of candidates.slice(0, 20)) {
-            const { error: affErr } = await supabaseAdmin.from("product_affinity").upsert(
-              {
-                tenant_id: tenantId,
-                product_a_id: c.a,
-                product_b_id: c.b,
-                co_purchase_count: c.count,
-                lift_score: c.lift,
-                computed_at: new Date().toISOString(),
-              },
-              { onConflict: "tenant_id,product_a_id,product_b_id", ignoreDuplicates: false },
-            );
+          // Batch upsert product_affinity for top-20
+          const affinityRows = candidates.slice(0, 20).map((c) => ({
+            tenant_id: tenantId,
+            product_a_id: c.a,
+            product_b_id: c.b,
+            co_purchase_count: c.count,
+            lift_score: c.lift,
+            computed_at: new Date().toISOString(),
+          }));
+          if (affinityRows.length > 0) {
+            const { error: affErr } = await supabaseAdmin
+              .from("product_affinity")
+              .upsert(affinityRows, {
+                onConflict: "tenant_id,product_a_id,product_b_id",
+                ignoreDuplicates: false,
+              });
             if (affErr) throw affErr;
           }
 

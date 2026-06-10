@@ -88,6 +88,16 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
           }
 
           const insights = [];
+          const elasticityRows: Array<{
+            tenant_id: string;
+            product_id: string;
+            elasticity: number;
+            optimal_price_cents: number;
+            sample_size: number;
+            data_window_days: number;
+            confidence: number;
+            computed_at: string;
+          }> = [];
           for (const p of products) {
             const sales = byProduct.get(p.id) ?? [];
             if (sales.length < 10) continue;
@@ -144,21 +154,17 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
             const totalSamples = pricePoints.reduce((s, x) => s + x.samples, 0);
             const confidence = Math.min(0.9, 0.3 + totalSamples / 30);
 
-            // Upsert price_elasticity row
-            const { error: upsertErr } = await supabaseAdmin.from("price_elasticity").upsert(
-              {
-                tenant_id: tenantId,
-                product_id: p.id,
-                elasticity,
-                optimal_price_cents: best.price,
-                sample_size: totalSamples,
-                data_window_days: 60,
-                confidence,
-                computed_at: new Date().toISOString(),
-              },
-              { onConflict: "tenant_id,product_id", ignoreDuplicates: false },
-            );
-            if (upsertErr) throw upsertErr;
+            // Collect for batch upsert after loop
+            elasticityRows.push({
+              tenant_id: tenantId,
+              product_id: p.id,
+              elasticity,
+              optimal_price_cents: best.price,
+              sample_size: totalSamples,
+              data_window_days: 60,
+              confidence,
+              computed_at: new Date().toISOString(),
+            });
 
             // Insight only if optimal differs from current by >=5%
             const diffPct = (best.price - p.price_cents) / p.price_cents;
@@ -193,6 +199,14 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
               },
               dedup_key: `price_pred::${p.id}::${best.price}`,
             });
+          }
+
+          // Batch upsert all elasticity rows
+          if (elasticityRows.length > 0) {
+            const { error: upsertErr } = await supabaseAdmin
+              .from("price_elasticity")
+              .upsert(elasticityRows, { onConflict: "tenant_id,product_id", ignoreDuplicates: false });
+            if (upsertErr) throw upsertErr;
           }
 
           const created = await insertInsightsDedup(insights);
