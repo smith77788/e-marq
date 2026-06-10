@@ -149,7 +149,8 @@ function BrandCollectionsPage() {
         .select("id, name, handle, description, image_url, is_active")
         .eq("tenant_id", effectiveTenantId!)
         .order("sort_order", { ascending: true })
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(500);
       if (error) throw error;
 
       const ids = (data ?? []).map((c) => c.id);
@@ -158,7 +159,8 @@ function BrandCollectionsPage() {
         const { data: rows, error: cErr } = await supabase
           .from("collection_products")
           .select("collection_id")
-          .in("collection_id", ids);
+          .in("collection_id", ids)
+          .limit(10000);
         if (cErr) throw cErr;
         for (const r of rows ?? []) {
           counts[r.collection_id] = (counts[r.collection_id] ?? 0) + 1;
@@ -177,7 +179,8 @@ function BrandCollectionsPage() {
         .select("id, name")
         .eq("tenant_id", effectiveTenantId!)
         .eq("is_active", true)
-        .order("name");
+        .order("name")
+        .limit(2000);
       if (error) throw error;
       return (data ?? []) as ProductOption[];
     },
