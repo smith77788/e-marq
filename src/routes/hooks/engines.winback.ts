@@ -105,7 +105,7 @@ export async function runWinbackForTenant(
       .select("product_name, quantity, orders!inner(customer_email, status)")
       .eq("tenant_id", tenantId)
       .eq("orders.customer_email", c.email ?? "")
-      .eq("orders.status", "paid")
+      .in("orders.status", ["paid", "fulfilled"])
       .limit(50);
     const tally: Record<string, number> = {};
     for (const it of items ?? [])

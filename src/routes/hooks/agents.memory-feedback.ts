@@ -255,7 +255,7 @@ async function evaluateAction(a: ActionRow): Promise<EvalResult | null> {
       .eq("product_id", productId)
       .gte("orders.created_at", appliedAt)
       .lte("orders.created_at", cutoff)
-      .eq("orders.status", "paid")
+      .in("orders.status", ["paid", "fulfilled"])
       .eq("orders.tenant_id", a.tenant_id)
       .limit(50);
     const items = (data ?? []) as Array<{ quantity: number; unit_price_cents: number }>;

@@ -78,7 +78,7 @@ async function runReorderForTenant(tenantId: string): Promise<{ queued: number }
       .select("product_name, product_id, orders!inner(customer_email, status)")
       .eq("tenant_id", tenantId)
       .eq("orders.customer_email", c.email ?? "")
-      .eq("orders.status", "paid")
+      .in("orders.status", ["paid", "fulfilled"])
       .order("created_at", { ascending: false })
       .limit(1);
     const productName = lastItems?.[0]?.product_name ?? "your favorite";
