@@ -105,10 +105,7 @@ export async function applyAction(kind: ActionKind, payload: AnyPayload): Promis
 }
 
 // ─── REVERT ─────────────────────────────────────────────────────────────────
-export async function revertAction(
-  kind: ActionKind,
-  revert: AnyPayload,
-): Promise<ExecResult> {
+export async function revertAction(kind: ActionKind, revert: AnyPayload): Promise<ExecResult> {
   switch (kind) {
     case "reschedule_outreach": {
       const ids = asArray<string>(revert.action_ids);
@@ -125,10 +122,11 @@ export async function revertAction(
       const tenantId = asString(revert.tenant_id);
       const agentId = asString(revert.agent_id);
       if (!tenantId || !agentId) return { ok: false, message: "missing ids", affected: 0 };
-      const { error } = await supabaseAdmin.from("agent_permissions").upsert(
-        { tenant_id: tenantId, agent_id: agentId, mode: "auto" as never } as never,
-        { onConflict: "tenant_id,agent_id" },
-      );
+      const { error } = await supabaseAdmin
+        .from("agent_permissions")
+        .upsert({ tenant_id: tenantId, agent_id: agentId, mode: "auto" as never } as never, {
+          onConflict: "tenant_id,agent_id",
+        });
       if (error) return { ok: false, message: error.message, affected: 0 };
       return { ok: true, message: `Re-enabled ${agentId}`, affected: 1 };
     }

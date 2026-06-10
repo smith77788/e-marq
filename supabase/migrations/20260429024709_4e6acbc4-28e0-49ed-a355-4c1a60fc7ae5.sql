@@ -27,7 +27,7 @@ SELECT public.admin_set_cron_job_command(
     IF v_pending > 0 THEN
       PERFORM net.http_post(
         url := 'https://e-marq.lovable.app/hooks/agents/outreach-action-executor',
-        headers := '{"Content-Type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnemN1a2huYXJ3ZXp4d2R5b25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjY5MjcsImV4cCI6MjA5MjIwMjkyN30.6JSHX3blYqoapNhO7WZL6LgDyGcDYSanR2Ob7nayEuw"}'::jsonb,
+        headers := '{"Content-Type":"application/json","Authorization":"Bearer <SUPABASE_PUBLISHABLE_KEY>"}'::jsonb,
         body := '{}'::jsonb
       );
     END IF;
@@ -46,7 +46,7 @@ SELECT public.admin_set_cron_job_command(
     IF v_pending > 0 THEN
       PERFORM net.http_post(
         url := 'https://e-marq.lovable.app/hooks/agents/tg-user-action-executor',
-        headers := '{"Content-Type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnemN1a2huYXJ3ZXp4d2R5b25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjY5MjcsImV4cCI6MjA5MjIwMjkyN30.6JSHX3blYqoapNhO7WZL6LgDyGcDYSanR2Ob7nayEuw"}'::jsonb,
+        headers := '{"Content-Type":"application/json","Authorization":"Bearer <SUPABASE_PUBLISHABLE_KEY>"}'::jsonb,
         body := '{}'::jsonb
       );
     END IF;

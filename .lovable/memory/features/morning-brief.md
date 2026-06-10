@@ -9,11 +9,13 @@ Cron `owner-daily-digest-08utc` (08:00 UTC) → `send_owner_daily_digest()`.
 CRITICAL FIX (2026-04-29): попередня версія мала `t.tenant_id` (колонка не існує — `tenants.id`), падала тихо у cron. Виправлено: `tenants t JOIN tenant_configs tc ON tc.tenant_id = t.id`.
 
 Skip правила:
+
 - pilot tenants (`tenants.is_pilot=true`) — навмисно
 - tenant без `tenant_configs.owner_telegram_chat_id`
 - tenant з `done24=0 AND pending=0` (нічого розповідати)
 
 Структура повідомлення:
+
 1. Opener: "За минулу добу я виконав N автономних дій — це ~M год вашого часу" (8 хв/дія)
 2. Revenue (24h + 30d з win-rate якщо measured>0; інакше "чекаємо вимірювання 24h gate")
 3. Top win тижня (action_type/title + attributed_revenue з action_outcomes)

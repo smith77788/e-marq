@@ -67,15 +67,11 @@ export function AcosLoopSummary({ tenantId }: { tenantId: string }) {
           <div className="flex items-center gap-2">
             <Inbox className="h-5 w-5 text-warning" />
             <div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                У черзі
-              </p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">У черзі</p>
               <p className="text-xl font-semibold">
                 {pending}
                 {pending > 0 && (
-                  <Badge className="ml-2 bg-warning text-warning-foreground">
-                    треба схвалити
-                  </Badge>
+                  <Badge className="ml-2 bg-warning text-warning-foreground">треба схвалити</Badge>
                 )}
               </p>
             </div>
@@ -84,9 +80,7 @@ export function AcosLoopSummary({ tenantId }: { tenantId: string }) {
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-primary" />
             <div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                Виконано
-              </p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Виконано</p>
               <p className="text-xl font-semibold">
                 {done}
                 {successRate !== null && (
@@ -104,9 +98,7 @@ export function AcosLoopSummary({ tenantId }: { tenantId: string }) {
               <p className="text-xs uppercase tracking-wide text-muted-foreground">
                 Атрибутований дохід
               </p>
-              <p className="text-xl font-semibold text-primary">
-                {fmtMoney(revenue)}
-              </p>
+              <p className="text-xl font-semibold text-primary">{fmtMoney(revenue)}</p>
             </div>
           </div>
         </div>

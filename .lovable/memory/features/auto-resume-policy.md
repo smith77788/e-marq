@@ -5,6 +5,7 @@ type: feature
 ---
 
 ## Що робить
+
 `auto_resume_policies_on_recovery()` SECURITY DEFINER — закриває loop після `auto_pause_policies_on_quality_drop` (#17).
 
 1. Сканує `auto_approval_policy WHERE enabled=false AND notes ILIKE '%auto-paused%'`.
@@ -14,11 +15,14 @@ type: feature
 5. Dedup 7 днів через перевірку owner_notifications.
 
 ## Розклад
+
 `45 6 * * *` (cron job `auto-resume-policy-daily`) — після #16 (06:15) і #17 (06:30).
 
 ## Чому це безпечно
+
 - quality_monitor (#16) і causal-disable лишаються активними. Якщо resume передчасний — paused знову за 1-2 тижні.
 - Threshold 50% win-rate vs 30% pause-threshold у #17 → буферна зона.
 
 ## Owner re-enable
+
 Owner все ще може вручну re-enable раніше через UI/SQL. Auto-resume тільки додає шлях для autonomous loop.

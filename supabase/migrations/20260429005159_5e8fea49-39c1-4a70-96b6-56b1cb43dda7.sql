@@ -33,7 +33,7 @@ SELECT public.admin_set_cron_job_command(
     url := 'https://e-marq.lovable.app/hooks/agents/tick',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnemN1a2huYXJ3ZXp4d2R5b25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjY5MjcsImV4cCI6MjA5MjIwMjkyN30.6JSHX3blYqoapNhO7WZL6LgDyGcDYSanR2Ob7nayEuw'
+      'Authorization', 'Bearer <SUPABASE_PUBLISHABLE_KEY>'
     ),
     body := '{}'::jsonb
   );

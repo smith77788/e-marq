@@ -9,6 +9,7 @@ type: feature
 **Ordering**: `ORDER BY (payload->forecast->expected_revenue_cents) DESC, created_at ASC` — найцінніші дії auto-approve-ляться першими у межах cron-tick.
 
 **Risk guardrails** (skip + tag, але НЕ approve):
+
 - `high_value_low_confidence`: expected ≥ 50000 cents (500₴) AND confidence < 0.4 → залишити owner-у
 - `daily_cap_reached`: вже ≥ 20 auto-approved decisions для tenant за останні 24h
 

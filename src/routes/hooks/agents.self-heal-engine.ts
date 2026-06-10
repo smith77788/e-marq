@@ -68,8 +68,7 @@ export const Route = createFileRoute("/hooks/agents/self-heal-engine")({
         const summary = await runSelfHealCycle(tenantId);
         return jsonOk({ summary });
       },
-      GET: async () =>
-        jsonOk({ hint: "POST to run a self-heal cycle" }),
+      GET: async () => jsonOk({ hint: "POST to run a self-heal cycle" }),
     },
   },
 });

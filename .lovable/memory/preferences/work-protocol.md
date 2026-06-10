@@ -21,6 +21,7 @@ type: preference
 Якщо на кроці 4 або 6 знайдеш помилку — повернись до 3. Не переходь до наступного файлу, поки поточний не пройшов всі 7 кроків.
 
 **Self-checklist перед здачею:**
+
 - TypeScript: 0 помилок, 0 `any`, всі імпорти валідні
 - DB: `.eq("tenant_id", tenantId)` скрізь; `supabaseAdmin` лише в `hooks/`/`*.server.ts`; нові таблиці мають RLS + INDEX по tenant_id + updated_at trigger
 - Patterns: agent → auth/start/try/finish/fail; компонент → Skeleton + error; усі рядки через `useT()`; нові ключі в обох мовах
@@ -28,6 +29,7 @@ type: preference
 - UX: mobile responsive, sonner toast при мутаціях, loading кнопки
 
 **Абсолютні заборони:**
+
 - Не редагувати існуючі міграції — лише нові
 - Не імпортувати `supabaseAdmin` в компоненти
 - Не хардкодити tenant_id / secrets / API keys

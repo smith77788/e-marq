@@ -23,12 +23,14 @@ type: feature
 Sprints 1-9 виконані. **Обидва залишкові гепи закриті**:
 
 ✅ Bulk-генератор промокодів — `src/components/owner/BulkPromoGeneratorDialog.tsx`
-   - Дет-preview формату, batch INSERT з ретраєм проти колізій
-   - CSV-завантаження client-side, повний i18n (UA+EN, ~16 ключів `bpr.bulk.*`)
-   - Підключений у `brand.promotions.tsx` (кнопка `bpr.bulk.button`)
+
+- Дет-preview формату, batch INSERT з ретраєм проти колізій
+- CSV-завантаження client-side, повний i18n (UA+EN, ~16 ключів `bpr.bulk.*`)
+- Підключений у `brand.promotions.tsx` (кнопка `bpr.bulk.button`)
 
 ✅ Multi-step Campaigns Wizard — `src/components/owner/EmailCampaignWizard.tsx`
-   - Підключений у `brand.email.tsx` Tab "Кампанії" поряд з EmailCampaignsCard
+
+- Підключений у `brand.email.tsx` Tab "Кампанії" поряд з EmailCampaignsCard
 
 ## Останні системні покращення (поза V2)
 

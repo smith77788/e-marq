@@ -3,11 +3,13 @@ name: ROI Dashboard
 description: /brand/roi сторінка з get_owner_roi_summary RPC; cumulative actions, time saved (8min/action), attributed revenue, win-rate, top action, 14d trend, breakdown by action_type
 type: feature
 ---
+
 Phase 18: Owner-facing ROI panel.
 
 **Route**: `/brand/roi` → `src/routes/_authenticated/brand.roi.tsx` → `<ROIDashboard />`.
 
 **Data source**: `public.get_owner_roi_summary(_tenant_id uuid) RETURNS jsonb`:
+
 - total_actions (decision_queue.status='done')
 - time_saved_minutes/hours (8 min × actions, same constant as morning brief)
 - total_revenue_cents (SUM action_outcomes.attributed_revenue_cents)

@@ -14,8 +14,7 @@ export function CopyButton({
 }) {
   const [done, setDone] = useState(false);
   const onClick = async () => {
-    const text =
-      typeof value === "string" ? value : JSON.stringify(value, null, 2);
+    const text = typeof value === "string" ? value : JSON.stringify(value, null, 2);
     try {
       await navigator.clipboard.writeText(text);
       setDone(true);

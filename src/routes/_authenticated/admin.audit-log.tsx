@@ -141,9 +141,7 @@ function AdminAuditLog() {
         <CardHeader>
           <CardTitle>Фільтри</CardTitle>
           <CardDescription>
-            {isSuperAdmin
-              ? "Перегляд по всіх тенантах"
-              : "Перегляд обмежений вашим брендом (RLS)"}
+            {isSuperAdmin ? "Перегляд по всіх тенантах" : "Перегляд обмежений вашим брендом (RLS)"}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 sm:flex-row">

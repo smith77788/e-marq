@@ -11,7 +11,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -118,10 +124,7 @@ function AdminOutcomes() {
   }, [filtered]);
 
   const byActionType = useMemo(() => {
-    const m = new Map<
-      string,
-      { count: number; wins: number; measured: number; revenue: number }
-    >();
+    const m = new Map<string, { count: number; wins: number; measured: number; revenue: number }>();
     for (const r of filtered) {
       const cur = m.get(r.action_type) ?? { count: 0, wins: 0, measured: 0, revenue: 0 };
       cur.count++;
@@ -136,10 +139,7 @@ function AdminOutcomes() {
   }, [filtered]);
 
   const byTenant = useMemo(() => {
-    const m = new Map<
-      string,
-      { count: number; wins: number; measured: number; revenue: number }
-    >();
+    const m = new Map<string, { count: number; wins: number; measured: number; revenue: number }>();
     for (const r of filtered) {
       const cur = m.get(r.tenant_id) ?? { count: 0, wins: 0, measured: 0, revenue: 0 };
       cur.count++;
@@ -259,7 +259,9 @@ function AdminOutcomes() {
                       >
                         {r.measured ? `${Math.round(wr * 100)}%` : "—"}
                       </TableCell>
-                      <TableCell className="text-right font-medium">{fmtMoney(r.revenue)}</TableCell>
+                      <TableCell className="text-right font-medium">
+                        {fmtMoney(r.revenue)}
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -308,7 +310,9 @@ function AdminOutcomes() {
                       >
                         {r.measured ? `${Math.round(wr * 100)}%` : "—"}
                       </TableCell>
-                      <TableCell className="text-right font-medium">{fmtMoney(r.revenue)}</TableCell>
+                      <TableCell className="text-right font-medium">
+                        {fmtMoney(r.revenue)}
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -366,7 +370,10 @@ function AdminOutcomes() {
                   </TableCell>
                   <TableCell>
                     {r.success === true && (
-                      <Badge variant="outline" className="border-success/30 bg-success/10 text-success">
+                      <Badge
+                        variant="outline"
+                        className="border-success/30 bg-success/10 text-success"
+                      >
                         <CheckCircle2 className="mr-1 h-3 w-3" /> win
                       </Badge>
                     )}
@@ -376,7 +383,9 @@ function AdminOutcomes() {
                       </Badge>
                     )}
                     {r.success === null && (
-                      <Badge variant="outline" className="text-xs">pending</Badge>
+                      <Badge variant="outline" className="text-xs">
+                        pending
+                      </Badge>
                     )}
                   </TableCell>
                 </TableRow>

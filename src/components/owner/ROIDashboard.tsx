@@ -99,9 +99,7 @@ export function ROIDashboard({ tenantId }: { tenantId: string | null }) {
       <Card>
         <CardHeader>
           <CardTitle>ROI від AI</CardTitle>
-          <CardDescription className="text-destructive">
-            {error ?? "Немає даних"}
-          </CardDescription>
+          <CardDescription className="text-destructive">{error ?? "Немає даних"}</CardDescription>
         </CardHeader>
       </Card>
     );
@@ -130,9 +128,7 @@ export function ROIDashboard({ tenantId }: { tenantId: string | null }) {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="text-2xl font-bold mt-1">{data.time_saved_hours} год</div>
-            <div className="text-xs text-muted-foreground mt-0.5">
-              ≈ 8 хв/дія
-            </div>
+            <div className="text-xs text-muted-foreground mt-0.5">≈ 8 хв/дія</div>
           </CardContent>
         </Card>
         <Card>
@@ -173,9 +169,7 @@ export function ROIDashboard({ tenantId }: { tenantId: string | null }) {
             <div className="flex items-center justify-between">
               <div>
                 <div className="font-medium">{actionLabel(data.top_action.action_type)}</div>
-                <div className="text-xs text-muted-foreground">
-                  {data.top_action.count} дій
-                </div>
+                <div className="text-xs text-muted-foreground">{data.top_action.count} дій</div>
               </div>
               <div className="text-lg font-bold text-emerald-600">
                 +{fmtUAH(data.top_action.total_revenue_cents)}
@@ -222,9 +216,7 @@ export function ROIDashboard({ tenantId }: { tenantId: string | null }) {
                         }}
                       />
                     </div>
-                    <div className="text-[9px] text-muted-foreground">
-                      {p.day.slice(5)}
-                    </div>
+                    <div className="text-[9px] text-muted-foreground">{p.day.slice(5)}</div>
                   </div>
                 );
               })}
@@ -271,7 +263,10 @@ export function ROIDashboard({ tenantId }: { tenantId: string | null }) {
                   </div>
                   <div className="text-right">
                     {Number(row.revenue_cents) > 0 ? (
-                      <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
+                      <Badge
+                        variant="secondary"
+                        className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                      >
                         +{fmtUAH(Number(row.revenue_cents))}
                       </Badge>
                     ) : (

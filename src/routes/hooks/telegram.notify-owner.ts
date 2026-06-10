@@ -191,18 +191,26 @@ async function renderNotification(
     .maybeSingle();
   if (!data || data.is_read) return null;
   const brand = await getBrandName(tenantId);
-  const batchedCount = Number((payload as { batched_count?: number } | undefined)?.batched_count ?? 1);
-  const batchedTitles = Array.isArray((payload as { batched_titles?: unknown[] } | undefined)?.batched_titles)
+  const batchedCount = Number(
+    (payload as { batched_count?: number } | undefined)?.batched_count ?? 1,
+  );
+  const batchedTitles = Array.isArray(
+    (payload as { batched_titles?: unknown[] } | undefined)?.batched_titles,
+  )
     ? ((payload as { batched_titles: unknown[] }).batched_titles.slice(-3) as string[])
     : [];
 
-  const header = batchedCount > 1
-    ? `${severityEmoji(data.severity)} <b>${escapeHtml(brand)}</b> · <i>${escapeHtml(humanizeKind(data.kind))}</i> · ${batchedCount} нових`
-    : `${severityEmoji(data.severity)} <b>${escapeHtml(brand)}</b> · <i>${escapeHtml(humanizeKind(data.kind))}</i>`;
+  const header =
+    batchedCount > 1
+      ? `${severityEmoji(data.severity)} <b>${escapeHtml(brand)}</b> · <i>${escapeHtml(humanizeKind(data.kind))}</i> · ${batchedCount} нових`
+      : `${severityEmoji(data.severity)} <b>${escapeHtml(brand)}</b> · <i>${escapeHtml(humanizeKind(data.kind))}</i>`;
 
-  const bodyText = batchedCount > 1 && batchedTitles.length > 0
-    ? batchedTitles.map((t) => `• ${escapeHtml(String(t))}`).join("\n")
-    : [`<b>${escapeHtml(data.title)}</b>`, data.body ? escapeHtml(data.body) : ""].filter(Boolean).join("\n");
+  const bodyText =
+    batchedCount > 1 && batchedTitles.length > 0
+      ? batchedTitles.map((t) => `• ${escapeHtml(String(t))}`).join("\n")
+      : [`<b>${escapeHtml(data.title)}</b>`, data.body ? escapeHtml(data.body) : ""]
+          .filter(Boolean)
+          .join("\n");
 
   const text = [header, "", bodyText].filter(Boolean).join("\n");
   const buttons: { text: string; data: string }[][] = [
@@ -222,7 +230,11 @@ async function renderForKind(row: OutboxRow): Promise<RenderResult> {
       return row.source_id ? renderAction(row.tenant_id, row.source_id) : null;
     case "notification":
       return row.source_id
-        ? renderNotification(row.tenant_id, row.source_id, row.payload as Record<string, unknown> | null)
+        ? renderNotification(
+            row.tenant_id,
+            row.source_id,
+            row.payload as Record<string, unknown> | null,
+          )
         : null;
     case "digest": {
       const text = (row.payload as { text?: string } | null)?.text;

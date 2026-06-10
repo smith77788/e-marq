@@ -42,14 +42,16 @@ export const Route = createFileRoute("/hooks/agents/self-heal-apply")({
           .select("role")
           .eq("user_id", userId)
           .eq("role", "super_admin");
-        if (!roles || roles.length === 0)
-          return json({ error: "Super-admin required" }, 403);
+        if (!roles || roles.length === 0) return json({ error: "Super-admin required" }, 403);
 
         const body = (await request.json().catch(() => ({}))) as { action_id?: string };
         if (!body.action_id) return json({ error: "Missing action_id" }, 400);
 
         const res = await applyProposal(body.action_id, userId);
-        return json({ ok: res.ok, message: res.message, affected: res.affected }, res.ok ? 200 : 400);
+        return json(
+          { ok: res.ok, message: res.message, affected: res.affected },
+          res.ok ? 200 : 400,
+        );
       },
     },
   },

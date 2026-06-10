@@ -7,6 +7,7 @@ type: feature
 # SQL pipeline tick (cron `sql-loop-tick-30min`)
 
 `run_sql_loop_tick()` викликає по черзі:
+
 1. `convert_insights_to_decisions()` — `status IN ('new','in_review')` → INSERT у decision_queue, потім ставить `status='applied'`
 2. `auto_approve_eligible_decisions()` — whitelist + history АБО bootstrap
 3. `execute_pending_decisions()` per tenant
@@ -25,6 +26,7 @@ type: feature
 ## Health guard (cron `pipeline-health-check-hourly`)
 
 `check_pipeline_health()` запускається о :37 щогодини, пише в `agent_health` (agent_id='sql_pipeline', tenant_id=NULL). Виявляє СПРАВЖНІ проблеми:
+
 - `no_recent_insights`: max(ai_insights.created_at) < now() - 6h
 - `converter_stuck`: count(status='new' AND created_at < 2h ago) > 5
 - `auto_approval_missed`: >5 pending whitelisted decisions старших за `max_age_hours`

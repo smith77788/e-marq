@@ -13,7 +13,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Check, X, Clock, AlertCircle, ChevronDown, ChevronRight, Trash2, ShieldAlert } from "lucide-react";
+import {
+  Check,
+  X,
+  Clock,
+  AlertCircle,
+  ChevronDown,
+  ChevronRight,
+  Trash2,
+  ShieldAlert,
+} from "lucide-react";
 
 const SKIP_REASON_LABELS: Record<string, { label: string; hint: string }> = {
   high_value_low_confidence: {
@@ -57,7 +66,10 @@ export const Route = createFileRoute("/_authenticated/brand/decisions")({
   head: () => ({
     meta: [
       { title: "Decision Inbox — MARQ" },
-      { name: "description", content: "Pending рішення AI-агентів, які потребують вашого підтвердження" },
+      {
+        name: "description",
+        content: "Pending рішення AI-агентів, які потребують вашого підтвердження",
+      },
     ],
   }),
   component: DecisionsPage,
@@ -92,7 +104,9 @@ function DecisionsPage() {
           <CardDescription>Спочатку створіть або оберіть бренд.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button asChild><Link to="/brand">← Назад</Link></Button>
+          <Button asChild>
+            <Link to="/brand">← Назад</Link>
+          </Button>
         </CardContent>
       </Card>
     );
@@ -103,8 +117,8 @@ function DecisionsPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Decision Inbox</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Рішення AI-агентів, які потребують вашого підтвердження. Auto-approval
-          уже виконує перевірені дії — тут ви бачите тільки те, що вимагає вашої уваги.
+          Рішення AI-агентів, які потребують вашого підтвердження. Auto-approval уже виконує
+          перевірені дії — тут ви бачите тільки те, що вимагає вашої уваги.
         </p>
       </div>
       <DecisionList tenantId={tenantId} />
@@ -122,7 +136,9 @@ function DecisionList({ tenantId }: { tenantId: string }) {
   const load = useCallback(async () => {
     const { data, error } = await supabase
       .from("decision_queue")
-      .select("id, tenant_id, agent_id, action_type, title, rationale, payload, confidence, expected_impact, created_at")
+      .select(
+        "id, tenant_id, agent_id, action_type, title, rationale, payload, confidence, expected_impact, created_at",
+      )
       .eq("tenant_id", tenantId)
       .eq("status", "pending")
       .order("created_at", { ascending: false })
@@ -134,13 +150,18 @@ function DecisionList({ tenantId }: { tenantId: string }) {
     setDecisions((data ?? []) as Decision[]);
   }, [tenantId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const approve = async (id: string) => {
     setBusyId(id);
     const { data, error } = await supabase.rpc("owner_approve_decision", { _decision_id: id });
     setBusyId(null);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     const result = data as { ok: boolean; error?: string } | null;
     if (result?.ok) {
       toast.success("Схвалено");
@@ -157,7 +178,10 @@ function DecisionList({ tenantId }: { tenantId: string }) {
       _reason: reason || undefined,
     });
     setBusyId(null);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     const result = data as { ok: boolean; error?: string } | null;
     if (result?.ok) {
       toast.success("Відхилено");
@@ -168,7 +192,10 @@ function DecisionList({ tenantId }: { tenantId: string }) {
   };
 
   const bulkReject = async (actionType: string) => {
-    if (!confirm(`Відхилити всі pending дії типу "${ACTION_TYPE_LABELS[actionType] ?? actionType}"?`)) return;
+    if (
+      !confirm(`Відхилити всі pending дії типу "${ACTION_TYPE_LABELS[actionType] ?? actionType}"?`)
+    )
+      return;
     setBulkBusy(actionType);
     const { data, error } = await supabase.rpc("owner_bulk_reject_decisions", {
       _tenant_id: tenantId,
@@ -176,7 +203,10 @@ function DecisionList({ tenantId }: { tenantId: string }) {
       _reason: "bulk_dismiss",
     });
     setBulkBusy(null);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     const result = data as { ok: boolean; count?: number; error?: string } | null;
     if (result?.ok) {
       toast.success(`Відхилено: ${result.count ?? 0}`);
@@ -197,8 +227,14 @@ function DecisionList({ tenantId }: { tenantId: string }) {
     // sort items within each group by forecast.expected_revenue_cents desc
     for (const [, items] of map) {
       items.sort((a, b) => {
-        const av = Number(((a.payload as { forecast?: { expected_revenue_cents?: number } } | null)?.forecast?.expected_revenue_cents) ?? 0);
-        const bv = Number(((b.payload as { forecast?: { expected_revenue_cents?: number } } | null)?.forecast?.expected_revenue_cents) ?? 0);
+        const av = Number(
+          (a.payload as { forecast?: { expected_revenue_cents?: number } } | null)?.forecast
+            ?.expected_revenue_cents ?? 0,
+        );
+        const bv = Number(
+          (b.payload as { forecast?: { expected_revenue_cents?: number } } | null)?.forecast
+            ?.expected_revenue_cents ?? 0,
+        );
         return bv - av;
       });
     }
@@ -258,7 +294,11 @@ function DecisionList({ tenantId }: { tenantId: string }) {
                   className="flex items-center gap-2 text-left"
                   onClick={() => setCollapsedGroups((prev) => ({ ...prev, [type]: !collapsed }))}
                 >
-                  {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  {collapsed ? (
+                    <ChevronRight className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
                   <CardTitle className="text-sm font-semibold">
                     {ACTION_TYPE_LABELS[type] ?? type}
                   </CardTitle>
@@ -316,16 +356,14 @@ const FORECAST_SKIP_LABELS: Record<string, string> = {
 };
 
 function ForecastBlock({ payload }: { payload: Record<string, unknown> | null }) {
-  const forecast = (payload?.forecast ?? null) as
-    | {
-        expected_revenue_cents?: number;
-        confidence?: number;
-        basis?: string;
-        source?: string;
-        tenant_samples?: number;
-        sample_size?: number;
-      }
-    | null;
+  const forecast = (payload?.forecast ?? null) as {
+    expected_revenue_cents?: number;
+    confidence?: number;
+    basis?: string;
+    source?: string;
+    tenant_samples?: number;
+    sample_size?: number;
+  } | null;
   const skipReason = (payload?.auto_approval_skip_reason as string | undefined) ?? undefined;
   if (!forecast && !skipReason) return null;
 
@@ -359,7 +397,8 @@ function ForecastBlock({ payload }: { payload: Record<string, unknown> | null })
       )}
       {skipReason && (
         <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
-          ⏸ {FORECAST_SKIP_LABELS[skipReason] ?? SKIP_REASON_LABELS[skipReason]?.label ?? skipReason}
+          ⏸{" "}
+          {FORECAST_SKIP_LABELS[skipReason] ?? SKIP_REASON_LABELS[skipReason]?.label ?? skipReason}
         </div>
       )}
     </div>
@@ -399,11 +438,16 @@ function DecisionCard({
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
             {(() => {
-              const skip = (d.payload as { auto_approval_skip_reason?: string } | null)?.auto_approval_skip_reason;
+              const skip = (d.payload as { auto_approval_skip_reason?: string } | null)
+                ?.auto_approval_skip_reason;
               const meta = skip ? SKIP_REASON_LABELS[skip] : null;
               if (!meta) return null;
               return (
-                <Badge variant="outline" className="gap-1 border-amber-500/50 text-amber-700 dark:text-amber-400" title={meta.hint}>
+                <Badge
+                  variant="outline"
+                  className="gap-1 border-amber-500/50 text-amber-700 dark:text-amber-400"
+                  title={meta.hint}
+                >
                   <ShieldAlert className="h-3 w-3" />
                   {meta.label}
                 </Badge>

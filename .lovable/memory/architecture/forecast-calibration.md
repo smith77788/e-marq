@@ -5,6 +5,7 @@ type: feature
 ---
 
 Таблиця `public.forecast_calibration`:
+
 - `tenant_id` (NULL = global rollup), `action_type`, `computed_at`
 - `sample_size`, `avg_forecast_cents`, `avg_actual_cents`
 - `bias_cents` (actual − forecast: >0 = AI недооцінює, <0 = переоцінює)

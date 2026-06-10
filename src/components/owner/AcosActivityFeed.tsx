@@ -5,24 +5,11 @@
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Lightbulb,
-  ListChecks,
-  CheckCircle2,
-  Play,
-  TrendingUp,
-  Minus,
-} from "lucide-react";
+import { Lightbulb, ListChecks, CheckCircle2, Play, TrendingUp, Minus } from "lucide-react";
 
 type Activity = {
   tenant_id: string;
@@ -141,14 +128,9 @@ export function AcosActivityFeed({ tenantId }: { tenantId: string }) {
                   <li key={`${ev.ref_id}-${i}`} className="relative">
                     <span className="absolute -left-[21px] top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-background ring-2 ring-border" />
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <Badge
-                        variant="outline"
-                        className={`gap-1 border ${meta.tone}`}
-                      >
+                      <Badge variant="outline" className={`gap-1 border ${meta.tone}`}>
                         {meta.icon}
-                        <span className="text-[10px] uppercase tracking-wide">
-                          {meta.label}
-                        </span>
+                        <span className="text-[10px] uppercase tracking-wide">{meta.label}</span>
                       </Badge>
                       {ev.subtype && (
                         <Badge variant="secondary" className="text-[10px]">
@@ -156,10 +138,7 @@ export function AcosActivityFeed({ tenantId }: { tenantId: string }) {
                         </Badge>
                       )}
                       {ev.risk_level && (
-                        <Badge
-                          variant="outline"
-                          className="text-[10px] capitalize"
-                        >
+                        <Badge variant="outline" className="text-[10px] capitalize">
                           risk: {ev.risk_level}
                         </Badge>
                       )}
@@ -167,13 +146,9 @@ export function AcosActivityFeed({ tenantId }: { tenantId: string }) {
                         {timeAgo(ev.event_at)}
                       </span>
                     </div>
-                    <p className="mt-1 text-sm font-medium leading-snug">
-                      {ev.title ?? "—"}
-                    </p>
+                    <p className="mt-1 text-sm font-medium leading-snug">{ev.title ?? "—"}</p>
                     {ev.detail && (
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {ev.detail}
-                      </p>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{ev.detail}</p>
                     )}
                   </li>
                 );

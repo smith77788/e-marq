@@ -35,11 +35,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CopyButton } from "@/components/admin/CopyButton";
 import { AutoApprovalHeatmap } from "@/components/admin/AutoApprovalHeatmap";
 import { Sparkline } from "@/components/detail/Sparkline";
@@ -322,9 +318,7 @@ function AdminDecisionsPage() {
     };
     const lines = [headers.join(",")];
     for (const d of filteredDecisions) {
-      const ageHours = Math.floor(
-        (Date.now() - new Date(d.created_at).getTime()) / 3_600_000,
-      );
+      const ageHours = Math.floor((Date.now() - new Date(d.created_at).getTime()) / 3_600_000);
       const risk = d.insight_id ? (riskByInsight.get(d.insight_id) ?? "") : "";
       lines.push(
         [
@@ -528,10 +522,7 @@ function AdminDecisionsPage() {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent>
-                <AutoApprovalHeatmap
-                  decisions={decisions}
-                  tenantNameById={tenantNameById}
-                />
+                <AutoApprovalHeatmap decisions={decisions} tenantNameById={tenantNameById} />
               </CardContent>
             </CollapsibleContent>
           </Card>
@@ -600,8 +591,7 @@ function AdminDecisionsPage() {
                   <TableHead className="w-10">
                     <Checkbox
                       checked={
-                        selected.size === filteredDecisions.length &&
-                        filteredDecisions.length > 0
+                        selected.size === filteredDecisions.length && filteredDecisions.length > 0
                       }
                       onCheckedChange={toggleAll}
                     />
@@ -623,9 +613,7 @@ function AdminDecisionsPage() {
                   );
                   const stale = ageHours >= 24;
                   const isSel = selected.has(d.id);
-                  const risk = d.insight_id
-                    ? (riskByInsight.get(d.insight_id) ?? null)
-                    : null;
+                  const risk = d.insight_id ? (riskByInsight.get(d.insight_id) ?? null) : null;
                   return (
                     <TableRow key={d.id} data-state={isSel ? "selected" : undefined}>
                       <TableCell>
@@ -835,10 +823,7 @@ function DecisionDetailDialog({
                 }
               />
               <Stat label="Status" value={decision.status} />
-              <Stat
-                label="Approval"
-                value={decision.requires_approval ? "manual" : "auto"}
-              />
+              <Stat label="Approval" value={decision.requires_approval ? "manual" : "auto"} />
               <Stat label="Executed" value={decision.executed_at ? "✓" : "—"} />
             </div>
 
@@ -852,13 +837,9 @@ function DecisionDetailDialog({
               }
             >
               {decision.rationale ? (
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                  {decision.rationale}
-                </p>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">{decision.rationale}</p>
               ) : (
-                <p className="text-xs text-muted-foreground italic">
-                  Агент не залишив пояснення.
-                </p>
+                <p className="text-xs text-muted-foreground italic">Агент не залишив пояснення.</p>
               )}
             </Section>
 
@@ -878,9 +859,7 @@ function DecisionDetailDialog({
             <Section
               title="Payload (повні параметри дії)"
               action={
-                decision.payload ? (
-                  <CopyButton value={decision.payload} label="Payload" />
-                ) : null
+                decision.payload ? <CopyButton value={decision.payload} label="Payload" /> : null
               }
             >
               <JsonBlock value={decision.payload} />
@@ -941,9 +920,7 @@ function DecisionDetailDialog({
                   )}
                   {insight.metrics && Object.keys(insight.metrics).length > 0 && (
                     <details className="text-xs">
-                      <summary className="cursor-pointer text-muted-foreground">
-                        Metrics
-                      </summary>
+                      <summary className="cursor-pointer text-muted-foreground">Metrics</summary>
                       <JsonBlock value={insight.metrics} />
                     </details>
                   )}
@@ -1038,11 +1015,7 @@ function DecisionDetailDialog({
 
         <div className="flex flex-wrap justify-end gap-2 border-t pt-4">
           {insight && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onOpenInsight(insight)}
-            >
+            <Button variant="outline" size="sm" onClick={() => onOpenInsight(insight)}>
               <Sparkles className="mr-1 h-4 w-4" /> Переглянути insight
             </Button>
           )}
@@ -1233,9 +1206,7 @@ function InsightDetailDialog({
 
             {insight.description && (
               <Section title="Опис">
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                  {insight.description}
-                </p>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">{insight.description}</p>
               </Section>
             )}
 
@@ -1256,9 +1227,7 @@ function InsightDetailDialog({
             <Section
               title="Метрики (full payload)"
               action={
-                insight.metrics ? (
-                  <CopyButton value={insight.metrics} label="Metrics" />
-                ) : null
+                insight.metrics ? <CopyButton value={insight.metrics} label="Metrics" /> : null
               }
             >
               <JsonBlock value={insight.metrics} />
@@ -1285,12 +1254,8 @@ function InsightDetailDialog({
                           {ACTION_TYPE_LABELS[d.action_type] ?? d.action_type}
                         </Badge>
                         <Badge variant="secondary">{d.status}</Badge>
-                        {d.approved_by_auto && (
-                          <Badge variant="default">auto</Badge>
-                        )}
-                        <span className="text-muted-foreground">
-                          {fmtDate(d.created_at)}
-                        </span>
+                        {d.approved_by_auto && <Badge variant="default">auto</Badge>}
+                        <span className="text-muted-foreground">{fmtDate(d.created_at)}</span>
                         <ArrowUpRight className="ml-auto h-3.5 w-3.5 text-muted-foreground" />
                       </div>
                       {d.title && <p className="mt-1 text-sm">{d.title}</p>}
@@ -1304,9 +1269,7 @@ function InsightDetailDialog({
               {loading ? (
                 <Skeleton className="h-16 w-full" />
               ) : outcomes.length === 0 ? (
-                <p className="text-xs text-muted-foreground italic">
-                  Outcomes ще не виміряні.
-                </p>
+                <p className="text-xs text-muted-foreground italic">Outcomes ще не виміряні.</p>
               ) : (
                 <div className="space-y-2">
                   {outcomes.map((o) => (
@@ -1321,23 +1284,15 @@ function InsightDetailDialog({
                                 : "secondary"
                           }
                         >
-                          {o.success === true
-                            ? "win"
-                            : o.success === false
-                              ? "loss"
-                              : "neutral"}
+                          {o.success === true ? "win" : o.success === false ? "loss" : "neutral"}
                         </Badge>
                         {o.measurement_window && (
                           <Badge variant="outline">{o.measurement_window}</Badge>
                         )}
-                        <span className="text-muted-foreground">
-                          {fmtDate(o.measured_at)}
-                        </span>
+                        <span className="text-muted-foreground">{fmtDate(o.measured_at)}</span>
                         <span>· {fmtMoney(o.attributed_revenue_cents)}</span>
                       </div>
-                      {o.notes && (
-                        <p className="mt-1 text-muted-foreground">{o.notes}</p>
-                      )}
+                      {o.notes && <p className="mt-1 text-muted-foreground">{o.notes}</p>}
                     </div>
                   ))}
                 </div>

@@ -52,15 +52,13 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    supabase
-      .rpc("get_acos_stats", { _tenant_id: tenantId })
-      .then(({ data, error }) => {
-        if (!mounted) return;
-        if (!error && data && (data as { ok?: boolean }).ok) {
-          setStats(data as unknown as Stats);
-        }
-        setLoading(false);
-      });
+    supabase.rpc("get_acos_stats", { _tenant_id: tenantId }).then(({ data, error }) => {
+      if (!mounted) return;
+      if (!error && data && (data as { ok?: boolean }).ok) {
+        setStats(data as unknown as Stats);
+      }
+      setLoading(false);
+    });
     return () => {
       mounted = false;
     };
@@ -79,9 +77,7 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
       : null;
   const totalApproved = stats.approval_split.auto_count + stats.approval_split.manual_count;
   const autoPct =
-    totalApproved > 0
-      ? Math.round((stats.approval_split.auto_count / totalApproved) * 100)
-      : 0;
+    totalApproved > 0 ? Math.round((stats.approval_split.auto_count / totalApproved) * 100) : 0;
 
   return (
     <Card>
@@ -90,9 +86,7 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
           <Activity className="h-5 w-5" />
           AI Activity Summary
         </CardTitle>
-        <CardDescription>
-          Що автономна система зробила для вашого бізнесу
-        </CardDescription>
+        <CardDescription>Що автономна система зробила для вашого бізнесу</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Top KPIs */}
@@ -130,9 +124,7 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
         {/* By type */}
         {stats.by_type.length > 0 && (
           <div>
-            <p className="mb-2 text-xs font-medium text-muted-foreground">
-              Топ дій за 30 днів
-            </p>
+            <p className="mb-2 text-xs font-medium text-muted-foreground">Топ дій за 30 днів</p>
             <div className="flex flex-wrap gap-2">
               {stats.by_type.map((row) => (
                 <Badge key={row.action_type} variant="secondary" className="gap-1">
@@ -148,10 +140,9 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
         {/* Bootstrap notice */}
         {stats.outcomes.measured === 0 && stats.done.all > 0 && (
           <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-xs text-muted-foreground">
-            Auto-approval працює у <strong>bootstrap-режимі</strong> (до 3 дій
-            на тип). Перші вимірювання з'являться через 24 год після виконання
-            дій — після цього система перейде у режим навчання на історії та
-            почне приймати рішення на основі реального win-rate.
+            Auto-approval працює у <strong>bootstrap-режимі</strong> (до 3 дій на тип). Перші
+            вимірювання з'являться через 24 год після виконання дій — після цього система перейде у
+            режим навчання на історії та почне приймати рішення на основі реального win-rate.
           </div>
         )}
       </CardContent>

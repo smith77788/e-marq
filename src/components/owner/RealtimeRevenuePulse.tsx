@@ -143,10 +143,7 @@ export function RealtimeRevenuePulse({ tenantId }: Props) {
             />
             Live Revenue Pulse · 24h
           </CardTitle>
-          <Badge
-            variant="outline"
-            className="text-[10px] border-primary/40 text-primary"
-          >
+          <Badge variant="outline" className="text-[10px] border-primary/40 text-primary">
             <Activity className="mr-1 h-2.5 w-2.5 animate-pulse" />
             REALTIME
           </Badge>

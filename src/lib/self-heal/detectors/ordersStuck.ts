@@ -33,7 +33,11 @@ export const detectOrdersStuck: DetectorFn = async ({ tenantId }) => {
       severity: total > 10 ? "p1" : "p2",
       title: `${total} orders stuck in pending >48h`,
       root_cause: "Orders not transitioning out of pending state — payment/processing issue likely",
-      scope: { tenant_id: tenantId, count: total, sample_ids: orders.slice(0, 10).map((o) => o.id) },
+      scope: {
+        tenant_id: tenantId,
+        count: total,
+        sample_ids: orders.slice(0, 10).map((o) => o.id),
+      },
       fingerprint: `orders_stuck:${tenantId}`,
       regression_risk: "high", // touching orders = high risk → always PROPOSE
       proposed_actions: [

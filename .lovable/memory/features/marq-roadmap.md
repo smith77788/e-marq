@@ -9,6 +9,7 @@ type: feature
 **Pilot tenant:** BASIC.FOOD (натуральні ласощі для собак і котів, UA)
 
 ## Правила без винятків
+
 - Кожен рядок коду слідує існуючим патернам
 - Не переписуєш робочий код — лише розширюєш
 - TypeScript strict, нуль `any`
@@ -16,6 +17,7 @@ type: feature
 - Весь UI текст через `useT()` / `tStatic()`
 
 ## Існуючі утиліти (використовувати, не переписувати)
+
 - `src/lib/acos/agentRuntime.ts` — authorizeAgentRequest, startAgentRun, finishAgentRun, failAgentRun, insertInsightsDedup
 - `src/lib/money.ts` — formatMoney(cents), formatMoneyCompact(cents)
 - `src/lib/i18n.ts` — useT(), tStatic()
@@ -27,6 +29,7 @@ type: feature
 ## Sprints
 
 ### Sprint 1 — DB Foundation ✅ (частково зроблено)
+
 - product_catalog_v2.sql: product_variants, product_images, collections, collection_products
 - ALTER products: compare_at_price_cents, url_handle, tags, weight_grams, seo_title/description, has_variants
 - ALTER orders: shipping_address, shipping_method, shipping_cost_cents, payment_method, payment_ref, tracking_number/url, paid_at, fulfilled_at, notes
@@ -36,19 +39,23 @@ type: feature
 - RPC: validate_discount_code, get_storefront_products_v2
 
 ### Sprint 2 — Storefront ✅ (частково)
+
 - s.$slug._layout / index / products.$productId / search / collections / checkout
 - ShippingSelector + Nova Poshta API proxy (np-cities, np-warehouses)
 
 ### Sprint 3 — Admin Catalog ✅ (частково)
+
 - brand.products, brand.products.$productId (tabs), brand.orders, brand.catalog
 - AppSidebar нав, Tabs у brand.tsx
 
 ### Sprint 4 — Email + Payments ✅ (готово)
+
 - Resend gateway, templates, webhooks, suppression, unsubscribe ✅
 - EmailDomainCard, EmailCampaignsCard ✅
 - TenantConfigForm: розширено payments секцію (manual + LiqPay + WayForPay + Monobank) ✅
 
 ### Sprint 7 — UA Payment Gateways ✅ (готово)
+
 - DB: payment_intents, payment_callbacks_log, RPC create_payment_intent / mark_payment_failed / mark_order_paid_by_gateway ✅
 - Server libs: `liqpay.server.ts` (SHA1), `wayforpay.server.ts` (HMAC-MD5), `monobank.server.ts` (Invoice API) ✅
 - Public routes: `/api/public/payments/{liqpay,wayforpay,monobank}-{init,callback}` ✅
@@ -57,14 +64,16 @@ type: feature
 - Спільна типізація `PaymentMethod` (manual | liqpay | wayforpay | monobank) ✅
 
 ### Sprint 5 — Promotions + Loyalty ✅ (готово)
+
 - brand.promotions: повний CRUD промокодів (percent_off / fixed_off / free_shipping)
 - validate_discount_code інтегровано в checkout
 - LoyaltyCard.tsx (admin: pts/100uah, uah/pt, min_redeem, on/off, stats)
 - validate_loyalty_redeem RPC + award_loyalty_points_on_paid trigger
-- place_storefront_order розширено _loyalty_redeem_points + _promo_code
+- place_storefront_order розширено \_loyalty_redeem_points + \_promo_code
 - Checkout: блок «Бали лояльності» (баланс, списання, projection earn)
 
 ### Sprint 6 — New Agents ✅ (готово)
+
 - agents.email-abandoned-cart ✅
 - agents.email-winback (auto-generated WINBACK-XXXXXX promo) ✅
 - agents.email-post-purchase (review request +6–8d) ✅
@@ -74,6 +83,7 @@ type: feature
 - Усі 5 агентів зареєстровані в agents.run-all.ts ✅
 
 ### Sprint 8 — Email UX consolidation ✅ (готово)
+
 - Окрема сторінка `/brand/email` з 3 табами: Кампанії / Автоматизації / Налаштування ✅
 - Новий `EmailAutomationsCard` — 5 toggle для email-сценаріїв; стан у `tenant_configs.features.email_automations.{key}` ✅
 - `EmailCampaignsCard` перенесено з `/brand/promotions` → `/brand/email#campaigns` ✅
@@ -82,6 +92,7 @@ type: feature
 - i18n: 18 нових ключів (UA + EN) для табів і автоматизацій ✅
 
 ### Sprint 9 — Email automation flags wiring ✅ (готово)
+
 - Новий helper `src/lib/acos/emailAutomationFlags.ts` — `isEmailAutomationEnabled(tenantId, key)` ✅
 - Усі 5 email-агентів роблять early-return з `reason: "disabled_by_owner"` коли власник вимкнув toggle: ✅
   - `agents.email-abandoned-cart` → `abandoned_cart`
@@ -93,6 +104,7 @@ type: feature
 - `tsc --noEmit` чистий ✅
 
 ### Sprint 10 — Bulk Promo Generator + Source-of-truth ✅ (готово)
+
 - `.lovable/MARQ_PROMPT_V2.md` зафіксовано як джерело істини ✅
 - Memory оновлено (`mem://features/marq-prompt-v2`) ✅
 - `BulkPromoGeneratorDialog.tsx` — генерація 1–500 кодів (percent_off / fixed_off / free_shipping), кастомний префікс, безконфліктна вибірка, CSV-експорт ✅
@@ -100,9 +112,11 @@ type: feature
 - 14 нових i18n ключів `bpr.bulk.*` (UA + EN) ✅
 
 ### Sprint 11 — White-label Site Builder ✅ (готово)
+
 **Мета:** дати бренду згенерувати власний публічний сайт на основі шаблону **My Food Diary** (project ID `a74eaa2d-62ac-4a30-98d6-1c37f45f6f79`, https://basicfood.lovable.app) — повна функціональна копія під його бренд, видана у вигляді ZIP-архіву з готовим до деплою кодом.
 
 **Етап 11.1 — Реєстр шаблонів і брендингу (DB)**
+
 - Нова міграція `site_builder.sql`:
   - `site_templates` (id, key="mfd", name, description, source_repo, source_commit, default_locale, is_active, preview_url, capabilities jsonb)
   - `site_brand_profiles` (tenant_id, template_id, brand_name, tagline, description, logo_url, favicon_url, primary_color, accent_color, font_family, contact_email, contact_phone, social_links jsonb, custom_domain, locale, currency, legal_entity, address, updated_at) — UNIQUE(tenant_id, template_id)
@@ -111,19 +125,22 @@ type: feature
 - Storage bucket `site-builds` (private, signed URL ~24h)
 
 **Етап 11.2 — Snapshot шаблону MFD**
+
 - Server-only задача `hooks/site-builder.snapshot-mfd.ts`:
-  - Читає файли через `cross_project--read_project_file` (whitelist: src/**, public/**, package.json, vite.config.ts, tailwind.config.ts, index.html, supabase/migrations/**, README)
-  - Виключає: .env, supabase/.temp, node_modules, lockfiles, .lovable/**, *.log
+  - Читає файли через `cross_project--read_project_file` (whitelist: src/**, public/**, package.json, vite.config.ts, tailwind.config.ts, index.html, supabase/migrations/\*\*, README)
+  - Виключає: .env, supabase/.temp, node_modules, lockfiles, .lovable/\*_, _.log
   - Зберігає манifest у `site_templates.capabilities.snapshot` + сирі файли в bucket `site-template-snapshots/mfd/<commit>/`
 - Запускається вручну адміністратором (не клієнтом)
 
 **Етап 11.3 — Підготовка контексту бренду**
+
 - `src/lib/site-builder/brandContext.ts`:
   - `loadBrandProfile(tenantId, templateId)` — мердж `site_brand_profiles` + `tenant_configs` (logo, brand_name, seo, payment keys → only public ones)
   - `validateBrandProfile()` — перевірка обов'язкових полів (brand_name, primary_color, contact_email)
   - НЕ копіюємо приватні ключі (Resend, LiqPay private, Monobank token, MARQ_WEBHOOK_SECRET)
 
 **Етап 11.4 — UI: майстер у брендовому кабінеті**
+
 - Нова сторінка `/brand/site-builder`:
   - Вкладка «Profile»: форма з усіма полями `site_brand_profiles` + preview логотипу/палітри
   - Вкладка «Theme»: 5 пресетів кольорів (oklch tokens), live-preview карти/кнопки
@@ -133,6 +150,7 @@ type: feature
 - Sidebar: пункт «Site Builder» (sb.site_builder) у групі «Магазин»
 
 **Етап 11.5 — Білд-пайплайн (server function)**
+
 - `src/routes/api/site-builder.build.ts` (POST, auth required):
   1. Перевірити права (owner / admin тенанта)
   2. Валідувати `site_brand_profiles` запис
@@ -154,12 +172,14 @@ type: feature
   6. На failure → status='failed', error=stack
 
 **Етап 11.6 — Безпека**
+
 - ZIP НЕ містить: `MARQ_WEBHOOK_SECRET`, Resend API key, LiqPay private key, Monobank token, service-role keys, `.lovable/**`
 - Public anon Supabase URL/key → у `.env.example` як plaintext placeholder з коментарем «створіть свій проект»
 - Власник бренду генерує не частіше ніж раз на 5 хв (rate limit у server function)
 - ZIP signed URL живе 24h, після цього потрібно перегенерувати посилання
 
 **Етап 11.7 — Тести й перевірка ✅**
+
 - `tsc --noEmit` чистий ✅
 - JSZip Worker-сумісний (smoke-test проходить) ✅
 - Bucket `site-builds` приватний, signed URL 24h ✅
@@ -170,6 +190,7 @@ type: feature
 - i18n: усі нові тексти через `useT()` (UA + EN) ✅
 
 **Етап 11.8 — Richer overlay ✅**
+
 - Повний `src/index.css` (HSL tokens, dark/light, утиліти, a11y) з підставленими брендовими `--primary`/`--accent`/`--ring` ✅
 - `REMIX_GUIDE.md` — 10 кроків від remix до publish, із врахуванням custom_domain ✅
 - `seed.json` — машино-читний контент (hero / about / contacts / theme / categories) для one-shot вставки через Lovable chat ✅
@@ -178,16 +199,19 @@ type: feature
 - TS чистий, smoke-test ZIP проходить, секретів немає ✅
 
 **Залежності з MFD-проекту:**
+
 - Шаблон витягуємо з `cross_project` API під час snapshot-етапу
 - За кожним relevant апдейтом MFD адмін MARQ запускає re-snapshot → версія в `site_templates.source_commit`
 
 ### Sprint 12 — Inline превʼю контенту в адмінці ✅ (готово)
+
 - Усі посилання, які раніше відкривали `/m/<slug>` в новій вкладці lovable, тепер відкривають **MagnetPreviewDialog** (модал) одразу в адмінці.
 - Спільна утиліта `src/lib/markdown.ts` (renderMarkdown + escapeHtml) для inline-показу. `m.$slug.tsx` теж її використовує.
 - У модалі: повний body, мета-опис, теги, статистика views/signups, кнопка «Відкрити публічну сторінку» для шерингу.
 - **Правило для майбутніх фіч:** усі внутрішні артефакти (магніти, content_pages, drafts, insights body) показувати inline через Dialog/Drawer, а не через переходи на окремі публічні сторінки. Публічні `/m/`, `/s/` лишаються тільки для зовнішніх читачів.
 
 ## Абсолютні заборони
+
 - НЕ редагувати існуючі міграції
 - НЕ міняти agentRuntime.ts
 - НЕ вводити нові UI бібліотеки (тільки @radix-ui / shadcn/ui)
@@ -198,6 +222,7 @@ type: feature
 - НЕ видаляти DN Trade інтеграцію
 
 ## Чекліст готовності модуля
+
 - [ ] Migration застосована
 - [ ] `tsc --noEmit` чистий
 - [ ] Server functions з try/catch
@@ -209,6 +234,7 @@ type: feature
 - [ ] Нові агенти видно в AcosAgentRuns
 
 ### Sprint 13 — Human-friendly agent toasts ✅
+
 - `src/lib/outreach/agentSummary.ts`: friendlyAgentSummary / friendlyAgentError / agentLabel
 - Toast більше не показує сирий JSON `{"<tenantId>":{"skipped":"instagram_inactive"}}`
 - Замість `instagram_inactive` користувач бачить "Instagram вимкнено в налаштуваннях outreach"
@@ -217,6 +243,7 @@ type: feature
 - Застосовано в Lead Radar (admin.lead-radar.tsx) та Outreach Hunter (OutreachHunterTabs.tsx)
 
 ### Sprint 14 — Brand-aware lead agents ✅
+
 - `src/lib/lead/brandContext.ts`: getAllTenantBrandContexts() + getTenantBrandContext()
 - Авто-синтез `bootstrap_facts.brand_profile` з products/seo/content_pages, якщо профілю ще немає
 - Web Prospector тепер генерує DuckDuckGo-запити з категорій і ключових слів КОЖНОГО тенанта (не hardcoded UA-нішами)
@@ -227,6 +254,7 @@ type: feature
 - Агенти працюють з першого дня без ручної настройки — bootstrap-дані синтезуються автоматично
 
 ### Sprint 15 — Inline довідка замість зовнішніх посилань ✅
+
 - Новий `src/components/layout/HandbookSheet.tsx` — повноцінний Sheet з 6 табами (Швидкий старт, Власник, Адмін, Агенти, Інтеграції, FAQ), всі дані з тих самих i18n ключів, що й `/handbook`
 - Кнопка «Посібник» у sidebar більше не веде на окрему сторінку — відкриває inline-Sheet прямо в кабінеті
 - Опціональна кнопка «Відкрити повний посібник» залишилася для тих, хто хоче поділитись посиланням
@@ -234,6 +262,7 @@ type: feature
 - Маркетингова сторінка `/handbook` залишається для зовнішніх відвідувачів і SEO
 
 ### Sprint 16 — Mobile polish + Lead Radar UA-локалізація ✅
+
 - Lead Radar повністю українською: статуси (знайдені/відібрані/у роботі/стали клієнтами/відхилені/не вдалось зв'язатись), кнопки агентів («Знайти бренди в інтернеті», «Підготувати листи», «Згенерувати SEO-сторінки»), таби («Звернення», «Глибокий пошук»), per-row actions («Написати»/«Відібрати»), бейдж "відповідність N" замість "fit N"
 - Кнопки агентів стали full-width на мобільному, з власним per-button loader (раніше всі три блимали разом)
 - Header кабінету (`_authenticated.tsx`) адаптовано під 394px:
@@ -246,6 +275,7 @@ type: feature
 - ProspectRow stack на mobile (flex-col) → action-кнопки переходять на новий рядок, не вилазять
 
 ### Sprint 17 — Code hygiene pass ✅
+
 - `prettier --write src/**` пройшов: відформатовано outreach-reddit-hunter, outreach-roi-collector, тощо
 - Виправлено 5 lint-помилок:
   - `src/components/ui/input-otp.tsx` — прибрано `as any`, додано типізацію `OTPInputContext.slots`
@@ -256,6 +286,7 @@ type: feature
 - Console + network: жодних 4xx/5xx, жодних client-side runtime errors
 
 ### Sprint 18 — Власний Telegram-бот для Lead Radar / Outreach Hunter ✅
+
 - Новий API: `GET/POST /api/telegram/status` — getMe через connector gateway + керування `outreach_settings.active_channels.{telegram,instagram}`
 - Новий компонент `src/components/owner/TelegramConnectCard.tsx` — статус бота (@username), Switch для увімкнення Telegram-агентів, опціонально й Instagram
 - Інтегровано в Lead Radar (`/admin/lead-radar`) — картка під header
@@ -263,21 +294,25 @@ type: feature
 - Усе залишається в межах кабінету: відповіді надсилаються через `sendTelegramText` без переходу в зовнішні панелі
 
 ### Sprint 19 — TelegramConnectCard polish + integrations link fix ✅
+
 - Виправлено битий маршрут «Підключити Telegram»: було `/integrations` (404) → стало `/brand/integrations`
 - Прибрано конфлікт `Button asChild + onClick` (toast блокував focus-handling клонованого `<a>`); тепер чистий navigation
 - TS `tsc --noEmit` 0 errors, ESLint 0 errors на нових файлах
 - Переконались що TelegramConnectCard коректно ховається/розгортається на 394px (Switch + checkbox у колонку, кнопка full-width)
 
 ### Sprint 22 — TelegramConnectCard hardening + повна перевірка ✅
+
 - **Bug fix у `TelegramConnectCard`**: вираз `if (!r.ok && r.status !== 200)` був надлишковим (`!r.ok` вже виключає 2xx). Замінено на чисте `if (!r.ok)`. Поведінка раніше була правильна випадково — тепер код самодокументований і не залежить від збігу.
 - **Mobile (394px)**: у disconnected-стані «Підключити Telegram» + «Оновити стан» обгорнуто в `flex flex-col gap-2 sm:flex-row`. Тепер обидві кнопки full-width на mobile, не наїжджають одна на одну. Перевірено на 394×665 viewport.
 - **Project-wide hygiene**: `prettier --write src/**` повторно (новий `types.ts` після підключення Telegram-схеми втратив форматування — повернули). `tsc --noEmit` 0 errors, ESLint 0 errors (15 fast-refresh warnings — shadcn/router, не критично).
 - **Чекап інтеграції**: `/api/telegram/status` GET повертає 200 з `error/hint` коли connector не підключено — клієнт коректно показує блок «Не підключено» без throw. POST правильно мерджить existing channels (не перетирає reddit/google/blog).
 
 ### Sprint 23 — Reanimation Phase 2: cron infrastructure fixes ✅
+
 **Контекст:** після першої фази реанімації (Sprint 21) виявлено що 75+ агентів НЕ запускались на проді, тільки `agents/tick` (sales-bot + dispatch). Корінь — heavy `cron-all` таймаутив (>8с) бо викликав 75 агентів послідовно.
 
 **Виправлено:**
+
 1. **Дубль `telegram-poll`** видалено (`telegram-poll-every-minute` конфліктував з `marq-telegram-poll-2min` → 409 «two getUpdates instances»).
 2. **5 cron-задач** переведено з нестабільного `id-preview--*.lovable.app` (404 HTML) на стабільний `e-marq.lovable.app`: abandoned-cart-all, feedback-loop-all, reorder-all, sales-bot-all, winback-all.
 3. **Heavy `cron-all` (timeout)** замінено на 5 chunked-cron'ів через новий `/hooks/agents/cron-chunk`:
@@ -286,20 +321,23 @@ type: feature
    - `agents-chunk-ops-daily` @ 08:00 (12 ops/safety)
    - `agents-chunk-retention-daily` @ 09:00 (16 retention/email)
    - `agents-chunk-lead-gen-30min` (6 multi-tenant)
-   Кожен chunk: tenants × agents паралельно, без вкладеного fetch-каскаду.
+     Кожен chunk: tenants × agents паралельно, без вкладеного fetch-каскаду.
 4. **Google-hunter intent threshold** опущено з 0.15 до 0.10 + дозволено `en` (раніше викидало 9 матчів — `BARF`/`raw food` запити майже завжди en).
 5. **Telegram min intent score** для basic-food опущено з 0.18 до 0.10.
 
 **Залишається (потребує дій користувача):**
+
 - DNTrade: `dntrade-cron` вертає `"no api key"` → користувач має внести API-ключ у `/brand/integrations`.
 - MTProto bridge не розгорнуто → 0 сесій, 0 виконаних tg-user-actions. Потрібен Node-host (Sprint 20).
 
 ## Backlog
 
 ### Sprint 20 — Керування від імені особистого Telegram-акаунта (не бота) ⏳ (DB+API+UI+Manual DM готові, чекаємо MTProto bridge runtime + secrets)
+
 **Мета:** дати власнику можливість виконувати дії в Lead Radar / Outreach Hunter не від імені бренд-бота, а від його власного особистого Telegram-профілю — як вручну з кабінету, так і автоматизовано агентами на їх розсуд.
 
 **Що має вміти агент від імені користувача:**
+
 - Залишати коментарі під постами в публічних каналах і чатах (де є ком'юніті)
 - Писати в особисті повідомлення цільовим користувачам / адмінам каналів
 - Ставити позитивні / негативні реакції (👍 ❤️ 🔥 / 👎 💩) на повідомлення в каналах
@@ -307,6 +345,7 @@ type: feature
 - Читати канали з telegram_channels (вже частково є через RSS, але user-account дає повний доступ без bot-обмежень)
 
 **Архітектурні рішення (фіксуємо для майбутньої реалізації):**
+
 - **MTProto клієнт, не Bot API.** Bot API не дає коментувати, ставити реакції чи писати незнайомим. Потрібен user-mode (gramjs / telethon-style). Через Worker SSR прямо неможливо (нема довгих TCP-сесій) — тому окремий runner поза Worker (Node host або self-hosted runner з cron pull-job).
 - **Авторизація:** UI кабінету веде через Login flow (phone → 2FA code → password). Зберігаємо StringSession **зашифровано** в `tenant_secrets.telegram_user_session` (новий стовпчик або JSONB у `tenant_configs.bot.telegram_user`). Шифрування — Supabase Vault або власний AES-GCM з MARQ_WEBHOOK_SECRET-похідним ключем.
 - **Per-tenant ізоляція:** одна сесія на тенанта. Owner може в будь-який момент Logout (revoke + clear session).
@@ -321,6 +360,7 @@ type: feature
 - **Compliance:** показуємо warning при підключенні («ваш особистий аккаунт — Telegram може забанити за спам, MARQ не несе відповідальності»). Logs зберігаються 90д для аудиту.
 
 **Поточний стан:**
+
 1. ✅ DB: `tg_user_sessions` (encrypted_session, login_state, status), `tg_user_actions` (queue), `tg_user_quotas` (per-action limits + delays + autonomy switch), `tg_user_action_log` + RPC `tg_user_count_actions`
 2. ✅ Bridge client: `src/lib/telegram/mtprotoBridge.ts` — HMAC-signed HTTPS до зовнішнього Node-сервісу (gramjs/Telethon). AES-GCM helpers для session blobs. ENV: `TG_MTPROTO_BRIDGE_URL`, `TG_MTPROTO_BRIDGE_SECRET`, `TG_SESSION_ENC_KEY` (поки не задані — UI показує warning).
 3. ✅ API роути: `/api/telegram/user/{status,send-code,sign-in}` — phone → SMS code → optional 2FA password.
@@ -330,13 +370,16 @@ type: feature
 7. ⏳ TODO: Manual action UI на prospect-row (3 кнопки), `agents.outreach-user-engager` для авто-інженджменту з risk-mode, виклик executor у `agents.cron-all`.
 
 ### Sprint 21 (planned) — Скарги на Telegram (reports на чат / канал / бот / профіль / повідомлення)
+
 **Мета:** дати власнику (вручну) і агентам (автоматично, з обережністю) можливість надсилати **офіційні скарги** в Telegram на спам/фрод/контрафакт, що шкодить бренду — без виходу з кабінету MARQ.
 
 **Сценарій використання:**
+
 - Outreach Hunter / Lead Radar знайшов канал, що паразитує на бренді (фейковий магазин «BASIC.FOOD», скам-бот, фішинг-група) → одна кнопка «Поскаржитись» → агент обирає категорію скарги, генерує текст обґрунтування, відправляє.
 - Кожна скарга логається з тенант-ідентифікатором, причиною, текстом, відповіддю Telegram, статусом.
 
 **Що скаржимо (Telegram entity types):**
+
 - **Channel** (`@channel`) — публічний канал
 - **Group / Supergroup** (`@chat`) — публічний чат
 - **Bot** (`@bot`) — автоматизований бот
@@ -344,6 +387,7 @@ type: feature
 - **Message** — конкретне повідомлення (потрібен `chat_id` + `message_id`)
 
 **Категорії скарги (з офіційного Telegram API — `InputReportReason`):**
+
 - `inputReportReasonSpam` — спам
 - `inputReportReasonViolence` — насильство
 - `inputReportReasonPornography` — порнографія
@@ -356,11 +400,13 @@ type: feature
 - `inputReportReasonOther` — інше (з обов'язковим текстом-описом)
 
 **Архітектурні обмеження (важливо!):**
+
 - **Bot API НЕ підтримує скарги.** Жоден `report*` метод недоступний через Telegram Bot API → **тільки MTProto (user-mode)**. Тобто скарги йдуть через ту ж саму external-runner інфраструктуру, що й Sprint 20 (gramjs).
 - Без активної user-session (Sprint 20) функціонал **disabled** — UI показує блокер «Підключіть особистий Telegram-акаунт у налаштуваннях».
 - Telegram rate-limits скарги жорстко (флуд-вейт + бан за зловживання) → жорсткий quota: **≤5 скарг/добу/тенант**, **≤1 скарга/хв**, **≤1 скарга на ту саму ціль/30 днів**.
 
 **DB:**
+
 - Нова таблиця `telegram_abuse_reports`:
   - `id`, `tenant_id`, `actor` ('owner' | 'agent:<agent_id>'), `actor_user_id` (auth.users.id або null для агента)
   - `target_kind` ('channel' | 'chat' | 'bot' | 'user' | 'message')
@@ -374,6 +420,7 @@ type: feature
 - RLS: тенант бачить тільки свої записи; запис створює тільки owner/admin або service-role (для агента)
 
 **UI (новий компонент `TelegramReportDialog.tsx`):**
+
 - Викликається з: Lead Radar prospect-row, Outreach Hunter post-row, та з контекстного меню в `OrderTelegramChat`
 - 3 кроки:
   1. **Target** — auto-fill з контексту (channel/chat/bot/user/message), readonly preview
@@ -383,12 +430,14 @@ type: feature
 - Показ quota: «Сьогодні: 2/5 скарг», «Остання скарга на цей канал: 12 днів тому»
 
 **Agent mode (`agents.telegram-report-watchdog`):**
+
 - Сканує `prospects` + `outreach_actions` із signals `is_brand_impersonation`, `is_scam`, `copyright_violation`
 - Для кандидатів **risk≤medium** → автоматично формує скаргу (reason=`inputReportReasonFake` або `inputReportReasonCopyright`)
 - Для **risk=high** → створює `pending_approval` запис, owner затверджує в UI
 - Виконується раз на добу, не швидше
 
 **Server flow:**
+
 - `src/routes/api/telegram.report.ts` (POST, auth required):
   1. Validate Zod schema (target_kind + reason_code + reason_text 50-500 chars)
   2. Quota check (5/добу, 1/30д на ту саму ціль)
@@ -398,12 +447,14 @@ type: feature
 - Runner-side (Node host): `gramjs` `client.invoke(new Api.messages.Report({...}))`
 
 **Compliance & UX:**
+
 - Warning в Dialog: «Скарга — серйозна дія. Telegram перевіряє ручно. Зловживання → бан вашого акаунта.»
 - Логи доступні в `/admin/lead-radar` → таб «Скарги»
 - Owner може скасувати queued-скаргу (поки runner не виконав)
 - Agent-mode default = **OFF** (toggle в `outreach_settings.user_account.reports_enabled`)
 
 **Етапи (коли почнемо):**
+
 1. DB: міграція `telegram_abuse_reports` + RLS + UNIQUE constraint
 2. UI: `TelegramReportDialog` + інтеграція в Lead Radar / Outreach Hunter row-actions
 3. Server: `/api/telegram/report` (queue insert + quota)
@@ -411,4 +462,3 @@ type: feature
 5. Agent: `agents.telegram-report-watchdog` (auto reports на impersonation/copyright)
 6. Логи + history view в `/admin/lead-radar` таб «Скарги»
 7. i18n: 30+ нових ключів (10 reason labels × 2 мови + UI strings)
-

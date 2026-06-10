@@ -80,19 +80,19 @@ export function ProductEconomicsPanel({ tenantId, productId, priceCents, currenc
       if (mn < 0 || mn > 100 || tgt < 0 || tgt > 100) {
         throw new Error("Margin має бути 0–100%");
       }
-      const { error } = await supabase
-        .from("product_economics")
-        .upsert(
-          [{
+      const { error } = await supabase.from("product_economics").upsert(
+        [
+          {
             tenant_id: tenantId,
             product_id: productId,
             cogs_cents: cogsCents,
             target_margin_pct: tgt,
             min_margin_pct: mn,
             notes: notes || null,
-          }],
-          { onConflict: "tenant_id,product_id" },
-        );
+          },
+        ],
+        { onConflict: "tenant_id,product_id" },
+      );
       if (error) throw error;
     },
     onSuccess: () => {
@@ -135,8 +135,8 @@ export function ProductEconomicsPanel({ tenantId, productId, priceCents, currenc
           Економіка товару
         </CardTitle>
         <CardDescription>
-          COGS і цільова маржа. Без цих даних AI-агент не наважиться запускати знижки чи
-          змінювати ціну автоматично — рішення піде в Inbox на ручне підтвердження.
+          COGS і цільова маржа. Без цих даних AI-агент не наважиться запускати знижки чи змінювати
+          ціну автоматично — рішення піде в Inbox на ручне підтвердження.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -203,9 +203,7 @@ export function ProductEconomicsPanel({ tenantId, productId, priceCents, currenc
               <>
                 {" "}
                 Макс. безпечна знижка:{" "}
-                <span className="font-semibold text-foreground">
-                  {maxDiscountPct.toFixed(1)}%
-                </span>
+                <span className="font-semibold text-foreground">{maxDiscountPct.toFixed(1)}%</span>
               </>
             )}
           </p>

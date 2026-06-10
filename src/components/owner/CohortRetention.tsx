@@ -127,9 +127,10 @@ export function CohortRetention({ tenantId }: Props) {
   }
 
   const totalCustomers = grid.rows.reduce((s, r) => s + r.size, 0);
-  const offsets = grid.source === "server"
-    ? Array.from({ length: MAX_OFFSET + 1 }, (_, i) => i)
-    : [0, 1, 2, 3, 4, 5];
+  const offsets =
+    grid.source === "server"
+      ? Array.from({ length: MAX_OFFSET + 1 }, (_, i) => i)
+      : [0, 1, 2, 3, 4, 5];
 
   return (
     <Card>

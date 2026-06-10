@@ -44,7 +44,11 @@ export const detectOutreachFailures: DetectorFn = async ({ tenantId }) => {
       severity: transient.length > 20 ? "p1" : "p2",
       title: `${transient.length} transient outreach failures`,
       root_cause: "Outreach actions failed with retryable reasons (network/timeout/etc.)",
-      scope: { tenant_id: tenantId, count: transient.length, channels: [...new Set(transient.map((t) => t.channel))] },
+      scope: {
+        tenant_id: tenantId,
+        count: transient.length,
+        channels: [...new Set(transient.map((t) => t.channel))],
+      },
       fingerprint: `outreach_failures:${tenantId}`,
       regression_risk: "low",
       proposed_actions: [

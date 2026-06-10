@@ -6,7 +6,7 @@ SET search_path TO 'public'
 AS $function$
 DECLARE
   _app_url text := 'https://e-marq.lovable.app';
-  _cron_secret text := 'mwmiGnvR5F4PIhHzFPg3wNd67fERqhBX9BtK68ErdEHVTMM8ssYqX_rII5c3hneY';
+  _cron_secret text := '<CRON_SECRET>';
 BEGIN
   BEGIN
     PERFORM net.http_post(

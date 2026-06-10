@@ -86,8 +86,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
 
         return jsonResponse({ ok: true });
       },
-      GET: async () =>
-        jsonResponse({ ok: true, hint: "Telegram webhook endpoint" }),
+      GET: async () => jsonResponse({ ok: true, hint: "Telegram webhook endpoint" }),
     },
   },
 });

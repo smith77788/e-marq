@@ -50,7 +50,8 @@ export function BudgetRecommendationsTable({ tenantId }: { tenantId: string | nu
       <CardHeader>
         <CardTitle>Рекомендації по бюджету</CardTitle>
         <CardDescription>
-          Автоматичний аналіз LTV/CAC і часу окупності каналів. Підтверджуйте зміни в Decision Inbox.
+          Автоматичний аналіз LTV/CAC і часу окупності каналів. Підтверджуйте зміни в Decision
+          Inbox.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -84,9 +85,7 @@ export function BudgetRecommendationsTable({ tenantId }: { tenantId: string | nu
                     )
                     .map((r) => {
                       const ltvCac =
-                        r.cac_cents > 0
-                          ? (r.predicted_ltv_cents / r.cac_cents).toFixed(2)
-                          : "—";
+                        r.cac_cents > 0 ? (r.predicted_ltv_cents / r.cac_cents).toFixed(2) : "—";
                       const tone =
                         r.recommendation === "scale"
                           ? "default"

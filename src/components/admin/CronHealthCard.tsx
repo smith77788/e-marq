@@ -86,15 +86,18 @@ export function CronHealthCard() {
           <>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               <Tile tone="ok" icon={CheckCircle2} label={t("hm.cron.healthy")} value={counts.ok} />
-              <Tile tone="warn" icon={AlertTriangle} label={t("hm.cron.warn")} value={counts.warn} />
+              <Tile
+                tone="warn"
+                icon={AlertTriangle}
+                label={t("hm.cron.warn")}
+                value={counts.warn}
+              />
               <Tile tone="fail" icon={XCircle} label={t("hm.cron.failing")} value={counts.fail} />
               <Tile tone="idle" icon={CircleDashed} label={t("hm.cron.idle")} value={counts.idle} />
             </div>
             {failing.length > 0 && (
               <div className="space-y-1.5">
-                <p className="text-xs font-medium text-muted-foreground">
-                  {t("hm.cron.worst")}
-                </p>
+                <p className="text-xs font-medium text-muted-foreground">{t("hm.cron.worst")}</p>
                 <ul className="space-y-1">
                   {failing.map((r) => (
                     <li

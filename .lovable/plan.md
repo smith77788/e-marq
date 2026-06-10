@@ -11,6 +11,7 @@
 ### Phase 1 — Розблокувати новий бренд одразу (найважливіше)
 
 **Migration:**
+
 - Поміняти `create_my_tenant`: новий tenant — одразу `status='active'`, але з прапорцем `verification_requested_at`. Супер-адмін може потім «verify» для розширених фіч (вищі ліміти, кастомний домен), але імпорт/Telegram/CSV — доступні з першої секунди.
 - Оновити `_authenticated/brand.integrations.tsx`: прибрати `isTenantActive`-gate (або лишити лише для платних інтеграцій типу custom domain). Дозволити Connect/Sync для всіх ready-провайдерів.
 - На `/brand` залишити м'який банер «Бренд новий — деякі ліміти знижені поки не верифікований», без блокувань.
@@ -24,6 +25,7 @@
 ### Phase 3 — Один цілісний «Connect your store» крок в onboarding
 
 Замість поточних окремих Steps 3 (товари вручну) + 4 (CSV клієнтів):
+
 - Об'єднати в один крок «Підключіть джерело даних» з трьома великими опціями:
   1. **«У мене є магазин Shopify/WooCommerce/REST»** → відкриває `IntegrationWizard` з відповідним провайдером.
   2. **«Імпортую CSV/Excel»** → відкриває file-based wizard, мапить products+customers+orders.
@@ -37,7 +39,7 @@
 
 ### Phase 5 — Verify & ship
 
-1. Створити дві тестові сесії (через існуючі tenants Coffe shops, Кавовий рай) — переконатися, що в обох усі фічі working. 
+1. Створити дві тестові сесії (через існуючі tenants Coffe shops, Кавовий рай) — переконатися, що в обох усі фічі working.
 2. Прогнати `cron.job_run_details` + `acos_agent_runs` 2h після Publish.
 3. Оновити mem://core про нову політику «новий бренд = active».
 

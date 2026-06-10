@@ -39,7 +39,9 @@ export function CacPaybackTable({ tenantId }: { tenantId: string | null }) {
     setLoading(true);
     supabase
       .from("cac_payback_metrics")
-      .select("cohort_month, channel, cac_cents, customer_count, payback_month, ltv_12m_cents, roi_pct")
+      .select(
+        "cohort_month, channel, cac_cents, customer_count, payback_month, ltv_12m_cents, roi_pct",
+      )
       .eq("tenant_id", tenantId)
       .order("cohort_month", { ascending: false })
       .limit(36)
@@ -89,8 +91,8 @@ export function CacPaybackTable({ tenantId }: { tenantId: string | null }) {
           <Badge variant="secondary">avg payback: {avgPayback.toFixed(1)} міс</Badge>
         </CardTitle>
         <CardDescription>
-          Скільки місяців когорта повертає вкладення в маркетинг. Зелений = швидко, червоний = ще
-          не окупилася.
+          Скільки місяців когорта повертає вкладення в маркетинг. Зелений = швидко, червоний = ще не
+          окупилася.
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -60,11 +60,11 @@ export const Route = createFileRoute("/hooks/agents/tick")({
             const dispatch = await dispatchTenantOutbound(t.id, 50);
             const salesSent =
               typeof sales === "object" && sales !== null && "sent" in sales
-                ? (sales as { sent?: number }).sent ?? 0
+                ? ((sales as { sent?: number }).sent ?? 0)
                 : 0;
             const dispatchSent =
               typeof dispatch === "object" && dispatch !== null && "sent" in dispatch
-                ? (dispatch as { sent?: number }).sent ?? 0
+                ? ((dispatch as { sent?: number }).sent ?? 0)
                 : 0;
             await finishAgentRun(handle, 0, {
               sales_messages: salesSent,

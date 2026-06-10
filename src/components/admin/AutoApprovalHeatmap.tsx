@@ -5,12 +5,7 @@
  */
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export type HeatmapDecision = {
   tenant_id: string;
@@ -75,11 +70,7 @@ export function AutoApprovalHeatmap({ decisions, tenantNameById }: Props) {
                 tenant ↓ / action →
               </th>
               {types.map((t) => (
-                <th
-                  key={t}
-                  className="p-1 text-left font-medium text-muted-foreground"
-                  title={t}
-                >
+                <th key={t} className="p-1 text-left font-medium text-muted-foreground" title={t}>
                   <div className="max-w-[100px] truncate">{t}</div>
                 </th>
               ))}

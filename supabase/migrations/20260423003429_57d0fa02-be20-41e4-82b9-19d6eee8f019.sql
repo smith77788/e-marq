@@ -14,7 +14,7 @@ SELECT cron.schedule(
   '*/15 * * * *',
   $$SELECT net.http_post(
     url := 'https://e-marq.lovable.app/hooks/engines/abandoned-cart-all',
-    headers := '{"Content-Type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnemN1a2huYXJ3ZXp4d2R5b25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjY5MjcsImV4cCI6MjA5MjIwMjkyN30.6JSHX3blYqoapNhO7WZL6LgDyGcDYSanR2Ob7nayEuw"}'::jsonb,
+    headers := '{"Content-Type":"application/json","Authorization":"Bearer <SUPABASE_PUBLISHABLE_KEY>"}'::jsonb,
     body := '{}'::jsonb
   );$$
 );
@@ -24,7 +24,7 @@ SELECT cron.schedule(
   '0 3 * * *',
   $$SELECT net.http_post(
     url := 'https://e-marq.lovable.app/hooks/agents/feedback-loop-all',
-    headers := '{"Content-Type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnemN1a2huYXJ3ZXp4d2R5b25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjY5MjcsImV4cCI6MjA5MjIwMjkyN30.6JSHX3blYqoapNhO7WZL6LgDyGcDYSanR2Ob7nayEuw"}'::jsonb,
+    headers := '{"Content-Type":"application/json","Authorization":"Bearer <SUPABASE_PUBLISHABLE_KEY>"}'::jsonb,
     body := '{}'::jsonb
   );$$
 );
@@ -34,7 +34,7 @@ SELECT cron.schedule(
   '0 9 * * *',
   $$SELECT net.http_post(
     url := 'https://e-marq.lovable.app/hooks/engines/reorder-all',
-    headers := '{"Content-Type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnemN1a2huYXJ3ZXp4d2R5b25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjY5MjcsImV4cCI6MjA5MjIwMjkyN30.6JSHX3blYqoapNhO7WZL6LgDyGcDYSanR2Ob7nayEuw"}'::jsonb,
+    headers := '{"Content-Type":"application/json","Authorization":"Bearer <SUPABASE_PUBLISHABLE_KEY>"}'::jsonb,
     body := '{}'::jsonb
   );$$
 );
@@ -44,7 +44,7 @@ SELECT cron.schedule(
   '*/5 * * * *',
   $$SELECT net.http_post(
     url := 'https://e-marq.lovable.app/hooks/agents/sales-bot-all',
-    headers := '{"Content-Type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnemN1a2huYXJ3ZXp4d2R5b25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjY5MjcsImV4cCI6MjA5MjIwMjkyN30.6JSHX3blYqoapNhO7WZL6LgDyGcDYSanR2Ob7nayEuw"}'::jsonb,
+    headers := '{"Content-Type":"application/json","Authorization":"Bearer <SUPABASE_PUBLISHABLE_KEY>"}'::jsonb,
     body := '{}'::jsonb
   );$$
 );
@@ -68,7 +68,7 @@ SELECT cron.schedule(
   '0 6 * * *',
   $$SELECT net.http_post(
     url := 'https://e-marq.lovable.app/hooks/agents/cron-chunk',
-    headers := '{"Content-Type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnemN1a2huYXJ3ZXp4d2R5b25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjY5MjcsImV4cCI6MjA5MjIwMjkyN30.6JSHX3blYqoapNhO7WZL6LgDyGcDYSanR2Ob7nayEuw"}'::jsonb,
+    headers := '{"Content-Type":"application/json","Authorization":"Bearer <SUPABASE_PUBLISHABLE_KEY>"}'::jsonb,
     body := '{"chunk":"catalog"}'::jsonb
   );$$
 );
@@ -78,7 +78,7 @@ SELECT cron.schedule(
   '0 7 * * *',
   $$SELECT net.http_post(
     url := 'https://e-marq.lovable.app/hooks/agents/cron-chunk',
-    headers := '{"Content-Type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnemN1a2huYXJ3ZXp4d2R5b25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjY5MjcsImV4cCI6MjA5MjIwMjkyN30.6JSHX3blYqoapNhO7WZL6LgDyGcDYSanR2Ob7nayEuw"}'::jsonb,
+    headers := '{"Content-Type":"application/json","Authorization":"Bearer <SUPABASE_PUBLISHABLE_KEY>"}'::jsonb,
     body := '{"chunk":"marketing"}'::jsonb
   );$$
 );
@@ -88,7 +88,7 @@ SELECT cron.schedule(
   '0 8 * * *',
   $$SELECT net.http_post(
     url := 'https://e-marq.lovable.app/hooks/agents/cron-chunk',
-    headers := '{"Content-Type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnemN1a2huYXJ3ZXp4d2R5b25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjY5MjcsImV4cCI6MjA5MjIwMjkyN30.6JSHX3blYqoapNhO7WZL6LgDyGcDYSanR2Ob7nayEuw"}'::jsonb,
+    headers := '{"Content-Type":"application/json","Authorization":"Bearer <SUPABASE_PUBLISHABLE_KEY>"}'::jsonb,
     body := '{"chunk":"ops"}'::jsonb
   );$$
 );
@@ -98,7 +98,7 @@ SELECT cron.schedule(
   '0 9 * * *',
   $$SELECT net.http_post(
     url := 'https://e-marq.lovable.app/hooks/agents/cron-chunk',
-    headers := '{"Content-Type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnemN1a2huYXJ3ZXp4d2R5b25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjY5MjcsImV4cCI6MjA5MjIwMjkyN30.6JSHX3blYqoapNhO7WZL6LgDyGcDYSanR2Ob7nayEuw"}'::jsonb,
+    headers := '{"Content-Type":"application/json","Authorization":"Bearer <SUPABASE_PUBLISHABLE_KEY>"}'::jsonb,
     body := '{"chunk":"retention"}'::jsonb
   );$$
 );
@@ -108,7 +108,7 @@ SELECT cron.schedule(
   '*/30 * * * *',
   $$SELECT net.http_post(
     url := 'https://e-marq.lovable.app/hooks/agents/cron-chunk',
-    headers := '{"Content-Type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnemN1a2huYXJ3ZXp4d2R5b25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjY5MjcsImV4cCI6MjA5MjIwMjkyN30.6JSHX3blYqoapNhO7WZL6LgDyGcDYSanR2Ob7nayEuw"}'::jsonb,
+    headers := '{"Content-Type":"application/json","Authorization":"Bearer <SUPABASE_PUBLISHABLE_KEY>"}'::jsonb,
     body := '{"chunk":"lead-gen"}'::jsonb
   );$$
 );

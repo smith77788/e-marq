@@ -152,8 +152,8 @@ function BrandCockpit({
             </CardTitle>
             <CardDescription>
               Усі функції доступні з першої секунди: підключайте Shopify, CSV, Telegram, додавайте
-              товари. Бейдж «Перевірено» від нашої команди потім підніме ліміти й активує
-              кастомний домен.
+              товари. Бейдж «Перевірено» від нашої команди потім підніме ліміти й активує кастомний
+              домен.
             </CardDescription>
           </CardHeader>
           <div className="flex flex-wrap gap-2 px-6 pb-6">

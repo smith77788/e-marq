@@ -212,12 +212,7 @@ export function IngestLogsView({ tenantId, title }: Props) {
               <SelectItem value="success">Тільки успіх</SelectItem>
             </SelectContent>
           </Select>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            disabled={isFetching}
-          >
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
             <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
           </Button>
         </div>
@@ -259,11 +254,7 @@ export function IngestLogsView({ tenantId, title }: Props) {
                 </TableHeader>
                 <TableBody>
                   {data!.map((r) => (
-                    <TableRow
-                      key={r.id}
-                      onClick={() => setSelected(r)}
-                      className="cursor-pointer"
-                    >
+                    <TableRow key={r.id} onClick={() => setSelected(r)} className="cursor-pointer">
                       <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
                         {new Date(r.created_at).toLocaleString("uk-UA", {
                           hour12: false,
@@ -275,9 +266,7 @@ export function IngestLogsView({ tenantId, title }: Props) {
                       {!tenantId && (
                         <TableCell className="text-xs">
                           {r.tenant_slug ? (
-                            <code className="rounded bg-muted px-1.5 py-0.5">
-                              {r.tenant_slug}
-                            </code>
+                            <code className="rounded bg-muted px-1.5 py-0.5">{r.tenant_slug}</code>
                           ) : (
                             <span className="text-muted-foreground">—</span>
                           )}

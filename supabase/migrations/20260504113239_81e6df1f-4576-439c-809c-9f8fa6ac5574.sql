@@ -1,7 +1,7 @@
 DO $$
 DECLARE
   rec RECORD;
-  new_token CONSTANT text := 'mwmiGnvR5F4PIhHzFPg3wNd67fERqhBX9BtK68ErdEHVTMM8ssYqX_rII5c3hneY';
+  new_token CONSTANT text := '<CRON_SECRET>';
 BEGIN
   FOR rec IN SELECT jobid, jobname, command FROM cron.job WHERE jobname = 'dntrade-weekly-digest' LOOP
     PERFORM cron.alter_job(

@@ -5,7 +5,9 @@ type: feature
 ---
 
 ## Що робить
+
 `compute_customer_cohorts()` SECURITY DEFINER — для кожного активного non-pilot тенанта:
+
 1. Бере `customers` із first_order_at у межах 12 останніх місяців
 2. JOIN `orders` по `lower(customer_email) = lower(customers.email)` (orders НЕ має FK customer_id) AND status IN ('paid','fulfilled')
 3. Рахує `month_offset = (year_diff*12 + month_diff)` між order_month і cohort_month
@@ -14,12 +16,15 @@ type: feature
    - revenue_curve: `[{m:0,r:cents},...]`
 
 ## Розклад
+
 `45 3 * * *` (cron `compute-cohorts-daily`). Skip pilot tenants — синтетичні replenish-orders спотворюють retention.
 
 ## Підводні камені
+
 - OUT params треба було перейменувати у `out_tenant_id`/`out_cohorts_written` — інакше `ON CONFLICT (tenant_id, ...)` плутає plpgsql variable з колонкою
 - order_status enum: тільки `('pending','paid','fulfilled','cancelled','refunded')` — `delivered/shipped/completed` НЕ існують
 
 ## Користь
+
 - UI може малювати справжній retention heatmap із backend-агрегацією замість клієнт-side апроксимації по first/last_order_at
 - Відкриває шлях до CAC payback / LTV-by-cohort аналітики

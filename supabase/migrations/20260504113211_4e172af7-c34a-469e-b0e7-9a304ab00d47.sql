@@ -5,8 +5,8 @@
 DO $$
 DECLARE
   rec RECORD;
-  old_token CONSTANT text := 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnemN1a2huYXJ3ZXp4d2R5b25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjY5MjcsImV4cCI6MjA5MjIwMjkyN30.6JSHX3blYqoapNhO7WZL6LgDyGcDYSanR2Ob7nayEuw';
-  new_token CONSTANT text := 'mwmiGnvR5F4PIhHzFPg3wNd67fERqhBX9BtK68ErdEHVTMM8ssYqX_rII5c3hneY';
+  old_token CONSTANT text := '<SUPABASE_PUBLISHABLE_KEY>';
+  new_token CONSTANT text := '<CRON_SECRET>';
   new_cmd text;
   rotated int := 0;
 BEGIN

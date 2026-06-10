@@ -147,10 +147,16 @@ export const Route = createFileRoute("/hooks/agents/run-all")({
             }),
           );
           const summary = fan.map((r) =>
-            r.status === "fulfilled" ? r.value : { tenant: "?", ok: false, error: String(r.reason) },
+            r.status === "fulfilled"
+              ? r.value
+              : { tenant: "?", ok: false, error: String(r.reason) },
           );
           const total = summary.reduce(
-            (s, r) => s + (typeof (r as { insights_created?: number }).insights_created === "number" ? (r as { insights_created: number }).insights_created : 0),
+            (s, r) =>
+              s +
+              (typeof (r as { insights_created?: number }).insights_created === "number"
+                ? (r as { insights_created: number }).insights_created
+                : 0),
             0,
           );
           return jsonOk({

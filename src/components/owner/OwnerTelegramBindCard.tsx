@@ -17,6 +17,14 @@ import { ensureAuthenticatedSession } from "@/lib/auth/ensureSession";
 
 type Props = { tenantId: string; tenantSlug: string };
 
+function getPairingCode(value: unknown) {
+  if (value && typeof value === "object" && "pairing_code" in value) {
+    const pairingCode = value.pairing_code;
+    return typeof pairingCode === "string" ? pairingCode : null;
+  }
+  return null;
+}
+
 export function OwnerTelegramBindCard({ tenantId }: Props) {
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
@@ -71,7 +79,7 @@ export function OwnerTelegramBindCard({ tenantId }: Props) {
       toast.error(e instanceof Error ? e.message : "Сесія не знайдена");
       return;
     }
-    const { data, error } = await (supabase.rpc as any)("create_telegram_owner_pairing", {
+    const { data, error } = await supabase.rpc("create_telegram_owner_pairing", {
       _tenant_id: tenantId,
     });
     setBusy(false);
@@ -79,7 +87,7 @@ export function OwnerTelegramBindCard({ tenantId }: Props) {
       toast.error("Не вдалося створити код Telegram", { description: error.message });
       return;
     }
-    setPairingCode(String(data?.pairing_code ?? ""));
+    setPairingCode(getPairingCode(data));
     toast.success("Код створено. Відкрийте бота або скопіюйте команду.");
     qc.invalidateQueries({ queryKey: ["owner-tg-binding", tenantId] });
   };
@@ -125,7 +133,7 @@ export function OwnerTelegramBindCard({ tenantId }: Props) {
       toast.error(e instanceof Error ? e.message : "Сесія не знайдена");
       return;
     }
-    const { error } = await (supabase.rpc as any)("create_owner_test_notification", {
+    const { error } = await supabase.rpc("create_owner_test_notification", {
       _tenant_id: tenantId,
     });
     setBusy(false);
@@ -241,9 +249,7 @@ export function OwnerTelegramBindCard({ tenantId }: Props) {
           <>
             <ol className="list-decimal space-y-1 pl-5 text-xs text-muted-foreground">
               <li>Створіть одноразовий код для безпечної привʼязки власника.</li>
-              <li>
-                Відкрийте @Oauther_bot кнопкою нижче або надішліть команду вручну.
-              </li>
+              <li>Відкрийте @Oauther_bot кнопкою нижче або надішліть команду вручну.</li>
               <li>Бот відповість, і ваш чат автоматично прив'яжеться тут.</li>
             </ol>
             {activePairingCode ? (
@@ -263,7 +269,8 @@ export function OwnerTelegramBindCard({ tenantId }: Props) {
               {botLink ? (
                 <Button size="sm" asChild>
                   <a href={botLink} target="_blank" rel="noreferrer">
-                    <Send className="mr-1.5 h-3.5 w-3.5" />Відкрити бота
+                    <Send className="mr-1.5 h-3.5 w-3.5" />
+                    Відкрити бота
                   </a>
                 </Button>
               ) : (
@@ -277,7 +284,8 @@ export function OwnerTelegramBindCard({ tenantId }: Props) {
                 </Button>
               )}
               <Button size="sm" variant="outline" onClick={() => refetch()} disabled={busy}>
-                <RefreshCw className="mr-1.5 h-3.5 w-3.5" />Перевірити підключення
+                <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                Перевірити підключення
               </Button>
             </div>
           </>

@@ -61,7 +61,11 @@ function asString(v: unknown): string {
 
 function normalizeGoogleSheetsCsvUrl(rawUrl: string): string {
   const url = new URL(rawUrl);
-  if (url.hostname === "docs.google.com" && url.pathname.includes("/spreadsheets/d/e/") && url.searchParams.get("output") === "csv") {
+  if (
+    url.hostname === "docs.google.com" &&
+    url.pathname.includes("/spreadsheets/d/e/") &&
+    url.searchParams.get("output") === "csv"
+  ) {
     return url.toString();
   }
   const idMatch = url.pathname.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
@@ -69,7 +73,9 @@ function normalizeGoogleSheetsCsvUrl(rawUrl: string): string {
     const gid = url.searchParams.get("gid") ?? url.hash.match(/gid=(\d+)/)?.[1] ?? "0";
     return `https://docs.google.com/spreadsheets/d/${idMatch[1]}/export?format=csv&gid=${gid}`;
   }
-  throw new Error("Не вдалось розпізнати URL Google Sheets. Вставте посилання з /spreadsheets/d/... або Published CSV link.");
+  throw new Error(
+    "Не вдалось розпізнати URL Google Sheets. Вставте посилання з /spreadsheets/d/... або Published CSV link.",
+  );
 }
 
 function centsFromMajor(amount: unknown): number {

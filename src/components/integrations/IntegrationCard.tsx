@@ -63,8 +63,7 @@ export function IntegrationCard({
   const syncStale = lastSyncAt
     ? Date.now() - new Date(lastSyncAt).getTime() > 24 * 60 * 60 * 1000
     : false;
-  const syncFailed =
-    lastSyncStatus === "failed" || lastSyncStatus === "completed_with_errors";
+  const syncFailed = lastSyncStatus === "failed" || lastSyncStatus === "completed_with_errors";
 
   return (
     <Card

@@ -71,7 +71,7 @@ export function SetupChecklist({ tenantId, tenantSlug }: Props) {
       ]);
       type AnyRes = { data?: unknown; count?: number | null };
       const pick = <T = AnyRes,>(i: number): T | null =>
-        settled[i].status === "fulfilled" ? ((settled[i] as PromiseFulfilledResult<T>).value) : null;
+        settled[i].status === "fulfilled" ? (settled[i] as PromiseFulfilledResult<T>).value : null;
       const tenantRes = pick<{ data: { id: string; name: string } | null }>(0);
       const configRes = pick<{ data: { bot?: unknown; features?: unknown } | null }>(1);
       const productsRes = pick<{ count: number | null }>(2);

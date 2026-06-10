@@ -8,7 +8,7 @@ SET search_path TO 'public'
 AS $$
 DECLARE
   _app_url text := 'https://autonomy-growth-lab.lovable.app';
-  _anon_key text := 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnemN1a2huYXJ3ZXp4d2R5b25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjY5MjcsImV4cCI6MjA5MjIwMjkyN30.6JSHX3blYqoapNhO7WZL6LgDyGcDYSanR2Ob7nayEuw';
+  _anon_key text := '<SUPABASE_PUBLISHABLE_KEY>';
 BEGIN
   -- best-effort, не блокуємо створення tenant якщо агент впаде
   BEGIN

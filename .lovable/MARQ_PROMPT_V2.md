@@ -1,4 +1,5 @@
 # MARQ — ПРОМПТ РЕАЛІЗАЦІЇ V2
+
 ## AI-розробник | Проект: MARQ / BASIC.FOOD | Revision: ULTRA-PRECISE
 
 ---
@@ -23,6 +24,7 @@
 ```
 
 **Перед кожним новим модулем обов'язково:**
+
 - `cat` або `grep` файли, які будеш зачіпати
 - Перевір чи не конфліктує нова таблиця з існуючими
 - Переконайся що imports резолвяться (перевір реальні шляхи)
@@ -36,23 +38,25 @@
 Мета: перевершити Shopify за кожним параметром.
 
 ### Технічний стек (незмінний):
-| Шар | Технологія |
-|-----|-----------|
-| Runtime | TanStack Start (TanStack Router + Server Functions) |
-| Frontend | React 19, TypeScript strict |
-| Build | Vite 7 + Cloudflare Workers (`wrangler.jsonc`) |
-| DB | Supabase (PostgreSQL + RLS + Edge) |
-| UI | Tailwind CSS v4 + Radix UI + shadcn/ui |
-| State | TanStack Query v5 |
-| Payments | Stripe (existing) + LiqPay + WayForPay + Monobank (нові) |
-| Messaging | Telegram Bot (existing) + Resend email (новий) |
-| Package manager | Bun |
+
+| Шар             | Технологія                                               |
+| --------------- | -------------------------------------------------------- |
+| Runtime         | TanStack Start (TanStack Router + Server Functions)      |
+| Frontend        | React 19, TypeScript strict                              |
+| Build           | Vite 7 + Cloudflare Workers (`wrangler.jsonc`)           |
+| DB              | Supabase (PostgreSQL + RLS + Edge)                       |
+| UI              | Tailwind CSS v4 + Radix UI + shadcn/ui                   |
+| State           | TanStack Query v5                                        |
+| Payments        | Stripe (existing) + LiqPay + WayForPay + Monobank (нові) |
+| Messaging       | Telegram Bot (existing) + Resend email (новий)           |
+| Package manager | Bun                                                      |
 
 ---
 
 ## 📁 ПОВНА КАРТА ІСНУЮЧОГО КОДУ
 
 ### Routes:
+
 ```
 src/routes/
 ├── __root.tsx                            ← кореневий layout, не чіпай
@@ -92,6 +96,7 @@ src/routes/
 ```
 
 ### Компоненти (src/components/):
+
 ```
 admin/      → AcosActionsLog, AcosAgentRuns, AcosInsightsQueue, AcosOverviewTab,
               CrossTenantPulse, MembersTab, MissionStatCard, PlanBadge,
@@ -113,6 +118,7 @@ ui/         → повний набір shadcn/ui компонентів
 ```
 
 ### Існуюча схема БД (НЕ редагуй міграції — лише нові файли):
+
 ```
 CORE:
   tenants(id,slug,name,status,owner_user_id)
@@ -199,22 +205,24 @@ BILLING (existing):
 ## 🔑 КЛЮЧОВІ УТИЛІТИ — ЗАВЖДИ ВИКОРИСТОВУЙ, НІКОЛИ НЕ ДУБЛЮЙ
 
 ### 1. Agent Runtime (src/lib/acos/agentRuntime.ts)
+
 ```typescript
 // Функції для агентів:
 import {
-  authorizeAgentRequest,  // перевіряє bearer token
-  startAgentRun,          // → AgentRunHandle
-  finishAgentRun,         // success
-  failAgentRun,           // failure
-  insertInsightsDedup,    // вставляє ai_insights без дублів
-  jsonOk,                 // Response з 200
-  jsonError,              // Response з помилкою
+  authorizeAgentRequest, // перевіряє bearer token
+  startAgentRun, // → AgentRunHandle
+  finishAgentRun, // success
+  failAgentRun, // failure
+  insertInsightsDedup, // вставляє ai_insights без дублів
+  jsonOk, // Response з 200
+  jsonError, // Response з помилкою
   type AgentInsightInput, // тип для insights
-  type AuthContext,        // { kind: 'cron' } | { kind: 'user', userId }
+  type AuthContext, // { kind: 'cron' } | { kind: 'user', userId }
 } from "@/lib/acos/agentRuntime";
 ```
 
 ### 2. Grошові функції (src/lib/money.ts)
+
 ```typescript
 import { formatMoney, formatMoneyCompact } from "@/lib/money";
 // formatMoney(125000) → "1 250 ₴"
@@ -223,6 +231,7 @@ import { formatMoney, formatMoneyCompact } from "@/lib/money";
 ```
 
 ### 3. i18n (src/lib/i18n.ts)
+
 ```typescript
 // В компонентах:
 import { useT } from "@/lib/i18n";
@@ -238,6 +247,7 @@ head: () => ({ meta: [{ title: tStatic("products.pageTitle") }] })
 ```
 
 ### 4. Supabase клієнти
+
 ```typescript
 // CLIENT-SIDE (браузер, компоненти):
 import { supabase } from "@/integrations/supabase/client";
@@ -248,6 +258,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 ```
 
 ### 5. Auth hooks
+
 ```typescript
 import { useAuth } from "@/hooks/useAuth";
 const { user, loading, isSuperAdmin, signOut } = useAuth();
@@ -258,6 +269,7 @@ const { current, tenants } = useTenantContext();
 ```
 
 ### 6. Cart (src/lib/cart.ts)
+
 ```typescript
 import { loadCart, saveCart, clearCart, type Cart } from "@/lib/cart";
 // Cart = Record<string, { quantity: number; name: string; price_cents: number }>
@@ -268,6 +280,7 @@ import { loadCart, saveCart, clearCart, type Cart } from "@/lib/cart";
 ## 📐 ОБОВ'ЯЗКОВІ ПАТТЕРНИ — КОПІЮЙ, НЕ ВИГАДУЙ
 
 ### Патерн 1: Server Function (Hook / Agent)
+
 ```typescript
 // src/routes/hooks/agents.my-agent.ts
 /**
@@ -277,8 +290,13 @@ import { loadCart, saveCart, clearCart, type Cart } from "@/lib/cart";
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import {
-  authorizeAgentRequest, failAgentRun, finishAgentRun,
-  insertInsightsDedup, jsonError, jsonOk, startAgentRun,
+  authorizeAgentRequest,
+  failAgentRun,
+  finishAgentRun,
+  insertInsightsDedup,
+  jsonError,
+  jsonOk,
+  startAgentRun,
   type AgentInsightInput,
 } from "@/lib/acos/agentRuntime";
 
@@ -289,7 +307,8 @@ export const Route = createFileRoute("/hooks/agents/my-agent")({
     handlers: {
       POST: async ({ request }) => {
         const token = (request.headers.get("authorization") ?? "")
-          .replace(/^Bearer\s+/i, "").trim();
+          .replace(/^Bearer\s+/i, "")
+          .trim();
         let tenantId: string | null = null;
         try {
           const body = (await request.json()) as { tenant_id?: string };
@@ -326,6 +345,7 @@ export const Route = createFileRoute("/hooks/agents/my-agent")({
 ```
 
 ### Патерн 2: React Component з TanStack Query
+
 ```typescript
 // src/components/owner/MyComponent.tsx
 import { useQuery } from "@tanstack/react-query";
@@ -395,6 +415,7 @@ export function MyComponent({ tenantId }: Props) {
 ```
 
 ### Патерн 3: Authenticated Route
+
 ```typescript
 // src/routes/_authenticated/brand.mypage.tsx
 import { createFileRoute } from "@tanstack/react-router";
@@ -429,6 +450,7 @@ function MyPage() {
 ```
 
 ### Патерн 4: Supabase Migration
+
 ```sql
 -- supabase/migrations/[timestamp]_description.sql
 -- ЗАВЖДИ використовуй ці функції для RLS:
@@ -474,6 +496,7 @@ CREATE POLICY "my_table_anon_read" ON public.my_table
 ```
 
 ### Патерн 5: Додати агента в run-all
+
 ```typescript
 // В src/routes/hooks/agents.run-all.ts є масив AGENTS:
 const AGENTS = [
@@ -492,13 +515,14 @@ const AGENTS = [
 ## 🚨 СПИСОК ВІДСУТНЬОГО (АУДИТ ПІДТВЕРДЖЕНИЙ)
 
 ### ❌ Немає взагалі:
+
 1. **brand.products.tsx** — мерчант не може керувати товарами через UI
 2. **brand.products.$productId.tsx** — редагування товару з tabs
 3. **brand.orders.tsx** — мерчант не бачить свої замовлення (є лише в super-admin!)
 4. **brand.catalog.tsx** — немає колекцій
 5. **brand.promotions.tsx** — промокоди є в БД, UI немає
 6. **brand.email.tsx** — email-маркетинг
-7. **s.$slug._layout.tsx** — storefront layout
+7. **s.$slug.\_layout.tsx** — storefront layout
 8. **s.$slug.products.$productId.tsx** — сторінка товару
 9. **s.$slug.collections.$handle.tsx** — сторінка колекції
 10. **s.$slug.search.tsx** — пошук
@@ -514,6 +538,7 @@ const AGENTS = [
 20. **Supabase Storage bucket** 'product-images' — не налаштований
 
 ### ⚠️ Існує частково (потребує розширення):
+
 - `ProductForm.tsx` — базова форма без варіантів і фото
 - `TenantConfigForm.tsx` — немає полів для shipping і нових платежів
 - `s.$slug.tsx` — 766 рядків, все в одному файлі, потребує розбивки
@@ -526,6 +551,7 @@ const AGENTS = [
 ---
 
 ### БЛОК 1 — DATABASE FOUNDATION
+
 **(Перший sprint — все інше залежить від цього)**
 
 #### Migration 1: `[timestamp]_product_catalog_v2.sql`
@@ -750,6 +776,7 @@ END; $$;
 ```
 
 #### Migration 2: `[timestamp]_email_engine.sql`
+
 ```sql
 -- EMAIL ENGINE
 CREATE TABLE public.email_sends (
@@ -806,6 +833,7 @@ CREATE POLICY "ec_member_write" ON public.email_campaigns FOR ALL TO authenticat
 ```
 
 #### Migration 3: `[timestamp]_loyalty_program.sql`
+
 ```sql
 -- LOYALTY PROGRAM
 CREATE TABLE public.loyalty_programs (
@@ -892,6 +920,7 @@ CREATE POLICY "rn_anon_insert" ON public.restock_notifications FOR INSERT TO ano
 ### БЛОК 2 — STOREFRONT EXPANSION
 
 #### 2.1 Storefront Layout: `src/routes/s.$slug._layout.tsx`
+
 ```
 Компонент-обгортка для всіх s.$slug.* routes:
 
@@ -920,6 +949,7 @@ UI:
 ```
 
 #### 2.2 Storefront Homepage: `src/routes/s.$slug.index.tsx`
+
 ```
 Завантаження: get_storefront_products_v2(_slug) + get_storefront_collections(_slug) [нова RPC]
 track('content_viewed', {})
@@ -945,6 +975,7 @@ UI:
 ```
 
 #### 2.3 Product Page: `src/routes/s.$slug.products.$productId.tsx`
+
 ```
 Завантаження: get_storefront_product(_slug, productId)
 track('product_viewed', { product_id: productId })
@@ -984,6 +1015,7 @@ UI:
 ```
 
 #### 2.4 Search: `src/routes/s.$slug.search.tsx`
+
 ```
 URL: /s/$slug/search?q=натурал
 
@@ -1009,6 +1041,7 @@ UI:
 ```
 
 #### 2.5 Checkout: `src/routes/s.$slug.checkout.tsx`
+
 ```
 One-page accordion layout. Секції розгортаються sequential.
 
@@ -1058,6 +1091,7 @@ Order summary сайдбар (desktop) або sticky bottom (mobile):
 ### БЛОК 3 — BRAND OWNER ROUTES
 
 #### 3.1 `src/routes/_authenticated/brand.products.tsx`
+
 ```
 Таблиця товарів тенанта:
   Колонки: Фото | Назва | SKU | Ціна | Залишок | Статус | Дії
@@ -1082,6 +1116,7 @@ Pagination: 50 per page (limit/offset)
 ```
 
 #### 3.2 `src/routes/_authenticated/brand.products.$productId.tsx`
+
 ```
 Параметр: productId ('new' для нового товару)
 
@@ -1131,6 +1166,7 @@ Save: useMutation → UPSERT products + toast success
 ```
 
 #### 3.3 `src/routes/_authenticated/brand.orders.tsx`
+
 ```
 Таблиця замовлень тенанта (ЗАРАЗ МЕРЧАНТ ЇХ НЕ БАЧИТЬ — критична проблема!):
 
@@ -1164,6 +1200,7 @@ Data:
 ```
 
 #### 3.4 `src/routes/_authenticated/brand.promotions.tsx`
+
 ```
 Таблиця промокодів:
   Columns: Код | Назва | Тип | Значення | Використань | Активний | Термін | Дії
@@ -1197,11 +1234,13 @@ Data: supabase.from('promotions').select('*').eq('tenant_id', tenantId)
 #### 4.1 Infrastructure
 
 **Встанови Resend:**
+
 ```bash
 bun add resend @react-email/components @react-email/render
 ```
 
 **`src/lib/email/resend.server.ts`:**
+
 ```typescript
 import { Resend } from "resend";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
@@ -1214,7 +1253,8 @@ export async function getTenantResend(tenantId: string) {
     .single();
 
   const email = (cfg?.features as Record<string, unknown> | null)?.email as
-    { resend_api_key?: string; from_name?: string; from_email?: string } | undefined;
+    | { resend_api_key?: string; from_name?: string; from_email?: string }
+    | undefined;
 
   if (!email?.resend_api_key) return null;
 
@@ -1267,6 +1307,7 @@ export async function sendTransactionalEmail(params: {
 **Templates (src/lib/email/templates/):**
 
 Кожен template — React Email компонент. Наприклад `order-confirmed.tsx`:
+
 ```typescript
 // src/lib/email/templates/order-confirmed.tsx
 import { Html, Body, Container, Heading, Text, Section, Row, Column } from "@react-email/components";
@@ -1318,6 +1359,7 @@ export function OrderConfirmedEmail({ brandName, orderNumber, customerName, item
 #### 4.2 Email Server Functions
 
 **`src/routes/hooks/email.order-confirmed.ts`** — POST { tenant_id, order_id }
+
 ```
 1. Завантаж order + order_items + tenant_config
 2. Render OrderConfirmedEmail
@@ -1326,6 +1368,7 @@ export function OrderConfirmedEmail({ brandName, orderNumber, customerName, item
 ```
 
 **`src/routes/hooks/email.resend-webhook.ts`** — POST (Resend webhook)
+
 ```
 1. Перевір підпис (Resend-Signature header)
 2. Визнач тип: email.opened / email.clicked / email.bounced / email.delivered
@@ -1334,6 +1377,7 @@ export function OrderConfirmedEmail({ brandName, orderNumber, customerName, item
 ```
 
 #### 4.3 `src/routes/_authenticated/brand.email.tsx`
+
 ```
 Tabs: Кампанії | Автоматизації | Налаштування
 
@@ -1365,6 +1409,7 @@ Tab Налаштування:
 ### БЛОК 5 — SHIPPING INTEGRATION
 
 #### 5.1 `src/routes/hooks/shipping.np-cities.ts` — GET ?q=Київ
+
 ```typescript
 // Proxy до Nova Poshta API
 // Читає np_api_key з tenant_configs.features.shipping.nova_poshta_api_key
@@ -1374,12 +1419,14 @@ Tab Налаштування:
 ```
 
 #### 5.2 `src/routes/hooks/shipping.np-warehouses.ts` — GET ?cityRef=xxx
+
 ```typescript
 // Аналогічно: Nova Poshta getWarehouses
 // Повертає: [{ Ref, Number, Description, TypeOfWarehouse }]
 ```
 
 #### 5.3 `src/components/checkout/ShippingSelector.tsx`
+
 ```typescript
 // Props: tenantId, slug, onSelect: (method: ShippingSelection) => void
 // type ShippingSelection = {
@@ -1396,6 +1443,7 @@ Tab Налаштування:
 ### БЛОК 6 — ПЛАТІЖНІ ШЛЮЗИ
 
 #### `src/routes/hooks/payments.liqpay.ts` — POST { tenant_id, order_id, amount_cents, return_url }
+
 ```typescript
 // Server function:
 // 1. Зчитує liqpay_public_key + liqpay_private_key з tenant_configs
@@ -1411,6 +1459,7 @@ Tab Налаштування:
 ```
 
 #### `src/routes/hooks/payments.liqpay-callback.ts` — POST (LiqPay webhook)
+
 ```typescript
 // 1. Перевір підпис: base64(SHA1(private_key + req.data + private_key))
 // 2. Decode data: JSON.parse(base64_decode(req.data))
@@ -1421,6 +1470,7 @@ Tab Налаштування:
 ```
 
 #### `src/routes/hooks/payments.wayforpay.ts` — POST { tenant_id, order_id, items, amount }
+
 ```typescript
 // Генерує WayForPay підпис (HMAC-MD5)
 // Signature string: merchant;domain;orderRef;orderDate;amount;currency;productName;productCount;productPrice
@@ -1429,6 +1479,7 @@ Tab Налаштування:
 ```
 
 #### `src/routes/hooks/payments.monobank.ts` — POST { tenant_id, order_id, amount_cents, redirect_url }
+
 ```typescript
 // POST https://api.monobank.ua/api/merchant/invoice/create
 // Headers: X-Token: {monobank_token}
@@ -1441,6 +1492,7 @@ Tab Налаштування:
 ### БЛОК 7 — НОВІ ACOS АГЕНТИ
 
 #### `src/routes/hooks/agents.email-abandoned-cart.ts`
+
 ```
 AGENT_ID: "email_abandoned_cart"
 Додай в AGENTS масив у agents.run-all.ts: "email-abandoned-cart"
@@ -1460,6 +1512,7 @@ Logic:
 ```
 
 #### `src/routes/hooks/agents.email-winback.ts`
+
 ```
 AGENT_ID: "email_winback"
 
@@ -1476,6 +1529,7 @@ Logic:
 ```
 
 #### `src/routes/hooks/agents.email-post-purchase.ts`
+
 ```
 AGENT_ID: "email_post_purchase"
 
@@ -1489,6 +1543,7 @@ Logic:
 ```
 
 #### `src/routes/hooks/agents.restock-notifier.ts`
+
 ```
 AGENT_ID: "restock_notifier"
 
@@ -1507,6 +1562,7 @@ Logic:
 #### `src/components/layout/AppSidebar.tsx`
 
 Додай нову групу "Магазин" для owner (non-super-admin):
+
 ```typescript
 // Після існуючих аналітичних посилань, перед "Налаштування":
 { label: t("sb.products"), to: "/brand/products", icon: Package },
@@ -1517,6 +1573,7 @@ Logic:
 ```
 
 Додай відповідні i18n ключі в `src/lib/i18n.ts`:
+
 ```typescript
 // dict.ua:
 "sb.products": "Товари",
@@ -1537,6 +1594,7 @@ Logic:
 ### БЛОК 9 — SUPABASE STORAGE
 
 **Migration: `[timestamp]_storage_setup.sql`**
+
 ```sql
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES (
@@ -1561,6 +1619,7 @@ CREATE POLICY IF NOT EXISTS "product_images_auth_delete"
 ```
 
 **`src/lib/storage.ts`:**
+
 ```typescript
 import { supabase } from "@/integrations/supabase/client";
 
@@ -1664,12 +1723,14 @@ SPRINT 6 — NEW AGENTS
 Перед здачею кожного файлу пройди цей список:
 
 ### TypeScript
+
 - [ ] `tsc --noEmit` — нуль помилок
 - [ ] Нуль `any` (окрім `unknown` при обробці JSON)
 - [ ] Всі імпорти резолвяться (перевір шляхи через `@/`)
 - [ ] Типи Supabase використані з `@/integrations/supabase/types`
 
 ### Database
+
 - [ ] Кожен `.from()` запит має `.eq("tenant_id", tenantId)`
 - [ ] `supabaseAdmin` — лише в `hooks/` і `*.server.ts` файлах
 - [ ] `supabase` (anon) — лише в компонентах
@@ -1678,6 +1739,7 @@ SPRINT 6 — NEW AGENTS
 - [ ] Нові міграції: чи є INDEX по tenant_id?
 
 ### Patterns
+
 - [ ] Кожен agent слідує патерну: auth → startAgentRun → try/catch → finish/fail
 - [ ] Кожен компонент: loading state (Skeleton) + error state
 - [ ] Кожен UI рядок через `useT()` (нуль hardcoded тексту)
@@ -1685,11 +1747,13 @@ SPRINT 6 — NEW AGENTS
 - [ ] Money завжди в cents, форматується через `formatMoney()`
 
 ### Security
+
 - [ ] Платіжні ключі — лише в server functions
 - [ ] Немає secrets в client-side коді
 - [ ] Storefront RPC — Security Definer (не виставляє приватні дані)
 
 ### UX
+
 - [ ] Mobile responsive (375px — перевір уявно)
 - [ ] Error toast через `sonner` при мутаціях (не при read)
 - [ ] Success toast після збереження

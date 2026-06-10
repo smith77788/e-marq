@@ -7,7 +7,7 @@ SELECT cron.schedule(
   $$
   select net.http_post(
     url:='https://e-marq.lovable.app/hooks/telegram/poll',
-    headers:='{"Content-Type":"application/json","Authorization":"Bearer mwmiGnvR5F4PIhHzFPg3wNd67fERqhBX9BtK68ErdEHVTMM8ssYqX_rII5c3hneY"}'::jsonb,
+    headers:='{"Content-Type":"application/json","Authorization":"Bearer <CRON_SECRET>"}'::jsonb,
     body:='{}'::jsonb,
     timeout_milliseconds := 35000
   )

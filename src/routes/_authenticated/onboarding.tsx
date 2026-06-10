@@ -157,7 +157,7 @@ function OnboardingPage() {
         actionTimeoutMessage("Оновлення статусів onboarding"),
       );
       const pick = <T,>(i: number): T | null =>
-        settled[i]?.status === "fulfilled" ? ((settled[i] as PromiseFulfilledResult<T>).value) : null;
+        settled[i]?.status === "fulfilled" ? (settled[i] as PromiseFulfilledResult<T>).value : null;
       const tn = pick<{ data: { name: string } | null; error: Error | null }>(0);
       const prod = pick<{ count: number | null; error: Error | null }>(1);
       const cust = pick<{ count: number | null; error: Error | null }>(2);
@@ -806,7 +806,15 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
   );
 }
 
-function Step5Tracking({ tenantId, tenantSlug, qc }: { tenantId: string; tenantSlug: string; qc: QC }) {
+function Step5Tracking({
+  tenantId,
+  tenantSlug,
+  qc,
+}: {
+  tenantId: string;
+  tenantSlug: string;
+  qc: QC;
+}) {
   const markInstalled = useMutation({
     mutationFn: async () => {
       await withTimeout(
@@ -816,7 +824,11 @@ function Step5Tracking({ tenantId, tenantSlug, qc }: { tenantId: string; tenantS
       );
       const [cfgRes, tenantRes] = await withTimeout(
         Promise.all([
-          supabase.from("tenant_configs").select("features").eq("tenant_id", tenantId).maybeSingle(),
+          supabase
+            .from("tenant_configs")
+            .select("features")
+            .eq("tenant_id", tenantId)
+            .maybeSingle(),
           supabase.from("tenants").select("name").eq("id", tenantId).maybeSingle(),
         ]),
         UI_QUERY_TIMEOUT_MS,
@@ -855,13 +867,9 @@ function Step5Tracking({ tenantId, tenantSlug, qc }: { tenantId: string; tenantS
   return (
     <div className="space-y-3">
       <IntegrationGuide tenantSlug={tenantSlug} />
-      <Button
-        size="sm"
-        onClick={() => markInstalled.mutate()}
-        disabled={markInstalled.isPending}
-      >
-        {markInstalled.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-        Я вставив код на сайт
+      <Button size="sm" onClick={() => markInstalled.mutate()} disabled={markInstalled.isPending}>
+        {markInstalled.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}Я вставив
+        код на сайт
       </Button>
     </div>
   );
@@ -903,7 +911,9 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
       const features = (cfg?.features ?? {}) as Record<string, unknown>;
       const payments =
-        features.payments && typeof features.payments === "object" && !Array.isArray(features.payments)
+        features.payments &&
+        typeof features.payments === "object" &&
+        !Array.isArray(features.payments)
           ? (features.payments as Record<string, unknown>)
           : {};
       const { error: configError } = await withTimeout(
@@ -953,7 +963,8 @@ function Step6Payment({ tenantId, qc }: { tenantId: string; qc: QC }) {
       <div className="rounded-md border border-border/60 bg-muted/20 p-3 text-sm opacity-80">
         <div className="font-medium">Онлайн-оплата карткою</div>
         <div className="mt-1 text-xs text-muted-foreground">
-          LiqPay, WayForPay або monobank підключаються в налаштуваннях бренду після базового запуску.
+          LiqPay, WayForPay або monobank підключаються в налаштуваннях бренду після базового
+          запуску.
         </div>
       </div>
     </div>

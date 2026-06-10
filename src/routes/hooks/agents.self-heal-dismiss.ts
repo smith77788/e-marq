@@ -42,8 +42,7 @@ export const Route = createFileRoute("/hooks/agents/self-heal-dismiss")({
           .select("role")
           .eq("user_id", userId)
           .eq("role", "super_admin");
-        if (!roles || roles.length === 0)
-          return json({ error: "Super-admin required" }, 403);
+        if (!roles || roles.length === 0) return json({ error: "Super-admin required" }, 403);
 
         const body = (await request.json().catch(() => ({}))) as {
           kind?: "incident" | "action";

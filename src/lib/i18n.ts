@@ -1597,7 +1597,8 @@ const dict = {
     "onb.s5.copy": "Copy snippet",
     "onb.s5.copied": "Copied ✓",
     "onb.s6.title": "Payment method",
-    "onb.s6.desc": "How customers pay. Manual works immediately; online payments can be connected after launch.",
+    "onb.s6.desc":
+      "How customers pay. Manual works immediately; online payments can be connected after launch.",
     "onb.s6.manual": "Manual (bank / cash)",
     "onb.s6.stripe": "Online payment (after launch)",
     "onb.s7.title": "Invite teammates",
@@ -2925,8 +2926,7 @@ const dict = {
 
     // Onboarding wizard
     "onb.title": "Быстрый старт за 7 шагов",
-    "onb.subtitle":
-      "Настрой свой автономный Revenue OS. Можно вернуться и дозаполнить позже.",
+    "onb.subtitle": "Настрой свой автономный Revenue OS. Можно вернуться и дозаполнить позже.",
     "onb.step": "Шаг",
     "onb.of": "из",
     "onb.next": "Далее",
@@ -2951,8 +2951,7 @@ const dict = {
     "onb.s3.pricePh": "Цена (₴)",
     "onb.s3.stockPh": "Остаток на складе",
     "onb.s4.title": "Импорт клиентов",
-    "onb.s4.desc":
-      "Загрузи CSV (email, name) — или используй демо-сид, если просто тестируешь.",
+    "onb.s4.desc": "Загрузи CSV (email, name) — или используй демо-сид, если просто тестируешь.",
     "onb.s4.csv": "Загрузить CSV",
     "onb.s4.demo": "Засеять демо-клиентов",
     "onb.s4.csvHint": "Формат: первая строка — заголовок 'email,name'.",
@@ -2975,8 +2974,7 @@ const dict = {
 
     // Setup checklist
     "checklist.title": "Чек-лист настройки",
-    "checklist.desc":
-      "Все настройки для запуска автономного Revenue OS на одном экране.",
+    "checklist.desc": "Все настройки для запуска автономного Revenue OS на одном экране.",
     "checklist.continue": "Продолжить настройку",
     "checklist.allDone": "Всё готово — ИИ-агенты работают в фоне 🚀",
     "checklist.s1": "Бренд создан",
@@ -3150,7 +3148,11 @@ const dict = {
     "sf.collection.sort.nameAsc": "По названию",
     "sf.breadcrumb.shop": "Магазин",
   } as Partial<Record<string, string>>,
-} satisfies { ua: Record<string, string>; en: Record<string, string>; ru: Partial<Record<string, string>> };
+} satisfies {
+  ua: Record<string, string>;
+  en: Record<string, string>;
+  ru: Partial<Record<string, string>>;
+};
 
 export type TKey = keyof (typeof dict)["ua"];
 
@@ -3222,4 +3224,3 @@ export function useT() {
 export function tStatic(key: TKey, lang: Lang = current): string {
   return lookup(lang, key) ?? key;
 }
-

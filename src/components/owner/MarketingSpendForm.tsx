@@ -133,8 +133,8 @@ export function MarketingSpendForm({ tenantId }: { tenantId: string }) {
           Маркетингові витрати
         </CardTitle>
         <CardDescription>
-          Введіть бюджет та кількість нових клієнтів за місяць і каналом. Дані живлять
-          CAC Payback Agent у /brand/roi.
+          Введіть бюджет та кількість нових клієнтів за місяць і каналом. Дані живлять CAC Payback
+          Agent у /brand/roi.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -259,8 +259,8 @@ export function MarketingSpendForm({ tenantId }: { tenantId: string }) {
         )}
 
         <p className="text-xs text-muted-foreground">
-          Підказка: канали Meta Ads / Google Ads можна імпортувати автоматично — інтеграція
-          буде доступна пізніше.
+          Підказка: канали Meta Ads / Google Ads можна імпортувати автоматично — інтеграція буде
+          доступна пізніше.
         </p>
       </CardContent>
     </Card>

@@ -91,8 +91,7 @@ export const Route = createFileRoute("/hooks/agents/health-check")({
           const dismissed = dismissedByKey.get(key) ?? 0;
           const failureRate = v.runs_total > 0 ? v.runs_failed / v.runs_total : 0;
           const productivity = Math.min(1, v.insights_created / Math.max(1, v.runs_total));
-          const acceptance =
-            approved + dismissed > 0 ? approved / (approved + dismissed) : 0.5;
+          const acceptance = approved + dismissed > 0 ? approved / (approved + dismissed) : 0.5;
           // health = (1 - failureRate) * 0.5 + productivity * 0.25 + acceptance * 0.25
           const score = (1 - failureRate) * 0.5 + productivity * 0.25 + acceptance * 0.25;
           return {
@@ -136,10 +135,10 @@ export const Route = createFileRoute("/hooks/agents/health-check")({
         });
       },
       GET: async () =>
-        new Response(
-          JSON.stringify({ ok: true, hint: "POST with cron bearer token" }),
-          { status: 200, headers: { "Content-Type": "application/json" } },
-        ),
+        new Response(JSON.stringify({ ok: true, hint: "POST with cron bearer token" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
     },
   },
 });

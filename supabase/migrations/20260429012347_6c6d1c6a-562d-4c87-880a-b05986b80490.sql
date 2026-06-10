@@ -23,7 +23,7 @@ DECLARE
   v_count int := 0;
   v_results jsonb := '[]'::jsonb;
   v_base_url text := 'https://e-marq.lovable.app';
-  v_anon text := 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnemN1a2huYXJ3ZXp4d2R5b25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjY5MjcsImV4cCI6MjA5MjIwMjkyN30.6JSHX3blYqoapNhO7WZL6LgDyGcDYSanR2Ob7nayEuw';
+  v_anon text := '<SUPABASE_PUBLISHABLE_KEY>';
 BEGIN
   FOR rec IN
     SELECT id, tenant_id, agent_id, action_type, parameters, source_insight_id

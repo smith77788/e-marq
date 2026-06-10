@@ -4,13 +4,7 @@
  */
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTenantContext } from "@/hooks/useTenantContext";
@@ -27,8 +21,7 @@ export const Route = createFileRoute("/_authenticated/brand/acos-loop")({
       { title: "ACOS Loop — MARQ" },
       {
         name: "description",
-        content:
-          "Closed-loop dashboard: insights, decisions queue, agent ROI and outcomes",
+        content: "Closed-loop dashboard: insights, decisions queue, agent ROI and outcomes",
       },
     ],
   }),
@@ -39,8 +32,7 @@ function AcosLoopPage() {
   const { tenant: urlTenant } = useSearch({
     from: "/_authenticated/brand/acos-loop",
   });
-  const { current, currentTenantId, setCurrentTenantId, tenants, loading } =
-    useTenantContext();
+  const { current, currentTenantId, setCurrentTenantId, tenants, loading } = useTenantContext();
 
   useEffect(() => {
     if (urlTenant && urlTenant !== currentTenantId) setCurrentTenantId(urlTenant);
@@ -80,9 +72,8 @@ function AcosLoopPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">ACOS Loop</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Кругообіг автономних рішень: інсайти → пропозиції → схвалення → виконання
-          → виміряний результат → пам'ять. Тут ви бачите весь цикл і керуєте чергою
-          схвалень одним кліком.
+          Кругообіг автономних рішень: інсайти → пропозиції → схвалення → виконання → виміряний
+          результат → пам'ять. Тут ви бачите весь цикл і керуєте чергою схвалень одним кліком.
         </p>
       </div>
 

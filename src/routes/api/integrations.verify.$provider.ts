@@ -29,10 +29,12 @@ const BodySchema = z.object({
 });
 
 function jsonResponse(body: unknown, status = 200) {
-  return withCors(new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  }));
+  return withCors(
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { "Content-Type": "application/json" },
+    }),
+  );
 }
 
 export const Route = createFileRoute("/api/integrations/verify/$provider")({

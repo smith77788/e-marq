@@ -36,8 +36,7 @@ async function loadSettings() {
     allowedKinds: new Set(
       ((map.get("allowed_kinds") as string[]) ?? WHITELIST_AUTO_APPLY) as ActionKind[],
     ),
-    severityThreshold:
-      ((map.get("severity_threshold") as Severity) ?? "p2") as Severity,
+    severityThreshold: ((map.get("severity_threshold") as Severity) ?? "p2") as Severity,
     dedupeWindowMin:
       typeof map.get("dedupe_window_minutes") === "number"
         ? (map.get("dedupe_window_minutes") as number)
@@ -80,9 +79,7 @@ export async function runSelfHealCycle(tenantId: string | null = null): Promise<
   };
 
   // If specific tenant — just that one. Else iterate active tenants.
-  const tenantIds: (string | null)[] = tenantId
-    ? [tenantId]
-    : await loadActiveTenantIds();
+  const tenantIds: (string | null)[] = tenantId ? [tenantId] : await loadActiveTenantIds();
   // Add a `null` pass for system-wide detectors that ignore tenant scoping.
   if (!tenantId && !tenantIds.includes(null)) tenantIds.push(null);
 
@@ -126,8 +123,7 @@ export async function runSelfHealCycle(tenantId: string | null = null): Promise<
             if (
               existingAction &&
               existingAction.decision === decision &&
-              Date.now() - new Date(existingAction.created_at).getTime() <
-                24 * 3600_000
+              Date.now() - new Date(existingAction.created_at).getTime() < 24 * 3600_000
             ) {
               if (decision === "propose") summary.actions_proposed++;
               else if (decision === "block") summary.actions_blocked++;
@@ -135,11 +131,7 @@ export async function runSelfHealCycle(tenantId: string | null = null): Promise<
             }
           }
 
-          const { actionId, applied } = await persistAction(
-            incident.id,
-            action,
-            decision,
-          );
+          const { actionId, applied } = await persistAction(incident.id, action, decision);
 
           if (decision === "apply" && actionId) {
             const res = await safeApply(action.kind, action.payload);
@@ -166,7 +158,11 @@ export async function runSelfHealCycle(tenantId: string | null = null): Promise<
 }
 
 async function loadActiveTenantIds(): Promise<(string | null)[]> {
-  const { data } = await supabaseAdmin.from("tenants").select("id").eq("status", "active").limit(100);
+  const { data } = await supabaseAdmin
+    .from("tenants")
+    .select("id")
+    .eq("status", "active")
+    .limit(100);
   return (data ?? []).map((t) => t.id as string);
 }
 
@@ -273,10 +269,7 @@ async function markIncidentFixed(incidentId: string) {
 }
 
 // ─── PROPOSAL APPLY (called by user via /apply endpoint) ────────────────────
-export async function applyProposal(
-  actionId: string,
-  userId: string,
-): Promise<ExecResult> {
+export async function applyProposal(actionId: string, userId: string): Promise<ExecResult> {
   const { data: action } = await supabaseAdmin
     .from("self_heal_actions")
     .select("id, kind, payload_json, status, incident_id")
@@ -286,7 +279,10 @@ export async function applyProposal(
   if (action.status === "applied") {
     return { ok: false, message: "already applied", affected: 0 };
   }
-  const res = await safeApply(action.kind as ActionKind, (action.payload_json ?? {}) as Record<string, unknown>);
+  const res = await safeApply(
+    action.kind as ActionKind,
+    (action.payload_json ?? {}) as Record<string, unknown>,
+  );
   await supabaseAdmin
     .from("self_heal_actions")
     .update({
@@ -300,10 +296,7 @@ export async function applyProposal(
   return res;
 }
 
-export async function revertAppliedAction(
-  actionId: string,
-  userId: string,
-): Promise<ExecResult> {
+export async function revertAppliedAction(actionId: string, userId: string): Promise<ExecResult> {
   const { data: action } = await supabaseAdmin
     .from("self_heal_actions")
     .select("id, kind, revert_payload, reversible, status")

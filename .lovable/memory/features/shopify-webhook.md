@@ -3,14 +3,17 @@ name: Shopify webhook receiver
 description: HMAC-SHA256 verified inbound webhooks for Shopify orders/products/customers, on shared /api/public/integrations/inbound/shopify endpoint
 type: feature
 ---
+
 Shopify webhooks приймаються через `/api/public/integrations/inbound/$provider` з `provider=shopify`.
 
 **Authentication path** (відрізняється від generic):
+
 - `X-Shopify-Hmac-Sha256` header — base64(HMAC-SHA256(rawBody, webhook_secret))
 - `webhook_secret` зберігається у `tenant_integrations.webhook_secret` (той самий стовпчик що й generic) — користувач ставить ОДИН секрет як у Shopify Admin → Notifications, так і у нас.
 - Comparison через `crypto.timingSafeEqual` — never-string-compare.
 
 **Topic mapping** (читаємо з `X-Shopify-Topic`):
+
 - `products/*` → entity=products
 - `customers/*` → entity=customers
 - `orders/*` → entity=orders

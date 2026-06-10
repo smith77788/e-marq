@@ -19,7 +19,11 @@ export const Route = createFileRoute("/_authenticated/brand/roi")({
   head: () => ({
     meta: [
       { title: "ROI від AI — MARQ" },
-      { name: "description", content: "Зведена панель ROI: атрибутований дохід, зекономлений час та ефективність автономних дій." },
+      {
+        name: "description",
+        content:
+          "Зведена панель ROI: атрибутований дохід, зекономлений час та ефективність автономних дій.",
+      },
     ],
   }),
   component: ROIPage,

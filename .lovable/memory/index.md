@@ -1,10 +1,11 @@
 # Project Memory
 
 ## Core
+
 ACOS = головний продукт: multi-tenant Autonomous Revenue OS для D2C-брендів.
 Архітектура за зразком My Food Diary: ai_insights → orchestrator → 1-click apply → ai_memory feedback loop.
 Storefront/Products/Orders = вторинна "commerce shell", не основа продукту.
-ACOS-агенти живуть як TanStack server routes у src/routes/hooks/agents.*.ts (НЕ Supabase edge functions). pg_cron оркеструє їх через /hooks/agents/* і /hooks/engines/*.
+ACOS-агенти живуть як TanStack server routes у src/routes/hooks/agents._.ts (НЕ Supabase edge functions). pg_cron оркеструє їх через /hooks/agents/_ і /hooks/engines/\*.
 Pure-SQL fallback layer (sql-insight-pipeline + auto-approval + measurement-loop + signal-layer + pilot-simulator) працює В БД — immune to cron 401/404, immune to Publish-затримок. Ця гілка лишається живою навіть коли всі hooks-агенти зомбі.
 Telemetry pipeline: agentRuntime.startAgentRun → acos_agent_runs; HealthCheckAgent (hourly) агрегує у agent_health.
 Auto-approval ЄДИНИЙ шлях: convert_insights_to_decisions (status=pending) → auto_approve_eligible_decisions (whitelist + history АБО bootstrap-cap=3 на (tenant,action_type) поки action_outcomes порожні). Legacy `propose_decisions_from_insights` ВИДАЛЕНА — вона ставила status='approved' напряму, обходячи policy і guardrails. owner_setup_task/owner_review/flag_for_review лишаються manual за дизайном. Approval mode tagged у `payload.approval_mode` = 'history' | 'bootstrap'.
@@ -29,6 +30,7 @@ v1.0 Roadmap: Phase 1-7 (DONE) → Phase 8 Pilot simulator with real lift (DONE)
 Реальність 2026-05-04: pure-SQL гілка повністю автономна, всі 36 HTTP-cron jobs з 30s timeout + CRON_SECRET, pipeline-health-guard hourly моніторить застій.
 
 ## Memories
+
 - [Agent network topology](mem://architecture/agent-network) — ~115 hooks-агентів, оркестрація через pg_cron, реєстр запусків
 - [Cron deploy trap](mem://architecture/cron-deploy-trap) — як відрізнити реальний 200 від 404, чек-лист публікації нових агентів
 - [Cron secret rollout](mem://security/cron-secret-rollout) — owner-action чек-ліст: додати CRON_SECRET, оновити cron jobs, ротація Telegram token

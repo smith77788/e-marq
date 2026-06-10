@@ -17,12 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ArrowLeft, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -126,9 +121,13 @@ function AdminAgentDetailPage() {
     for (const r of runs) {
       if (new Date(r.started_at).getTime() < cutoff) continue;
       const key = r.tenant_id ?? "—";
-      const cur =
-        map.get(key) ??
-        { tenant_id: key, runs: 0, failed: 0, insights: 0, lastRun: r.started_at };
+      const cur = map.get(key) ?? {
+        tenant_id: key,
+        runs: 0,
+        failed: 0,
+        insights: 0,
+        lastRun: r.started_at,
+      };
       cur.runs += 1;
       if (r.status === "failed") cur.failed += 1;
       cur.insights += r.insights_created ?? 0;
@@ -139,7 +138,8 @@ function AdminAgentDetailPage() {
   }, [runs]);
 
   const heatmap = useMemo(() => {
-    if (!runs) return { days: [] as string[], tenantIds: [] as string[], cells: new Map<string, number>() };
+    if (!runs)
+      return { days: [] as string[], tenantIds: [] as string[], cells: new Map<string, number>() };
     const days: string[] = [];
     for (let i = 13; i >= 0; i--) {
       const d = new Date(Date.now() - i * 86_400_000);
@@ -189,19 +189,13 @@ function AdminAgentDetailPage() {
         <Stat label="Runs 24h" value={stats.runs24} />
         <Stat
           label="Fail 24h"
-          value={
-            stats.runs24 > 0
-              ? `${Math.round((stats.fail24 / stats.runs24) * 100)}%`
-              : "—"
-          }
+          value={stats.runs24 > 0 ? `${Math.round((stats.fail24 / stats.runs24) * 100)}%` : "—"}
           tone={stats.fail24 / Math.max(stats.runs24, 1) > 0.3 ? "fail" : "ok"}
         />
         <Stat label="Runs 7d" value={stats.runs7} />
         <Stat
           label="Fail 7d"
-          value={
-            stats.runs7 > 0 ? `${Math.round((stats.fail7 / stats.runs7) * 100)}%` : "—"
-          }
+          value={stats.runs7 > 0 ? `${Math.round((stats.fail7 / stats.runs7) * 100)}%` : "—"}
           tone={stats.fail7 / Math.max(stats.runs7, 1) > 0.1 ? "warn" : "ok"}
         />
         <Stat

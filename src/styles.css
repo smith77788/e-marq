@@ -108,9 +108,9 @@
   /* Charts: neon spectrum */
   --chart-1: oklch(0.74 0.16 220); /* cyan */
   --chart-2: oklch(0.72 0.18 155); /* green */
-  --chart-3: oklch(0.78 0.16 85);  /* amber */
+  --chart-3: oklch(0.78 0.16 85); /* amber */
   --chart-4: oklch(0.68 0.22 305); /* violet */
-  --chart-5: oklch(0.7 0.22 25);   /* coral */
+  --chart-5: oklch(0.7 0.22 25); /* coral */
 
   /* Sidebar (slightly darker than cards for separation) */
   --sidebar: oklch(0.18 0.035 262);
@@ -192,7 +192,8 @@
     border-color: var(--color-border);
   }
 
-  html, body {
+  html,
+  body {
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
@@ -206,8 +207,13 @@
   }
 
   /* Subtle scrollbar */
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
   ::-webkit-scrollbar-thumb {
     background: oklch(1 0 0 / 8%);
     border-radius: 999px;
@@ -233,14 +239,30 @@
 }
 
 @layer utilities {
-  .bg-gradient-primary { background-image: var(--gradient-primary); }
-  .bg-gradient-success { background-image: var(--gradient-success); }
-  .bg-gradient-warning { background-image: var(--gradient-warning); }
-  .bg-gradient-surface { background-image: var(--gradient-surface); }
-  .shadow-glow { box-shadow: var(--shadow-glow); }
-  .shadow-glow-violet { box-shadow: var(--shadow-glow-violet); }
-  .shadow-elevated { box-shadow: var(--shadow-elevated); }
-  .shadow-card { box-shadow: var(--shadow-card); }
+  .bg-gradient-primary {
+    background-image: var(--gradient-primary);
+  }
+  .bg-gradient-success {
+    background-image: var(--gradient-success);
+  }
+  .bg-gradient-warning {
+    background-image: var(--gradient-warning);
+  }
+  .bg-gradient-surface {
+    background-image: var(--gradient-surface);
+  }
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  .shadow-glow-violet {
+    box-shadow: var(--shadow-glow-violet);
+  }
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
 
   .text-gradient-primary {
     background-image: var(--gradient-primary);
@@ -268,9 +290,18 @@
     animation: pulse-ring 1.6s ease-out infinite;
   }
   @keyframes pulse-ring {
-    0%   { transform: scale(0.6); opacity: 0.55; }
-    80%  { transform: scale(1.6); opacity: 0; }
-    100% { transform: scale(1.6); opacity: 0; }
+    0% {
+      transform: scale(0.6);
+      opacity: 0.55;
+    }
+    80% {
+      transform: scale(1.6);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1.6);
+      opacity: 0;
+    }
   }
 
   /* ─── Cockpit shimmer + reveal animations ───────────────────────────── */
@@ -278,36 +309,63 @@
     position: relative;
     overflow: hidden;
     background:
-      linear-gradient(
-        90deg,
-        oklch(1 0 0 / 0%) 0%,
-        oklch(1 0 0 / 6%) 50%,
-        oklch(1 0 0 / 0%) 100%
-      ),
+      linear-gradient(90deg, oklch(1 0 0 / 0%) 0%, oklch(1 0 0 / 6%) 50%, oklch(1 0 0 / 0%) 100%),
       var(--muted);
-    background-size: 200% 100%, 100% 100%;
+    background-size:
+      200% 100%,
+      100% 100%;
     animation: shimmer-slide 1.6s linear infinite;
   }
   @keyframes shimmer-slide {
-    0%   { background-position: -150% 0, 0 0; }
-    100% { background-position:  150% 0, 0 0; }
+    0% {
+      background-position:
+        -150% 0,
+        0 0;
+    }
+    100% {
+      background-position:
+        150% 0,
+        0 0;
+    }
   }
 
   /* Stagger fade-up reveal — applied to .reveal-stagger > * children */
   .reveal-stagger > * {
     animation: reveal-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
-  .reveal-stagger > *:nth-child(1) { animation-delay: 0ms; }
-  .reveal-stagger > *:nth-child(2) { animation-delay: 60ms; }
-  .reveal-stagger > *:nth-child(3) { animation-delay: 120ms; }
-  .reveal-stagger > *:nth-child(4) { animation-delay: 180ms; }
-  .reveal-stagger > *:nth-child(5) { animation-delay: 240ms; }
-  .reveal-stagger > *:nth-child(6) { animation-delay: 300ms; }
-  .reveal-stagger > *:nth-child(7) { animation-delay: 360ms; }
-  .reveal-stagger > *:nth-child(n+8) { animation-delay: 420ms; }
+  .reveal-stagger > *:nth-child(1) {
+    animation-delay: 0ms;
+  }
+  .reveal-stagger > *:nth-child(2) {
+    animation-delay: 60ms;
+  }
+  .reveal-stagger > *:nth-child(3) {
+    animation-delay: 120ms;
+  }
+  .reveal-stagger > *:nth-child(4) {
+    animation-delay: 180ms;
+  }
+  .reveal-stagger > *:nth-child(5) {
+    animation-delay: 240ms;
+  }
+  .reveal-stagger > *:nth-child(6) {
+    animation-delay: 300ms;
+  }
+  .reveal-stagger > *:nth-child(7) {
+    animation-delay: 360ms;
+  }
+  .reveal-stagger > *:nth-child(n + 8) {
+    animation-delay: 420ms;
+  }
   @keyframes reveal-up {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   /* Soft fade-in (no transform) for content swaps */
@@ -315,14 +373,20 @@
     animation: fade-in-soft 0.35s ease-out both;
   }
   @keyframes fade-in-soft {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   /* Top-of-page progress bar (perceived speed) */
   .top-progress {
     position: fixed;
-    top: 0; left: 0; right: 0;
+    top: 0;
+    left: 0;
+    right: 0;
     height: 2px;
     z-index: 100;
     background: linear-gradient(90deg, transparent, var(--primary), var(--accent), transparent);
@@ -331,15 +395,25 @@
     pointer-events: none;
   }
   @keyframes top-progress-slide {
-    0%   { background-position: -100% 0; }
-    100% { background-position:  200% 0; }
+    0% {
+      background-position: -100% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
 
   /* Respect reduced motion */
   @media (prefers-reduced-motion: reduce) {
-    .shimmer, .reveal-stagger > *, .fade-in-soft, .top-progress {
+    .shimmer,
+    .reveal-stagger > *,
+    .fade-in-soft,
+    .top-progress {
       animation: none !important;
     }
-    .reveal-stagger > * { opacity: 1; transform: none; }
+    .reveal-stagger > * {
+      opacity: 1;
+      transform: none;
+    }
   }
 }
