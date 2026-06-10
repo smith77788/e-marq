@@ -33,18 +33,24 @@ function paybackColor(pm: number | null): string {
 export function CacPaybackTable({ tenantId }: { tenantId: string | null }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!tenantId) return;
     setLoading(true);
+    setFetchError(null);
     supabase
       .from("cac_payback_metrics")
       .select("cohort_month, channel, cac_cents, customer_count, payback_month, ltv_12m_cents, roi_pct")
       .eq("tenant_id", tenantId)
       .order("cohort_month", { ascending: false })
       .limit(36)
-      .then(({ data }) => {
-        setRows((data ?? []) as Row[]);
+      .then(({ data, error }) => {
+        if (error) {
+          setFetchError(error.message);
+        } else {
+          setRows((data ?? []) as Row[]);
+        }
         setLoading(false);
       });
   }, [tenantId]);
@@ -56,6 +62,17 @@ export function CacPaybackTable({ tenantId }: { tenantId: string | null }) {
           <CardTitle>CAC та окупність</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">Завантаження…</CardContent>
+      </Card>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>CAC та окупність</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-destructive">{fetchError}</CardContent>
       </Card>
     );
   }
