@@ -58,7 +58,7 @@ export const Route = createFileRoute("/hooks/agents/integration-scout")({
               .from("orders")
               .select("id", { count: "exact", head: true })
               .eq("tenant_id", tenantId)
-              .eq("status", "paid")
+              .in("status", ["paid", "fulfilled"])
               .gte("created_at", since30),
             supabaseAdmin
               .from("products")
