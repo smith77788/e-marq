@@ -49,9 +49,10 @@ export function RealtimeRevenuePulse({ tenantId }: Props) {
         .from("orders")
         .select("id, total_cents, paid_at, status")
         .eq("tenant_id", tenantId)
-        .eq("status", "paid")
+        .in("status", ["paid", "fulfilled"])
         .gte("paid_at", since)
-        .order("paid_at", { ascending: true });
+        .order("paid_at", { ascending: true })
+        .limit(2000);
       return (data ?? []) as OrderRow[];
     },
   });
