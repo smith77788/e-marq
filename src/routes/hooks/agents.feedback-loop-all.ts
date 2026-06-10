@@ -90,7 +90,7 @@ async function runFeedbackForTenant(
       .from("orders")
       .select("total_cents")
       .eq("tenant_id", tenantId)
-      .eq("status", "paid")
+      .in("status", ["paid", "fulfilled"])
       .ilike("customer_email", email)
       .gte("paid_at", r.sent_at)
       .lte("paid_at", windowEnd);

@@ -98,7 +98,7 @@ export const Route = createFileRoute("/hooks/agents/bot-quality")({
               .from("orders")
               .select("customer_email, paid_at, total_cents")
               .eq("tenant_id", tenantId)
-              .eq("status", "paid")
+              .in("status", ["paid", "fulfilled"])
               .gte("paid_at", since);
             // Map customer_id → email via customers table
             const { data: customers } = await supabaseAdmin

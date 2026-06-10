@@ -172,26 +172,33 @@ export const Route = createFileRoute("/hooks/agents/web-prospector")({
           const email = detectEmail(html);
           const { signals, fit } = scoreSignals(html, f.snippet);
 
-          const { error } = await supabaseAdmin.from("lead_prospects").upsert(
-            {
-              source: "web_prospector",
-              source_query: f.source_query,
-              name: stripHtml(f.title).slice(0, 120) || origin.replace(/^https?:\/\//, ""),
-              website_url: origin,
-              instagram_handle: insta,
-              email,
-              niche: f.niche,
-              fit_score: fit,
-              signals: {
-                ...signals,
-                discovered_for_tenant: f.source_tenant_id,
-                discovered_for_brand: f.source_tenant_brand,
+          const { data: upserted, error } = await supabaseAdmin
+            .from("lead_prospects")
+            .upsert(
+              {
+                source: "web_prospector",
+                source_query: f.source_query,
+                name: stripHtml(f.title).slice(0, 120) || origin.replace(/^https?:\/\//, ""),
+                website_url: origin,
+                instagram_handle: insta,
+                email,
+                niche: f.niche,
+                fit_score: fit,
+                signals: {
+                  ...signals,
+                  discovered_for_tenant: f.source_tenant_id,
+                  discovered_for_brand: f.source_tenant_brand,
+                },
+                status: "discovered",
               },
-              status: "discovered",
-            },
-            { onConflict: "lower((website_url))", ignoreDuplicates: true } as never,
-          );
-          if (!error) created += 1;
+              { onConflict: "lower((website_url))", ignoreDuplicates: true } as never,
+            )
+            .select("id");
+          if (error) {
+            console.error("[web-prospector] upsert failed:", error.message);
+          } else if ((upserted?.length ?? 0) > 0) {
+            created += 1;
+          }
         }
 
         return jsonOk({
