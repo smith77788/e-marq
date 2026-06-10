@@ -95,7 +95,7 @@ export const Route = createFileRoute("/hooks/agents/tick")({
 
 async function loadActiveTenantsForCron(token: string) {
   if (!isCronToken(token)) return { error: "Unauthorized", status: 401 } as const;
-  const { data, error } = await supabaseAdmin.from("tenants").select("id").eq("status", "active");
+  const { data, error } = await supabaseAdmin.from("tenants").select("id").eq("status", "active").limit(500);
   if (error) return { error: error.message, status: 500 } as const;
   return data ?? [];
 }
