@@ -8,6 +8,7 @@
  * aggregates totals. Designed to be hit once per day by an external cron / pg_cron.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { FANOUT_TENANT_STATUSES } from "@/lib/acos/fanoutTenants";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { jsonError, jsonOk } from "@/lib/acos/agentRuntime";
@@ -125,7 +126,7 @@ export const Route = createFileRoute("/hooks/engines/reorder-all")({
         const { data: tenants, error } = await supabaseAdmin
           .from("tenants")
           .select("id, slug")
-          .eq("status", "active");
+          .in("status", [...FANOUT_TENANT_STATUSES]);
         if (error) return jsonError("Failed to load tenants", 500, { details: error.message });
 
         const outcomes: TenantOutcome[] = [];

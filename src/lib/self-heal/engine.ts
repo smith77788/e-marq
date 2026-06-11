@@ -2,6 +2,7 @@
  * Self-Heal Engine — orchestrates detectors, dedupe, decision, and apply.
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { loadFanoutTenantIds } from "@/lib/acos/fanoutTenants";
 import { detectOutreachFailures } from "./detectors/outreachFailures";
 import { detectAgentRunsStuck } from "./detectors/agentRunsStuck";
 import { detectAgentRunsFailing } from "./detectors/agentRunsFailing";
@@ -158,12 +159,8 @@ export async function runSelfHealCycle(tenantId: string | null = null): Promise<
 }
 
 async function loadActiveTenantIds(): Promise<(string | null)[]> {
-  const { data } = await supabaseAdmin
-    .from("tenants")
-    .select("id")
-    .eq("status", "active")
-    .limit(100);
-  return (data ?? []).map((t) => t.id as string);
+  // active + pending — pending tenants are live and must get self-heal coverage.
+  return loadFanoutTenantIds(100);
 }
 
 async function upsertIncident(

@@ -9,6 +9,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
 import { isCronToken } from "@/lib/acos/cronAuth";
+import { loadFanoutTenantIds } from "@/lib/acos/fanoutTenants";
 
 export type OutreachAuth =
   | { kind: "cron" }
@@ -63,19 +64,9 @@ export async function resolveTargetTenants(
   if (auth.kind === "member") return [auth.tenantId];
   if (auth.kind === "super") {
     if (hint) return [hint];
-    const { data } = await supabaseAdmin
-      .from("tenants")
-      .select("id")
-      .eq("status", "active")
-      .limit(50);
-    return (data ?? []).map((t) => t.id);
+    return loadFanoutTenantIds(50);
   }
-  // cron — всі активні tenants
+  // cron — всі активні tenants (active + pending)
   if (hint) return [hint];
-  const { data } = await supabaseAdmin
-    .from("tenants")
-    .select("id")
-    .eq("status", "active")
-    .limit(100);
-  return (data ?? []).map((t) => t.id);
+  return loadFanoutTenantIds(100);
 }

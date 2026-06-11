@@ -6,6 +6,7 @@
  * Cron auth required for fan-out mode.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { FANOUT_TENANT_STATUSES } from "@/lib/acos/fanoutTenants";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { authorizeAgentRequest, jsonError, jsonOk } from "@/lib/acos/agentRuntime";
 import { isCronToken } from "@/lib/acos/cronAuth";
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/hooks/engines/dispatch")({
           const { data: tenants, error: tErr } = await supabaseAdmin
             .from("tenants")
             .select("id, slug")
-            .eq("status", "active")
+            .in("status", [...FANOUT_TENANT_STATUSES])
             .limit(50);
           if (tErr) return jsonError("tenant_lookup_failed", 500, { details: tErr.message });
           const out: Array<Record<string, unknown>> = [];

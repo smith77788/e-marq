@@ -8,6 +8,7 @@
  * Auth: SUPABASE_PUBLISHABLE_KEY (cron) — той самий що в існуючих pg_cron headers.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { FANOUT_TENANT_STATUSES } from "@/lib/acos/fanoutTenants";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { jsonError, jsonOk } from "@/lib/acos/agentRuntime";
 import { isCronToken } from "@/lib/acos/cronAuth";
@@ -135,7 +136,7 @@ export const Route = createFileRoute("/hooks/agents/cron-chunk")({
         const { data: tenants } = await supabaseAdmin
           .from("tenants")
           .select("id, slug")
-          .eq("status", "active")
+          .in("status", [...FANOUT_TENANT_STATUSES])
           .limit(50);
 
         const tenantResults = await Promise.allSettled(

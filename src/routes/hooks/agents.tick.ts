@@ -3,6 +3,7 @@
  * Triggered by pg_cron every minute. No auth (cron-only).
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { FANOUT_TENANT_STATUSES } from "@/lib/acos/fanoutTenants";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { dispatchTenantOutbound } from "@/lib/acos/channels";
 import { runSalesBotForTenant } from "@/lib/acos/salesBot";
@@ -95,7 +96,7 @@ export const Route = createFileRoute("/hooks/agents/tick")({
 
 async function loadActiveTenantsForCron(token: string) {
   if (!isCronToken(token)) return { error: "Unauthorized", status: 401 } as const;
-  const { data, error } = await supabaseAdmin.from("tenants").select("id").eq("status", "active");
+  const { data, error } = await supabaseAdmin.from("tenants").select("id").in("status", [...FANOUT_TENANT_STATUSES]);
   if (error) return { error: error.message, status: 500 } as const;
   return data ?? [];
 }

@@ -5,6 +5,7 @@
  * Used by pg_cron (daily 07:00 UTC) and manual super-admin trigger.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { FANOUT_TENANT_STATUSES } from "@/lib/acos/fanoutTenants";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
@@ -47,7 +48,7 @@ export const Route = createFileRoute("/hooks/agents/cron-all")({
         const { data: tenants, error } = await supabaseAdmin
           .from("tenants")
           .select("id, slug, name")
-          .eq("status", "active")
+          .in("status", [...FANOUT_TENANT_STATUSES])
           .limit(500);
         if (error) return jsonError("Failed to list tenants", 500, { details: error.message });
 
