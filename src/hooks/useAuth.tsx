@@ -54,47 +54,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
-      setUser(newSession?.user ?? null);
-      if (newSession?.user) {
-        setTimeout(() => {
-          void checkSuperAdmin(newSession.user.id);
-        }, 0);
-      } else {
-        setIsSuperAdmin(false);
-      }
-    });
-
+    let subscription: { unsubscribe: () => void } | null = null;
     // Safety net: if getSession() hangs (slow network / Supabase outage), the
     // whole UI gets stuck on a "loading auth" spinner forever. Force-resolve
     // after 8s — onAuthStateChange will still update state when it eventually
     // arrives, so users can at least see the login screen instead of a frozen app.
     const failsafe = setTimeout(() => setLoading(false), 8_000);
 
-    void supabase.auth
-      .getSession()
-      .then(({ data }) => {
-        setSession(data.session);
-        setUser(data.session?.user ?? null);
-        if (data.session?.user) {
-          void checkSuperAdmin(data.session.user.id);
+    try {
+      const {
+        data: { subscription: sub },
+      } = supabase.auth.onAuthStateChange((_event, newSession) => {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        if (newSession?.user) {
+          setTimeout(() => {
+            void checkSuperAdmin(newSession.user.id);
+          }, 0);
+        } else {
+          setIsSuperAdmin(false);
         }
-      })
-      .catch((err) => {
-        // eslint-disable-next-line no-console
-        console.warn("[auth] getSession failed", err);
-      })
-      .finally(() => {
-        clearTimeout(failsafe);
-        setLoading(false);
       });
+      subscription = sub;
+
+      void supabase.auth
+        .getSession()
+        .then(({ data }) => {
+          setSession(data.session);
+          setUser(data.session?.user ?? null);
+          if (data.session?.user) {
+            void checkSuperAdmin(data.session.user.id);
+          }
+        })
+        .catch((err) => {
+          console.warn("[auth] getSession failed", err);
+        })
+        .finally(() => {
+          clearTimeout(failsafe);
+          setLoading(false);
+        });
+    } catch (err) {
+      // Supabase client not configured (missing env vars) — degrade gracefully
+      console.warn("[auth] Supabase client unavailable:", err);
+      clearTimeout(failsafe);
+      setLoading(false);
+    }
 
     return () => {
       clearTimeout(failsafe);
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, []);
 

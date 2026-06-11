@@ -8,7 +8,6 @@ import {
   Bot,
   Building2,
   Coins,
-  Cpu,
   CreditCard,
   Gauge,
   HeartPulse,
@@ -197,137 +196,41 @@ const OWNER_NAV: NavGroup[] = [COCKPIT, SALES, CATALOG, MARKETING, AI_AGENTS, OW
 
 // ─── ADMIN navigation ─────────────────────────────────────────────────────────
 
-const MONITORING: NavGroup = {
-  labelKey: "sb.monitoring" as TKey,
-  tone: "text-destructive/70",
-  items: [
-    {
-      labelKey: "sb.missionControl",
-      to: "/admin",
-      icon: ShieldCheck,
-      exact: true,
-      tone: "text-destructive",
-    },
-    {
-      labelKey: "sb.healthMonitor" as TKey,
-      to: "/admin/health",
-      icon: HeartPulse,
-      tone: "text-destructive",
-    },
-    {
-      labelKey: "sb.selfHeal" as TKey,
-      to: "/admin/self-heal",
-      icon: Sparkles,
-      tone: "text-success",
-    },
-    {
-      labelKey: "sb.adminAuditLog" as TKey,
-      to: "/admin/audit-log",
-      icon: ShieldCheck,
-      tone: "text-warning",
-    },
-    {
-      labelKey: "sb.ingestLogs" as TKey,
-      to: "/admin/ingest-logs",
-      icon: Activity,
-      tone: "text-warning",
-    },
-  ],
-};
-
-const MANAGEMENT: NavGroup = {
-  labelKey: "sb.management" as TKey,
-  tone: "text-info/70",
-  items: [
-    { labelKey: "sb.allTenants", to: "/admin/tenants", icon: Building2, tone: "text-primary" },
-    {
-      labelKey: "sb.adminUsers" as TKey,
-      to: "/admin/users",
-      icon: UsersRound,
-      tone: "text-accent",
-    },
-    {
-      labelKey: "sb.adminPermissions" as TKey,
-      to: "/admin/permissions",
-      icon: ShieldCheck,
-      tone: "text-primary",
-    },
-    { labelKey: "sb.plansCatalog" as TKey, to: "/admin/plans", icon: Coins, tone: "text-warning" },
-    {
-      labelKey: "sb.topupRequests" as TKey,
-      to: "/admin/topup-requests",
-      icon: CreditCard,
-      tone: "text-success",
-    },
-  ],
-};
-
-const ADMIN_AGENTS: NavGroup = {
-  labelKey: "sb.agents",
-  tone: "text-accent/70",
-  items: [
-    {
-      labelKey: "sb.adminCommands" as TKey,
-      to: "/admin/commands",
-      icon: Zap,
-      tone: "text-warning",
-    },
-    {
-      labelKey: "sb.adminDecisions" as TKey,
-      to: "/admin/decisions",
-      icon: Inbox,
-      tone: "text-warning",
-    },
-    { labelKey: "sb.liveRuns", to: "/agents/live", icon: Activity, tone: "text-success" },
-    {
-      labelKey: "sb.adminOutcomes" as TKey,
-      to: "/admin/outcomes",
-      icon: TrendingUp,
-      tone: "text-success",
-    },
-    {
-      labelKey: "sb.adminAgents" as TKey,
-      to: "/admin/agents",
-      icon: Bot,
-      tone: "text-warning",
-    },
-    {
-      labelKey: "sb.insightStream",
-      to: "/admin/overview",
-      hash: "stream",
-      icon: Radio,
-      tone: "text-warning",
-    },
-    { labelKey: "sb.agentLibrary", to: "/agents/library", icon: Cpu, tone: "text-accent" },
-  ],
-};
-
-const LEAD_GEN: NavGroup = {
-  labelKey: "sb.leadGen" as TKey,
-  tone: "text-accent/70",
-  items: [
-    { labelKey: "sb.leadRadar" as TKey, to: "/admin/lead-radar", icon: Radio, tone: "text-accent" },
-    { labelKey: "sb.crossTenant" as TKey, to: "/admin/overview", icon: Layers, tone: "text-info" },
-    {
-      labelKey: "sb.dntradeHealth" as TKey,
-      to: "/admin/dntrade-health",
-      icon: HeartPulse,
-      tone: "text-destructive",
-    },
-  ],
-};
-
 const ADMIN_NAV: NavGroup[] = [
-  MONITORING,
-  MANAGEMENT,
-  ADMIN_AGENTS,
-  LEAD_GEN,
-  COCKPIT,
-  SALES,
-  CATALOG,
-  MARKETING,
-  AI_AGENTS,
-  OWNER_SETTINGS,
+  {
+    labelKey: "sb.monitoring" as TKey,
+    tone: "text-destructive/70",
+    items: [
+      { labelKey: "sb.missionControl", to: "/admin", icon: ShieldCheck, exact: true, tone: "text-destructive" },
+      { labelKey: "sb.healthMonitor" as TKey, to: "/admin/health", icon: HeartPulse, tone: "text-warning" },
+      { labelKey: "sb.selfHeal" as TKey, to: "/admin/self-heal", icon: Sparkles, tone: "text-success" },
+      { labelKey: "sb.adminAuditLog" as TKey, to: "/admin/audit-log", icon: ShieldCheck, tone: "text-muted-foreground" },
+      { labelKey: "sb.ingestLogs" as TKey, to: "/admin/ingest-logs", icon: Activity, tone: "text-muted-foreground" },
+    ],
+  },
+  {
+    labelKey: "sb.management" as TKey,
+    tone: "text-info/70",
+    items: [
+      { labelKey: "sb.allTenants", to: "/admin/tenants", icon: Building2, tone: "text-primary" },
+      { labelKey: "sb.adminUsers" as TKey, to: "/admin/users", icon: UsersRound, tone: "text-accent" },
+      { labelKey: "sb.adminPermissions" as TKey, to: "/admin/permissions", icon: ShieldCheck, tone: "text-primary" },
+      { labelKey: "sb.plansCatalog" as TKey, to: "/admin/plans", icon: Coins, tone: "text-warning" },
+      { labelKey: "sb.topupRequests" as TKey, to: "/admin/topup-requests", icon: CreditCard, tone: "text-success" },
+    ],
+  },
+  {
+    labelKey: "sb.agents",
+    tone: "text-accent/70",
+    items: [
+      { labelKey: "sb.adminCommands" as TKey, to: "/admin/commands", icon: Zap, tone: "text-warning" },
+      { labelKey: "sb.adminDecisions" as TKey, to: "/admin/decisions", icon: Inbox, tone: "text-warning" },
+      { labelKey: "sb.liveRuns", to: "/agents/live", icon: Activity, tone: "text-success" },
+      { labelKey: "sb.adminOutcomes" as TKey, to: "/admin/outcomes", icon: TrendingUp, tone: "text-success" },
+      { labelKey: "sb.insightStream", to: "/admin/overview", hash: "stream", icon: Radio, tone: "text-warning" },
+      { labelKey: "sb.leadRadar" as TKey, to: "/admin/lead-radar", icon: Gauge, tone: "text-accent" },
+    ],
+  },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
