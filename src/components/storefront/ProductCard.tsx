@@ -47,7 +47,7 @@ export function ProductCard({ product, slug }: { product: StorefrontProduct; slu
       price_cents: product.price_cents,
       currency: product.currency,
       image_url: product.image_url,
-      stock: product.stock || 9999,
+      stock: product.stock,
     });
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 2000);

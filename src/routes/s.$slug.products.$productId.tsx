@@ -156,7 +156,7 @@ function ProductDetailPage() {
         price_cents: activePriceCents,
         currency: product.currency,
         image_url: galleryImages[0]?.url ?? null,
-        stock: activeStock || 9999,
+        stock: activeStock,
       },
       1,
       selectedVariant?.id ?? null,

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
+import { formatMoneyExact } from "@/lib/money";
 
 type OrderRow = {
   id: string;
@@ -136,7 +137,6 @@ function OrderStatusPage() {
               <ManualPaymentInstructions
                 orderId={order.id}
                 totalCents={order.total_cents}
-                currency={order.currency}
                 instructions={payments.manual_instructions}
                 contact={payments.manual_contact}
               />
@@ -179,16 +179,14 @@ function OrderStatusPage() {
                       {item.product_name} × {item.quantity}
                     </span>
                     <span className="shrink-0 text-muted-foreground">
-                      {((item.unit_price_cents * item.quantity) / 100).toFixed(2)} {order.currency}
+                      {formatMoneyExact(item.unit_price_cents * item.quantity)}
                     </span>
                   </li>
                 ))}
               </ul>
               <div className="flex justify-between border-t pt-2 text-sm font-semibold">
                 <span>Разом</span>
-                <span>
-                  {(order.total_cents / 100).toFixed(2)} {order.currency}
-                </span>
+                <span>{formatMoneyExact(order.total_cents)}</span>
               </div>
             </div>
 
@@ -240,9 +238,9 @@ function StatusBadge({ status }: { status: OrderRow["status"] }) {
   > = {
     pending: { label: "Очікує оплати", variant: "secondary" },
     paid: { label: "Оплачено", variant: "default" },
-    fulfilled: { label: "Відправлено", variant: "default" },
+    fulfilled: { label: "Відправлено", variant: "outline" },
     cancelled: { label: "Скасовано", variant: "destructive" },
-    refunded: { label: "Повернено", variant: "destructive" },
+    refunded: { label: "Повернено", variant: "outline" },
   };
   const { label, variant } = map[status];
   return <Badge variant={variant}>{label}</Badge>;
@@ -251,13 +249,11 @@ function StatusBadge({ status }: { status: OrderRow["status"] }) {
 function ManualPaymentInstructions({
   orderId,
   totalCents,
-  currency,
   instructions,
   contact,
 }: {
   orderId: string;
   totalCents: number;
-  currency: string;
   instructions?: string;
   contact?: string;
 }) {
@@ -268,7 +264,7 @@ function ManualPaymentInstructions({
         <div>
           <p className="text-sm font-semibold text-foreground">Очікує оплати</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Сплатіть {(totalCents / 100).toFixed(2)} {currency} за реквізитами нижче. Вкажіть
+            Сплатіть {formatMoneyExact(totalCents)} за реквізитами нижче. Вкажіть
             номер замовлення <span className="font-mono font-medium">{orderId.slice(0, 8)}</span> у
             призначенні платежу.
           </p>

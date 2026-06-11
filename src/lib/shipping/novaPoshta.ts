@@ -27,19 +27,30 @@ export type NPSelection = {
 };
 
 async function call<T>(body: unknown): Promise<T[]> {
-  const res = await fetch("/api/public/shipping/np", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    if (res.status === 503) throw new Error("Доставка тимчасово недоступна");
-    if (res.status === 429) throw new Error("Забагато запитів, спробуйте пізніше");
-    throw new Error(`Помилка ${res.status}`);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10_000);
+  try {
+    const res = await fetch("/api/public/shipping/np", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      if (res.status === 503) throw new Error("Доставка тимчасово недоступна");
+      if (res.status === 429) throw new Error("Забагато запитів, спробуйте пізніше");
+      throw new Error(`Помилка ${res.status}`);
+    }
+    const json = (await res.json()) as { data?: T[]; error?: string };
+    if (json.error) throw new Error(json.error);
+    return json.data ?? [];
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError")
+      throw new Error("Час очікування вичерпано, спробуйте ще раз");
+    throw err;
+  } finally {
+    clearTimeout(timeout);
   }
-  const json = (await res.json()) as { data?: T[]; error?: string };
-  if (json.error) throw new Error(json.error);
-  return json.data ?? [];
 }
 
 export function searchCities(query: string): Promise<NPCity[]> {

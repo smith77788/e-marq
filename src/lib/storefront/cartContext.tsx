@@ -134,7 +134,9 @@ export function CartProvider({
       registerProduct(p);
       setCart((prev) => {
         const current = prev[p.id]?.quantity ?? 0;
-        const next = Math.max(1, Math.min(current + qty, p.stock || 9999));
+        if (p.stock <= 0 && current === 0) return prev; // truly OOS, nothing in cart yet
+        const cap = p.stock > 0 ? p.stock : current; // if stock went to 0, don't increase
+        const next = Math.max(1, Math.min(current + qty, cap));
         return { ...prev, [p.id]: { quantity: next } };
       });
       track(tenantId, "add_to_cart", {
@@ -222,6 +224,7 @@ export function CartProvider({
       clear,
       registerProduct,
       cartOpen,
+      setCartOpen,
     ],
   );
 
