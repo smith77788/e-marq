@@ -131,6 +131,7 @@ export function CartProvider({
 
   const addToCart = useCallback<CartCtx["addToCart"]>(
     (p, qty = 1, variantId = null) => {
+      if (!Number.isFinite(qty) || qty < 1) return;
       registerProduct(p);
       setCart((prev) => {
         const current = prev[p.id]?.quantity ?? 0;

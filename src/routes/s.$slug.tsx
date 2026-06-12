@@ -426,12 +426,26 @@ function StorefrontFooter({
     | undefined;
   const freeFrom = shipping?.free_shipping_from_cents as number | undefined;
 
-  const socialLinks = (ui.social_links ? JSON.parse(ui.social_links as string) : null) as Record<
-    string,
-    string
-  > | null;
-  const contactEmail = ui.contact_email;
-  const contactPhone = ui.contact_phone;
+  let socialLinks: Record<string, string> | null = null;
+  try {
+    if (ui.social_links) {
+      const parsed: unknown = JSON.parse(ui.social_links as string);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        socialLinks = Object.fromEntries(
+          Object.entries(parsed as Record<string, unknown>)
+            .filter(([, v]) => typeof v === "string" && /^https?:\/\//i.test(v as string))
+            .map(([k, v]) => [k, v as string]),
+        );
+        if (Object.keys(socialLinks).length === 0) socialLinks = null;
+      }
+    }
+  } catch {
+    // malformed JSON — ignore
+  }
+  const rawEmail = ui.contact_email?.trim();
+  const rawPhone = ui.contact_phone?.trim();
+  const contactEmail = rawEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail) ? rawEmail : null;
+  const contactPhone = rawPhone && /^[+\d\s()[\]-]{6,32}$/.test(rawPhone) ? rawPhone : null;
   const tagline = seo.description ?? null;
 
   const year = new Date().getFullYear();

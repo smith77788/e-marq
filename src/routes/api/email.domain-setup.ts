@@ -114,6 +114,8 @@ export const Route = createFileRoute("/api/email/domain-setup")({
         let resendStatus: string | null = null;
         let records: unknown = null;
         try {
+          const ctrl = new AbortController();
+          const t = setTimeout(() => ctrl.abort(), 15_000);
           const r = await fetch(`${RESEND_GATEWAY}/domains`, {
             method: "POST",
             headers: {
@@ -122,7 +124,8 @@ export const Route = createFileRoute("/api/email/domain-setup")({
               "Content-Type": "application/json",
             },
             body: JSON.stringify({ name: domain, region }),
-          });
+            signal: ctrl.signal,
+          }).finally(() => clearTimeout(t));
           const j = (await r.json().catch(() => ({}))) as {
             id?: string;
             status?: string;
@@ -133,12 +136,15 @@ export const Route = createFileRoute("/api/email/domain-setup")({
           if (!r.ok) {
             // If domain already exists in Resend, look it up.
             if (r.status === 422 || (j.message ?? "").toLowerCase().includes("already")) {
+              const listCtrl = new AbortController();
+              const lt = setTimeout(() => listCtrl.abort(), 15_000);
               const list = await fetch(`${RESEND_GATEWAY}/domains`, {
                 headers: {
                   Authorization: `Bearer ${lovableKey}`,
                   "X-Connection-Api-Key": resendKey,
                 },
-              });
+                signal: listCtrl.signal,
+              }).finally(() => clearTimeout(lt));
               const lj = (await list.json().catch(() => ({}))) as {
                 data?: Array<{ id: string; name: string; status: string }>;
               };

@@ -89,15 +89,21 @@ export const Route = createFileRoute("/api/email/domain-verify")({
           return jsonResponse({ error: "Resend connector not linked" }, 500);
 
         try {
+          const ctrl1 = new AbortController();
+          const t1 = setTimeout(() => ctrl1.abort(), 15_000);
           // Trigger verification
           await fetch(`${RESEND_GATEWAY}/domains/${domainId}/verify`, {
             method: "POST",
             headers: { Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": resendKey },
-          });
+            signal: ctrl1.signal,
+          }).finally(() => clearTimeout(t1));
           // Re-read status
+          const ctrl2 = new AbortController();
+          const t2 = setTimeout(() => ctrl2.abort(), 15_000);
           const r = await fetch(`${RESEND_GATEWAY}/domains/${domainId}`, {
             headers: { Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": resendKey },
-          });
+            signal: ctrl2.signal,
+          }).finally(() => clearTimeout(t2));
           const j = (await r.json().catch(() => ({}))) as { status?: string; records?: unknown };
           email.resend_status = j.status ?? null;
           email.records = j.records ?? email.records ?? null;

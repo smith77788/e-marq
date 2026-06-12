@@ -100,12 +100,15 @@ async function readBot(): Promise<
   const tgKey = process.env.TELEGRAM_API_KEY;
   if (!tgKey) return { ok: false, reason: "missing_tg_key" };
   try {
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 10_000);
     const r = await fetch(`${TG_GATEWAY}/getMe`, {
       headers: {
         Authorization: `Bearer ${lovableKey}`,
         "X-Connection-Api-Key": tgKey,
       },
-    });
+      signal: ctrl.signal,
+    }).finally(() => clearTimeout(timeout));
     const j = (await r.json().catch(() => ({}))) as {
       ok?: boolean;
       result?: { id?: number; first_name?: string; username?: string };

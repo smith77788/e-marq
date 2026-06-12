@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -32,12 +31,7 @@ export const Route = createFileRoute("/api/public/contact")({
           }
           const { name, email, message, website } = parsed.data;
 
-          const url = process.env.VITE_SUPABASE_URL!;
-          const key =
-            process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY!;
-          const supa = createClient<Database>(url, key);
-
-          const { error } = await supa.from("lead_prospects").insert({
+          const { error } = await supabaseAdmin.from("lead_prospects").insert({
             source: "contact_form",
             name,
             email,
