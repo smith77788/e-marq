@@ -113,6 +113,7 @@ export function InsightToasts() {
             agent_id: string;
             status: string;
             insights_created?: number;
+            metadata?: Record<string, unknown> | null;
             error?: string | null;
           };
           if (!tenantIds.includes(row.tenant_id)) return;
@@ -137,10 +138,16 @@ export function InsightToasts() {
 
           if (row.status !== "success") return;
           seenRunsRef.current.add(row.id);
-          if (!row.insights_created || row.insights_created === 0) return;
+          // Digest agents honestly report insights_created=0 and surface their
+          // work as metadata.digests_created — still worth a completion toast.
+          const digestsCreated =
+            typeof row.metadata?.digests_created === "number" ? row.metadata.digests_created : 0;
+          const insights = row.insights_created ?? 0;
+          if (insights === 0 && digestsCreated === 0) return;
           const brand = tenantNameById.get(row.tenant_id) ?? "";
+          const work = insights > 0 ? `+${insights}` : `${digestsCreated} ✉`;
           toast.success(t("toast.agentCompleted"), {
-            description: `${brand ? brand + " · " : ""}${row.agent_id} → +${row.insights_created}`,
+            description: `${brand ? brand + " · " : ""}${row.agent_id} → ${work}`,
             icon: <Bot className="h-4 w-4 text-success" />,
             duration: 4000,
           });
