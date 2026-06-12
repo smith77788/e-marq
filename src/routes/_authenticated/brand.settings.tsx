@@ -31,8 +31,8 @@ import {
   Link as LinkIcon,
   TrendingUp,
 } from "lucide-react";
-import { ImageUploadField } from "@/components/owner/ImageUploadField";
 import { MarketingSpendForm } from "@/components/owner/MarketingSpendForm";
+import { ImageUploadField } from "@/components/owner/ImageUploadField";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -353,17 +353,37 @@ function StoreSettingsPage() {
                     placeholder="Напр., Basic Food"
                   />
                 </div>
-                <ImageUploadField
-                  tenantId={tenantId}
-                  slug="logo"
-                  id="logo"
-                  label="Логотип"
-                  value={form.logo_url}
-                  onChange={(v) => setForm((f) => ({ ...f, logo_url: v }))}
-                  placeholder="https://…/logo.png"
-                  hint="Прозорий PNG/SVG, рекомендовано 256×256."
-                  previewClassName="h-10 w-10 rounded-md border border-border object-contain bg-card"
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="logo">Логотип (URL або файл)</Label>
+                  <div className="flex items-center gap-3">
+                    <ImageUploadField
+                      id="logo"
+                      tenantId={tenantId}
+                      field="logo"
+                      value={form.logo_url}
+                      onChange={(v) => setForm((f) => ({ ...f, logo_url: v }))}
+                      placeholder="https://…/logo.png"
+                      className="flex-1"
+                    />
+                    {form.logo_url && (
+                      <img
+                        src={form.logo_url}
+                        alt="logo preview"
+                        loading="lazy"
+                        decoding="async"
+                        width={40}
+                        height={40}
+                        className="h-10 w-10 rounded-md border border-border object-contain bg-card"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Прозорий PNG/SVG, рекомендовано 256×256, до 2MB.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -482,17 +502,30 @@ function StoreSettingsPage() {
                       maxLength={40}
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="hero-image">Зображення (URL або файл)</Label>
+                    <ImageUploadField
+                      id="hero-image"
+                      tenantId={tenantId}
+                      field="hero"
+                      value={form.hero_image}
+                      onChange={(v) => setForm((f) => ({ ...f, hero_image: v }))}
+                      placeholder="https://…/hero.jpg"
+                    />
+                  </div>
                 </div>
-                <ImageUploadField
-                  tenantId={tenantId}
-                  slug="hero"
-                  id="hero-image"
-                  label="Зображення банера"
-                  value={form.hero_image}
-                  onChange={(v) => setForm((f) => ({ ...f, hero_image: v }))}
-                  placeholder="https://…/hero.jpg"
-                  hint="Горизонтальне фото для головного банера."
-                />
+                {form.hero_image && (
+                  <img
+                    src={form.hero_image}
+                    alt="hero preview"
+                    loading="lazy"
+                    decoding="async"
+                    className="max-h-40 rounded-md border border-border bg-card object-cover"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                )}
               </CardContent>
             </Card>
 
@@ -681,16 +714,29 @@ function StoreSettingsPage() {
                   <p className="text-xs text-muted-foreground">{form.seo_description.length}/160</p>
                 </div>
                 <Separator />
-                <ImageUploadField
-                  tenantId={tenantId}
-                  slug="og"
-                  id="og"
-                  label="Open Graph image"
-                  value={form.og_image_url}
-                  onChange={(v) => setForm((f) => ({ ...f, og_image_url: v }))}
-                  placeholder="https://…/cover.jpg (1200×630)"
-                  hint="Превʼю для месенджерів і соцмереж, рекомендовано 1200×630."
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="og">Open Graph банер (URL або файл)</Label>
+                  <ImageUploadField
+                    id="og"
+                    tenantId={tenantId}
+                    field="banner"
+                    value={form.og_image_url}
+                    onChange={(v) => setForm((f) => ({ ...f, og_image_url: v }))}
+                    placeholder="https://…/cover.jpg (1200×630)"
+                  />
+                  {form.og_image_url && (
+                    <img
+                      src={form.og_image_url}
+                      alt="OG preview"
+                      loading="lazy"
+                      decoding="async"
+                      className="mt-2 max-h-40 rounded-md border border-border bg-card object-cover"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
