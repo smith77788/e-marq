@@ -22,6 +22,7 @@ import {
   jsonOk,
   startAgentRun,
 } from "@/lib/acos/agentRuntime";
+import { churnProbabilityFromCycles, ltvConfidence } from "@/lib/acos/ltvMath";
 
 export const Route = createFileRoute("/hooks/agents/ltv-predictor")({
   server: {
@@ -71,13 +72,9 @@ export const Route = createFileRoute("/hooks/agents/ltv-predictor")({
               ? (now - new Date(c.last_order_at).getTime()) / (24 * 3600 * 1000)
               : 365;
             const cyclesSince = daysSinceLast / Math.max(cycle, 7);
-            // Sigmoid-ish: 0 cycles = 0.05 churn, 1 cycle = 0.3, 2 cycles = 0.7, 3+ cycles = 0.95
-            let churn = 0.05;
-            if (cyclesSince > 0.5) churn = 0.15;
-            if (cyclesSince > 1) churn = 0.3;
-            if (cyclesSince > 1.5) churn = 0.55;
-            if (cyclesSince > 2) churn = 0.75;
-            if (cyclesSince > 3) churn = 0.95;
+            // Continuous logistic churn (see ltvMath) — replaces the old
+            // discrete ladder so the score moves smoothly with recency.
+            const churn = churnProbabilityFromCycles(cyclesSince);
 
             // Segment heuristic
             let segment = "regular";
@@ -105,7 +102,7 @@ export const Route = createFileRoute("/hooks/agents/ltv-predictor")({
                 title: `${c.name || c.email || "VIP"}: ризик втрати високоцінного клієнта`,
                 description: `Predicted LTV ${(predictedLtv / 100).toFixed(0)} ₴, не купував ${Math.round(daysSinceLast)} днів (зазвичай раз на ${Math.round(cycle)} днів).`,
                 expected_impact: `Win-back може зберегти ~${(predictedLtv / 100).toFixed(0)} ₴ протягом 12 міс.`,
-                confidence: 0.8,
+                confidence: ltvConfidence(c.total_orders),
                 risk_level: "high" as const,
                 metrics: {
                   customer_id: c.id,
