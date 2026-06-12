@@ -304,6 +304,17 @@ function BrandOrdersPage() {
         <CardContent className="p-0">
           {ordersQuery.isLoading ? (
             <TableSkeleton rows={6} columns={6} />
+          ) : ordersQuery.isError ? (
+            <p className="p-6 text-sm text-destructive">
+              Не вдалося завантажити замовлення.{" "}
+              <button
+                type="button"
+                className="underline"
+                onClick={() => void ordersQuery.refetch()}
+              >
+                Повторити
+              </button>
+            </p>
           ) : isEmpty ? (
             <EmptyState
               variant="inline"

@@ -106,7 +106,7 @@ function AgentLibraryPage() {
     [],
   );
 
-  const { data: runStats = [], isLoading: runsLoading } = useQuery<RunStat[]>({
+  const { data: runStats = [], isLoading: runsLoading, isError: runsError } = useQuery<RunStat[]>({
     queryKey: ["agent-library-runs", tenantId, sevenDaysAgo],
     enabled: Boolean(tenantId),
     queryFn: async () => {
@@ -190,6 +190,15 @@ function AgentLibraryPage() {
             <Skeleton key={i} className="h-24 w-full" />
           ))}
         </div>
+      ) : runsError ? (
+        <Card>
+          <CardContent className="p-6 text-sm text-destructive">
+            Не вдалося завантажити статистику запусків.{" "}
+            <button type="button" className="underline" onClick={() => window.location.reload()}>
+              Оновити сторінку
+            </button>
+          </CardContent>
+        </Card>
       ) : !tenantId ? (
         <Card>
           <CardContent className="p-6 text-sm text-muted-foreground">

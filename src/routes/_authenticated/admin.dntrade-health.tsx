@@ -311,6 +311,16 @@ function DnTradeHealthContent() {
       </div>
     );
   }
+  if (data.isError) {
+    return (
+      <p className="py-8 text-center text-sm text-destructive">
+        Не вдалося завантажити дані здоров'я DN Trade.{" "}
+        <button type="button" className="underline" onClick={() => void data.refetch()}>
+          Повторити
+        </button>
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-6">

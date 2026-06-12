@@ -381,6 +381,13 @@ function Content() {
 
           {prospects.isLoading ? (
             <Skeleton className="h-48" />
+          ) : prospects.isError ? (
+            <p className="p-6 text-sm text-destructive">
+              Не вдалося завантажити.{" "}
+              <button type="button" className="underline" onClick={() => void prospects.refetch()}>
+                Повторити
+              </button>
+            </p>
           ) : filteredProspects.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center text-sm text-muted-foreground">
@@ -409,6 +416,13 @@ function Content() {
             <CardContent className="p-0">
               {outreach.isLoading ? (
                 <Skeleton className="h-32" />
+              ) : outreach.isError ? (
+                <p className="p-6 text-sm text-destructive">
+                  Не вдалося завантажити.{" "}
+                  <button type="button" className="underline" onClick={() => void outreach.refetch()}>
+                    Повторити
+                  </button>
+                </p>
               ) : (outreach.data?.length ?? 0) === 0 ? (
                 <p className="p-6 text-sm text-muted-foreground">Ще не було торкань.</p>
               ) : (
@@ -478,6 +492,13 @@ function Content() {
             <CardContent className="p-0">
               {magnets.isLoading ? (
                 <Skeleton className="h-32" />
+              ) : magnets.isError ? (
+                <p className="p-6 text-sm text-destructive">
+                  Не вдалося завантажити.{" "}
+                  <button type="button" className="underline" onClick={() => void magnets.refetch()}>
+                    Повторити
+                  </button>
+                </p>
               ) : (magnets.data?.length ?? 0) === 0 ? (
                 <p className="p-6 text-sm text-muted-foreground">
                   Поки порожньо. Запустіть Content Magnet — він згенерує початковий пакет.

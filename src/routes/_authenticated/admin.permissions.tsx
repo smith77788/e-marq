@@ -157,6 +157,17 @@ function AdminPermissionsPage() {
         <CardContent>
           {capsQuery.isLoading || usersQuery.isLoading ? (
             <TableSkeleton rows={4} columns={6} />
+          ) : capsQuery.isError || usersQuery.isError ? (
+            <p className="py-6 text-center text-sm text-destructive">
+              Не вдалося завантажити дані.{" "}
+              <button
+                type="button"
+                className="underline"
+                onClick={() => { void capsQuery.refetch(); void usersQuery.refetch(); }}
+              >
+                Повторити
+              </button>
+            </p>
           ) : (
             <div className="overflow-x-auto">
               <Table>

@@ -189,6 +189,16 @@ function Drill({ tenantId }: { tenantId: string }) {
   if (data.isLoading) {
     return <Skeleton className="h-96 w-full" />;
   }
+  if (data.isError) {
+    return (
+      <p className="py-8 text-center text-sm text-destructive">
+        Не вдалося завантажити дані тенанта.{" "}
+        <button type="button" className="underline" onClick={() => void data.refetch()}>
+          Повторити
+        </button>
+      </p>
+    );
+  }
 
   const tenantLabel = data.data?.tenant?.name ?? tenantId.slice(0, 8);
 

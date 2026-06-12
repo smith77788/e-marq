@@ -53,7 +53,7 @@ export function KpiDashboard({ tenantId }: Props) {
   const compareDays = Math.max(1, Math.floor(days / 4)); // shorter sub-window for context
   const compareSinceMs = Date.now() - compareDays * 24 * 3600 * 1000;
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["kpi-dashboard", tenantId, days],
     enabled: !!tenantId,
     refetchInterval: 60_000,
@@ -85,7 +85,7 @@ export function KpiDashboard({ tenantId }: Props) {
     },
   });
 
-  if (isLoading || !data) {
+  if (isLoading) {
     return (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
@@ -94,6 +94,16 @@ export function KpiDashboard({ tenantId }: Props) {
           </Card>
         ))}
       </div>
+    );
+  }
+  if (isError || !data) {
+    return (
+      <p className="text-sm text-destructive">
+        Не вдалося завантажити KPI.{" "}
+        <button type="button" className="underline" onClick={() => void refetch()}>
+          Повторити
+        </button>
+      </p>
     );
   }
 

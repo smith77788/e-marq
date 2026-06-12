@@ -356,6 +356,17 @@ function HealthMonitorContent() {
                   <Skeleton key={i} className="h-12 w-full" />
                 ))}
               </div>
+            ) : query.isError ? (
+              <p className="p-6 text-sm text-destructive">
+                Не вдалося завантажити дані.{" "}
+                <button
+                  type="button"
+                  className="underline"
+                  onClick={() => void query.refetch()}
+                >
+                  Повторити
+                </button>
+              </p>
             ) : filtered.length === 0 ? (
               <p className="p-6 text-sm text-muted-foreground">
                 {showOnlyUnhealthy ? t("hm.emptyFiltered") : t("hm.empty")}
