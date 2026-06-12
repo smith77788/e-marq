@@ -269,7 +269,7 @@ function SelfHealContent() {
         qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
       ]);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed");
+      toast.error(e instanceof Error ? e.message : "Помилка виконання дії");
     }
   };
 
@@ -279,13 +279,13 @@ function SelfHealContent() {
         "/hooks/agents/self-heal-dismiss",
         { kind, id, reason },
       );
-      toast.success(json.message ?? "Dismissed");
+      toast.success(json.message ?? "Відхилено");
       await Promise.all([
         qc.invalidateQueries({ queryKey: ["self-heal-incidents"] }),
         qc.invalidateQueries({ queryKey: ["self-heal-actions"] }),
       ]);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed");
+      toast.error(e instanceof Error ? e.message : "Помилка відхилення");
     }
   };
 
@@ -299,10 +299,10 @@ function SelfHealContent() {
         { onConflict: "key" },
       );
       if (error) throw error;
-      toast.success(`Auto-heal ${next ? "enabled" : "disabled"}`);
+      toast.success(`Авто-відновлення ${next ? "ввімкнено" : "вимкнено"}`);
       await qc.invalidateQueries({ queryKey: ["self-heal-settings"] });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to save auto-heal setting");
+      toast.error(e instanceof Error ? e.message : "Не вдалося зберегти налаштування");
     }
   };
 
@@ -434,7 +434,7 @@ function SelfHealContent() {
                           size="sm"
                           variant="outline"
                           type="button"
-                          onClick={() => callDismiss("action", a.id, "Dismissed by admin")}
+                          onClick={() => callDismiss("action", a.id, "Відхилено адміном")}
                         >
                           Dismiss
                         </Button>
@@ -499,7 +499,7 @@ function SelfHealContent() {
                         size="sm"
                         variant="outline"
                         type="button"
-                        onClick={() => callDismiss("incident", i.id, "Dismissed by admin")}
+                        onClick={() => callDismiss("incident", i.id, "Відхилено адміном")}
                       >
                         Dismiss
                       </Button>
