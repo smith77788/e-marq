@@ -90,7 +90,12 @@ export function OwnerPlanSwitcher({
       qc.invalidateQueries({ queryKey: ["balance-ledger", tenantId] });
       qc.invalidateQueries({ queryKey: ["my-tenants-rpc"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error(
+        e.message.includes("paid_plan_requires_payment")
+          ? "Перехід на платний тариф тимчасово недоступний у самообслуговуванні — зверніться до підтримки."
+          : e.message,
+      ),
   });
 
   if (plansQuery.isLoading)
