@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Bot, Clock, Settings, ShieldAlert, Wand2 } from "lucide-react";
+import { Bot, Clock, Database, Receipt, Settings, ShieldAlert, ShoppingBag, Store, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -246,6 +246,8 @@ function BrandCockpitInner({
 
         <SetupChecklist tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
 
+        <QuickConnectBanner tenantId={current.tenant_id} />
+
         <SeedDemoButton tenantId={current.tenant_id} />
 
         <SetupReadinessCard tenantId={current.tenant_id} tenantSlug={current.tenant_slug} />
@@ -355,6 +357,77 @@ function BrandCockpitInner({
         </Card>
       </div>
     </>
+  );
+}
+
+function QuickConnectBanner({ tenantId }: { tenantId: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["quick-connect-check", tenantId],
+    queryFn: async () => {
+      const [intResult, prodResult] = await Promise.all([
+        supabase
+          .from("tenant_integrations")
+          .select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId)
+          .eq("is_active", true),
+        supabase
+          .from("products")
+          .select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId),
+      ]);
+      return {
+        hasIntegrations: (intResult.count ?? 0) > 0,
+        hasProducts: (prodResult.count ?? 0) > 0,
+      };
+    },
+  });
+
+  if (isLoading || !data) return null;
+  if (data.hasIntegrations || data.hasProducts) return null;
+
+  const providers = [
+    { id: "shopify", name: "Shopify", Icon: ShoppingBag, desc: "Магазин на Shopify" },
+    { id: "woocommerce", name: "WooCommerce", Icon: Store, desc: "WordPress + WooCommerce" },
+    { id: "dntrade", name: "DN Trade", Icon: Database, desc: "DN Trade ERP" },
+    { id: "poster", name: "Poster POS", Icon: Receipt, desc: "Poster касова система" },
+  ];
+
+  return (
+    <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">Підключіть джерело даних за 2 хвилини</CardTitle>
+        <CardDescription>
+          Імпортуйте товари та клієнтів автоматично. Виберіть платформу — ми запросимо тільки
+          необхідні дані.
+        </CardDescription>
+      </CardHeader>
+      <div className="grid grid-cols-2 gap-2 px-6 pb-4 sm:grid-cols-4">
+        {providers.map(({ id, name, Icon, desc }) => (
+          <Link
+            key={id}
+            to="/brand/integrations"
+            search={{ tenant: tenantId }}
+            className="flex flex-col items-center gap-1.5 rounded-lg border border-border/60 bg-card p-3 text-center transition hover:border-primary/50 hover:bg-primary/5"
+          >
+            <Icon className="h-6 w-6 text-primary" />
+            <span className="text-xs font-medium leading-tight">{name}</span>
+            <span className="text-[10px] text-muted-foreground leading-tight">{desc}</span>
+          </Link>
+        ))}
+      </div>
+      <div className="flex items-center gap-2 px-6 pb-5">
+        <Button asChild size="sm">
+          <Link to="/brand/integrations" search={{ tenant: tenantId }}>
+            Переглянути всі інтеграції
+          </Link>
+        </Button>
+        <Button asChild size="sm" variant="ghost">
+          <Link to="/brand/products" search={{ tenant: tenantId }}>
+            Додати товари вручну
+          </Link>
+        </Button>
+      </div>
+    </Card>
   );
 }
 

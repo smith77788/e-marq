@@ -13,11 +13,17 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  CheckCircle2,
   Copy,
+  Database,
   Loader2,
   Mail,
+  Receipt,
   RefreshCw,
+  ShoppingBag,
   Sparkles,
+  Store,
+  XCircle,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -267,7 +273,7 @@ function OnboardingPage() {
     {
       titleKey: "onb.s3.title",
       descKey: "onb.s3.desc",
-      render: () => <Step3Product tenantId={tenantId} qc={qc} />,
+      render: () => <Step3Import tenantId={tenantId} qc={qc} />,
     },
     {
       titleKey: "onb.s4.title",
@@ -673,7 +679,243 @@ function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
   );
 }
 
-function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
+/* ─── Quick-connect data for onboarding Step3 ─── */
+type QFields = { domain: string; apiKey: string; apiSecret: string };
+
+const QUICK_PROVIDERS = [
+  {
+    id: "shopify",
+    name: "Shopify",
+    Icon: ShoppingBag,
+    fields: [
+      { key: "domain" as const, label: "Домен магазину", placeholder: "my-store.myshopify.com" },
+      { key: "apiKey" as const, label: "Admin API Access Token", placeholder: "shpat_..." },
+    ],
+    credentials: (f: QFields) => f.apiKey.trim(),
+    config: (f: QFields) => {
+      const d = f.domain.trim().replace(/^https?:\/\//, "");
+      return d ? { domain: `https://${d}` } : {};
+    },
+  },
+  {
+    id: "woocommerce",
+    name: "WooCommerce",
+    Icon: Store,
+    fields: [
+      { key: "domain" as const, label: "URL сайту", placeholder: "https://mystore.com" },
+      { key: "apiKey" as const, label: "Consumer Key", placeholder: "ck_..." },
+      { key: "apiSecret" as const, label: "Consumer Secret", placeholder: "cs_..." },
+    ],
+    credentials: (f: QFields) => `${f.apiKey.trim()}:${f.apiSecret.trim()}`,
+    config: (f: QFields) => {
+      const d = f.domain.trim();
+      return d ? { domain: d.startsWith("http") ? d : `https://${d}` } : {};
+    },
+  },
+  {
+    id: "dntrade",
+    name: "DN Trade",
+    Icon: Database,
+    fields: [{ key: "apiKey" as const, label: "DN Trade API Key", placeholder: "..." }],
+    credentials: (f: QFields) => f.apiKey.trim(),
+    config: () => ({}),
+  },
+  {
+    id: "poster",
+    name: "Poster POS",
+    Icon: Receipt,
+    fields: [{ key: "apiKey" as const, label: "API Token", placeholder: "..." }],
+    credentials: (f: QFields) => f.apiKey.trim(),
+    config: () => ({}),
+  },
+] as const;
+
+type QuickProvider = (typeof QUICK_PROVIDERS)[number];
+
+function Step3Import({ tenantId, qc }: { tenantId: string; qc: QC }) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showManual, setShowManual] = useState(false);
+  const [fields, setFields] = useState<QFields>({ domain: "", apiKey: "", apiSecret: "" });
+  const [phase, setPhase] = useState<"idle" | "connecting" | "done" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const provider = QUICK_PROVIDERS.find((p) => p.id === selectedId) as QuickProvider | undefined;
+
+  function resetPicker() {
+    setSelectedId(null);
+    setFields({ domain: "", apiKey: "", apiSecret: "" });
+    setPhase("idle");
+    setErrorMsg(null);
+  }
+
+  async function handleConnect() {
+    if (!provider) return;
+    setPhase("connecting");
+    setErrorMsg(null);
+    try {
+      const { session } = await ensureAuthenticatedSession();
+      const token = session.access_token;
+      const credentials = provider.credentials(fields);
+      const config = provider.config(fields);
+
+      if (!credentials) throw new Error("Заповніть всі обов'язкові поля");
+
+      // 1. Verify credentials
+      const verifyRes = await fetch(`/api/integrations/verify/${provider.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ tenantId, credentials, config, entityKind: "products" }),
+      });
+      const verifyJson = (await verifyRes.json()) as { ok?: boolean; error?: string };
+      if (!verifyRes.ok || !verifyJson.ok) {
+        throw new Error(verifyJson.error ?? "Підключення не вдалось перевірити");
+      }
+
+      // 2. Save integration
+      const { error: saveErr } = await supabase.rpc("save_tenant_integration", {
+        _tenant_id: tenantId,
+        _provider: provider.id,
+        _credentials: credentials,
+        _config: config as never,
+        _last_sync_status: "verified",
+        _last_sync_error: null,
+        _webhook_secret: null,
+      });
+      if (saveErr) throw saveErr;
+
+      // 3. Trigger async sync for products + customers (fire and forget)
+      for (const entityKind of ["products", "customers"]) {
+        void fetch(`/api/integrations/sync/${provider.id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ tenantId, entityKind, async: true }),
+        });
+      }
+
+      setPhase("done");
+      qc.invalidateQueries({ queryKey: ["onboarding-status", tenantId] });
+      qc.invalidateQueries({ queryKey: ["tenant-integrations", tenantId] });
+      qc.invalidateQueries({ queryKey: ["onboarding-integration", tenantId] });
+    } catch (e) {
+      setPhase("error");
+      setErrorMsg(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  if (showManual) {
+    return <Step3ProductManual tenantId={tenantId} qc={qc} onBack={() => setShowManual(false)} />;
+  }
+
+  if (phase === "done") {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 rounded-md border border-success/30 bg-success/5 p-3 text-sm text-success">
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
+          <div>
+            <p className="font-medium">Підключено!</p>
+            <p className="text-xs text-muted-foreground">
+              Синхронізацію товарів і клієнтів запущено у фоні. Статуси кроків оновляться
+              автоматично (зазвичай до 60 секунд).
+            </p>
+          </div>
+        </div>
+        <Button size="sm" variant="outline" onClick={resetPicker}>
+          Підключити інше джерело
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {!selectedId ? (
+        <>
+          <p className="text-xs text-muted-foreground">
+            Підключіть вашу платформу — товари і клієнти з'являться автоматично.
+          </p>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {QUICK_PROVIDERS.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setSelectedId(p.id)}
+                className="flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-3 text-xs font-medium transition-colors hover:border-primary/50 hover:bg-primary/5"
+              >
+                <p.Icon className="h-5 w-5 text-muted-foreground" />
+                {p.name}
+              </button>
+            ))}
+          </div>
+          <div className="border-t pt-3">
+            <button
+              type="button"
+              onClick={() => setShowManual(true)}
+              className="text-xs text-muted-foreground underline hover:text-foreground"
+            >
+              Додати товар вручну (без інтеграції)
+            </button>
+          </div>
+        </>
+      ) : (
+        provider && (
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={resetPicker}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-3 w-3" /> Обрати інше джерело
+            </button>
+            <div className="flex items-center gap-2">
+              <provider.Icon className="h-4 w-4" />
+              <span className="text-sm font-medium">{provider.name}</span>
+            </div>
+            {provider.fields.map((f) => (
+              <div key={f.key} className="space-y-1">
+                <Label className="text-xs">{f.label}</Label>
+                <Input
+                  value={fields[f.key]}
+                  onChange={(e) => setFields((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                  placeholder={f.placeholder}
+                  autoComplete="off"
+                />
+              </div>
+            ))}
+            {phase === "error" && errorMsg && (
+              <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/5 p-2 text-xs text-destructive">
+                <XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                {errorMsg}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={() => void handleConnect()}
+                disabled={phase === "connecting"}
+              >
+                {phase === "connecting" && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+                {phase === "connecting" ? "Підключаємо…" : "Підключити і синхронізувати"}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={resetPicker}>
+                Скасувати
+              </Button>
+            </div>
+          </div>
+        )
+      )}
+    </div>
+  );
+}
+
+function Step3ProductManual({
+  tenantId,
+  qc,
+  onBack,
+}: {
+  tenantId: string;
+  qc: QC;
+  onBack?: () => void;
+}) {
   const { t } = useT();
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -715,6 +957,15 @@ function Step3Product({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   return (
     <div className="space-y-3">
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-3 w-3" /> Підключити джерело даних
+        </button>
+      )}
       <Input
         value={name}
         onChange={(e) => setName(e.target.value)}
@@ -749,6 +1000,21 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
   const { t, lang } = useT();
   const [csv, setCsv] = useState("");
 
+  const integrationQuery = useQuery({
+    queryKey: ["onboarding-integration", tenantId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("tenant_integrations")
+        .select("provider, last_sync_status, synced_customers_count")
+        .eq("tenant_id", tenantId)
+        .eq("is_active", true)
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+  const integration = integrationQuery.data;
+
   const importCsv = useMutation({
     mutationFn: async () => {
       await withTimeout(
@@ -780,7 +1046,23 @@ function Step4Customers({ tenantId, qc }: { tenantId: string; qc: QC }) {
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-muted-foreground">{t("onb.s4.csvHint")}</p>
+      {integration && (
+        <div className="flex items-start gap-2 rounded-md border border-success/30 bg-success/5 p-3 text-xs text-success">
+          <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>
+            {lang === "ua"
+              ? `Клієнти синхронізуються з ${integration.provider}. Зазвичай займає до хвилини після підключення.`
+              : `Customers syncing from ${integration.provider}. Usually takes under a minute.`}
+          </span>
+        </div>
+      )}
+      <p className="text-xs text-muted-foreground">
+        {integration
+          ? lang === "ua"
+            ? "Або вставте CSV вручну, якщо є додаткові клієнти:"
+            : "Or paste CSV manually for additional customers:"
+          : t("onb.s4.csvHint")}
+      </p>
       <textarea
         value={csv}
         onChange={(e) => setCsv(e.target.value)}

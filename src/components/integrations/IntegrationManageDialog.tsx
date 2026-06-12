@@ -55,6 +55,13 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -764,6 +771,14 @@ export function IntegrationManageDialog({
 
             {/* ── Налаштування / небезпека ── */}
             <TabsContent value="danger" className="space-y-3">
+              <AutoSyncConfig
+                integrationId={data?.id ?? null}
+                config={data?.config as Record<string, unknown> | null}
+                onUpdated={() => void integ.refetch()}
+              />
+
+              <Separator />
+
               <div className="rounded-lg border border-border/40 bg-card/40 p-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="space-y-0.5">
@@ -845,6 +860,75 @@ export function IntegrationManageDialog({
       </AlertDialogContent>
     </AlertDialog>
     </>
+  );
+}
+
+const SYNC_INTERVAL_LABELS: Record<string, string> = {
+  manual: "Вручну (тільки за кнопкою)",
+  daily: "Щодня (о 03:00 UTC)",
+  weekly: "Щотижня (у вівторок о 03:00 UTC)",
+};
+
+function AutoSyncConfig({
+  integrationId,
+  config,
+  onUpdated,
+}: {
+  integrationId: string | null;
+  config: Record<string, unknown> | null;
+  onUpdated: () => void;
+}) {
+  const currentInterval = (config?.sync_interval as string | undefined) ?? "manual";
+  const [saving, setSaving] = useState(false);
+
+  async function handleChange(value: string) {
+    if (!integrationId || value === currentInterval) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("tenant_integrations")
+        .update({ config: { ...(config ?? {}), sync_interval: value } })
+        .eq("id", integrationId);
+      if (error) throw error;
+      toast.success(
+        value === "manual"
+          ? "Авто-синхронізацію вимкнено"
+          : `Авто-синхронізацію налаштовано: ${SYNC_INTERVAL_LABELS[value] ?? value}`,
+      );
+      onUpdated();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Не вдалося зберегти");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="rounded-lg border border-border/40 bg-card/40 p-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="space-y-0.5">
+          <div className="text-sm font-medium">Авто-синхронізація</div>
+          <p className="text-xs text-muted-foreground">
+            Регулярно підтягує оновлені дані з джерела без ручного запуску.
+          </p>
+        </div>
+        <Select value={currentInterval} onValueChange={(v) => void handleChange(v)} disabled={saving || !integrationId}>
+          <SelectTrigger className="w-56">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(SYNC_INTERVAL_LABELS).map(([val, label]) => (
+              <SelectItem key={val} value={val}>{label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      {currentInterval !== "manual" && (
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Планувальник запускається автоматично. Результати відображаються у журналі імпортів.
+        </p>
+      )}
+    </div>
   );
 }
 
