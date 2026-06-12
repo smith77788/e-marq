@@ -569,6 +569,24 @@ function StorefrontFooter({
                   Пошук
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/s/$slug/about"
+                  params={{ slug }}
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Про магазин
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/s/$slug/faq"
+                  params={{ slug }}
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Часті питання
+                </Link>
+              </li>
             </ul>
           </div>
 

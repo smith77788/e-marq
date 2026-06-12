@@ -65,6 +65,8 @@ export type StorefrontConfig = {
     hero_cta_text?: string;
     announcement?: string;
     announcement_bg?: string;
+    about_text?: string;
+    faq_items?: Array<{ question: string; answer: string }>;
   } | null;
   seo: { title?: string; description?: string; og_image?: string } | null;
   features: {

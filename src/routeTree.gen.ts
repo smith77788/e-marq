@@ -41,8 +41,10 @@ import { Route as AuthenticatedBrandIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as SSlugWishlistRouteImport } from './routes/s.$slug.wishlist'
 import { Route as SSlugSearchRouteImport } from './routes/s.$slug.search'
+import { Route as SSlugFaqRouteImport } from './routes/s.$slug.faq'
 import { Route as SSlugCheckoutRouteImport } from './routes/s.$slug.checkout'
 import { Route as SSlugAccountRouteImport } from './routes/s.$slug.account'
+import { Route as SSlugAboutRouteImport } from './routes/s.$slug.about'
 import { Route as HooksTelegramPollRouteImport } from './routes/hooks/telegram.poll'
 import { Route as HooksTelegramNotifyOwnerRouteImport } from './routes/hooks/telegram.notify-owner'
 import { Route as HooksIntegrationsDntradeWeeklyDigestRouteImport } from './routes/hooks/integrations.dntrade-weekly-digest'
@@ -61,7 +63,6 @@ import { Route as HooksEnginesReorderRouteImport } from './routes/hooks/engines.
 import { Route as HooksEnginesDispatchRouteImport } from './routes/hooks/engines.dispatch'
 import { Route as HooksEnginesAbandonedCartAllRouteImport } from './routes/hooks/engines.abandoned-cart-all'
 import { Route as HooksEnginesAbandonedCartRouteImport } from './routes/hooks/engines.abandoned-cart'
-import { Route as HooksDemoSeedRouteImport } from './routes/hooks/demo.seed'
 import { Route as HooksAgentsWinbackRoiRouteImport } from './routes/hooks/agents.winback-roi'
 import { Route as HooksAgentsWebProspectorRouteImport } from './routes/hooks/agents.web-prospector'
 import { Route as HooksAgentsVipConciergeRouteImport } from './routes/hooks/agents.vip-concierge'
@@ -405,6 +406,11 @@ const SSlugSearchRoute = SSlugSearchRouteImport.update({
   path: '/search',
   getParentRoute: () => SSlugRoute,
 } as any)
+const SSlugFaqRoute = SSlugFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => SSlugRoute,
+} as any)
 const SSlugCheckoutRoute = SSlugCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
@@ -413,6 +419,11 @@ const SSlugCheckoutRoute = SSlugCheckoutRouteImport.update({
 const SSlugAccountRoute = SSlugAccountRouteImport.update({
   id: '/account',
   path: '/account',
+  getParentRoute: () => SSlugRoute,
+} as any)
+const SSlugAboutRoute = SSlugAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => SSlugRoute,
 } as any)
 const HooksTelegramPollRoute = HooksTelegramPollRouteImport.update({
@@ -516,11 +527,6 @@ const HooksEnginesAbandonedCartRoute =
     path: '/hooks/engines/abandoned-cart',
     getParentRoute: () => rootRouteImport,
   } as any)
-const HooksDemoSeedRoute = HooksDemoSeedRouteImport.update({
-  id: '/hooks/demo/seed',
-  path: '/hooks/demo/seed',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const HooksAgentsWinbackRoiRoute = HooksAgentsWinbackRoiRouteImport.update({
   id: '/hooks/agents/winback-roi',
   path: '/hooks/agents/winback-roi',
@@ -1735,7 +1741,6 @@ export interface FileRoutesByFullPath {
   '/hooks/agents/vip-concierge': typeof HooksAgentsVipConciergeRoute
   '/hooks/agents/web-prospector': typeof HooksAgentsWebProspectorRoute
   '/hooks/agents/winback-roi': typeof HooksAgentsWinbackRoiRoute
-  '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
@@ -1754,8 +1759,10 @@ export interface FileRoutesByFullPath {
   '/hooks/integrations/dntrade-weekly-digest': typeof HooksIntegrationsDntradeWeeklyDigestRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
+  '/s/$slug/about': typeof SSlugAboutRoute
   '/s/$slug/account': typeof SSlugAccountRoute
   '/s/$slug/checkout': typeof SSlugCheckoutRoute
+  '/s/$slug/faq': typeof SSlugFaqRoute
   '/s/$slug/search': typeof SSlugSearchRoute
   '/s/$slug/wishlist': typeof SSlugWishlistRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -1971,7 +1978,6 @@ export interface FileRoutesByTo {
   '/hooks/agents/vip-concierge': typeof HooksAgentsVipConciergeRoute
   '/hooks/agents/web-prospector': typeof HooksAgentsWebProspectorRoute
   '/hooks/agents/winback-roi': typeof HooksAgentsWinbackRoiRoute
-  '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
@@ -1990,8 +1996,10 @@ export interface FileRoutesByTo {
   '/hooks/integrations/dntrade-weekly-digest': typeof HooksIntegrationsDntradeWeeklyDigestRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
+  '/s/$slug/about': typeof SSlugAboutRoute
   '/s/$slug/account': typeof SSlugAccountRoute
   '/s/$slug/checkout': typeof SSlugCheckoutRoute
+  '/s/$slug/faq': typeof SSlugFaqRoute
   '/s/$slug/search': typeof SSlugSearchRoute
   '/s/$slug/wishlist': typeof SSlugWishlistRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -2210,7 +2218,6 @@ export interface FileRoutesById {
   '/hooks/agents/vip-concierge': typeof HooksAgentsVipConciergeRoute
   '/hooks/agents/web-prospector': typeof HooksAgentsWebProspectorRoute
   '/hooks/agents/winback-roi': typeof HooksAgentsWinbackRoiRoute
-  '/hooks/demo/seed': typeof HooksDemoSeedRoute
   '/hooks/engines/abandoned-cart': typeof HooksEnginesAbandonedCartRoute
   '/hooks/engines/abandoned-cart-all': typeof HooksEnginesAbandonedCartAllRoute
   '/hooks/engines/dispatch': typeof HooksEnginesDispatchRoute
@@ -2229,8 +2236,10 @@ export interface FileRoutesById {
   '/hooks/integrations/dntrade-weekly-digest': typeof HooksIntegrationsDntradeWeeklyDigestRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
+  '/s/$slug/about': typeof SSlugAboutRoute
   '/s/$slug/account': typeof SSlugAccountRoute
   '/s/$slug/checkout': typeof SSlugCheckoutRoute
+  '/s/$slug/faq': typeof SSlugFaqRoute
   '/s/$slug/search': typeof SSlugSearchRoute
   '/s/$slug/wishlist': typeof SSlugWishlistRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -2449,7 +2458,6 @@ export interface FileRouteTypes {
     | '/hooks/agents/vip-concierge'
     | '/hooks/agents/web-prospector'
     | '/hooks/agents/winback-roi'
-    | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/abandoned-cart-all'
     | '/hooks/engines/dispatch'
@@ -2468,8 +2476,10 @@ export interface FileRouteTypes {
     | '/hooks/integrations/dntrade-weekly-digest'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
+    | '/s/$slug/about'
     | '/s/$slug/account'
     | '/s/$slug/checkout'
+    | '/s/$slug/faq'
     | '/s/$slug/search'
     | '/s/$slug/wishlist'
     | '/admin/'
@@ -2685,7 +2695,6 @@ export interface FileRouteTypes {
     | '/hooks/agents/vip-concierge'
     | '/hooks/agents/web-prospector'
     | '/hooks/agents/winback-roi'
-    | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/abandoned-cart-all'
     | '/hooks/engines/dispatch'
@@ -2704,8 +2713,10 @@ export interface FileRouteTypes {
     | '/hooks/integrations/dntrade-weekly-digest'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
+    | '/s/$slug/about'
     | '/s/$slug/account'
     | '/s/$slug/checkout'
+    | '/s/$slug/faq'
     | '/s/$slug/search'
     | '/s/$slug/wishlist'
     | '/admin'
@@ -2923,7 +2934,6 @@ export interface FileRouteTypes {
     | '/hooks/agents/vip-concierge'
     | '/hooks/agents/web-prospector'
     | '/hooks/agents/winback-roi'
-    | '/hooks/demo/seed'
     | '/hooks/engines/abandoned-cart'
     | '/hooks/engines/abandoned-cart-all'
     | '/hooks/engines/dispatch'
@@ -2942,8 +2952,10 @@ export interface FileRouteTypes {
     | '/hooks/integrations/dntrade-weekly-digest'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
+    | '/s/$slug/about'
     | '/s/$slug/account'
     | '/s/$slug/checkout'
+    | '/s/$slug/faq'
     | '/s/$slug/search'
     | '/s/$slug/wishlist'
     | '/_authenticated/admin/'
@@ -3122,7 +3134,6 @@ export interface RootRouteChildren {
   HooksAgentsVipConciergeRoute: typeof HooksAgentsVipConciergeRoute
   HooksAgentsWebProspectorRoute: typeof HooksAgentsWebProspectorRoute
   HooksAgentsWinbackRoiRoute: typeof HooksAgentsWinbackRoiRoute
-  HooksDemoSeedRoute: typeof HooksDemoSeedRoute
   HooksEnginesAbandonedCartRoute: typeof HooksEnginesAbandonedCartRoute
   HooksEnginesAbandonedCartAllRoute: typeof HooksEnginesAbandonedCartAllRoute
   HooksEnginesDispatchRoute: typeof HooksEnginesDispatchRoute
@@ -3391,6 +3402,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SSlugSearchRouteImport
       parentRoute: typeof SSlugRoute
     }
+    '/s/$slug/faq': {
+      id: '/s/$slug/faq'
+      path: '/faq'
+      fullPath: '/s/$slug/faq'
+      preLoaderRoute: typeof SSlugFaqRouteImport
+      parentRoute: typeof SSlugRoute
+    }
     '/s/$slug/checkout': {
       id: '/s/$slug/checkout'
       path: '/checkout'
@@ -3403,6 +3421,13 @@ declare module '@tanstack/react-router' {
       path: '/account'
       fullPath: '/s/$slug/account'
       preLoaderRoute: typeof SSlugAccountRouteImport
+      parentRoute: typeof SSlugRoute
+    }
+    '/s/$slug/about': {
+      id: '/s/$slug/about'
+      path: '/about'
+      fullPath: '/s/$slug/about'
+      preLoaderRoute: typeof SSlugAboutRouteImport
       parentRoute: typeof SSlugRoute
     }
     '/hooks/telegram/poll': {
@@ -3529,13 +3554,6 @@ declare module '@tanstack/react-router' {
       path: '/hooks/engines/abandoned-cart'
       fullPath: '/hooks/engines/abandoned-cart'
       preLoaderRoute: typeof HooksEnginesAbandonedCartRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/hooks/demo/seed': {
-      id: '/hooks/demo/seed'
-      path: '/hooks/demo/seed'
-      fullPath: '/hooks/demo/seed'
-      preLoaderRoute: typeof HooksDemoSeedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/agents/winback-roi': {
@@ -4977,8 +4995,10 @@ const HandbookRouteWithChildren = HandbookRoute._addFileChildren(
 )
 
 interface SSlugRouteChildren {
+  SSlugAboutRoute: typeof SSlugAboutRoute
   SSlugAccountRoute: typeof SSlugAccountRoute
   SSlugCheckoutRoute: typeof SSlugCheckoutRoute
+  SSlugFaqRoute: typeof SSlugFaqRoute
   SSlugSearchRoute: typeof SSlugSearchRoute
   SSlugWishlistRoute: typeof SSlugWishlistRoute
   SSlugIndexRoute: typeof SSlugIndexRoute
@@ -4988,8 +5008,10 @@ interface SSlugRouteChildren {
 }
 
 const SSlugRouteChildren: SSlugRouteChildren = {
+  SSlugAboutRoute: SSlugAboutRoute,
   SSlugAccountRoute: SSlugAccountRoute,
   SSlugCheckoutRoute: SSlugCheckoutRoute,
+  SSlugFaqRoute: SSlugFaqRoute,
   SSlugSearchRoute: SSlugSearchRoute,
   SSlugWishlistRoute: SSlugWishlistRoute,
   SSlugIndexRoute: SSlugIndexRoute,
@@ -5145,7 +5167,6 @@ const rootRouteChildren: RootRouteChildren = {
   HooksAgentsVipConciergeRoute: HooksAgentsVipConciergeRoute,
   HooksAgentsWebProspectorRoute: HooksAgentsWebProspectorRoute,
   HooksAgentsWinbackRoiRoute: HooksAgentsWinbackRoiRoute,
-  HooksDemoSeedRoute: HooksDemoSeedRoute,
   HooksEnginesAbandonedCartRoute: HooksEnginesAbandonedCartRoute,
   HooksEnginesAbandonedCartAllRoute: HooksEnginesAbandonedCartAllRoute,
   HooksEnginesDispatchRoute: HooksEnginesDispatchRoute,
@@ -5196,12 +5217,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

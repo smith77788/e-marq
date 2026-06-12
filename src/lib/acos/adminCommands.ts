@@ -149,15 +149,8 @@ const TELEGRAM: AdminCommand[] = [
 
 /** Системні / дані */
 const SYSTEM: AdminCommand[] = [
-  {
-    id: "demo-seed",
-    path: "/hooks/demo/seed",
-    title: "Заповнити бренд демо-даними",
-    description:
-      "Створює 8 товарів, 25 клієнтів, 90 днів замовлень + події воронки. Безпечно для існуючих даних.",
-    scope: "tenant",
-    extraBody: { force: false },
-  },
+  // demo-seed command removed: the /hooks/demo/seed route was deleted; demo
+  // seeding now runs via the seed_demo_catalog RPC (SeedDemoButton).
   {
     id: "ingest",
     path: "/hooks/ingest",

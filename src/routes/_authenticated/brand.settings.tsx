@@ -14,16 +14,20 @@ import { toast } from "sonner";
 import {
   Bot,
   CreditCard,
+  FileText,
   Globe,
+  HelpCircle,
   Image as ImageIcon,
   LayoutTemplate,
   Loader2,
   MapPin,
   Megaphone,
   Palette,
+  Plus,
   Save,
   Settings,
   Store,
+  Trash2,
   Link as LinkIcon,
   TrendingUp,
 } from "lucide-react";
@@ -78,6 +82,8 @@ type StoreForm = {
   hero_image: string;
   announcement: string;
   announcement_bg: string;
+  about_text: string;
+  faq_items: Array<{ question: string; answer: string }>;
   seo_title: string;
   seo_description: string;
   og_image_url: string;
@@ -98,6 +104,8 @@ const DEFAULTS: StoreForm = {
   hero_image: "",
   announcement: "",
   announcement_bg: "bg-primary",
+  about_text: "",
+  faq_items: [],
   seo_title: "",
   seo_description: "",
   og_image_url: "",
@@ -118,6 +126,19 @@ function pickStr(o: Json | null, k: string, fallback = ""): string {
   if (!o) return fallback;
   const v = o[k];
   return typeof v === "string" ? v : fallback;
+}
+
+function parseFaqItems(o: Json | null): Array<{ question: string; answer: string }> {
+  const raw = o?.faq_items;
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(
+      (it): it is { question: string; answer: string } =>
+        !!it &&
+        typeof (it as { question?: unknown }).question === "string" &&
+        typeof (it as { answer?: unknown }).answer === "string",
+    )
+    .map((it) => ({ question: it.question, answer: it.answer }));
 }
 
 function StoreSettingsPage() {
@@ -166,6 +187,8 @@ function StoreSettingsPage() {
       hero_image: pickStr(r.ui, "hero_image", ""),
       announcement: pickStr(r.ui, "announcement", ""),
       announcement_bg: pickStr(r.ui, "announcement_bg", DEFAULTS.announcement_bg),
+      about_text: pickStr(r.ui, "about_text", ""),
+      faq_items: parseFaqItems(r.ui),
       seo_title: pickStr(r.seo, "title", ""),
       seo_description: pickStr(r.seo, "description", ""),
       og_image_url: pickStr(r.seo, "og_image_url", ""),
@@ -195,6 +218,10 @@ function StoreSettingsPage() {
           hero_image: form.hero_image.trim(),
           announcement: form.announcement.trim(),
           announcement_bg: form.announcement_bg,
+          about_text: form.about_text.trim(),
+          faq_items: form.faq_items
+            .map((it) => ({ question: it.question.trim(), answer: it.answer.trim() }))
+            .filter((it) => it.question.length > 0),
         } as Json,
         seo: {
           ...((cfgQuery.data?.seo as Json) ?? {}),
@@ -543,6 +570,101 @@ function StoreSettingsPage() {
                     {form.announcement}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-primary" /> Сторінка «Про магазин»
+                </CardTitle>
+                <CardDescription>
+                  Текст для сторінки /about вашої вітрини. Звичайний текст; переноси рядків
+                  зберігаються. Порожнє поле — сторінка показує заглушку.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  value={form.about_text}
+                  onChange={(e) => setForm((f) => ({ ...f, about_text: e.target.value }))}
+                  placeholder="Розкажіть історію бренду, цінності, чим ви відрізняєтесь…"
+                  className="min-h-48"
+                  maxLength={5000}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">{form.about_text.length}/5000</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <HelpCircle className="h-4 w-4 text-accent" /> Часті питання (FAQ)
+                </CardTitle>
+                <CardDescription>
+                  Питання та відповіді для сторінки /faq. Порожні питання не зберігаються.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {form.faq_items.map((item, idx) => (
+                  <div key={idx} className="space-y-2 rounded-lg border border-border/60 p-3">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={item.question}
+                        onChange={(e) =>
+                          setForm((f) => {
+                            const next = [...f.faq_items];
+                            next[idx] = { ...next[idx], question: e.target.value };
+                            return { ...f, faq_items: next };
+                          })
+                        }
+                        placeholder="Питання…"
+                        className="text-sm font-medium"
+                        maxLength={160}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0"
+                        onClick={() =>
+                          setForm((f) => ({
+                            ...f,
+                            faq_items: f.faq_items.filter((_, i) => i !== idx),
+                          }))
+                        }
+                        aria-label="Видалити питання"
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                    <Textarea
+                      value={item.answer}
+                      onChange={(e) =>
+                        setForm((f) => {
+                          const next = [...f.faq_items];
+                          next[idx] = { ...next[idx], answer: e.target.value };
+                          return { ...f, faq_items: next };
+                        })
+                      }
+                      placeholder="Відповідь…"
+                      className="min-h-16 text-sm"
+                      maxLength={1000}
+                    />
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() =>
+                    setForm((f) => ({
+                      ...f,
+                      faq_items: [...f.faq_items, { question: "", answer: "" }],
+                    }))
+                  }
+                >
+                  <Plus className="mr-1.5 h-4 w-4" /> Додати питання
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
