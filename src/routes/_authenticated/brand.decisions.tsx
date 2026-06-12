@@ -23,6 +23,16 @@ import {
   Trash2,
   ShieldAlert,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const SKIP_REASON_LABELS: Record<string, { label: string; hint: string }> = {
   high_value_low_confidence: {
@@ -132,6 +142,7 @@ function DecisionList({ tenantId }: { tenantId: string }) {
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [filter, setFilter] = useState<string | null>(null);
   const [bulkBusy, setBulkBusy] = useState<string | null>(null);
+  const [pendingBulkReject, setPendingBulkReject] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const { data, error } = await supabase
@@ -192,10 +203,6 @@ function DecisionList({ tenantId }: { tenantId: string }) {
   };
 
   const bulkReject = async (actionType: string) => {
-    if (
-      !confirm(`Відхилити всі pending дії типу "${ACTION_TYPE_LABELS[actionType] ?? actionType}"?`)
-    )
-      return;
     setBulkBusy(actionType);
     const { data, error } = await supabase.rpc("owner_bulk_reject_decisions", {
       _tenant_id: tenantId,
@@ -309,7 +316,7 @@ function DecisionList({ tenantId }: { tenantId: string }) {
                     size="sm"
                     variant="ghost"
                     disabled={bulkBusy === type}
-                    onClick={() => bulkReject(type)}
+                    onClick={() => setPendingBulkReject(type)}
                     className="text-muted-foreground hover:text-destructive"
                   >
                     <Trash2 className="mr-1 h-3 w-3" />
@@ -334,6 +341,37 @@ function DecisionList({ tenantId }: { tenantId: string }) {
           </Card>
         );
       })}
+
+      <AlertDialog
+        open={pendingBulkReject !== null}
+        onOpenChange={(open) => !open && setPendingBulkReject(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Відхилити всі рішення цього типу?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Всі pending рішення типу «
+              {pendingBulkReject
+                ? (ACTION_TYPE_LABELS[pendingBulkReject] ?? pendingBulkReject)
+                : ""}
+              » будуть відхилені. Цю дію не можна скасувати.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Скасувати</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                const type = pendingBulkReject;
+                setPendingBulkReject(null);
+                if (type) void bulkReject(type);
+              }}
+            >
+              Відхилити всі
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

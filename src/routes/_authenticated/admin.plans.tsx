@@ -3,6 +3,16 @@
  * Тут можна редагувати ціни, ліміти, доступні можливості.
  */
 import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -60,6 +70,7 @@ function AdminPlansPage() {
   const { isSuperAdmin, loading } = useAuth();
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Plan | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const plansQuery = useQuery({
     queryKey: ["plans-admin"],
@@ -167,14 +178,36 @@ function AdminPlansPage() {
               onEdit={() => setEditing(p)}
               onCancel={() => setEditing(null)}
               onSave={(patch) => savePlan.mutate(patch)}
-              onDelete={() => {
-                if (window.confirm(MSG.confirmDelete)) deletePlan.mutate(p.id);
-              }}
+              onDelete={() => setDeletingId(p.id)}
               saving={savePlan.isPending}
             />
           ))}
         </div>
       )}
+
+      <AlertDialog open={deletingId !== null} onOpenChange={(open) => !open && setDeletingId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Видалити тариф?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ця дія незворотна. Бренди, що використовують цей тариф, можуть втратити доступ.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Скасувати</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                const id = deletingId;
+                setDeletingId(null);
+                if (id) deletePlan.mutate(id);
+              }}
+            >
+              Видалити
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
