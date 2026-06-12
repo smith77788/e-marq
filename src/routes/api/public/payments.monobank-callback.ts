@@ -9,7 +9,11 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { getMonoInvoiceStatus, isMonoSuccess } from "@/lib/payments/monobank.server";
+import {
+  getMonoInvoiceStatus,
+  isMonoSuccess,
+  monoCcyMatchesOrderCurrency,
+} from "@/lib/payments/monobank.server";
 import { readGatewayConfig } from "@/lib/payments/types";
 
 function clientIp(req: Request): string {
@@ -101,7 +105,7 @@ export const Route = createFileRoute("/api/public/payments/monobank-callback")({
 
         const { data: order } = await supabaseAdmin
           .from("orders")
-          .select("id, tenant_id, total_cents")
+          .select("id, tenant_id, total_cents, currency")
           .eq("id", orderId)
           .maybeSingle();
         if (!order) {
@@ -154,6 +158,41 @@ export const Route = createFileRoute("/api/public/payments/monobank-callback")({
         }
 
         const enriched = { ...parsed, verified_status: status };
+
+        // Привязка invoice↔order. Якщо intent не знайдено, orderId прийшов з
+        // керованого відправником parsed.reference — тоді вимагаємо, щоб
+        // reference з авторитетної відповіді API збігався з orderId. Інакше
+        // оплачений invoice замовлення A можна "застосувати" до замовлення B
+        // з тією ж сумою.
+        if (!intent && status.reference !== orderId) {
+          await logCallback({
+            orderId,
+            tenantId: order.tenant_id,
+            externalId: invoiceId,
+            signatureValid: false,
+            rawBody,
+            parsed: { ...enriched, error: "reference_mismatch" },
+            httpStatus: 401,
+            ip,
+          });
+          return new Response("reference_mismatch", { status: 401 });
+        }
+
+        // Валюта invoice'а має збігатися з валютою замовлення:
+        // amount-guard у RPC порівнює лише числа, 2000 USD != 2000 UAH.
+        if (!monoCcyMatchesOrderCurrency(status.ccy, order.currency)) {
+          await logCallback({
+            orderId,
+            tenantId: order.tenant_id,
+            externalId: invoiceId,
+            signatureValid: true,
+            rawBody,
+            parsed: { ...enriched, error: "currency_mismatch" },
+            httpStatus: 400,
+            ip,
+          });
+          return new Response("currency_mismatch", { status: 400 });
+        }
 
         if (isMonoSuccess(status.status)) {
           const { error: rpcErr } = await supabaseAdmin.rpc("mark_order_paid_by_gateway", {

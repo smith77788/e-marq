@@ -106,3 +106,21 @@ export function currencyCodeNumeric(code: string): number {
 export function isMonoSuccess(status: string): boolean {
   return status === "success" || status === "hold";
 }
+
+/**
+ * Строге зіставлення валюти замовлення з ISO-4217 numeric кодом callback'а.
+ * Невідома валюта замовлення → false (на відміну від currencyCodeNumeric,
+ * який дефолтить до UAH і підходить лише для init-шляху).
+ */
+export function monoCcyMatchesOrderCurrency(ccy: number, orderCurrency: string | null): boolean {
+  switch ((orderCurrency || "UAH").toUpperCase()) {
+    case "UAH":
+      return ccy === 980;
+    case "USD":
+      return ccy === 840;
+    case "EUR":
+      return ccy === 978;
+    default:
+      return false;
+  }
+}

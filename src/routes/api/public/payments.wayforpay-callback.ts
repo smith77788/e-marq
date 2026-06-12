@@ -80,7 +80,7 @@ export const Route = createFileRoute("/api/public/payments/wayforpay-callback")(
 
         const { data: order } = await supabaseAdmin
           .from("orders")
-          .select("id, tenant_id, total_cents")
+          .select("id, tenant_id, total_cents, currency")
           .eq("id", orderId)
           .maybeSingle();
         if (!order) {
@@ -130,6 +130,23 @@ export const Route = createFileRoute("/api/public/payments/wayforpay-callback")(
             ip,
           });
           return new Response("invalid_signature", { status: 401 });
+        }
+
+        // Валюта callback'а має збігатися з валютою замовлення:
+        // amount-guard у RPC порівнює лише числа, 2000 USD != 2000 UAH.
+        const orderCurrency = (order.currency || "UAH").toUpperCase();
+        if (String(parsed.currency || "").toUpperCase() !== orderCurrency) {
+          await logCallback({
+            orderId,
+            tenantId: order.tenant_id,
+            externalId,
+            signatureValid: true,
+            rawBody,
+            parsed: { ...parsed, error: "currency_mismatch" },
+            httpStatus: 400,
+            ip,
+          });
+          return new Response("currency_mismatch", { status: 400 });
         }
 
         if (isWayForPaySuccess(parsed.transactionStatus)) {

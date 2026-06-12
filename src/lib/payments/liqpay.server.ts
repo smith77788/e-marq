@@ -8,7 +8,7 @@
  *
  * Server only — private_key НЕ можна виставляти клієнту.
  */
-import { createHash } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 
 const LIQPAY_CHECKOUT_URL = "https://www.liqpay.ua/api/3/checkout";
 
@@ -61,14 +61,9 @@ export function verifyLiqPaySignature(
   signature: string,
 ): boolean {
   if (!data || !signature || !privateKey) return false;
-  const expected = sha1Base64(privateKey + data + privateKey);
-  // Constant-time compare
-  if (expected.length !== signature.length) return false;
-  let diff = 0;
-  for (let i = 0; i < expected.length; i++) {
-    diff |= expected.charCodeAt(i) ^ signature.charCodeAt(i);
-  }
-  return diff === 0;
+  const expected = Buffer.from(sha1Base64(privateKey + data + privateKey), "utf8");
+  const actual = Buffer.from(signature, "utf8");
+  return expected.length === actual.length && timingSafeEqual(expected, actual);
 }
 
 export type LiqPayCallbackPayload = {

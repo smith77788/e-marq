@@ -10,7 +10,7 @@
  * Підпис відповіді webhook (orderReference;status;time):
  *   HMAC-MD5(merchantAccount;orderReference;amount;currency;authCode;cardPan;transactionStatus;reasonCode)
  */
-import { createHmac } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 const WAYFORPAY_CHECKOUT_URL = "https://secure.wayforpay.com/pay";
 
@@ -106,23 +106,24 @@ export type WayForPayCallback = {
 };
 
 export function verifyWayForPayCallback(secretKey: string, payload: WayForPayCallback): boolean {
-  const src = [
-    payload.merchantAccount,
-    payload.orderReference,
-    Number(payload.amount.toFixed(2)).toString(),
-    payload.currency,
-    payload.authCode ?? "",
-    payload.cardPan ?? "",
-    payload.transactionStatus,
-    String(payload.reasonCode ?? ""),
-  ].join(";");
-  const expected = md5Hmac(secretKey, src);
-  if (expected.length !== payload.merchantSignature.length) return false;
-  let diff = 0;
-  for (let i = 0; i < expected.length; i++) {
-    diff |= expected.charCodeAt(i) ^ payload.merchantSignature.charCodeAt(i);
-  }
-  return diff === 0;
+  const signature = Buffer.from(String(payload.merchantSignature ?? ""), "utf8");
+  // WayForPay підписує amount так, як сам його серіалізував ("1500" або "1500.00") —
+  // перевіряємо обидва варіанти, щоб не відхиляти валідні callback'и.
+  const amountVariants = [...new Set([String(payload.amount), Number(payload.amount).toFixed(2)])];
+  return amountVariants.some((amount) => {
+    const src = [
+      payload.merchantAccount,
+      payload.orderReference,
+      amount,
+      payload.currency,
+      payload.authCode ?? "",
+      payload.cardPan ?? "",
+      payload.transactionStatus,
+      String(payload.reasonCode ?? ""),
+    ].join(";");
+    const expected = Buffer.from(md5Hmac(secretKey, src), "utf8");
+    return expected.length === signature.length && timingSafeEqual(expected, signature);
+  });
 }
 
 export function buildWayForPayAck(
