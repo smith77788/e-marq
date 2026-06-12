@@ -87,10 +87,20 @@ function submitHiddenForm(action: string, fields: Record<string, string | string
 export async function startGatewayPayment(
   method: Exclude<PaymentMethod, "manual">,
   orderId: string,
+  /**
+   * Called once init has succeeded and immediately before the redirect/submit.
+   * The caller uses this to clear the cart only when payment is actually about
+   * to start — if init throws (timeout / network / ok:false) the cart is left
+   * intact so the customer can retry instead of being stranded with an empty
+   * cart and a stuck pending order.
+   */
+  onReady?: () => void,
 ): Promise<void> {
   const path = `/api/public/payments/${method}-init`;
   const result = await postInit(path, orderId);
   if (!result.ok) throw new Error("payment_init_failed");
+
+  onReady?.();
 
   if (result.provider === "monobank") {
     window.location.assign(result.redirectUrl);

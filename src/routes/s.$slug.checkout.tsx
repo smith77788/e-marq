@@ -378,10 +378,12 @@ function CheckoutPage() {
         cart.clear();
         navigate({ to: "/s/$slug/orders/$orderId", params: { slug, orderId } });
       } else {
-        // Очищаємо кошик до редіректу — startGatewayPayment робить form.submit() і не повертається
-        cart.clear();
+        // Кошик чистимо лише коли оплата справді стартує (onReady викликається
+        // після успішного init, перед редіректом). Якщо init впаде — кошик
+        // лишається, щоб клієнт міг повторити, а не лишитись з порожнім кошиком
+        // і завислим pending-замовленням.
         toast.success("Перенаправляємо на оплату…");
-        await startGatewayPayment(method, orderId);
+        await startGatewayPayment(method, orderId, () => cart.clear());
       }
     } catch (e) {
       const raw = e instanceof Error ? e.message : "Невідома помилка";
