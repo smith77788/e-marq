@@ -721,7 +721,7 @@ const QUICK_PROVIDERS = [
     config: () => ({}),
   },
   {
-    id: "poster",
+    id: "poster_pos",
     name: "Poster POS",
     Icon: Receipt,
     fields: [{ key: "apiKey" as const, label: "API Token", placeholder: "..." }],
