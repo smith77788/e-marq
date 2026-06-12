@@ -337,7 +337,6 @@ export function OutreachLeadsTab() {
   const bulkReject = async () => {
     const ids = filtered.filter((l) => l.status !== "rejected").map((l) => l.id);
     if (ids.length === 0) return;
-    if (!confirm(`Відхилити ${ids.length} лідів(а)?`)) return;
     setBulkBusy(true);
     const { error } = await supabase
       .from("outreach_leads")
@@ -703,7 +702,6 @@ export function OutreachActionsTab() {
   const bulkApprove = async () => {
     const ids = (actions.data ?? []).filter((a) => a.status === "pending_review").map((a) => a.id);
     if (ids.length === 0) return;
-    if (!confirm(`Підтвердити ${ids.length} драфт(ів)?`)) return;
     const { error } = await supabase
       .from("outreach_actions")
       .update({ status: "approved" } as never)

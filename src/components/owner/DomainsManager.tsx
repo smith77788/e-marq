@@ -4,6 +4,16 @@
  * основного домену. Спирається на public.tenant_domains (RLS).
  */
 import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -62,6 +72,7 @@ const statusBadge = (status: string) => {
 export function DomainsManager({ tenantId }: { tenantId: string }) {
   const qc = useQueryClient();
   const [newDomain, setNewDomain] = useState("");
+  const [deletingDomain, setDeletingDomain] = useState<{ id: string; domain: string } | null>(null);
 
   const list = useQuery({
     queryKey: ["tenant-domains", tenantId],
@@ -284,9 +295,7 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
                       size="sm"
                       variant="ghost"
                       className="text-destructive hover:text-destructive"
-                      onClick={() => {
-                        if (confirm(`Видалити домен ${d.domain}?`)) deleteMut.mutate(d.id);
-                      }}
+                      onClick={() => setDeletingDomain({ id: d.id, domain: d.domain })}
                       disabled={deleteMut.isPending}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -351,6 +360,34 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog
+        open={deletingDomain !== null}
+        onOpenChange={(open) => !open && setDeletingDomain(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Видалити домен?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Домен <strong>{deletingDomain?.domain}</strong> буде видалено. Сайт перестане
+              відкриватись за цією адресою.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Скасувати</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                const d = deletingDomain;
+                setDeletingDomain(null);
+                if (d) deleteMut.mutate(d.id);
+              }}
+            >
+              Видалити
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

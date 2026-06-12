@@ -40,6 +40,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -146,6 +156,7 @@ export function IntegrationManageDialog({
 }: Props) {
   const qc = useQueryClient();
   const [syncEntity, setSyncEntity] = useState<SyncTarget | null>(null);
+  const [confirmDisconnect, setConfirmDisconnect] = useState(false);
   const autoSyncKeyRef = useRef<string | null>(null);
 
   const integ = useQuery<IntegRow | null>({
@@ -794,11 +805,7 @@ export function IntegrationManageDialog({
                   </div>
                   <Button
                     variant="destructive"
-                    onClick={() => {
-                      if (window.confirm(`Відключити ${integration.name}? Ключ буде видалено.`)) {
-                        disconnect.mutate();
-                      }
-                    }}
+                    onClick={() => setConfirmDisconnect(true)}
                     disabled={disconnect.isPending || !data}
                     className="gap-1"
                   >
@@ -816,6 +823,26 @@ export function IntegrationManageDialog({
         </ScrollArea>
       </DialogContent>
     </Dialog>
+
+    <AlertDialog open={confirmDisconnect} onOpenChange={setConfirmDisconnect}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Відключити {integration?.name}?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Ключ та конфігурація будуть видалені. Раніше імпортовані дані залишаться, але синхронізація зупиниться.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Скасувати</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={() => disconnect.mutate()}
+          >
+            Відключити
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 

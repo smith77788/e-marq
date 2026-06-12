@@ -102,7 +102,6 @@ export function OwnerTelegramBindCard({ tenantId }: Props) {
   };
 
   const handleUnbind = async () => {
-    if (!confirm("Перестати отримувати сповіщення в Telegram для цього магазину?")) return;
     setBusy(true);
     try {
       await ensureAuthenticatedSession();

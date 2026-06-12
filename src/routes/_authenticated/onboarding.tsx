@@ -1163,17 +1163,7 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
                         size="sm"
                         variant="ghost"
                         className="h-7 px-2 text-destructive hover:text-destructive"
-                        onClick={() => {
-                          if (
-                            confirm(
-                              lang === "ua"
-                                ? "Скасувати це запрошення?"
-                                : "Revoke this invitation?",
-                            )
-                          ) {
-                            revoke.mutate(inv.id);
-                          }
-                        }}
+                        onClick={() => revoke.mutate(inv.id)}
                         disabled={revoke.isPending}
                         title={lang === "ua" ? "Скасувати" : "Revoke"}
                       >
