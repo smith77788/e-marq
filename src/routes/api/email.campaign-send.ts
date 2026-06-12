@@ -279,7 +279,7 @@ export const Route = createFileRoute("/api/email/campaign-send")({
         const campaignId = campaign.id;
 
         // Pre-create recipient rows (so we have a record even if we crash mid-send).
-        await supabaseAdmin.from("email_campaign_recipients").insert(
+        const { error: recipientsErr } = await supabaseAdmin.from("email_campaign_recipients").insert(
           eligible.map((c) => ({
             campaign_id: campaignId,
             tenant_id: tenantId,
@@ -288,6 +288,10 @@ export const Route = createFileRoute("/api/email/campaign-send")({
             status: "pending",
           })),
         );
+        if (recipientsErr) {
+          console.error("[campaign-send] failed to pre-create recipients:", recipientsErr.message);
+          return jsonResponse({ error: "recipients_insert_failed" }, 500);
+        }
 
         let sent = 0;
         let failed = 0;

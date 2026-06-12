@@ -36,11 +36,22 @@ type InitResponse =
   | { ok: false; error: string };
 
 async function postInit(path: string, orderId: string): Promise<InitResponse> {
-  const res = await fetch(path, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ orderId }),
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
+  let res: Response;
+  try {
+    res = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId }),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if ((err as Error).name === "AbortError") throw new Error("payment_init_timeout");
+    throw err;
+  } finally {
+    clearTimeout(timeout);
+  }
   let payload: InitResponse;
   try {
     payload = (await res.json()) as InitResponse;

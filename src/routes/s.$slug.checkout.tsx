@@ -378,10 +378,10 @@ function CheckoutPage() {
         cart.clear();
         navigate({ to: "/s/$slug/orders/$orderId", params: { slug, orderId } });
       } else {
-        // Кошик очищаємо ПІСЛЯ успішного запуску платежу; email прийде з webhook'у після оплати
+        // Очищаємо кошик до редіректу — startGatewayPayment робить form.submit() і не повертається
+        cart.clear();
         toast.success("Перенаправляємо на оплату…");
         await startGatewayPayment(method, orderId);
-        cart.clear();
       }
     } catch (e) {
       const raw = e instanceof Error ? e.message : "Невідома помилка";

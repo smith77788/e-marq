@@ -145,7 +145,7 @@ function ProductDetailPage() {
   }, [cart.tenantId, product.id]);
 
   const inCart = cart.cart[product.id]?.quantity ?? 0;
-  const outOfStock = activeStock <= 0;
+  const outOfStock = (activeStock ?? 0) <= 0;
   const [justAdded, setJustAdded] = useState(false);
 
   function addToCart() {
