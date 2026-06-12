@@ -65,8 +65,14 @@ export const Route = createFileRoute("/hooks/agents/self-heal-engine")({
           if (!sa) return jsonError("Forbidden: super-admin required", 403);
         }
 
-        const summary = await runSelfHealCycle(tenantId);
-        return jsonOk({ summary });
+        try {
+          const summary = await runSelfHealCycle(tenantId);
+          return jsonOk({ summary });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          console.error("[self-heal-engine] cycle failed:", message);
+          return jsonError(`cycle_failed: ${message}`, 500);
+        }
       },
       GET: async () => jsonOk({ hint: "POST to run a self-heal cycle" }),
     },

@@ -21,6 +21,8 @@ export type LiqPayParams = {
   orderId: string;
   resultUrl: string; // куди редіректнути користувача після оплати (UI)
   serverUrl: string; // куди LiqPay POST'не webhook
+  /** Тестовий режим LiqPay (тенант явно ввімкнув liqpay_sandbox у конфігу). */
+  sandbox?: boolean;
 };
 
 export type LiqPayInitOutput = {
@@ -48,7 +50,7 @@ export function buildLiqPayCheckout(p: LiqPayParams): LiqPayInitOutput {
     order_id: p.orderId,
     result_url: p.resultUrl,
     server_url: p.serverUrl,
-    sandbox: 0,
+    sandbox: p.sandbox ? 1 : 0,
   };
   const data = base64(JSON.stringify(params));
   const signature = sha1Base64(p.privateKey + data + p.privateKey);
@@ -82,7 +84,16 @@ export function parseLiqPayCallback(data: string): LiqPayCallbackPayload {
   return JSON.parse(json) as LiqPayCallbackPayload;
 }
 
-/** Статуси, які LiqPay вважає успішною оплатою. */
-export function isLiqPaySuccess(status: string): boolean {
-  return status === "success" || status === "wait_compensation" || status === "sandbox";
+/**
+ * Статуси, які зараховуємо як оплату.
+ *
+ * - "success" — оплата пройшла;
+ * - "wait_compensation" — гроші списані з покупця, очікують розрахунку
+ *   з мерчантом (фактично оплачено);
+ * - "sandbox" — ЛИШЕ якщо тенант явно ввімкнув liqpay_sandbox у конфігу,
+ *   інакше тестовий callback не може позначити реальне замовлення оплаченим.
+ */
+export function isLiqPaySuccess(status: string, allowSandbox = false): boolean {
+  if (status === "success" || status === "wait_compensation") return true;
+  return allowSandbox && status === "sandbox";
 }

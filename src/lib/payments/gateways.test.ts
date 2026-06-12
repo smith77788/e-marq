@@ -59,14 +59,22 @@ describe("liqpay signature", () => {
     expect(parseLiqPayCallback(data)).toEqual(payload);
   });
 
-  it("isLiqPaySuccess documents current accepted statuses", () => {
+  it("isLiqPaySuccess: success and wait_compensation are paid", () => {
     expect(isLiqPaySuccess("success")).toBe(true);
+    expect(isLiqPaySuccess("wait_compensation")).toBe(true);
     expect(isLiqPaySuccess("failure")).toBe(false);
     expect(isLiqPaySuccess("error")).toBe(false);
     expect(isLiqPaySuccess("reversed")).toBe(false);
-    // спірні, чекають рішення (див. ревю 2026-06-12): прийняті зараз
-    expect(isLiqPaySuccess("sandbox")).toBe(true);
-    expect(isLiqPaySuccess("wait_compensation")).toBe(true);
+    expect(isLiqPaySuccess("wait_accept")).toBe(false);
+  });
+
+  it("isLiqPaySuccess: sandbox counts as paid only when tenant enabled sandbox mode", () => {
+    expect(isLiqPaySuccess("sandbox")).toBe(false);
+    expect(isLiqPaySuccess("sandbox", false)).toBe(false);
+    expect(isLiqPaySuccess("sandbox", true)).toBe(true);
+    // звичайні статуси не залежать від прапорця
+    expect(isLiqPaySuccess("success", true)).toBe(true);
+    expect(isLiqPaySuccess("failure", true)).toBe(false);
   });
 });
 

@@ -120,6 +120,7 @@ export const Route = createFileRoute("/api/public/payments/liqpay-init")({
           orderId: order.id,
           resultUrl,
           serverUrl,
+          sandbox: gw.liqpay_sandbox,
         });
 
         // Create intent

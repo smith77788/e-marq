@@ -9,6 +9,13 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { FANOUT_TENANT_STATUSES } from "@/lib/acos/fanoutTenants";
+import {
+  AGENT_FANOUT_CONCURRENCY,
+  TENANT_FANOUT_CONCURRENCY,
+  allSettledWithConcurrency,
+  callHook,
+  isTotalFailure,
+} from "@/lib/acos/fanout";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { jsonError, jsonOk } from "@/lib/acos/agentRuntime";
 import { isCronToken } from "@/lib/acos/cronAuth";
@@ -104,60 +111,56 @@ export const Route = createFileRoute("/hooks/agents/cron-chunk")({
 
         // Lead-gen — multi-tenant single-shot
         if (!PER_TENANT_CHUNKS.has(chunk)) {
-          const out = await Promise.allSettled(
-            agents.map(async (a) => {
-              const res = await fetch(`${origin}/hooks/agents/${a}`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({}),
-              });
-              const j = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-              return { agent: a, ok: res.ok, ...j };
-            }),
+          const out = await allSettledWithConcurrency(
+            agents,
+            AGENT_FANOUT_CONCURRENCY,
+            async (a) => {
+              const call = await callHook(origin, `agents/${a}`, token, {});
+              return { agent: a, ok: call.ok, error: call.error, ...call.body };
+            },
           );
           const summary = out.map((r, i) =>
             r.status === "fulfilled"
               ? r.value
               : { agent: agents[i], ok: false, error: String(r.reason) },
           );
-          return jsonOk({
+          const payload = {
             chunk,
             duration_ms: Date.now() - started,
+            failed_agents: summary.filter((r) => !r.ok).length,
             agents: summary,
-          });
+          };
+          if (isTotalFailure(summary as Array<{ ok: boolean }>)) {
+            return jsonError("all_agent_runs_failed", 500, payload);
+          }
+          return jsonOk(payload);
         }
 
-        // Per-tenant: для кожного активного tenant викликаємо КОЖНОГО агента
-        // ПАРАЛЕЛЬНО (Promise.all обмежено всередині fetch). Не використовуємо
-        // важкий run-all — щоб уникнути cascading timeouts.
+        // Per-tenant: для кожного активного tenant викликаємо агентів чанка.
+        // Конкуренція обмежена (tenant'и × агенти), кожен виклик з таймаутом —
+        // раніше тут стартувало до ~800 одночасних fetch'ів без таймауту.
         const { data: tenants } = await supabaseAdmin
           .from("tenants")
           .select("id, slug")
           .in("status", [...FANOUT_TENANT_STATUSES])
           .limit(50);
 
-        const tenantResults = await Promise.allSettled(
-          (tenants ?? []).map(async (t) => {
-            const inner = await Promise.allSettled(
-              agents.map(async (a) => {
-                const res = await fetch(`${origin}/hooks/agents/${a}`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({ tenant_id: t.id }),
-                });
-                const j = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+        const tenantResults = await allSettledWithConcurrency(
+          tenants ?? [],
+          TENANT_FANOUT_CONCURRENCY,
+          async (t) => {
+            const inner = await allSettledWithConcurrency(
+              agents,
+              AGENT_FANOUT_CONCURRENCY,
+              async (a) => {
+                const call = await callHook(origin, `agents/${a}`, token, { tenant_id: t.id });
                 return {
                   agent: a,
-                  ok: res.ok,
-                  insights_created: typeof j.insights_created === "number" ? j.insights_created : 0,
+                  ok: call.ok,
+                  insights_created:
+                    typeof call.body.insights_created === "number" ? call.body.insights_created : 0,
                 };
-              }),
+              },
             );
             const created = inner.reduce((s, r) => {
               if (r.status !== "fulfilled") return s;
@@ -166,19 +169,30 @@ export const Route = createFileRoute("/hooks/agents/cron-chunk")({
             const failed = inner.filter(
               (r) => r.status === "rejected" || (r.status === "fulfilled" && !r.value.ok),
             ).length;
-            return { tenant: t.slug, agents: agents.length, insights_created: created, failed };
-          }),
+            return {
+              tenant: t.slug,
+              agents: agents.length,
+              insights_created: created,
+              failed,
+              ok: failed < agents.length,
+            };
+          },
         );
 
         const summary = tenantResults.map((r) =>
-          r.status === "fulfilled" ? r.value : { error: String(r.reason) },
+          r.status === "fulfilled" ? r.value : { ok: false, error: String(r.reason) },
         );
-        return jsonOk({
+        const payload = {
           chunk,
           tenants_processed: tenants?.length ?? 0,
           duration_ms: Date.now() - started,
+          failed_tenants: summary.filter((r) => !r.ok).length,
           per_tenant: summary,
-        });
+        };
+        if (isTotalFailure(summary as Array<{ ok: boolean }>)) {
+          return jsonError("all_tenant_runs_failed", 500, payload);
+        }
+        return jsonOk(payload);
       },
     },
   },

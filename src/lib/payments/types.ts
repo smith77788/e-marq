@@ -31,6 +31,12 @@ export type GatewayConfig = {
   liqpay_enabled: boolean;
   liqpay_public_key: string;
   liqpay_private_key: string;
+  /**
+   * Тестовий режим LiqPay для цього tenant'а: checkout створюється з
+   * sandbox=1, а callback зі статусом "sandbox" зараховується як оплата.
+   * Без прапорця sandbox-callback НІКОЛИ не позначає замовлення оплаченим.
+   */
+  liqpay_sandbox: boolean;
   wayforpay_enabled: boolean;
   wayforpay_merchant_account: string;
   wayforpay_secret_key: string;
@@ -48,6 +54,7 @@ export function readGatewayConfig(features: unknown): GatewayConfig {
     liqpay_enabled: b(p.liqpay_enabled),
     liqpay_public_key: s(p.liqpay_public_key),
     liqpay_private_key: s(p.liqpay_private_key),
+    liqpay_sandbox: b(p.liqpay_sandbox),
     wayforpay_enabled: b(p.wayforpay_enabled),
     wayforpay_merchant_account: s(p.wayforpay_merchant_account),
     wayforpay_secret_key: s(p.wayforpay_secret_key),

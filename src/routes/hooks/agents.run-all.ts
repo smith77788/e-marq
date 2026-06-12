@@ -8,6 +8,14 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { FANOUT_TENANT_STATUSES } from "@/lib/acos/fanoutTenants";
+import {
+  AGENT_FANOUT_CONCURRENCY,
+  RUN_ALL_CALL_TIMEOUT_MS,
+  TENANT_FANOUT_CONCURRENCY,
+  allSettledWithConcurrency,
+  callHook,
+  isTotalFailure,
+} from "@/lib/acos/fanout";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { authorizeAgentRequest, jsonError, jsonOk } from "@/lib/acos/agentRuntime";
 import { isCronToken } from "@/lib/acos/cronAuth";
@@ -132,25 +140,26 @@ export const Route = createFileRoute("/hooks/agents/run-all")({
             .limit(50);
           if (tErr) return jsonError("tenant lookup failed", 500, { details: tErr.message });
 
-          const fan = await Promise.allSettled(
-            (tenants ?? []).map(async (t) => {
-              const r = await fetch(`${origin}/hooks/agents/run-all`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ tenant_id: t.id }),
-              });
-              const j = (await r.json().catch(() => ({}))) as Record<string, unknown>;
-              const ic = typeof j.insights_created === "number" ? j.insights_created : 0;
-              return { tenant: t.slug, ok: r.ok, insights_created: ic };
-            }),
+          const fan = await allSettledWithConcurrency(
+            tenants ?? [],
+            TENANT_FANOUT_CONCURRENCY,
+            async (t) => {
+              const call = await callHook(
+                origin,
+                "agents/run-all",
+                token,
+                { tenant_id: t.id },
+                RUN_ALL_CALL_TIMEOUT_MS,
+              );
+              const ic =
+                typeof call.body.insights_created === "number" ? call.body.insights_created : 0;
+              return { tenant: t.slug, ok: call.ok, error: call.error, insights_created: ic };
+            },
           );
-          const summary = fan.map((r) =>
+          const summary = fan.map((r, i) =>
             r.status === "fulfilled"
               ? r.value
-              : { tenant: "?", ok: false, error: String(r.reason) },
+              : { tenant: tenants?.[i]?.slug ?? "?", ok: false, error: String(r.reason) },
           );
           const total = summary.reduce(
             (s, r) =>
@@ -160,27 +169,29 @@ export const Route = createFileRoute("/hooks/agents/run-all")({
                 : 0),
             0,
           );
-          return jsonOk({
+          const payload = {
             mode: "fan-out",
             tenants_processed: tenants?.length ?? 0,
             insights_created: total,
+            failed_tenants: summary.filter((r) => !r.ok).length,
             per_tenant: summary,
-          });
+          };
+          if (isTotalFailure(summary as Array<{ ok: boolean }>)) {
+            return jsonError("all_tenant_runs_failed", 500, payload);
+          }
+          return jsonOk(payload);
         }
 
         const ctx = await authorizeAgentRequest(token, tenantId);
         if ("error" in ctx) return jsonError(ctx.error, ctx.status);
 
-        const results = await Promise.allSettled(
-          AGENTS.map(async (a) => {
-            const res = await fetch(`${origin}/hooks/agents/${a}`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-              body: JSON.stringify({ tenant_id: tenantId }),
-            });
-            const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-            return { agent: a, ok: res.ok, ...json };
-          }),
+        const results = await allSettledWithConcurrency(
+          AGENTS,
+          AGENT_FANOUT_CONCURRENCY,
+          async (a) => {
+            const call = await callHook(origin, `agents/${a}`, token, { tenant_id: tenantId });
+            return { agent: a, ok: call.ok, error: call.error, ...call.body };
+          },
         );
 
         const summary = results.map((r, i) =>
@@ -193,7 +204,15 @@ export const Route = createFileRoute("/hooks/agents/run-all")({
           return s + (typeof v === "number" ? v : 0);
         }, 0);
 
-        return jsonOk({ insights_created: totalCreated, agents: summary });
+        const payload = {
+          insights_created: totalCreated,
+          failed_agents: summary.filter((r) => !r.ok).length,
+          agents: summary,
+        };
+        if (isTotalFailure(summary as Array<{ ok: boolean }>)) {
+          return jsonError("all_agent_runs_failed", 500, payload);
+        }
+        return jsonOk(payload);
       },
     },
   },

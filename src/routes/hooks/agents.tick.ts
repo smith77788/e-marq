@@ -80,8 +80,10 @@ export const Route = createFileRoute("/hooks/agents/tick")({
             });
           }
         }
-        return new Response(JSON.stringify({ ok: true, tenants: summary.length, summary }), {
-          status: 200,
+        // Усі tenant'и впали → 500, щоб pg_cron/моніторинг бачили відказ.
+        const allFailed = summary.length > 0 && summary.every((s) => "error" in s);
+        return new Response(JSON.stringify({ ok: !allFailed, tenants: summary.length, summary }), {
+          status: allFailed ? 500 : 200,
           headers: { "Content-Type": "application/json" },
         });
       },

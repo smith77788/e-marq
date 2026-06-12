@@ -6,6 +6,14 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { FANOUT_TENANT_STATUSES } from "@/lib/acos/fanoutTenants";
+import {
+  AGENT_FANOUT_CONCURRENCY,
+  RUN_ALL_CALL_TIMEOUT_MS,
+  TENANT_FANOUT_CONCURRENCY,
+  allSettledWithConcurrency,
+  callHook,
+  isTotalFailure,
+} from "@/lib/acos/fanout";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
@@ -56,32 +64,32 @@ export const Route = createFileRoute("/hooks/agents/cron-all")({
         const cronToken = getInternalCronToken();
 
         const started = Date.now();
-        const results = await Promise.allSettled(
-          (tenants ?? []).map(async (t) => {
-            const res = await fetch(`${origin}/hooks/agents/run-all`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json", Authorization: `Bearer ${cronToken}` },
-              body: JSON.stringify({ tenant_id: t.id }),
-            });
-            const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-            return { tenant: t.slug, ok: res.ok, ...body };
-          }),
+        const results = await allSettledWithConcurrency(
+          tenants ?? [],
+          TENANT_FANOUT_CONCURRENCY,
+          async (t) => {
+            const call = await callHook(
+              origin,
+              "agents/run-all",
+              cronToken,
+              { tenant_id: t.id },
+              RUN_ALL_CALL_TIMEOUT_MS,
+            );
+            return { tenant: t.slug, ok: call.ok, error: call.error, ...call.body };
+          },
         );
 
         // Платформенні (multi-tenant) агенти-генератори лідів — запускаємо
         // ОДИН раз на цикл, незалежно від тенантів. Вони працюють з
         // public.lead_prospects/lead_outreach/lead_magnets.
         const PLATFORM_LEAD_AGENTS = ["web-prospector", "social-engager", "content-magnet"];
-        const platformResults = await Promise.allSettled(
-          PLATFORM_LEAD_AGENTS.map(async (a) => {
-            const res = await fetch(`${origin}/hooks/agents/${a}`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json", Authorization: `Bearer ${cronToken}` },
-              body: JSON.stringify({}),
-            });
-            const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-            return { agent: a, ok: res.ok, ...body };
-          }),
+        const platformResults = await allSettledWithConcurrency(
+          PLATFORM_LEAD_AGENTS,
+          AGENT_FANOUT_CONCURRENCY,
+          async (a) => {
+            const call = await callHook(origin, `agents/${a}`, cronToken, {});
+            return { agent: a, ok: call.ok, error: call.error, ...call.body };
+          },
         );
 
         const summary = results.map((r, i) =>
@@ -100,14 +108,19 @@ export const Route = createFileRoute("/hooks/agents/cron-all")({
             : { agent: PLATFORM_LEAD_AGENTS[i], ok: false, error: String(r.reason) },
         );
 
-        return jsonOk({
+        const payload = {
           tenants_processed: tenants?.length ?? 0,
           total_insights_created: totalCreated,
           duration_ms: Date.now() - started,
           triggered_by: authed,
+          failed_tenants: summary.filter((r) => !r.ok).length,
           results: summary,
           platform_lead_agents: platformSummary,
-        });
+        };
+        if (isTotalFailure(summary as Array<{ ok: boolean }>)) {
+          return jsonError("all_tenant_runs_failed", 500, payload);
+        }
+        return jsonOk(payload);
       },
     },
   },

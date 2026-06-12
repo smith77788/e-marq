@@ -176,7 +176,7 @@ export const Route = createFileRoute("/api/public/payments/liqpay-callback")({
           return new Response("currency_mismatch", { status: 400 });
         }
 
-        if (isLiqPaySuccess(parsed.status)) {
+        if (isLiqPaySuccess(parsed.status, gw.liqpay_sandbox)) {
           const { error: rpcErr } = await supabaseAdmin.rpc("mark_order_paid_by_gateway", {
             _order_id: orderId,
             _provider: "liqpay",
