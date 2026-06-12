@@ -27,6 +27,8 @@ async function callNP(
   method: string,
   props: Record<string, unknown>,
 ) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 10_000);
   const res = await fetch(NP_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -36,7 +38,8 @@ async function callNP(
       calledMethod: method,
       methodProperties: props,
     }),
-  });
+    signal: ctrl.signal,
+  }).finally(() => clearTimeout(t));
   if (!res.ok) throw new Error(`NP HTTP ${res.status}`);
   return (await res.json()) as { success: boolean; data: unknown[]; errors?: string[] };
 }
@@ -85,10 +88,10 @@ export const Route = createFileRoute("/api/public/shipping/np")({
               Limit: 20,
             });
             if (!json.success) {
-              return new Response(JSON.stringify({ data: [] }), {
-                status: 200,
-                headers: { "Content-Type": "application/json" },
-              });
+              return new Response(
+                JSON.stringify({ error: "np_api_error", details: json.errors?.[0] ?? "API error" }),
+                { status: 502, headers: { "Content-Type": "application/json" } },
+              );
             }
             // searchSettlements повертає [{ Addresses: [...] }]
             const addresses =
@@ -126,10 +129,10 @@ export const Route = createFileRoute("/api/public/shipping/np")({
 
             const json = await callNP(apiKey, "Address", "getWarehouses", props);
             if (!json.success) {
-              return new Response(JSON.stringify({ data: [] }), {
-                status: 200,
-                headers: { "Content-Type": "application/json" },
-              });
+              return new Response(
+                JSON.stringify({ error: "np_api_error", details: json.errors?.[0] ?? "API error" }),
+                { status: 502, headers: { "Content-Type": "application/json" } },
+              );
             }
             const warehouses = (json.data as Array<Record<string, unknown>>).map((w) => ({
               ref: String(w.Ref ?? ""),

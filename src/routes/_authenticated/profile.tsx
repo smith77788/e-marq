@@ -544,6 +544,8 @@ function ProfilePage() {
           {tenantId ? (
             summaryQuery.isLoading ? (
               <p className="text-sm text-muted-foreground">Завантажую тариф…</p>
+            ) : summaryQuery.isError ? (
+              <p className="text-sm text-destructive">Не вдалося завантажити дані тарифу</p>
             ) : summaryQuery.data ? (
               <>
                 <Card>

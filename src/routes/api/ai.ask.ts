@@ -217,6 +217,8 @@ export const Route = createFileRoute("/api/ai/ask")({
         const userMsg = `Дані бренду (JSON): ${JSON.stringify(ctx)}\n\nПитання власника: ${question}`;
 
         try {
+          const aiCtrl = new AbortController();
+          const aiTimeout = setTimeout(() => aiCtrl.abort(), 30_000);
           const aiRes = await fetch(LOVABLE_AI_URL, {
             method: "POST",
             headers: {
@@ -231,7 +233,8 @@ export const Route = createFileRoute("/api/ai/ask")({
               ],
               temperature: 0.3,
             }),
-          });
+            signal: aiCtrl.signal,
+          }).finally(() => clearTimeout(aiTimeout));
           if (aiRes.status === 429) {
             return jsonError("AI rate limit, спробуйте за хвилину", 429);
           }

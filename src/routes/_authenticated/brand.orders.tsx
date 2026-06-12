@@ -445,6 +445,8 @@ function BrandOrdersPage() {
                 <div className="rounded-md border border-border">
                   {itemsQuery.isLoading ? (
                     <p className="px-3 py-4 text-xs text-muted-foreground">…</p>
+                  ) : itemsQuery.isError ? (
+                    <p className="px-3 py-4 text-xs text-destructive">Не вдалося завантажити позиції</p>
                   ) : (itemsQuery.data ?? []).length === 0 ? (
                     <p className="px-3 py-4 text-xs text-muted-foreground">—</p>
                   ) : (

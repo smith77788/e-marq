@@ -268,7 +268,8 @@ function PendingInvitations({ tenantId, brandName }: { tenantId: string; brandNa
         .from("tenant_invitations")
         .select("id, email, role, token, status, expires_at, created_at")
         .eq("tenant_id", tenantId)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(200);
       if (error) throw error;
       return (data ?? []) as Invitation[];
     },

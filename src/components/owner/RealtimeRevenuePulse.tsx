@@ -161,6 +161,11 @@ export function RealtimeRevenuePulse({ tenantId }: Props) {
       </CardHeader>
       <CardContent>
         <div className="h-[140px] w-full">
+          {totals.count === 0 && data !== undefined ? (
+            <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+              Ще немає оплачених замовлень за останні 24 год
+            </div>
+          ) : (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={series} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
               <defs>
@@ -202,6 +207,7 @@ export function RealtimeRevenuePulse({ tenantId }: Props) {
               />
             </AreaChart>
           </ResponsiveContainer>
+          )}
         </div>
       </CardContent>
     </Card>
