@@ -60,7 +60,7 @@ function AdminAgentDetailPage() {
           .gte("started_at", since)
           .order("started_at", { ascending: false })
           .limit(2000),
-        supabase.from("tenants").select("id, name, slug"),
+        supabase.from("tenants").select("id, name, slug").limit(1000),
       ]);
       setRuns((r ?? []) as RunRow[]);
       setTenants((t ?? []) as TenantOpt[]);

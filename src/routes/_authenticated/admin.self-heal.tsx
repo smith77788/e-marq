@@ -191,7 +191,7 @@ function SelfHealContent() {
   const settingsQ = useQuery({
     queryKey: ["self-heal-settings"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("self_heal_settings").select("key, value");
+      const { data, error } = await supabase.from("self_heal_settings").select("key, value").limit(100);
       if (error) throw error;
       const map = new Map((data ?? []).map((r) => [r.key, r.value]));
       return {

@@ -177,6 +177,21 @@ function ProductDetailEditor() {
     );
   }
 
+  if (productQuery.isError) {
+    return (
+      <div className="py-12 text-center">
+        <p className="text-sm text-destructive">Не вдалося завантажити товар.</p>
+        <button
+          type="button"
+          className="mt-2 text-sm underline text-muted-foreground"
+          onClick={() => void productQuery.refetch()}
+        >
+          Спробувати ще раз
+        </button>
+      </div>
+    );
+  }
+
   const product = productQuery.data;
   if (!product) return null;
   const tenant = tenantQuery.data;

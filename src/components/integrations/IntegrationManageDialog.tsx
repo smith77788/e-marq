@@ -432,6 +432,7 @@ export function IntegrationManageDialog({
   }
 
   return (
+    <>
     <Dialog open={!!integration} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
@@ -843,6 +844,7 @@ export function IntegrationManageDialog({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+    </>
   );
 }
 

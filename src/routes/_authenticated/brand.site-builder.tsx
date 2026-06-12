@@ -364,6 +364,26 @@ function BrandSiteBuilderPage() {
     );
   }
 
+  if (templateQuery.isError || profileQuery.isError) {
+    return (
+      <Card className="border-destructive/40 bg-destructive/5">
+        <CardContent className="flex items-center justify-between p-6">
+          <p className="text-sm text-destructive">Не вдалося завантажити конструктор сайту.</p>
+          <button
+            type="button"
+            className="text-sm underline"
+            onClick={() => {
+              void templateQuery.refetch();
+              void profileQuery.refetch();
+            }}
+          >
+            Спробувати ще раз
+          </button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const isReady = !!draft && !!template;
   const dirty =
     !!draft &&

@@ -386,6 +386,17 @@ function BrandCollectionsPage() {
         <CardContent className="p-0">
           {collectionsQuery.isLoading ? (
             <TableSkeleton rows={5} columns={5} />
+          ) : collectionsQuery.isError ? (
+            <p className="p-6 text-sm text-destructive">
+              Не вдалося завантажити колекції.{" "}
+              <button
+                type="button"
+                className="underline"
+                onClick={() => void collectionsQuery.refetch()}
+              >
+                Повторити
+              </button>
+            </p>
           ) : isEmpty ? (
             <EmptyState
               variant="inline"
