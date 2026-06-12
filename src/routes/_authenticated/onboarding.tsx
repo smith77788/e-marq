@@ -1339,19 +1339,23 @@ function parseCustomerCsv(csv: string): { email: string; name: string | null }[]
   if (lines.length === 0) return [];
   const delimiter = lines[0].includes(";") && !lines[0].includes(",") ? ";" : ",";
   const header = splitCsvLine(lines[0], delimiter).map((h) => h.toLowerCase());
-  const emailIdx = Math.max(
-    header.findIndex((h) => h.includes("email") || h.includes("e-mail")),
-    0,
-  );
+  // Explicit -1 check: Math.max(findIndex, 0) silently used column 0 (usually
+  // "name") as the email column when no email header existed, so every row
+  // failed RPC validation with an opaque "no_valid_customers" error.
+  const emailIdx = header.findIndex((h) => h.includes("email") || h.includes("e-mail"));
+  if (emailIdx === -1) {
+    throw new Error('CSV має містити колонку "email" (або "e-mail")');
+  }
   const nameIdx = header.findIndex((h) =>
     ["name", "імʼя", "ім'я", "імя", "піб", "customer"].some((k) => h.includes(k)),
   );
+  const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
   return lines
     .slice(1)
     .map((line) => {
       const cells = splitCsvLine(line, delimiter);
       const email = (cells[emailIdx] ?? "").trim().toLowerCase();
-      if (!email) return null;
+      if (!EMAIL_RE.test(email)) return null;
       const name = nameIdx >= 0 ? (cells[nameIdx] ?? "").trim() : "";
       return { email, name: name || null };
     })

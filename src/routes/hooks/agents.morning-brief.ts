@@ -224,8 +224,10 @@ export const Route = createFileRoute("/hooks/agents/morning-brief")({
           });
           if (notifErr) throw notifErr;
 
-          await finishAgentRun(handle, 1, { digest_date: digestDate });
-          return jsonOk({ insights_created: 1, digest_date: digestDate });
+          // Produces a digest + owner notification, not ai_insights — report 0
+          // insights honestly and surface the real work separately.
+          await finishAgentRun(handle, 0, { digest_date: digestDate, digests_created: 1 });
+          return jsonOk({ insights_created: 0, digests_created: 1, digest_date: digestDate });
         } catch (err) {
           await failAgentRun(handle, err);
           return jsonError("Morning brief failed", 500, {
