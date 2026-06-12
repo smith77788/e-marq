@@ -220,7 +220,22 @@ export const Route = createFileRoute("/api/public/payments/liqpay-callback")({
           _error: `${parsed.status}: ${parsed.err_description || parsed.err_code || ""}`,
           _payload: parsed as never,
         });
-        if (failErr) console.error("[liqpay-callback] mark_payment_failed:", failErr.message);
+        if (failErr) {
+          // Recording the failure failed — return 500 so LiqPay retries instead
+          // of believing the callback was handled and dropping the payment state.
+          await logCallback({
+            provider: "liqpay",
+            orderId,
+            tenantId: order.tenant_id,
+            externalId,
+            signatureValid: true,
+            rawBody,
+            parsed: { ...parsed, error: failErr.message },
+            httpStatus: 500,
+            ip,
+          });
+          return new Response("rpc_failed", { status: 500 });
+        }
         await logCallback({
           provider: "liqpay",
           orderId,

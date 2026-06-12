@@ -178,7 +178,21 @@ export const Route = createFileRoute("/api/public/payments/wayforpay-callback")(
             _error: `${parsed.transactionStatus}: ${parsed.reasonCode ?? ""}`,
             _payload: parsed as never,
           });
-          if (failErr) console.error("[wayforpay-callback] mark_payment_failed:", failErr.message);
+          if (failErr) {
+            // Recording the failure failed — return 500 (not the accept ack) so
+            // WayForPay retries rather than treating the payment as resolved.
+            await logCallback({
+              orderId,
+              tenantId: order.tenant_id,
+              externalId,
+              signatureValid: true,
+              rawBody,
+              parsed: { ...parsed, error: failErr.message },
+              httpStatus: 500,
+              ip,
+            });
+            return new Response("rpc_failed", { status: 500 });
+          }
         }
 
         await logCallback({

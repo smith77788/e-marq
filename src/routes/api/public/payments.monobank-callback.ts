@@ -227,7 +227,21 @@ export const Route = createFileRoute("/api/public/payments/monobank-callback")({
             _error: `${status.status}: ${status.failureReason ?? ""}`,
             _payload: enriched as never,
           });
-          if (failErr) console.error("[monobank-callback] mark_payment_failed:", failErr.message);
+          if (failErr) {
+            // Recording the failure failed — return 500 so Monobank retries the
+            // webhook instead of treating the payment state as resolved.
+            await logCallback({
+              orderId,
+              tenantId: order.tenant_id,
+              externalId: invoiceId,
+              signatureValid: true,
+              rawBody,
+              parsed: { ...enriched, error: failErr.message },
+              httpStatus: 500,
+              ip,
+            });
+            return new Response("rpc_failed", { status: 500 });
+          }
         }
 
         await logCallback({

@@ -119,12 +119,21 @@ export const Route = createFileRoute("/api/public/payments/monobank-init")({
           console.error("[monobank-init] create_payment_intent failed:", intentErr.message);
         }
 
-        // Зберегти invoice_id у external_id intent'а одразу
+        // Зберегти invoice_id у external_id intent'а одразу. Якщо це не вдасться,
+        // callback не зможе знайти intent за invoiceId і впаде на
+        // parsed.reference (контрольований відправником) — тому фейлимо явно.
         if (intentId) {
-          await supabaseAdmin
+          const { error: extErr } = await supabaseAdmin
             .from("payment_intents")
             .update({ external_id: result.invoiceId })
             .eq("id", intentId);
+          if (extErr) {
+            console.error("[monobank-init] failed to save external_id:", extErr.message);
+            return Response.json(
+              { ok: false, error: "payment_intent_link_failed" },
+              { status: 500 },
+            );
+          }
         }
 
         return Response.json({
