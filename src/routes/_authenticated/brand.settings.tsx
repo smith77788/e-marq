@@ -15,8 +15,10 @@ import {
   Bot,
   Globe,
   Image as ImageIcon,
+  LayoutTemplate,
   Loader2,
   MapPin,
+  Megaphone,
   Palette,
   Save,
   Settings,
@@ -67,6 +69,13 @@ type StoreForm = {
   primary_color: string;
   accent_color: string;
   logo_url: string;
+  hero_headline: string;
+  hero_subline: string;
+  hero_badge: string;
+  hero_cta_text: string;
+  hero_image: string;
+  announcement: string;
+  announcement_bg: string;
   seo_title: string;
   seo_description: string;
   og_image_url: string;
@@ -80,6 +89,13 @@ const DEFAULTS: StoreForm = {
   primary_color: "#5b8cff",
   accent_color: "#a855f7",
   logo_url: "",
+  hero_headline: "",
+  hero_subline: "",
+  hero_badge: "",
+  hero_cta_text: "",
+  hero_image: "",
+  announcement: "",
+  announcement_bg: "bg-primary",
   seo_title: "",
   seo_description: "",
   og_image_url: "",
@@ -87,6 +103,14 @@ const DEFAULTS: StoreForm = {
   bot_system: "",
   geo_targets: DEFAULT_GEO_TARGETS,
 };
+
+/** Готові пресети тла для смуги-оголошення (Tailwind utility-класи). */
+const ANNOUNCEMENT_BG_PRESETS: Array<{ value: string; label: string }> = [
+  { value: "bg-primary", label: "Основний" },
+  { value: "bg-accent", label: "Акцент" },
+  { value: "bg-destructive", label: "Розпродаж" },
+  { value: "bg-foreground", label: "Контраст" },
+];
 
 function pickStr(o: Json | null, k: string, fallback = ""): string {
   if (!o) return fallback;
@@ -133,6 +157,13 @@ function StoreSettingsPage() {
       primary_color: pickStr(r.ui, "primary_color", DEFAULTS.primary_color),
       accent_color: pickStr(r.ui, "accent_color", DEFAULTS.accent_color),
       logo_url: pickStr(r.ui, "logo_url", ""),
+      hero_headline: pickStr(r.ui, "hero_headline", ""),
+      hero_subline: pickStr(r.ui, "hero_subline", ""),
+      hero_badge: pickStr(r.ui, "hero_badge", ""),
+      hero_cta_text: pickStr(r.ui, "hero_cta_text", ""),
+      hero_image: pickStr(r.ui, "hero_image", ""),
+      announcement: pickStr(r.ui, "announcement", ""),
+      announcement_bg: pickStr(r.ui, "announcement_bg", DEFAULTS.announcement_bg),
       seo_title: pickStr(r.seo, "title", ""),
       seo_description: pickStr(r.seo, "description", ""),
       og_image_url: pickStr(r.seo, "og_image_url", ""),
@@ -155,6 +186,13 @@ function StoreSettingsPage() {
           primary_color: form.primary_color,
           accent_color: form.accent_color,
           logo_url: form.logo_url.trim(),
+          hero_headline: form.hero_headline.trim(),
+          hero_subline: form.hero_subline.trim(),
+          hero_badge: form.hero_badge.trim(),
+          hero_cta_text: form.hero_cta_text.trim(),
+          hero_image: form.hero_image.trim(),
+          announcement: form.announcement.trim(),
+          announcement_bg: form.announcement_bg,
         } as Json,
         seo: {
           ...((cfgQuery.data?.seo as Json) ?? {}),
@@ -240,6 +278,9 @@ function StoreSettingsPage() {
             </TabsTrigger>
             <TabsTrigger value="appearance" className="gap-1.5">
               <Palette className="h-3.5 w-3.5" /> Зовнішній вигляд
+            </TabsTrigger>
+            <TabsTrigger value="storefront" className="gap-1.5">
+              <LayoutTemplate className="h-3.5 w-3.5" /> Вітрина
             </TabsTrigger>
             <TabsTrigger value="seo" className="gap-1.5">
               <Globe className="h-3.5 w-3.5" /> SEO
@@ -366,6 +407,137 @@ function StoreSettingsPage() {
                     </div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* STOREFRONT — hero + announcement */}
+          <TabsContent value="storefront" className="mt-4 space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <LayoutTemplate className="h-4 w-4 text-primary" /> Головний банер (hero)
+                </CardTitle>
+                <CardDescription>
+                  Перше, що бачить покупець на головній сторінці вітрини. Залиште порожнім —
+                  показуватиметься назва бренду за замовчуванням.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="hero-badge">Бейдж (необов'язково)</Label>
+                  <Input
+                    id="hero-badge"
+                    value={form.hero_badge}
+                    onChange={(e) => setForm((f) => ({ ...f, hero_badge: e.target.value }))}
+                    placeholder="Напр., Новинка · Безкоштовна доставка"
+                    maxLength={40}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="hero-headline">Заголовок</Label>
+                  <Input
+                    id="hero-headline"
+                    value={form.hero_headline}
+                    onChange={(e) => setForm((f) => ({ ...f, hero_headline: e.target.value }))}
+                    placeholder="Напр., Свіжа кава з обсмажуванням на замовлення"
+                    maxLength={100}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="hero-subline">Підзаголовок</Label>
+                  <Textarea
+                    id="hero-subline"
+                    value={form.hero_subline}
+                    onChange={(e) => setForm((f) => ({ ...f, hero_subline: e.target.value }))}
+                    placeholder="Короткий опис цінності для покупця…"
+                    maxLength={200}
+                    className="min-h-20"
+                  />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="hero-cta">Текст кнопки</Label>
+                    <Input
+                      id="hero-cta"
+                      value={form.hero_cta_text}
+                      onChange={(e) => setForm((f) => ({ ...f, hero_cta_text: e.target.value }))}
+                      placeholder="Переглянути каталог"
+                      maxLength={40}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="hero-image">URL зображення</Label>
+                    <Input
+                      id="hero-image"
+                      value={form.hero_image}
+                      onChange={(e) => setForm((f) => ({ ...f, hero_image: e.target.value }))}
+                      placeholder="https://…/hero.jpg"
+                    />
+                  </div>
+                </div>
+                {form.hero_image && (
+                  <img
+                    src={form.hero_image}
+                    alt="hero preview"
+                    loading="lazy"
+                    decoding="async"
+                    className="max-h-40 rounded-md border border-border bg-card object-cover"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Megaphone className="h-4 w-4 text-accent" /> Смуга-оголошення
+                </CardTitle>
+                <CardDescription>
+                  Тонка смуга вгорі вітрини — для акцій, умов доставки чи новин. Порожнє поле —
+                  смуга прихована.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="announcement">Текст оголошення</Label>
+                  <Input
+                    id="announcement"
+                    value={form.announcement}
+                    onChange={(e) => setForm((f) => ({ ...f, announcement: e.target.value }))}
+                    placeholder="Напр., 🚚 Безкоштовна доставка від 1000 ₴"
+                    maxLength={120}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Тло смуги</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {ANNOUNCEMENT_BG_PRESETS.map((preset) => (
+                      <button
+                        key={preset.value}
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, announcement_bg: preset.value }))}
+                        className={`rounded-md border px-3 py-1.5 text-xs font-medium transition ${
+                          form.announcement_bg === preset.value
+                            ? "border-primary ring-2 ring-primary/40"
+                            : "border-border hover:border-primary/50"
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {form.announcement && (
+                  <div
+                    className={`flex items-center justify-center rounded-md px-4 py-2 text-center text-xs font-medium text-primary-foreground ${form.announcement_bg}`}
+                  >
+                    {form.announcement}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

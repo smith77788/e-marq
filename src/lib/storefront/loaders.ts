@@ -35,6 +35,10 @@ export type StorefrontConfig = {
     hero_image?: string;
     hero_headline?: string;
     hero_subline?: string;
+    hero_badge?: string;
+    hero_cta_text?: string;
+    announcement?: string;
+    announcement_bg?: string;
   } | null;
   seo: { title?: string; description?: string; og_image?: string } | null;
   features: {

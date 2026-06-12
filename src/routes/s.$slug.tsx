@@ -104,8 +104,12 @@ function StorefrontLayout() {
 
   const themeStyle = useMemo(() => {
     const style: Record<string, string> = {};
-    if (ui.primary) style["--primary"] = ui.primary;
-    if (ui.accent) style["--accent"] = ui.accent;
+    // Власник зберігає кольори як primary_color/accent_color (brand.settings,
+    // TenantConfigForm). Старі ключі primary/accent лишаємо як фолбек.
+    const primary = ui.primary_color || ui.primary;
+    const accent = ui.accent_color || ui.accent;
+    if (primary) style["--primary"] = primary;
+    if (accent) style["--accent"] = accent;
     if (ui.font) style["--font-sans"] = ui.font;
     return style as React.CSSProperties;
   }, [ui]);
@@ -133,9 +137,7 @@ function StorefrontLayout() {
   return (
     <div className="min-h-screen bg-background" style={themeStyle}>
       <CartProvider tenantId={tenant.id} brand={brand} slug={slug} initialProducts={cartProducts}>
-        {announcement && (
-          <AnnouncementBar text={announcement} bgClass={announcementBg} />
-        )}
+        {announcement && <AnnouncementBar text={announcement} bgClass={announcementBg} />}
         <StorefrontHeader brand={brand} slug={slug} products={data.products} config={config} />
         <Outlet />
         <StorefrontFooter brand={brand} slug={slug} config={config} />
@@ -242,7 +244,10 @@ function StorefrontHeader({
         </Link>
 
         {/* Search bar */}
-        <div ref={wrapperRef} className="relative ml-auto hidden flex-1 items-center sm:flex sm:max-w-sm">
+        <div
+          ref={wrapperRef}
+          className="relative ml-auto hidden flex-1 items-center sm:flex sm:max-w-sm"
+        >
           <form
             className="flex w-full items-center"
             onSubmit={(e) => {
@@ -280,7 +285,10 @@ function StorefrontHeader({
                   onClick={() => {
                     setOpen(false);
                     setQ("");
-                    navigate({ to: "/s/$slug/products/$productId", params: { slug, productId: s.id } });
+                    navigate({
+                      to: "/s/$slug/products/$productId",
+                      params: { slug, productId: s.id },
+                    });
                   }}
                   className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-accent"
                 >
@@ -326,7 +334,9 @@ function StorefrontHeader({
             className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-input bg-background text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <Heart
-              className={wishlist.count > 0 ? "h-4 w-4 fill-destructive text-destructive" : "h-4 w-4"}
+              className={
+                wishlist.count > 0 ? "h-4 w-4 fill-destructive text-destructive" : "h-4 w-4"
+              }
             />
             {wishlist.count > 0 && (
               <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-white">
@@ -353,9 +363,7 @@ function StorefrontHeader({
             className="relative inline-flex h-9 items-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <ShoppingCart className="h-4 w-4" />
-            {cartCount > 0 && (
-              <span className="tabular-nums">{cartCount}</span>
-            )}
+            {cartCount > 0 && <span className="tabular-nums">{cartCount}</span>}
           </button>
 
           {/* Mobile search toggle */}
@@ -391,7 +399,9 @@ function StorefrontHeader({
                 autoFocus
               />
             </div>
-            <Button type="submit" size="sm">Знайти</Button>
+            <Button type="submit" size="sm">
+              Знайти
+            </Button>
           </form>
         </div>
       )}
@@ -411,12 +421,15 @@ function StorefrontFooter({
   const ui = (config?.ui ?? {}) as Record<string, string>;
   const seo = config?.seo ?? {};
   const features = config?.features ?? {};
-  const shipping = (features as Record<string, unknown>).shipping as Record<string, unknown> | undefined;
+  const shipping = (features as Record<string, unknown>).shipping as
+    | Record<string, unknown>
+    | undefined;
   const freeFrom = shipping?.free_shipping_from_cents as number | undefined;
 
-  const socialLinks = (ui.social_links ? JSON.parse(ui.social_links as string) : null) as
-    | Record<string, string>
-    | null;
+  const socialLinks = (ui.social_links ? JSON.parse(ui.social_links as string) : null) as Record<
+    string,
+    string
+  > | null;
   const contactEmail = ui.contact_email;
   const contactPhone = ui.contact_phone;
   const tagline = seo.description ?? null;
@@ -577,7 +590,12 @@ function StorefrontFooter({
           </span>
           <span className="flex items-center gap-1">
             Магазин на базі{" "}
-            <a href="https://marq.app" className="font-semibold text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://marq.app"
+              className="font-semibold text-primary hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               MARQ
             </a>
           </span>
@@ -600,8 +618,17 @@ function TrustBadge({ icon, title, desc }: { icon: React.ReactNode; title: strin
 }
 
 function CartSheet() {
-  const { cartLines, totalCents, currency, cartOpen, setCartOpen, updateQty, removeLine, slug, tenantId } =
-    useStorefrontCart();
+  const {
+    cartLines,
+    totalCents,
+    currency,
+    cartOpen,
+    setCartOpen,
+    updateQty,
+    removeLine,
+    slug,
+    tenantId,
+  } = useStorefrontCart();
   const navigate = useNavigate();
 
   const isEmpty = cartLines.length === 0;
@@ -657,7 +684,9 @@ function CartSheet() {
                   )}
                   <div className="flex flex-1 flex-col gap-1">
                     <div className="flex items-start justify-between gap-2">
-                      <span className="line-clamp-2 text-sm font-medium leading-snug">{product.name}</span>
+                      <span className="line-clamp-2 text-sm font-medium leading-snug">
+                        {product.name}
+                      </span>
                       <button
                         type="button"
                         onClick={() => removeLine(product.id)}
@@ -680,7 +709,9 @@ function CartSheet() {
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
-                      <span className="w-6 text-center text-sm font-semibold tabular-nums">{quantity}</span>
+                      <span className="w-6 text-center text-sm font-semibold tabular-nums">
+                        {quantity}
+                      </span>
                       <Button
                         size="icon"
                         variant="outline"
@@ -706,7 +737,9 @@ function CartSheet() {
             <div className="w-full space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Разом</span>
-                <span className="text-xl font-bold tabular-nums">{formatMoneyExact(totalCents)}</span>
+                <span className="text-xl font-bold tabular-nums">
+                  {formatMoneyExact(totalCents)}
+                </span>
               </div>
               <Button
                 className="w-full"

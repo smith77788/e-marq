@@ -9,6 +9,91 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { authorizeAgentRequest, jsonError, jsonOk } from "@/lib/acos/agentRuntime";
 import { pickChannelForCustomer } from "@/lib/acos/channels";
 
+function generateWinbackCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let s = "WB-";
+  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return s;
+}
+
+/**
+ * churn_risk → реальний winback: створює персональний промокод і ставить
+ * outbound-повідомлення клієнту з insight'а. Раніше це був no-op
+ * (`{ note: "Action recorded." }`) — insight позначався applied, але клієнт
+ * нічого не отримував.
+ */
+async function queueWinbackTouch(
+  tenantId: string,
+  metrics: { email?: string; customer_name?: string; suggested_discount_pct?: number },
+  sourceInsightId: string,
+): Promise<Record<string, unknown>> {
+  const email = (metrics.email ?? "").trim().toLowerCase();
+  if (!email) return { error: "missing_email_in_metrics" };
+
+  const { data: customer } = await supabaseAdmin
+    .from("customers")
+    .select("id, name")
+    .eq("tenant_id", tenantId)
+    .ilike("email", email)
+    .maybeSingle();
+  if (!customer) return { error: "customer_not_found" };
+
+  const channel = await pickChannelForCustomer(customer.id);
+  if (!channel) return { skipped: "no_consent_or_channel" };
+
+  const discountPct = Math.min(50, Math.max(5, Math.round(metrics.suggested_discount_pct ?? 15)));
+  const now = Date.now();
+  const expiresAt = new Date(now + 30 * 24 * 3600 * 1000).toISOString();
+
+  // Унікальний промокод (до 5 спроб при колізії)
+  let code = "";
+  let promoId: string | null = null;
+  for (let attempt = 0; attempt < 5 && !promoId; attempt++) {
+    const candidate = generateWinbackCode();
+    const { data: inserted, error } = await supabaseAdmin
+      .from("promotions")
+      .insert({
+        tenant_id: tenantId,
+        code: candidate,
+        name: `Winback −${discountPct}% (${customer.name ?? email})`,
+        promo_type: "percent_off",
+        value: discountPct,
+        starts_at: new Date(now).toISOString(),
+        ends_at: expiresAt,
+        usage_limit: 1,
+        usage_per_customer: 1,
+        is_active: true,
+        agent: "churn_risk_predictor",
+      })
+      .select("id, code")
+      .maybeSingle();
+    if (!error && inserted) {
+      code = inserted.code ?? candidate;
+      promoId = inserted.id;
+    }
+  }
+  if (!promoId) return { error: "promo_code_generation_failed" };
+
+  const firstName = (customer.name ?? "").split(" ")[0] || "there";
+  const body =
+    `${firstName}, ми скучили за вами! Ось ваш персональний промокод <b>${code}</b> ` +
+    `на знижку −${discountPct}% на наступне замовлення. Діє 30 днів.`;
+
+  const { error: msgErr } = await supabaseAdmin.from("outbound_messages").insert({
+    tenant_id: tenantId,
+    customer_id: customer.id,
+    channel,
+    trigger_kind: "winback",
+    template_key: "winback.churn_touch.v1",
+    body,
+    status: "pending",
+    metadata: { source_insight_id: sourceInsightId, promo_code: code } as never,
+  });
+  if (msgErr) return { error: msgErr.message };
+
+  return { queued: 1, channel, promo_code: code, discount_pct: discountPct };
+}
+
 async function queueVipProductNudges(
   tenantId: string,
   productId: string,
@@ -203,7 +288,17 @@ export const Route = createFileRoute("/hooks/actions/apply")({
 
         // Side effects per action_type
         let sideEffect: Record<string, unknown> = { note: "Action recorded." };
-        if (mapping.action_type === "vip_product_nudge" && targetId) {
+        if (mapping.action_type === "winback_touch") {
+          sideEffect = await queueWinbackTouch(
+            ins.tenant_id,
+            ins.metrics as {
+              email?: string;
+              customer_name?: string;
+              suggested_discount_pct?: number;
+            },
+            ins.id,
+          );
+        } else if (mapping.action_type === "vip_product_nudge" && targetId) {
           const queued = await queueVipProductNudges(ins.tenant_id, targetId, ins.id);
           sideEffect = { queued_messages: queued };
         } else if (
