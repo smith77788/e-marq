@@ -76,17 +76,21 @@ async function buildStorefrontEntries(origin: string, today: string): Promise<Si
     const tenantBySlug = new Map(tenants.map((t) => [t.id, t.slug]));
     if (tenantIds.length === 0) return entries;
 
+    // Cap per-call fetch so a tenant with a huge catalogue can't blow up
+    // memory/latency. The 50k-URL sitemap budget is still enforced below.
     const [productsRes, collectionsRes] = await Promise.all([
       supabaseAdmin
         .from("products")
         .select("id, tenant_id, updated_at")
         .in("tenant_id", tenantIds)
-        .eq("is_active", true),
+        .eq("is_active", true)
+        .limit(5000),
       supabaseAdmin
         .from("collections")
         .select("handle, tenant_id, updated_at")
         .in("tenant_id", tenantIds)
-        .eq("is_active", true),
+        .eq("is_active", true)
+        .limit(5000),
     ]);
 
     for (const p of productsRes.data ?? []) {

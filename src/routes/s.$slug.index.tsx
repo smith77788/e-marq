@@ -2,11 +2,19 @@
  * Storefront homepage: announcement hero, trust badges, collections strip,
  * full product grid.
  */
+import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Package, Sparkles, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   loadStorefrontShell,
   loadCollections,
@@ -16,6 +24,8 @@ import {
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { canonicalUrl } from "@/lib/seo";
 import { storefrontIndexJsonLd } from "@/lib/storefront/jsonLd";
+
+type SortOpt = "default" | "price_asc" | "price_desc" | "name_asc";
 
 export const Route = createFileRoute("/s/$slug/")({
   loader: async ({ params }) => {
@@ -72,6 +82,21 @@ function StorefrontIndex() {
   const { shell, collections } = data;
   const ui = (shell.config?.ui ?? {}) as Record<string, string>;
 
+  const [sort, setSort] = useState<SortOpt>("default");
+  const sortedProducts = useMemo(() => {
+    const list = [...shell.products];
+    switch (sort) {
+      case "price_asc":
+        return list.sort((a, b) => a.price_cents - b.price_cents);
+      case "price_desc":
+        return list.sort((a, b) => b.price_cents - a.price_cents);
+      case "name_asc":
+        return list.sort((a, b) => a.name.localeCompare(b.name, "uk"));
+      default:
+        return list; // catalogue order (products have no position field)
+    }
+  }, [shell.products, sort]);
+
   const hasHero = !!(ui.hero_image || ui.hero_headline);
   const discountedProducts = shell.products.filter(
     (p) => p.compare_at_price_cents && p.compare_at_price_cents > p.price_cents,
@@ -85,7 +110,11 @@ function StorefrontIndex() {
       {hasHero ? (
         <HeroSection ui={ui} brand={shell.config?.brand_name ?? ""} slug={slug} />
       ) : (
-        <DefaultHero brand={shell.config?.brand_name ?? ""} slug={slug} productCount={shell.products.length} />
+        <DefaultHero
+          brand={shell.config?.brand_name ?? ""}
+          slug={slug}
+          productCount={shell.products.length}
+        />
       )}
 
       {/* ─── Collections strip ────────────────────────────── */}
@@ -143,6 +172,19 @@ function StorefrontIndex() {
               {outOfStockCount > 0 && ` · ${outOfStockCount} закінчились`}
             </p>
           </div>
+          {shell.products.length > 1 && (
+            <Select value={sort} onValueChange={(v) => setSort(v as SortOpt)}>
+              <SelectTrigger className="h-9 w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">За замовчуванням</SelectItem>
+                <SelectItem value="price_asc">Спочатку дешевші</SelectItem>
+                <SelectItem value="price_desc">Спочатку дорожчі</SelectItem>
+                <SelectItem value="name_asc">За назвою (А–Я)</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         {shell.products.length === 0 ? (
@@ -155,7 +197,7 @@ function StorefrontIndex() {
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {shell.products.map((p) => (
+            {sortedProducts.map((p) => (
               <ProductCard key={p.id} product={p} slug={slug} />
             ))}
           </div>
@@ -188,9 +230,7 @@ function HeroSection({
             {ui.hero_headline ?? brand}
           </h1>
           {ui.hero_subline && (
-            <p className="max-w-md text-base text-muted-foreground sm:text-lg">
-              {ui.hero_subline}
-            </p>
+            <p className="max-w-md text-base text-muted-foreground sm:text-lg">{ui.hero_subline}</p>
           )}
           <div className="flex flex-wrap gap-3 pt-2">
             <Link to="/s/$slug" params={{ slug }}>
