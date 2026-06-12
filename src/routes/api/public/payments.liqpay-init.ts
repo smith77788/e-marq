@@ -18,42 +18,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { buildLiqPayCheckout } from "@/lib/payments/liqpay.server";
 import { readGatewayConfig } from "@/lib/payments/types";
+import { clientIp, originUrl, createIpRateLimiter } from "@/lib/http/rateLimit";
 
-const ipBuckets = new Map<string, { count: number; reset: number }>();
-const RATE_LIMIT = 10;
-
-function clientIp(req: Request): string {
-  return (
-    req.headers.get("cf-connecting-ip") ||
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    "unknown"
-  );
-}
-
-function rateLimit(ip: string): boolean {
-  const now = Date.now();
-  const b = ipBuckets.get(ip);
-  if (!b || b.reset < now) {
-    ipBuckets.set(ip, { count: 1, reset: now + 60_000 });
-    return true;
-  }
-  if (b.count >= RATE_LIMIT) return false;
-  b.count += 1;
-  return true;
-}
-
-function originUrl(req: Request): string {
-  const proto = req.headers.get("x-forwarded-proto") || "https";
-  const host = req.headers.get("host") || req.headers.get("x-forwarded-host") || "";
-  return `${proto}://${host}`;
-}
+const limiter = createIpRateLimiter({ limit: 10 });
 
 export const Route = createFileRoute("/api/public/payments/liqpay-init")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         const ip = clientIp(request);
-        if (!rateLimit(ip)) {
+        if (!limiter.check(ip)) {
           return Response.json({ ok: false, error: "rate_limited" }, { status: 429 });
         }
 

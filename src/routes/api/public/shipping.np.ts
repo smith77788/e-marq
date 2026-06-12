@@ -17,29 +17,9 @@ type Body =
   | { kind: "cities"; query: string }
   | { kind: "warehouses"; cityRef: string; query?: string };
 
-const RATE_LIMIT = 30; // запитів за хвилину з одного IP
-const ipBuckets = new Map<string, { count: number; reset: number }>();
+import { clientIp, createIpRateLimiter } from "@/lib/http/rateLimit";
 
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const bucket = ipBuckets.get(ip);
-  if (!bucket || bucket.reset < now) {
-    ipBuckets.set(ip, { count: 1, reset: now + 60_000 });
-    return true;
-  }
-  if (bucket.count >= RATE_LIMIT) return false;
-  bucket.count += 1;
-  return true;
-}
-
-function clientIp(req: Request): string {
-  return (
-    req.headers.get("cf-connecting-ip") ||
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "unknown"
-  );
-}
+const limiter = createIpRateLimiter({ limit: 30 });
 
 async function callNP(
   apiKey: string,
@@ -66,7 +46,7 @@ export const Route = createFileRoute("/api/public/shipping/np")({
     handlers: {
       POST: async ({ request }) => {
         const ip = clientIp(request);
-        if (!checkRateLimit(ip)) {
+        if (!limiter.check(ip)) {
           return new Response(JSON.stringify({ error: "rate_limited" }), {
             status: 429,
             headers: { "Content-Type": "application/json" },

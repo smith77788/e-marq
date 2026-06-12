@@ -117,13 +117,18 @@ async function queueVipProductNudges(
     .in("lifecycle_stage", ["vip", "active"])
     .gte("total_orders", 2)
     .limit(20);
-  let queued = 0;
+
+  // Resolve channels sequentially (pickChannelForCustomer hits DB each call),
+  // then batch-insert all rows in one query instead of N individual inserts.
+  const rows = [];
   for (const c of vips ?? []) {
     const channel = await pickChannelForCustomer(c.id);
     if (!channel) continue;
-    const firstName = (c.name ?? "").split(" ")[0] || "there";
-    const body = `Hey ${firstName} — have you tried our <b>${product.name}</b>? It's been getting lots of attention lately. Want me to add one to your next order?`;
-    const { error } = await supabaseAdmin.from("outbound_messages").insert({
+    const firstName = (c.name ?? "").split(" ")[0] || "там";
+    const body =
+      `${firstName}, зверніть увагу на <b>${product.name}</b> — ` +
+      `цей товар зараз дуже популярний. Додати у наступне замовлення?`;
+    rows.push({
       tenant_id: tenantId,
       customer_id: c.id,
       channel,
@@ -135,9 +140,10 @@ async function queueVipProductNudges(
       related_product_id: product.id,
       metadata: { source_insight_id: sourceInsightId } as never,
     });
-    if (!error) queued++;
   }
-  return queued;
+  if (rows.length === 0) return 0;
+  const { error } = await supabaseAdmin.from("outbound_messages").insert(rows);
+  return error ? 0 : rows.length;
 }
 
 /** Unicode-aware slug: зберігає кирилицю, бо пошукові запити часто українські. */
@@ -194,6 +200,14 @@ function buildSeoDescription(bodyMd: string | null, pageTitle: string, brandName
 
 const BROADCAST_FANOUT_LIMIT = 500;
 
+const ALLOWED_BROADCAST_THEMES = new Set([
+  "generic",
+  "dormant_reengagement",
+  "new_arrival",
+  "sale",
+  "promo",
+]);
+
 /**
  * broadcast_suggestion → реальний fan-out: ставить outbound_messages
  * (trigger_kind='broadcast') кожному consenting-клієнту з готового драфта
@@ -207,7 +221,8 @@ async function queueBroadcast(
 ): Promise<Record<string, unknown>> {
   const body = (metrics.draft_ua ?? metrics.draft_en ?? "").trim();
   if (!body) return { error: "missing_draft_in_metrics" };
-  const theme = metrics.theme ?? "generic";
+  const rawTheme = (metrics.theme ?? "generic").replace(/[^a-z_]/g, "");
+  const theme = ALLOWED_BROADCAST_THEMES.has(rawTheme) ? rawTheme : "generic";
 
   let q = supabaseAdmin
     .from("customers")
@@ -528,7 +543,10 @@ async function applyPriceUpdate(
   productId: string,
   metrics: { current_price_cents?: number; suggested_price_cents?: number },
 ): Promise<Record<string, unknown>> {
-  if (!metrics.suggested_price_cents) return { error: "missing suggested_price_cents in metrics" };
+  const suggested = metrics.suggested_price_cents;
+  if (!suggested || !Number.isInteger(suggested) || suggested <= 0) {
+    return { error: "missing or invalid suggested_price_cents in metrics" };
+  }
   // Fetch live price first so we record the actual baseline (not stale insight metric)
   const { data: prod } = await supabaseAdmin
     .from("products")
@@ -539,14 +557,14 @@ async function applyPriceUpdate(
   const oldPrice = prod?.price_cents ?? metrics.current_price_cents ?? null;
   const { error } = await supabaseAdmin
     .from("products")
-    .update({ price_cents: metrics.suggested_price_cents })
+    .update({ price_cents: suggested })
     .eq("id", productId)
     .eq("tenant_id", tenantId);
   if (error) return { error: error.message };
   return {
     old_price_cents: oldPrice,
-    new_price_cents: metrics.suggested_price_cents,
-    delta_cents: oldPrice != null ? metrics.suggested_price_cents - oldPrice : null,
+    new_price_cents: suggested,
+    delta_cents: oldPrice != null ? suggested - oldPrice : null,
   };
 }
 

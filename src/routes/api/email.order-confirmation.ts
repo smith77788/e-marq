@@ -13,39 +13,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { sendEmailViaGateway } from "@/lib/email/resendGateway";
 import { renderOrderConfirmation } from "@/lib/email/templates";
 import { loadOrderEmailContext, alreadySent, logEmailSend } from "@/lib/email/orderContext";
+import { clientIp, createIpRateLimiter } from "@/lib/http/rateLimit";
 
 const TEMPLATE = "order_confirmation";
-
-const ipBuckets = new Map<string, { count: number; reset: number }>();
-const RATE_LIMIT = 20; // 20/хв з одного IP
-
-function clientIp(req: Request): string {
-  return (
-    req.headers.get("cf-connecting-ip") ||
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "unknown"
-  );
-}
-
-function rateLimit(ip: string): boolean {
-  const now = Date.now();
-  const b = ipBuckets.get(ip);
-  if (!b || b.reset < now) {
-    ipBuckets.set(ip, { count: 1, reset: now + 60_000 });
-    return true;
-  }
-  if (b.count >= RATE_LIMIT) return false;
-  b.count += 1;
-  return true;
-}
+const limiter = createIpRateLimiter({ limit: 20 });
 
 export const Route = createFileRoute("/api/email/order-confirmation")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         const ip = clientIp(request);
-        if (!rateLimit(ip)) {
+        if (!limiter.check(ip)) {
           return Response.json({ error: "rate_limited" }, { status: 429 });
         }
 
