@@ -119,7 +119,8 @@ function HealthMonitorContent() {
         supabase
           .from("tenants")
           .select("id, name, slug, status")
-          .order("created_at", { ascending: false }),
+          .order("created_at", { ascending: false })
+          .limit(1000),
         supabase
           .from("acos_agent_runs")
           .select("tenant_id, status")
@@ -128,13 +129,14 @@ function HealthMonitorContent() {
         supabase
           .from("tenant_integrations")
           .select("tenant_id, provider, last_sync_at, last_sync_status")
-          .eq("provider", "dntrade"),
+          .eq("provider", "dntrade")
+          .limit(1000),
         supabase
           .from("email_sends")
           .select("tenant_id, status")
           .gte("created_at", since7d)
           .limit(20000),
-        supabase.from("tenant_balances").select("tenant_id, money_balance_cents, currency"),
+        supabase.from("tenant_balances").select("tenant_id, money_balance_cents, currency").limit(1000),
         supabase
           .from("orders")
           .select("tenant_id, status")

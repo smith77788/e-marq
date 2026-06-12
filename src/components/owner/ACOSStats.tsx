@@ -31,9 +31,9 @@ const ACTION_LABELS: Record<string, string> = {
   owner_review: "Потребує перегляду",
   flag_for_review: "Помічено",
   feature_product: "Виділити товар",
-  cross_sell_recommend: "Cross-sell",
+  cross_sell_recommend: "Крос-продаж",
   request_review: "Запит відгуку",
-  outreach_send: "Outreach",
+  outreach_send: "Аутріч",
   promo_apply: "Промо-знижка",
   restock_alert: "Поповнення складу",
 };
@@ -49,16 +49,25 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    supabase.rpc("get_acos_stats", { _tenant_id: tenantId }).then(({ data, error }) => {
-      if (!mounted) return;
-      if (!error && data && (data as { ok?: boolean }).ok) {
-        setStats(data as unknown as Stats);
-      }
-      setLoading(false);
-    });
+    setError(null);
+    supabase
+      .rpc("get_acos_stats", { _tenant_id: tenantId })
+      .then(({ data, error: rpcError }) => {
+        if (!mounted) return;
+        if (rpcError) {
+          setError(rpcError.message);
+        } else if (data && (data as { ok?: boolean }).ok) {
+          setStats(data as unknown as Stats);
+        } else {
+          setError("Немає даних");
+        }
+        setLoading(false);
+      });
     return () => {
       mounted = false;
     };
@@ -67,8 +76,20 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
   if (loading) {
     return <Skeleton className="h-48 w-full" />;
   }
-  if (!stats) {
-    return null;
+  if (error || !stats) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="h-5 w-5" />
+            Активність AI-агентів
+          </CardTitle>
+          <CardDescription className="text-destructive">
+            {error ?? "Немає даних"}
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
   }
 
   const winRate =
@@ -84,7 +105,7 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Activity className="h-5 w-5" />
-          AI Activity Summary
+          Активність AI-агентів
         </CardTitle>
         <CardDescription>Що автономна система зробила для вашого бізнесу</CardDescription>
       </CardHeader>
@@ -105,7 +126,7 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
           />
           <KPI
             icon={<Target className="h-4 w-4" />}
-            label="Win-rate"
+            label="Відсоток успіху"
             value={winRate !== null ? `${winRate}%` : "—"}
             sub={
               stats.outcomes.measured > 0
@@ -115,9 +136,9 @@ export function ACOSStats({ tenantId }: { tenantId: string }) {
           />
           <KPI
             icon={<Inbox className="h-4 w-4" />}
-            label="Pending Inbox"
+            label="Черга підтверджень"
             value={String(stats.pending_inbox)}
-            sub={`Auto: ${autoPct}% / Manual: ${100 - autoPct}%`}
+            sub={`Авто: ${autoPct}% / Вручну: ${100 - autoPct}%`}
           />
         </div>
 

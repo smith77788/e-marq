@@ -58,7 +58,7 @@ import {
 export const Route = createFileRoute("/_authenticated/admin/decisions")({
   head: () => ({
     meta: [
-      { title: "Decision Inbox (admin) — MARQ" },
+      { title: "Рішення агентів (адмін) — MARQ" },
       { name: "description", content: "Cross-tenant pending decisions для super-admin" },
     ],
   }),
@@ -401,7 +401,7 @@ function AdminDecisionsPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Decision Inbox · admin</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Рішення агентів · адмін</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Pending рішення з усіх tenants. Фільтруй за брендом / типом і обробляй масово.
           </p>

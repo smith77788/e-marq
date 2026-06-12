@@ -94,6 +94,8 @@ export const Route = createFileRoute("/hooks/agents/customer-voice")({
               .gte("created_at", since)
               .limit(500),
           ]);
+          if (convRes.error) throw convRes.error;
+          if (proofRes.error) throw proofRes.error;
 
           const allTexts: string[] = [];
           for (const c of convRes.data ?? []) if (c.body) allTexts.push(c.body);
@@ -169,7 +171,7 @@ export const Route = createFileRoute("/hooks/agents/customer-voice")({
               tenant_id: tenantId,
               insight_type: "bootstrap_no_customer_voice",
               affected_layer: "crm",
-              title: "No customer messages collected yet",
+              title: "Ще немає повідомлень від клієнтів",
               description:
                 "Без розмов із клієнтами агенти broadcast-composer і seo-rewriter пишуть нейтральні шаблонні тексти. Активуйте Telegram-бота та збирайте відгуки — це різко підвищить якість автоматичних повідомлень.",
               expected_impact: "Дозволяє agent-ам говорити голосом ваших клієнтів",
@@ -183,7 +185,7 @@ export const Route = createFileRoute("/hooks/agents/customer-voice")({
               tenant_id: tenantId,
               insight_type: "bootstrap_negative_voice",
               affected_layer: "crm",
-              title: "Customer sentiment trends negative",
+              title: "Тренд настроїв клієнтів — негативний",
               description: `За останні 90 днів негативних згадок ${negative} проти ${positive} позитивних (${allTexts.length} повідомлень). Перегляньте топ-теми проблем та запустіть csat-dispatcher.`,
               expected_impact: "Захищає від втрати лояльних клієнтів",
               confidence: 0.8,

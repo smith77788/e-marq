@@ -46,11 +46,12 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
         try {
           const geo = await loadEffectiveGeoTargets(tenantId, AGENT_ID);
 
-          const { data: products } = await supabaseAdmin
+          const { data: products, error: productsErr } = await supabaseAdmin
             .from("products")
             .select("id, name, price_cents")
             .eq("tenant_id", tenantId)
             .eq("is_active", true);
+          if (productsErr) throw productsErr;
           if (!products?.length) {
             await finishAgentRun(handle, 0, { reason: "no_products" });
             return jsonOk({ insights_created: 0 });
@@ -58,12 +59,14 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
 
           // Load 60d order_items per product (joined with order metadata for geo filter)
           const since = new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString();
-          const { data: itemsRaw } = await supabaseAdmin
+          const { data: itemsRaw, error: itemsErr } = await supabaseAdmin
             .from("order_items")
             .select("product_id, quantity, unit_price_cents, created_at, orders!inner(metadata)")
             .eq("tenant_id", tenantId)
             .gte("created_at", since)
-            .not("product_id", "is", null);
+            .not("product_id", "is", null)
+            .limit(50000);
+          if (itemsErr) throw itemsErr;
 
           const items = (itemsRaw ?? []).filter((r) => {
             const ord = (r as unknown as { orders?: { metadata?: Record<string, unknown> | null } })
@@ -85,6 +88,16 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
           }
 
           const insights = [];
+          const elasticityRows: Array<{
+            tenant_id: string;
+            product_id: string;
+            elasticity: number;
+            optimal_price_cents: number;
+            sample_size: number;
+            data_window_days: number;
+            confidence: number;
+            computed_at: string;
+          }> = [];
           for (const p of products) {
             const sales = byProduct.get(p.id) ?? [];
             if (sales.length < 10) continue;
@@ -141,20 +154,17 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
             const totalSamples = pricePoints.reduce((s, x) => s + x.samples, 0);
             const confidence = Math.min(0.9, 0.3 + totalSamples / 30);
 
-            // Upsert price_elasticity row
-            await supabaseAdmin.from("price_elasticity").upsert(
-              {
-                tenant_id: tenantId,
-                product_id: p.id,
-                elasticity,
-                optimal_price_cents: best.price,
-                sample_size: totalSamples,
-                data_window_days: 60,
-                confidence,
-                computed_at: new Date().toISOString(),
-              },
-              { onConflict: "tenant_id,product_id", ignoreDuplicates: false },
-            );
+            // Collect for batch upsert after loop
+            elasticityRows.push({
+              tenant_id: tenantId,
+              product_id: p.id,
+              elasticity,
+              optimal_price_cents: best.price,
+              sample_size: totalSamples,
+              data_window_days: 60,
+              confidence,
+              computed_at: new Date().toISOString(),
+            });
 
             // Insight only if optimal differs from current by >=5%
             const diffPct = (best.price - p.price_cents) / p.price_cents;
@@ -191,10 +201,18 @@ export const Route = createFileRoute("/hooks/agents/predictive-pricing")({
             });
           }
 
+          // Batch upsert all elasticity rows
+          if (elasticityRows.length > 0) {
+            const { error: upsertErr } = await supabaseAdmin
+              .from("price_elasticity")
+              .upsert(elasticityRows, { onConflict: "tenant_id,product_id", ignoreDuplicates: false });
+            if (upsertErr) throw upsertErr;
+          }
+
           const created = await insertInsightsDedup(insights);
           await finishAgentRun(handle, created, {
             products_analyzed: byProduct.size,
-            geo: summarizeGeo(geo, "en"),
+            geo: summarizeGeo(geo, "uk"),
             items_in_scope: items.length,
           });
           return jsonOk({ insights_created: created });

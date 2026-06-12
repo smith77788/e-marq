@@ -40,7 +40,7 @@ export const Route = createFileRoute("/hooks/agents/payment-retry")({
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
           const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
-          const { data: stuck } = await supabaseAdmin
+          const { data: stuck, error: queryErr } = await supabaseAdmin
             .from("orders")
             .select(
               "id, total_cents, customer_email, customer_name, payment_method, created_at, status",
@@ -50,6 +50,8 @@ export const Route = createFileRoute("/hooks/agents/payment-retry")({
             .gte("created_at", since)
             .order("total_cents", { ascending: false })
             .limit(50);
+
+          if (queryErr) throw queryErr;
 
           const insights: AgentInsightInput[] = [];
           let totalRecoverable = 0;
@@ -65,7 +67,7 @@ export const Route = createFileRoute("/hooks/agents/payment-retry")({
               description: `Замовлення pending ${ageHours.toFixed(0)}h. Метод: ${o.payment_method}.`,
               expected_impact: `Retry або alt. метод відновлює ~30% таких замовлень → ~${((o.total_cents * 0.3) / 100).toFixed(2)} ₴`,
               confidence: 0.65,
-              risk_level: o.total_cents > 5000 ? "high" : "medium",
+              risk_level: o.total_cents > 50000 ? "high" : "medium",
               metrics: {
                 order_id: o.id,
                 amount_cents: o.total_cents,

@@ -17,7 +17,7 @@ export function ListSkeleton({ rows = 4, showAvatar = true, className }: ListSke
   return (
     <div
       role="status"
-      aria-label="Loading…"
+      aria-label="Завантаження…"
       aria-busy="true"
       className={cn("space-y-2", className)}
     >

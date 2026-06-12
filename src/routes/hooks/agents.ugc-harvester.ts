@@ -39,10 +39,12 @@ export const Route = createFileRoute("/hooks/agents/ugc-harvester")({
         const handle = await startAgentRun("ugc-harvester", tenantId, ctx);
         try {
           // Existing UGC authors
-          const { data: ugc } = await supabaseAdmin
+          const { data: ugc, error: ugcErr } = await supabaseAdmin
             .from("ugc_items")
             .select("customer_id, product_id, rating")
-            .eq("tenant_id", tenantId);
+            .eq("tenant_id", tenantId)
+            .limit(5000);
+          if (ugcErr) throw ugcErr;
           const ugcByCustomer = new Set<string>();
           const ugcRatings: number[] = [];
           for (const u of ugc ?? []) {
@@ -52,7 +54,7 @@ export const Route = createFileRoute("/hooks/agents/ugc-harvester")({
 
           // Eligible customers: 2+ orders, last order in last 60 days
           const since = new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString();
-          const { data: customers } = await supabaseAdmin
+          const { data: customers, error: customersErr } = await supabaseAdmin
             .from("customers")
             .select("id, name, email, total_orders, last_order_at, consent_marketing")
             .eq("tenant_id", tenantId)
@@ -60,6 +62,7 @@ export const Route = createFileRoute("/hooks/agents/ugc-harvester")({
             .gte("last_order_at", since)
             .order("total_orders", { ascending: false })
             .limit(200);
+          if (customersErr) throw customersErr;
 
           const eligible = (customers ?? []).filter(
             (c) => !ugcByCustomer.has(c.id) && c.consent_marketing !== false,

@@ -55,7 +55,7 @@ const ACTION_TYPE_LABELS: Record<string, string> = {
   owner_review: "Потребує перегляду",
   flag_for_review: "Помічено для розгляду",
   feature_product: "Виділити товар",
-  cross_sell_recommend: "Cross-sell",
+  cross_sell_recommend: "Крос-продаж",
   request_review: "Запит відгуку",
 };
 
@@ -65,7 +65,7 @@ export const Route = createFileRoute("/_authenticated/brand/decisions")({
   }),
   head: () => ({
     meta: [
-      { title: "Decision Inbox — MARQ" },
+      { title: "Рішення агентів — MARQ" },
       {
         name: "description",
         content: "Pending рішення AI-агентів, які потребують вашого підтвердження",
@@ -115,7 +115,7 @@ function DecisionsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Decision Inbox</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Рішення агентів</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Рішення AI-агентів, які потребують вашого підтвердження. Auto-approval уже виконує
           перевірені дії — тут ви бачите тільки те, що вимагає вашої уваги.

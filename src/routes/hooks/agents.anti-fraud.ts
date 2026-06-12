@@ -69,13 +69,14 @@ export const Route = createFileRoute("/hooks/agents/anti-fraud")({
               )
               .eq("tenant_id", tenantId)
               .gte("created_at", since)
-              .eq("status", "paid"),
+              .in("status", ["paid", "fulfilled"])
+              .limit(5000),
             supabaseAdmin
               .from("orders")
               .select("total_cents")
               .eq("tenant_id", tenantId)
               .gte("created_at", baselineSince)
-              .eq("status", "paid")
+              .in("status", ["paid", "fulfilled"])
               .limit(2000),
             supabaseAdmin
               .from("order_fraud_signals")
@@ -98,6 +99,31 @@ export const Route = createFileRoute("/hooks/agents/anti-fraud")({
             if (t < oneHourAgo) continue;
             const k = o.customer_email.toLowerCase();
             emailHourCounts.set(k, (emailHourCounts.get(k) ?? 0) + 1);
+          }
+
+          // Batch-check prior order history for high-value emails (avoid N+1)
+          const highValueEmails = [
+            ...new Set(
+              recent
+                .filter((o) => o.total_cents >= 20_000 && o.customer_email)
+                .map((o) => o.customer_email!.toLowerCase()),
+            ),
+          ];
+          const priorOrdersByEmail = new Map<string, number>();
+          if (highValueEmails.length > 0) {
+            const { data: priorOrders } = await supabaseAdmin
+              .from("orders")
+              .select("customer_email")
+              .eq("tenant_id", tenantId)
+              .in("customer_email", highValueEmails)
+              .in("status", ["paid", "fulfilled"])
+              .lt("created_at", since)
+              .limit(5000);
+            for (const p of priorOrders ?? []) {
+              if (!p.customer_email) continue;
+              const k = p.customer_email.toLowerCase();
+              priorOrdersByEmail.set(k, (priorOrdersByEmail.get(k) ?? 0) + 1);
+            }
           }
 
           const fraudRows: Array<{
@@ -124,19 +150,11 @@ export const Route = createFileRoute("/hooks/agents/anti-fraud")({
               score += w;
             }
 
-            // Signal 2: high-value first order from email
-            if (o.total_cents >= 20_000) {
-              const { count } = await supabaseAdmin
-                .from("orders")
-                .select("*", { count: "exact", head: true })
-                .eq("tenant_id", tenantId)
-                .eq("customer_email", o.customer_email ?? "")
-                .lt("created_at", o.created_at);
-              if ((count ?? 0) === 0) {
-                const w = 0.3;
-                signals.push({ kind: "first_order_high_value", weight: w });
-                score += w;
-              }
+            // Signal 2: high-value first order from email (uses pre-loaded batch data)
+            if (o.total_cents >= 20_000 && (priorOrdersByEmail.get(email) ?? 0) === 0) {
+              const w = 0.3;
+              signals.push({ kind: "first_order_high_value", weight: w });
+              score += w;
             }
 
             // Signal 3: burst — 3+ orders in 1h from same email
@@ -183,7 +201,7 @@ export const Route = createFileRoute("/hooks/agents/anti-fraud")({
                 insight_type: "fraud_risk_high",
                 affected_layer: "ops",
                 title: `⚠️ Order ${o.id.slice(0, 8)}: підозра на fraud (score ${score.toFixed(2)})`,
-                description: `${signals.length} red flags: ${signals.map((s) => s.kind).join(", ")}.`,
+                description: `${signals.length} тривожних сигналів: ${signals.map((s) => s.kind).join(", ")}.`,
                 expected_impact:
                   "Перегляньте замовлення вручну до виконання — можливий chargeback.",
                 confidence: Math.min(1, 0.5 + score / 2),
@@ -193,7 +211,7 @@ export const Route = createFileRoute("/hooks/agents/anti-fraud")({
                   total_cents: o.total_cents,
                   customer_email: o.customer_email,
                   signals,
-                  risk_score: score,
+                  risk_score: Math.min(1, score),
                   suggested_action: "manual_review",
                 },
                 dedup_key: `fraud::${o.id}`,

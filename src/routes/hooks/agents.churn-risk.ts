@@ -51,7 +51,7 @@ export const Route = createFileRoute("/hooks/agents/churn-risk")({
             .from("orders")
             .select("id, customer_email, customer_name, total_cents, created_at, metadata")
             .eq("tenant_id", tenantId)
-            .eq("status", "paid")
+            .in("status", ["paid", "fulfilled"])
             .gte("created_at", since)
             .order("created_at", { ascending: true })
             .limit(5000);
@@ -69,7 +69,7 @@ export const Route = createFileRoute("/hooks/agents/churn-risk")({
           const insights: AgentInsightInput[] = [];
           let vipCount = 0;
           for (const [email, list] of byCustomer.entries()) {
-            if (list.length < 4) continue;
+            if (list.length < 2) continue;
             vipCount++;
             list.sort(
               (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
@@ -96,9 +96,9 @@ export const Route = createFileRoute("/hooks/agents/churn-risk")({
                 tenant_id: tenantId,
                 insight_type: "churn_risk",
                 affected_layer: "crm",
-                title: `${name ?? email} likely to churn — ${recency.toFixed(0)}d silent vs ${avg.toFixed(0)}d avg`,
-                description: `VIP customer with ${list.length} orders (lifetime ${(totalSpent / 100).toFixed(2)} ₴) hasn't ordered in ${recency.toFixed(0)} days. Typical interval ${avg.toFixed(0)}d — drift ${drift.toFixed(2)}×. Recommend a 15% winback touch.`,
-                expected_impact: `Recover ~${(expectedRevenueCents / 100).toFixed(2)} ₴ of next order revenue`,
+                title: `${name ?? email}: ризик відтоку — ${recency.toFixed(0)}д мовчання (норма ${avg.toFixed(0)}д)`,
+                description: `VIP-клієнт, ${list.length} замовлень (lifetime ${(totalSpent / 100).toFixed(2)} ₴), не купував ${recency.toFixed(0)} дн. Типовий інтервал ${avg.toFixed(0)}д — drift ${drift.toFixed(2)}×. Рекомендовано winback зі знижкою 15%.`,
+                expected_impact: `Повернути ~${(expectedRevenueCents / 100).toFixed(2)} ₴ наступного замовлення`,
                 confidence,
                 risk_level: risk,
                 metrics: {

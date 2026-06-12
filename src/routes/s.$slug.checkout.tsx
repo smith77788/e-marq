@@ -4,7 +4,7 @@
  * Server validation (place_storefront_order RPC) recomputes totals — client
  * cannot tamper with prices. Stripe/LiqPay/etc. are wired in Sprint 4.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -30,6 +30,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { loadStorefrontShell } from "@/lib/storefront/loaders";
 import { useStorefrontCart, track } from "@/lib/storefront/cartContext";
@@ -142,10 +143,19 @@ function CheckoutPage() {
   const discountCents = promoDiscountCents + loyaltyDiscountCents;
   const finalTotalCents = Math.max(0, subtotalCents - discountCents);
 
-  // Bали які буде нараховано (передбачення)
   const projectedEarnPoints = loyalty?.programActive
     ? Math.floor(loyalty.pointsPer100 * (finalTotalCents / 10000))
     : 0;
+
+  // Track whether empty-cart state is due to a just-submitted order (skip redirect in that case)
+  const orderSubmittedRef = useRef(false);
+
+  // Redirect to catalogue only if the user arrives here with an already-empty cart (no items added)
+  useEffect(() => {
+    if (cart.cartLines.length === 0 && !orderSubmittedRef.current) {
+      navigate({ to: "/s/$slug", params: { slug } });
+    }
+  }, []); // intentionally run only on mount
 
   // Завантаження loyalty стану коли email стабільний
   useEffect(() => {
@@ -251,6 +261,10 @@ function CheckoutPage() {
   async function applyPromo() {
     const code = promoCode.trim();
     if (!code) return;
+    if (code.length > 50 || !/^[A-Z0-9_-]+$/.test(code)) {
+      toast.error("Невірний формат промокоду");
+      return;
+    }
     setValidatingPromo(true);
     setDiscount(null);
     try {
@@ -258,7 +272,7 @@ function CheckoutPage() {
         _slug: slug,
         _code: code,
         _order_total_cents: subtotalCents,
-        _customer_email: email.trim() || "guest@example.com",
+        _customer_email: email.trim() || null,
       });
       if (error) throw error;
       const result = data as unknown as DiscountResult;
@@ -337,6 +351,7 @@ function CheckoutPage() {
         _payment_method: method,
         _shipping: shippingPayload,
         _promo_code: discount?.valid ? promoCode.trim().toUpperCase() : null,
+        _promo_discount_cents: discount?.valid ? promoDiscountCents : null,
         _loyalty_redeem_points: redeemApplied?.points ?? null,
       });
       if (rpcErr) throw rpcErr;
@@ -355,6 +370,7 @@ function CheckoutPage() {
         },
       });
 
+      orderSubmittedRef.current = true;
       // Manual → одразу на сторінку замовлення; gateways → редірект на провайдера
       if (method === "manual") {
         toast.success("Замовлення створено!");
@@ -362,10 +378,10 @@ function CheckoutPage() {
         cart.clear();
         navigate({ to: "/s/$slug/orders/$orderId", params: { slug, orderId } });
       } else {
-        // Кошик очищаємо ПЕРЕД редіректом; email прийде з webhook'у після оплати
-        cart.clear();
+        // Кошик очищаємо ПІСЛЯ успішного запуску платежу; email прийде з webhook'у після оплати
         toast.success("Перенаправляємо на оплату…");
         await startGatewayPayment(method, orderId);
+        cart.clear();
       }
     } catch (e) {
       const raw = e instanceof Error ? e.message : "Невідома помилка";
@@ -643,6 +659,12 @@ function CheckoutPage() {
               </div>
 
               {/* Loyalty block — visible only if program is active for this email */}
+              {loyaltyChecking && !loyalty && (
+                <>
+                  <Separator />
+                  <Skeleton className="h-20 w-full rounded-md" />
+                </>
+              )}
               {loyalty?.programActive && (
                 <>
                   <Separator />

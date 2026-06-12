@@ -71,7 +71,7 @@ export const Route = createFileRoute("/hooks/agents/cohort-engine")({
             .from("orders")
             .select("customer_email, customer_user_id, total_cents, paid_at, created_at")
             .eq("tenant_id", tenantId)
-            .eq("status", "paid")
+            .in("status", ["paid", "fulfilled"])
             .gte("created_at", since.toISOString())
             .limit(50_000);
           if (error) throw error;
@@ -130,11 +130,12 @@ export const Route = createFileRoute("/hooks/agents/cohort-engine")({
             const total = c.firstDates.size;
             const retentionPct = c.retention.map((cnt) => (total > 0 ? cnt / total : 0));
             // delete + insert (no unique constraint guarantee here)
-            await supabaseAdmin
+            const { error: delErr } = await supabaseAdmin
               .from("customer_cohorts")
               .delete()
               .eq("tenant_id", tenantId)
               .eq("cohort_month", cKey);
+            if (delErr) console.error("[cohort-engine] delete failed:", delErr.message);
             const { error: insErr } = await supabaseAdmin.from("customer_cohorts").insert({
               tenant_id: tenantId,
               cohort_month: cKey,
@@ -154,7 +155,7 @@ export const Route = createFileRoute("/hooks/agents/cohort-engine")({
             const total = c.firstDates.size;
             if (total < 10) continue;
             const m1Pct = c.retention[1] / total;
-            if (m1Pct >= 0.15) break; // healthy
+            if (m1Pct >= 0.15) continue; // healthy
             insights.push({
               tenant_id: tenantId,
               insight_type: "cohort_low_retention",

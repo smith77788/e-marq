@@ -35,7 +35,8 @@ export function LifecycleDistribution({ tenantId }: Props) {
       const { data, error } = await supabase
         .from("customers")
         .select("lifecycle_stage, total_spent_cents, total_orders")
-        .eq("tenant_id", tenantId);
+        .eq("tenant_id", tenantId)
+        .limit(10000);
       if (error) throw error;
       return (data ?? []) as Customer[];
     },

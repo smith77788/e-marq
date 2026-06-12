@@ -79,7 +79,7 @@ async function runReorderForTenant(tenantId: string): Promise<{ queued: number }
       .select("product_name, product_id, orders!inner(customer_email, status)")
       .eq("tenant_id", tenantId)
       .eq("orders.customer_email", c.email ?? "")
-      .eq("orders.status", "paid")
+      .in("orders.status", ["paid", "fulfilled"])
       .order("created_at", { ascending: false })
       .limit(1);
     const productName = lastItems?.[0]?.product_name ?? "your favorite";
@@ -126,7 +126,8 @@ export const Route = createFileRoute("/hooks/engines/reorder-all")({
         const { data: tenants, error } = await supabaseAdmin
           .from("tenants")
           .select("id, slug")
-          .in("status", [...FANOUT_TENANT_STATUSES]);
+          .in("status", [...FANOUT_TENANT_STATUSES])
+          .limit(500);
         if (error) return jsonError("Failed to load tenants", 500, { details: error.message });
 
         const outcomes: TenantOutcome[] = [];

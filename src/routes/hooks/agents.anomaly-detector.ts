@@ -55,28 +55,36 @@ export const Route = createFileRoute("/hooks/agents/anomaly-detector")({
               .from("orders")
               .select("id, total_cents, status, created_at")
               .eq("tenant_id", tenantId)
-              .gte("created_at", todayStart),
+              .gte("created_at", todayStart)
+              .limit(10_000),
             supabaseAdmin
               .from("orders")
               .select("id, total_cents, status, created_at")
               .eq("tenant_id", tenantId)
               .gte("created_at", baselineStart)
-              .lt("created_at", baselineEnd),
+              .lt("created_at", baselineEnd)
+              .limit(10_000),
             supabaseAdmin
               .from("events")
               .select("type, session_id, created_at")
               .eq("tenant_id", tenantId)
-              .gte("created_at", todayStart),
+              .gte("created_at", todayStart)
+              .limit(10_000),
             supabaseAdmin
               .from("events")
               .select("type, session_id, created_at")
               .eq("tenant_id", tenantId)
               .gte("created_at", baselineStart)
-              .lt("created_at", baselineEnd),
+              .lt("created_at", baselineEnd)
+              .limit(10_000),
           ]);
 
-          const todayPaid = (todayOrdersRes.data ?? []).filter((o) => o.status === "paid");
-          const basePaid = (baseOrdersRes.data ?? []).filter((o) => o.status === "paid");
+          if (todayOrdersRes.error || baseOrdersRes.error || todayEventsRes.error || baseEventsRes.error) {
+            throw new Error(`DB query failed: ${(todayOrdersRes.error || baseOrdersRes.error || todayEventsRes.error || baseEventsRes.error)?.message}`);
+          }
+
+          const todayPaid = (todayOrdersRes.data ?? []).filter((o) => o.status === "paid" || o.status === "fulfilled");
+          const basePaid = (baseOrdersRes.data ?? []).filter((o) => o.status === "paid" || o.status === "fulfilled");
           const todayRevenue = todayPaid.reduce((s, o) => s + o.total_cents, 0);
           const baseRevenuePerDay = basePaid.reduce((s, o) => s + o.total_cents, 0) / 7;
           const todayOrderCount = todayPaid.length;

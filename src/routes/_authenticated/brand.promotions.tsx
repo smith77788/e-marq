@@ -172,7 +172,8 @@ function BrandPromotionsPage() {
           "id, code, name, promo_type, value, min_order_cents, usage_limit, usage_per_customer, times_used, starts_at, ends_at, is_active",
         )
         .eq("tenant_id", effectiveTenantId!)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(500);
       if (error) throw error;
       return (data ?? []) as PromoRow[];
     },
@@ -411,7 +412,7 @@ function BrandPromotionsPage() {
                         variant="ghost"
                         className="h-8 w-8"
                         onClick={() => setEditing(p)}
-                        aria-label="Edit"
+                        aria-label="Редагувати"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
@@ -420,7 +421,7 @@ function BrandPromotionsPage() {
                         variant="ghost"
                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
                         onClick={() => setDeleting(p)}
-                        aria-label="Delete"
+                        aria-label="Видалити"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>

@@ -54,49 +54,57 @@ type StaticEntry = {
 };
 
 const PAGES_OWNER: StaticEntry[] = [
-  { label: "Cockpit", hint: "/brand", to: "/brand", icon: Compass },
-  { label: "Revenue dashboard", hint: "/dashboard", to: "/dashboard", icon: Compass },
-  { label: "Products", hint: "/brand/products", to: "/brand/products", icon: Package },
-  { label: "Orders", hint: "/brand/orders", to: "/brand/orders", icon: ShoppingCart },
-  { label: "Catalog & Collections", hint: "/brand/catalog", to: "/brand/catalog", icon: Compass },
-  { label: "Promotions", hint: "/brand/promotions", to: "/brand/promotions", icon: Compass },
-  { label: "Email", hint: "/brand/email", to: "/brand/email", icon: Compass },
-  { label: "Site builder", hint: "/brand/site-builder", to: "/brand/site-builder", icon: Compass },
-  { label: "Store settings", hint: "/brand/settings", to: "/brand/settings", icon: Compass },
-  { label: "Integrations", hint: "/brand/integrations", to: "/brand/integrations", icon: Compass },
-  { label: "Plan & Billing", hint: "/brand/billing", to: "/brand/billing", icon: Compass },
-  { label: "Agents library", hint: "/agents/library", to: "/agents/library", icon: Bot },
-  { label: "Live agent runs", hint: "/agents/live", to: "/agents/live", icon: Bot },
-  { label: "Onboarding", hint: "/onboarding", to: "/onboarding", icon: Compass },
-  { label: "Profile", hint: "/profile", to: "/profile", icon: Compass },
+  // Дашборд
+  { label: "Огляд", hint: "/brand", to: "/brand", icon: Compass },
+  { label: "Аналітика", hint: "/dashboard", to: "/dashboard", icon: Compass },
+  // Продажі
+  { label: "Замовлення", hint: "/brand/orders", to: "/brand/orders", icon: ShoppingCart },
+  { label: "Клієнти", hint: "/brand/customers", to: "/brand/customers", icon: Users },
+  // Каталог
+  { label: "Товари", hint: "/brand/products", to: "/brand/products", icon: Package },
+  { label: "Колекції", hint: "/brand/catalog", to: "/brand/catalog", icon: Compass },
+  { label: "Акції та знижки", hint: "/brand/promotions", to: "/brand/promotions", icon: Compass },
+  // Маркетинг
+  { label: "Email-розсилки", hint: "/brand/email", to: "/brand/email", icon: Compass },
+  { label: "Конструктор сайту", hint: "/brand/site-builder", to: "/brand/site-builder", icon: Compass },
+  // AI-Агенти
+  { label: "Інсайти", hint: "/brand/insights", to: "/brand/insights", icon: Lightbulb },
+  { label: "Рішення агентів", hint: "/brand/decisions", to: "/brand/decisions", icon: Bot },
+  { label: "Автоматизація", hint: "/brand/acos-loop", to: "/brand/acos-loop", icon: Bot },
+  { label: "ROI від AI", hint: "/brand/roi", to: "/brand/roi", icon: Compass },
+  { label: "Бібліотека агентів", hint: "/agents/library", to: "/agents/library", icon: Bot },
+  // Налаштування
+  { label: "Канали", hint: "/brand/channels", to: "/brand/channels", icon: Compass },
+  { label: "Інтеграції", hint: "/brand/integrations", to: "/brand/integrations", icon: Compass },
+  { label: "Команда", hint: "/brand/team", to: "/brand/team", icon: Users },
+  { label: "Налаштування магазину", hint: "/brand/settings", to: "/brand/settings", icon: Compass },
+  { label: "Тарифний план", hint: "/brand/billing", to: "/brand/billing", icon: Compass },
+  { label: "Профіль", hint: "/profile", to: "/profile", icon: Compass },
+  { label: "Журнал запитів", hint: "/brand/ingest-logs", to: "/brand/ingest-logs", icon: Compass },
 ];
 
 const PAGES_ADMIN: StaticEntry[] = [
-  { label: "Admin · Mission Control", hint: "/admin", to: "/admin", icon: Compass },
-  { label: "Admin · Health Monitor", hint: "/admin/health", to: "/admin/health", icon: Compass },
-  { label: "Admin · Cross-tenant", hint: "/admin/overview", to: "/admin/overview", icon: Compass },
-  { label: "Admin · All tenants", hint: "/admin/tenants", to: "/admin/tenants", icon: Building2 },
-  { label: "Admin · Plans catalog", hint: "/admin/plans", to: "/admin/plans", icon: Compass },
-  { label: "Admin · Users", hint: "/admin/users", to: "/admin/users", icon: Users },
-  {
-    label: "Admin · Top-up requests",
-    hint: "/admin/topup-requests",
-    to: "/admin/topup-requests",
-    icon: Compass,
-  },
-  {
-    label: "Admin · Lead Radar",
-    hint: "/admin/lead-radar",
-    to: "/admin/lead-radar",
-    icon: Compass,
-  },
-  {
-    label: "Admin · DN Trade Health",
-    hint: "/admin/dntrade-health",
-    to: "/admin/dntrade-health",
-    icon: Compass,
-  },
-  { label: "Admin · Commands", hint: "/admin/commands", to: "/admin/commands", icon: Compass },
+  // Моніторинг
+  { label: "Командний центр", hint: "/admin", to: "/admin", icon: Compass },
+  { label: "Health-монітор", hint: "/admin/health", to: "/admin/health", icon: Compass },
+  { label: "Самовідновлення", hint: "/admin/self-heal", to: "/admin/self-heal", icon: Compass },
+  { label: "Аудит-лог", hint: "/admin/audit-log", to: "/admin/audit-log", icon: Compass },
+  { label: "Журнал запитів (адмін)", hint: "/admin/ingest-logs", to: "/admin/ingest-logs", icon: Compass },
+  // Управління
+  { label: "Усі бренди", hint: "/admin/tenants", to: "/admin/tenants", icon: Building2 },
+  { label: "Користувачі", hint: "/admin/users", to: "/admin/users", icon: Users },
+  { label: "Права адмінів", hint: "/admin/permissions", to: "/admin/permissions", icon: Compass },
+  { label: "Каталог тарифів", hint: "/admin/plans", to: "/admin/plans", icon: Compass },
+  { label: "Заявки на оплату", hint: "/admin/topup-requests", to: "/admin/topup-requests", icon: Compass },
+  // AI-Агенти (адмін)
+  { label: "Команди системи", hint: "/admin/commands", to: "/admin/commands", icon: Compass },
+  { label: "Рішення агентів (адмін)", hint: "/admin/decisions", to: "/admin/decisions", icon: Compass },
+  { label: "Запуски в ефірі", hint: "/agents/live", to: "/agents/live", icon: Bot },
+  { label: "Цикл вимірювань", hint: "/admin/outcomes", to: "/admin/outcomes", icon: Compass },
+  { label: "Потік інсайтів", hint: "/admin/overview", to: "/admin/overview", icon: Compass },
+  // Лідогенерація
+  { label: "Lead Radar", hint: "/admin/lead-radar", to: "/admin/lead-radar", icon: Compass },
+  { label: "DN Trade Health", hint: "/admin/dntrade-health", to: "/admin/dntrade-health", icon: Compass },
 ];
 
 type ProductHit = { id: string; tenant_id: string; name: string; sku: string | null };

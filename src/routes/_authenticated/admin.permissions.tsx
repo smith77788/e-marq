@@ -64,7 +64,8 @@ function AdminPermissionsPage() {
       const { data, error } = await supabase
         .from("admin_capabilities")
         .select("*")
-        .order("sort_order");
+        .order("sort_order")
+        .limit(200);
       if (error) throw error;
       return (data ?? []) as Capability[];
     },

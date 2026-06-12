@@ -79,11 +79,13 @@ function timeAgo(iso: string): string {
 export function AcosActivityFeed({ tenantId }: { tenantId: string }) {
   const [items, setItems] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
+      setFetchError(null);
       const { data, error } = await supabase
         .from("acos_loop_activity" as never)
         .select("*")
@@ -91,7 +93,11 @@ export function AcosActivityFeed({ tenantId }: { tenantId: string }) {
         .order("event_at", { ascending: false })
         .limit(40);
       if (!cancelled) {
-        if (!error && data) setItems(data as Activity[]);
+        if (error) {
+          setFetchError(error.message);
+        } else if (data) {
+          setItems(data as Activity[]);
+        }
         setLoading(false);
       }
     })();
@@ -115,6 +121,8 @@ export function AcosActivityFeed({ tenantId }: { tenantId: string }) {
             <Skeleton className="h-12 w-full" />
             <Skeleton className="h-12 w-full" />
           </div>
+        ) : fetchError ? (
+          <p className="py-6 text-center text-sm text-destructive">{fetchError}</p>
         ) : items.length === 0 ? (
           <p className="py-6 text-center text-sm text-muted-foreground">
             Поки тиша — агенти ще не згенерували подій.

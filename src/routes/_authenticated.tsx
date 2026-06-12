@@ -31,15 +31,20 @@ export const Route = createFileRoute("/_authenticated")({
   }),
   beforeLoad: async ({ location }) => {
     if (typeof window === "undefined") return;
-    const { data, error } = await withTimeout(
-      supabase.auth.getUser(),
-      8_000,
-      "Auth check timed out",
-    ).catch((err) => {
-      console.warn("[auth-route] getUser failed", err);
-      return { data: { user: null }, error: err };
-    });
-    if (!error && data.user) return;
+    try {
+      const { data, error } = await withTimeout(
+        supabase.auth.getUser(),
+        8_000,
+        "Auth check timed out",
+      ).catch((err) => {
+        console.warn("[auth-route] getUser failed", err);
+        return { data: { user: null }, error: err };
+      });
+      if (!error && data.user) return;
+    } catch (err) {
+      // Supabase client not configured (missing env vars) — fall through to login
+      console.warn("[auth-route] Supabase client unavailable:", err);
+    }
 
     try {
       const here = location.href;

@@ -51,11 +51,12 @@ export const Route = createFileRoute("/hooks/agents/daily-digest-v2")({
           const digestDate = weekStart.toISOString().slice(0, 10);
 
           // Skip if already exists
-          const { data: existing } = await supabaseAdmin
+          const { data: existing, error: existErr } = await supabaseAdmin
             .from("daily_digests")
             .select("id, metrics")
             .eq("tenant_id", tenantId)
             .eq("digest_date", digestDate);
+          if (existErr) throw existErr;
           const alreadyWeekly = (existing ?? []).some(
             (d) => (d.metrics as Record<string, unknown>)?.weekly === true,
           );
@@ -73,13 +74,17 @@ export const Route = createFileRoute("/hooks/agents/daily-digest-v2")({
               .select("total_cents, status")
               .eq("tenant_id", tenantId)
               .gte("created_at", weekStart.toISOString())
-              .lt("created_at", today.toISOString()),
+              .lt("created_at", today.toISOString())
+              .in("status", ["paid", "fulfilled"])
+              .limit(5000),
             supabaseAdmin
               .from("orders")
               .select("total_cents, status")
               .eq("tenant_id", tenantId)
               .gte("created_at", prevWeekStart.toISOString())
-              .lt("created_at", weekStart.toISOString()),
+              .lt("created_at", weekStart.toISOString())
+              .in("status", ["paid", "fulfilled"])
+              .limit(5000),
             supabaseAdmin
               .from("ai_insights")
               .select("id, title, risk_level, status, expected_impact")
@@ -89,8 +94,8 @@ export const Route = createFileRoute("/hooks/agents/daily-digest-v2")({
               .limit(100),
           ]);
 
-          const tw = (thisWeek.data ?? []).filter((o) => o.status === "paid");
-          const pw = (prevWeek.data ?? []).filter((o) => o.status === "paid");
+          const tw = (thisWeek.data ?? []).filter((o) => ["paid", "fulfilled"].includes(o.status));
+          const pw = (prevWeek.data ?? []).filter((o) => ["paid", "fulfilled"].includes(o.status));
           const twRev = tw.reduce((s, o) => s + o.total_cents, 0);
           const pwRev = pw.reduce((s, o) => s + o.total_cents, 0);
           const delta = pwRev > 0 ? (twRev - pwRev) / pwRev : 0;
@@ -167,7 +172,7 @@ export const Route = createFileRoute("/hooks/agents/daily-digest-v2")({
 
           const summary = lines.join("\n");
 
-          await supabaseAdmin.from("daily_digests").insert({
+          const { error: digestErr } = await supabaseAdmin.from("daily_digests").insert({
             tenant_id: tenantId,
             digest_date: digestDate,
             summary,
@@ -184,8 +189,9 @@ export const Route = createFileRoute("/hooks/agents/daily-digest-v2")({
             },
             recommended_actions: recommended,
           });
+          if (digestErr) throw digestErr;
 
-          await supabaseAdmin.from("owner_notifications").insert({
+          const { error: notifErr } = await supabaseAdmin.from("owner_notifications").insert({
             tenant_id: tenantId,
             kind: "weekly_digest",
             severity: delta < -0.2 ? "warning" : "info",
@@ -194,6 +200,7 @@ export const Route = createFileRoute("/hooks/agents/daily-digest-v2")({
             link: "/brand",
             metadata: { digest_date: digestDate, weekly: true },
           });
+          if (notifErr) throw notifErr;
 
           await finishAgentRun(handle, 1, {
             digest_date: digestDate,

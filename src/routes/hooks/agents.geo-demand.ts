@@ -47,7 +47,7 @@ export const Route = createFileRoute("/hooks/agents/geo-demand")({
             .from("orders")
             .select("total_cents, metadata, created_at")
             .eq("tenant_id", tenantId)
-            .eq("status", "paid")
+            .in("status", ["paid", "fulfilled"])
             .gte("created_at", since)
             .limit(2000);
 
@@ -107,7 +107,7 @@ export const Route = createFileRoute("/hooks/agents/geo-demand")({
           const created = await insertInsightsDedup(insights);
           await finishAgentRun(handle, created, {
             regions: byRegion.size,
-            geo: summarizeGeo(geo, "en"),
+            geo: summarizeGeo(geo, "uk"),
             orders_in_scope: orders.length,
           });
           return jsonOk({ insights_created: created });

@@ -42,6 +42,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as SSlugWishlistRouteImport } from './routes/s.$slug.wishlist'
 import { Route as SSlugSearchRouteImport } from './routes/s.$slug.search'
 import { Route as SSlugCheckoutRouteImport } from './routes/s.$slug.checkout'
+import { Route as SSlugAccountRouteImport } from './routes/s.$slug.account'
 import { Route as HooksTelegramPollRouteImport } from './routes/hooks/telegram.poll'
 import { Route as HooksTelegramNotifyOwnerRouteImport } from './routes/hooks/telegram.notify-owner'
 import { Route as HooksIntegrationsDntradeWeeklyDigestRouteImport } from './routes/hooks/integrations.dntrade-weekly-digest'
@@ -407,6 +408,11 @@ const SSlugSearchRoute = SSlugSearchRouteImport.update({
 const SSlugCheckoutRoute = SSlugCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
+  getParentRoute: () => SSlugRoute,
+} as any)
+const SSlugAccountRoute = SSlugAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => SSlugRoute,
 } as any)
 const HooksTelegramPollRoute = HooksTelegramPollRouteImport.update({
@@ -1748,6 +1754,7 @@ export interface FileRoutesByFullPath {
   '/hooks/integrations/dntrade-weekly-digest': typeof HooksIntegrationsDntradeWeeklyDigestRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
+  '/s/$slug/account': typeof SSlugAccountRoute
   '/s/$slug/checkout': typeof SSlugCheckoutRoute
   '/s/$slug/search': typeof SSlugSearchRoute
   '/s/$slug/wishlist': typeof SSlugWishlistRoute
@@ -1983,6 +1990,7 @@ export interface FileRoutesByTo {
   '/hooks/integrations/dntrade-weekly-digest': typeof HooksIntegrationsDntradeWeeklyDigestRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
+  '/s/$slug/account': typeof SSlugAccountRoute
   '/s/$slug/checkout': typeof SSlugCheckoutRoute
   '/s/$slug/search': typeof SSlugSearchRoute
   '/s/$slug/wishlist': typeof SSlugWishlistRoute
@@ -2221,6 +2229,7 @@ export interface FileRoutesById {
   '/hooks/integrations/dntrade-weekly-digest': typeof HooksIntegrationsDntradeWeeklyDigestRoute
   '/hooks/telegram/notify-owner': typeof HooksTelegramNotifyOwnerRoute
   '/hooks/telegram/poll': typeof HooksTelegramPollRoute
+  '/s/$slug/account': typeof SSlugAccountRoute
   '/s/$slug/checkout': typeof SSlugCheckoutRoute
   '/s/$slug/search': typeof SSlugSearchRoute
   '/s/$slug/wishlist': typeof SSlugWishlistRoute
@@ -2459,6 +2468,7 @@ export interface FileRouteTypes {
     | '/hooks/integrations/dntrade-weekly-digest'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
+    | '/s/$slug/account'
     | '/s/$slug/checkout'
     | '/s/$slug/search'
     | '/s/$slug/wishlist'
@@ -2694,6 +2704,7 @@ export interface FileRouteTypes {
     | '/hooks/integrations/dntrade-weekly-digest'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
+    | '/s/$slug/account'
     | '/s/$slug/checkout'
     | '/s/$slug/search'
     | '/s/$slug/wishlist'
@@ -2931,6 +2942,7 @@ export interface FileRouteTypes {
     | '/hooks/integrations/dntrade-weekly-digest'
     | '/hooks/telegram/notify-owner'
     | '/hooks/telegram/poll'
+    | '/s/$slug/account'
     | '/s/$slug/checkout'
     | '/s/$slug/search'
     | '/s/$slug/wishlist'
@@ -3384,6 +3396,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/s/$slug/checkout'
       preLoaderRoute: typeof SSlugCheckoutRouteImport
+      parentRoute: typeof SSlugRoute
+    }
+    '/s/$slug/account': {
+      id: '/s/$slug/account'
+      path: '/account'
+      fullPath: '/s/$slug/account'
+      preLoaderRoute: typeof SSlugAccountRouteImport
       parentRoute: typeof SSlugRoute
     }
     '/hooks/telegram/poll': {
@@ -4958,6 +4977,7 @@ const HandbookRouteWithChildren = HandbookRoute._addFileChildren(
 )
 
 interface SSlugRouteChildren {
+  SSlugAccountRoute: typeof SSlugAccountRoute
   SSlugCheckoutRoute: typeof SSlugCheckoutRoute
   SSlugSearchRoute: typeof SSlugSearchRoute
   SSlugWishlistRoute: typeof SSlugWishlistRoute
@@ -4968,6 +4988,7 @@ interface SSlugRouteChildren {
 }
 
 const SSlugRouteChildren: SSlugRouteChildren = {
+  SSlugAccountRoute: SSlugAccountRoute,
   SSlugCheckoutRoute: SSlugCheckoutRoute,
   SSlugSearchRoute: SSlugSearchRoute,
   SSlugWishlistRoute: SSlugWishlistRoute,

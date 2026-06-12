@@ -50,7 +50,8 @@ export const Route = createFileRoute("/hooks/agents/cart-recovery")({
             .eq("tenant_id", tenantId)
             .eq("type", "add_to_cart")
             .gte("created_at", since)
-            .not("session_id", "is", null);
+            .not("session_id", "is", null)
+            .limit(5000);
 
           if (!cartEvents?.length) {
             await finishAgentRun(handle, 0, { reason: "no_cart_events" });
@@ -128,6 +129,11 @@ export const Route = createFileRoute("/hooks/agents/cart-recovery")({
           const newAttempts = abandoned.filter((a) => !attemptedSet.has(a.sessionId));
 
           // Step 6: insert attempts + insights
+          const attemptCountBySesssion = new Map((existingAttempts ?? []).reduce((acc, a) => {
+            acc.set(a.session_id, (acc.get(a.session_id) ?? 0) + 1);
+            return acc;
+          }, new Map<string, number>()));
+
           const attemptRows = newAttempts.map((a) => {
             const customer = a.data.userId ? userToCustomer.get(a.data.userId) : null;
             return {
@@ -137,7 +143,7 @@ export const Route = createFileRoute("/hooks/agents/cart-recovery")({
               cart_value_cents: a.data.value,
               cart_items: a.data.products.map((pid) => ({ product_id: pid })),
               abandoned_at: a.data.latest,
-              attempt_number: 1,
+              attempt_number: (attemptCountBySesssion.get(a.sessionId) ?? 0) + 1,
               channel: "email",
             };
           });

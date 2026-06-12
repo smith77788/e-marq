@@ -55,7 +55,7 @@ export const Route = createFileRoute("/hooks/agents/stockout")({
               )
               .eq("tenant_id", tenantId)
               .gte("orders.created_at", since)
-              .eq("orders.status", "paid")
+              .in("orders.status", ["paid", "fulfilled"])
               .eq("orders.tenant_id", tenantId)
               .limit(20000),
           ]);
@@ -75,6 +75,7 @@ export const Route = createFileRoute("/hooks/agents/stockout")({
             const units = sold.get(p.id) ?? 0;
             const velocity = units / WINDOW_DAYS;
             if (velocity <= 0.3) continue; // skip slow movers
+            if (p.stock === null || p.stock === undefined) continue;
             const dos = velocity > 0 ? p.stock / velocity : Infinity;
             if (dos >= 7) continue;
             const lostRevenueCents = Math.round(
@@ -90,9 +91,9 @@ export const Route = createFileRoute("/hooks/agents/stockout")({
               tenant_id: tenantId,
               insight_type: "stockout_predicted",
               affected_layer: "inventory",
-              title: `${p.name} runs out in ~${dos.toFixed(1)}d at current pace`,
-              description: `Sold ${units} units in last ${WINDOW_DAYS}d (velocity ${velocity.toFixed(2)} u/day). Stock left: ${p.stock}. Reorder ~${reorderQty} units to cover 30 days. Expected lost revenue if no action: ~${(lostRevenueCents / 100).toFixed(2)} ₴ over the next 7 days.`,
-              expected_impact: `Protect ~${(lostRevenueCents / 100).toFixed(2)} ₴ of forecasted revenue`,
+              title: `${p.name}: закінчиться через ~${dos.toFixed(1)} дн. при поточному темпі`,
+              description: `Продано ${units} шт. за ${WINDOW_DAYS}д (темп ${velocity.toFixed(2)} шт./день). Залишок: ${p.stock} шт. Замовте ~${reorderQty} шт. на 30 днів. Прогнозоване втрачення виторгу без дій: ~${(lostRevenueCents / 100).toFixed(2)} ₴ за 7 днів.`,
+              expected_impact: `Захистити ~${(lostRevenueCents / 100).toFixed(2)} ₴ прогнозованого виторгу`,
               confidence,
               risk_level: risk,
               metrics: {

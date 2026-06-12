@@ -58,7 +58,7 @@ export const Route = createFileRoute("/hooks/agents/order-status-notifier")({
           }
           const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
 
-          const { data: orders } = await supabaseAdmin
+          const { data: orders, error: ordersErr } = await supabaseAdmin
             .from("orders")
             .select("id, status, customer_email, updated_at")
             .eq("tenant_id", tenantId)
@@ -66,6 +66,7 @@ export const Route = createFileRoute("/hooks/agents/order-status-notifier")({
             .gte("updated_at", since)
             .not("customer_email", "is", null)
             .limit(200);
+          if (ordersErr) throw ordersErr;
 
           if (!orders?.length) {
             await finishAgentRun(handle, 0, { reason: "no_orders" });
@@ -85,6 +86,10 @@ export const Route = createFileRoute("/hooks/agents/order-status-notifier")({
           let sent = 0;
           let skipped = 0;
           for (const o of orders) {
+            if (!(TRACKED as readonly string[]).includes(o.status)) {
+              skipped++;
+              continue;
+            }
             const status = o.status as Tracked;
             const template = `order_status_${status}`;
             if (sentSet.has(`${o.id}::${template}`)) {

@@ -137,7 +137,8 @@ function BrandProductsPage() {
           "id, name, sku, price_cents, currency, stock, is_active, description, image_url, created_at",
         )
         .eq("tenant_id", effectiveTenantId!)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(2000);
       if (error) throw error;
       return (data ?? []) as ProductRow[];
     },
@@ -383,7 +384,7 @@ function BrandProductsPage() {
                         variant="ghost"
                         className="h-8 w-8"
                         onClick={() => setEditing(p)}
-                        aria-label="Edit"
+                        aria-label="Редагувати"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
@@ -392,7 +393,7 @@ function BrandProductsPage() {
                         variant="ghost"
                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
                         onClick={() => setDeleting(p)}
-                        aria-label="Archive"
+                        aria-label="Архівувати"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>

@@ -41,14 +41,16 @@ export const Route = createFileRoute("/hooks/agents/discount-elasticity")({
         try {
           // Look at promos that ended in last 90d with stats
           const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString();
-          const { data: promos } = await supabaseAdmin
+          const { data: promos, error: promosError } = await supabaseAdmin
             .from("promotions")
             .select(
               "id, name, value, promo_type, times_used, revenue_cents, cost_cents, starts_at, ends_at",
             )
             .eq("tenant_id", tenantId)
-            .gte("starts_at", ninetyDaysAgo)
+            .lte("ends_at", new Date().toISOString())
+            .gte("ends_at", ninetyDaysAgo)
             .gt("times_used", 0);
+          if (promosError) throw promosError;
 
           if (!promos || promos.length < 3) {
             await finishAgentRun(handle, 0, {

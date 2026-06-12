@@ -43,7 +43,8 @@ export const Route = createFileRoute("/hooks/agents/search-intent-miner")({
             .from("search_queries")
             .select("query, clicked, led_to_purchase, result_count")
             .eq("tenant_id", tenantId)
-            .gte("occurred_at", since);
+            .gte("occurred_at", since)
+            .limit(5000);
 
           if (!queries?.length) {
             await finishAgentRun(handle, 0, { reason: "no_queries" });

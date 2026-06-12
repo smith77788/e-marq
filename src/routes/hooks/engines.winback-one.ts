@@ -95,7 +95,7 @@ export const Route = createFileRoute("/hooks/engines/winback-one")({
             "product_name, quantity, order_id, orders!inner(customer_user_id, customer_email, status)",
           )
           .eq("tenant_id", body.tenant_id)
-          .eq("orders.status", "paid")
+          .in("orders.status", ["paid", "fulfilled"])
           .limit(50);
         const counts = new Map<string, number>();
         for (const it of items ?? []) {

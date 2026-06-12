@@ -358,22 +358,22 @@ function DetailPanel({ row }: { row: FeedRow }) {
   return (
     <div className="mt-4 space-y-4 text-sm">
       <KV label="Час" value={new Date(row.created_at).toISOString()} />
-      <KV label="Status" value={String(row.status_code)} />
-      <KV label="Tenant slug" value={row.tenant_slug ?? "—"} />
-      <KV label="Tenant id" value={row.tenant_id ?? "—"} mono />
-      <KV label="Event type" value={row.event_type ?? "—"} />
+      <KV label="Статус" value={String(row.status_code)} />
+      <KV label="Slug бренду" value={row.tenant_slug ?? "—"} />
+      <KV label="ID бренду" value={row.tenant_id ?? "—"} mono />
+      <KV label="Тип події" value={row.event_type ?? "—"} />
       {isError && (
         <>
-          <KV label="Error code" value={(r as ErrorRow).error_code ?? "—"} mono />
-          <KV label="Error message" value={(r as ErrorRow).error_message ?? "—"} />
+          <KV label="Код помилки" value={(r as ErrorRow).error_code ?? "—"} mono />
+          <KV label="Повідомлення помилки" value={(r as ErrorRow).error_message ?? "—"} />
           <KV label="IP" value={(r as ErrorRow).request_ip ?? "—"} mono />
           <KV label="User-Agent" value={(r as ErrorRow).user_agent ?? "—"} />
-          <KV label="Origin" value={(r as ErrorRow).origin ?? "—"} />
+          <KV label="Джерело" value={(r as ErrorRow).origin ?? "—"} />
         </>
       )}
       <div>
         <div className="mb-1 text-xs uppercase tracking-wide text-muted-foreground">
-          {isError ? "Request body" : "Payload"}
+          {isError ? "Тіло запиту" : "Payload"}
         </div>
         <pre className="max-h-[400px] overflow-auto rounded bg-muted p-3 text-xs">
           {JSON.stringify(

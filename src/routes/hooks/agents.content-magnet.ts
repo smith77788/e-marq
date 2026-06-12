@@ -49,20 +49,26 @@ export const Route = createFileRoute("/hooks/agents/content-magnet")({
             }
             usedSlugs.add(slug);
 
-            const { error } = await supabaseAdmin.from("lead_magnets").upsert(
-              {
-                slug,
-                title: m.title,
-                meta_description: m.meta_description,
-                topic: m.topic,
-                keywords: m.keywords,
-                body_md: m.body_md,
-                cta_url: "/signup",
-                is_published: true,
-              },
-              { onConflict: "slug", ignoreDuplicates: true } as never,
-            );
-            if (!error) {
+            const { data: upserted, error } = await supabaseAdmin
+              .from("lead_magnets")
+              .upsert(
+                {
+                  slug,
+                  title: m.title,
+                  meta_description: m.meta_description,
+                  topic: m.topic,
+                  keywords: m.keywords,
+                  body_md: m.body_md,
+                  cta_url: "/signup",
+                  is_published: true,
+                },
+                { onConflict: "slug", ignoreDuplicates: true } as never,
+              )
+              .select("slug");
+            if (error) {
+              console.error("[content-magnet] lead_magnets upsert failed:", error.message);
+            } else if ((upserted?.length ?? 0) > 0) {
+              // ignoreDuplicates: existing rows are not returned, so count only real inserts
               created += 1;
               perBrand[ctx.profile.brand_name] = (perBrand[ctx.profile.brand_name] ?? 0) + 1;
             }

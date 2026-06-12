@@ -53,8 +53,8 @@ type ProductRow = {
   stock: number;
 };
 
-function fmtUsd(cents: number) {
-  return `${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })} ₴`;
+function fmtUah(cents: number) {
+  return `${(cents / 100).toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`;
 }
 
 export const Route = createFileRoute("/hooks/agents/price-optimizer")({
@@ -81,11 +81,12 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
           const since = new Date(Date.now() - WINDOW_DAYS * 24 * 3600 * 1000).toISOString();
           const geo = await loadEffectiveGeoTargets(tenantId, AGENT_ID);
 
-          const { data: products } = await supabaseAdmin
+          const { data: products, error: productsErr } = await supabaseAdmin
             .from("products")
             .select("id, name, price_cents, is_active, stock")
             .eq("tenant_id", tenantId)
             .eq("is_active", true);
+          if (productsErr) throw productsErr;
 
           if (!products || products.length === 0) {
             await finishAgentRun(handle, 0, { skipped: "no_products" });
@@ -116,11 +117,14 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
                 "product_id, quantity, unit_price_cents, orders!inner(status, paid_at, tenant_id, metadata)",
               )
               .eq("tenant_id", tenantId)
-              .eq("orders.status", "paid")
+              .in("orders.status", ["paid", "fulfilled"])
               .gte("orders.paid_at", since)
               .not("product_id", "is", null)
               .limit(50_000),
           ]);
+          if (viewsRes.error) throw viewsRes.error;
+          if (cartsRes.error) throw cartsRes.error;
+          if (soldRes.error) throw soldRes.error;
 
           const filteredViews = (viewsRes.data ?? []).filter((r) =>
             rowMatchesGeo({ metadata: (r.payload ?? null) as Record<string, unknown> | null }, geo),
@@ -175,9 +179,9 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
                 tenant_id: tenantId,
                 insight_type: "price_optimization",
                 affected_layer: "pricing",
-                title: `${p.name}: raise price by 10% (high demand)`,
-                description: `Last ${WINDOW_DAYS}d: ${views} views, ${carts} carts (${(v2c * 100).toFixed(0)}% v→c), ${purchases} sold (${(c2b * 100).toFixed(0)}% c→b), ${fmtUsd(monthlyRev)}/mo. Demand is hot — test ${fmtUsd(p.price_cents)} → ${fmtUsd(newPrice)}.`,
-                expected_impact: `+${fmtUsd(upliftMonthly)}/mo if conversion holds`,
+                title: `${p.name}: підняти ціну на 10% (висока конверсія)`,
+                description: `За ${WINDOW_DAYS}д: ${views} переглядів, ${carts} кошиків (${(v2c * 100).toFixed(0)}% v→c), ${purchases} продажів (${(c2b * 100).toFixed(0)}% c→b), ${fmtUah(monthlyRev)}/міс. Попит сильний — тест ${fmtUah(p.price_cents)} → ${fmtUah(newPrice)}.`,
+                expected_impact: `+${fmtUah(upliftMonthly)}/міс при збереженні конверсії`,
                 confidence: 0.7,
                 risk_level: "medium",
                 metrics: {
@@ -204,19 +208,19 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
             if (views >= 80 && v2c < 0.04) {
               const newPrice = Math.round(p.price_cents * 0.9);
               // assume conversion doubles at 10% lower
-              const projectedMonthlyUnits = carts * 2 * (30 / WINDOW_DAYS) * 0.5;
+              const projectedMonthlyUnits = carts * 2 * (30 / WINDOW_DAYS);
               const projectedRev = projectedMonthlyUnits * newPrice;
               const upliftMonthly = Math.round(projectedRev - monthlyRev);
               insights.push({
                 tenant_id: tenantId,
                 insight_type: "price_optimization",
                 affected_layer: "pricing",
-                title: `${p.name}: lower price by 10% (low engagement)`,
-                description: `Last ${WINDOW_DAYS}d: ${views} views but only ${carts} carts (${(v2c * 100).toFixed(1)}% v→c). Price may be the friction. Test ${fmtUsd(p.price_cents)} → ${fmtUsd(newPrice)}.`,
+                title: `${p.name}: знизити ціну на 10% (низька конверсія)`,
+                description: `За ${WINDOW_DAYS}д: ${views} переглядів, але лише ${carts} кошиків (${(v2c * 100).toFixed(1)}% v→c). Ціна може бути бар'єром. Тест ${fmtUah(p.price_cents)} → ${fmtUah(newPrice)}.`,
                 expected_impact:
                   upliftMonthly > 0
-                    ? `+${fmtUsd(upliftMonthly)}/mo at 2x conversion`
-                    : `breakeven at 2x conversion`,
+                    ? `+${fmtUah(upliftMonthly)}/міс при 2x конверсії`
+                    : `беззбитковість при 2x конверсії`,
                 confidence: 0.55,
                 risk_level: "medium",
                 metrics: {
@@ -244,7 +248,7 @@ export const Route = createFileRoute("/hooks/agents/price-optimizer")({
           await finishAgentRun(handle, inserted, {
             products_evaluated: products.length,
             candidates: insights.length,
-            geo: summarizeGeo(geo, "en"),
+            geo: summarizeGeo(geo, "uk"),
             views_in_scope: filteredViews.length,
             sold_in_scope: filteredSold.length,
           });

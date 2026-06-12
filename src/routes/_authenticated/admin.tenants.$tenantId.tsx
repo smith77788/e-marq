@@ -142,7 +142,8 @@ function TenantDetailPage() {
           "id, name, sku, price_cents, currency, stock, is_active, description, image_url, created_at",
         )
         .eq("tenant_id", tenantId)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(2000);
       if (error) throw error;
       return data as ProductRow[];
     },

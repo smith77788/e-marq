@@ -48,24 +48,27 @@ export const Route = createFileRoute("/hooks/agents/aov-optimizer")({
         try {
           const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
 
-          const { data: products } = await supabaseAdmin
+          const { data: products, error: productsErr } = await supabaseAdmin
             .from("products")
             .select("id, name, price_cents, stock, is_active")
             .eq("tenant_id", tenantId)
             .eq("is_active", true);
+          if (productsErr) throw productsErr;
 
           const { data: viewEvents } = await supabaseAdmin
             .from("events")
             .select("product_id")
             .eq("tenant_id", tenantId)
             .eq("type", "product_viewed")
-            .gte("created_at", since);
+            .gte("created_at", since)
+            .limit(100000);
           const { data: cartEvents } = await supabaseAdmin
             .from("events")
             .select("product_id")
             .eq("tenant_id", tenantId)
             .eq("type", "add_to_cart")
-            .gte("created_at", since);
+            .gte("created_at", since)
+            .limit(100000);
 
           const viewCount: Record<string, number> = {};
           const cartCount: Record<string, number> = {};
@@ -78,7 +81,7 @@ export const Route = createFileRoute("/hooks/agents/aov-optimizer")({
             .from("order_items")
             .select("product_id, quantity, orders!inner(status, created_at)")
             .eq("tenant_id", tenantId)
-            .eq("orders.status", "paid")
+            .in("orders.status", ["paid", "fulfilled"])
             .gte("orders.created_at", since);
           const purchaseCount: Record<string, number> = {};
           for (const it of items ?? []) {
@@ -98,9 +101,9 @@ export const Route = createFileRoute("/hooks/agents/aov-optimizer")({
                 tenant_id: tenantId,
                 insight_type: "low_engagement_product",
                 affected_layer: "catalogue",
-                title: `Product "${p.name}" has high views, no carts`,
-                description: `${v} views vs ${c} cart adds in the last 30d (${((c / Math.max(v, 1)) * 100).toFixed(1)}%). Likely needs a better product image, clearer description, or price tweak.`,
-                expected_impact: `Lifting cart-add rate to 8% could mean ~${Math.round((v * 0.08 - c) * (p.price_cents / 100))} extra revenue / month`,
+                title: `"${p.name}": багато переглядів, мало кошиків`,
+                description: `${v} переглядів vs ${c} додавань до кошика за 30д (${((c / Math.max(v, 1)) * 100).toFixed(1)}%). Можливо, потрібно краще фото, чіткіший опис або зміна ціни.`,
+                expected_impact: `Підняти конверсію до 8% → ~${Math.round((v * 0.08 - c) * (p.price_cents / 100))} ₴ додаткового виторгу/міс`,
                 confidence: 0.7,
                 risk_level: "low",
                 metrics: {
@@ -119,9 +122,9 @@ export const Route = createFileRoute("/hooks/agents/aov-optimizer")({
                 tenant_id: tenantId,
                 insight_type: "cart_abandon",
                 affected_layer: "checkout",
-                title: `Product "${p.name}" abandoned in cart often`,
-                description: `${c} cart adds → only ${pu} purchases (${((pu / Math.max(c, 1)) * 100).toFixed(1)}%). Friction at checkout, shipping cost shock, or trust issue.`,
-                expected_impact: `Recovering 30% of these carts = ~${Math.round((c * 0.3 - pu) * (p.price_cents / 100))} revenue uplift`,
+                title: `"${p.name}": часто покидають кошик`,
+                description: `${c} додавань до кошика → лише ${pu} покупок (${((pu / Math.max(c, 1)) * 100).toFixed(1)}%). Тертя при оформленні, шок від вартості доставки або брак довіри.`,
+                expected_impact: `Повернення 30% кошиків = ~${Math.max(0, Math.round((c * 0.3 - pu) * (p.price_cents / 100)))} ₴ додаткового виторгу`,
                 confidence: 0.75,
                 risk_level: "medium",
                 metrics: {

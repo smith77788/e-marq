@@ -106,12 +106,18 @@ export const Route = createFileRoute("/api/public/payments/monobank-init")({
           );
         }
 
-        const { data: intentId } = await supabaseAdmin.rpc("create_payment_intent", {
-          _order_id: order.id,
-          _provider: "monobank",
-          _amount_cents: order.total_cents,
-          _redirect_url: result.pageUrl,
-        });
+        const { data: intentId, error: intentErr } = await supabaseAdmin.rpc(
+          "create_payment_intent",
+          {
+            _order_id: order.id,
+            _provider: "monobank",
+            _amount_cents: order.total_cents,
+            _redirect_url: result.pageUrl,
+          },
+        );
+        if (intentErr) {
+          console.error("[monobank-init] create_payment_intent failed:", intentErr.message);
+        }
 
         // Зберегти invoice_id у external_id intent'а одразу
         if (intentId) {

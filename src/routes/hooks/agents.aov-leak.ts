@@ -103,11 +103,12 @@ export const Route = createFileRoute("/hooks/agents/aov-leak")({
             });
           }
 
-          const { data: products } = await supabaseAdmin
+          const { data: products, error: productsErr } = await supabaseAdmin
             .from("products")
             .select("id, name, sku, price_cents, stock")
             .eq("tenant_id", tenantId)
             .in("id", productIds);
+          if (productsErr) throw productsErr;
           const byId = new Map<
             string,
             { name: string; sku: string | null; price_cents: number; stock: number }
@@ -121,19 +122,14 @@ export const Route = createFileRoute("/hooks/agents/aov-leak")({
             });
           }
 
-          // Aggregate totals to compute funnel-wide leak
-          let totalCarts = 0;
-          let totalCheckouts = 0;
-          for (const k of productIds) {
-            totalCarts += abandoned[k].carts;
-            totalCheckouts += abandoned[k].checkouts;
-          }
-          const totalPurchasedCarts = (events ?? []).filter(
-            (e) => e.type === "purchase_completed",
-          ).length;
+          // Compare sessions, not raw event counts: one session can fire many events
+          const purchasedCount = purchasedSessions.size;
+          const abandonedSessionCount = new Set(
+            productIds.flatMap((k) => [...abandoned[k].sessions]),
+          ).size;
           const conversionRate =
-            totalCarts + totalPurchasedCarts > 0
-              ? totalPurchasedCarts / (totalCarts + totalPurchasedCarts)
+            abandonedSessionCount + purchasedCount > 0
+              ? purchasedCount / (abandonedSessionCount + purchasedCount)
               : 0;
 
           const insights: AgentInsightInput[] = [];
@@ -155,9 +151,9 @@ export const Route = createFileRoute("/hooks/agents/aov-leak")({
               tenant_id: tenantId,
               insight_type: "aov_leak",
               affected_layer: "recovery",
-              title: `${p.name}: ${a.sessions.size} carts abandoned in ${WINDOW_DAYS}d`,
-              description: `Of ${a.sessions.size} sessions that added "${p.name}" to cart, none completed checkout. ${a.checkouts} reached the checkout step but didn't pay. Trigger an abandoned-cart email with a soft 10% reminder — typical recovery rate ~25%.`,
-              expected_impact: `Recover ~${(recoverableRevCents / 100).toFixed(2)} ₴ (~${recoverableSessions} orders)`,
+              title: `${p.name}: ${a.sessions.size} покинутих кошиків за ${WINDOW_DAYS}д`,
+              description: `З ${a.sessions.size} сесій, де "${p.name}" додали до кошика, жодна не завершила оплату. ${a.checkouts} дійшли до оформлення, але не оплатили. Надішліть листа про покинутий кошик зі знижкою 10% — типовий відсоток повернення ~25%.`,
+              expected_impact: `Повернути ~${(recoverableRevCents / 100).toFixed(2)} ₴ (~${recoverableSessions} замовлень)`,
               confidence,
               risk_level: risk,
               metrics: {

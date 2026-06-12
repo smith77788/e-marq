@@ -143,14 +143,14 @@ export function ROIDashboard({ tenantId }: { tenantId: string | null }) {
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center justify-between">
-              <div className="text-xs text-muted-foreground">Win-rate</div>
+              <div className="text-xs text-muted-foreground">Відсоток успіху</div>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="text-2xl font-bold mt-1">
               {data.win_rate_pct !== null ? `${data.win_rate_pct}%` : "—"}
             </div>
             <div className="text-xs text-muted-foreground mt-0.5">
-              {data.avg_lift_pct !== null ? `avg lift: ${data.avg_lift_pct}%` : "очікуємо вимірів"}
+              {data.avg_lift_pct !== null ? `сер. підйом: ${data.avg_lift_pct}%` : "очікуємо вимірів"}
             </div>
           </CardContent>
         </Card>

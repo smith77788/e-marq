@@ -63,8 +63,9 @@ export function KpiDashboard({ tenantId }: Props) {
           .from("orders")
           .select("total_cents, paid_at")
           .eq("tenant_id", tenantId)
-          .eq("status", "paid")
-          .gte("paid_at", sinceIso),
+          .in("status", ["paid", "fulfilled"])
+          .gte("paid_at", sinceIso)
+          .limit(5000),
         supabase
           .from("outbound_messages")
           .select("trigger_kind, status, actual_revenue_cents, sent_at, converted_at")
@@ -73,7 +74,8 @@ export function KpiDashboard({ tenantId }: Props) {
         supabase
           .from("customers")
           .select("lifecycle_stage, last_order_at, predicted_next_order_at")
-          .eq("tenant_id", tenantId),
+          .eq("tenant_id", tenantId)
+          .limit(10000),
       ]);
       return {
         orders: (ordersRes.data ?? []) as Order[],

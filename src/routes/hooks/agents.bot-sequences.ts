@@ -107,7 +107,7 @@ export const Route = createFileRoute("/hooks/agents/bot-sequences")({
             }
           }
 
-          const custIds = stuck.map((s) => s.custId);
+          const custIds = stuck.slice(0, 50).map((s) => s.custId);
           const { data: customers } = custIds.length
             ? await supabaseAdmin.from("customers").select("id, email, name").in("id", custIds)
             : { data: [] };

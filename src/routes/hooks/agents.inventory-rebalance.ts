@@ -54,18 +54,16 @@ export const Route = createFileRoute("/hooks/agents/inventory-rebalance")({
 
           const productIds = products.map((p) => p.id);
           const since = new Date(Date.now() - 60 * 86_400_000).toISOString();
-          const { data: recentSales } = await supabaseAdmin
+          const { data: recentSales, error: salesErr } = await supabaseAdmin
             .from("order_items")
             .select("product_id, orders!inner(status, created_at)")
             .eq("tenant_id", tenantId)
             .in("product_id", productIds)
-            .in("orders.status", ["paid", "fulfilled"])
-            .gte("orders.created_at", since);
+            .gte("orders.created_at", since)
+            .limit(5000);
+          if (salesErr) throw salesErr;
 
-          const sold = new Set<string>();
-          for (const r of recentSales ?? []) {
-            if (r.product_id) sold.add(r.product_id);
-          }
+          const sold = new Set((recentSales ?? []).filter(r => ["paid", "fulfilled"].includes((r.orders as Record<string, string>)?.status ?? "")).map(r => r.product_id));
 
           const insights: AgentInsightInput[] = [];
           let totalDeadCapital = 0;

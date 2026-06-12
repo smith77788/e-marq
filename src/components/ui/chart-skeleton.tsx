@@ -23,7 +23,7 @@ export function ChartSkeleton({
   return (
     <div
       role="status"
-      aria-label="Loading chart…"
+      aria-label="Завантаження графіка…"
       aria-busy="true"
       className={cn("w-full", heightClassName, className)}
     >

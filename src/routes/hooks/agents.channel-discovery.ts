@@ -63,6 +63,13 @@ export const Route = createFileRoute("/hooks/agents/channel-discovery")({
               .from("events")
               .select("id", { count: "exact", head: true })
               .eq("tenant_id", tenantId)
+              .in("type", [
+                "page_view",
+                "product_viewed",
+                "add_to_cart",
+                "checkout_started",
+                "purchase_completed",
+              ])
               .gte("created_at", since7),
             supabaseAdmin
               .from("telegram_chat_routing")
@@ -88,7 +95,8 @@ export const Route = createFileRoute("/hooks/agents/channel-discovery")({
             supabaseAdmin
               .from("tenant_integrations")
               .select("provider, is_active, last_sync_status")
-              .eq("tenant_id", tenantId),
+              .eq("tenant_id", tenantId)
+              .limit(100),
           ]);
 
           const slug = tenantRes.data?.slug ?? "";
@@ -135,7 +143,7 @@ export const Route = createFileRoute("/hooks/agents/channel-discovery")({
               tenant_id: tenantId,
               insight_type: "bootstrap_no_telegram_channel",
               affected_layer: "channels",
-              title: "Telegram channel not connected",
+              title: "Telegram-канал не підключений",
               description:
                 "Без Telegram win-back, abandoned-cart та reorder агенти не мають як зв'язатися з клієнтами. Це найшвидший канал, який можна підключити за 2 хвилини.",
               expected_impact: "Активує 24/7 sales-bot + 5 повідомлень-агентів",
@@ -150,7 +158,7 @@ export const Route = createFileRoute("/hooks/agents/channel-discovery")({
               tenant_id: tenantId,
               insight_type: "bootstrap_no_email_channel",
               affected_layer: "channels",
-              title: "No email addresses captured",
+              title: "Email-адреси не зібрані",
               description:
                 "Email-канал недоступний — broadcast-composer не зможе відправляти масові розсилки. Додайте поле email на checkout.",
               expected_impact: "Подвоює доступну аудиторію для розсилок",

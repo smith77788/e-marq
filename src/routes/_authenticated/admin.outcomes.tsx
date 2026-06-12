@@ -34,7 +34,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/admin/outcomes")({
   head: () => ({
     meta: [
-      { title: "Measurement loop — MARQ" },
+      { title: "Цикл вимірювань — MARQ" },
       { name: "description", content: "Cross-tenant action outcomes" },
     ],
   }),
@@ -162,7 +162,7 @@ function AdminOutcomes() {
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-semibold">
             <Activity className="h-6 w-6 text-primary" />
-            Measurement loop
+            Цикл вимірювань
           </h1>
           <p className="text-sm text-muted-foreground">
             Що сталося після кожної виконаної дії: win-rate, revenue, breakdowns.
@@ -182,7 +182,7 @@ function AdminOutcomes() {
             </SelectContent>
           </Select>
           <Button asChild variant="outline" size="sm">
-            <Link to="/admin/decisions">Decision Inbox</Link>
+            <Link to="/admin/decisions">Рішення агентів</Link>
           </Button>
         </div>
       </header>

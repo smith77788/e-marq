@@ -102,6 +102,7 @@ export const Route = createFileRoute("/api/ai/ask")({
               .from("orders")
               .select("id, total_cents, status, created_at")
               .eq("tenant_id", tenantId)
+              .in("status", ["paid", "fulfilled"])
               .gte("created_at", since30Iso)
               .order("created_at", { ascending: false })
               .limit(300),

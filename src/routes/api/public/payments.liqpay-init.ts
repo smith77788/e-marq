@@ -123,19 +123,25 @@ export const Route = createFileRoute("/api/public/payments/liqpay-init")({
         });
 
         // Create intent
-        const { data: intentId } = await supabaseAdmin.rpc("create_payment_intent", {
-          _order_id: order.id,
-          _provider: "liqpay",
-          _amount_cents: order.total_cents,
-          _redirect_url: out.checkoutUrl,
-        });
+        const { data: intentId, error: intentErr } = await supabaseAdmin.rpc(
+          "create_payment_intent",
+          {
+            _order_id: order.id,
+            _provider: "liqpay",
+            _amount_cents: order.total_cents,
+            _redirect_url: out.checkoutUrl,
+          },
+        );
+        if (intentErr) {
+          console.error("[liqpay-init] create_payment_intent failed:", intentErr.message);
+        }
 
         return Response.json({
           ok: true,
           provider: "liqpay",
           formFields: { data: out.data, signature: out.signature },
           action: out.checkoutUrl,
-          intentId,
+          intentId: intentId ?? null,
         });
       },
     },

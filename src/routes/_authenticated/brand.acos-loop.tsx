@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_authenticated/brand/acos-loop")({
       { title: "ACOS Loop — MARQ" },
       {
         name: "description",
-        content: "Closed-loop dashboard: insights, decisions queue, agent ROI and outcomes",
+        content: "Closed-loop дашборд: insights, черга рішень, ROI агентів та outcomes",
       },
     ],
   }),

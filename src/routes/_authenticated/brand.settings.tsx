@@ -149,7 +149,7 @@ function StoreSettingsPage() {
       // зберігаємо ui/seo/bot, не перезаписуючи інші ключі
       const merged = {
         tenant_id: tenantId,
-        brand_name: (form.brand_name.trim() || current?.tenant_name) ?? "Brand",
+        brand_name: (form.brand_name.trim() || current?.tenant_name) ?? "Бренд",
         ui: {
           ...((cfgQuery.data?.ui as Json) ?? {}),
           primary_color: form.primary_color,

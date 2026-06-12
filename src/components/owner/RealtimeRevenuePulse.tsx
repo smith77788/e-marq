@@ -49,9 +49,10 @@ export function RealtimeRevenuePulse({ tenantId }: Props) {
         .from("orders")
         .select("id, total_cents, paid_at, status")
         .eq("tenant_id", tenantId)
-        .eq("status", "paid")
+        .in("status", ["paid", "fulfilled"])
         .gte("paid_at", since)
-        .order("paid_at", { ascending: true });
+        .order("paid_at", { ascending: true })
+        .limit(2000);
       return (data ?? []) as OrderRow[];
     },
   });
@@ -141,11 +142,11 @@ export function RealtimeRevenuePulse({ tenantId }: Props) {
             <Zap
               className={`h-4 w-4 ${isLive ? "text-primary animate-pulse" : "text-muted-foreground"}`}
             />
-            Live Revenue Pulse · 24h
+            Пульс доходу · 24 год
           </CardTitle>
           <Badge variant="outline" className="text-[10px] border-primary/40 text-primary">
             <Activity className="mr-1 h-2.5 w-2.5 animate-pulse" />
-            REALTIME
+            В ЕФІРІ
           </Badge>
         </div>
         <CardDescription className="text-xs">

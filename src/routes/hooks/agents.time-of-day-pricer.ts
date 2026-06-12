@@ -55,7 +55,7 @@ export const Route = createFileRoute("/hooks/agents/time-of-day-pricer")({
               .from("orders")
               .select("created_at, metadata")
               .eq("tenant_id", tenantId)
-              .eq("status", "paid")
+              .in("status", ["paid", "fulfilled"])
               .gte("created_at", since)
               .limit(2000),
           ]);
@@ -73,7 +73,12 @@ export const Route = createFileRoute("/hooks/agents/time-of-day-pricer")({
           for (const o of paid) ordersByHour[new Date(o.created_at).getUTCHours()]++;
 
           const cr = viewsByHour.map((v, i) => (v > 0 ? ordersByHour[i] / v : 0));
-          const avgCr = cr.reduce((s, x) => s + x, 0) / 24;
+          // Average only over hours with traffic; zero-traffic hours deflate the baseline
+          const activeHours = cr.filter((_, i) => viewsByHour[i] > 0);
+          const avgCr =
+            activeHours.length > 0
+              ? activeHours.reduce((s, x) => s + x, 0) / activeHours.length
+              : 0;
 
           const lowHours: number[] = [];
           for (let h = 0; h < 24; h++) {
@@ -108,7 +113,7 @@ export const Route = createFileRoute("/hooks/agents/time-of-day-pricer")({
           await finishAgentRun(handle, created, {
             avg_cr: avgCr,
             low_hours_count: lowHours.length,
-            geo: summarizeGeo(geo, "en"),
+            geo: summarizeGeo(geo, "uk"),
             views_in_scope: views.length,
             orders_in_scope: paid.length,
           });

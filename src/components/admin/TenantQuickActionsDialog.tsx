@@ -82,7 +82,7 @@ export function TenantQuickActionsDialog({
 
   const setStatus = useMutation({
     mutationFn: async (status: string) => {
-      if (!tenant) throw new Error("No tenant");
+      if (!tenant) throw new Error("Бренд не обрано");
       const { error } = await supabase.rpc("admin_set_tenant_status", {
         _tenant_id: tenant.tenant_id,
         _status: status,
@@ -98,7 +98,7 @@ export function TenantQuickActionsDialog({
 
   const changePlan = useMutation({
     mutationFn: async (key: string) => {
-      if (!tenant) throw new Error("No tenant");
+      if (!tenant) throw new Error("Бренд не обрано");
       const { error } = await supabase.rpc("change_tenant_plan", {
         _tenant_id: tenant.tenant_id,
         _plan_key: key,

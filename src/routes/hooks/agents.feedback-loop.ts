@@ -52,7 +52,7 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop")({
         const handle = await startAgentRun(AGENT_ID, tenantId, ctx);
         try {
           const cutoff = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
-          const { data: rows } = await supabaseAdmin
+          const { data: rows, error: rowsErr } = await supabaseAdmin
             .from("outbound_messages")
             .select("id, tenant_id, customer_id, trigger_kind, sent_at, expected_impact_cents")
             .eq("tenant_id", tenantId)
@@ -61,6 +61,7 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop")({
             .is("converted_at", null)
             .lte("sent_at", cutoff)
             .limit(200);
+          if (rowsErr) throw rowsErr;
 
           let measured = 0,
             conversions = 0,
@@ -76,10 +77,14 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop")({
             policyAgg[r.trigger_kind].trials++;
 
             if (!r.customer_id) {
-              await supabaseAdmin
+              const { error: updErr } = await supabaseAdmin
                 .from("outbound_messages")
-                .update({ actual_revenue_cents: 0 })
+                .update({ actual_revenue_cents: 0, status: "measured" })
                 .eq("id", r.id);
+              if (updErr) {
+                console.error("outbound_messages update failed", updErr);
+                throw updErr;
+              }
               measured++;
               continue;
             }
@@ -88,14 +93,19 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop")({
             const { data: customer } = await supabaseAdmin
               .from("customers")
               .select("email")
+              .eq("tenant_id", tenantId)
               .eq("id", r.customer_id)
               .maybeSingle();
             const email = customer?.email ?? null;
             if (!email) {
-              await supabaseAdmin
+              const { error: updErr } = await supabaseAdmin
                 .from("outbound_messages")
-                .update({ actual_revenue_cents: 0 })
+                .update({ actual_revenue_cents: 0, status: "measured" })
                 .eq("id", r.id);
+              if (updErr) {
+                console.error("outbound_messages update failed", updErr);
+                throw updErr;
+              }
               measured++;
               continue;
             }
@@ -108,20 +118,24 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop")({
               .from("orders")
               .select("total_cents")
               .eq("tenant_id", tenantId)
-              .eq("status", "paid")
+              .in("status", ["paid", "fulfilled"])
               .ilike("customer_email", email)
               .gte("paid_at", sentAt)
               .lte("paid_at", windowEnd);
             const revenue = (orders ?? []).reduce((s, o) => s + (o.total_cents ?? 0), 0);
 
-            await supabaseAdmin
+            const { error: updErr } = await supabaseAdmin
               .from("outbound_messages")
               .update({
                 actual_revenue_cents: revenue,
-                status: revenue > 0 ? "converted" : undefined,
+                status: revenue > 0 ? "converted" : "measured",
                 converted_at: revenue > 0 ? new Date().toISOString() : null,
               })
               .eq("id", r.id);
+            if (updErr) {
+              console.error("outbound_messages update failed", updErr);
+              throw updErr;
+            }
             measured++;
             if (revenue > 0) {
               conversions++;
@@ -142,7 +156,7 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop")({
               .eq("is_active", true)
               .maybeSingle();
             if (existing) {
-              await supabaseAdmin
+              const { error: policyErr } = await supabaseAdmin
                 .from("decision_policies")
                 .update({
                   trial_count: existing.trial_count + agg.trials,
@@ -151,8 +165,9 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop")({
                   reason: `Updated by feedback loop: ${agg.wins}/${agg.trials} wins this batch`,
                 })
                 .eq("id", existing.id);
+              if (policyErr) throw policyErr;
             } else {
-              await supabaseAdmin.from("decision_policies").insert({
+              const { error: policyErr } = await supabaseAdmin.from("decision_policies").insert({
                 tenant_id: tenantId,
                 policy_key: policyKey,
                 value: { kind } as never,
@@ -161,6 +176,7 @@ export const Route = createFileRoute("/hooks/agents/feedback-loop")({
                 total_revenue_cents: agg.revenue,
                 reason: `Initial measurement`,
               });
+              if (policyErr) throw policyErr;
             }
           }
 

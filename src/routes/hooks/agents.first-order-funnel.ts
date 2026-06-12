@@ -52,7 +52,8 @@ export const Route = createFileRoute("/hooks/agents/first-order-funnel")({
               "add_to_cart",
               "checkout_started",
               "purchase_completed",
-            ]);
+            ])
+            .limit(100000);
 
           if (!events?.length) {
             await finishAgentRun(handle, 0, { reason: "no_events" });

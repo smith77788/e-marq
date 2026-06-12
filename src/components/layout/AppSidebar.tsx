@@ -3,18 +3,18 @@ import { useCallback, useState } from "react";
 import { HandbookSheet } from "@/components/layout/HandbookSheet";
 import {
   Activity,
+  BarChart2,
   BookOpen,
   Bot,
   Building2,
   Coins,
-  Cpu,
   CreditCard,
   Gauge,
   HeartPulse,
   IdCard,
+  Inbox,
   Layers,
   LayoutDashboard,
-  Inbox,
   Lightbulb,
   Mail,
   Package,
@@ -52,20 +52,19 @@ import { useT, type TKey } from "@/lib/i18n";
 type NavItem = {
   labelKey: TKey;
   to: string;
-  /** Optional hash anchor (`#section`) appended to the link href. */
   hash?: string;
   icon: typeof LayoutDashboard;
   exact?: boolean;
-  /** Tailwind text-color class for the icon when inactive (group accent). */
   tone?: string;
 };
 
 type NavGroup = {
   labelKey: TKey;
-  /** Tailwind text-color class for the group label (subtle accent). */
   tone?: string;
   items: NavItem[];
 };
+
+// ─── OWNER navigation ────────────────────────────────────────────────────────
 
 const COCKPIT: NavGroup = {
   labelKey: "sb.cockpit",
@@ -78,18 +77,39 @@ const COCKPIT: NavGroup = {
       exact: true,
       tone: "text-primary",
     },
-    { labelKey: "sb.revenue", to: "/dashboard", icon: Gauge, exact: true, tone: "text-success" },
+    {
+      labelKey: "sb.revenue",
+      to: "/dashboard",
+      icon: BarChart2,
+      exact: true,
+      tone: "text-success",
+    },
   ],
 };
 
-const SHOP: NavGroup = {
-  labelKey: "sb.shop",
+const SALES: NavGroup = {
+  labelKey: "sb.sales" as TKey,
+  tone: "text-warning/70",
+  items: [
+    { labelKey: "sb.orders", to: "/brand/orders", icon: ShoppingCart, tone: "text-warning" },
+    { labelKey: "sb.customers", to: "/brand/customers", icon: Users, tone: "text-info" },
+  ],
+};
+
+const CATALOG: NavGroup = {
+  labelKey: "sb.catalog" as TKey,
   tone: "text-info/70",
   items: [
     { labelKey: "sb.products", to: "/brand/products", icon: Package, tone: "text-info" },
-    { labelKey: "sb.orders", to: "/brand/orders", icon: ShoppingCart, tone: "text-warning" },
     { labelKey: "sb.collections", to: "/brand/catalog", icon: Layers, tone: "text-info" },
     { labelKey: "sb.promotions", to: "/brand/promotions", icon: Tag, tone: "text-accent" },
+  ],
+};
+
+const MARKETING: NavGroup = {
+  labelKey: "sb.marketing" as TKey,
+  tone: "text-accent/70",
+  items: [
     { labelKey: "sb.email" as TKey, to: "/brand/email", icon: Mail, tone: "text-primary" },
     {
       labelKey: "sb.siteBuilder" as TKey,
@@ -97,24 +117,24 @@ const SHOP: NavGroup = {
       icon: Wand2,
       tone: "text-accent",
     },
-    {
-      labelKey: "sb.storeSettings" as TKey,
-      to: "/brand/settings",
-      icon: Settings,
-      tone: "text-primary",
-    },
   ],
 };
 
-const GROWTH: NavGroup = {
+const AI_AGENTS: NavGroup = {
   labelKey: "sb.growth",
-  tone: "text-accent/70",
+  tone: "text-primary/70",
   items: [
     {
       labelKey: "sb.insights",
       to: "/brand/insights",
       icon: Lightbulb,
       tone: "text-warning",
+    },
+    {
+      labelKey: "sb.decisions" as TKey,
+      to: "/brand/decisions",
+      icon: Inbox,
+      tone: "text-info",
     },
     {
       labelKey: "sb.acosLoop",
@@ -128,12 +148,11 @@ const GROWTH: NavGroup = {
       icon: Coins,
       tone: "text-success",
     },
-    { labelKey: "sb.customers", to: "/brand/customers", icon: Users, tone: "text-info" },
-    { labelKey: "sb.agents", to: "/agents/library", icon: Bot, tone: "text-accent" },
+    { labelKey: "sb.agentLibrary", to: "/agents/library", icon: Bot, tone: "text-accent" },
   ],
 };
 
-const SETUP: NavGroup = {
+const OWNER_SETTINGS: NavGroup = {
   labelKey: "sb.setup",
   tone: "text-muted-foreground",
   items: [
@@ -146,12 +165,17 @@ const SETUP: NavGroup = {
     },
     { labelKey: "sb.team" as TKey, to: "/brand/team", icon: UsersRound, tone: "text-accent" },
     {
-      labelKey: "Ingest logs" as TKey,
-      to: "/brand/ingest-logs",
-      icon: Activity,
+      labelKey: "sb.storeSettings" as TKey,
+      to: "/brand/settings",
+      icon: Settings,
+      tone: "text-primary",
+    },
+    {
+      labelKey: "sb.planBilling" as TKey,
+      to: "/brand/billing",
+      icon: CreditCard,
       tone: "text-warning",
     },
-    { labelKey: "sb.onboarding", to: "/onboarding", icon: Sparkles, tone: "text-accent" },
     {
       labelKey: "sb.profile" as TKey,
       to: "/profile",
@@ -159,133 +183,57 @@ const SETUP: NavGroup = {
       exact: true,
       tone: "text-primary",
     },
-  ],
-};
-
-const BILLING: NavGroup = {
-  labelKey: "sb.billing" as TKey,
-  tone: "text-warning/70",
-  items: [
     {
-      labelKey: "sb.planBilling" as TKey,
-      to: "/brand/billing",
-      icon: CreditCard,
-      tone: "text-warning",
-    },
-  ],
-};
-
-const OWNER_NAV: NavGroup[] = [COCKPIT, SHOP, GROWTH, SETUP, BILLING];
-
-const ADMIN_SYSTEM: NavGroup = {
-  labelKey: "sb.system",
-  tone: "text-destructive/70",
-  items: [
-    {
-      labelKey: "sb.adminCommands" as TKey,
-      to: "/admin/commands",
-      icon: Zap,
-      tone: "text-warning",
-    },
-    {
-      labelKey: "sb.adminDecisions" as TKey,
-      to: "/admin/decisions",
-      icon: Inbox,
-      tone: "text-warning",
-    },
-    {
-      labelKey: "sb.missionControl",
-      to: "/admin",
-      icon: ShieldCheck,
-      exact: true,
-      tone: "text-destructive",
-    },
-    {
-      labelKey: "sb.healthMonitor" as TKey,
-      to: "/admin/health",
-      icon: HeartPulse,
-      tone: "text-destructive",
-    },
-    {
-      labelKey: "sb.selfHeal" as TKey,
-      to: "/admin/self-heal",
-      icon: Sparkles,
-      tone: "text-success",
-    },
-    {
-      labelKey: "Ingest logs" as TKey,
-      to: "/admin/ingest-logs",
+      labelKey: "sb.ingestLogs" as TKey,
+      to: "/brand/ingest-logs",
       icon: Activity,
-      tone: "text-warning",
-    },
-    { labelKey: "sb.crossTenant" as TKey, to: "/admin/overview", icon: Layers, tone: "text-info" },
-    { labelKey: "sb.allTenants", to: "/admin/tenants", icon: Building2, tone: "text-primary" },
-    { labelKey: "sb.plansCatalog" as TKey, to: "/admin/plans", icon: Coins, tone: "text-warning" },
-    {
-      labelKey: "sb.adminUsers" as TKey,
-      to: "/admin/users",
-      icon: UsersRound,
-      tone: "text-accent",
-    },
-    {
-      labelKey: "sb.adminPermissions" as TKey,
-      to: "/admin/permissions",
-      icon: ShieldCheck,
-      tone: "text-primary",
-    },
-    {
-      labelKey: "sb.topupRequests" as TKey,
-      to: "/admin/topup-requests",
-      icon: CreditCard,
-      tone: "text-success",
-    },
-    { labelKey: "sb.leadRadar" as TKey, to: "/admin/lead-radar", icon: Radio, tone: "text-accent" },
-    {
-      labelKey: "sb.dntradeHealth" as TKey,
-      to: "/admin/dntrade-health",
-      icon: HeartPulse,
-      tone: "text-destructive",
-    },
-    {
-      labelKey: "sb.adminAuditLog" as TKey,
-      to: "/admin/audit-log",
-      icon: ShieldCheck,
-      tone: "text-warning",
+      tone: "text-muted-foreground",
     },
   ],
 };
 
-const ADMIN_AGENTS: NavGroup = {
-  labelKey: "sb.agents",
-  tone: "text-accent/70",
-  items: [
-    { labelKey: "sb.liveRuns", to: "/agents/live", icon: Activity, tone: "text-success" },
-    { labelKey: "sb.agentLibrary", to: "/agents/library", icon: Cpu, tone: "text-accent" },
-    {
-      labelKey: "sb.adminAgents" as TKey,
-      to: "/admin/agents",
-      icon: Bot,
-      tone: "text-warning",
-    },
-    {
-      labelKey: "sb.adminOutcomes" as TKey,
-      to: "/admin/outcomes",
-      icon: Activity,
-      tone: "text-success",
-    },
-    {
-      labelKey: "sb.insightStream",
-      to: "/admin/overview",
-      hash: "stream",
-      icon: Radio,
-      tone: "text-warning",
-    },
-  ],
-};
+const OWNER_NAV: NavGroup[] = [COCKPIT, SALES, CATALOG, MARKETING, AI_AGENTS, OWNER_SETTINGS];
 
-// Адмін бачить системні розділи + повний доступ до всіх бренд-розділів,
-// щоб міг керувати магазином обраного бренду без перемикань ролей.
-const ADMIN_NAV: NavGroup[] = [ADMIN_SYSTEM, ADMIN_AGENTS, COCKPIT, SHOP, GROWTH, SETUP, BILLING];
+// ─── ADMIN navigation ─────────────────────────────────────────────────────────
+
+const ADMIN_NAV: NavGroup[] = [
+  {
+    labelKey: "sb.monitoring" as TKey,
+    tone: "text-destructive/70",
+    items: [
+      { labelKey: "sb.missionControl", to: "/admin", icon: ShieldCheck, exact: true, tone: "text-destructive" },
+      { labelKey: "sb.healthMonitor" as TKey, to: "/admin/health", icon: HeartPulse, tone: "text-warning" },
+      { labelKey: "sb.selfHeal" as TKey, to: "/admin/self-heal", icon: Sparkles, tone: "text-success" },
+      { labelKey: "sb.adminAuditLog" as TKey, to: "/admin/audit-log", icon: ShieldCheck, tone: "text-muted-foreground" },
+      { labelKey: "sb.ingestLogs" as TKey, to: "/admin/ingest-logs", icon: Activity, tone: "text-muted-foreground" },
+    ],
+  },
+  {
+    labelKey: "sb.management" as TKey,
+    tone: "text-info/70",
+    items: [
+      { labelKey: "sb.allTenants", to: "/admin/tenants", icon: Building2, tone: "text-primary" },
+      { labelKey: "sb.adminUsers" as TKey, to: "/admin/users", icon: UsersRound, tone: "text-accent" },
+      { labelKey: "sb.adminPermissions" as TKey, to: "/admin/permissions", icon: ShieldCheck, tone: "text-primary" },
+      { labelKey: "sb.plansCatalog" as TKey, to: "/admin/plans", icon: Coins, tone: "text-warning" },
+      { labelKey: "sb.topupRequests" as TKey, to: "/admin/topup-requests", icon: CreditCard, tone: "text-success" },
+    ],
+  },
+  {
+    labelKey: "sb.agents",
+    tone: "text-accent/70",
+    items: [
+      { labelKey: "sb.adminCommands" as TKey, to: "/admin/commands", icon: Zap, tone: "text-warning" },
+      { labelKey: "sb.adminDecisions" as TKey, to: "/admin/decisions", icon: Inbox, tone: "text-warning" },
+      { labelKey: "sb.liveRuns", to: "/agents/live", icon: Activity, tone: "text-success" },
+      { labelKey: "sb.adminOutcomes" as TKey, to: "/admin/outcomes", icon: TrendingUp, tone: "text-success" },
+      { labelKey: "sb.insightStream", to: "/admin/overview", hash: "stream", icon: Radio, tone: "text-warning" },
+      { labelKey: "sb.leadRadar" as TKey, to: "/admin/lead-radar", icon: Gauge, tone: "text-accent" },
+    ],
+  },
+];
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 type Props = {
   isSuperAdmin: boolean;
@@ -305,12 +253,6 @@ export function AppSidebar({ isSuperAdmin, brandName, tenantSlug, currentTenantI
 
   const withTenantSearch = currentTenantId ? { tenant: currentTenantId } : undefined;
 
-  /**
-   * Smart hash navigation:
-   * - If we're already on the target route, smooth-scroll to the anchor.
-   * - Otherwise, navigate via TanStack router (no full reload) and after
-   *   the route mounts scroll to the anchor.
-   */
   const handleHashNav = useCallback(
     (e: React.MouseEvent, to: string, hash: string) => {
       e.preventDefault();
@@ -476,18 +418,6 @@ export function AppSidebar({ isSuperAdmin, brandName, tenantSlug, currentTenantI
                   {!collapsed && <span>{t("sb.storefront")}</span>}
                 </Link>
               )}
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip={t("sb.settings")}>
-              <Link
-                to={isSuperAdmin ? "/admin/health" : "/brand/settings"}
-                search={!isSuperAdmin ? withTenantSearch : undefined}
-                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60"
-              >
-                <Settings className="h-4 w-4 text-accent" />
-                {!collapsed && <span>{t("sb.settings")}</span>}
-              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

@@ -45,7 +45,8 @@ export const Route = createFileRoute("/hooks/engines/abandoned-cart-all")({
         const { data: tenants, error } = await supabaseAdmin
           .from("tenants")
           .select("id, slug")
-          .in("status", [...FANOUT_TENANT_STATUSES]);
+          .in("status", [...FANOUT_TENANT_STATUSES])
+          .limit(500);
         if (error) return jsonError("Failed to load tenants", 500, { details: error.message });
 
         const outcomes: Array<Record<string, unknown>> = [];

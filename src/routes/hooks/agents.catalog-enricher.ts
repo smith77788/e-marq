@@ -103,13 +103,19 @@ export const Route = createFileRoute("/hooks/agents/catalog-enricher")({
 
           worst.sort((a, b) => b.missing.length - a.missing.length);
 
+          // shortDesc counts as half a problem: description exists but is too thin
           const completeness =
             rows.length === 0
               ? 0
               : Math.max(
                   0,
                   1 -
-                    (missingDesc + missingImage + missingCategory + missingCost + missingPrice) /
+                    (missingDesc +
+                      shortDesc * 0.5 +
+                      missingImage +
+                      missingCategory +
+                      missingCost +
+                      missingPrice) /
                       (rows.length * 5),
                 );
 
@@ -153,7 +159,7 @@ export const Route = createFileRoute("/hooks/agents/catalog-enricher")({
               tenant_id: tenantId,
               insight_type: "bootstrap_catalog_missing_cost",
               affected_layer: "catalog",
-              title: `${missingCost} product${missingCost === 1 ? "" : "s"} have no cost price`,
+              title: `${missingCost} ${missingCost === 1 ? "товар не має" : "товарів не мають"} собівартості`,
               description:
                 "Без собівартості margin-optimizer та promo-portfolio працюють наосліп. Додайте cost у metadata кожного SKU.",
               expected_impact: "Активує margin-агентів і захищає від збиткових промо",
@@ -168,7 +174,7 @@ export const Route = createFileRoute("/hooks/agents/catalog-enricher")({
               tenant_id: tenantId,
               insight_type: "bootstrap_catalog_missing_image",
               affected_layer: "catalog",
-              title: `${missingImage} product${missingImage === 1 ? "" : "s"} have no image`,
+              title: `${missingImage} ${missingImage === 1 ? "товар без" : "товарів без"} фото`,
               description: "Картка товару без фото конвертить у 3-4 рази гірше.",
               expected_impact: "Підіймає CTR картки на ~2-3×",
               confidence: 0.85,

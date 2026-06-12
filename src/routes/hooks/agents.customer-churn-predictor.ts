@@ -38,13 +38,15 @@ export const Route = createFileRoute("/hooks/agents/customer-churn-predictor")({
 
         const handle = await startAgentRun("customer-churn-predictor", tenantId, ctx);
         try {
-          const { data: customers } = await supabaseAdmin
+          const { data: customers, error: customersErr } = await supabaseAdmin
             .from("customers")
             .select(
               "id, name, email, total_orders, total_spent_cents, last_order_at, avg_cycle_days, predicted_next_order_at",
             )
             .eq("tenant_id", tenantId)
-            .gte("total_orders", 1);
+            .gte("total_orders", 1)
+            .limit(5000);
+          if (customersErr) throw customersErr;
 
           if (!customers?.length) {
             await finishAgentRun(handle, 0, { reason: "no_customers" });
@@ -133,7 +135,7 @@ export const Route = createFileRoute("/hooks/agents/customer-churn-predictor")({
               insight_type: "high_value_churn_risk",
               affected_layer: "lifecycle",
               title: `Високий ризик: ${r.name} (LTV ${(r.ltv / 100).toFixed(0)} ₴)`,
-              description: `Churn-probability ${(r.prob * 100).toFixed(0)}% — причина: ${r.reason}.`,
+              description: `Ймовірність відтоку ${(r.prob * 100).toFixed(0)}% — причина: ${r.reason}.`,
               expected_impact: `Win-back з знижкою 15-20% повертає ~25-35% таких клієнтів.`,
               confidence: r.prob,
               risk_level: r.ltv >= 20000 ? "high" : "medium",

@@ -9,6 +9,7 @@
  * Email still uses Resend if RESEND_API_KEY is configured.
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { sendEmailViaGateway } from "@/lib/email/resendGateway";
 
 export type OutboundRow = {
   id: string;
@@ -100,48 +101,43 @@ function bodyToHtml(body: string): string {
 async function sendEmail(
   row: OutboundRow,
 ): Promise<{ ok: true; channel_message_id: string } | { ok: false; error: string }> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return { ok: false, error: "RESEND_API_KEY not configured" };
-
-  const { bot, brandName } = await getTenantBot(row.tenant_id);
-  const from = bot.email?.from ?? "noreply@resend.dev";
-  const replyTo = bot.email?.reply_to;
-
   const { data: customer } = await supabaseAdmin
     .from("customers")
-    .select("email, name")
+    .select("email, name, unsubscribe_token")
     .eq("id", row.customer_id ?? "")
     .maybeSingle();
   const to = customer?.email;
   if (!to) return { ok: false, error: "Customer has no email" };
 
+  const { brandName } = await getTenantBot(row.tenant_id);
+
+  // Use first non-empty text line as subject (strip HTML tags)
   const firstLine =
     row.body
       .split("\n")[0]
       ?.replace(/<[^>]+>/g, "")
       .trim() ?? "";
   const subject =
-    firstLine.length > 4 && firstLine.length < 80 ? firstLine : `A note from ${brandName}`;
+    firstLine.length > 4 && firstLine.length < 80
+      ? firstLine
+      : `Повідомлення від ${brandName}`;
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      from: `${brandName} <${from}>`,
-      to: [to],
-      subject,
-      html: bodyToHtml(row.body),
-      reply_to: replyTo,
-    }),
+  const result = await sendEmailViaGateway({
+    to,
+    subject,
+    html: bodyToHtml(row.body),
+    fromName: brandName,
+    tenantId: row.tenant_id,
+    category: "marketing",
+    unsubscribeToken: customer?.unsubscribe_token ?? undefined,
+    tags: [
+      { name: "template", value: row.metadata?.template_key as string ?? "outbound_auto" },
+      { name: "tenant", value: row.tenant_id.slice(0, 16) },
+    ],
   });
-  const json = (await res.json().catch(() => ({}))) as {
-    id?: string;
-    message?: string;
-    name?: string;
-  };
-  if (!res.ok || !json.id)
-    return { ok: false, error: json.message ?? json.name ?? `HTTP ${res.status}` };
-  return { ok: true, channel_message_id: json.id };
+
+  if (!result.ok) return { ok: false, error: result.error };
+  return { ok: true, channel_message_id: result.id };
 }
 
 /** Process all due outbound messages for a tenant. */

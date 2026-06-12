@@ -68,16 +68,21 @@ export function MarketingSpendForm({ tenantId }: { tenantId: string }) {
     enabled: !!tenantId,
   });
 
+  const DEFAULT_CHANNELS = ["organic", "meta_ads", "google_ads", "instagram", "referral", "direct"];
+
   const channelsQuery = useQuery({
     queryKey: ["acquisition-channels", tenantId],
+    enabled: !!tenantId,
+    staleTime: 5 * 60_000,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("customer_cohorts")
-        .select("retention_curve")
-        .eq("tenant_id", tenantId)
-        .limit(1);
-      // Suggested defaults — DnTrade store data rarely tags channel cleanly.
-      return ["organic", "meta_ads", "google_ads", "instagram", "referral", "direct"];
+      const { data, error } = await supabase
+        .from("acquisition_costs")
+        .select("channel")
+        .eq("tenant_id", tenantId);
+      if (error) throw error;
+      const existing = [...new Set((data ?? []).map((r) => r.channel).filter(Boolean))];
+      const merged = [...new Set([...existing, ...DEFAULT_CHANNELS])];
+      return merged.sort();
     },
   });
 

@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 export const Route = createFileRoute("/_authenticated/brand/ingest-logs")({
   head: () => ({
     meta: [
-      { title: "Ingest logs · Brand" },
+      { title: "Журнал запитів · Бренд" },
       { name: "description", content: "POST на /hooks/ingest для вашого бренду" },
     ],
   }),
@@ -27,5 +27,5 @@ function BrandIngestLogsRoute() {
       </div>
     );
   }
-  return <IngestLogsView tenantId={currentTenantId} title="Ingest logs (мій бренд)" />;
+  return <IngestLogsView tenantId={currentTenantId} title="Журнал запитів (мій бренд)" />;
 }

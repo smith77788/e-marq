@@ -68,7 +68,7 @@ export const Route = createFileRoute("/hooks/agents/segmentation")({
           }
 
           // p90 spend for whale threshold
-          const sorted = [...customers].map((c) => c.total_spent_cents).sort((a, b) => a - b);
+          const sorted = [...customers].map((c) => c.total_spent_cents).filter((v) => v > 0).sort((a, b) => a - b);
           const p90 = sorted[Math.floor(sorted.length * 0.9)] ?? 0;
           const now = Date.now();
 
@@ -114,7 +114,8 @@ export const Route = createFileRoute("/hooks/agents/segmentation")({
             const { error: upErr } = await supabaseAdmin
               .from("customers")
               .update({ metadata: u.metadata as never })
-              .eq("id", u.id);
+              .eq("id", u.id)
+              .eq("tenant_id", tenantId);
             if (!upErr) updated++;
           }
 
@@ -128,9 +129,9 @@ export const Route = createFileRoute("/hooks/agents/segmentation")({
               tenant_id: tenantId,
               insight_type: "segment_at_risk_cohort",
               affected_layer: "crm",
-              title: `${atRisk.count} customers entering "at_risk" cohort`,
-              description: `Segmentation refresh found ${atRisk.count} customers (${((atRisk.revenue / Math.max(totalRev, 1)) * 100).toFixed(0)}% of historical revenue) that haven't ordered in 60-120 days. Schedule a winback sequence with a 15% nudge before they go dormant.`,
-              expected_impact: `Recover ~${Math.round(atRisk.count * 0.2)} customers (~${((atRisk.revenue * 0.2) / 100 / Math.max(atRisk.count, 1)).toFixed(0)} ₴/each)`,
+              title: `${atRisk.count} клієнтів переходять у когорту «під ризиком»`,
+              description: `Оновлення сегментів: ${atRisk.count} клієнтів (${((atRisk.revenue / Math.max(totalRev, 1)) * 100).toFixed(0)}% від виторгу) не купували 60-120 днів. Запустіть winback-сценарій зі знижкою 15% до того, як вони стануть «сплячими».`,
+              expected_impact: `Повернути ~${Math.round(atRisk.count * 0.2)} клієнтів (~${((atRisk.revenue * 0.2) / 100 / Math.max(atRisk.count, 1)).toFixed(0)} ₴/кожен)`,
               confidence: 0.75,
               risk_level: "medium",
               metrics: {

@@ -69,6 +69,9 @@ const STATUS_HEADLINE: Record<OrderStatusEmailContext["newStatus"], string> = {
 const PAYMENT_LABEL: Record<string, string> = {
   manual: "Переказ на карту",
   stripe_card: "Картка (Stripe)",
+  liqpay: "LiqPay · картка",
+  wayforpay: "WayForPay · картка",
+  monobank: "Monobank",
 };
 
 function shell(

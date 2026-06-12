@@ -91,7 +91,7 @@ export const Route = createFileRoute("/hooks/engines/reorder")({
               )
               .eq("tenant_id", tenantId)
               .eq("orders.customer_email", c.email ?? "")
-              .eq("orders.status", "paid")
+              .in("orders.status", ["paid", "fulfilled"])
               .order("created_at", { ascending: false })
               .limit(1);
             const productName = lastItems?.[0]?.product_name ?? "your favorite";

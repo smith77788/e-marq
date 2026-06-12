@@ -104,6 +104,12 @@ export const Route = createFileRoute("/api/public/shipping/np")({
               CityName: q,
               Limit: 20,
             });
+            if (!json.success) {
+              return new Response(JSON.stringify({ data: [] }), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              });
+            }
             // searchSettlements повертає [{ Addresses: [...] }]
             const addresses =
               (json.data?.[0] as { Addresses?: unknown[] } | undefined)?.Addresses ?? [];
@@ -139,6 +145,12 @@ export const Route = createFileRoute("/api/public/shipping/np")({
             if (q && q.length <= 50) props.FindByString = q;
 
             const json = await callNP(apiKey, "Address", "getWarehouses", props);
+            if (!json.success) {
+              return new Response(JSON.stringify({ data: [] }), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              });
+            }
             const warehouses = (json.data as Array<Record<string, unknown>>).map((w) => ({
               ref: String(w.Ref ?? ""),
               number: String(w.Number ?? ""),
@@ -161,11 +173,9 @@ export const Route = createFileRoute("/api/public/shipping/np")({
             headers: { "Content-Type": "application/json" },
           });
         } catch (e) {
+          console.error("[shipping.np] upstream error", e instanceof Error ? e.message : e);
           return new Response(
-            JSON.stringify({
-              error: "np_error",
-              message: e instanceof Error ? e.message : "unknown",
-            }),
+            JSON.stringify({ error: "external_api_error" }),
             { status: 502, headers: { "Content-Type": "application/json" } },
           );
         }

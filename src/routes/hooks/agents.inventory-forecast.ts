@@ -56,8 +56,11 @@ export const Route = createFileRoute("/hooks/agents/inventory-forecast")({
               .from("order_items")
               .select("product_id, quantity, created_at, orders!inner(status)")
               .eq("tenant_id", tenantId)
-              .gte("created_at", since),
+              .gte("created_at", since)
+              .limit(50000),
           ]);
+          if (productsRes.error) throw productsRes.error;
+          if (itemsRes.error) throw itemsRes.error;
 
           const products = productsRes.data ?? [];
           if (products.length === 0) {
@@ -74,7 +77,7 @@ export const Route = createFileRoute("/hooks/agents/inventory-forecast")({
           }>) {
             if (!it.product_id) continue;
             const status = Array.isArray(it.orders) ? it.orders[0]?.status : it.orders?.status;
-            if (status !== "paid") continue;
+            if (status !== "paid" && status !== "fulfilled") continue;
             sold.set(it.product_id, (sold.get(it.product_id) ?? 0) + (it.quantity ?? 0));
           }
 

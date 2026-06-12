@@ -44,7 +44,8 @@ export const Route = createFileRoute("/hooks/agents/health-check")({
         const { data: runs, error: runsErr } = await supabaseAdmin
           .from("acos_agent_runs")
           .select("tenant_id, agent_id, status, insights_created, started_at")
-          .gte("started_at", since);
+          .gte("started_at", since)
+          .limit(10_000);
         if (runsErr) return jsonError(runsErr.message, 500);
 
         // 2. Aggregate
@@ -70,7 +71,8 @@ export const Route = createFileRoute("/hooks/agents/health-check")({
         const { data: actions } = await supabaseAdmin
           .from("ai_actions")
           .select("tenant_id, agent_id, status, applied_at")
-          .gte("created_at", since);
+          .gte("created_at", since)
+          .limit(10_000);
 
         const approvedByKey = new Map<string, number>();
         const dismissedByKey = new Map<string, number>();

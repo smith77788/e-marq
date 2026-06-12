@@ -1,11 +1,12 @@
 /**
- * Storefront homepage: hero, optional collections strip, full product grid.
- * Loaded shell comes from the parent `s.$slug` layout — we re-use its data
- * via the same query key.
+ * Storefront homepage: announcement hero, trust badges, collections strip,
+ * full product grid.
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight, Package, Sparkles, Tag } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   loadStorefrontShell,
   loadCollections,
@@ -41,6 +42,7 @@ export const Route = createFileRoute("/s/$slug/")({
   ),
   notFoundComponent: () => (
     <div className="mx-auto max-w-6xl px-4 py-12 text-center">
+      <Package className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
       <p className="text-sm text-muted-foreground">Магазин не знайдено.</p>
       <Link to="/" className="mt-3 inline-flex text-sm text-primary underline">
         На головну
@@ -68,91 +70,212 @@ function StorefrontIndex() {
   });
 
   const { shell, collections } = data;
-  const ui = shell.config?.ui ?? {};
+  const ui = (shell.config?.ui ?? {}) as Record<string, string>;
+
+  const hasHero = !!(ui.hero_image || ui.hero_headline);
+  const discountedProducts = shell.products.filter(
+    (p) => p.compare_at_price_cents && p.compare_at_price_cents > p.price_cents,
+  );
+  const inStockProducts = shell.products.filter((p) => p.stock > 0);
+  const outOfStockCount = shell.products.filter((p) => p.stock <= 0).length;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8">
-      {(ui.hero_image || ui.hero_headline) && (
-        <section className="mb-8 overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/10 via-background to-accent/5">
-          <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:p-10">
-            <div className="flex-1 space-y-3">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                {ui.hero_headline ?? shell.config.brand_name}
-              </h2>
-              {ui.hero_subline && (
-                <p className="text-sm text-muted-foreground sm:text-base">{ui.hero_subline}</p>
-              )}
-            </div>
-            {ui.hero_image && (
-              <img
-                src={ui.hero_image}
-                alt=""
-                decoding="async"
-                fetchPriority="high"
-                width={192}
-                height={192}
-                className="h-40 w-40 shrink-0 rounded-xl object-cover sm:h-48 sm:w-48"
-              />
-            )}
-          </div>
-        </section>
+    <main className="mx-auto max-w-6xl px-4 pb-16">
+      {/* ─── Hero ─────────────────────────────────────────── */}
+      {hasHero ? (
+        <HeroSection ui={ui} brand={shell.config?.brand_name ?? ""} slug={slug} />
+      ) : (
+        <DefaultHero brand={shell.config?.brand_name ?? ""} slug={slug} productCount={shell.products.length} />
       )}
 
+      {/* ─── Collections strip ────────────────────────────── */}
       {collections.length > 0 && (
-        <section className="mb-8">
-          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Категорії
-          </h3>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="mb-12">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-foreground">Категорії</h2>
+            <span className="text-xs text-muted-foreground">{collections.length} категорій</span>
+          </div>
+          <div
+            className={`grid gap-3 ${
+              collections.length === 1
+                ? "grid-cols-1"
+                : collections.length === 2
+                  ? "grid-cols-2"
+                  : collections.length === 3
+                    ? "sm:grid-cols-3"
+                    : "grid-cols-2 sm:grid-cols-2 lg:grid-cols-4"
+            }`}
+          >
             {collections.map((c) => (
-              <Link
-                key={c.id}
-                to="/s/$slug/collections/$handle"
-                params={{ slug, handle: c.handle }}
-                className="group relative aspect-[3/2] overflow-hidden rounded-lg border bg-muted transition-shadow hover:shadow-md"
-              >
-                {c.image_url ? (
-                  <img
-                    src={c.image_url}
-                    alt={c.name}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="h-full w-full bg-gradient-to-br from-primary/20 to-accent/10" />
-                )}
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                  <p className="text-sm font-semibold text-white">{c.name}</p>
-                  <p className="text-xs text-white/80">{c.product_count} товарів</p>
-                </div>
-              </Link>
+              <CollectionCard key={c.id} collection={c} slug={slug} />
             ))}
           </div>
         </section>
       )}
 
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-foreground">Усі товари</h2>
-        <p className="text-sm text-muted-foreground">
-          {shell.products.length} {pluralize(shell.products.length)} в наявності
-        </p>
-      </div>
+      {/* ─── Sale strip ───────────────────────────────────── */}
+      {discountedProducts.length > 0 && (
+        <section className="mb-12">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-xl font-bold text-foreground">
+              <Tag className="h-5 w-5 text-destructive" />
+              Акції та знижки
+            </h2>
+            <Badge variant="destructive" className="text-xs">
+              -{discountedProducts.length} товарів
+            </Badge>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {discountedProducts.slice(0, 4).map((p) => (
+              <ProductCard key={p.id} product={p} slug={slug} />
+            ))}
+          </div>
+        </section>
+      )}
 
-      {shell.products.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-sm text-muted-foreground">Поки що немає товарів.</p>
-          </CardContent>
-        </Card>
+      {/* ─── All products ─────────────────────────────────── */}
+      <section>
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-bold text-foreground">Усі товари</h2>
+            <p className="text-sm text-muted-foreground">
+              {inStockProducts.length} в наявності
+              {outOfStockCount > 0 && ` · ${outOfStockCount} закінчились`}
+            </p>
+          </div>
+        </div>
+
+        {shell.products.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed bg-muted/30 py-20 text-center">
+            <Package className="mb-4 h-16 w-16 text-muted-foreground/30" />
+            <p className="font-semibold text-foreground">Поки що немає товарів</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Незабаром тут з'являться нові товари.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {shell.products.map((p) => (
+              <ProductCard key={p.id} product={p} slug={slug} />
+            ))}
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}
+
+function HeroSection({
+  ui,
+  brand,
+  slug,
+}: {
+  ui: Record<string, string>;
+  brand: string;
+  slug: string;
+}) {
+  return (
+    <section className="mb-12 mt-6 overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-background to-accent/10 ring-1 ring-border/50">
+      <div className="flex flex-col items-center gap-6 p-8 sm:flex-row sm:p-12">
+        <div className="flex-1 space-y-4">
+          {ui.hero_badge && (
+            <Badge className="bg-primary/10 text-primary hover:bg-primary/10">
+              <Sparkles className="mr-1 h-3 w-3" />
+              {ui.hero_badge}
+            </Badge>
+          )}
+          <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+            {ui.hero_headline ?? brand}
+          </h1>
+          {ui.hero_subline && (
+            <p className="max-w-md text-base text-muted-foreground sm:text-lg">
+              {ui.hero_subline}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-3 pt-2">
+            <Link to="/s/$slug" params={{ slug }}>
+              <Button size="lg" className="gap-2">
+                {ui.hero_cta_text ?? "Переглянути каталог"}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+        {ui.hero_image && (
+          <div className="shrink-0">
+            <img
+              src={ui.hero_image}
+              alt={brand}
+              decoding="async"
+              fetchPriority="high"
+              width={320}
+              height={320}
+              className="h-48 w-48 rounded-2xl object-cover shadow-lg sm:h-64 sm:w-64"
+            />
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function DefaultHero({
+  brand,
+  slug,
+  productCount,
+}: {
+  brand: string;
+  slug: string;
+  productCount: number;
+}) {
+  return (
+    <section className="mb-12 mt-6 overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-background to-accent/5 px-8 py-12 text-center sm:px-12 sm:py-16">
+      <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
+        {brand}
+      </h1>
+      <p className="mx-auto mt-3 max-w-md text-base text-muted-foreground">
+        {productCount > 0
+          ? `${productCount} ${pluralize(productCount)} для вас`
+          : "Відкрийте для себе наш каталог"}
+      </p>
+      <Link to="/s/$slug" params={{ slug }}>
+        <Button size="lg" className="mt-6 gap-2">
+          Переглянути товари
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </Link>
+    </section>
+  );
+}
+
+function CollectionCard({ collection, slug }: { collection: CollectionSummary; slug: string }) {
+  return (
+    <Link
+      to="/s/$slug/collections/$handle"
+      params={{ slug, handle: collection.handle }}
+      className="group relative aspect-[4/3] overflow-hidden rounded-xl border bg-muted shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+    >
+      {collection.image_url ? (
+        <img
+          src={collection.image_url}
+          alt={collection.name}
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {shell.products.map((p) => (
-            <ProductCard key={p.id} product={p} slug={slug} />
-          ))}
+        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 via-muted to-accent/10">
+          <Package className="h-10 w-10 text-muted-foreground/40" />
         </div>
       )}
-    </main>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 p-4">
+        <p className="text-sm font-bold text-white drop-shadow-sm">{collection.name}</p>
+        <p className="mt-0.5 text-xs text-white/80">
+          {collection.product_count} товар{collection.product_count === 1 ? "" : "ів"}
+        </p>
+      </div>
+    </Link>
   );
 }
 

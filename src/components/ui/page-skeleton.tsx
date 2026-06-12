@@ -16,7 +16,7 @@ export function PageSkeleton({ blocks = 3, className }: PageSkeletonProps) {
   return (
     <div
       role="status"
-      aria-label="Loading…"
+      aria-label="Завантаження…"
       aria-busy="true"
       className={cn("space-y-6", className)}
     >

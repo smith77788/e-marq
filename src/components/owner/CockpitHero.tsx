@@ -52,19 +52,26 @@ export function CockpitHero({ tenantId }: Props) {
           .from("orders")
           .select("total_cents, paid_at, created_at")
           .eq("tenant_id", tenantId)
-          .eq("status", "paid")
-          .gte("paid_at", since30),
+          .in("status", ["paid", "fulfilled"])
+          .gte("paid_at", since30)
+          .limit(5000),
         supabase
           .from("outbound_messages")
           .select("actual_revenue_cents, converted_at, sent_at")
           .eq("tenant_id", tenantId)
-          .gte("created_at", since30),
-        supabase.from("customers").select("id, lifecycle_stage").eq("tenant_id", tenantId),
+          .gte("created_at", since30)
+          .limit(2000),
+        supabase
+          .from("customers")
+          .select("id, lifecycle_stage")
+          .eq("tenant_id", tenantId)
+          .limit(10000),
         supabase
           .from("acos_agent_runs")
           .select("status, started_at")
           .eq("tenant_id", tenantId)
-          .gte("started_at", since30),
+          .gte("started_at", since30)
+          .limit(2000),
       ]);
       return {
         orders: (orders.data ?? []) as Order[],

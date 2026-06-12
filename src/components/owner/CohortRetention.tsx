@@ -56,7 +56,8 @@ export function CohortRetention({ tenantId }: Props) {
         .from("customers")
         .select("first_order_at, last_order_at")
         .eq("tenant_id", tenantId)
-        .not("first_order_at", "is", null);
+        .not("first_order_at", "is", null)
+        .limit(10000);
       if (error) throw error;
       return (data ?? []) as CustomerFallback[];
     },

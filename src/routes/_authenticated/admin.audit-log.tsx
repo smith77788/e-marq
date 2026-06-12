@@ -33,8 +33,8 @@ import { useAuth } from "@/hooks/useAuth";
 export const Route = createFileRoute("/_authenticated/admin/audit-log")({
   head: () => ({
     meta: [
-      { title: "Audit log — MARQ" },
-      { name: "description", content: "Sensitive actions audit trail" },
+      { title: "Журнал аудиту — MARQ" },
+      { name: "description", content: "Журнал чутливих дій у системі" },
     ],
   }),
   component: AdminAuditLog,
@@ -130,7 +130,7 @@ function AdminAuditLog() {
       <header className="flex items-center gap-3">
         <ShieldCheck className="h-7 w-7 text-warning" />
         <div>
-          <h1 className="text-2xl font-bold">Audit log</h1>
+          <h1 className="text-2xl font-bold">Журнал аудиту</h1>
           <p className="text-sm text-muted-foreground">
             Хто, коли і що змінив у чутливих сутностях. Записи immutable, додаються тригерами БД.
           </p>

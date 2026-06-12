@@ -65,7 +65,7 @@ function AdminPlansPage() {
     queryKey: ["plans-admin"],
     enabled: isSuperAdmin,
     queryFn: async () => {
-      const { data, error } = await supabase.from("plans").select("*").order("sort_order");
+      const { data, error } = await supabase.from("plans").select("*").order("sort_order").limit(100);
       if (error) throw error;
       return data as Plan[];
     },

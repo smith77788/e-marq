@@ -47,14 +47,16 @@ export const Route = createFileRoute("/hooks/agents/return-predictor")({
             )
             .eq("tenant_id", tenantId)
             .gte("orders.created_at", since)
-            .eq("orders.status", "refunded");
+            .eq("orders.status", "refunded")
+            .limit(5000);
 
           const { data: paidItems } = await supabaseAdmin
             .from("order_items")
             .select("product_id, quantity, orders!inner(status, created_at)")
             .eq("tenant_id", tenantId)
             .gte("orders.created_at", since)
-            .in("orders.status", ["paid", "fulfilled", "refunded"]);
+            .in("orders.status", ["paid", "fulfilled"])
+            .limit(5000);
 
           const refundsByProduct = new Map<string, { name: string; qty: number; cents: number }>();
           for (const r of refundedItems ?? []) {

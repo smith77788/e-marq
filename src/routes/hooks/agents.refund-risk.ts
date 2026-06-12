@@ -44,9 +44,29 @@ export const Route = createFileRoute("/hooks/agents/refund-risk")({
             .from("orders")
             .select("id, total_cents, customer_email, customer_user_id, created_at, customer_name")
             .eq("tenant_id", tenantId)
-            .eq("status", "paid")
+            .in("status", ["paid", "fulfilled"])
             .gte("created_at", since)
             .limit(200);
+
+          // Batch-load prior order history for all customer emails at once (avoid N+1)
+          const emails = [...new Set((orders ?? []).map((o) => o.customer_email).filter(Boolean))] as string[];
+          const historyLookback = new Date(Date.now() - 365 * 86_400_000).toISOString();
+          const { data: priorOrders, error: priorErr } = emails.length
+            ? await supabaseAdmin
+                .from("orders")
+                .select("customer_email, created_at")
+                .eq("tenant_id", tenantId)
+                .in("customer_email", emails)
+                .lt("created_at", since)
+                .gte("created_at", historyLookback)
+                .limit(5000)
+            : { data: [], error: null };
+          if (priorErr) throw priorErr;
+          const priorByEmail = new Map<string, number>();
+          for (const p of priorOrders ?? []) {
+            if (p.customer_email)
+              priorByEmail.set(p.customer_email, (priorByEmail.get(p.customer_email) ?? 0) + 1);
+          }
 
           const insights: AgentInsightInput[] = [];
           for (const o of orders ?? []) {
@@ -64,18 +84,10 @@ export const Route = createFileRoute("/hooks/agents/refund-risk")({
               score += 0.2;
               reasons.push("late_night");
             }
-            // (3) New customer (no prior orders)
-            if (o.customer_email) {
-              const { count } = await supabaseAdmin
-                .from("orders")
-                .select("id", { count: "exact", head: true })
-                .eq("tenant_id", tenantId)
-                .eq("customer_email", o.customer_email)
-                .lt("created_at", o.created_at);
-              if ((count ?? 0) === 0) {
-                score += 0.3;
-                reasons.push("first_time_buyer");
-              }
+            // (3) New customer (no prior orders before the 7d window)
+            if (o.customer_email && (priorByEmail.get(o.customer_email) ?? 0) === 0) {
+              score += 0.3;
+              reasons.push("first_time_buyer");
             }
             if (score < 0.5) continue;
             insights.push({
