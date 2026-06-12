@@ -7018,6 +7018,29 @@ export type Database = {
     };
     Functions: {
       _agent_slug_for: { Args: { _agent_id: string }; Returns: string };
+      get_tenant_payment_settings: {
+        Args: { _tenant_id: string };
+        Returns: Json;
+      };
+      update_tenant_payment_settings: {
+        Args: {
+          _tenant_id: string;
+          _currency: string;
+          _manual_enabled: boolean;
+          _manual_instructions: string;
+          _manual_contact: string;
+          _liqpay_enabled: boolean;
+          _liqpay_public_key: string;
+          _liqpay_private_key: string | null;
+          _wayforpay_enabled: boolean;
+          _wayforpay_merchant_account: string;
+          _wayforpay_merchant_domain: string;
+          _wayforpay_secret_key: string | null;
+          _monobank_enabled: boolean;
+          _monobank_token: string | null;
+        };
+        Returns: Json;
+      };
       _compute_bundle_suggestions_v1: {
         Args: {
           _min_co_orders?: number;

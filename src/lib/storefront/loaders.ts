@@ -18,6 +18,32 @@ export type StorefrontPaymentsConfig = {
   currency?: string;
 };
 
+/**
+ * Public payment fields the storefront is allowed to see. Gateway secrets
+ * (liqpay_private_key, wayforpay_secret_key, monobank_token, etc.) must NEVER
+ * reach the client. The get_storefront_config RPC already whitelists these
+ * server-side; this is defense-in-depth so a future RPC regression can't leak.
+ */
+export const STOREFRONT_PUBLIC_PAYMENT_FIELDS = [
+  "manual_enabled",
+  "stripe_enabled",
+  "liqpay_enabled",
+  "wayforpay_enabled",
+  "monobank_enabled",
+  "manual_instructions",
+  "manual_contact",
+  "currency",
+] as const;
+
+export function redactStorefrontPayments(payments: unknown): StorefrontPaymentsConfig {
+  const src = (payments ?? {}) as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const key of STOREFRONT_PUBLIC_PAYMENT_FIELDS) {
+    if (key in src) out[key] = src[key];
+  }
+  return out as StorefrontPaymentsConfig;
+}
+
 export type StorefrontShippingConfig = {
   nova_poshta_enabled?: boolean;
   justin_enabled?: boolean;
@@ -196,11 +222,14 @@ export async function loadStorefrontShell(slug: string): Promise<StorefrontShell
     });
   }
 
+  const rawFeatures = cfgPayload.features ?? null;
   const config: StorefrontConfig = {
     brand_name: cfgPayload.brand_name,
     ui: cfgPayload.ui ?? null,
     seo: cfgPayload.seo ?? null,
-    features: cfgPayload.features ?? null,
+    features: rawFeatures
+      ? { ...rawFeatures, payments: redactStorefrontPayments(rawFeatures.payments) }
+      : null,
   };
 
   return { tenant: tenant as StorefrontTenant, config, products };

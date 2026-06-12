@@ -13,6 +13,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Bot,
+  CreditCard,
   Globe,
   Image as ImageIcon,
   LayoutTemplate,
@@ -38,6 +39,7 @@ import { Separator } from "@/components/ui/separator";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import { supabase } from "@/integrations/supabase/client";
 import { DomainsManager } from "@/components/owner/DomainsManager";
+import { PaymentsSettingsForm } from "@/components/owner/PaymentsSettingsForm";
 import { RegionSelector } from "@/components/owner/RegionSelector";
 import {
   DEFAULT_GEO_TARGETS,
@@ -281,6 +283,9 @@ function StoreSettingsPage() {
             </TabsTrigger>
             <TabsTrigger value="storefront" className="gap-1.5">
               <LayoutTemplate className="h-3.5 w-3.5" /> Вітрина
+            </TabsTrigger>
+            <TabsTrigger value="payments" className="gap-1.5">
+              <CreditCard className="h-3.5 w-3.5" /> Оплата
             </TabsTrigger>
             <TabsTrigger value="seo" className="gap-1.5">
               <Globe className="h-3.5 w-3.5" /> SEO
@@ -540,6 +545,11 @@ function StoreSettingsPage() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* PAYMENTS */}
+          <TabsContent value="payments" className="mt-4 space-y-4">
+            <PaymentsSettingsForm tenantId={tenantId} />
           </TabsContent>
 
           {/* SEO */}
