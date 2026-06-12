@@ -200,9 +200,17 @@ function StoreSettingsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cfgQuery.data?.tenant_id]);
 
+  const HEX_RE = /^#[0-9a-f]{3}([0-9a-f]{3})?$/i;
+
   const saveMut = useMutation({
     mutationFn: async () => {
       if (!tenantId) throw new Error("Бренд не обрано");
+      if (form.primary_color && !HEX_RE.test(form.primary_color)) {
+        throw new Error("Основний колір — невірний HEX (#rgb або #rrggbb)");
+      }
+      if (form.accent_color && !HEX_RE.test(form.accent_color)) {
+        throw new Error("Акцентний колір — невірний HEX (#rgb або #rrggbb)");
+      }
       // зберігаємо ui/seo/bot, не перезаписуючи інші ключі
       const merged = {
         tenant_id: tenantId,
@@ -300,6 +308,8 @@ function StoreSettingsPage() {
 
       {cfgQuery.isLoading ? (
         <p className="text-sm text-muted-foreground">Завантажую конфігурацію…</p>
+      ) : cfgQuery.isError ? (
+        <p className="text-sm text-destructive">Не вдалося завантажити налаштування бренду</p>
       ) : (
         <Tabs defaultValue="general">
           <TabsList className="flex w-full max-w-3xl flex-wrap">

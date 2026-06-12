@@ -238,7 +238,7 @@ function BrandPromotionsPage() {
     promo_type: promoType,
     value: promoType === "free_shipping" ? 0 : value,
     min_order_cents: Math.max(0, Math.round(minOrderUah * 100)),
-    usage_limit: usageLimit.trim() === "" ? null : Number(usageLimit),
+    usage_limit: (() => { const n = Number(usageLimit.trim()); return usageLimit.trim() === "" || !Number.isFinite(n) || n <= 0 ? null : Math.round(n); })(),
     usage_per_customer: Math.max(1, usagePerCustomer),
     starts_at: fromLocalInput(startsAt) ?? new Date().toISOString(),
     ends_at: fromLocalInput(endsAt),
@@ -355,6 +355,8 @@ function BrandPromotionsPage() {
         <CardContent className="p-0">
           {promosQuery.isLoading ? (
             <TableSkeleton rows={5} columns={7} />
+          ) : promosQuery.isError ? (
+            <p className="px-4 py-8 text-center text-sm text-destructive">Не вдалося завантажити акції</p>
           ) : isEmpty ? (
             <EmptyState
               variant="inline"

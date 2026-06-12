@@ -308,6 +308,8 @@ function BrandProductsPage() {
         <CardContent className="p-0">
           {productsQuery.isLoading ? (
             <TableSkeleton rows={6} columns={7} />
+          ) : productsQuery.isError ? (
+            <p className="px-4 py-8 text-center text-sm text-destructive">Не вдалося завантажити товари</p>
           ) : isEmpty ? (
             <EmptyState
               variant="inline"
