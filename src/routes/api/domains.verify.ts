@@ -61,7 +61,9 @@ type DohResponse = { Status: number; Answer?: DohAnswer[] };
 /** Resolve TXT records for a hostname using Cloudflare DoH (Worker-friendly). */
 async function lookupTxt(hostname: string): Promise<string[]> {
   const url = `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(hostname)}&type=TXT`;
-  const r = await fetch(url, { headers: { Accept: "application/dns-json" } });
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 10_000);
+  const r = await fetch(url, { headers: { Accept: "application/dns-json" }, signal: ctrl.signal }).finally(() => clearTimeout(t));
   if (!r.ok) throw new Error(`DoH ${r.status}`);
   const j = (await r.json()) as DohResponse;
   if (!j.Answer) return [];
@@ -77,7 +79,9 @@ async function lookupTxt(hostname: string): Promise<string[]> {
 /** Resolve CNAME records to confirm storefront target points to MARQ. */
 async function lookupCname(hostname: string): Promise<string[]> {
   const url = `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(hostname)}&type=CNAME`;
-  const r = await fetch(url, { headers: { Accept: "application/dns-json" } });
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 10_000);
+  const r = await fetch(url, { headers: { Accept: "application/dns-json" }, signal: ctrl.signal }).finally(() => clearTimeout(t));
   if (!r.ok) return [];
   const j = (await r.json()) as DohResponse;
   if (!j.Answer) return [];
