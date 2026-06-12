@@ -69,6 +69,9 @@ const ACTION_LABELS: Record<string, string> = {
   update_price: "оновити ціну на товар",
   revert_price: "повернути попередню ціну",
   auto_create_pending_order: "підготувати чернетку замовлення",
+  send_broadcast: "розіслати повідомлення клієнтам",
+  rewrite_seo_meta: "оновити SEO-заголовок і опис сторінки",
+  catalog_fix_checklist: "надіслати чек-лист доопрацювання каталогу",
 };
 const AGENT_LABELS: Record<string, string> = {
   churn_risk_predictor: "помічник з утримання клієнтів",
@@ -80,11 +83,15 @@ const AGENT_LABELS: Record<string, string> = {
   price_revert_safety: "запобіжник цін",
   orchestrator: "диригент агентів",
   telegram_reorder_bot: "бот повторних замовлень",
+  "broadcast-composer": "помічник із розсилок",
+  "seo-rewriter": "помічник із SEO",
+  catalog_enricher: "помічник із каталогу",
 };
 const ENTITY_LABELS: Record<string, string> = {
   product: "товар",
   customer: "клієнт",
   search_term: "пошуковий запит",
+  page: "сторінка",
   orders: "замовлення",
 };
 const KIND_LABELS: Record<string, string> = {

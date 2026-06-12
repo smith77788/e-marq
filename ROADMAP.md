@@ -43,7 +43,7 @@
 |----------|--------|----------|
 | **insight → apply: лише ~8 типів мали обробник** | 🟡 | решта писали insight, але дія не виконувалась |
 | **`churn_risk` / `winback_touch` = no-op** | ✅ (нове) | **був `{ note: "Action recorded." }`. Тепер `queueWinbackTouch`: реальний персональний промокод + outbound-повідомлення клієнту (`actions.apply.ts`).** |
-| Обробники для `broadcast_suggestion`, `seo_rewrite_opportunity`, `bootstrap_catalog_*`, `search_gap` | ❌ | insights створюються, дія не застосовується автоматично |
+| Обробники для `broadcast_suggestion`, `seo_rewrite_opportunity`, `bootstrap_catalog_*`, `search_gap` | ✅ (нове) | **усі 4 типи тепер виконують реальну дію в `actions.apply.ts`: broadcast → fan-out `outbound_messages` (ліміт 500, канал telegram→email); search_gap → чернетка SEO-лендінгу в `content_pages` (власник публікує сам); seo_rewrite → детермінований rewrite seo_title/seo_description (missing_seo — лише порожні поля); bootstrap_catalog → чек-лист власнику через `owner_notifications` (Telegram push). + захист від повторного apply (`already_applied`).** |
 | `ltv-predictor` churn — хардкод порогів | ❌ | дискретні 0.05/0.3/0.75/0.95 замість моделі; `confidence` фіктивний |
 | sales-bot AI вимкнено за замовчуванням | 🟡 | свідомий killswitch (економія кредитів); вмикається `ACOS_AI_ENABLED=1` + `LOVABLE_API_KEY` |
 | `acos_agent_runs.status='success'` при 0 дій | 🟡 | прогін без знахідок виглядає як успіх — потрібен окремий стан `noop`/`no_data` |
@@ -65,7 +65,7 @@
 
 1. ~~Платіжні credentials UI~~ ✅ + ~~закрити витік секретів~~ ✅
 2. **Власний домен** — RPC `get_tenant_by_domain` ✅; лишилась едж-маршрутизація за Host (middleware/SSL — потребує Cloudflare-інфри, відкладено).
-3. **Завершити insight→apply** — winback ✅; broadcast/seo/catalog — лишились.
+3. ~~Завершити insight→apply~~ ✅ — winback, broadcast, search_gap, seo_rewrite, bootstrap_catalog.
 4. ~~Сторінки About/FAQ~~ ✅ (редактор у brand.settings + /about, /faq). Файл-аплоадер — лишився.
 5. **Доставка `outbound_messages`** — ретраї невдалих + ідемпотентність (потребує узгодженої зміни 7 inserter'ів + UNIQUE; відкладено).
 6. ~~Хардкод у `ltv-predictor`~~ ✅

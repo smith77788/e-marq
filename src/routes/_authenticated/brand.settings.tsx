@@ -31,6 +31,7 @@ import {
   Link as LinkIcon,
   TrendingUp,
 } from "lucide-react";
+import { ImageUploadField } from "@/components/owner/ImageUploadField";
 import { MarketingSpendForm } from "@/components/owner/MarketingSpendForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -352,34 +353,17 @@ function StoreSettingsPage() {
                     placeholder="Напр., Basic Food"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="logo">URL логотипу</Label>
-                  <div className="flex items-center gap-3">
-                    <Input
-                      id="logo"
-                      value={form.logo_url}
-                      onChange={(e) => setForm((f) => ({ ...f, logo_url: e.target.value }))}
-                      placeholder="https://…/logo.png"
-                    />
-                    {form.logo_url && (
-                      <img
-                        src={form.logo_url}
-                        alt="logo preview"
-                        loading="lazy"
-                        decoding="async"
-                        width={40}
-                        height={40}
-                        className="h-10 w-10 rounded-md border border-border object-contain bg-card"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = "none";
-                        }}
-                      />
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Прозорий PNG/SVG, рекомендовано 256×256.
-                  </p>
-                </div>
+                <ImageUploadField
+                  tenantId={tenantId}
+                  slug="logo"
+                  id="logo"
+                  label="Логотип"
+                  value={form.logo_url}
+                  onChange={(v) => setForm((f) => ({ ...f, logo_url: v }))}
+                  placeholder="https://…/logo.png"
+                  hint="Прозорий PNG/SVG, рекомендовано 256×256."
+                  previewClassName="h-10 w-10 rounded-md border border-border object-contain bg-card"
+                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -498,28 +482,17 @@ function StoreSettingsPage() {
                       maxLength={40}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="hero-image">URL зображення</Label>
-                    <Input
-                      id="hero-image"
-                      value={form.hero_image}
-                      onChange={(e) => setForm((f) => ({ ...f, hero_image: e.target.value }))}
-                      placeholder="https://…/hero.jpg"
-                    />
-                  </div>
                 </div>
-                {form.hero_image && (
-                  <img
-                    src={form.hero_image}
-                    alt="hero preview"
-                    loading="lazy"
-                    decoding="async"
-                    className="max-h-40 rounded-md border border-border bg-card object-cover"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display = "none";
-                    }}
-                  />
-                )}
+                <ImageUploadField
+                  tenantId={tenantId}
+                  slug="hero"
+                  id="hero-image"
+                  label="Зображення банера"
+                  value={form.hero_image}
+                  onChange={(v) => setForm((f) => ({ ...f, hero_image: v }))}
+                  placeholder="https://…/hero.jpg"
+                  hint="Горизонтальне фото для головного банера."
+                />
               </CardContent>
             </Card>
 
@@ -708,27 +681,16 @@ function StoreSettingsPage() {
                   <p className="text-xs text-muted-foreground">{form.seo_description.length}/160</p>
                 </div>
                 <Separator />
-                <div className="space-y-2">
-                  <Label htmlFor="og">Open Graph image URL</Label>
-                  <Input
-                    id="og"
-                    value={form.og_image_url}
-                    onChange={(e) => setForm((f) => ({ ...f, og_image_url: e.target.value }))}
-                    placeholder="https://…/cover.jpg (1200×630)"
-                  />
-                  {form.og_image_url && (
-                    <img
-                      src={form.og_image_url}
-                      alt="OG preview"
-                      loading="lazy"
-                      decoding="async"
-                      className="mt-2 max-h-40 rounded-md border border-border bg-card object-cover"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).style.display = "none";
-                      }}
-                    />
-                  )}
-                </div>
+                <ImageUploadField
+                  tenantId={tenantId}
+                  slug="og"
+                  id="og"
+                  label="Open Graph image"
+                  value={form.og_image_url}
+                  onChange={(v) => setForm((f) => ({ ...f, og_image_url: v }))}
+                  placeholder="https://…/cover.jpg (1200×630)"
+                  hint="Превʼю для месенджерів і соцмереж, рекомендовано 1200×630."
+                />
               </CardContent>
             </Card>
           </TabsContent>

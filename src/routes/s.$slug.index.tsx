@@ -2,10 +2,11 @@
  * Storefront homepage: announcement hero, trust badges, collections strip,
  * full product grid.
  */
-import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Package, Sparkles, Tag } from "lucide-react";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,16 +19,31 @@ import {
 import {
   loadStorefrontShell,
   loadCollections,
+  loadCollectionProducts,
   type CollectionSummary,
   type StorefrontShell,
 } from "@/lib/storefront/loaders";
 import { ProductCard } from "@/components/storefront/ProductCard";
+import { CatalogFilters } from "@/components/storefront/CatalogFilters";
+import {
+  applyCatalogFilters,
+  catalogFiltersSchema,
+  countActiveFilters,
+  type CatalogFilters as CatalogFilterValues,
+} from "@/lib/storefront/catalogFilters";
 import { canonicalUrl } from "@/lib/seo";
 import { storefrontIndexJsonLd } from "@/lib/storefront/jsonLd";
 
 type SortOpt = "default" | "price_asc" | "price_desc" | "name_asc";
 
+const searchSchema = z
+  .object({
+    sort: z.enum(["default", "price_asc", "price_desc", "name_asc"]).optional().catch(undefined),
+  })
+  .merge(catalogFiltersSchema);
+
 export const Route = createFileRoute("/s/$slug/")({
+  validateSearch: (search) => searchSchema.parse(search),
   loader: async ({ params }) => {
     const [shell, collections] = await Promise.all([
       loadStorefrontShell(params.slug),
