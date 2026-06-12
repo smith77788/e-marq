@@ -130,7 +130,7 @@ export const Route = createFileRoute("/hooks/agents/cart-recovery")({
 
           // Step 6: insert attempts + insights
           const attemptCountBySesssion = new Map((existingAttempts ?? []).reduce((acc, a) => {
-            acc.set(a.session_id, (acc.get(a.session_id) ?? 0) + 1);
+            if (a.session_id) acc.set(a.session_id, (acc.get(a.session_id) ?? 0) + 1);
             return acc;
           }, new Map<string, number>()));
 

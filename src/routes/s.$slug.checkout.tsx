@@ -272,7 +272,7 @@ function CheckoutPage() {
         _slug: slug,
         _code: code,
         _order_total_cents: subtotalCents,
-        _customer_email: email.trim() || null,
+        _customer_email: email.trim(),
       });
       if (error) throw error;
       const result = data as unknown as DiscountResult;

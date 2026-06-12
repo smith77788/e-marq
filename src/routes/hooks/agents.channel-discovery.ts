@@ -64,7 +64,7 @@ export const Route = createFileRoute("/hooks/agents/channel-discovery")({
               .select("id", { count: "exact", head: true })
               .eq("tenant_id", tenantId)
               .in("type", [
-                "page_view",
+                "page_viewed",
                 "product_viewed",
                 "add_to_cart",
                 "checkout_started",
