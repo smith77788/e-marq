@@ -147,6 +147,13 @@ function AdminUsersPage() {
         <CardContent className="overflow-x-auto">
           {usersQuery.isLoading ? (
             <TableSkeleton rows={6} columns={6} />
+          ) : usersQuery.isError ? (
+            <p className="py-4 text-sm text-destructive">
+              Не вдалося завантажити список користувачів.{" "}
+              <button type="button" className="underline" onClick={() => void usersQuery.refetch()}>
+                Повторити
+              </button>
+            </p>
           ) : (
             <Table>
               <TableHeader>

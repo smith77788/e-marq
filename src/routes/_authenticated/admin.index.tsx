@@ -194,6 +194,22 @@ function MissionControlContent() {
   if (critical.isLoading || !critical.data) {
     return <CockpitSkeleton variant="admin" />;
   }
+  if (critical.isError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <p className="text-sm text-destructive">
+          Не вдалося завантажити дані Mission Control.
+        </p>
+        <button
+          type="button"
+          className="mt-2 text-sm underline text-muted-foreground"
+          onClick={() => void critical.refetch()}
+        >
+          Спробувати ще раз
+        </button>
+      </div>
+    );
+  }
 
   const cData = critical.data;
   const dData = detail.data; // may be undefined while still loading

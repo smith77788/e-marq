@@ -150,6 +150,13 @@ function AdminPlansPage() {
 
       {plansQuery.isLoading ? (
         <p className="text-sm text-muted-foreground">Завантажуємо тарифи…</p>
+      ) : plansQuery.isError ? (
+        <p className="text-sm text-destructive">
+          Не вдалося завантажити тарифи.{" "}
+          <button type="button" className="underline" onClick={() => void plansQuery.refetch()}>
+            Повторити
+          </button>
+        </p>
       ) : (
         <div className="space-y-3">
           {plansQuery.data?.map((p) => (

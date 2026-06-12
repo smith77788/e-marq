@@ -174,6 +174,13 @@ function Content() {
                 <Skeleton key={i} className="h-16" />
               ))}
             </div>
+          ) : list.isError ? (
+            <p className="p-6 text-center text-sm text-destructive">
+              Не вдалося завантажити заявки.{" "}
+              <button type="button" className="underline" onClick={() => void list.refetch()}>
+                Повторити
+              </button>
+            </p>
           ) : filtered.length === 0 ? (
             <p className="p-6 text-center text-sm text-muted-foreground">Заявок не знайдено.</p>
           ) : (

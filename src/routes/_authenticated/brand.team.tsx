@@ -261,7 +261,7 @@ function InviteCreator({
 
 function PendingInvitations({ tenantId, brandName }: { tenantId: string; brandName: string }) {
   const qc = useQueryClient();
-  const { data: invites = [], isLoading } = useQuery<Invitation[]>({
+  const { data: invites = [], isLoading, isError } = useQuery<Invitation[]>({
     queryKey: ["team-invitations", tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -290,6 +290,7 @@ function PendingInvitations({ tenantId, brandName }: { tenantId: string; brandNa
   const pending = useMemo(() => invites.filter((i) => i.status === "pending"), [invites]);
 
   if (isLoading) return <Skeleton className="h-24 w-full" />;
+  if (isError) return <p className="text-sm text-destructive">Не вдалося завантажити запрошення.</p>;
   if (pending.length === 0) return null;
 
   return (
@@ -321,9 +322,7 @@ function PendingInvitations({ tenantId, brandName }: { tenantId: string; brandNa
                     size="sm"
                     variant="ghost"
                     className="ml-auto h-7 px-2 text-destructive hover:text-destructive"
-                    onClick={() => {
-                      if (confirm("Скасувати це посилання?")) revoke.mutate(inv.id);
-                    }}
+                    onClick={() => revoke.mutate(inv.id)}
                     disabled={revoke.isPending}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -363,7 +362,7 @@ function PendingInvitations({ tenantId, brandName }: { tenantId: string; brandNa
 }
 
 function ActiveMembers({ tenantId }: { tenantId: string }) {
-  const { data: members = [], isLoading } = useQuery<Member[]>({
+  const { data: members = [], isLoading, isError } = useQuery<Member[]>({
     queryKey: ["team-members", tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -381,6 +380,7 @@ function ActiveMembers({ tenantId }: { tenantId: string }) {
   });
 
   if (isLoading) return <Skeleton className="h-32 w-full" />;
+  if (isError) return <p className="text-sm text-destructive">Не вдалося завантажити список учасників.</p>;
 
   return (
     <Card>
