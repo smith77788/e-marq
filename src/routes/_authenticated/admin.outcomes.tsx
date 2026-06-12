@@ -4,7 +4,7 @@
  * breakdowns by action_type and tenant, recent outcomes list.
  */
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { uk } from "date-fns/locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Activity, CheckCircle2, MinusCircle, TrendingUp, Wallet } from "lucide-react";
+import { Activity, CheckCircle2, MinusCircle, RefreshCw, TrendingUp, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -75,35 +75,39 @@ function AdminOutcomes() {
   const [range, setRange] = useState("7d");
   const [err, setErr] = useState<string | null>(null);
 
-  useEffect(() => {
-    void (async () => {
-      try {
-        const sel = await supabase
-          .from("action_outcomes")
-          .select(
-            "id, tenant_id, decision_id, action_id, agent_id, action_type, attributed_revenue_cents, success, measurement_window, measured_at, notes",
-          )
-          .order("measured_at", { ascending: false })
-          .limit(2000);
-        if (sel.error) throw sel.error;
-        const data = (sel.data ?? []) as OutcomeRow[];
-        setRows(data);
-        const ids = Array.from(new Set(data.map((r) => r.tenant_id)));
-        if (ids.length) {
-          const t = await supabase.from("tenants").select("id, name").in("id", ids);
-          if (t.data) {
-            const map: Record<string, string> = {};
-            (t.data as TenantRow[]).forEach((x) => {
-              map[x.id] = x.name ?? x.id.slice(0, 8);
-            });
-            setTenants(map);
-          }
+  const load = useCallback(async () => {
+    setErr(null);
+    setRows(null);
+    try {
+      const sel = await supabase
+        .from("action_outcomes")
+        .select(
+          "id, tenant_id, decision_id, action_id, agent_id, action_type, attributed_revenue_cents, success, measurement_window, measured_at, notes",
+        )
+        .order("measured_at", { ascending: false })
+        .limit(2000);
+      if (sel.error) throw sel.error;
+      const data = (sel.data ?? []) as OutcomeRow[];
+      setRows(data);
+      const ids = Array.from(new Set(data.map((r) => r.tenant_id)));
+      if (ids.length) {
+        const t = await supabase.from("tenants").select("id, name").in("id", ids);
+        if (t.data) {
+          const map: Record<string, string> = {};
+          (t.data as TenantRow[]).forEach((x) => {
+            map[x.id] = x.name ?? x.id.slice(0, 8);
+          });
+          setTenants(map);
         }
-      } catch (e) {
-        setErr(e instanceof Error ? e.message : String(e));
       }
-    })();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+    }
   }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const filtered = useMemo(() => {
     if (!rows) return [];
@@ -189,7 +193,12 @@ function AdminOutcomes() {
 
       {err && (
         <Card className="border-destructive/40 bg-destructive/5">
-          <CardContent className="p-4 text-sm text-destructive">{err}</CardContent>
+          <CardContent className="flex items-center justify-between p-4">
+            <p className="text-sm text-destructive">Не вдалося завантажити outcomes: {err}</p>
+            <Button size="sm" variant="outline" onClick={() => void load()}>
+              <RefreshCw className="mr-1 h-3 w-3" /> Повторити
+            </Button>
+          </CardContent>
         </Card>
       )}
 

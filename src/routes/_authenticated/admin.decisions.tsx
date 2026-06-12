@@ -33,6 +33,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -142,6 +152,8 @@ function AdminDecisionsPage() {
   const [detailOutcome, setDetailOutcome] = useState<OutcomeRow | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [insightView, setInsightView] = useState<InsightRow | null>(null);
+  const [confirmAction, setConfirmAction] = useState<"approve" | "reject" | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const openDetail = useCallback(async (d: Decision) => {
     setDetail(d);
@@ -198,6 +210,7 @@ function AdminDecisionsPage() {
 
   const load = useCallback(async () => {
     setRefreshing(true);
+    setLoadError(null);
     let q = supabase
       .from("decision_queue")
       .select(
@@ -211,7 +224,8 @@ function AdminDecisionsPage() {
     const { data, error } = await q;
     setRefreshing(false);
     if (error) {
-      toast.error("Не вдалося завантажити: " + error.message);
+      setLoadError(error.message);
+      setDecisions([]);
       return;
     }
     const list = (data ?? []) as Decision[];
@@ -352,8 +366,6 @@ function AdminDecisionsPage() {
   };
 
   const bulkApprove = async () => {
-    if (selected.size === 0) return;
-    if (!confirm(`Схвалити ${selected.size} рішень?`)) return;
     setBusy(true);
     let ok = 0;
     let fail = 0;
@@ -371,8 +383,6 @@ function AdminDecisionsPage() {
   };
 
   const bulkReject = async () => {
-    if (selected.size === 0) return;
-    if (!confirm(`Відхилити ${selected.size} рішень?`)) return;
     setBusy(true);
     let ok = 0;
     let fail = 0;
@@ -558,7 +568,7 @@ function AdminDecisionsPage() {
             <Button
               size="sm"
               disabled={busy || selected.size === 0}
-              onClick={() => void bulkApprove()}
+              onClick={() => setConfirmAction("approve")}
             >
               <Check className="mr-1 h-4 w-4" /> Схвалити
             </Button>
@@ -566,7 +576,7 @@ function AdminDecisionsPage() {
               size="sm"
               variant="destructive"
               disabled={busy || selected.size === 0}
-              onClick={() => void bulkReject()}
+              onClick={() => setConfirmAction("reject")}
             >
               <X className="mr-1 h-4 w-4" /> Відхилити
             </Button>
@@ -685,6 +695,47 @@ function AdminDecisionsPage() {
           )}
         </CardContent>
       </Card>
+
+      {loadError && (
+        <Card className="border-destructive/40 bg-destructive/5">
+          <CardContent className="flex items-center justify-between p-4">
+            <p className="text-sm text-destructive">Не вдалося завантажити рішення: {loadError}</p>
+            <Button size="sm" variant="outline" onClick={() => void load()}>
+              <RefreshCw className="mr-1 h-3 w-3" /> Повторити
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <AlertDialog
+        open={confirmAction !== null}
+        onOpenChange={(open) => !open && setConfirmAction(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmAction === "approve" ? "Схвалити рішення?" : "Відхилити рішення?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmAction === "approve"
+                ? `Буде схвалено ${selected.size} рішень. Цю дію не можна скасувати.`
+                : `Буде відхилено ${selected.size} рішень. Цю дію не можна скасувати.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Скасувати</AlertDialogCancel>
+            <AlertDialogAction
+              className={confirmAction === "reject" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+              onClick={() => {
+                setConfirmAction(null);
+                void (confirmAction === "approve" ? bulkApprove() : bulkReject());
+              }}
+            >
+              {confirmAction === "approve" ? "Схвалити" : "Відхилити"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <DecisionDetailDialog
         decision={detail}

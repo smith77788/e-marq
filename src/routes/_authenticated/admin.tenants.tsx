@@ -253,6 +253,17 @@ function AdminTenantsPage() {
         <CardContent>
           {overviewQuery.isLoading ? (
             <TableSkeleton rows={5} columns={7} />
+          ) : overviewQuery.isError ? (
+            <p className="py-4 text-sm text-destructive">
+              Не вдалося завантажити список брендів.{" "}
+              <button
+                type="button"
+                className="underline"
+                onClick={() => void overviewQuery.refetch()}
+              >
+                Спробувати ще раз
+              </button>
+            </p>
           ) : filtered.length > 0 ? (
             <div className="overflow-x-auto">
               <Table>

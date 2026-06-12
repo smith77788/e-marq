@@ -44,10 +44,12 @@ type AgentAgg = {
 function AdminAgentsIndex() {
   const { isSuperAdmin, loading } = useAuth();
   const [rows, setRows] = useState<RunRow[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [q, setQ] = useState("");
 
   useEffect(() => {
     void (async () => {
+      setLoadError(null);
       const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
       const { data, error } = await supabase
         .from("acos_agent_runs")
@@ -56,6 +58,7 @@ function AdminAgentsIndex() {
         .order("started_at", { ascending: false })
         .limit(5000);
       if (error) {
+        setLoadError(error.message);
         setRows([]);
         return;
       }
@@ -126,6 +129,12 @@ function AdminAgentsIndex() {
 
       {rows === null ? (
         <Skeleton className="h-64 w-full" />
+      ) : loadError ? (
+        <Card className="border-destructive/40 bg-destructive/5">
+          <CardContent className="p-6 text-sm text-destructive">
+            Не вдалося завантажити дані агентів: {loadError}
+          </CardContent>
+        </Card>
       ) : filtered.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-sm text-muted-foreground">
