@@ -98,26 +98,48 @@ function StorefrontIndex() {
   const { shell, collections } = data;
   const ui = (shell.config?.ui ?? {}) as Record<string, string>;
 
-  const [sort, setSort] = useState<SortOpt>("default");
-  const sortedProducts = useMemo(() => {
-    const list = [...shell.products];
-    switch (sort) {
-      case "price_asc":
-        return list.sort((a, b) => a.price_cents - b.price_cents);
-      case "price_desc":
-        return list.sort((a, b) => b.price_cents - a.price_cents);
-      case "name_asc":
-        return list.sort((a, b) => a.name.localeCompare(b.name, "uk"));
-      default:
-        return list; // catalogue order (products have no position field)
-    }
-  }, [shell.products, sort]);
+  const search = Route.useSearch();
+  const sort: SortOpt = search.sort ?? "default";
+  const filters: CatalogFilterValues = {
+    price_min: search.price_min,
+    price_max: search.price_max,
+    in_stock: search.in_stock,
+    collection: search.collection,
+  };
+
+  const collectionProductsQuery = useQuery<ReadonlySet<string>>({
+    queryKey: ["collection-products", slug, filters.collection],
+    enabled: !!filters.collection,
+    queryFn: async () => {
+      const items = await loadCollectionProducts(slug, filters.collection!);
+      return new Set(items.map((p) => p.id));
+    },
+    staleTime: 60_000,
+  });
+
+  const visibleProducts = useMemo(() => {
+    const sorted = (() => {
+      const list = [...shell.products];
+      switch (sort) {
+        case "price_asc":
+          return list.sort((a, b) => a.price_cents - b.price_cents);
+        case "price_desc":
+          return list.sort((a, b) => b.price_cents - a.price_cents);
+        case "name_asc":
+          return list.sort((a, b) => a.name.localeCompare(b.name, "uk"));
+        default:
+          return list;
+      }
+    })();
+    return applyCatalogFilters(sorted, filters, collectionProductsQuery.data);
+  }, [shell.products, sort, filters, collectionProductsQuery.data]);
 
   const hasHero = !!(ui.hero_image || ui.hero_headline);
   const discountedProducts = shell.products.filter(
     (p) => p.compare_at_price_cents && p.compare_at_price_cents > p.price_cents,
   );
   const inStockProducts = shell.products.filter((p) => p.stock > 0);
+  const activeFilterCount = countActiveFilters(filters);
   const outOfStockCount = shell.products.filter((p) => p.stock <= 0).length;
 
   return (
@@ -189,17 +211,31 @@ function StorefrontIndex() {
             </p>
           </div>
           {shell.products.length > 1 && (
-            <Select value={sort} onValueChange={(v) => setSort(v as SortOpt)}>
-              <SelectTrigger className="h-9 w-44">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="default">За замовчуванням</SelectItem>
-                <SelectItem value="price_asc">Спочатку дешевші</SelectItem>
-                <SelectItem value="price_desc">Спочатку дорожчі</SelectItem>
-                <SelectItem value="name_asc">За назвою (А–Я)</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <CatalogFilters
+                value={filters}
+                onChange={(next) =>
+                  void navigate({ to: "/s/$slug/", params: { slug }, search: { ...search, ...next } })
+                }
+                collections={collections.map((c) => ({ handle: c.handle, name: c.name }))}
+              />
+              <Select
+                value={sort}
+                onValueChange={(v) =>
+                  void navigate({ to: "/s/$slug/", params: { slug }, search: { ...search, sort: v as SortOpt } })
+                }
+              >
+                <SelectTrigger className="h-9 w-44">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">За замовчуванням</SelectItem>
+                  <SelectItem value="price_asc">Спочатку дешевші</SelectItem>
+                  <SelectItem value="price_desc">Спочатку дорожчі</SelectItem>
+                  <SelectItem value="name_asc">За назвою (А–Я)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           )}
         </div>
 
@@ -211,9 +247,24 @@ function StorefrontIndex() {
               Незабаром тут з'являться нові товари.
             </p>
           </div>
+        ) : visibleProducts.length === 0 && activeFilterCount > 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed bg-muted/30 py-16 text-center">
+            <p className="font-semibold text-foreground">Нічого не знайдено</p>
+            <p className="mt-1 text-sm text-muted-foreground">Змініть або скиньте фільтри</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4"
+              onClick={() =>
+                void navigate({ to: "/s/$slug/", params: { slug }, search: { sort: search.sort } })
+              }
+            >
+              Скинути фільтри
+            </Button>
+          </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {sortedProducts.map((p) => (
+            {visibleProducts.map((p) => (
               <ProductCard key={p.id} product={p} slug={slug} />
             ))}
           </div>

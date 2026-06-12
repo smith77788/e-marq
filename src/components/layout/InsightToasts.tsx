@@ -53,7 +53,6 @@ export function InsightToasts() {
           .from("owner_notifications")
           .select("id")
           .in("tenant_id", tenantIds)
-          .in("kind", ["dntrade_unhealthy", "dntrade_partial_repeat"])
           .gte("created_at", since),
       ]);
       if (cancelled) return;
@@ -156,7 +155,7 @@ export function InsightToasts() {
       .subscribe();
 
     const notifsChannel = supabase
-      .channel("pulse-dntrade-notifs")
+      .channel("pulse-owner-notifs")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "owner_notifications" },
@@ -171,19 +170,21 @@ export function InsightToasts() {
             severity: string;
           };
           if (!tenantIds.includes(row.tenant_id)) return;
-          if (row.kind !== "dntrade_unhealthy" && row.kind !== "dntrade_partial_repeat") return;
           if (seenNotifsRef.current.has(row.id)) return;
           seenNotifsRef.current.add(row.id);
           const brand = tenantNameById.get(row.tenant_id) ?? "";
           const desc = `${brand ? brand + " · " : ""}${row.body ?? ""}`.slice(0, 220);
-          const isHigh = row.severity === "high" || row.kind === "dntrade_unhealthy";
-          (isHigh ? toast.error : toast.warning)(row.title, {
+          const isError = row.severity === "error" || row.severity === "high";
+          const isWarning = row.severity === "warning";
+          const fn = isError ? toast.error : isWarning ? toast.warning : toast.info;
+          const icon = isError ? (
+            <HeartPulse className="h-4 w-4 text-destructive" />
+          ) : (
+            <TriangleAlert className="h-4 w-4 text-warning" />
+          );
+          fn(row.title, {
             description: desc,
-            icon: isHigh ? (
-              <HeartPulse className="h-4 w-4 text-destructive" />
-            ) : (
-              <TriangleAlert className="h-4 w-4 text-warning" />
-            ),
+            icon,
             duration: 9000,
             action: {
               label: t("toast.detailsLabel"),
