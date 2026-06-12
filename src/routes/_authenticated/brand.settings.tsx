@@ -32,6 +32,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { MarketingSpendForm } from "@/components/owner/MarketingSpendForm";
+import { ImageUploadField } from "@/components/owner/ImageUploadField";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -353,13 +354,16 @@ function StoreSettingsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="logo">URL логотипу</Label>
+                  <Label htmlFor="logo">Логотип (URL або файл)</Label>
                   <div className="flex items-center gap-3">
-                    <Input
+                    <ImageUploadField
                       id="logo"
+                      tenantId={tenantId}
+                      field="logo"
                       value={form.logo_url}
-                      onChange={(e) => setForm((f) => ({ ...f, logo_url: e.target.value }))}
+                      onChange={(v) => setForm((f) => ({ ...f, logo_url: v }))}
                       placeholder="https://…/logo.png"
+                      className="flex-1"
                     />
                     {form.logo_url && (
                       <img
@@ -377,7 +381,7 @@ function StoreSettingsPage() {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Прозорий PNG/SVG, рекомендовано 256×256.
+                    Прозорий PNG/SVG, рекомендовано 256×256, до 2MB.
                   </p>
                 </div>
               </CardContent>
@@ -499,11 +503,13 @@ function StoreSettingsPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="hero-image">URL зображення</Label>
-                    <Input
+                    <Label htmlFor="hero-image">Зображення (URL або файл)</Label>
+                    <ImageUploadField
                       id="hero-image"
+                      tenantId={tenantId}
+                      field="hero"
                       value={form.hero_image}
-                      onChange={(e) => setForm((f) => ({ ...f, hero_image: e.target.value }))}
+                      onChange={(v) => setForm((f) => ({ ...f, hero_image: v }))}
                       placeholder="https://…/hero.jpg"
                     />
                   </div>
@@ -709,11 +715,13 @@ function StoreSettingsPage() {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <Label htmlFor="og">Open Graph image URL</Label>
-                  <Input
+                  <Label htmlFor="og">Open Graph банер (URL або файл)</Label>
+                  <ImageUploadField
                     id="og"
+                    tenantId={tenantId}
+                    field="banner"
                     value={form.og_image_url}
-                    onChange={(e) => setForm((f) => ({ ...f, og_image_url: e.target.value }))}
+                    onChange={(v) => setForm((f) => ({ ...f, og_image_url: v }))}
                     placeholder="https://…/cover.jpg (1200×630)"
                   />
                   {form.og_image_url && (
