@@ -1,0 +1,21 @@
+# Normalize all text files to LF in repo and working tree.
+# Lovable and CI run on Linux (LF); this stops phantom CRLF diffs on Windows.
+* text=auto eol=lf
+
+# Binary assets — never touch line endings
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.avif binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
+*.pdf binary
+*.zip binary
+*.mp4 binary
+*.webm binary
