@@ -600,7 +600,7 @@ function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
           size="sm"
           variant="outline"
           onClick={() => {
-            navigator.clipboard.writeText(deepLink).then(() => toast.success("Скопійовано"));
+            navigator.clipboard.writeText(deepLink).then(() => toast.success("Скопійовано")).catch(() => toast.error("Не вдалося скопіювати"));
           }}
           disabled={!deepLink}
         >
@@ -637,6 +637,7 @@ function Step2Channel({ tenantId, qc }: { tenantId: string; qc: QC }) {
                     navigator.clipboard
                       .writeText(ownerCommand)
                       .then(() => toast.success("Скопійовано"))
+                      .catch(() => toast.error("Не вдалося скопіювати"))
                   }
                 >
                   <Copy className="h-3.5 w-3.5" />
@@ -1434,7 +1435,8 @@ function Step7Team({ tenantId, tenantSlug }: { tenantId: string; tenantSlug: str
                         onClick={() => {
                           navigator.clipboard
                             .writeText(url)
-                            .then(() => toast.success(lang === "ua" ? "Скопійовано." : "Copied."));
+                            .then(() => toast.success(lang === "ua" ? "Скопійовано." : "Copied."))
+                            .catch(() => toast.error(lang === "ua" ? "Не вдалося скопіювати." : "Copy failed."));
                         }}
                         title={lang === "ua" ? "Скопіювати посилання" : "Copy link"}
                       >

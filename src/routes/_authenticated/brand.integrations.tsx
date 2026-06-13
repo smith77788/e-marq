@@ -238,8 +238,8 @@ function IntegrationsHubPage() {
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       if (message.includes("Синхронізація триває занадто довго")) {
-        toast.success("Імпорт запущено у фоні", {
-          description: "Журнал нижче оновиться автоматично, щойно зовнішня система відповість.",
+        toast.warning("Синхронізація зайняла забагато часу", {
+          description: "Зовнішнє API відповідає повільно. Спробуйте ще раз через кілька хвилин або перевірте журнал.",
         });
         qc.invalidateQueries({ queryKey: ["import-jobs", effectiveTenantId] });
         qc.invalidateQueries({ queryKey: ["tenant-integrations", effectiveTenantId] });
