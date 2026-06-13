@@ -179,6 +179,8 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
       toast.success("Домен видалено");
       qc.invalidateQueries({ queryKey: ["tenant-domains", tenantId] });
     },
+    onError: (e: unknown) =>
+      toast.error(e instanceof Error ? e.message : "Не вдалося видалити домен"),
   });
 
   const copy = (text: string, label: string) => {

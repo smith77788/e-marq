@@ -282,15 +282,19 @@ export function IntegrationManageDialog({
                   ? { tenant_id: tenantId, kinds: [entity], jobId: json.jobId }
                   : { entityKind: entity, tenantId, jobId: json.jobId },
               ),
-            }).finally(() => {
-              void qc.invalidateQueries({
-                queryKey: ["integration-jobs", tenantId, integration?.id],
+            })
+              .catch(() => {
+                toast.warning("Фоновий імпорт не підтвердився — перевірте журнал нижче.");
+              })
+              .finally(() => {
+                void qc.invalidateQueries({
+                  queryKey: ["integration-jobs", tenantId, integration?.id],
+                });
+                void qc.invalidateQueries({ queryKey: ["import-jobs", tenantId] });
+                void qc.invalidateQueries({
+                  queryKey: ["tenant-integration-detail", tenantId, integration?.id],
+                });
               });
-              void qc.invalidateQueries({ queryKey: ["import-jobs", tenantId] });
-              void qc.invalidateQueries({
-                queryKey: ["tenant-integration-detail", tenantId, integration?.id],
-              });
-            });
             continue;
           }
           // Нормалізуємо DN Trade summary до спільного формату
@@ -435,7 +439,10 @@ export function IntegrationManageDialog({
   const webhookUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/api/public/integrations/inbound/${integration.id}?tenant=${tenantId}`;
 
   function copy(text: string, label: string) {
-    navigator.clipboard.writeText(text).then(() => toast.success(`${label} скопійовано`));
+    navigator.clipboard.writeText(text).then(
+      () => toast.success(`${label} скопійовано`),
+      () => toast.error("Не вдалося скопіювати — скопіюйте вручну"),
+    );
   }
 
   return (
