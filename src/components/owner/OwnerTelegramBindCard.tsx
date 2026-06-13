@@ -97,8 +97,12 @@ export function OwnerTelegramBindCard({ tenantId }: Props) {
       await handleCreatePairing();
       return;
     }
-    await navigator.clipboard.writeText(startCommand);
-    toast.success("Скопійовано — вставте в чат із ботом");
+    try {
+      await navigator.clipboard.writeText(startCommand);
+      toast.success("Скопійовано — вставте в чат із ботом");
+    } catch {
+      toast.error("Не вдалося скопіювати — скопіюйте вручну");
+    }
   };
 
   const handleUnbind = async () => {

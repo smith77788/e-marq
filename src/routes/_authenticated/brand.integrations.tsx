@@ -218,10 +218,14 @@ function IntegrationsHubPage() {
               ? { tenant_id: effectiveTenantId, kinds: [entity], jobId: json.jobId }
               : { entityKind: entity, tenantId: effectiveTenantId, jobId: json.jobId },
           ),
-        }).finally(() => {
-          qc.invalidateQueries({ queryKey: ["import-jobs", effectiveTenantId] });
-          qc.invalidateQueries({ queryKey: ["tenant-integrations", effectiveTenantId] });
-        });
+        })
+          .catch(() => {
+            toast.warning("Фоновий імпорт не підтвердився — перевірте журнал нижче.");
+          })
+          .finally(() => {
+            qc.invalidateQueries({ queryKey: ["import-jobs", effectiveTenantId] });
+            qc.invalidateQueries({ queryKey: ["tenant-integrations", effectiveTenantId] });
+          });
         return;
       }
       const importedCount = isDn

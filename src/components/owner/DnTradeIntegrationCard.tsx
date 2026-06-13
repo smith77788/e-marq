@@ -225,11 +225,15 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
           method: "POST",
           headers,
           body: JSON.stringify({ tenant_id: tenantId, full, jobId: json.jobId }),
-        }).finally(() => {
-          void qc.invalidateQueries({ queryKey: ["dntrade-integration", tenantId] });
-          void qc.invalidateQueries({ queryKey: ["dntrade-mapping-errors", tenantId] });
-          void qc.invalidateQueries({ queryKey: ["import-jobs", tenantId] });
-        });
+        })
+          .catch(() => {
+            toast.warning("Фоновий синк не підтвердився — перевірте журнал нижче.");
+          })
+          .finally(() => {
+            void qc.invalidateQueries({ queryKey: ["dntrade-integration", tenantId] });
+            void qc.invalidateQueries({ queryKey: ["dntrade-mapping-errors", tenantId] });
+            void qc.invalidateQueries({ queryKey: ["import-jobs", tenantId] });
+          });
         return { queued: true } as const;
       }
       return json.summary as DryRunSummary;
@@ -619,8 +623,10 @@ export function DnTradeIntegrationCard({ tenantId }: Props) {
                       size="sm"
                       variant="outline"
                       onClick={() => {
-                        navigator.clipboard.writeText(webhookUrl);
-                        toast.success(MSG.copied);
+                        navigator.clipboard.writeText(webhookUrl).then(
+                          () => toast.success(MSG.copied),
+                          () => toast.error("Не вдалося скопіювати"),
+                        );
                       }}
                     >
                       <Copy className="h-3 w-3" />

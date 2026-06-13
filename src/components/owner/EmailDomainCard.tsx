@@ -168,8 +168,10 @@ export function EmailDomainCard({ tenantId }: { tenantId: string }) {
   });
 
   const copyValue = (v: string) => {
-    void navigator.clipboard.writeText(v);
-    toast.success("Скопійовано");
+    navigator.clipboard.writeText(v).then(
+      () => toast.success("Скопійовано"),
+      () => toast.error("Не вдалося скопіювати — скопіюйте вручну"),
+    );
   };
 
   const status = statusQuery.data;
