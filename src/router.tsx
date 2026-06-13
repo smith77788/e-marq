@@ -3,9 +3,28 @@ import { AlertTriangle } from "lucide-react";
 import { routeTree } from "./routeTree.gen";
 import { useT } from "@/lib/i18n";
 
+function isChunkLoadError(error: Error) {
+  // Vite/Rollup chunk load failures after a new deployment
+  return (
+    error.name === "ChunkLoadError" ||
+    /loading chunk|dynamically imported module|failed to fetch dynamically|loading css chunk/i.test(
+      error.message,
+    )
+  );
+}
+
 function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   const { t } = useT();
+
+  // After a new deployment, stale cached JS chunks throw ChunkLoadError.
+  // The fix is a full hard reload — the new bundle hashes will be picked up.
+  if (isChunkLoadError(error)) {
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
+    return null;
+  }
 
   return (
     <div
@@ -54,10 +73,7 @@ export const getRouter = () => {
     routeTree,
     context: {},
     scrollRestoration: true,
-    // Prefetch route chunks + loader on hover/focus → instant navigation.
-    // Default 50ms intent delay avoids over-fetching when user just passes by.
     defaultPreload: "intent",
-    // Reuse preloaded loader data for 30s before re-fetching on actual nav.
     defaultPreloadStaleTime: 30_000,
     defaultErrorComponent: DefaultErrorComponent,
   });
