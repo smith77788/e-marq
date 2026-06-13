@@ -4,27 +4,26 @@ import { Button } from "@/components/ui/button";
 
 const STORAGE_KEY = "acos.theme";
 
-type Theme = "dark" | "light";
+type Theme = "light" | "dark";
 
 function applyTheme(theme: Theme) {
   const root = document.documentElement;
-  root.classList.toggle("light", theme === "light");
-  // We do NOT toggle .dark — dark IS the default in :root.
+  root.classList.toggle("dark", theme === "dark");
 }
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
     const stored =
       (typeof window !== "undefined" && (localStorage.getItem(STORAGE_KEY) as Theme | null)) ||
-      "dark";
+      "light";
     setTheme(stored);
     applyTheme(stored);
   }, []);
 
   function toggle() {
-    const next: Theme = theme === "dark" ? "light" : "dark";
+    const next: Theme = theme === "light" ? "dark" : "light";
     setTheme(next);
     applyTheme(next);
     try {
@@ -42,7 +41,7 @@ export function ThemeToggle() {
       aria-label="Перемкнути тему"
       className="h-8 w-8 text-muted-foreground hover:text-foreground"
     >
-      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
     </Button>
   );
 }

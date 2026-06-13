@@ -5,9 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * ACOS Cockpit Design System
- * Mission-control aesthetic: deep navy base, cyan/violet accents, glow effects.
- * Dark is the DEFAULT (cockpit always-on). Light theme available via .light class.
+ * MARQ Design System
+ * Light emerald theme as default. Dark mode available via .dark class.
  */
 
 @theme inline {
@@ -60,11 +59,89 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Default = COCKPIT DARK. */
+/* ═══════════════════════════════════════════════════════════════
+   DEFAULT = LIGHT EMERALD
+   Clean, airy, professional — emerald as the accent.
+   ═══════════════════════════════════════════════════════════════ */
 :root {
   --radius: 0.75rem;
 
-  /* Deep navy/space base */
+  /* Near-white background with the faintest sage warmth */
+  --background: oklch(0.98 0.006 155);
+  --foreground: oklch(0.17 0.022 265);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.17 0.022 265);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.17 0.022 265);
+
+  /* Emerald primary */
+  --primary: oklch(0.54 0.18 152);
+  --primary-foreground: oklch(0.99 0.004 155);
+  --primary-glow: oklch(0.64 0.20 152);
+
+  /* Light sage secondary */
+  --secondary: oklch(0.95 0.018 152);
+  --secondary-foreground: oklch(0.24 0.045 160);
+
+  --muted: oklch(0.95 0.010 152);
+  --muted-foreground: oklch(0.50 0.028 255);
+
+  --accent: oklch(0.93 0.025 152);
+  --accent-foreground: oklch(0.24 0.045 160);
+
+  --destructive: oklch(0.59 0.22 22);
+  --destructive-foreground: oklch(0.99 0.005 250);
+
+  --success: oklch(0.56 0.18 152);
+  --success-foreground: oklch(0.99 0.004 155);
+
+  --warning: oklch(0.68 0.16 72);
+  --warning-foreground: oklch(0.17 0.022 265);
+
+  --info: oklch(0.58 0.15 235);
+  --info-foreground: oklch(0.99 0.005 250);
+
+  --border: oklch(0.88 0.016 155);
+  --input: oklch(0.91 0.012 155);
+  --ring: oklch(0.54 0.18 152 / 55%);
+
+  /* Charts: emerald-led spectrum */
+  --chart-1: oklch(0.54 0.18 152); /* emerald */
+  --chart-2: oklch(0.58 0.16 235); /* blue */
+  --chart-3: oklch(0.70 0.17 78);  /* amber */
+  --chart-4: oklch(0.58 0.20 295); /* violet */
+  --chart-5: oklch(0.60 0.22 22);  /* coral */
+
+  /* Sidebar — subtly distinct from white cards */
+  --sidebar: oklch(0.96 0.014 152);
+  --sidebar-foreground: oklch(0.17 0.022 265);
+  --sidebar-primary: oklch(0.54 0.18 152);
+  --sidebar-primary-foreground: oklch(0.99 0.004 155);
+  --sidebar-accent: oklch(0.92 0.022 152);
+  --sidebar-accent-foreground: oklch(0.24 0.045 160);
+  --sidebar-border: oklch(0.88 0.016 155);
+  --sidebar-ring: oklch(0.54 0.18 152 / 50%);
+
+  /* Gradients & shadows */
+  --gradient-primary: linear-gradient(135deg, oklch(0.54 0.18 152), oklch(0.50 0.17 175));
+  --gradient-success: linear-gradient(135deg, oklch(0.56 0.18 152), oklch(0.58 0.16 195));
+  --gradient-warning: linear-gradient(135deg, oklch(0.70 0.17 78), oklch(0.64 0.22 40));
+  --gradient-surface: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.008 152));
+  --gradient-glow: radial-gradient(circle at 50% 0%, oklch(0.54 0.18 152 / 7%), transparent 55%);
+
+  --shadow-glow: 0 0 24px -4px oklch(0.54 0.18 152 / 22%);
+  --shadow-glow-violet: 0 0 28px -6px oklch(0.54 0.18 152 / 16%);
+  --shadow-elevated: 0 10px 40px -12px oklch(0.17 0.022 265 / 12%);
+  --shadow-card: 0 1px 2px 0 oklch(0.17 0.022 265 / 5%), 0 4px 16px -8px oklch(0.17 0.022 265 / 7%);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK = COCKPIT (navy + cyan)
+   Applied when .dark class is on <html>.
+   ═══════════════════════════════════════════════════════════════ */
+.dark {
+  color-scheme: dark;
+
   --background: oklch(0.16 0.03 260);
   --foreground: oklch(0.97 0.01 250);
   --card: oklch(0.21 0.035 262);
@@ -72,17 +149,14 @@
   --popover: oklch(0.22 0.038 262);
   --popover-foreground: oklch(0.97 0.01 250);
 
-  /* Cyan-electric primary (mission control) */
   --primary: oklch(0.74 0.16 220);
   --primary-foreground: oklch(0.14 0.03 260);
   --primary-glow: oklch(0.82 0.18 215);
 
-  /* Violet secondary accent */
   --secondary: oklch(0.28 0.05 270);
   --secondary-foreground: oklch(0.97 0.01 250);
 
   --muted: oklch(0.26 0.035 262);
-  /* WCAG AA на фоні card (>= 4.5:1). Раніше 0.68 був занадто блідим. */
   --muted-foreground: oklch(0.78 0.025 255);
 
   --accent: oklch(0.7 0.2 295);
@@ -100,19 +174,16 @@
   --info: oklch(0.78 0.14 235);
   --info-foreground: oklch(0.14 0.03 260);
 
-  /* Раніше border був ledve видимий — піднімаємо до ~16%. */
   --border: oklch(1 0 0 / 14%);
   --input: oklch(1 0 0 / 18%);
   --ring: oklch(0.78 0.16 220 / 65%);
 
-  /* Charts: neon spectrum */
-  --chart-1: oklch(0.74 0.16 220); /* cyan */
-  --chart-2: oklch(0.72 0.18 155); /* green */
-  --chart-3: oklch(0.78 0.16 85); /* amber */
-  --chart-4: oklch(0.68 0.22 305); /* violet */
-  --chart-5: oklch(0.7 0.22 25); /* coral */
+  --chart-1: oklch(0.74 0.16 220);
+  --chart-2: oklch(0.72 0.18 155);
+  --chart-3: oklch(0.78 0.16 85);
+  --chart-4: oklch(0.68 0.22 305);
+  --chart-5: oklch(0.7 0.22 25);
 
-  /* Sidebar (slightly darker than cards for separation) */
   --sidebar: oklch(0.18 0.035 262);
   --sidebar-foreground: oklch(0.95 0.012 250);
   --sidebar-primary: oklch(0.78 0.16 220);
@@ -122,7 +193,6 @@
   --sidebar-border: oklch(1 0 0 / 12%);
   --sidebar-ring: oklch(0.78 0.16 220 / 65%);
 
-  /* Cockpit gradients & shadows */
   --gradient-primary: linear-gradient(135deg, oklch(0.74 0.16 220), oklch(0.68 0.22 305));
   --gradient-success: linear-gradient(135deg, oklch(0.72 0.18 155), oklch(0.74 0.16 220));
   --gradient-warning: linear-gradient(135deg, oklch(0.82 0.16 80), oklch(0.7 0.22 25));
@@ -133,58 +203,6 @@
   --shadow-glow-violet: 0 0 28px -6px oklch(0.68 0.22 305 / 40%);
   --shadow-elevated: 0 10px 40px -12px oklch(0 0 0 / 60%);
   --shadow-card: 0 1px 0 0 oklch(1 0 0 / 5%) inset, 0 4px 16px -8px oklch(0 0 0 / 50%);
-}
-
-/* Optional light mode (cockpit-pale). */
-.light {
-  --background: oklch(0.99 0.005 250);
-  --foreground: oklch(0.18 0.03 262);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.03 262);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.03 262);
-  --primary: oklch(0.55 0.18 235);
-  --primary-foreground: oklch(0.99 0.005 250);
-  --primary-glow: oklch(0.65 0.2 230);
-  --secondary: oklch(0.96 0.01 250);
-  --secondary-foreground: oklch(0.18 0.03 262);
-  --muted: oklch(0.96 0.01 250);
-  --muted-foreground: oklch(0.5 0.03 258);
-  --accent: oklch(0.55 0.22 295);
-  --accent-foreground: oklch(0.99 0.005 250);
-  --destructive: oklch(0.6 0.24 22);
-  --destructive-foreground: oklch(0.99 0.005 250);
-  --success: oklch(0.58 0.18 155);
-  --success-foreground: oklch(0.99 0.005 250);
-  --warning: oklch(0.7 0.16 70);
-  --warning-foreground: oklch(0.18 0.03 262);
-  --info: oklch(0.6 0.14 235);
-  --info-foreground: oklch(0.99 0.005 250);
-  --border: oklch(0.9 0.012 252);
-  --input: oklch(0.9 0.012 252);
-  --ring: oklch(0.55 0.18 235 / 50%);
-  --chart-1: oklch(0.55 0.18 235);
-  --chart-2: oklch(0.58 0.18 155);
-  --chart-3: oklch(0.7 0.16 70);
-  --chart-4: oklch(0.55 0.22 295);
-  --chart-5: oklch(0.6 0.24 22);
-  --sidebar: oklch(0.98 0.005 250);
-  --sidebar-foreground: oklch(0.18 0.03 262);
-  --sidebar-primary: oklch(0.55 0.18 235);
-  --sidebar-primary-foreground: oklch(0.99 0.005 250);
-  --sidebar-accent: oklch(0.95 0.01 250);
-  --sidebar-accent-foreground: oklch(0.18 0.03 262);
-  --sidebar-border: oklch(0.9 0.012 252);
-  --sidebar-ring: oklch(0.55 0.18 235 / 50%);
-  --shadow-glow: 0 0 24px -6px oklch(0.55 0.18 235 / 25%);
-  --shadow-glow-violet: 0 0 28px -8px oklch(0.55 0.22 295 / 25%);
-  --shadow-elevated: 0 10px 40px -16px oklch(0.18 0.03 262 / 18%);
-  --shadow-card: 0 1px 2px 0 oklch(0.18 0.03 262 / 8%);
-}
-
-/* Backward-compat: any leftover .dark class behaves as cockpit (already default). */
-.dark {
-  color-scheme: dark;
 }
 
 @layer base {
@@ -206,7 +224,7 @@
     background-position: top center;
   }
 
-  /* Subtle scrollbar */
+  /* Scrollbar — adapts to light/dark */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -215,19 +233,19 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: oklch(1 0 0 / 8%);
+    background: oklch(0.17 0.022 265 / 10%);
     border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.17 0.022 265 / 18%);
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background: oklch(1 0 0 / 8%);
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
     background: oklch(1 0 0 / 14%);
   }
 
-  /*
-   * A11y: Global focus-visible baseline for native interactive elements.
-   * Ensures any unstyled <button>/<a>/[role=button]/[tabindex] still shows
-   * a visible keyboard focus ring. Components that set their own
-   * `focus-visible:outline-none` (shadcn Button/Input/etc.) override this.
-   */
   a:focus-visible,
   button:focus-visible,
   [role="button"]:focus-visible,
@@ -304,7 +322,7 @@
     }
   }
 
-  /* ─── Cockpit shimmer + reveal animations ───────────────────────────── */
+  /* Shimmer skeleton */
   .shimmer {
     position: relative;
     overflow: hidden;
@@ -329,34 +347,18 @@
     }
   }
 
-  /* Stagger fade-up reveal — applied to .reveal-stagger > * children */
+  /* Stagger fade-up reveal */
   .reveal-stagger > * {
     animation: reveal-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
-  .reveal-stagger > *:nth-child(1) {
-    animation-delay: 0ms;
-  }
-  .reveal-stagger > *:nth-child(2) {
-    animation-delay: 60ms;
-  }
-  .reveal-stagger > *:nth-child(3) {
-    animation-delay: 120ms;
-  }
-  .reveal-stagger > *:nth-child(4) {
-    animation-delay: 180ms;
-  }
-  .reveal-stagger > *:nth-child(5) {
-    animation-delay: 240ms;
-  }
-  .reveal-stagger > *:nth-child(6) {
-    animation-delay: 300ms;
-  }
-  .reveal-stagger > *:nth-child(7) {
-    animation-delay: 360ms;
-  }
-  .reveal-stagger > *:nth-child(n + 8) {
-    animation-delay: 420ms;
-  }
+  .reveal-stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .reveal-stagger > *:nth-child(2) { animation-delay: 60ms; }
+  .reveal-stagger > *:nth-child(3) { animation-delay: 120ms; }
+  .reveal-stagger > *:nth-child(4) { animation-delay: 180ms; }
+  .reveal-stagger > *:nth-child(5) { animation-delay: 240ms; }
+  .reveal-stagger > *:nth-child(6) { animation-delay: 300ms; }
+  .reveal-stagger > *:nth-child(7) { animation-delay: 360ms; }
+  .reveal-stagger > *:nth-child(n + 8) { animation-delay: 420ms; }
   @keyframes reveal-up {
     from {
       opacity: 0;
@@ -368,20 +370,16 @@
     }
   }
 
-  /* Soft fade-in (no transform) for content swaps */
+  /* Soft fade-in */
   .fade-in-soft {
     animation: fade-in-soft 0.35s ease-out both;
   }
   @keyframes fade-in-soft {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 
-  /* Top-of-page progress bar (perceived speed) */
+  /* Top-of-page progress bar */
   .top-progress {
     position: fixed;
     top: 0;
@@ -395,12 +393,8 @@
     pointer-events: none;
   }
   @keyframes top-progress-slide {
-    0% {
-      background-position: -100% 0;
-    }
-    100% {
-      background-position: 200% 0;
-    }
+    0%   { background-position: -100% 0; }
+    100% { background-position: 200% 0; }
   }
 
   /* Respect reduced motion */

@@ -152,14 +152,14 @@ export const QUICK_ACTIONS: QuickAction[] = [
 ];
 
 // Helper used by the toggle-theme action — must mirror ThemeToggle.tsx
-// (key = "acos.theme", only `.light` class is toggled; dark is :root default).
+// (key = "acos.theme", .dark class toggled; light is :root default).
 const THEME_STORAGE_KEY = "acos.theme";
 export function toggleThemeMode() {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
-  const isLight = root.classList.contains("light");
-  const next = isLight ? "dark" : "light";
-  root.classList.toggle("light", next === "light");
+  const isDark = root.classList.contains("dark");
+  const next = isDark ? "light" : "dark";
+  root.classList.toggle("dark", next === "dark");
   try {
     window.localStorage.setItem(THEME_STORAGE_KEY, next);
   } catch {
