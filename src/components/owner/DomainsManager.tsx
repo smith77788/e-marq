@@ -148,22 +148,26 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
 
   const setPrimaryMut = useMutation({
     mutationFn: async (id: string) => {
-      // Скидаємо is_primary на всіх, потім встановлюємо на цьому
+      // Спочатку встановлюємо цільовий домен як primary — якщо впаде, старий primary лишається.
+      // Потім знімаємо прапор з усіх ІНШИХ — якщо впаде, матимемо дублікат (менш критично).
       const { error: e1 } = await supabase
-        .from("tenant_domains")
-        .update({ is_primary: false })
-        .eq("tenant_id", tenantId);
-      if (e1) throw e1;
-      const { error: e2 } = await supabase
         .from("tenant_domains")
         .update({ is_primary: true })
         .eq("id", id);
+      if (e1) throw e1;
+      const { error: e2 } = await supabase
+        .from("tenant_domains")
+        .update({ is_primary: false })
+        .eq("tenant_id", tenantId)
+        .neq("id", id);
       if (e2) throw e2;
     },
     onSuccess: () => {
       toast.success("Основний домен оновлено");
       qc.invalidateQueries({ queryKey: ["tenant-domains", tenantId] });
     },
+    onError: (e: unknown) =>
+      toast.error(e instanceof Error ? e.message : "Не вдалося змінити основний домен"),
   });
 
   const deleteMut = useMutation({
@@ -178,8 +182,10 @@ export function DomainsManager({ tenantId }: { tenantId: string }) {
   });
 
   const copy = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success(`${label} скопійовано`);
+    navigator.clipboard.writeText(text).then(
+      () => toast.success(`${label} скопійовано`),
+      () => toast.error("Не вдалося скопіювати — скопіюйте вручну"),
+    );
   };
 
   return (

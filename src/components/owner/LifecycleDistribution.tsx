@@ -27,7 +27,7 @@ function fmtUsd(cents: number) {
 }
 
 export function LifecycleDistribution({ tenantId }: Props) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["lifecycle-dist", tenantId],
     enabled: !!tenantId,
     refetchInterval: 5 * 60_000,
@@ -75,6 +75,27 @@ export function LifecycleDistribution({ tenantId }: Props) {
         </CardHeader>
         <CardContent>
           <div className="h-48 animate-pulse rounded-md bg-muted/30" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <UsersRound className="h-4 w-4 text-primary" />
+            Розподіл клієнтів за стадіями
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-destructive">
+            Не вдалося завантажити.{" "}
+            <button type="button" className="underline" onClick={() => void refetch()}>
+              Повторити
+            </button>
+          </p>
         </CardContent>
       </Card>
     );

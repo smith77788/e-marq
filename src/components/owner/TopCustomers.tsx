@@ -59,13 +59,14 @@ export function TopCustomers({ tenantId }: Props) {
   const {
     data: customers,
     isLoading,
+    isError,
     refetch,
   } = useQuery({
     queryKey: ["top-customers", tenantId],
     enabled: !!tenantId,
     refetchInterval: 60_000,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("customers")
         .select(
           "id, name, email, total_orders, total_spent_cents, last_order_at, predicted_next_order_at, lifecycle_stage, consent_marketing, telegram_chat_id",
@@ -73,6 +74,7 @@ export function TopCustomers({ tenantId }: Props) {
         .eq("tenant_id", tenantId)
         .order("total_spent_cents", { ascending: false })
         .limit(10);
+      if (error) throw error;
       return (data ?? []) as Customer[];
     },
   });
@@ -122,6 +124,13 @@ export function TopCustomers({ tenantId }: Props) {
               <div key={i} className="h-12 animate-pulse rounded-md bg-muted/30" />
             ))}
           </div>
+        ) : isError ? (
+          <p className="text-sm text-destructive">
+            Не вдалося завантажити.{" "}
+            <button type="button" className="underline" onClick={() => void refetch()}>
+              Повторити
+            </button>
+          </p>
         ) : !customers || customers.length === 0 ? (
           <EmptyState
             variant="inline"
