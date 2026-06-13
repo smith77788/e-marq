@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, tStatic } from "@/lib/i18n";
@@ -71,27 +70,17 @@ function LoginPage() {
   async function onGoogle() {
     setSubmitting(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/auth/callback`,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
-      if (result.redirected) return;
-
-      if (result.error) {
-        const { data } = await supabase.auth.getSession();
-        if (data.session) {
-          window.location.assign("/auth/callback");
-          return;
-        }
-        const msg = result.error instanceof Error ? result.error.message : String(result.error);
-        if (!/cancel/i.test(msg)) {
-          toast.error(msg || t("auth.failGoogle"));
-        }
+      if (error) {
+        toast.error(error.message || t("auth.failGoogle"));
         setSubmitting(false);
-        return;
       }
-
-      toast.success(t("auth.welcome"));
-      window.location.assign("/auth/callback");
+      // On success Supabase navigates to Google — no further action needed
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.fail"));
       setSubmitting(false);

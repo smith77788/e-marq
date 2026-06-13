@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { lovable } from "@/integrations/lovable";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, tStatic } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
@@ -122,19 +122,17 @@ function SignupPage() {
       } catch {
         /* storage may be blocked */
       }
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/auth/callback`,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
-      if (result.error) {
-        toast.error(
-          result.error instanceof Error ? result.error.message : t("auth.failSignupGoogle"),
-        );
+      if (error) {
+        toast.error(error.message || t("auth.failSignupGoogle"));
         setSubmitting(false);
-        return;
       }
-      if (result.redirected) return;
-      toast.success(t("auth.created"));
-      window.location.assign("/auth/callback");
+      // On success Supabase navigates to Google — no further action needed
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.failSignup"));
       setSubmitting(false);
