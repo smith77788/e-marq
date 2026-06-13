@@ -128,8 +128,10 @@ export function AiAskPanel({ tenantId, question, onNavigate, onPickQuestion }: P
               value={`ai-answer::${result.answer.slice(0, 40)}`}
               onSelect={() => {
                 if (typeof navigator !== "undefined" && navigator.clipboard) {
-                  void navigator.clipboard.writeText(result.answer);
-                  toast.success(t("gs.aiCopied"));
+                  navigator.clipboard.writeText(result.answer).then(
+                    () => toast.success(t("gs.aiCopied")),
+                    () => toast.error("Не вдалося скопіювати"),
+                  );
                 }
               }}
               className="items-start"
@@ -173,8 +175,10 @@ export function AiAskPanel({ tenantId, question, onNavigate, onPickQuestion }: P
                 url.searchParams.set("ask", trimmed);
                 const link = url.toString();
                 if (typeof navigator !== "undefined" && navigator.clipboard) {
-                  void navigator.clipboard.writeText(link);
-                  toast.success(t("gs.aiShareCopied"));
+                  navigator.clipboard.writeText(link).then(
+                    () => toast.success(t("gs.aiShareCopied")),
+                    () => toast.error("Не вдалося скопіювати"),
+                  );
                 }
               }}
             >
@@ -185,8 +189,10 @@ export function AiAskPanel({ tenantId, question, onNavigate, onPickQuestion }: P
               value={`ai-action-copy::${trimmed}`}
               onSelect={() => {
                 if (typeof navigator !== "undefined" && navigator.clipboard) {
-                  void navigator.clipboard.writeText(result.answer);
-                  toast.success(t("gs.aiCopied"));
+                  navigator.clipboard.writeText(result.answer).then(
+                    () => toast.success(t("gs.aiCopied")),
+                    () => toast.error("Не вдалося скопіювати"),
+                  );
                 }
               }}
             >
