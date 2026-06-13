@@ -62,7 +62,7 @@ function SignupPage() {
   const { t } = useT();
   const { signUp } = useAuth();
   const search = Route.useSearch();
-  const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting] = useState<"google" | "apple" | null>(null);
   const [emailSubmitting, setEmailSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -108,8 +108,8 @@ function SignupPage() {
     }
   }
 
-  async function onGoogle() {
-    setSubmitting(true);
+  async function onOAuth(provider: "google" | "apple") {
+    setSubmitting(provider);
     try {
       // Persist desired destination across the OAuth round-trip.
       // /auth/callback will read this and finalize navigation.
@@ -123,19 +123,21 @@ function SignupPage() {
         /* storage may be blocked */
       }
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
+        provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
       if (error) {
-        toast.error(error.message || t("auth.failSignupGoogle"));
-        setSubmitting(false);
+        toast.error(
+          error.message || t(provider === "apple" ? "auth.failSignupApple" : "auth.failSignupGoogle"),
+        );
+        setSubmitting(null);
       }
-      // On success Supabase navigates to Google — no further action needed
+      // On success Supabase navigates to provider — no further action needed
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.failSignup"));
-      setSubmitting(false);
+      setSubmitting(null);
     }
   }
 
@@ -189,7 +191,7 @@ function SignupPage() {
               />
               <p className="text-xs text-muted-foreground">{t("auth.passwordHint")}</p>
             </div>
-            <Button type="submit" className="w-full" disabled={emailSubmitting || submitting}>
+            <Button type="submit" className="w-full" disabled={emailSubmitting || !!submitting}>
               {emailSubmitting ? t("auth.redirecting") : t("auth.signupBtn")}
             </Button>
           </form>
@@ -201,16 +203,28 @@ function SignupPage() {
             </span>
           </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={onGoogle}
-            disabled={submitting || emailSubmitting}
-          >
-            <GoogleIcon />
-            {submitting ? t("auth.redirecting") : t("auth.signupGoogle")}
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => onOAuth("google")}
+              disabled={!!submitting || emailSubmitting}
+            >
+              <GoogleIcon />
+              {submitting === "google" ? t("auth.redirecting") : t("auth.signupGoogle")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => onOAuth("apple")}
+              disabled={!!submitting || emailSubmitting}
+            >
+              <AppleIcon />
+              {submitting === "apple" ? t("auth.redirecting") : t("auth.signupApple")}
+            </Button>
+          </div>
           <p className="text-center text-sm text-muted-foreground">
             {t("auth.hasAccount")}{" "}
             <Link to="/login" className="font-medium text-primary hover:underline">
@@ -241,6 +255,14 @@ function GoogleIcon() {
         fill="#EA4335"
         d="M12 10.2v3.9h5.5c-.2 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.7 3.4 14.6 2.4 12 2.4 6.7 2.4 2.5 6.6 2.5 12s4.2 9.6 9.5 9.6c5.5 0 9.1-3.9 9.1-9.3 0-.6-.1-1.1-.2-1.6H12z"
       />
+    </svg>
+  );
+}
+
+function AppleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="mr-2 h-4 w-4 fill-current" aria-hidden="true">
+      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.42.07 2.41.74 3.24.8 1.23-.25 2.41-.96 3.72-.84 1.59.18 2.8.83 3.56 2.07-3.26 2.02-2.6 6.3.48 7.9-.57 1.37-1.3 2.73-3 2.95zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
     </svg>
   );
 }
