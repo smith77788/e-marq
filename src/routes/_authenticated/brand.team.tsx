@@ -221,7 +221,10 @@ function InviteCreator({
                 variant="outline"
                 className="h-8 px-2"
                 onClick={() => {
-                  navigator.clipboard.writeText(lastLink).then(() => toast.success("Скопійовано"));
+                  navigator.clipboard
+                    .writeText(lastLink)
+                    .then(() => toast.success("Скопійовано"))
+                    .catch(() => toast.error("Не вдалося скопіювати"));
                 }}
               >
                 <Copy className="h-3.5 w-3.5" />
@@ -335,7 +338,10 @@ function PendingInvitations({ tenantId, brandName }: { tenantId: string; brandNa
                     variant="outline"
                     className="h-7 px-2"
                     onClick={() => {
-                      navigator.clipboard.writeText(url).then(() => toast.success("Скопійовано"));
+                      navigator.clipboard
+                        .writeText(url)
+                        .then(() => toast.success("Скопійовано"))
+                        .catch(() => toast.error("Не вдалося скопіювати"));
                     }}
                   >
                     <Copy className="h-3 w-3" />

@@ -174,8 +174,12 @@ function ProductDetailPage() {
         /* user cancelled */
       }
     } else {
-      await navigator.clipboard.writeText(url);
-      toast.success("Посилання скопійовано!");
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success("Посилання скопійовано!");
+      } catch {
+        toast.error("Не вдалося скопіювати");
+      }
     }
   }
 
