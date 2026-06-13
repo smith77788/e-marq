@@ -266,7 +266,7 @@ function BrandCollectionsPage() {
     const rows = productIds.map((pid, idx) => ({
       collection_id: collectionId,
       product_id: pid,
-      tenant_id: tenantId!,
+      tenant_id: effectiveTenantId!,
       position: idx,
     }));
     const { error: insErr } = await supabase.from("collection_products").insert(rows);
@@ -278,7 +278,7 @@ function BrandCollectionsPage() {
       const { data, error } = await supabase
         .from("collections")
         .insert({
-          tenant_id: tenantId!,
+          tenant_id: effectiveTenantId!,
           name: name.trim(),
           handle: handle.trim() || slugify(name),
           description: description.trim() || null,

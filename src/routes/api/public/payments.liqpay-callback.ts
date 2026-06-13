@@ -35,17 +35,21 @@ async function logCallback(args: {
   httpStatus: number;
   ip: string;
 }) {
-  await supabaseAdmin.from("payment_callbacks_log").insert({
-    provider: args.provider,
-    order_id: args.orderId ?? null,
-    tenant_id: args.tenantId ?? null,
-    external_id: args.externalId ?? null,
-    signature_valid: args.signatureValid,
-    raw_body: args.rawBody.slice(0, 8000),
-    parsed_payload: (args.parsed ?? {}) as never,
-    http_status: args.httpStatus,
-    ip: args.ip,
-  });
+  try {
+    await supabaseAdmin.from("payment_callbacks_log").insert({
+      provider: args.provider,
+      order_id: args.orderId ?? null,
+      tenant_id: args.tenantId ?? null,
+      external_id: args.externalId ?? null,
+      signature_valid: args.signatureValid,
+      raw_body: args.rawBody.slice(0, 8000),
+      parsed_payload: (args.parsed ?? {}) as never,
+      http_status: args.httpStatus,
+      ip: args.ip,
+    });
+  } catch (e) {
+    console.error("[liqpay-callback] logCallback failed:", e instanceof Error ? e.message : e);
+  }
 }
 
 export const Route = createFileRoute("/api/public/payments/liqpay-callback")({

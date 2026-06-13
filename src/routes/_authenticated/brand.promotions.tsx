@@ -247,7 +247,7 @@ function BrandPromotionsPage() {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      const payload = { tenant_id: tenantId!, ...buildPayload() };
+      const payload = { tenant_id: effectiveTenantId!, ...buildPayload() };
       const { error } = await supabase.from("promotions").insert(payload);
       if (error) throw error;
     },
@@ -347,9 +347,9 @@ function BrandPromotionsPage() {
         </div>
       </div>
 
-      <LoyaltyCard tenantId={tenantId!} />
+      <LoyaltyCard tenantId={effectiveTenantId!} />
 
-      <BulkPromoGeneratorDialog tenantId={tenantId!} open={bulkOpen} onOpenChange={setBulkOpen} />
+      <BulkPromoGeneratorDialog tenantId={effectiveTenantId!} open={bulkOpen} onOpenChange={setBulkOpen} />
 
       <Card>
         <CardContent className="p-0">

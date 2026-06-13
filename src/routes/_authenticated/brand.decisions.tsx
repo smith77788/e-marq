@@ -156,6 +156,7 @@ function DecisionList({ tenantId }: { tenantId: string }) {
       .limit(200);
     if (error) {
       toast.error("Не вдалося завантажити: " + error.message);
+      setDecisions([]);
       return;
     }
     setDecisions((data ?? []) as Decision[]);
