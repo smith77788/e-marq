@@ -46,7 +46,8 @@ export function TenantSwitcher() {
       const { data, error } = await supabase
         .from("tenants")
         .select("id, name, slug, status")
-        .order("name");
+        .order("name")
+        .limit(2000);
       if (error) throw error;
       return (data ?? []) as AdminTenant[];
     },

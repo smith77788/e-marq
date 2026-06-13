@@ -24,7 +24,7 @@ export function InsightToasts() {
     queryKey: ["pulse-tenants", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase.from("tenants").select("id, name").limit(20);
+      const { data } = await supabase.from("tenants").select("id, name").limit(500);
       return data ?? [];
     },
   });
