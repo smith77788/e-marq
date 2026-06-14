@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, tStatic } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
@@ -122,19 +122,21 @@ function SignupPage() {
       } catch {
         /* storage may be blocked */
       }
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
+      const result = await lovable.auth.signInWithOAuth(provider, {
+        redirect_uri: `${window.location.origin}/auth/callback`,
       });
-      if (error) {
+      if (result.error) {
         toast.error(
-          error.message || t(provider === "apple" ? "auth.failSignupApple" : "auth.failSignupGoogle"),
+          result.error instanceof Error
+            ? result.error.message
+            : t(provider === "apple" ? "auth.failSignupApple" : "auth.failSignupGoogle"),
         );
         setSubmitting(null);
+        return;
       }
-      // On success Supabase navigates to provider — no further action needed
+      if (result.redirected) return;
+      toast.success(t("auth.created"));
+      window.location.assign("/auth/callback");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.failSignup"));
       setSubmitting(null);
@@ -174,7 +176,7 @@ function SignupPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={emailSubmitting || submitting}
+                disabled={emailSubmitting || !!submitting}
               />
             </div>
             <div className="space-y-1.5">
@@ -187,7 +189,7 @@ function SignupPage() {
                 minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={emailSubmitting || submitting}
+                disabled={emailSubmitting || !!submitting}
               />
               <p className="text-xs text-muted-foreground">{t("auth.passwordHint")}</p>
             </div>

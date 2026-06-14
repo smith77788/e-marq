@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, tStatic } from "@/lib/i18n";
@@ -70,19 +71,27 @@ function LoginPage() {
   async function onOAuth(provider: "google" | "apple") {
     setSubmitting(provider);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
+      const result = await lovable.auth.signInWithOAuth(provider, {
+        redirect_uri: `${window.location.origin}/auth/callback`,
       });
-      if (error) {
-        toast.error(
-          error.message || t(provider === "apple" ? "auth.failApple" : "auth.failGoogle"),
-        );
+      if (result.redirected) return;
+
+      if (result.error) {
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          window.location.assign("/auth/callback");
+          return;
+        }
+        const msg = result.error instanceof Error ? result.error.message : String(result.error);
+        if (!/cancel/i.test(msg)) {
+          toast.error(msg || t(provider === "apple" ? "auth.failApple" : "auth.failGoogle"));
+        }
         setSubmitting(null);
+        return;
       }
-      // On success Supabase navigates to provider — no further action needed
+
+      toast.success(t("auth.welcome"));
+      window.location.assign("/auth/callback");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.fail"));
       setSubmitting(null);
@@ -110,7 +119,7 @@ function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={emailSubmitting || submitting}
+                disabled={emailSubmitting || !!submitting}
               />
             </div>
             <div className="space-y-1.5">
@@ -131,7 +140,7 @@ function LoginPage() {
                 minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={emailSubmitting || submitting}
+                disabled={emailSubmitting || !!submitting}
               />
             </div>
             <Button type="submit" className="w-full" disabled={emailSubmitting || !!submitting}>
