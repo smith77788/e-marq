@@ -38,8 +38,8 @@ export const Route = createFileRoute("/track/$")({
         }
         const origin = new URL(request.url).origin;
         const js = `(function(){
-  var TENANT='${tenant.slug}';
-  var INGEST='${origin}/hooks/ingest';
+  var TENANT=${JSON.stringify(tenant.slug)};
+  var INGEST=${JSON.stringify(`${origin}/hooks/ingest`)};
   function uuid(){return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16);});}
   var sid;
   try{sid=localStorage.getItem('acos_sid');if(!sid){sid=uuid();localStorage.setItem('acos_sid',sid);}}catch(e){sid=uuid();}
