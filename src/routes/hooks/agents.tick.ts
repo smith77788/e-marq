@@ -15,6 +15,9 @@ import {
   startAgentRun,
 } from "@/lib/acos/agentRuntime";
 import { isCronToken } from "@/lib/acos/cronAuth";
+import { withTimeout } from "@/lib/async/withTimeout";
+
+const TENANT_TICK_TIMEOUT_MS = 45_000;
 
 const AGENT_ID = "tick";
 
@@ -57,8 +60,11 @@ export const Route = createFileRoute("/hooks/agents/tick")({
             continue;
           }
           try {
-            const sales = await runSalesBotForTenant(t.id, 10);
-            const dispatch = await dispatchTenantOutbound(t.id, 50);
+            const [sales, dispatch] = await withTimeout(
+              Promise.all([runSalesBotForTenant(t.id, 10), dispatchTenantOutbound(t.id, 50)]),
+              TENANT_TICK_TIMEOUT_MS,
+              `Tenant tick timed out after ${TENANT_TICK_TIMEOUT_MS / 1000}s`,
+            );
             const salesSent =
               typeof sales === "object" && sales !== null && "sent" in sales
                 ? ((sales as { sent?: number }).sent ?? 0)

@@ -11,6 +11,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { authorizeAgentRequest, jsonError, jsonOk } from "@/lib/acos/agentRuntime";
 import { isCronToken } from "@/lib/acos/cronAuth";
 import { dispatchTenantOutbound } from "@/lib/acos/channels";
+import { allSettledWithConcurrency, TENANT_FANOUT_CONCURRENCY } from "@/lib/acos/fanout";
 
 export const Route = createFileRoute("/hooks/engines/dispatch")({
   server: {
@@ -34,19 +35,23 @@ export const Route = createFileRoute("/hooks/engines/dispatch")({
             .in("status", [...FANOUT_TENANT_STATUSES])
             .limit(50);
           if (tErr) return jsonError("tenant_lookup_failed", 500, { details: tErr.message });
-          const out: Array<Record<string, unknown>> = [];
-          for (const t of tenants ?? []) {
-            try {
+          const settled = await allSettledWithConcurrency(
+            tenants ?? [],
+            TENANT_FANOUT_CONCURRENCY,
+            async (t) => {
               const result = await dispatchTenantOutbound(t.id, 100);
-              out.push({ tenant: t.slug, ok: true, ...result });
-            } catch (err) {
-              out.push({
-                tenant: t.slug,
-                ok: false,
-                error: err instanceof Error ? err.message : String(err),
-              });
-            }
-          }
+              return { tenant: t.slug, ok: true, ...result };
+            },
+          );
+          const out = settled.map((r, i) =>
+            r.status === "fulfilled"
+              ? r.value
+              : {
+                  tenant: (tenants ?? [])[i]?.slug,
+                  ok: false,
+                  error: r.reason instanceof Error ? r.reason.message : String(r.reason),
+                },
+          );
           return jsonOk({
             mode: "fan-out",
             tenants_processed: tenants?.length ?? 0,

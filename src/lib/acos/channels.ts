@@ -52,6 +52,7 @@ export async function sendTelegramText(
 
   const res = await fetch(`${TG_GATEWAY}/sendMessage`, {
     method: "POST",
+    signal: AbortSignal.timeout(10_000),
     headers: {
       Authorization: `Bearer ${lovableKey}`,
       "X-Connection-Api-Key": tgKey,
@@ -63,6 +64,8 @@ export async function sendTelegramText(
       parse_mode: "HTML",
       disable_web_page_preview: true,
     }),
+  }).catch((err: unknown) => {
+    throw new Error(`Telegram gateway timeout/error: ${err instanceof Error ? err.message : String(err)}`);
   });
   const json = (await res.json().catch(() => ({}))) as {
     ok?: boolean;

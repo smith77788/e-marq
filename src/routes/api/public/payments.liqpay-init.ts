@@ -109,6 +109,7 @@ export const Route = createFileRoute("/api/public/payments/liqpay-init")({
         );
         if (intentErr) {
           console.error("[liqpay-init] create_payment_intent failed:", intentErr.message);
+          return Response.json({ ok: false, error: "payment_intent_failed" }, { status: 500 });
         }
 
         return Response.json({

@@ -123,6 +123,7 @@ export const Route = createFileRoute("/api/public/payments/wayforpay-init")({
         );
         if (intentErr) {
           console.error("[wayforpay-init] create_payment_intent failed:", intentErr.message);
+          return Response.json({ ok: false, error: "payment_intent_failed" }, { status: 500 });
         }
 
         return Response.json({

@@ -99,6 +99,7 @@ async function aiReply(opts: {
 
   const res = await fetch(LOVABLE_AI_URL, {
     method: "POST",
+    signal: AbortSignal.timeout(25_000),
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({ model: MODEL, messages, temperature: 0.4 }),
   });
@@ -174,6 +175,27 @@ export async function runSalesBotForTenant(
     queue.push(r);
   }
 
+  // Batch-prefetch to avoid N+1: one query for dedup check, one for customer data.
+  const queuedCustomerIds = [...new Set(queue.map((r) => r.customer_id).filter(Boolean))] as string[];
+
+  const [{ data: sentRows }, { data: customerRows }] = await Promise.all([
+    supabaseAdmin
+      .from("outbound_messages")
+      .select("customer_id")
+      .eq("tenant_id", tenantId)
+      .in("customer_id", queuedCustomerIds)
+      .eq("trigger_kind", "sales_reply")
+      .gte("created_at", since)
+      .limit(queuedCustomerIds.length * 2),
+    supabaseAdmin
+      .from("customers")
+      .select("id, name, telegram_chat_id")
+      .in("id", queuedCustomerIds)
+      .limit(queuedCustomerIds.length),
+  ]);
+  const alreadySentIds = new Set(sentRows?.map((r) => r.customer_id) ?? []);
+  const customerMap = new Map((customerRows ?? []).map((c) => [c.id, c]));
+
   let replied = 0,
     skipped = 0;
   for (const r of queue) {
@@ -182,25 +204,12 @@ export async function runSalesBotForTenant(
       continue;
     }
 
-    // Skip if we already queued/sent an outbound after this inbound
-    const { data: alreadySent } = await supabaseAdmin
-      .from("outbound_messages")
-      .select("id")
-      .eq("tenant_id", tenantId)
-      .eq("customer_id", r.customer_id)
-      .eq("trigger_kind", "sales_reply")
-      .gte("created_at", r.created_at)
-      .limit(1);
-    if (alreadySent && alreadySent.length > 0) {
+    if (alreadySentIds.has(r.customer_id)) {
       skipped++;
       continue;
     }
 
-    const { data: customer } = await supabaseAdmin
-      .from("customers")
-      .select("name, telegram_chat_id")
-      .eq("id", r.customer_id)
-      .maybeSingle();
+    const customer = customerMap.get(r.customer_id);
     if (!customer?.telegram_chat_id && r.channel === "telegram") {
       skipped++;
       continue;
