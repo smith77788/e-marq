@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, tStatic } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
@@ -109,34 +110,46 @@ function SignupPage() {
 
   async function onOAuth(provider: "google" | "apple") {
     setSubmitting(provider);
+    // Persist desired destination across the OAuth round-trip.
     try {
-      // Persist desired destination across the OAuth round-trip.
-      // /auth/callback will read this and finalize navigation.
+      if (goingToCheckout) {
+        window.sessionStorage.setItem("marq.postAuthDest", destination);
+      } else {
+        window.sessionStorage.removeItem("marq.postAuthDest");
+      }
+    } catch {
+      /* storage may be blocked */
+    }
+    try {
+      let lovableDone = false;
       try {
-        if (goingToCheckout) {
-          window.sessionStorage.setItem("marq.postAuthDest", destination);
-        } else {
-          window.sessionStorage.removeItem("marq.postAuthDest");
+        const { lovable } = await import("@/integrations/lovable");
+        const result = await lovable.auth.signInWithOAuth(provider, {
+          redirect_uri: `${window.location.origin}/auth/callback`,
+        });
+        if (result.redirected) return;
+        if (!result.error) {
+          window.location.assign("/auth/callback");
+          return;
         }
+        lovableDone = true;
       } catch {
-        /* storage may be blocked */
+        lovableDone = true;
       }
-      const { lovable } = await import("@/integrations/lovable");
-      const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: `${window.location.origin}/auth/callback`,
-      });
-      if (result.error) {
-        toast.error(
-          result.error instanceof Error
-            ? result.error.message
-            : t(provider === "apple" ? "auth.failSignupApple" : "auth.failSignupGoogle"),
-        );
-        setSubmitting(null);
-        return;
+
+      if (lovableDone) {
+        // Fallback: direct Supabase OAuth
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: { redirectTo: `${window.location.origin}/auth/callback` },
+        });
+        if (error) {
+          toast.error(
+            error.message || t(provider === "apple" ? "auth.failSignupApple" : "auth.failSignupGoogle"),
+          );
+          setSubmitting(null);
+        }
       }
-      if (result.redirected) return;
-      toast.success(t("auth.created"));
-      window.location.assign("/auth/callback");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.failSignup"));
       setSubmitting(null);

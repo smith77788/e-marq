@@ -70,30 +70,44 @@ function LoginPage() {
   async function onOAuth(provider: "google" | "apple") {
     setSubmitting(provider);
     try {
-      // Dynamic import prevents module-level createLovableAuth() failure from
-      // crashing the login page before the user even clicks anything.
-      const { lovable } = await import("@/integrations/lovable");
-      const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: `${window.location.origin}/auth/callback`,
-      });
-      if (result.redirected) return;
+      // Try Lovable proxy first (works on lovable.app without any env config).
+      // Dynamic import so a proxy init failure doesn't crash the page on load.
+      let lovableDone = false;
+      try {
+        const { lovable } = await import("@/integrations/lovable");
+        const result = await lovable.auth.signInWithOAuth(provider, {
+          redirect_uri: `${window.location.origin}/auth/callback`,
+        });
+        if (result.redirected) return; // browser navigated — we're done
 
-      if (result.error) {
+        if (!result.error) {
+          // Proxy set the session directly (popup flow)
+          window.location.assign("/auth/callback");
+          return;
+        }
+        // Proxy returned error — check if session was somehow set anyway
         const { data } = await supabase.auth.getSession();
         if (data.session) {
           window.location.assign("/auth/callback");
           return;
         }
-        const msg = result.error instanceof Error ? result.error.message : String(result.error);
-        if (!/cancel/i.test(msg)) {
-          toast.error(msg || t(provider === "apple" ? "auth.failApple" : "auth.failGoogle"));
-        }
-        setSubmitting(null);
-        return;
+        lovableDone = true; // explicit error, fall through to Supabase direct
+      } catch {
+        lovableDone = true; // proxy unavailable, fall through
       }
 
-      toast.success(t("auth.welcome"));
-      window.location.assign("/auth/callback");
+      if (lovableDone) {
+        // Fallback: direct Supabase OAuth (requires Google/Apple configured in Supabase dashboard)
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: { redirectTo: `${window.location.origin}/auth/callback` },
+        });
+        if (error) {
+          toast.error(error.message || t(provider === "apple" ? "auth.failApple" : "auth.failGoogle"));
+          setSubmitting(null);
+        }
+        // On success Supabase navigates — no further action needed
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.fail"));
       setSubmitting(null);
