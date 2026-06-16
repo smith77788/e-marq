@@ -2,14 +2,12 @@
  * Блок підписки на повідомлення про повернення товару в наявність.
  * Показується, коли активний варіант (або сам товар, якщо без варіантів) має stock=0.
  *
- * Викликає public RPC `subscribe_restock_notification` — анонімний доступ дозволено.
+ * Викликає /api/public/restock/subscribe (server-side proxy з rate-limiting),
+ * а не напряму Supabase RPC, щоб захистити від флуду з анонімних IP.
  */
 import { useState } from "react";
 import { Bell, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
   tenantId: string;
@@ -35,21 +33,30 @@ export function RestockSubscribe({ tenantId, productId, variantId }: Props) {
     if (!email.trim() || submitting) return;
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.rpc("subscribe_restock_notification", {
-        _tenant_id: tenantId,
-        _product_id: productId,
-        // RPC сигнатура очікує UUID; types.ts звужує до string, тому передаємо undefined-as-null trick.
-        _variant_id: (variantId ?? null) as unknown as string,
-        _email: email.trim(),
+      const res = await fetch("/api/public/restock/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tenant_id: tenantId,
+          product_id: productId,
+          variant_id: variantId ?? null,
+          email: email.trim(),
+        }),
       });
-      if (error) {
-        const code = error.message?.trim();
-        toast.error(ERROR_MESSAGES[code] ?? "Не вдалося оформити підписку");
+      const json = (await res.json()) as { ok: boolean; error?: string; already_subscribed?: boolean };
+
+      if (!json.ok) {
+        const code = json.error?.trim() ?? "";
+        if (res.status === 429) {
+          toast.error("Забагато спроб — спробуйте трохи пізніше");
+        } else {
+          toast.error(ERROR_MESSAGES[code] ?? "Не вдалося оформити підписку");
+        }
         return;
       }
-      const already = (data as { already_subscribed?: boolean } | null)?.already_subscribed;
+
       toast.success(
-        already
+        json.already_subscribed
           ? "Ви вже у списку — повідомимо одразу, як товар знову з'явиться"
           : "Готово! Надішлемо лист, коли товар повернеться",
       );

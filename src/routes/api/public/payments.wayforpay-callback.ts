@@ -22,6 +22,35 @@ function clientIp(req: Request): string {
   );
 }
 
+/** PII fields that must never appear in logs or the callbacks audit table. */
+const PII_FIELDS = new Set([
+  "cardPan", "card_pan", "clientEmail", "clientFirstName", "clientLastName",
+  "client_email", "client_name", "customer_email", "customer_name",
+  "payment_ref", "merchantSignature",
+]);
+
+function redactParsed(payload: unknown): unknown {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return payload;
+  const redacted: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(payload as Record<string, unknown>)) {
+    redacted[k] = PII_FIELDS.has(k) ? "[REDACTED]" : v;
+  }
+  return redacted;
+}
+
+/** Redact PII from JSON rawBody before storing in the audit log. */
+function redactRawBody(rawBody: string): string {
+  try {
+    const obj = JSON.parse(rawBody) as Record<string, unknown>;
+    for (const key of PII_FIELDS) {
+      if (key in obj) obj[key] = "[REDACTED]";
+    }
+    return JSON.stringify(obj);
+  } catch {
+    return "[REDACTED]";
+  }
+}
+
 async function logCallback(args: {
   orderId?: string | null;
   tenantId?: string | null;
@@ -39,8 +68,8 @@ async function logCallback(args: {
       tenant_id: args.tenantId ?? null,
       external_id: args.externalId ?? null,
       signature_valid: args.signatureValid,
-      raw_body: args.rawBody.slice(0, 8000),
-      parsed_payload: (args.parsed ?? {}) as never,
+      raw_body: redactRawBody(args.rawBody).slice(0, 8000),
+      parsed_payload: (redactParsed(args.parsed) ?? {}) as never,
       http_status: args.httpStatus,
       ip: args.ip,
     });
@@ -84,7 +113,7 @@ export const Route = createFileRoute("/api/public/payments/wayforpay-callback")(
 
         const { data: order } = await supabaseAdmin
           .from("orders")
-          .select("id, tenant_id, total_cents, currency, status")
+          .select("id, tenant_id, total_cents, currency")
           .eq("id", orderId)
           .maybeSingle();
         if (!order) {
@@ -105,24 +134,6 @@ export const Route = createFileRoute("/api/public/payments/wayforpay-callback")(
           .eq("tenant_id", order.tenant_id)
           .maybeSingle();
         const gw = readGatewayConfig(cfg?.features);
-
-        // Duplicate callback protection: if already paid, send ack immediately
-        if (order.status === "paid") {
-          await logCallback({
-            orderId,
-            tenantId: order.tenant_id,
-            signatureValid: true,
-            rawBody,
-            parsed: { ...parsed, note: "duplicate_callback_already_paid" },
-            httpStatus: 200,
-            ip,
-          });
-          if (gw.wayforpay_secret_key) {
-            const ack = buildWayForPayAck(gw.wayforpay_secret_key, orderId);
-            return Response.json(ack, { status: 200 });
-          }
-          return new Response("ok", { status: 200 });
-        }
         if (!gw.wayforpay_secret_key) {
           await logCallback({
             orderId,

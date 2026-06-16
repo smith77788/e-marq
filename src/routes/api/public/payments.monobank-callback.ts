@@ -24,6 +24,35 @@ function clientIp(req: Request): string {
   );
 }
 
+/** PII fields that must never appear in logs or the callbacks audit table. */
+const PII_FIELDS = new Set([
+  "cardPan", "card_pan", "customerEmail", "customer_email", "customer_name",
+  "clientEmail", "clientFirstName", "clientLastName",
+  "maskedPan", "walletData", "payment_ref",
+]);
+
+function redactParsed(payload: unknown): unknown {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return payload;
+  const redacted: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(payload as Record<string, unknown>)) {
+    redacted[k] = PII_FIELDS.has(k) ? "[REDACTED]" : v;
+  }
+  return redacted;
+}
+
+/** Redact PII from JSON rawBody before storing in the audit log. */
+function redactRawBody(rawBody: string): string {
+  try {
+    const obj = JSON.parse(rawBody) as Record<string, unknown>;
+    for (const key of PII_FIELDS) {
+      if (key in obj) obj[key] = "[REDACTED]";
+    }
+    return JSON.stringify(obj);
+  } catch {
+    return "[REDACTED]";
+  }
+}
+
 async function logCallback(args: {
   orderId?: string | null;
   tenantId?: string | null;
@@ -41,8 +70,8 @@ async function logCallback(args: {
       tenant_id: args.tenantId ?? null,
       external_id: args.externalId ?? null,
       signature_valid: args.signatureValid,
-      raw_body: args.rawBody.slice(0, 8000),
-      parsed_payload: (args.parsed ?? {}) as never,
+      raw_body: redactRawBody(args.rawBody).slice(0, 8000),
+      parsed_payload: (redactParsed(args.parsed) ?? {}) as never,
       http_status: args.httpStatus,
       ip: args.ip,
     });
@@ -109,7 +138,7 @@ export const Route = createFileRoute("/api/public/payments/monobank-callback")({
 
         const { data: order } = await supabaseAdmin
           .from("orders")
-          .select("id, tenant_id, total_cents, currency, status")
+          .select("id, tenant_id, total_cents, currency")
           .eq("id", orderId)
           .maybeSingle();
         if (!order) {
@@ -123,22 +152,6 @@ export const Route = createFileRoute("/api/public/payments/monobank-callback")({
             ip,
           });
           return new Response("order_not_found", { status: 404 });
-        }
-
-        // Duplicate callback protection: if already paid, acknowledge immediately
-        // (avoids an unnecessary external Monobank API call)
-        if (order.status === "paid") {
-          await logCallback({
-            orderId,
-            tenantId: order.tenant_id,
-            externalId: invoiceId,
-            signatureValid: true,
-            rawBody,
-            parsed: { ...parsed, note: "duplicate_callback_already_paid" },
-            httpStatus: 200,
-            ip,
-          });
-          return new Response("ok", { status: 200 });
         }
 
         const { data: cfg } = await supabaseAdmin

@@ -171,6 +171,7 @@ import { Route as HooksAgentsActionWatchdogRouteImport } from './routes/hooks/ag
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
 import { Route as ApiTelegramStatusRouteImport } from './routes/api/telegram.status'
 import { Route as ApiSiteBuilderBuildRouteImport } from './routes/api/site-builder.build'
+import { Route as ApiPublicRestockSubscribeRouteImport } from './routes/api/public/restock.subscribe'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 import { Route as ApiEmailOrderStatusRouteImport } from './routes/api/email.order-status'
 import { Route as ApiEmailOrderConfirmationRouteImport } from './routes/api/email.order-confirmation'
@@ -1133,6 +1134,11 @@ const ApiSiteBuilderBuildRoute = ApiSiteBuilderBuildRouteImport.update({
   path: '/api/site-builder/build',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicRestockSubscribeRoute = ApiPublicRestockSubscribeRouteImport.update({
+  id: '/api/public/restock/subscribe',
+  path: '/api/public/restock/subscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
   id: '/api/public/contact',
   path: '/api/public/contact',
@@ -1632,6 +1638,7 @@ export interface FileRoutesByFullPath {
   '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
+  '/api/public/restock/subscribe': typeof ApiPublicRestockSubscribeRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
   '/api/telegram/status': typeof ApiTelegramStatusRoute
@@ -1869,6 +1876,7 @@ export interface FileRoutesByTo {
   '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
+  '/api/public/restock/subscribe': typeof ApiPublicRestockSubscribeRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
   '/api/telegram/status': typeof ApiTelegramStatusRoute
@@ -2109,6 +2117,7 @@ export interface FileRoutesById {
   '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
+  '/api/public/restock/subscribe': typeof ApiPublicRestockSubscribeRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
   '/api/telegram/status': typeof ApiTelegramStatusRoute
@@ -3025,6 +3034,7 @@ export interface RootRouteChildren {
   ApiEmailDomainVerifyRoute: typeof ApiEmailDomainVerifyRoute
   ApiEmailOrderConfirmationRoute: typeof ApiEmailOrderConfirmationRoute
   ApiEmailOrderStatusRoute: typeof ApiEmailOrderStatusRoute
+  ApiPublicRestockSubscribeRoute: typeof ApiPublicRestockSubscribeRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiSiteBuilderBuildRoute: typeof ApiSiteBuilderBuildRoute
   ApiTelegramStatusRoute: typeof ApiTelegramStatusRoute
@@ -4312,6 +4322,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSiteBuilderBuildRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/restock/subscribe': {
+      id: '/api/public/restock/subscribe'
+      path: '/api/public/restock/subscribe'
+      fullPath: '/api/public/restock/subscribe'
+      preLoaderRoute: typeof ApiPublicRestockSubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/contact': {
       id: '/api/public/contact'
       path: '/api/public/contact'
@@ -5054,6 +5071,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiEmailDomainVerifyRoute: ApiEmailDomainVerifyRoute,
   ApiEmailOrderConfirmationRoute: ApiEmailOrderConfirmationRoute,
   ApiEmailOrderStatusRoute: ApiEmailOrderStatusRoute,
+  ApiPublicRestockSubscribeRoute: ApiPublicRestockSubscribeRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiSiteBuilderBuildRoute: ApiSiteBuilderBuildRoute,
   ApiTelegramStatusRoute: ApiTelegramStatusRoute,
