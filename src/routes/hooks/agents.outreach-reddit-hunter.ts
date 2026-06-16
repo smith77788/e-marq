@@ -58,6 +58,7 @@ async function fetchSubreddit(sub: string, limit = 25): Promise<RedditPost[]> {
           Accept: a.parser === "rss" ? "application/rss+xml,application/xml" : "application/json",
           "User-Agent": REDDIT_USER_AGENT,
         },
+        signal: AbortSignal.timeout(12_000),
       });
       if (!res.ok) continue;
       if (a.parser === "json") {

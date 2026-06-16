@@ -52,6 +52,7 @@ async function fetchHashtag(tag: string): Promise<IgPost[]> {
   try {
     const res = await fetch(url, {
       headers: { "User-Agent": "MarqOutreach/1.0", Accept: "application/rss+xml,*/*" },
+      signal: AbortSignal.timeout(12_000),
     });
     if (!res.ok) return [];
     return parseRss(await res.text(), tag);

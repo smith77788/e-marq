@@ -43,6 +43,7 @@ async function ddgSearch(query: string): Promise<SearchResult[]> {
           Referer: "https://duckduckgo.com/",
         },
         body: body.toString(),
+        signal: AbortSignal.timeout(12_000),
       });
       if (!res.ok) continue;
       const html = await res.text();

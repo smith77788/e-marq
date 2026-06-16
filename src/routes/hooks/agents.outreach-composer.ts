@@ -80,6 +80,7 @@ async function generateDrafts(args: {
   try {
     const res = await fetch(LOVABLE_AI_URL, {
       method: "POST",
+      signal: AbortSignal.timeout(20_000),
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",

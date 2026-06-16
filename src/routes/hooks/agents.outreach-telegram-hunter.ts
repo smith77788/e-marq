@@ -56,6 +56,7 @@ async function fetchChannel(channel: string, maxPosts: number): Promise<TgPost[]
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
       "Accept-Language": "uk-UA,uk;q=0.9,en;q=0.8",
     },
+    signal: AbortSignal.timeout(12_000),
   });
   if (!res.ok) return [];
   const html = await res.text();
