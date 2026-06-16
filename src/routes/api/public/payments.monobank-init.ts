@@ -22,21 +22,27 @@ export const Route = createFileRoute("/api/public/payments/monobank-init")({
           return Response.json({ ok: false, error: "rate_limited" }, { status: 429 });
         }
 
-        let body: { orderId?: unknown };
+        let body: { orderId?: unknown; accessToken?: unknown };
         try {
-          body = (await request.json()) as { orderId?: unknown };
+          body = (await request.json()) as { orderId?: unknown; accessToken?: unknown };
         } catch {
           return Response.json({ ok: false, error: "bad_json" }, { status: 400 });
         }
         const orderId = typeof body.orderId === "string" ? body.orderId.trim() : "";
+        const accessToken = typeof body.accessToken === "string" ? body.accessToken.trim() : "";
         if (!/^[0-9a-f-]{36}$/i.test(orderId)) {
           return Response.json({ ok: false, error: "invalid_order_id" }, { status: 400 });
         }
+        if (!/^[0-9a-f-]{36}$/i.test(accessToken)) {
+          return Response.json({ ok: false, error: "invalid_access_token" }, { status: 400 });
+        }
 
+        // Verify access_token to prevent IDOR on payment init
         const { data: order } = await supabaseAdmin
           .from("orders")
           .select("id, tenant_id, total_cents, currency, status")
           .eq("id", orderId)
+          .eq("access_token", accessToken)
           .maybeSingle();
         if (!order) {
           return Response.json({ ok: false, error: "order_not_found" }, { status: 404 });

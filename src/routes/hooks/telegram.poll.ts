@@ -8,6 +8,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { isCronToken } from "@/lib/acos/cronAuth";
 import {
   MAX_RUNTIME_MS,
   MIN_REMAINING_MS,
@@ -21,6 +22,14 @@ export const Route = createFileRoute("/hooks/telegram/poll")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const token = request.headers.get("authorization")?.replace(/^Bearer /i, "");
+        if (!isCronToken(token)) {
+          return new Response(JSON.stringify({ ok: false, error: "unauthorized" }), {
+            status: 401,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
         const lovableKey = process.env.LOVABLE_API_KEY;
         const tgKey = process.env.TELEGRAM_API_KEY;
         if (!lovableKey || !tgKey) {

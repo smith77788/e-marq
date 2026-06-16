@@ -33,8 +33,15 @@ type PaymentsConfig = {
   manual_contact?: string;
 };
 
-async function loadOrder(slug: string, orderId: string) {
-  const { data, error } = await supabase.rpc("get_public_order", { _order_id: orderId });
+type OrderSearch = { tok?: string };
+
+async function loadOrder(slug: string, orderId: string, tok: string | undefined) {
+  if (!tok) throw notFound();
+
+  const { data, error } = await supabase.rpc("get_public_order_v2", {
+    _order_id: orderId,
+    _access_token: tok,
+  });
   if (error) throw error;
   if (!data) throw notFound();
 
@@ -62,7 +69,11 @@ async function loadOrder(slug: string, orderId: string) {
 }
 
 export const Route = createFileRoute("/s/$slug/orders/$orderId")({
-  loader: ({ params }) => loadOrder(params.slug, params.orderId),
+  validateSearch: (s: Record<string, unknown>): OrderSearch => ({
+    tok: typeof s.tok === "string" ? s.tok : undefined,
+  }),
+  loaderDeps: ({ search }) => ({ tok: search.tok }),
+  loader: ({ params, deps }) => loadOrder(params.slug, params.orderId, deps.tok),
   head: ({ loaderData }) => {
     const brand = loaderData?.brand ?? "Магазин";
     const orderShort = loaderData?.order.id.slice(0, 8) ?? "";

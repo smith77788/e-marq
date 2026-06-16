@@ -35,7 +35,11 @@ type InitResponse =
     }
   | { ok: false; error: string };
 
-async function postInit(path: string, orderId: string): Promise<InitResponse> {
+async function postInit(
+  path: string,
+  orderId: string,
+  accessToken: string,
+): Promise<InitResponse> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15_000);
   let res: Response;
@@ -43,7 +47,7 @@ async function postInit(path: string, orderId: string): Promise<InitResponse> {
     res = await fetch(path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId }),
+      body: JSON.stringify({ orderId, accessToken }),
       signal: controller.signal,
     });
   } catch (err) {
@@ -87,6 +91,7 @@ function submitHiddenForm(action: string, fields: Record<string, string | string
 export async function startGatewayPayment(
   method: Exclude<PaymentMethod, "manual">,
   orderId: string,
+  accessToken: string,
   /**
    * Called once init has succeeded and immediately before the redirect/submit.
    * The caller uses this to clear the cart only when payment is actually about
@@ -97,7 +102,7 @@ export async function startGatewayPayment(
   onReady?: () => void,
 ): Promise<void> {
   const path = `/api/public/payments/${method}-init`;
-  const result = await postInit(path, orderId);
+  const result = await postInit(path, orderId, accessToken);
   if (!result.ok) throw new Error("payment_init_failed");
 
   onReady?.();

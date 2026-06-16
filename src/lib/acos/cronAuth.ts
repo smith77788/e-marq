@@ -42,8 +42,9 @@ export function isCronToken(token: string | undefined | null): boolean {
   if (cronSecret && cronSecret.length >= 16) {
     return token === cronSecret;
   }
-  // Legacy fallback — opt-out via CRON_ALLOW_ANON=false.
-  const allowAnon = envBool("CRON_ALLOW_ANON", true);
+  // Anon-key fallback is disabled by default (CRON_SECRET must be set).
+  // Set CRON_ALLOW_ANON=true only during migration to the new secret.
+  const allowAnon = envBool("CRON_ALLOW_ANON", false);
   if (!allowAnon) return false;
   const anon = process.env.SUPABASE_PUBLISHABLE_KEY;
   return !!anon && token === anon;

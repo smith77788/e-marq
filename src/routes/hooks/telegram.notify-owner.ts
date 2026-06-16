@@ -9,6 +9,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { isCronToken } from "@/lib/acos/cronAuth";
 
 const TG_GATEWAY = "https://connector-gateway.lovable.dev/telegram";
 const APP_BASE = process.env.APP_BASE_URL ?? "https://e-marq.lovable.app";
@@ -401,6 +402,14 @@ export const Route = createFileRoute("/hooks/telegram/notify-owner")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const token = request.headers.get("authorization")?.replace(/^Bearer /i, "");
+        if (!isCronToken(token)) {
+          return new Response(JSON.stringify({ ok: false, error: "unauthorized" }), {
+            status: 401,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
         let body: { tenant_id?: string; kind?: string; source_id?: string } = {};
         try {
           body = (await request.json()) as typeof body;

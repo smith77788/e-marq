@@ -7732,6 +7732,10 @@ export type Database = {
         }[];
       };
       get_public_order: { Args: { _order_id: string }; Returns: Json };
+      get_public_order_v2: {
+        Args: { _order_id: string; _access_token: string };
+        Returns: Json;
+      };
       get_storefront_bundles: {
         Args: { _slug: string };
         Returns: {
@@ -7983,41 +7987,19 @@ export type Database = {
         Args: { _amount: number; _reason?: string; _tenant_id: string };
         Returns: number;
       };
-      place_storefront_order:
-        | {
-            Args: {
-              _customer_email: string;
-              _customer_name: string;
-              _items: Json;
-              _payment_method?: string;
-              _tenant_id: string;
-            };
-            Returns: string;
-          }
-        | {
-            Args: {
-              _customer_email: string;
-              _customer_name: string;
-              _items: Json;
-              _payment_method?: string;
-              _shipping?: Json;
-              _tenant_id: string;
-            };
-            Returns: string;
-          }
-        | {
-            Args: {
-              _customer_email: string;
-              _customer_name: string;
-              _items: Json;
-              _loyalty_redeem_points?: number;
-              _payment_method?: string;
-              _promo_code?: string;
-              _shipping?: Json;
-              _tenant_id: string;
-            };
-            Returns: string;
-          };
+      place_storefront_order: {
+        Args: {
+          _tenant_id: string;
+          _customer_name: string;
+          _customer_email: string;
+          _items: Json;
+          _payment_method?: string;
+          _shipping?: Json;
+          _promo_code?: string;
+          _loyalty_redeem_points?: number;
+        };
+        Returns: Json; // { order_id: string; access_token: string }
+      };
       reconcile_dispatched_ai_actions: { Args: never; Returns: Json };
       refresh_all_signal_metrics: { Args: never; Returns: Json };
       refresh_customer_metrics_30d: {

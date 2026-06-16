@@ -343,7 +343,7 @@ function CheckoutPage() {
         warehouse_number: shipping.warehouseNumber,
         warehouse_description: shipping.warehouseDescription,
       };
-      const { data: orderId, error: rpcErr } = await supabase.rpc("place_storefront_order", {
+      const { data: orderResult, error: rpcErr } = await supabase.rpc("place_storefront_order", {
         _tenant_id: cart.tenantId,
         _customer_name: trimmedName,
         _customer_email: trimmedEmail,
@@ -351,11 +351,13 @@ function CheckoutPage() {
         _payment_method: method,
         _shipping: shippingPayload,
         _promo_code: discount?.valid ? promoCode.trim().toUpperCase() : null,
-        _promo_discount_cents: discount?.valid ? promoDiscountCents : null,
         _loyalty_redeem_points: redeemApplied?.points ?? null,
       });
       if (rpcErr) throw rpcErr;
-      if (!orderId) throw new Error("Не вдалося створити замовлення");
+      const rpcData = orderResult as { order_id?: string; access_token?: string } | null;
+      const orderId = rpcData?.order_id ?? "";
+      const accessToken = rpcData?.access_token ?? "";
+      if (!orderId || !accessToken) throw new Error("Не вдалося створити замовлення");
 
       track(cart.tenantId, "purchase_completed", {
         order_id: orderId,
@@ -376,14 +378,18 @@ function CheckoutPage() {
         toast.success("Замовлення створено!");
         void sendOrderConfirmationEmail(orderId);
         cart.clear();
-        navigate({ to: "/s/$slug/orders/$orderId", params: { slug, orderId } });
+        navigate({
+          to: "/s/$slug/orders/$orderId",
+          params: { slug, orderId },
+          search: { tok: accessToken },
+        });
       } else {
         // Кошик чистимо лише коли оплата справді стартує (onReady викликається
         // після успішного init, перед редіректом). Якщо init впаде — кошик
         // лишається, щоб клієнт міг повторити, а не лишитись з порожнім кошиком
         // і завислим pending-замовленням.
         toast.success("Перенаправляємо на оплату…");
-        await startGatewayPayment(method, orderId, () => cart.clear());
+        await startGatewayPayment(method, orderId, accessToken, () => cart.clear());
       }
     } catch (e) {
       const raw = e instanceof Error ? e.message : "Невідома помилка";

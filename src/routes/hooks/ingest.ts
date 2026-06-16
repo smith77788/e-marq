@@ -36,7 +36,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { jsonError } from "@/lib/acos/agentRuntime";
+import { clientIp, createIpRateLimiter } from "@/lib/http/rateLimit";
 import type { Database } from "@/integrations/supabase/types";
+
+// Per-tenant quota: 600 events/min (10/s burst) to prevent ingest flooding
+const tenantIngestLimiter = createIpRateLimiter({ limit: 600, windowMs: 60_000 });
+// Per-IP quota: 200 events/min to block script kiddies without hurting legit stores
+const ipIngestLimiter = createIpRateLimiter({ limit: 200, windowMs: 60_000 });
 
 type EventType = Database["public"]["Enums"]["event_type"];
 
@@ -201,6 +207,11 @@ export const Route = createFileRoute("/hooks/ingest")({
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: corsHeaders() }),
       POST: async ({ request }) => {
+        const ip = clientIp(request);
+        if (!ipIngestLimiter.check(ip)) {
+          return jsonError("Too Many Requests", 429);
+        }
+
         const meta = pickRequestMeta(request);
         const rawText = await request.text();
         let body: IngestBody;
@@ -263,6 +274,11 @@ export const Route = createFileRoute("/hooks/ingest")({
             event_type_attempted: (body.type ?? null) as string | null,
           });
           return jsonError("Unknown tenant", 404);
+        }
+
+        // Per-tenant quota check (after tenant is resolved)
+        if (!tenantIngestLimiter.check(tenantId)) {
+          return jsonError("Too Many Requests", 429);
         }
 
         // Adaptive event-type fallback: unknown types become content_viewed

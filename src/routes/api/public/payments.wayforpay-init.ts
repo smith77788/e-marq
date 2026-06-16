@@ -14,6 +14,7 @@ import { clientIp, originUrl, createIpRateLimiter } from "@/lib/http/rateLimit";
 
 const wayForPayInitBodySchema = z.object({
   orderId: z.string().uuid(),
+  accessToken: z.string().uuid(),
 });
 
 const limiter = createIpRateLimiter({ limit: 10 });
@@ -38,12 +39,14 @@ export const Route = createFileRoute("/api/public/payments/wayforpay-init")({
         if (!parsedBody.success) {
           return Response.json({ ok: false, error: "invalid_order_id" }, { status: 400 });
         }
-        const orderId = parsedBody.data.orderId;
+        const { orderId, accessToken } = parsedBody.data;
 
+        // Verify access_token to prevent IDOR on payment init
         const { data: order } = await supabaseAdmin
           .from("orders")
           .select("id, tenant_id, total_cents, currency, status, customer_email, customer_name")
           .eq("id", orderId)
+          .eq("access_token", accessToken)
           .maybeSingle();
         if (!order) {
           return Response.json({ ok: false, error: "order_not_found" }, { status: 404 });
