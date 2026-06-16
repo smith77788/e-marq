@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, tStatic } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
@@ -122,6 +121,7 @@ function SignupPage() {
       } catch {
         /* storage may be blocked */
       }
+      const { lovable } = await import("@/integrations/lovable");
       const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: `${window.location.origin}/auth/callback`,
       });

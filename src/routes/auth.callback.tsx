@@ -45,16 +45,19 @@ function AuthCallbackPage() {
 
     let cancelled = false;
 
-    void supabase.auth.getSession().then(({ data }) => {
-      if (cancelled) return;
-
-      if (data.session?.user) {
-        window.location.replace(readAndClearDest() ?? "/dashboard");
-        return;
-      }
-
-      window.location.replace("/login");
-    });
+    void supabase.auth.getSession().then(
+      ({ data }) => {
+        if (cancelled) return;
+        if (data.session?.user) {
+          window.location.replace(readAndClearDest() ?? "/dashboard");
+          return;
+        }
+        window.location.replace("/login");
+      },
+      () => {
+        if (!cancelled) window.location.replace("/login");
+      },
+    );
 
     return () => {
       cancelled = true;

@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, tStatic } from "@/lib/i18n";
@@ -71,6 +70,9 @@ function LoginPage() {
   async function onOAuth(provider: "google" | "apple") {
     setSubmitting(provider);
     try {
+      // Dynamic import prevents module-level createLovableAuth() failure from
+      // crashing the login page before the user even clicks anything.
+      const { lovable } = await import("@/integrations/lovable");
       const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: `${window.location.origin}/auth/callback`,
       });
