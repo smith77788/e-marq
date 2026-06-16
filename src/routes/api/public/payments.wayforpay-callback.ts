@@ -84,7 +84,7 @@ export const Route = createFileRoute("/api/public/payments/wayforpay-callback")(
 
         const { data: order } = await supabaseAdmin
           .from("orders")
-          .select("id, tenant_id, total_cents, currency")
+          .select("id, tenant_id, total_cents, currency, status")
           .eq("id", orderId)
           .maybeSingle();
         if (!order) {
@@ -105,6 +105,24 @@ export const Route = createFileRoute("/api/public/payments/wayforpay-callback")(
           .eq("tenant_id", order.tenant_id)
           .maybeSingle();
         const gw = readGatewayConfig(cfg?.features);
+
+        // Duplicate callback protection: if already paid, send ack immediately
+        if (order.status === "paid") {
+          await logCallback({
+            orderId,
+            tenantId: order.tenant_id,
+            signatureValid: true,
+            rawBody,
+            parsed: { ...parsed, note: "duplicate_callback_already_paid" },
+            httpStatus: 200,
+            ip,
+          });
+          if (gw.wayforpay_secret_key) {
+            const ack = buildWayForPayAck(gw.wayforpay_secret_key, orderId);
+            return Response.json(ack, { status: 200 });
+          }
+          return new Response("ok", { status: 200 });
+        }
         if (!gw.wayforpay_secret_key) {
           await logCallback({
             orderId,

@@ -71,6 +71,30 @@ export const Route = createFileRoute("/api/public/payments/monobank-init")({
         }
 
         const baseUrl = originUrl(request);
+
+        // Idempotency: check for a recent pending intent before calling Mono API.
+        // Monobank creates a real invoice on each call, so we must avoid duplicate calls.
+        const { data: existingIntent } = await supabaseAdmin
+          .from("payment_intents")
+          .select("id, redirect_url")
+          .eq("order_id", order.id)
+          .eq("provider", "monobank")
+          .eq("status", "pending")
+          .gte("created_at", new Date(Date.now() - 30 * 60 * 1000).toISOString())
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (existingIntent?.redirect_url) {
+          // Return cached invoice URL — no new Mono API call needed
+          return Response.json({
+            ok: true,
+            provider: "monobank",
+            redirectUrl: existingIntent.redirect_url,
+            intentId: existingIntent.id,
+          });
+        }
+
         const result = await createMonoInvoice({
           token: gw.monobank_token,
           amountCents: order.total_cents,
@@ -89,7 +113,7 @@ export const Route = createFileRoute("/api/public/payments/monobank-init")({
           );
         }
 
-        const { data: intentId, error: intentErr } = await supabaseAdmin.rpc(
+        const { data: intentResult, error: intentErr } = await supabaseAdmin.rpc(
           "create_payment_intent",
           {
             _order_id: order.id,
@@ -101,6 +125,8 @@ export const Route = createFileRoute("/api/public/payments/monobank-init")({
         if (intentErr) {
           console.error("[monobank-init] create_payment_intent failed:", intentErr.message);
         }
+
+        const intentId = (intentResult as { intent_id?: string } | null)?.intent_id ?? null;
 
         // Зберегти invoice_id у external_id intent'а одразу. Якщо це не вдасться,
         // callback не зможе знайти intent за invoiceId і впаде на

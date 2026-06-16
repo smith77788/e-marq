@@ -109,7 +109,7 @@ export const Route = createFileRoute("/api/public/payments/monobank-callback")({
 
         const { data: order } = await supabaseAdmin
           .from("orders")
-          .select("id, tenant_id, total_cents, currency")
+          .select("id, tenant_id, total_cents, currency, status")
           .eq("id", orderId)
           .maybeSingle();
         if (!order) {
@@ -123,6 +123,22 @@ export const Route = createFileRoute("/api/public/payments/monobank-callback")({
             ip,
           });
           return new Response("order_not_found", { status: 404 });
+        }
+
+        // Duplicate callback protection: if already paid, acknowledge immediately
+        // (avoids an unnecessary external Monobank API call)
+        if (order.status === "paid") {
+          await logCallback({
+            orderId,
+            tenantId: order.tenant_id,
+            externalId: invoiceId,
+            signatureValid: true,
+            rawBody,
+            parsed: { ...parsed, note: "duplicate_callback_already_paid" },
+            httpStatus: 200,
+            ip,
+          });
+          return new Response("ok", { status: 200 });
         }
 
         const { data: cfg } = await supabaseAdmin

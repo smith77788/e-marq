@@ -115,7 +115,8 @@ export const Route = createFileRoute("/api/public/payments/wayforpay-init")({
           returnUrl: `${baseUrl}/s/${tenant.slug}/orders/${order.id}`,
         });
 
-        const { data: intentId, error: intentErr } = await supabaseAdmin.rpc(
+        // Idempotent intent: returns cached row if one exists within 30 min
+        const { data: intentResult, error: intentErr } = await supabaseAdmin.rpc(
           "create_payment_intent",
           {
             _order_id: order.id,
@@ -129,12 +130,14 @@ export const Route = createFileRoute("/api/public/payments/wayforpay-init")({
           return Response.json({ ok: false, error: "payment_intent_failed" }, { status: 500 });
         }
 
+        const intentId = (intentResult as { intent_id?: string } | null)?.intent_id ?? null;
+
         return Response.json({
           ok: true,
           provider: "wayforpay",
           action: out.action,
           formFields: out.fields,
-          intentId: intentId ?? null,
+          intentId,
         });
       },
     },
