@@ -56,12 +56,38 @@ export async function getKeyMetrics(
   const allProducts = products.data ?? [];
   const activeProducts = allProducts.filter((p) => p.is_active).length;
 
+  // Revenue trend: compare this month vs previous month
+  const twoMonthsAgo = new Date(now.getTime() - 60 * 24 * 3600 * 1000).toISOString();
+  const [prevMonthOrders, topItemRes, conversionRes] = await Promise.all([
+    supabaseAdmin.from("orders").select("total_cents").eq("tenant_id", tenantId).eq("status", "paid").gte("created_at", twoMonthsAgo).lt("created_at", monthAgo),
+    supabaseAdmin.from("order_items").select("product_name, quantity").eq("tenant_id", tenantId).gte("created_at", monthAgo).limit(1000),
+    supabaseAdmin.from("events").select("type, session_id").eq("tenant_id", tenantId).gte("created_at", monthAgo).in("type", ["checkout_started", "add_to_cart"]).limit(5000),
+  ]);
+
+  const prevMonthTotal = (prevMonthOrders.data ?? []).reduce((s, o) => s + o.total_cents, 0);
+  const trend = prevMonthTotal > 0 ? Math.round(((monthTotal - prevMonthTotal) / prevMonthTotal) * 100) : 0;
+
+  // Top seller by quantity
+  const qtySold: Record<string, number> = {};
+  for (const item of topItemRes.data ?? []) {
+    qtySold[item.product_name] = (qtySold[item.product_name] ?? 0) + (item.quantity ?? 1);
+  }
+  const topSeller = Object.entries(qtySold).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+
+  // Conversion: checkouts → orders
+  const events = conversionRes.data ?? [];
+  const checkoutSessions = new Set(events.filter((e) => e.type === "checkout_started").map((e) => e.session_id)).size;
+  const orderCount = (weekOrders.data ?? []).length;
+  const conversionRate = checkoutSessions > 0 ? Math.round((orderCount / checkoutSessions) * 100) : 0;
+  const cartSessions = new Set(events.filter((e) => e.type === "add_to_cart").map((e) => e.session_id)).size;
+  const cartAbandonmentRate = cartSessions > 0 ? Math.round(((cartSessions - checkoutSessions) / cartSessions) * 100) : 0;
+
   return {
     revenue: {
       today: todayTotal,
       week: weekTotal,
       month: monthTotal,
-      trend: 0, // TODO: calculate vs previous period
+      trend,
     },
     customers: {
       total: allCustomers.length,
@@ -72,12 +98,12 @@ export async function getKeyMetrics(
     products: {
       total: allProducts.length,
       active: activeProducts,
-      top_seller: "", // TODO: calculate
+      top_seller: topSeller,
     },
     conversion: {
-      rate: 0, // TODO: calculate
-      checkout_rate: 0,
-      cart_abandonment: 0,
+      rate: conversionRate,
+      checkout_rate: checkoutSessions > 0 ? Math.round((checkoutSessions / cartSessions) * 100) : 0,
+      cart_abandonment: cartAbandonmentRate,
     },
   };
 }
