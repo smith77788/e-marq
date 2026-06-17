@@ -10,8 +10,6 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { aiMultiTurn, isAnyAiEnabled } from "@/lib/acos/aiGateway";
 
-const MODEL = DEFAULT_AI_MODEL;
-
 type InboundRow = {
   id: string;
   tenant_id: string;
