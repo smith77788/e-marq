@@ -182,7 +182,9 @@ export async function runWinbackForTenant(
     // Insert in chunks of 100
     for (let i = 0; i < outboundInserts.length; i += 100) {
       const chunk = outboundInserts.slice(i, i + 100);
-      const { error: insErr } = await supabaseAdmin.from("outbound_messages").insert(chunk);
+      const { error: insErr } = await supabaseAdmin
+        .from("outbound_messages")
+        .insert(chunk as never);
       if (!insErr) {
         queued += chunk.length;
       } else {

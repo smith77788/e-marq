@@ -779,8 +779,8 @@ function Step3Import({ tenantId, qc }: { tenantId: string; qc: QC }) {
         _credentials: credentials,
         _config: config as never,
         _last_sync_status: "verified",
-        _last_sync_error: null,
-        _webhook_secret: null,
+        _last_sync_error: undefined,
+        _webhook_secret: undefined,
       });
       if (saveErr) throw saveErr;
 

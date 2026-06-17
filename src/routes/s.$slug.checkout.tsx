@@ -359,8 +359,8 @@ function CheckoutPage() {
         _items: items,
         _payment_method: method,
         _shipping: shippingPayload,
-        _promo_code: discount?.valid ? promoCode.trim().toUpperCase() : null,
-        _loyalty_redeem_points: redeemApplied?.points ?? null,
+        _promo_code: discount?.valid ? promoCode.trim().toUpperCase() : undefined,
+        _loyalty_redeem_points: redeemApplied?.points ?? undefined,
       });
       if (rpcErr) throw rpcErr;
       const rpcData = orderResult as { order_id?: string; access_token?: string } | null;
