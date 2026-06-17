@@ -72,7 +72,7 @@ export function createCheckoutSaga(): Saga<{
   items: Array<{ productId: string; quantity: number }>;
   paymentMethod: string;
 }> {
-  return new Saga()
+  return new Saga<{ orderId: string; items: Array<{ productId: string; quantity: number }>; paymentMethod: string }>()
     .addStep({
       name: "validate_order",
       execute: async (ctx) => {
