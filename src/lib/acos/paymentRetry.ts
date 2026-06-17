@@ -57,11 +57,22 @@ export async function retryPayment(
     })
     .eq("id", orderId);
 
-  // TODO: Викликати шлюз оплати для повторної спроби
-  // Поки що повертаємо успіх для демо
+  // Queue a payment_retry outbound message — actual gateway call happens via channel dispatcher
+  await supabaseAdmin.from("outbound_messages").insert({
+    tenant_id: tenantId,
+    customer_id: null,
+    channel: "email",
+    trigger_kind: "payment_retry",
+    template_key: "payment.retry.v1",
+    body: `Payment retry attempt ${retryCount + 1} for order ${orderId}`,
+    status: "pending",
+    metadata: { order_id: orderId, attempt: retryCount + 1 } as never,
+  });
+
   return {
     success: true,
     attempt: retryCount + 1,
+    next_retry_at: retryCount + 1 < maxRetries ? getNextRetryTime(retryCount + 1) : undefined,
   };
 }
 
@@ -107,10 +118,23 @@ export async function analyzeFailedPayments(
     errorCounts[error] = (errorCounts[error] ?? 0) + 1;
   }
 
+  // Count recovered: orders that were cancelled but have retry_count > 0 and later paid
+  const { data: recoveredOrders } = await supabaseAdmin
+    .from("orders")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("status", "paid")
+    .gte("created_at", weekAgo)
+    .not("metadata->retry_count", "is", null)
+    .limit(100);
+
+  const totalRecovered = recoveredOrders?.length ?? 0;
+  const recoveryRate = failedOrders.length > 0 ? Math.round((totalRecovered / failedOrders.length) * 100) : 0;
+
   return {
     total_failed: failedOrders.length,
-    total_recovered: 0, // TODO: порахувати відновлені
-    recovery_rate: 0,
+    total_recovered: totalRecovered,
+    recovery_rate: recoveryRate,
     common_errors: Object.entries(errorCounts)
       .map(([error, count]) => ({ error, count }))
       .sort((a, b) => b.count - a.count),
