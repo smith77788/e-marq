@@ -33,12 +33,15 @@ import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendEmailViaGateway } from "@/lib/email/resendGateway";
+import { clientIp, createIpRateLimiter } from "@/lib/http/rateLimit";
 
 const MAX_RECIPIENTS = 5000;
 // Resend gateway limit: 10 req/s. We throttle to 8/s (125ms between sends)
 // to stay safely under with some slack. No batching needed — sequential is correct.
 const SEND_INTERVAL_MS = 125;
 const MAX_RETRIES = 3;
+// Campaign sending is high-impact — strict rate limit: 2 per minute per IP
+const limiter = createIpRateLimiter({ limit: 2, windowMs: 60_000 });
 
 const BodySchema = z.object({
   tenantId: z.string().uuid(),
@@ -188,6 +191,12 @@ export const Route = createFileRoute("/api/email/campaign-send")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        // Rate limit: campaign sending is high-impact
+        const ip = clientIp(request);
+        if (!limiter.check(ip)) {
+          return jsonResponse({ error: "rate_limit_exceeded" }, 429);
+        }
+
         const auth = await authUser(request);
         if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
 
