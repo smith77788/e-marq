@@ -235,14 +235,14 @@ function StorefrontIndex() {
               <CatalogFilters
                 value={filters}
                 onChange={(next) =>
-                  void navigate({ to: "/s/$slug/", params: { slug }, search: { ...search, ...next } })
+                  void navigate({ to: ".", search: { ...search, ...next } })
                 }
                 collections={collections.map((c) => ({ handle: c.handle, name: c.name }))}
               />
               <Select
                 value={sort}
                 onValueChange={(v) =>
-                  void navigate({ to: "/s/$slug/", params: { slug }, search: { ...search, sort: v as SortOpt } })
+                  void navigate({ to: ".", search: { ...search, sort: v as SortOpt } })
                 }
               >
                 <SelectTrigger className="h-9 w-44">
@@ -276,7 +276,7 @@ function StorefrontIndex() {
               size="sm"
               className="mt-4"
               onClick={() =>
-                void navigate({ to: "/s/$slug/", params: { slug }, search: { sort: search.sort } })
+                void navigate({ to: ".", search: { sort: search.sort } })
               }
             >
               Скинути фільтри

@@ -8,6 +8,10 @@
  * Returns: { ok: true, ... } | { ok: false, error: string }
  *
  * Auth: Bearer JWT, roles owner / admin / super_admin.
+ *
+ * NOTE: subscription_payments table and create_subscription_payment RPC are defined in
+ * migration 20260617000001_subscription_payments.sql. Supabase types haven't been
+ * regenerated yet, hence the `as never` casts on the RPC call.
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
@@ -69,7 +73,6 @@ export const Route = createFileRoute("/api/subscription/init")({
           return Response.json({ ok: false, error: "Rate limit exceeded" }, { status: 429 });
         }
 
-        // Auth check
         const auth = await authUser(request);
         if (!auth.ok) {
           return Response.json({ ok: false, error: auth.error }, { status: auth.status });
@@ -89,26 +92,26 @@ export const Route = createFileRoute("/api/subscription/init")({
 
         const { tenantId, planKey, provider } = parsed.data;
 
-        // Tenant membership check
         if (!(await userCanManageTenant(auth.userId, tenantId))) {
           return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
         }
 
-        // Create payment intent via RPC
+        // Create payment intent via RPC (defined in 20260617000001_subscription_payments.sql)
+        // Types cast as never because supabase types haven't been regenerated after the migration
         const { data: paymentData, error: rpcError } = await supabaseAdmin.rpc(
-          "create_subscription_payment",
+          "create_subscription_payment" as never,
           {
             _tenant_id: tenantId,
             _plan_key: planKey,
             _provider: provider,
-          },
+          } as never,
         );
 
         if (rpcError) {
           return Response.json({ ok: false, error: rpcError.message }, { status: 400 });
         }
 
-        const payment = paymentData as {
+        const payment = paymentData as unknown as {
           payment_id: string;
           provider_order_id: string;
           amount_cents: number;
@@ -133,7 +136,6 @@ export const Route = createFileRoute("/api/subscription/init")({
         const resultUrl = `${baseUrl}/brand/billing?tenant=${tenantId}&payment=success`;
         const serverUrl = `${baseUrl}/api/subscription/callback`;
 
-        // Build gateway-specific redirect/form data
         if (provider === "liqpay" && gateway.liqpay_enabled) {
           const checkout = buildLiqPayCheckout({
             publicKey: gateway.liqpay_public_key,

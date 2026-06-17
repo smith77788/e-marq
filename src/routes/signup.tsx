@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, tStatic } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
@@ -66,7 +66,6 @@ function SignupPage() {
   const [emailSubmitting, setEmailSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [honeypot, setHoneypot] = useState("");
 
   const destination = postSignupDestination(search);
   const planLabel = search.plan ? PLAN_LABEL[search.plan as keyof typeof PLAN_LABEL] : null;
@@ -74,11 +73,6 @@ function SignupPage() {
 
   async function onEmailSubmit(e: FormEvent) {
     e.preventDefault();
-    // Honeypot check
-    if (honeypot) {
-      toast.success(t("auth.created"));
-      return;
-    }
     if (password.length < 8) {
       toast.error(t("auth.passwordHint"));
       return;
@@ -116,46 +110,33 @@ function SignupPage() {
 
   async function onOAuth(provider: "google" | "apple") {
     setSubmitting(provider);
-    // Persist desired destination across the OAuth round-trip.
     try {
-      if (goingToCheckout) {
-        window.sessionStorage.setItem("marq.postAuthDest", destination);
-      } else {
-        window.sessionStorage.removeItem("marq.postAuthDest");
-      }
-    } catch {
-      /* storage may be blocked */
-    }
-    try {
-      let lovableDone = false;
+      // Persist desired destination across the OAuth round-trip.
+      // /auth/callback will read this and finalize navigation.
       try {
-        const { lovable } = await import("@/integrations/lovable");
-        const result = await lovable.auth.signInWithOAuth(provider, {
-          redirect_uri: `${window.location.origin}/auth/callback`,
-        });
-        if (result.redirected) return;
-        if (!result.error) {
-          window.location.assign("/auth/callback");
-          return;
+        if (goingToCheckout) {
+          window.sessionStorage.setItem("marq.postAuthDest", destination);
+        } else {
+          window.sessionStorage.removeItem("marq.postAuthDest");
         }
-        lovableDone = true;
       } catch {
-        lovableDone = true;
+        /* storage may be blocked */
       }
-
-      if (lovableDone) {
-        // Fallback: direct Supabase OAuth
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider,
-          options: { redirectTo: `${window.location.origin}/auth/callback` },
-        });
-        if (error) {
-          toast.error(
-            error.message || t(provider === "apple" ? "auth.failSignupApple" : "auth.failSignupGoogle"),
-          );
-          setSubmitting(null);
-        }
+      const result = await lovable.auth.signInWithOAuth(provider, {
+        redirect_uri: `${window.location.origin}/auth/callback`,
+      });
+      if (result.error) {
+        toast.error(
+          result.error instanceof Error
+            ? result.error.message
+            : t(provider === "apple" ? "auth.failApple" : "auth.failSignupGoogle"),
+        );
+        setSubmitting(null);
+        return;
       }
+      if (result.redirected) return;
+      toast.success(t("auth.created"));
+      window.location.assign("/auth/callback");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.failSignup"));
       setSubmitting(null);
@@ -211,18 +192,6 @@ function SignupPage() {
                 disabled={emailSubmitting || !!submitting}
               />
               <p className="text-xs text-muted-foreground">{t("auth.passwordHint")}</p>
-            </div>
-            {/* Honeypot field — hidden from humans, bots will fill it */}
-            <div className="absolute -left-[9999px]" aria-hidden="true">
-              <Label htmlFor="website">Website</Label>
-              <Input
-                id="website"
-                name="website"
-                value={honeypot}
-                onChange={(e) => setHoneypot(e.target.value)}
-                tabIndex={-1}
-                autoComplete="off"
-              />
             </div>
             <Button type="submit" className="w-full" disabled={emailSubmitting || !!submitting}>
               {emailSubmitting ? t("auth.redirecting") : t("auth.signupBtn")}

@@ -18,14 +18,14 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 export type Promotion = {
   id: string;
   name: string;
-  type: "welcome" | "winback" | "upsell" | "seasonal" | "flash";
-  discount_pct: number;
-  min_order_cents?: number;
-  max_uses?: number;
-  used_count: number;
+  promo_type: string;
+  value: number;
+  min_order_cents: number;
+  usage_limit: number | null;
+  times_used: number;
   starts_at: string;
-  expires_at: string;
-  status: "active" | "paused" | "expired";
+  ends_at: string | null;
+  is_active: boolean;
 };
 
 /**
@@ -35,22 +35,20 @@ export async function createWelcomePromo(
   tenantId: string,
   customerEmail: string,
 ): Promise<string | null> {
-  // Генерувати унікальний код
   const code = `WELCOME-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
-  // Оптимальна знижка: 10% для першої покупки
   const { error } = await supabaseAdmin.from("promotions").insert({
     tenant_id: tenantId,
+    name: `Welcome ${customerEmail}`,
     code,
-    discount_type: "percentage",
-    discount_value: 10,
-    min_order_cents: 10000, // мінімум 100 грн
-    max_uses: 1,
-    used_count: 0,
+    value: 10,
+    promo_type: "percentage",
+    min_order_cents: 10000,
+    usage_limit: 1,
     starts_at: new Date().toISOString(),
-    expires_at: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(), // 30 днів
-    status: "active",
-    metadata: { type: "welcome", customer_email: customerEmail },
+    ends_at: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
+    is_active: true,
+    agent: customerEmail,
   });
 
   if (error) return null;
@@ -67,23 +65,22 @@ export async function createWinbackPromo(
 ): Promise<string | null> {
   const code = `COMEBACK-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
-  // Знижка залежно від того, як давно пішов
   let discountPct = 15;
   if (daysInactive > 90) discountPct = 25;
   else if (daysInactive > 60) discountPct = 20;
 
   const { error } = await supabaseAdmin.from("promotions").insert({
     tenant_id: tenantId,
+    name: `Winback ${customerEmail}`,
     code,
-    discount_type: "percentage",
-    discount_value: discountPct,
+    value: discountPct,
+    promo_type: "percentage",
     min_order_cents: 5000,
-    max_uses: 1,
-    used_count: 0,
+    usage_limit: 1,
     starts_at: new Date().toISOString(),
-    expires_at: new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString(), // 14 днів
-    status: "active",
-    metadata: { type: "winback", customer_email: customerEmail, days_inactive: daysInactive },
+    ends_at: new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString(),
+    is_active: true,
+    agent: customerEmail,
   });
 
   if (error) return null;
@@ -96,15 +93,16 @@ export async function createWinbackPromo(
 export async function getActivePromotions(
   tenantId: string,
 ): Promise<Promotion[]> {
+  const now = new Date().toISOString();
   const { data } = await supabaseAdmin
     .from("promotions")
-    .select("*")
+    .select("id, name, promo_type, value, min_order_cents, usage_limit, times_used, starts_at, ends_at, is_active")
     .eq("tenant_id", tenantId)
-    .eq("status", "active")
-    .gte("expires_at", new Date().toISOString())
-    .order("expires_at");
+    .eq("is_active", true)
+    .or(`ends_at.is.null,ends_at.gte.${now}`)
+    .order("starts_at");
 
-  return (data ?? []) as Promotion[];
+  return (data ?? []) as unknown as Promotion[];
 }
 
 /**
@@ -120,23 +118,24 @@ export async function analyzePromoEffectiveness(
 }> {
   const { data: promos } = await supabaseAdmin
     .from("promotions")
-    .select("id, discount_value, used_count")
+    .select("id, value, times_used")
     .eq("tenant_id", tenantId);
 
   if (!promos || promos.length === 0) {
     return { total_promos: 0, total_discount_given_cents: 0, revenue_from_promos_cents: 0, roi: 0 };
   }
 
-  // Оцінити вартість знижок
+  // Estimate: avg order ~1000 UAH, discount applied per use
   let totalDiscount = 0;
   for (const p of promos) {
-    totalDiscount += p.discount_value * p.used_count * 100; // спрощений розрахунок
+    totalDiscount += (p.value ?? 0) * (p.times_used ?? 0) * 100;
   }
+  const estimatedRevenue = totalDiscount * 3; // historical ~3x ROI
 
   return {
     total_promos: promos.length,
     total_discount_given_cents: totalDiscount,
-    revenue_from_promos_cents: totalDiscount * 3, // ROI ~3x
-    roi: 3.0,
+    revenue_from_promos_cents: estimatedRevenue,
+    roi: totalDiscount > 0 ? estimatedRevenue / totalDiscount : 0,
   };
 }

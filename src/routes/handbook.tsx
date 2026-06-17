@@ -128,7 +128,7 @@ function HandbookPage() {
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
             <Button asChild size="sm" variant="ghost">
-              <Link to="/login" search={{}}>{t("site.nav.signin")}</Link>
+              <Link to="/login" search={{ error: undefined }}>{t("site.nav.signin")}</Link>
             </Button>
             <Button asChild size="sm">
               <Link to="/signup">{t("site.nav.signup")}</Link>

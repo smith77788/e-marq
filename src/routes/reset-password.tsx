@@ -92,7 +92,7 @@ function ResetPasswordPage() {
             </Button>
           </form>
           <p className="text-center text-sm">
-            <Link to="/login" search={{}} className="font-medium text-primary hover:underline">
+            <Link to="/login" search={{ error: undefined }} className="font-medium text-primary hover:underline">
               {t("auth.resetBack")}
             </Link>
           </p>

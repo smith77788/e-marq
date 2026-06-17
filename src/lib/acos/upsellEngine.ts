@@ -83,6 +83,7 @@ async function findComplementaryProducts(
   // Порахувати частоту кожного товару
   const freq: Record<string, { name: string; price: number; count: number }> = {};
   for (const item of coItems) {
+    if (!item.product_id) continue;
     if (!freq[item.product_id]) {
       freq[item.product_id] = { name: item.product_name, price: item.unit_price_cents, count: 0 };
     }
