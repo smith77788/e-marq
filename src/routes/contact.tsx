@@ -28,10 +28,16 @@ function ContactPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (submitting) return;
+    // Honeypot check — bots will fill this, humans won't
+    if (honeypot) {
+      toast.success(t("ct.toastOk"));
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch("/api/public/contact", {
@@ -119,6 +125,18 @@ function ContactPage() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder={t("ct.messagePh")}
+                  />
+                </div>
+                {/* Honeypot field — hidden from humans, bots will fill it */}
+                <div className="absolute -left-[9999px]" aria-hidden="true">
+                  <Label htmlFor="ct-website">Website</Label>
+                  <Input
+                    id="ct-website"
+                    name="website"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    tabIndex={-1}
+                    autoComplete="off"
                   />
                 </div>
                 <Button type="submit" disabled={submitting} className="w-full">

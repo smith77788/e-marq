@@ -61,11 +61,30 @@ export const Route = createFileRoute("/s/$slug/")({
         }))
       : [],
   }),
-  errorComponent: ({ error }: { error: Error }) => (
-    <div className="mx-auto max-w-6xl px-4 py-12 text-center">
-      <p className="text-sm text-destructive">Помилка: {error.message}</p>
-    </div>
-  ),
+  errorComponent: ({ error }: { error: Error }) => {
+    const isConfigError =
+      error.message?.includes("Missing Supabase") || error.message?.includes("environment variables");
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-12 text-center">
+        <Package className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
+        <p className="font-semibold text-foreground">
+          {isConfigError ? "Магазин тимчасово недоступний" : "Помилка завантаження"}
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {isConfigError
+            ? "Ми вже працюємо над відновленням. Спробуйте оновити сторінку за кілька хвилин."
+            : "Щось пішло не так. Спробуйте оновити сторінку."}
+        </p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="mt-4 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        >
+          Оновити
+        </button>
+      </div>
+    );
+  },
   notFoundComponent: () => (
     <div className="mx-auto max-w-6xl px-4 py-12 text-center">
       <Package className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />

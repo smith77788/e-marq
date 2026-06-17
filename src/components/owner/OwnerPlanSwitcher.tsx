@@ -75,13 +75,60 @@ export function OwnerPlanSwitcher({
   });
 
   const change = useMutation({
-    mutationFn: async (planKey: string) => {
-      const { error } = await supabase.rpc("owner_change_plan", {
-        _tenant_id: tenantId,
-        _plan_key: planKey,
-        _reason: reason || undefined,
-      });
-      if (error) throw error;
+    mutationFn: async (plan: Plan) => {
+      const isPaid = plan.price_cents_monthly > 0;
+
+      if (isPaid) {
+        // For paid plans, create subscription payment via API
+        const response = await fetch("/api/subscription/init", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tenantId,
+            planKey: plan.key,
+            provider: "liqpay",
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!result.ok) {
+          throw new Error(result.error || "Failed to create payment");
+        }
+
+        // Redirect to LiqPay checkout if form fields are available
+        if (result.formFields && result.formAction) {
+          // Create a form and submit it to LiqPay
+          const form = document.createElement("form");
+          form.method = "POST";
+          form.action = result.formAction;
+
+          const dataInput = document.createElement("input");
+          dataInput.type = "hidden";
+          dataInput.name = "data";
+          dataInput.value = result.formFields.data;
+          form.appendChild(dataInput);
+
+          const signatureInput = document.createElement("input");
+          signatureInput.type = "hidden";
+          signatureInput.name = "signature";
+          signatureInput.value = result.formFields.signature;
+          form.appendChild(signatureInput);
+
+          document.body.appendChild(form);
+          form.submit();
+        } else {
+          toast.info(`Оформлення підписки на ${plan.name}… Сума: ${Math.round(plan.price_cents_monthly / 100)} ${plan.currency}`);
+        }
+      } else {
+        // For free plans, call owner_change_plan directly
+        const { error } = await supabase.rpc("owner_change_plan", {
+          _tenant_id: tenantId,
+          _plan_key: plan.key,
+          _reason: reason || undefined,
+        });
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       toast.success("Тариф оновлено");
@@ -180,7 +227,7 @@ export function OwnerPlanSwitcher({
                       plan: p.key,
                       from_pricing: !!highlightPlanKey && p.key === highlightPlanKey,
                     });
-                    change.mutate(p.key);
+                    change.mutate(p);
                   }}
                 >
                   {isCurrent

@@ -76,11 +76,32 @@ export const Route = createFileRoute("/s/$slug")({
       </div>
     </div>
   ),
-  errorComponent: ({ error }: { error: Error }) => (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <p className="text-sm text-destructive">Не вдалося завантажити магазин: {error.message}</p>
-    </div>
-  ),
+  errorComponent: ({ error }: { error: Error }) => {
+    const isConfigError =
+      error.message?.includes("Missing Supabase") || error.message?.includes("environment variables");
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="max-w-md text-center">
+          <Package className="mx-auto mb-4 h-16 w-16 text-muted-foreground/30" />
+          <h1 className="text-2xl font-bold text-foreground">
+            {isConfigError ? "Магазин тимчасово недоступний" : "Помилка завантаження"}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {isConfigError
+              ? "Ми вже працюємо над відновленням. Спробуйте оновити сторінку за кілька хвилин."
+              : "Щось пішло не так. Спробуйте оновити сторінку або повернутися пізніше."}
+          </p>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="mt-6 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            Оновити сторінку
+          </button>
+        </div>
+      </div>
+    );
+  },
   component: StorefrontLayout,
 });
 

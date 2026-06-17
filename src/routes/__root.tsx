@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/useAuth";
 import { DetailControllerProvider, DetailDrawer } from "@/components/detail";
+import { CookieConsent } from "@/components/CookieConsent";
 
 import appCss from "../styles.css?url";
 
@@ -58,7 +59,12 @@ export const Route = createRootRoute({
       // og:image always wins over leaf-route images. Set og:image only at
       // the leaf-route level (via buildSeo({ ogImage })).
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.json" },
+      { name: "theme-color", content: "#6366f1" },
+      { rel: "apple-touch-icon", href: "/favicon-192.png" },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -93,6 +99,7 @@ function RootComponent() {
           <Outlet />
           <DetailDrawer />
           <Toaster richColors position="top-right" theme="system" />
+          <CookieConsent />
         </DetailControllerProvider>
       </AuthProvider>
     </QueryClientProvider>

@@ -101,7 +101,7 @@ function MagnetPage() {
             Хочете автоматизувати це у своєму магазині?
           </h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            MARQ робить це автоматично — 90+ AI-агентів працюють для вас 24/7.
+            MARQ робить це автоматично — 70+ AI-агентів працюють для вас 24/7.
           </p>
           <Button asChild size="lg" className="mt-4">
             <Link to={magnet.cta_url || "/signup"}>

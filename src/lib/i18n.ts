@@ -497,6 +497,13 @@ const dict = {
     "ab.ctaBody": "14 днів безкоштовно. Без картки. Без контракту. Просто підключіть і подивіться.",
     "ab.ctaPrimary": "Запустити безкоштовно",
     "ab.ctaSecondary": "Зв'язатися з нами",
+    "ab.companyTitle": "Про компанію",
+    "ab.companyName": "Назва",
+    "ab.companyContact": "Контакти",
+    "ab.companyJurisdiction": "Юрисдикція",
+    "ab.companyJurisdictionValue": "Україна. Спори вирішуються за місцем реєстрації.",
+    "ab.companyData": "Зберігання даних",
+    "ab.companyDataValue": "Supabase (Postgres) + Cloudflare. Дані видаляються протягом 30 днів після закриття акаунту.",
 
     // Contact page (UA)
     "ct.metaTitle": "Контакти MARQ — напишіть нам напряму",
@@ -679,10 +686,10 @@ const dict = {
       "Без прихованих платежів. Без довгих контрактів. Скасувати можна в будь-який момент.",
     "hb.price.m1.title": "1. Підписка (SaaS)",
     "hb.price.m1.body": "Класична модель: фіксована сума щомісяця за бренд. Підходить більшості.",
-    "hb.price.m1.tier1": "Starter — 1 199 ₴/міс — 1 бренд, всі агенти, до 100 інсайтів/міс",
+    "hb.price.m1.tier1": "Starter — 1 199 ₴/міс — 1 бренд, 23 агенти, до 300 товарів, 5 учасників",
     "hb.price.m1.tier2":
-      "Growth — 3 999 ₴/міс — 1 бренд, безлімітні інсайти, всі канали, пріоритетна підтримка",
-    "hb.price.m1.tier3": "Scale — 11 999 ₴/міс — до 5 брендів, white-label, кастомні агенти",
+      "Growth — 3 999 ₴/міс — 1 бренд, 47 агентів, до 3 000 товарів, 15 учасників, пріоритетна підтримка",
+    "hb.price.m1.tier3": "Scale — 11 999 ₴/міс — до 5 брендів, усі 58 агентів, безліміт, 50 учасників, white-label",
     "hb.price.m2.title": "2. Разова оплата + ліцензія",
     "hb.price.m2.body":
       "Для enterprise. Платите за впровадження, далі — щорічна ліцензія за оновлення.",
@@ -1919,6 +1926,13 @@ const dict = {
     "ab.ctaBody": "14 days free. No card. No contract. Just connect and watch.",
     "ab.ctaPrimary": "Start for free",
     "ab.ctaSecondary": "Get in touch",
+    "ab.companyTitle": "About the company",
+    "ab.companyName": "Name",
+    "ab.companyContact": "Contact",
+    "ab.companyJurisdiction": "Jurisdiction",
+    "ab.companyJurisdictionValue": "Ukraine. Disputes resolved at the company's registered address.",
+    "ab.companyData": "Data storage",
+    "ab.companyDataValue": "Supabase (Postgres) + Cloudflare. Data deleted within 30 days of account closure.",
 
     "ct.metaTitle": "Contact MARQ — talk to us directly",
     "ct.metaDesc":

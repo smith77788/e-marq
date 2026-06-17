@@ -84,6 +84,44 @@ function AboutPage() {
         </div>
       </section>
 
+      {/* Company info section */}
+      <section className="mx-auto max-w-4xl px-4 py-16">
+        <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          {t("ab.companyTitle")}
+        </h2>
+        <div className="mt-6 grid gap-6 sm:grid-cols-2">
+          <div className="space-y-4 text-sm text-muted-foreground">
+            <div>
+              <p className="font-semibold text-foreground">{t("ab.companyName")}</p>
+              <p>MARQ — Merchant Autonomous Revenue Quorum</p>
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">{t("ab.companyContact")}</p>
+              <p>
+                <a href="mailto:hello@marq.app" className="text-primary hover:underline">
+                  hello@marq.app
+                </a>
+              </p>
+              <p>
+                <a href="mailto:support@marq.app" className="text-primary hover:underline">
+                  support@marq.app
+                </a>
+              </p>
+            </div>
+          </div>
+          <div className="space-y-4 text-sm text-muted-foreground">
+            <div>
+              <p className="font-semibold text-foreground">{t("ab.companyJurisdiction")}</p>
+              <p>{t("ab.companyJurisdictionValue")}</p>
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">{t("ab.companyData")}</p>
+              <p>{t("ab.companyDataValue")}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="mx-auto max-w-3xl px-4 py-16 text-center">
         <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           {t("ab.ctaTitle")}

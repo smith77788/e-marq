@@ -66,6 +66,7 @@ function SignupPage() {
   const [emailSubmitting, setEmailSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [honeypot, setHoneypot] = useState("");
 
   const destination = postSignupDestination(search);
   const planLabel = search.plan ? PLAN_LABEL[search.plan as keyof typeof PLAN_LABEL] : null;
@@ -73,6 +74,11 @@ function SignupPage() {
 
   async function onEmailSubmit(e: FormEvent) {
     e.preventDefault();
+    // Honeypot check
+    if (honeypot) {
+      toast.success(t("auth.created"));
+      return;
+    }
     if (password.length < 8) {
       toast.error(t("auth.passwordHint"));
       return;
@@ -205,6 +211,18 @@ function SignupPage() {
                 disabled={emailSubmitting || !!submitting}
               />
               <p className="text-xs text-muted-foreground">{t("auth.passwordHint")}</p>
+            </div>
+            {/* Honeypot field — hidden from humans, bots will fill it */}
+            <div className="absolute -left-[9999px]" aria-hidden="true">
+              <Label htmlFor="website">Website</Label>
+              <Input
+                id="website"
+                name="website"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+              />
             </div>
             <Button type="submit" className="w-full" disabled={emailSubmitting || !!submitting}>
               {emailSubmitting ? t("auth.redirecting") : t("auth.signupBtn")}
