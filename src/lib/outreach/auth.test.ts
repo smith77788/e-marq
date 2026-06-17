@@ -29,10 +29,17 @@ describe("cron auth — outreach/lead regression", () => {
     expect(isCronToken(undefined)).toBe(false);
   });
 
-  it("falls back to anon when CRON_SECRET missing and CRON_ALLOW_ANON not false", () => {
+  it("rejects anon when CRON_SECRET missing and CRON_ALLOW_ANON not set (secure default)", () => {
     delete process.env.CRON_SECRET;
     process.env.SUPABASE_PUBLISHABLE_KEY = "anon-key";
     delete process.env.CRON_ALLOW_ANON;
+    expect(isCronToken("anon-key")).toBe(false);
+  });
+
+  it("accepts anon when CRON_SECRET missing and CRON_ALLOW_ANON=true (migration mode)", () => {
+    delete process.env.CRON_SECRET;
+    process.env.SUPABASE_PUBLISHABLE_KEY = "anon-key";
+    process.env.CRON_ALLOW_ANON = "true";
     expect(isCronToken("anon-key")).toBe(true);
   });
 

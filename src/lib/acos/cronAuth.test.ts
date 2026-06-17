@@ -26,8 +26,17 @@ describe("isCronToken", () => {
     expect(isCronToken("wrong")).toBe(false);
   });
 
-  it("ignores too-short CRON_SECRET (<16 chars), falls back to anon", () => {
+  it("ignores too-short CRON_SECRET (<16 chars), rejects all by default", () => {
     process.env.CRON_SECRET = "tooshort";
+    process.env.SUPABASE_PUBLISHABLE_KEY = "anon-key";
+    // anon fallback is disabled by default (CRON_ALLOW_ANON defaults false)
+    expect(isCronToken("anon-key")).toBe(false);
+    expect(isCronToken("tooshort")).toBe(false);
+  });
+
+  it("ignores too-short CRON_SECRET, accepts anon when CRON_ALLOW_ANON=true", () => {
+    process.env.CRON_SECRET = "tooshort";
+    process.env.CRON_ALLOW_ANON = "true";
     process.env.SUPABASE_PUBLISHABLE_KEY = "anon-key";
     expect(isCronToken("anon-key")).toBe(true);
     expect(isCronToken("tooshort")).toBe(false);
@@ -39,7 +48,14 @@ describe("isCronToken", () => {
     expect(isCronToken("anon-key")).toBe(false);
   });
 
-  it("default: accepts anon key when no CRON_SECRET", () => {
+  it("default: rejects anon key when no CRON_SECRET (CRON_ALLOW_ANON defaults false)", () => {
+    process.env.SUPABASE_PUBLISHABLE_KEY = "anon-key";
+    expect(isCronToken("anon-key")).toBe(false);
+    expect(isCronToken("other")).toBe(false);
+  });
+
+  it("accepts anon key when CRON_ALLOW_ANON=true and no CRON_SECRET", () => {
+    process.env.CRON_ALLOW_ANON = "true";
     process.env.SUPABASE_PUBLISHABLE_KEY = "anon-key";
     expect(isCronToken("anon-key")).toBe(true);
     expect(isCronToken("other")).toBe(false);
