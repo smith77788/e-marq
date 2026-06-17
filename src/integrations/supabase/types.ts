@@ -3607,6 +3607,7 @@ export type Database = {
       };
       orders: {
         Row: {
+          access_token: string;
           created_at: string;
           currency: string;
           customer_email: string | null;
@@ -3630,6 +3631,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          access_token?: string;
           created_at?: string;
           currency?: string;
           customer_email?: string | null;
@@ -3653,6 +3655,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          access_token?: string;
           created_at?: string;
           currency?: string;
           customer_email?: string | null;
