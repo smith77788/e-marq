@@ -54,7 +54,7 @@ export const Route = createFileRoute("/_authenticated")({
     } catch {
       /* auth storage may be blocked or malformed */
     }
-    throw redirect({ to: "/login", replace: true });
+    throw redirect({ to: "/login", search: {}, replace: true });
   },
   component: AuthenticatedLayout,
 });
@@ -77,7 +77,7 @@ function AuthenticatedLayout() {
   // Auth resolved → no user. The route guard normally handles this before
   // render; this remains as a defensive fallback for expired/cleared sessions.
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" search={{}} replace />;
   }
 
   async function handleSignOut() {

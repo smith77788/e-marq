@@ -123,7 +123,7 @@ function AdminAuditLog() {
   }, [rows, search]);
 
   if (loading) return <Skeleton className="h-96 w-full" />;
-  if (!user) return <Navigate to="/login" />;
+  if (!user) return <Navigate to="/login" search={{}} />;
 
   return (
     <div className="space-y-6 p-6">
