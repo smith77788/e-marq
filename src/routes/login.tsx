@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, tStatic } from "@/lib/i18n";
@@ -13,9 +14,6 @@ import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 import { NOINDEX_META } from "@/lib/seo";
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    error: typeof s.error === "string" ? s.error : undefined,
-  }),
   head: () => ({
     meta: [
       { title: `${tStatic("auth.signinTitle")} — MARQ` },
@@ -29,15 +27,10 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const { user, loading, signIn } = useAuth();
   const { t } = useT();
-  const search = Route.useSearch();
-  const [submitting, setSubmitting] = useState<"google" | "apple" | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [emailSubmitting, setEmailSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  // Show error if Supabase is not configured
-  const configError = search.error === "supabase_not_configured";
-  const authTimeout = search.error === "auth_timeout";
 
   function readAndClearDest(): string {
     try {
@@ -70,80 +63,38 @@ function LoginPage() {
       toast.success(t("auth.welcome"));
       window.location.assign(readAndClearDest());
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      // If Supabase not configured, show helpful message
-      if (msg.includes("not configured") || msg.includes("Supabase")) {
-        toast.error("Авторизація через email тимчасово недоступна. Спробуйте Google.");
-      } else {
-        toast.error(msg || t("auth.fail"));
-      }
+      toast.error(err instanceof Error ? err.message : t("auth.fail"));
       setEmailSubmitting(false);
     }
   }
 
-  async function onOAuth(provider: "google" | "apple") {
-    setSubmitting(provider);
+  async function onGoogle() {
+    setSubmitting(true);
     try {
-      // Lovable proxy works WITHOUT Supabase env vars — try it first
-      try {
-        const { lovable } = await import("@/integrations/lovable");
-        console.log("[login] Trying Lovable proxy for", provider);
-        const result = await lovable.auth.signInWithOAuth(provider, {
-          redirect_uri: `${window.location.origin}/auth/callback`,
-        });
-        console.log("[login] Lovable proxy result:", result);
-        if (result.redirected) {
-          console.log("[login] Redirected to", provider);
-          return; // browser navigated — we're done
-        }
-        if (!result.error) {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: `${window.location.origin}/auth/callback`,
+      });
+      if (result.redirected) return;
+
+      if (result.error) {
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
           window.location.assign("/auth/callback");
           return;
         }
-        // Proxy returned error — check if session was somehow set anyway
-        try {
-          const { data } = await supabase.auth.getSession();
-          if (data.session) {
-            window.location.assign("/auth/callback");
-            return;
-          }
-        } catch {
-          // Supabase not configured — that's ok, Lovable proxy should handle it
+        const msg = result.error instanceof Error ? result.error.message : String(result.error);
+        if (!/cancel/i.test(msg)) {
+          toast.error(msg || t("auth.failGoogle"));
         }
-        console.warn("[login] Lovable proxy returned error:", result.error);
-      } catch (e) {
-        console.warn("[login] Lovable proxy unavailable:", e);
-      }
-
-      // Fallback: direct Supabase OAuth (only if Supabase is configured)
-      const supabaseConfigured = !!(
-        import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL
-      ) && !!(
-        import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY
-      );
-
-      if (!supabaseConfigured) {
-        toast.error("Авторизація тимчасово недоступна. Спробуйте увійти через email.");
-        setSubmitting(null);
+        setSubmitting(false);
         return;
       }
 
-      try {
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider,
-          options: { redirectTo: `${window.location.origin}/auth/callback` },
-        });
-        if (error) {
-          toast.error(error.message || t(provider === "apple" ? "auth.failApple" : "auth.failGoogle"));
-          setSubmitting(null);
-        }
-      } catch {
-        toast.error("Авторизація тимчасово недоступна. Спробуйте пізніше.");
-        setSubmitting(null);
-      }
+      toast.success(t("auth.welcome"));
+      window.location.assign("/auth/callback");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.fail"));
-      setSubmitting(null);
+      setSubmitting(false);
     }
   }
 
@@ -158,16 +109,6 @@ function LoginPage() {
           <CardDescription>{t("auth.signinDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {configError && (
-            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
-              Сервіс тимчасово недоступний. Спробуйте увійти через email та пароль або зверніться до підтримки.
-            </div>
-          )}
-          {authTimeout && (
-            <div className="rounded-md border border-yellow-500/50 bg-yellow-500/10 p-3 text-sm text-yellow-600">
-              Авторизація через Google/Apple не вдалася. Перевірте налаштування OAuth в Lovable Dashboard або увійдіть через email.
-            </div>
-          )}
           <form onSubmit={onEmailSubmit} className="space-y-3">
             <div className="space-y-1.5">
               <Label htmlFor="email">{t("auth.email")}</Label>
@@ -178,7 +119,7 @@ function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={emailSubmitting || !!submitting}
+                disabled={emailSubmitting || submitting}
               />
             </div>
             <div className="space-y-1.5">
@@ -199,10 +140,10 @@ function LoginPage() {
                 minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={emailSubmitting || !!submitting}
+                disabled={emailSubmitting || submitting}
               />
             </div>
-            <Button type="submit" className="w-full" disabled={emailSubmitting || !!submitting}>
+            <Button type="submit" className="w-full" disabled={emailSubmitting || submitting}>
               {emailSubmitting ? t("auth.redirecting") : t("auth.signinBtn")}
             </Button>
           </form>
@@ -214,28 +155,16 @@ function LoginPage() {
             </span>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => onOAuth("google")}
-              disabled={!!submitting || emailSubmitting}
-            >
-              <GoogleIcon />
-              {submitting === "google" ? t("auth.redirecting") : t("auth.continueGoogle")}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => onOAuth("apple")}
-              disabled={!!submitting || emailSubmitting}
-            >
-              <AppleIcon />
-              {submitting === "apple" ? t("auth.redirecting") : t("auth.continueApple")}
-            </Button>
-          </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={onGoogle}
+            disabled={submitting || emailSubmitting}
+          >
+            <GoogleIcon />
+            {submitting ? t("auth.redirecting") : t("auth.continueGoogle")}
+          </Button>
           <p className="text-center text-sm text-muted-foreground">
             {t("auth.noAccount")}{" "}
             <Link to="/signup" className="font-medium text-primary hover:underline">
@@ -264,14 +193,6 @@ function GoogleIcon() {
         fill="#EA4335"
         d="M12 10.2v3.9h5.5c-.2 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.7 3.4 14.6 2.4 12 2.4 6.7 2.4 2.5 6.6 2.5 12s4.2 9.6 9.5 9.6c5.5 0 9.1-3.9 9.1-9.3 0-.6-.1-1.1-.2-1.6H12z"
       />
-    </svg>
-  );
-}
-
-function AppleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="mr-2 h-4 w-4 fill-current" aria-hidden="true">
-      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.42.07 2.41.74 3.24.8 1.23-.25 2.41-.96 3.72-.84 1.59.18 2.8.83 3.56 2.07-3.26 2.02-2.6 6.3.48 7.9-.57 1.37-1.3 2.73-3 2.95zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
     </svg>
   );
 }
