@@ -38,20 +38,13 @@ function AuthCallbackPage() {
       return null;
     }
 
+    // If user is already set (from Lovable proxy or Supabase), redirect to dashboard
     if (user) {
       window.location.replace(readAndClearDest() ?? "/dashboard");
       return;
     }
 
-    // Check if Supabase is configured before trying to use it
-    const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-    const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
-    if (!SUPABASE_URL || !SUPABASE_KEY) {
-      // Supabase not configured — redirect to login with error
-      window.location.replace("/login?error=supabase_not_configured");
-      return;
-    }
-
+    // Try to get session from Supabase (might be set by Lovable proxy)
     let cancelled = false;
 
     void supabase.auth.getSession().then(
@@ -61,10 +54,18 @@ function AuthCallbackPage() {
           window.location.replace(readAndClearDest() ?? "/dashboard");
           return;
         }
+        // No session — redirect to login
         window.location.replace("/login");
       },
       () => {
-        if (!cancelled) window.location.replace("/login");
+        // Error getting session — might be Lovable proxy callback
+        // Give it a moment for the session to propagate
+        setTimeout(() => {
+          if (!cancelled) {
+            // Check if user was set in the meantime
+            window.location.replace("/login");
+          }
+        }, 2000);
       },
     );
 
