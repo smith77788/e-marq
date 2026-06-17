@@ -2,12 +2,18 @@
  * POST /api/subscription/callback
  *
  * Payment callback endpoint for LiqPay subscription payments.
- * Looks up the pending session in bootstrap_facts, verifies signature,
- * then activates the subscription in tenant_subscriptions.
+ * Uses subscription_payments table and complete_subscription_payment RPC
+ * defined in migration 20260617000001_subscription_payments.sql.
+ *
+ * NOTE: Types cast as never because supabase types haven't been regenerated
+ * after the migration that added subscription_payments.
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { verifyLiqPaySignature, parseLiqPayCallback, isLiqPaySuccess } from "@/lib/payments/liqpay.server";
+
+// Typed proxy for tables not yet in generated types
+const db = supabaseAdmin as unknown as typeof supabaseAdmin;
 
 export const Route = createFileRoute("/api/subscription/callback")({
   server: {
@@ -30,30 +36,27 @@ export const Route = createFileRoute("/api/subscription/callback")({
         const callbackPayload = parseLiqPayCallback(data);
         const providerOrderId = callbackPayload.order_id;
 
-        // Find the pending payment session stored in bootstrap_facts
-        const { data: sessions } = await supabaseAdmin
-          .from("bootstrap_facts")
-          .select("*")
-          .eq("fact_kind", "payment_session")
-          .limit(200);
+        // Find the pending payment record
+        const { data: payment, error: findError } = await db
+          .from("subscription_payments" as never)
+          .select("id, tenant_id, status" as never)
+          .eq("provider_order_id" as never, providerOrderId)
+          .eq("provider" as never, "liqpay")
+          .eq("status" as never, "pending")
+          .single() as unknown as {
+            data: { id: string; tenant_id: string; status: string } | null;
+            error: { message: string } | null;
+          };
 
-        const sessionRow = (sessions ?? []).find((row) => {
-          const v = (row.value ?? {}) as Record<string, unknown>;
-          return v.provider_order_id === providerOrderId && v.status === "pending";
-        });
-
-        if (!sessionRow) {
-          return Response.json({ error: "Payment session not found" }, { status: 404 });
+        if (findError || !payment) {
+          return Response.json({ error: "Payment not found" }, { status: 404 });
         }
-
-        const session = (sessionRow.value ?? {}) as Record<string, unknown>;
-        const tenantId = sessionRow.tenant_id;
 
         // Get tenant's LiqPay config for signature verification
         const { data: tenantConfig } = await supabaseAdmin
           .from("tenant_configs")
           .select("features")
-          .eq("tenant_id", tenantId)
+          .eq("tenant_id", payment.tenant_id)
           .single();
 
         const features = (tenantConfig?.features ?? {}) as Record<string, unknown>;
@@ -71,55 +74,22 @@ export const Route = createFileRoute("/api/subscription/callback")({
         const allowSandbox = payments.liqpay_sandbox === true;
 
         if (!isLiqPaySuccess(callbackPayload.status, allowSandbox)) {
-          // Mark session as failed
-          await supabaseAdmin
-            .from("bootstrap_facts")
-            .update({
-              value: { ...session, status: "failed", failed_at: new Date().toISOString() } as never,
-            })
-            .eq("id", sessionRow.id);
+          await db
+            .from("subscription_payments" as never)
+            .update({ status: "failed" } as never)
+            .eq("id" as never, payment.id);
 
           return Response.json({ ok: true, status: "failed" });
         }
 
-        // Activate the subscription in tenant_subscriptions
-        const planId = session.plan_id as string;
-        const now = new Date();
-        const periodEnd = new Date(now);
-        periodEnd.setMonth(periodEnd.getMonth() + 1);
+        // Complete the payment via RPC — activates subscription, logs plan change, grants credits
+        const { data: completed } = await supabaseAdmin.rpc("complete_subscription_payment" as never, {
+          _provider_order_id: providerOrderId,
+          _provider: "liqpay",
+          _provider_transaction_id: String(callbackPayload.transaction_id || ""),
+        } as never);
 
-        const { error: subError } = await supabaseAdmin
-          .from("tenant_subscriptions")
-          .upsert(
-            {
-              tenant_id: tenantId,
-              plan_id: planId,
-              status: "active",
-              current_period_start: now.toISOString(),
-              current_period_end: periodEnd.toISOString(),
-              cancel_at_period_end: false,
-            },
-            { onConflict: "tenant_id" },
-          );
-
-        if (subError) {
-          return Response.json({ error: "Failed to activate subscription" }, { status: 500 });
-        }
-
-        // Mark session as completed
-        await supabaseAdmin
-          .from("bootstrap_facts")
-          .update({
-            value: {
-              ...session,
-              status: "completed",
-              transaction_id: String(callbackPayload.transaction_id || ""),
-              completed_at: new Date().toISOString(),
-            } as never,
-          })
-          .eq("id", sessionRow.id);
-
-        return Response.json({ ok: true, status: "completed" });
+        return Response.json({ ok: true, completed: !!completed });
       },
 
       // Handle GET for result_url redirects from LiqPay

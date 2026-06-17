@@ -76,12 +76,14 @@ export async function createAutomation(
  * Увімкнути/вимкнути автоматизацію.
  */
 export async function toggleAutomation(
+  tenantId: string,
   automationId: string,
   enabled: boolean,
 ): Promise<{ ok: boolean }> {
   const { data: existing } = await supabaseAdmin
     .from("bootstrap_facts")
     .select("value")
+    .eq("tenant_id", tenantId)
     .eq("fact_key", automationId)
     .maybeSingle();
 
@@ -92,6 +94,7 @@ export async function toggleAutomation(
   const { error } = await supabaseAdmin
     .from("bootstrap_facts")
     .update({ value: updated as never })
+    .eq("tenant_id", tenantId)
     .eq("fact_key", automationId);
 
   return { ok: !error };
@@ -101,11 +104,13 @@ export async function toggleAutomation(
  * Виконати автоматизацію.
  */
 export async function runAutomation(
+  tenantId: string,
   automationId: string,
 ): Promise<{ ok: boolean }> {
   const { data: existing } = await supabaseAdmin
     .from("bootstrap_facts")
     .select("value")
+    .eq("tenant_id", tenantId)
     .eq("fact_key", automationId)
     .maybeSingle();
 
@@ -121,6 +126,7 @@ export async function runAutomation(
   const { error } = await supabaseAdmin
     .from("bootstrap_facts")
     .update({ value: updated as never })
+    .eq("tenant_id", tenantId)
     .eq("fact_key", automationId);
 
   return { ok: !error };

@@ -74,18 +74,29 @@ export async function syncShopifyProducts(tenantId: string): Promise<SyncResult>
   for (const p of data.products) {
     const variant = p.variants[0];
     if (!variant) continue;
-    const { error } = await supabaseAdmin.from("products").upsert(
-      {
-        tenant_id: tenantId,
-        name: p.title,
-        price_cents: Math.round(parseFloat(variant.price) * 100),
-        currency: "UAH",
-        stock: variant.inventory_quantity ?? 0,
-        is_active: true,
-        metadata: { shopify_id: p.id } as never,
-      },
-      { onConflict: "tenant_id,metadata->shopify_id" },
-    );
+
+    // Lookup by shopify_id in metadata — no unique index on jsonb path yet
+    const { data: existing } = await supabaseAdmin
+      .from("products")
+      .select("id")
+      .eq("tenant_id", tenantId)
+      .eq("metadata->>shopify_id" as never, String(p.id))
+      .maybeSingle();
+
+    const productData = {
+      tenant_id: tenantId,
+      name: p.title,
+      price_cents: Math.round(parseFloat(variant.price) * 100),
+      currency: "UAH",
+      stock: variant.inventory_quantity ?? 0,
+      is_active: true,
+      metadata: { shopify_id: p.id } as never,
+    };
+
+    const { error } = existing?.id
+      ? await supabaseAdmin.from("products").update(productData).eq("id", existing.id)
+      : await supabaseAdmin.from("products").insert(productData);
+
     if (error) errors++; else synced++;
   }
 
@@ -108,18 +119,29 @@ export async function syncShopifyOrders(tenantId: string): Promise<SyncResult> {
   let synced = 0, errors = 0;
   for (const o of data.orders) {
     const status = o.financial_status === "paid" ? "paid" : "pending";
-    const { error } = await supabaseAdmin.from("orders").upsert(
-      {
-        tenant_id: tenantId,
-        customer_email: o.email,
-        total_cents: Math.round(parseFloat(o.total_price) * 100),
-        currency: o.currency,
-        status,
-        created_at: o.created_at,
-        metadata: { shopify_id: o.id } as never,
-      },
-      { onConflict: "tenant_id,metadata->shopify_id" },
-    );
+
+    // Lookup by shopify_id in metadata — no unique index on jsonb path yet
+    const { data: existing } = await supabaseAdmin
+      .from("orders")
+      .select("id")
+      .eq("tenant_id", tenantId)
+      .eq("metadata->>shopify_id" as never, String(o.id))
+      .maybeSingle();
+
+    const orderData = {
+      tenant_id: tenantId,
+      customer_email: o.email,
+      total_cents: Math.round(parseFloat(o.total_price) * 100),
+      currency: o.currency,
+      status: status as "pending" | "paid",
+      created_at: o.created_at,
+      metadata: { shopify_id: o.id } as never,
+    };
+
+    const { error } = existing?.id
+      ? await supabaseAdmin.from("orders").update(orderData).eq("id", existing.id)
+      : await supabaseAdmin.from("orders").insert(orderData);
+
     if (error) errors++; else synced++;
   }
 

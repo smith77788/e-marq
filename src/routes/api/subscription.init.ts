@@ -1,13 +1,17 @@
 /**
  * POST /api/subscription/init
  *
- * Creates a subscription payment session and returns LiqPay checkout data.
- * Stores the pending session in bootstrap_facts (no subscription_payments table exists).
+ * Creates a subscription payment intent for plan upgrades.
+ * Returns payment details for gateway redirect.
  *
  * Body: { tenantId: string, planKey: string, provider?: string }
  * Returns: { ok: true, ... } | { ok: false, error: string }
  *
  * Auth: Bearer JWT, roles owner / admin / super_admin.
+ *
+ * NOTE: subscription_payments table and create_subscription_payment RPC are defined in
+ * migration 20260617000001_subscription_payments.sql. Supabase types haven't been
+ * regenerated yet, hence the `as never` casts on the RPC call.
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
@@ -92,17 +96,29 @@ export const Route = createFileRoute("/api/subscription/init")({
           return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
         }
 
-        // Look up the plan by key
-        const { data: plan, error: planError } = await supabaseAdmin
-          .from("plans")
-          .select("id, name, key, price_cents_monthly, currency")
-          .eq("key", planKey)
-          .eq("is_active", true)
-          .single();
+        // Create payment intent via RPC (defined in 20260617000001_subscription_payments.sql)
+        // Types cast as never because supabase types haven't been regenerated after the migration
+        const { data: paymentData, error: rpcError } = await supabaseAdmin.rpc(
+          "create_subscription_payment" as never,
+          {
+            _tenant_id: tenantId,
+            _plan_key: planKey,
+            _provider: provider,
+          } as never,
+        );
 
-        if (planError || !plan) {
-          return Response.json({ ok: false, error: "Plan not found" }, { status: 404 });
+        if (rpcError) {
+          return Response.json({ ok: false, error: rpcError.message }, { status: 400 });
         }
+
+        const payment = paymentData as unknown as {
+          payment_id: string;
+          provider_order_id: string;
+          amount_cents: number;
+          currency: string;
+          plan_name: string;
+          plan_key: string;
+        };
 
         // Get tenant config for payment gateway
         const { data: tenantConfig, error: configError } = await supabaseAdmin
@@ -117,38 +133,6 @@ export const Route = createFileRoute("/api/subscription/init")({
 
         const gateway = readGatewayConfig(tenantConfig.features);
         const baseUrl = originUrl(request);
-
-        // Create a unique order ID for this payment session
-        const providerOrderId = `sub_${tenantId.slice(0, 8)}_${Date.now()}`;
-        const paymentId = crypto.randomUUID();
-
-        // Store pending payment session in bootstrap_facts
-        const { error: sessionError } = await supabaseAdmin
-          .from("bootstrap_facts")
-          .insert({
-            fact_key: `payment_session_${paymentId}`,
-            fact_kind: "payment_session",
-            tenant_id: tenantId,
-            confidence: 1.0,
-            source: "subscription_init",
-            value: {
-              payment_id: paymentId,
-              provider_order_id: providerOrderId,
-              plan_id: plan.id,
-              plan_key: plan.key,
-              plan_name: plan.name,
-              amount_cents: plan.price_cents_monthly,
-              currency: plan.currency,
-              provider,
-              status: "pending",
-              created_at: new Date().toISOString(),
-            } as never,
-          });
-
-        if (sessionError) {
-          return Response.json({ ok: false, error: "Failed to create payment session" }, { status: 500 });
-        }
-
         const resultUrl = `${baseUrl}/brand/billing?tenant=${tenantId}&payment=success`;
         const serverUrl = `${baseUrl}/api/subscription/callback`;
 
@@ -156,10 +140,10 @@ export const Route = createFileRoute("/api/subscription/init")({
           const checkout = buildLiqPayCheckout({
             publicKey: gateway.liqpay_public_key,
             privateKey: gateway.liqpay_private_key,
-            amount: plan.price_cents_monthly / 100,
-            currency: plan.currency,
-            description: `MARQ ${plan.name} — підписка`,
-            orderId: providerOrderId,
+            amount: payment.amount_cents / 100,
+            currency: payment.currency,
+            description: `MARQ ${payment.plan_name} — підписка`,
+            orderId: payment.provider_order_id,
             resultUrl,
             serverUrl,
             sandbox: gateway.liqpay_sandbox,
@@ -168,7 +152,7 @@ export const Route = createFileRoute("/api/subscription/init")({
           return Response.json({
             ok: true,
             provider: "liqpay",
-            intentId: paymentId,
+            intentId: payment.payment_id,
             formFields: { data: checkout.data, signature: checkout.signature },
             formAction: checkout.checkoutUrl,
           });
