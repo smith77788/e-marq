@@ -13,9 +13,7 @@ export type Event = {
   id: string;
   tenant_id: string;
   type: string;
-  category: "business" | "system" | "user" | "agent";
   payload: unknown;
-  source: string;
   created_at: string;
 };
 
@@ -25,18 +23,16 @@ export type Event = {
 export async function trackEvent(
   tenantId: string,
   type: string,
-  category: Event["category"],
+  _category: "business" | "system" | "user" | "agent",
   payload: unknown,
-  source: string,
+  _source: string,
 ): Promise<{ ok: boolean; id?: string }> {
   const { data, error } = await supabaseAdmin
     .from("events")
     .insert({
       tenant_id: tenantId,
-      type,
-      category,
-      payload,
-      source,
+      type: type as never,
+      payload: payload as never,
     })
     .select("id")
     .single();
@@ -64,11 +60,8 @@ export async function getEvents(
     .order("created_at", { ascending: false })
     .limit(options?.limit ?? 100);
 
-  if (options?.category) {
-    query = query.eq("category", options.category);
-  }
   if (options?.type) {
-    query = query.eq("type", options.type);
+    query = query.eq("type", options.type as never);
   }
   if (options?.since) {
     query = query.gte("created_at", options.since);

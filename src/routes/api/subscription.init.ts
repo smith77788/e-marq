@@ -96,19 +96,19 @@ export const Route = createFileRoute("/api/subscription/init")({
 
         // Create payment intent via RPC
         const { data: paymentData, error: rpcError } = await supabaseAdmin.rpc(
-          "create_subscription_payment",
+          "create_subscription_payment" as never,
           {
             _tenant_id: tenantId,
             _plan_key: planKey,
             _provider: provider,
-          },
+          } as never,
         );
 
         if (rpcError) {
           return Response.json({ ok: false, error: rpcError.message }, { status: 400 });
         }
 
-        const payment = paymentData as {
+        const payment = paymentData as unknown as {
           payment_id: string;
           provider_order_id: string;
           amount_cents: number;

@@ -1,12 +1,7 @@
 /**
  * Smart Automation System — централізована система автоматизації.
  *
- * Автоматизації:
- * 1. Email campaigns — розсилки
- * 2. Social media posts — публікації
- * 3. Inventory alerts — сповіщення про запаси
- * 4. Price adjustments — зміна цін
- * 5. Customer follow-up — листування з клієнтами
+ * Автоматизації зберігаються в bootstrap_facts (fact_kind: "automation").
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
@@ -22,6 +17,21 @@ export type Automation = {
   run_count: number;
 };
 
+function rowToAutomation(row: { fact_key: string | null; tenant_id: string | null; value: unknown }): Automation {
+  const v = (row.value ?? {}) as Record<string, unknown>;
+  return {
+    id: row.fact_key ?? "",
+    tenant_id: row.tenant_id ?? "",
+    name: (v.name as string) ?? "",
+    trigger: (v.trigger as string) ?? "",
+    action: (v.action as string) ?? "",
+    enabled: (v.enabled as boolean) ?? false,
+    last_run: (v.last_run as string) ?? undefined,
+    next_run: (v.next_run as string) ?? undefined,
+    run_count: (v.run_count as number) ?? 0,
+  };
+}
+
 /**
  * Отримати автоматизації тенанта.
  */
@@ -29,12 +39,13 @@ export async function getAutomations(
   tenantId: string,
 ): Promise<Automation[]> {
   const { data } = await supabaseAdmin
-    .from("automations")
-    .select("*")
+    .from("bootstrap_facts")
+    .select("fact_key, tenant_id, value")
     .eq("tenant_id", tenantId)
+    .eq("fact_kind", "automation")
     .order("created_at", { ascending: false });
 
-  return (data ?? []) as Automation[];
+  return (data ?? []).map(rowToAutomation);
 }
 
 /**
@@ -46,21 +57,19 @@ export async function createAutomation(
   trigger: string,
   action: string,
 ): Promise<{ ok: boolean; id?: string }> {
-  const { data, error } = await supabaseAdmin
-    .from("automations")
+  const id = `automation:${tenantId}:${Date.now()}`;
+
+  const { error } = await supabaseAdmin
+    .from("bootstrap_facts")
     .insert({
+      fact_key: id,
+      fact_kind: "automation",
       tenant_id: tenantId,
-      name,
-      trigger,
-      action,
-      enabled: true,
-      run_count: 0,
-    })
-    .select("id")
-    .single();
+      value: { name, trigger, action, enabled: true, run_count: 0 } as never,
+    });
 
   if (error) return { ok: false };
-  return { ok: true, id: data.id };
+  return { ok: true, id };
 }
 
 /**
@@ -70,10 +79,20 @@ export async function toggleAutomation(
   automationId: string,
   enabled: boolean,
 ): Promise<{ ok: boolean }> {
+  const { data: existing } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .select("value")
+    .eq("fact_key", automationId)
+    .maybeSingle();
+
+  if (!existing) return { ok: false };
+
+  const updated = { ...(existing.value as Record<string, unknown>), enabled };
+
   const { error } = await supabaseAdmin
-    .from("automations")
-    .update({ enabled })
-    .eq("id", automationId);
+    .from("bootstrap_facts")
+    .update({ value: updated as never })
+    .eq("fact_key", automationId);
 
   return { ok: !error };
 }
@@ -84,13 +103,25 @@ export async function toggleAutomation(
 export async function runAutomation(
   automationId: string,
 ): Promise<{ ok: boolean }> {
+  const { data: existing } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .select("value")
+    .eq("fact_key", automationId)
+    .maybeSingle();
+
+  if (!existing) return { ok: false };
+
+  const v = (existing.value ?? {}) as Record<string, unknown>;
+  const updated = {
+    ...v,
+    last_run: new Date().toISOString(),
+    run_count: ((v.run_count as number) ?? 0) + 1,
+  };
+
   const { error } = await supabaseAdmin
-    .from("automations")
-    .update({
-      last_run: new Date().toISOString(),
-      run_count: supabaseAdmin.rpc("increment", { x: 1 }),
-    })
-    .eq("id", automationId);
+    .from("bootstrap_facts")
+    .update({ value: updated as never })
+    .eq("fact_key", automationId);
 
   return { ok: !error };
 }

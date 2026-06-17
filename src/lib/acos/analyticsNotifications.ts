@@ -21,7 +21,7 @@ export async function notifyInsight(
   // Записати в БД
   const { error } = await supabaseAdmin.from("owner_notifications").insert({
     tenant_id: tenantId,
-    type: "agent_insight",
+    kind: "agent_insight",
     severity: insightType === "warning" ? "high" : "medium",
     title,
     body,

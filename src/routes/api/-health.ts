@@ -12,7 +12,7 @@ import { createFileRoute } from "@tanstack/react-router";
 /**
  * GET /api/health — Health check endpoint.
  */
-export const HealthRoute = createFileRoute("/api/health")({
+export const HealthRoute = createFileRoute("/api/health" as never)({
   server: {
     handlers: {
       GET: async () => {
@@ -29,7 +29,7 @@ export const HealthRoute = createFileRoute("/api/health")({
 /**
  * GET /api/metrics — System metrics endpoint.
  */
-export const MetricsRoute = createFileRoute("/api/metrics")({
+export const MetricsRoute = createFileRoute("/api/metrics" as never)({
   server: {
     handlers: {
       GET: async () => {

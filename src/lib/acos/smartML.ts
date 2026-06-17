@@ -34,31 +34,56 @@ export async function predictChurnWithAI(
   const results = [];
   const now = Date.now();
 
-  for (const c of customers.slice(0, 10)) {
+  // Heuristic churn scoring (no AI credits needed for large batches).
+  // AI is called only for borderline cases (score 30-70) when enabled.
+  const BATCH_AI_LIMIT = 20;
+  let aiCallsUsed = 0;
+
+  for (const c of customers) {
     const daysSinceLastOrder = c.last_order_at
       ? Math.floor((now - new Date(c.last_order_at).getTime()) / (24 * 3600 * 1000))
       : 999;
 
-    const result = await aiChat({
-      system: `You are a churn prediction model. Analyze customer data and predict churn probability (0-1). List key factors.`,
-      user: `Customer: ${c.name ?? c.email}\nOrders: ${c.total_orders}\nSpent: ${c.total_spent_cents / 100} UAH\nDays since last order: ${daysSinceLastOrder}\n\nPredict churn probability and list factors.`,
-      temperature: 0.2,
-    });
+    // Heuristic score: deterministic, fast, zero cost
+    const factors: string[] = [];
+    let score = 0;
 
-    try {
-      const parsed = JSON.parse(result.content ?? "{}");
-      results.push({
-        customer_id: c.id,
-        churn_probability: parsed.probability ?? 0.5,
-        factors: parsed.factors ?? [],
+    if (daysSinceLastOrder > 90) { score += 40; factors.push("Не купував понад 90 днів"); }
+    else if (daysSinceLastOrder > 60) { score += 25; factors.push("Не купував понад 60 днів"); }
+    else if (daysSinceLastOrder > 30) { score += 10; factors.push("Не купував понад 30 днів"); }
+
+    if (c.total_orders <= 1) { score += 20; factors.push("Лише одна покупка"); }
+    else if (c.total_orders <= 2) score += 10;
+
+    if (c.total_spent_cents < 50000) { score += 10; factors.push("Невисокий LTV"); }
+
+    const heuristicProb = Math.min(score / 100, 0.95);
+
+    // For borderline cases, ask AI (up to BATCH_AI_LIMIT calls per batch)
+    if (isAnyAiEnabled() && score >= 25 && score <= 65 && aiCallsUsed < BATCH_AI_LIMIT) {
+      aiCallsUsed++;
+      const result = await aiChat({
+        system: `You are a churn prediction model. Output ONLY valid JSON: {"probability": 0.0-1.0, "factors": ["string"]}. No other text.`,
+        user: `Orders: ${c.total_orders}\nSpent: ${c.total_spent_cents / 100} UAH\nDays since last order: ${daysSinceLastOrder}\nHeuristic score: ${score}/100`,
+        temperature: 0.1,
       });
-    } catch {
-      results.push({
-        customer_id: c.id,
-        churn_probability: daysSinceLastOrder > 60 ? 0.7 : 0.3,
-        factors: [daysSinceLastOrder > 60 ? "Давно не купував" : "Активний клієнт"],
-      });
+
+      try {
+        const parsed = JSON.parse(result.content ?? "{}") as { probability?: number; factors?: string[] };
+        results.push({
+          customer_id: c.id,
+          churn_probability: typeof parsed.probability === "number"
+            ? Math.max(0, Math.min(1, parsed.probability))
+            : heuristicProb,
+          factors: Array.isArray(parsed.factors) && parsed.factors.length > 0 ? parsed.factors : factors,
+        });
+        continue;
+      } catch {
+        /* fall through to heuristic */
+      }
     }
+
+    results.push({ customer_id: c.id, churn_probability: heuristicProb, factors });
   }
 
   return results;

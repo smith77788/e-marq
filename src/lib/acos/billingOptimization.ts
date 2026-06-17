@@ -38,13 +38,13 @@ export async function analyzeSubscription(
   const planName = (plan?.name as string) ?? "Free";
 
   // Отримати використання
-  const { data: usage } = await supabaseAdmin
+  const { count: productCount } = await supabaseAdmin
     .from("products")
     .select("*", { count: "exact", head: true })
     .eq("tenant_id", tenantId);
 
   const maxProducts = (plan?.max_products as number) ?? 50;
-  const usagePct = maxProducts > 0 ? ((usage?.count ?? 0) / maxProducts) * 100 : 0;
+  const usagePct = maxProducts > 0 ? ((productCount ?? 0) / maxProducts) * 100 : 0;
 
   // Дні до оновлення
   const periodEnd = new Date(sub.current_period_end);

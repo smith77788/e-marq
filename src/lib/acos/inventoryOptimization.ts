@@ -40,6 +40,7 @@ export async function analyzeAbc(
   // Порахувати виручку по товарах
   const revenueMap: Record<string, { name: string; revenue: number }> = {};
   for (const s of sales) {
+    if (!s.product_id) continue;
     if (!revenueMap[s.product_id]) {
       revenueMap[s.product_id] = { name: s.product_name, revenue: 0 };
     }

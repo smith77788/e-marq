@@ -16,30 +16,26 @@ export type ArchiveResult = {
 };
 
 /**
- * Архівувати старі дані.
+ * Архівувати старі дані (видалити старі події безпосередньо з events).
  */
 export async function archiveOldData(
   tenantId: string,
 ): Promise<ArchiveResult[]> {
   const results: ArchiveResult[] = [];
 
-  // Архівувати події старі 90 днів
+  // Порахувати події старіші 90 днів
   const days90Ago = new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString();
 
-  const { count: archived } = await supabaseAdmin
-    .from("events_archive")
-    .insert(
-      await supabaseAdmin
-        .from("events")
-        .select("*")
-        .eq("tenant_id", tenantId)
-        .lt("created_at", days90Ago)
-        .limit(10000)
-        .then((res) => (res.data ?? []).map((e) => ({ ...e }))),
-    );
+  const { count: toArchive } = await supabaseAdmin
+    .from("events")
+    .select("*", { count: "exact", head: true })
+    .eq("tenant_id", tenantId)
+    .lt("created_at", days90Ago);
 
-  if (archived && archived > 0) {
-    // Видалити архівовані з основної таблиці
+  const archived = toArchive ?? 0;
+
+  if (archived > 0) {
+    // Видалити старі події
     await supabaseAdmin
       .from("events")
       .delete()

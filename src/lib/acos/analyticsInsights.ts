@@ -79,31 +79,28 @@ export async function generateAnalyticsInsights(
   }
 
   // 3. Conversion opportunity
-  const { data: checkouts } = await supabaseAdmin
+  const { count: checkoutCount } = await supabaseAdmin
     .from("events")
     .select("id", { count: "exact", head: true })
     .eq("tenant_id", tenantId)
     .eq("type", "checkout_started")
     .gte("created_at", weekAgo);
 
-  const { data: purchases } = await supabaseAdmin
+  const { count: purchaseCount } = await supabaseAdmin
     .from("orders")
     .select("id", { count: "exact", head: true })
     .eq("tenant_id", tenantId)
     .eq("status", "paid")
     .gte("created_at", weekAgo);
+  const conversionRate = (checkoutCount ?? 0) > 0 ? ((purchaseCount ?? 0) / (checkoutCount ?? 1)) * 100 : 0;
 
-  const checkoutCount = checkouts?.count ?? 0;
-  const purchaseCount = purchases?.count ?? 0;
-  const conversionRate = checkoutCount > 0 ? (purchaseCount / checkoutCount) * 100 : 0;
-
-  if (conversionRate < 50 && checkoutCount > 10) {
+  if (conversionRate < 50 && (checkoutCount ?? 0) > 10) {
     insights.push({
       id: `conversion-${Date.now()}`,
       type: "opportunity",
       title: "Потенціал покращення конверсії",
       description: `Конверсія checkout: ${Math.round(conversionRate)}% (бенчмарк: 65%)`,
-      impact: `+${Math.round((65 - conversionRate) * checkoutCount / 100)} замовлень/тиждень`,
+      impact: `+${Math.round((65 - conversionRate) * (checkoutCount ?? 0) / 100)} замовлень/тиждень`,
       priority: "high",
       created_at: new Date().toISOString(),
     });

@@ -14,18 +14,14 @@ export type EmailCampaign = {
   tenant_id: string;
   name: string;
   subject: string;
-  html: string;
+  template: string;
   segment: string;
-  status: "draft" | "scheduled" | "sending" | "sent" | "failed";
+  status: string;
   scheduled_at?: string;
   sent_at?: string;
-  stats: {
-    sent: number;
-    opened: number;
-    clicked: number;
-    bounced: number;
-    unsubscribed: number;
-  };
+  recipients_count: number;
+  opens_count: number;
+  clicks_count: number;
 };
 
 /**
@@ -35,7 +31,7 @@ export async function createEmailCampaign(
   tenantId: string,
   name: string,
   subject: string,
-  html: string,
+  template: string,
   segment: string = "all",
 ): Promise<{ ok: boolean; id?: string }> {
   const { data, error } = await supabaseAdmin
@@ -44,10 +40,12 @@ export async function createEmailCampaign(
       tenant_id: tenantId,
       name,
       subject,
-      html,
+      template,
       segment,
       status: "draft",
-      stats: { sent: 0, opened: 0, clicked: 0, bounced: 0, unsubscribed: 0 },
+      recipients_count: 0,
+      opens_count: 0,
+      clicks_count: 0,
     })
     .select("id")
     .single();
@@ -68,7 +66,7 @@ export async function getEmailCampaigns(
     .eq("tenant_id", tenantId)
     .order("created_at", { ascending: false });
 
-  return (data ?? []) as EmailCampaign[];
+  return (data ?? []) as unknown as EmailCampaign[];
 }
 
 /**
@@ -89,12 +87,12 @@ export async function analyzeEmailPerformance(
     return { total_campaigns: 0, avg_open_rate: 0, avg_click_rate: 0, best_performing_subject: "" };
   }
 
-  const totalSent = sent.reduce((s, c) => s + c.stats.sent, 0);
-  const totalOpened = sent.reduce((s, c) => s + c.stats.opened, 0);
-  const totalClicked = sent.reduce((s, c) => s + c.stats.clicked, 0);
+  const totalSent = sent.reduce((s, c) => s + c.recipients_count, 0);
+  const totalOpened = sent.reduce((s, c) => s + c.opens_count, 0);
+  const totalClicked = sent.reduce((s, c) => s + c.clicks_count, 0);
 
   const bestCampaign = sent.sort(
-    (a, b) => (b.stats.opened / Math.max(b.stats.sent, 1)) - (a.stats.opened / Math.max(a.stats.sent, 1)),
+    (a, b) => (b.opens_count / Math.max(b.recipients_count, 1)) - (a.opens_count / Math.max(a.recipients_count, 1)),
   )[0];
 
   return {

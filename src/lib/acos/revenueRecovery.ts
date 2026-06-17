@@ -179,6 +179,7 @@ async function analyzeUnderpricing(tenantId: string): Promise<RevenueLeak[]> {
   // Порахувати середню ціну продажу для кожного товару
   const avgPrices: Record<string, { total: number; count: number; name: string }> = {};
   for (const item of fastSelling) {
+    if (!item.product_id) continue;
     if (!avgPrices[item.product_id]) {
       avgPrices[item.product_id] = { total: 0, count: 0, name: item.product_name };
     }

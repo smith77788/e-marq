@@ -53,6 +53,7 @@ export async function forecastInventory(
   const salesByProduct: Record<string, { d30: number; d60: number; d90: number }> = {};
 
   for (const s of sales ?? []) {
+    if (!s.product_id) continue;
     if (!salesByProduct[s.product_id]) {
       salesByProduct[s.product_id] = { d30: 0, d60: 0, d90: 0 };
     }

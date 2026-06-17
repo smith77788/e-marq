@@ -63,7 +63,7 @@ export async function checkDataAnomalies(
         value: recentTotal,
         threshold: avgHourly,
         message: `Виручка впала на ${Math.round(Math.abs(change) * 100)}% за годину`,
-        severity: "critical",
+        severity: "high",
         created_at: new Date().toISOString(),
       });
     }

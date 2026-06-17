@@ -61,8 +61,8 @@ export async function pollForChanges(
   table: string,
   lastSeen: string,
 ): Promise<RealtimeEvent[]> {
-  const { data } = await supabaseAdmin
-    .from(table)
+  const { data } = await (supabaseAdmin as never as typeof supabaseAdmin)
+    .from(table as never)
     .select("*")
     .eq("tenant_id", tenantId)
     .gte("updated_at", lastSeen)
@@ -71,7 +71,7 @@ export async function pollForChanges(
   return (data ?? []).map((row) => ({
     type: "UPDATE" as const,
     table,
-    payload: row,
+    payload: row as unknown as Record<string, unknown>,
     timestamp: (row as Record<string, unknown>).updated_at as string,
   }));
 }

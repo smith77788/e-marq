@@ -90,7 +90,7 @@ export async function updateNotificationPreference(
           ...notifications,
           [key]: { enabled, frequency },
         },
-      },
+      } as never,
     })
     .eq("tenant_id", tenantId);
 

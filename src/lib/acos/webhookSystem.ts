@@ -28,25 +28,25 @@ export async function sendWebhook(
   event: string,
   payload: Record<string, unknown>,
 ): Promise<{ ok: boolean; sent: number; failed: number }> {
-  // Отримати вебхуки для цього типу події
-  const { data: webhooks } = await supabaseAdmin
-    .from("webhooks")
+  const { data: rows } = await supabaseAdmin
+    .from("bootstrap_facts")
     .select("*")
     .eq("tenant_id", tenantId)
-    .eq("enabled", true)
-    .contains("events", [event]);
+    .eq("fact_kind", "webhook");
 
-  if (!webhooks || webhooks.length === 0) {
-    return { ok: true, sent: 0, failed: 0 };
-  }
+  const webhooks = (rows ?? [])
+    .map((r) => (r.value ?? {}) as Record<string, unknown>)
+    .filter((v) => v.enabled && Array.isArray(v.events) && (v.events as string[]).includes(event));
+
+  if (webhooks.length === 0) return { ok: true, sent: 0, failed: 0 };
 
   let sent = 0;
   let failed = 0;
 
   for (const wh of webhooks) {
     try {
-      const signature = await signPayload(wh.secret, payload);
-      const res = await fetch(wh.url, {
+      const signature = await signPayload((wh.secret as string) ?? "", payload);
+      const res = await fetch(wh.url as string, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,7 +71,6 @@ export async function sendWebhook(
  * Підписати payload для верифікації.
  */
 async function signPayload(secret: string, payload: Record<string, unknown>): Promise<string> {
-  // HMAC-SHA256
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
     "raw",
@@ -100,13 +99,16 @@ export async function registerWebhook(
 ): Promise<{ ok: boolean; secret: string }> {
   const secret = crypto.randomUUID();
 
-  const { error } = await supabaseAdmin.from("webhooks").insert({
-    tenant_id: tenantId,
-    url,
-    events,
-    secret,
-    enabled: true,
-  });
+  const { error } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .insert({
+      fact_key: `webhook_${tenantId}_${Buffer.from(url).toString("base64").slice(0, 32)}`,
+      fact_kind: "webhook",
+      tenant_id: tenantId,
+      confidence: 1.0,
+      source: "webhook_system",
+      value: { url, events, secret, enabled: true } as never,
+    });
 
   return { ok: !error, secret };
 }

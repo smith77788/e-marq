@@ -30,12 +30,11 @@ export async function requestDomainVerification(
   // Генерувати токен верифікації
   const token = `marq-verify-${Math.random().toString(36).slice(2, 15)}`;
 
-  const { error } = await supabaseAdmin.from("custom_domains").insert({
+  const { error } = await supabaseAdmin.from("tenant_domains").insert({
     tenant_id: tenantId,
     domain: domain.toLowerCase().trim(),
     status: "pending",
     verification_token: token,
-    verification_method: "dns_txt",
   });
 
   if (error) throw error;
@@ -57,7 +56,7 @@ export async function verifyDomain(
 ): Promise<{ verified: boolean; error?: string }> {
   // Отримати токен верифікації
   const { data: domainRecord } = await supabaseAdmin
-    .from("custom_domains")
+    .from("tenant_domains")
     .select("verification_token")
     .eq("tenant_id", tenantId)
     .eq("domain", domain.toLowerCase().trim())
@@ -65,9 +64,32 @@ export async function verifyDomain(
 
   if (!domainRecord) return { verified: false, error: "Domain not found" };
 
-  // TODO: DNS TXT lookup
-  // Поки що повертаємо pending
-  return { verified: false, error: "Verification pending" };
+  // DNS TXT lookup via Cloudflare DoH (no API key needed)
+  const expectedToken = domainRecord.verification_token;
+  let found = false;
+  try {
+    const res = await fetch(
+      `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain.toLowerCase().trim())}&type=TXT`,
+      { headers: { Accept: "application/dns-json" }, signal: AbortSignal.timeout(8_000) },
+    );
+    if (res.ok) {
+      const json = (await res.json()) as { Answer?: Array<{ data: string }> };
+      found = (json.Answer ?? []).some((a) => a.data.replace(/^"|"$/g, "") === expectedToken);
+    }
+  } catch {
+    return { verified: false, error: "DNS lookup failed" };
+  }
+
+  if (found) {
+    await supabaseAdmin
+      .from("tenant_domains")
+      .update({ status: "verified", verified_at: new Date().toISOString() })
+      .eq("tenant_id", tenantId)
+      .eq("domain", domain.toLowerCase().trim());
+    return { verified: true };
+  }
+
+  return { verified: false, error: `TXT record marq-verify=<token> not found for ${domain}` };
 }
 
 /**
@@ -77,16 +99,16 @@ export async function getDomainStatus(
   tenantId: string,
 ): Promise<DomainVerification[]> {
   const { data: domains } = await supabaseAdmin
-    .from("custom_domains")
+    .from("tenant_domains")
     .select("*")
     .eq("tenant_id", tenantId);
 
   return (domains ?? []).map((d) => ({
     domain: d.domain,
-    status: d.status,
-    method: d.verification_method,
+    status: d.status as DomainVerification["status"],
+    method: "dns_txt" as const,
     verification_token: d.verification_token,
-    verified_at: d.verified_at,
-    expires_at: d.expires_at,
+    verified_at: d.verified_at ?? undefined,
+    expires_at: undefined,
   }));
 }

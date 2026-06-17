@@ -6,6 +6,8 @@
  * 2. Ескалація
  * 3. Розв'язання
  * 4. Аналіз
+ *
+ * Storage: bootstrap_facts with fact_kind:"incident"
  */
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
@@ -22,6 +24,15 @@ export type Incident = {
   resolved_at?: string;
 };
 
+type IncidentValue = {
+  title: string;
+  description: string;
+  severity: Incident["severity"];
+  status: Incident["status"];
+  assigned_to?: string;
+  resolved_at?: string;
+};
+
 /**
  * Створити інцидент.
  */
@@ -31,14 +42,16 @@ export async function createIncident(
   description: string,
   severity: Incident["severity"],
 ): Promise<{ ok: boolean; id?: string }> {
+  const value: IncidentValue = { title, description, severity, status: "open" };
+
   const { data, error } = await supabaseAdmin
-    .from("incidents")
+    .from("bootstrap_facts")
     .insert({
       tenant_id: tenantId,
-      title,
-      description,
-      severity,
-      status: "open",
+      fact_kind: "incident",
+      fact_key: `incident:${Date.now()}`,
+      value: value as never,
+      source: "incident_management",
     })
     .select("id")
     .single();
@@ -54,14 +67,21 @@ export async function updateIncidentStatus(
   incidentId: string,
   status: Incident["status"],
 ): Promise<{ ok: boolean }> {
-  const updates: Record<string, unknown> = { status };
+  const { data: existing } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .select("value")
+    .eq("id", incidentId)
+    .maybeSingle();
+
+  const current = (existing?.value as IncidentValue | null) ?? {} as IncidentValue;
+  const updated: IncidentValue = { ...current, status };
   if (status === "resolved") {
-    updates.resolved_at = new Date().toISOString();
+    updated.resolved_at = new Date().toISOString();
   }
 
   const { error } = await supabaseAdmin
-    .from("incidents")
-    .update(updates)
+    .from("bootstrap_facts")
+    .update({ value: updated as never })
     .eq("id", incidentId);
 
   return { ok: !error };
@@ -74,13 +94,28 @@ export async function getOpenIncidents(
   tenantId: string,
 ): Promise<Incident[]> {
   const { data } = await supabaseAdmin
-    .from("incidents")
-    .select("*")
+    .from("bootstrap_facts")
+    .select("id, tenant_id, value, created_at")
     .eq("tenant_id", tenantId)
-    .not("status", "eq", "resolved")
-    .order("severity", { ascending: false });
+    .eq("fact_kind", "incident")
+    .order("created_at", { ascending: false });
 
-  return (data ?? []) as Incident[];
+  return (data ?? [])
+    .filter((r) => (r.value as IncidentValue)?.status !== "resolved")
+    .map((r) => {
+      const v = r.value as IncidentValue;
+      return {
+        id: r.id,
+        tenant_id: r.tenant_id,
+        title: v.title,
+        description: v.description,
+        severity: v.severity,
+        status: v.status,
+        assigned_to: v.assigned_to,
+        created_at: r.created_at,
+        resolved_at: v.resolved_at,
+      };
+    });
 }
 
 /**
@@ -95,17 +130,22 @@ export async function analyzeIncidents(
   avgResolutionTime: number;
 }> {
   const { data } = await supabaseAdmin
-    .from("incidents")
-    .select("status, created_at, resolved_at")
-    .eq("tenant_id", tenantId);
+    .from("bootstrap_facts")
+    .select("value, created_at")
+    .eq("tenant_id", tenantId)
+    .eq("fact_kind", "incident");
 
-  const incidents = data ?? [];
-  const open = incidents.filter((i) => i.status !== "resolved").length;
-  const resolved = incidents.filter((i) => i.status === "resolved");
+  const incidents = (data ?? []).map((r) => ({
+    value: r.value as IncidentValue,
+    created_at: r.created_at,
+  }));
+
+  const open = incidents.filter((i) => i.value?.status !== "resolved").length;
+  const resolved = incidents.filter((i) => i.value?.status === "resolved");
 
   const resolutionTimes = resolved
-    .filter((i) => i.resolved_at)
-    .map((i) => new Date(i.resolved_at!).getTime() - new Date(i.created_at).getTime());
+    .filter((i) => i.value?.resolved_at)
+    .map((i) => new Date(i.value.resolved_at!).getTime() - new Date(i.created_at).getTime());
 
   return {
     total: incidents.length,

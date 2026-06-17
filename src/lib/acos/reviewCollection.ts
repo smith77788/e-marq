@@ -49,7 +49,7 @@ export async function getReviewRequestCandidates(
       .from("ugc_items")
       .select("*", { count: "exact", head: true })
       .eq("tenant_id", tenantId)
-      .eq("order_id", order.id);
+      .eq("customer_id", order.customer_user_id ?? "");
 
     candidates.push({
       customer_id: order.customer_user_id ?? "",

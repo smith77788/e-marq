@@ -83,7 +83,7 @@ export function MarketingHeader() {
             variant="ghost"
             className="hidden xs:inline-flex sm:inline-flex"
           >
-            <Link to="/login">{t("site.nav.signin")}</Link>
+            <Link to="/login" search={{ error: undefined }}>{t("site.nav.signin")}</Link>
           </Button>
           <Button asChild size="sm" className="inline-flex">
             <Link to="/signup">{t("site.nav.signup")}</Link>
@@ -115,7 +115,7 @@ export function MarketingHeader() {
               </nav>
               <div className="mt-6 grid gap-2">
                 <Button asChild variant="outline" onClick={() => setOpen(false)}>
-                  <Link to="/login">{t("site.nav.signin")}</Link>
+                  <Link to="/login" search={{ error: undefined }}>{t("site.nav.signin")}</Link>
                 </Button>
                 <Button asChild onClick={() => setOpen(false)}>
                   <Link to="/signup">{t("site.nav.signup")}</Link>
@@ -186,7 +186,7 @@ export function MarketingFooter() {
               </Link>
             </li>
             <li>
-              <Link to="/login" className="hover:text-foreground">
+              <Link to="/login" search={{ error: undefined }} className="hover:text-foreground">
                 {t("site.nav.signin")}
               </Link>
             </li>

@@ -29,23 +29,27 @@ export const Route = createFileRoute("/api/subscription/callback")({
           const providerOrderId = callbackPayload.order_id;
 
           // Find payment record
-          const { data: payment, error: findError } = await supabaseAdmin
-            .from("subscription_payments")
-            .select("*, tenant_subscriptions!inner(tenant_id)")
-            .eq("provider_order_id", providerOrderId)
-            .eq("provider", "liqpay")
-            .eq("status", "pending")
+          const db = supabaseAdmin as unknown as { from: (t: string) => unknown };
+          const paymentRes = await (db.from("subscription_payments") as ReturnType<typeof supabaseAdmin.from>)
+            .select("id, status, metadata, tenant_id")
+            .eq("provider_order_id" as never, providerOrderId)
+            .eq("provider" as never, "liqpay")
+            .eq("status" as never, "pending")
             .single();
+          const payment = paymentRes.data as Record<string, unknown> | null;
+          const findError = paymentRes.error;
 
           if (findError || !payment) {
             return Response.json({ error: "Payment not found" }, { status: 404 });
           }
 
+          const tenantId = payment.tenant_id as string;
+
           // Get tenant's LiqPay config for signature verification
           const { data: tenantConfig } = await supabaseAdmin
             .from("tenant_configs")
             .select("features")
-            .eq("tenant_id", payment.tenant_subscriptions.tenant_id)
+            .eq("tenant_id", tenantId)
             .single();
 
           const features = tenantConfig?.features as Record<string, unknown> | null;
@@ -65,20 +69,19 @@ export const Route = createFileRoute("/api/subscription/callback")({
           const allowSandbox = payments.liqpay_sandbox === true;
           if (!isLiqPaySuccess(callbackPayload.status, allowSandbox)) {
             // Mark as failed
-            await supabaseAdmin
-              .from("subscription_payments")
-              .update({ status: "failed", metadata: { error: callbackPayload.status } })
-              .eq("id", payment.id);
+            await (db.from("subscription_payments") as ReturnType<typeof supabaseAdmin.from>)
+              .update({ status: "failed", metadata: { error: callbackPayload.status } } as never)
+              .eq("id" as never, payment.id as string);
 
             return Response.json({ ok: true, status: "failed" });
           }
 
           // Complete the payment
-          const { data: completed } = await supabaseAdmin.rpc("complete_subscription_payment", {
+          const { data: completed } = await supabaseAdmin.rpc("complete_subscription_payment" as never, {
             _provider_order_id: providerOrderId,
             _provider: "liqpay",
             _provider_transaction_id: String(callbackPayload.transaction_id || ""),
-          });
+          } as never);
 
           return Response.json({ ok: true, completed: !!completed });
         }

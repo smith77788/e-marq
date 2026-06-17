@@ -33,15 +33,14 @@ export async function scheduleCronJob(
   payload: unknown,
 ): Promise<{ ok: boolean; id?: string }> {
   const { data, error } = await supabaseAdmin
-    .from("scheduled_jobs")
+    .from("bootstrap_facts")
     .insert({
+      fact_key: `scheduler_${tenantId}_${name}`,
+      fact_kind: "scheduler_job",
       tenant_id: tenantId,
-      name,
-      cron,
-      handler,
-      payload,
-      enabled: true,
-      run_count: 0,
+      confidence: 1.0,
+      source: "scheduler",
+      value: { name, cron, handler, payload, enabled: true, run_count: 0 } as never,
     })
     .select("id")
     .single();
@@ -61,15 +60,15 @@ export async function scheduleDelayedJob(
   payload: unknown,
 ): Promise<{ ok: boolean; id?: string }> {
   const { data, error } = await supabaseAdmin
-    .from("scheduled_jobs")
+    .from("bootstrap_facts")
     .insert({
+      fact_key: `scheduler_${tenantId}_${name}_${Date.now()}`,
+      fact_kind: "scheduler_job",
       tenant_id: tenantId,
-      name,
-      delay_ms: delayMs,
-      handler,
-      payload,
-      enabled: true,
-      run_count: 0,
+      confidence: 1.0,
+      source: "scheduler",
+      value: { name, delay_ms: delayMs, handler, payload, enabled: true, run_count: 0 } as never,
+      expires_at: new Date(Date.now() + delayMs + 86400_000).toISOString(),
     })
     .select("id")
     .single();
@@ -85,12 +84,28 @@ export async function getScheduledJobs(
   tenantId: string,
 ): Promise<ScheduledJob[]> {
   const { data } = await supabaseAdmin
-    .from("scheduled_jobs")
+    .from("bootstrap_facts")
     .select("*")
     .eq("tenant_id", tenantId)
+    .eq("fact_kind", "scheduler_job")
     .order("created_at", { ascending: false });
 
-  return (data ?? []) as ScheduledJob[];
+  return (data ?? []).map((row) => {
+    const v = (row.value ?? {}) as Record<string, unknown>;
+    return {
+      id: row.id,
+      tenant_id: row.tenant_id,
+      name: (v.name as string) ?? "",
+      cron: v.cron as string | undefined,
+      delay_ms: v.delay_ms as number | undefined,
+      handler: (v.handler as string) ?? "",
+      payload: v.payload,
+      enabled: (v.enabled as boolean) ?? true,
+      last_run: v.last_run as string | undefined,
+      next_run: v.next_run as string | undefined,
+      run_count: (v.run_count as number) ?? 0,
+    } satisfies ScheduledJob;
+  });
 }
 
 /**
@@ -100,9 +115,16 @@ export async function toggleScheduledJob(
   jobId: string,
   enabled: boolean,
 ): Promise<{ ok: boolean }> {
+  const { data: row } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .select("value")
+    .eq("id", jobId)
+    .single();
+
+  const v = (row?.value ?? {}) as Record<string, unknown>;
   const { error } = await supabaseAdmin
-    .from("scheduled_jobs")
-    .update({ enabled })
+    .from("bootstrap_facts")
+    .update({ value: { ...v, enabled } as never })
     .eq("id", jobId);
 
   return { ok: !error };
@@ -115,7 +137,7 @@ export async function deleteScheduledJob(
   jobId: string,
 ): Promise<{ ok: boolean }> {
   const { error } = await supabaseAdmin
-    .from("scheduled_jobs")
+    .from("bootstrap_facts")
     .delete()
     .eq("id", jobId);
 

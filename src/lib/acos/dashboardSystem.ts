@@ -74,7 +74,7 @@ export async function getFullDashboard(
 
   return {
     sections,
-    insights: insights.map((i) => ({ title: i.title, description: i.recommendation, priority: i.priority })),
+    insights: insights.map((i) => ({ title: i.title, description: i.description, priority: i.priority })),
     last_updated: new Date().toISOString(),
   };
 }

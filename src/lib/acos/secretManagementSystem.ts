@@ -34,12 +34,14 @@ export async function storeSecret(
   const encryptedValue = sha256Hash(value);
 
   const { data, error } = await supabaseAdmin
-    .from("secrets")
+    .from("bootstrap_facts")
     .insert({
+      fact_key: `secret_${tenantId}_${name}`,
+      fact_kind: "secret",
       tenant_id: tenantId,
-      name,
-      type,
-      encrypted_value: encryptedValue,
+      confidence: 1.0,
+      source: "secret_management",
+      value: { name, type, encrypted_value: encryptedValue } as never,
     })
     .select("id")
     .single();
@@ -55,17 +57,21 @@ export async function getSecrets(
   tenantId: string,
 ): Promise<Array<{ id: string; name: string; type: string; masked: string; created_at: string }>> {
   const { data } = await supabaseAdmin
-    .from("secrets")
-    .select("id, name, type, encrypted_value, created_at")
-    .eq("tenant_id", tenantId);
+    .from("bootstrap_facts")
+    .select("*")
+    .eq("tenant_id", tenantId)
+    .eq("fact_kind", "secret");
 
-  return (data ?? []).map((s) => ({
-    id: s.id,
-    name: s.name,
-    type: s.type,
-    masked: maskApiKey(s.encrypted_value),
-    created_at: s.created_at,
-  }));
+  return (data ?? []).map((row) => {
+    const v = (row.value ?? {}) as Record<string, unknown>;
+    return {
+      id: row.id,
+      name: (v.name as string) ?? "",
+      type: (v.type as string) ?? "",
+      masked: maskApiKey((v.encrypted_value as string) ?? ""),
+      created_at: row.created_at,
+    };
+  });
 }
 
 /**
@@ -75,7 +81,7 @@ export async function deleteSecret(
   secretId: string,
 ): Promise<{ ok: boolean }> {
   const { error } = await supabaseAdmin
-    .from("secrets")
+    .from("bootstrap_facts")
     .delete()
     .eq("id", secretId);
 
@@ -89,11 +95,17 @@ export async function rotateSecret(
   secretId: string,
   newValue: string,
 ): Promise<{ ok: boolean }> {
+  const { data: row } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .select("value")
+    .eq("id", secretId)
+    .single();
+
+  const v = (row?.value ?? {}) as Record<string, unknown>;
   const { error } = await supabaseAdmin
-    .from("secrets")
+    .from("bootstrap_facts")
     .update({
-      encrypted_value: sha256Hash(newValue),
-      rotated_at: new Date().toISOString(),
+      value: { ...v, encrypted_value: sha256Hash(newValue), rotated_at: new Date().toISOString() } as never,
     })
     .eq("id", secretId);
 

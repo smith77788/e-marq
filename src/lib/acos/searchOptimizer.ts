@@ -54,7 +54,7 @@ export async function getSearchSuggestions(
 
   for (const s of searches ?? []) {
     if (!suggestions.find((sg) => sg.query === s.query)) {
-      suggestions.push({ query: s.query, count: s.result_count, type: "recent" });
+      suggestions.push({ query: s.query, count: s.result_count ?? 0, type: "recent" });
     }
   }
 
@@ -121,7 +121,7 @@ export async function getSearchQualityScore(
 
   const zeroResults = searches.filter((s) => s.result_count === 0).length;
   const zeroResultRate = (zeroResults / searches.length) * 100;
-  const avgResults = searches.reduce((s, sr) => s + sr.result_count, 0) / searches.length;
+  const avgResults = searches.reduce((s, sr) => s + (sr.result_count ?? 0), 0) / searches.length;
 
   // Score: 100 - zero_result_rate * 2 + min(avg_results, 10)
   const score = Math.max(0, Math.min(100, 100 - zeroResultRate * 2 + Math.min(avgResults, 10)));

@@ -3,10 +3,11 @@
  *
  * Методи:
  * 1. Bearer Token — JWT токени
- * 2. API Key — ключі API
+ * 2. API Key — ключі API (перевіряються по таблиці api_keys або bootstrap_facts)
  * 3. OAuth — зовнішня автентифікація
  * 4. Session — сесії
  */
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export type AuthResult = {
   authenticated: boolean;
@@ -48,19 +49,37 @@ export async function verifyBearerToken(
 }
 
 /**
- * Перевірити API ключ.
+ * Перевірити API ключ по bootstrap_facts (ключ api_keys).
+ * Формат запису: { [apiKey]: { user_id, tenant_id, role, expires_at? } }
  */
 export async function verifyApiKey(
   apiKey: string,
 ): Promise<AuthResult> {
-  // TODO: Перевірити API ключ в БД
   if (!apiKey || apiKey.length < 10) {
     return { authenticated: false, error: "Invalid API key" };
   }
 
+  const { data } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .select("value")
+    .eq("tenant_id", "system")
+    .eq("fact_key", "api_keys")
+    .maybeSingle();
+
+  const registry = ((data?.value as Record<string, unknown>) ?? {});
+  const entry = registry[apiKey] as { user_id?: string; tenant_id?: string; role?: string; expires_at?: string } | undefined;
+
+  if (!entry) return { authenticated: false, error: "Unknown API key" };
+
+  if (entry.expires_at && new Date(entry.expires_at) < new Date()) {
+    return { authenticated: false, error: "API key expired" };
+  }
+
   return {
     authenticated: true,
-    userId: "api-user",
+    userId: entry.user_id,
+    tenantId: entry.tenant_id,
+    role: entry.role,
   };
 }
 

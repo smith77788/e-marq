@@ -136,11 +136,10 @@ export async function completeOnboardingStep(
           [`${stepId}_selected`]: true,
           [`${stepId}_connected`]: true,
           [`${stepId}_configured`]: true,
-          [`${stepId}_connected`]: true,
           [`${stepId}_run`]: true,
           [`${stepId}_completed`]: true,
         },
-      },
+      } as never,
     })
     .eq("tenant_id", tenantId);
 

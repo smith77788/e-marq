@@ -28,13 +28,14 @@ export async function registerService(
   metadata: Record<string, unknown> = {},
 ): Promise<{ ok: boolean; id?: string }> {
   const { data, error } = await supabaseAdmin
-    .from("services")
+    .from("bootstrap_facts")
     .upsert({
-      name,
-      url,
-      status: "unknown",
-      last_checked: new Date().toISOString(),
-      metadata,
+      fact_key: `service_${name}`,
+      fact_kind: "service",
+      tenant_id: "system",
+      confidence: 1.0,
+      source: "service_discovery",
+      value: { name, url, status: "unknown", last_checked: new Date().toISOString(), metadata } as never,
     })
     .select("id")
     .single();
@@ -50,12 +51,16 @@ export async function updateServiceStatus(
   serviceId: string,
   status: Service["status"],
 ): Promise<{ ok: boolean }> {
+  const { data: row } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .select("value")
+    .eq("id", serviceId)
+    .single();
+
+  const v = (row?.value ?? {}) as Record<string, unknown>;
   const { error } = await supabaseAdmin
-    .from("services")
-    .update({
-      status,
-      last_checked: new Date().toISOString(),
-    })
+    .from("bootstrap_facts")
+    .update({ value: { ...v, status, last_checked: new Date().toISOString() } as never })
     .eq("id", serviceId);
 
   return { ok: !error };
@@ -66,12 +71,24 @@ export async function updateServiceStatus(
  */
 export async function getHealthyServices(): Promise<Service[]> {
   const { data } = await supabaseAdmin
-    .from("services")
+    .from("bootstrap_facts")
     .select("*")
-    .eq("status", "healthy")
-    .order("last_checked", { ascending: false });
+    .eq("fact_kind", "service")
+    .order("updated_at", { ascending: false });
 
-  return (data ?? []) as Service[];
+  return (data ?? [])
+    .map((row) => {
+      const v = (row.value ?? {}) as Record<string, unknown>;
+      return {
+        id: row.id,
+        name: (v.name as string) ?? "",
+        url: (v.url as string) ?? "",
+        status: (v.status as Service["status"]) ?? "unknown",
+        lastChecked: (v.last_checked as string) ?? row.created_at,
+        metadata: (v.metadata as Record<string, unknown>) ?? {},
+      } satisfies Service;
+    })
+    .filter((s) => s.status === "healthy");
 }
 
 /**
@@ -82,27 +99,28 @@ export async function checkAllServices(): Promise<Array<{
   status: string;
   latency: number;
 }>> {
-  const { data: services } = await supabaseAdmin
-    .from("services")
-    .select("id, name, url");
+  const { data } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .select("id, value")
+    .eq("fact_kind", "service");
 
-  if (!services) return [];
+  if (!data) return [];
 
   const results = [];
-  for (const service of services) {
+  for (const row of data) {
+    const v = (row.value ?? {}) as Record<string, unknown>;
+    const name = (v.name as string) ?? "";
+    const url = (v.url as string) ?? "";
     const start = Date.now();
     try {
-      const response = await fetch(service.url, {
-        signal: AbortSignal.timeout(5000),
-      });
+      const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
       const latency = Date.now() - start;
       const status = response.ok ? "healthy" : "unhealthy";
-
-      await updateServiceStatus(service.id, status as Service["status"]);
-      results.push({ service: service.name, status, latency });
+      await updateServiceStatus(row.id, status as Service["status"]);
+      results.push({ service: name, status, latency });
     } catch {
-      await updateServiceStatus(service.id, "unhealthy");
-      results.push({ service: service.name, status: "unhealthy", latency: Date.now() - start });
+      await updateServiceStatus(row.id, "unhealthy");
+      results.push({ service: name, status: "unhealthy", latency: Date.now() - start });
     }
   }
 

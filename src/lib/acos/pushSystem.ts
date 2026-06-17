@@ -28,12 +28,14 @@ export async function registerPushSubscription(
   keys: { p256dh: string; auth: string },
 ): Promise<{ ok: boolean }> {
   const { error } = await supabaseAdmin
-    .from("push_subscriptions")
+    .from("bootstrap_facts")
     .upsert({
+      fact_key: `push_${tenantId}_${userId}_${Buffer.from(endpoint).toString("base64").slice(0, 32)}`,
+      fact_kind: "push_subscription",
       tenant_id: tenantId,
-      user_id: userId,
-      endpoint,
-      keys,
+      confidence: 1.0,
+      source: "browser",
+      value: { user_id: userId, endpoint, keys } as never,
     });
 
   return { ok: !error };
@@ -46,11 +48,22 @@ export async function getPushSubscriptions(
   tenantId: string,
 ): Promise<PushSubscription[]> {
   const { data } = await supabaseAdmin
-    .from("push_subscriptions")
+    .from("bootstrap_facts")
     .select("*")
-    .eq("tenant_id", tenantId);
+    .eq("tenant_id", tenantId)
+    .eq("fact_kind", "push_subscription");
 
-  return (data ?? []) as PushSubscription[];
+  return (data ?? []).map((row) => {
+    const v = (row.value ?? {}) as Record<string, unknown>;
+    return {
+      id: row.id,
+      tenant_id: row.tenant_id,
+      user_id: (v.user_id as string) ?? "",
+      endpoint: (v.endpoint as string) ?? "",
+      keys: (v.keys as { p256dh: string; auth: string }) ?? { p256dh: "", auth: "" },
+      created_at: row.created_at,
+    } satisfies PushSubscription;
+  });
 }
 
 /**
@@ -59,10 +72,22 @@ export async function getPushSubscriptions(
 export async function removePushSubscription(
   endpoint: string,
 ): Promise<{ ok: boolean }> {
+  const { data: rows } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .select("id, value")
+    .eq("fact_kind", "push_subscription");
+
+  const toDelete = (rows ?? []).filter((r) => {
+    const v = (r.value ?? {}) as Record<string, unknown>;
+    return v.endpoint === endpoint;
+  });
+
+  if (toDelete.length === 0) return { ok: true };
+
   const { error } = await supabaseAdmin
-    .from("push_subscriptions")
+    .from("bootstrap_facts")
     .delete()
-    .eq("endpoint", endpoint);
+    .in("id", toDelete.map((r) => r.id));
 
   return { ok: !error };
 }

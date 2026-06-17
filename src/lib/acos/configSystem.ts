@@ -36,7 +36,7 @@ export async function updateTenantConfig(
   const { error } = await supabaseAdmin
     .from("tenant_configs")
     .update({
-      features: { ...current, ...updates },
+      features: { ...current, ...updates } as never,
     })
     .eq("tenant_id", tenantId);
 

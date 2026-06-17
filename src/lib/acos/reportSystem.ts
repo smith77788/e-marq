@@ -74,7 +74,7 @@ export async function generateReport(
 
     <h2>Insights</h2>
     <ul>
-      ${insights.map((i) => `<li><strong>${i.title}</strong>: ${i.recommendation}</li>`).join("")}
+      ${insights.map((i) => `<li><strong>${i.metric}</strong>: ${i.recommendation}</li>`).join("")}
     </ul>
   `;
 

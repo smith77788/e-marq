@@ -13,7 +13,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 export type ChartDataset = {
   label: string;
   data: number[];
-  backgroundColor?: string;
+  backgroundColor?: string | string[];
   borderColor?: string;
 };
 

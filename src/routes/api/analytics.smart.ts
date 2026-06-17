@@ -74,7 +74,7 @@ export const Route = createFileRoute("/api/analytics/smart")({
             segmentCustomers(tenantId),
             predictCustomerLtv(tenantId),
             analyzeFunnel(tenantId),
-            getUpsellOffers(tenantId),
+            getUpsellOffers(tenantId, [], 0),
             getActivePromotions(tenantId),
             getLoyaltyStats(tenantId),
           ]);

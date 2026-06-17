@@ -71,7 +71,7 @@ export async function getProductSocialProof(
     .select("rating")
     .eq("tenant_id", tenantId)
     .eq("product_id", productId)
-    .eq("status", "approved")
+    .eq("is_approved", true)
     .limit(100);
 
   if (reviews && reviews.length > 0) {

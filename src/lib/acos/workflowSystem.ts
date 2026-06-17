@@ -38,14 +38,20 @@ export async function createWorkflow(
   steps: Omit<WorkflowStep, "id" | "status">[],
 ): Promise<{ ok: boolean; id?: string }> {
   const { data, error } = await supabaseAdmin
-    .from("workflows")
+    .from("bootstrap_facts")
     .insert({
+      fact_key: `workflow_${tenantId}_${name}_${Date.now()}`,
+      fact_kind: "workflow",
       tenant_id: tenantId,
-      name,
-      type,
-      status: "active",
-      steps: steps.map((s, i) => ({ ...s, id: `step-${i}`, status: "pending" })),
-      current_step: 0,
+      confidence: 1.0,
+      source: "workflow_system",
+      value: {
+        name,
+        type,
+        status: "active",
+        steps: steps.map((s, i) => ({ ...s, id: `step-${i}`, status: "pending" })),
+        current_step: 0,
+      } as never,
     })
     .select("id")
     .single();
@@ -62,26 +68,30 @@ export async function updateWorkflowStep(
   stepId: string,
   status: WorkflowStep["status"],
 ): Promise<{ ok: boolean }> {
-  const { data: workflow } = await supabaseAdmin
-    .from("workflows")
-    .select("steps")
+  const { data: row } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .select("value")
     .eq("id", workflowId)
     .single();
 
-  if (!workflow) return { ok: false };
+  if (!row) return { ok: false };
 
-  const steps = (workflow.steps as WorkflowStep[]).map((s) =>
+  const v = (row.value ?? {}) as Record<string, unknown>;
+  const steps = ((v.steps as WorkflowStep[]) ?? []).map((s) =>
     s.id === stepId ? { ...s, status } : s,
   );
 
   const currentStep = steps.findIndex((s) => s.status === "pending");
 
   const { error } = await supabaseAdmin
-    .from("workflows")
+    .from("bootstrap_facts")
     .update({
-      steps,
-      current_step: currentStep >= 0 ? currentStep : steps.length,
-      status: currentStep >= 0 ? "active" : "completed",
+      value: {
+        ...v,
+        steps,
+        current_step: currentStep >= 0 ? currentStep : steps.length,
+        status: currentStep >= 0 ? "active" : "completed",
+      } as never,
     })
     .eq("id", workflowId);
 
@@ -95,10 +105,23 @@ export async function getWorkflows(
   tenantId: string,
 ): Promise<Workflow[]> {
   const { data } = await supabaseAdmin
-    .from("workflows")
+    .from("bootstrap_facts")
     .select("*")
     .eq("tenant_id", tenantId)
+    .eq("fact_kind", "workflow")
     .order("created_at", { ascending: false });
 
-  return (data ?? []) as Workflow[];
+  return (data ?? []).map((row) => {
+    const v = (row.value ?? {}) as Record<string, unknown>;
+    return {
+      id: row.id,
+      tenant_id: row.tenant_id,
+      name: (v.name as string) ?? "",
+      type: (v.type as string) ?? "",
+      status: (v.status as Workflow["status"]) ?? "active",
+      steps: (v.steps as WorkflowStep[]) ?? [],
+      current_step: (v.current_step as number) ?? 0,
+      created_at: row.created_at,
+    } satisfies Workflow;
+  });
 }

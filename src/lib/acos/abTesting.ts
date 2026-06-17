@@ -2,7 +2,7 @@
  * Smart A/B Testing — автоматичне тестування елементів вітрини
  * для максимізації конверсії.
  *
- Тестовані елементи:
+ * Тестовані елементи:
  * 1. Hero заголовок та CTA
  * 2. Цінові пропозиції
  * 3. Позиція товарів
@@ -14,20 +14,23 @@
  * 2. Збір даних (конверсія, AOV)
  * 3. Статистично значущий результат (p < 0.05)
  * 4. Автоматичне застосування переможця
+ *
+ * Schema: ab_tests — columns: id, tenant_id, test_key, name, metric, status,
+ * variants (JSON), results (JSON), started_at, ended_at, winner_variant.
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export type AbTest = {
   id: string;
   tenant_id: string;
+  test_key: string;
   name: string;
+  metric: string;
   status: "running" | "paused" | "completed";
-  variant_a: AbVariant;
-  variant_b: AbVariant;
-  traffic_split: number; // 0-100, percentage for variant A
-  winner?: "a" | "b";
+  variants: { a: AbVariant; b: AbVariant; traffic_split: number };
+  winner_variant?: "a" | "b" | null;
   started_at: string;
-  ended_at?: string;
+  ended_at?: string | null;
 };
 
 type AbVariant = {
@@ -50,7 +53,9 @@ type AbResult = {
  */
 export async function createAbTest(
   tenantId: string,
+  testKey: string,
   name: string,
+  metric: string,
   variantA: AbVariant,
   variantB: AbVariant,
 ): Promise<AbTest | null> {
@@ -58,41 +63,74 @@ export async function createAbTest(
     .from("ab_tests")
     .insert({
       tenant_id: tenantId,
+      test_key: testKey,
       name,
+      metric,
       status: "running",
-      variant_a: variantA,
-      variant_b: variantB,
-      traffic_split: 50,
+      variants: { a: variantA, b: variantB, traffic_split: 50 } as never,
       started_at: new Date().toISOString(),
     })
     .select()
     .single();
 
   if (error || !data) return null;
-  return data as unknown as AbTest;
+  const d = data as typeof data & { variants: AbTest["variants"] };
+  return {
+    id: d.id,
+    tenant_id: d.tenant_id,
+    test_key: d.test_key,
+    name: d.name,
+    metric: d.metric,
+    status: d.status as AbTest["status"],
+    variants: d.variants,
+    started_at: d.started_at,
+    ended_at: d.ended_at,
+    winner_variant: (d.winner_variant as "a" | "b" | null) ?? null,
+  };
 }
 
 /**
  * Визначити який варіант показувати користувачу.
  */
 export function assignVariant(test: AbTest, userId: string): "a" | "b" {
-  // Детермінований розподіл на основі userId
   const hash = simpleHash(userId + test.id);
-  return hash % 100 < test.traffic_split ? "a" : "b";
+  const split = test.variants.traffic_split ?? 50;
+  return hash % 100 < split ? "a" : "b";
 }
 
 /**
- * Записати конверсію.
+ * Записати конверсію у поле results таблиці ab_tests.
  */
 export async function trackConversion(
   testId: string,
   variant: "a" | "b",
-  userId: string,
+  _userId: string,
   orderCents: number,
 ): Promise<void> {
-  await supabaseAdmin.from("ab_tests").select("*").eq("id", testId).single();
-  // TODO: Store conversion in ab_test_results table
-  console.log(`[AB] ${testId} variant=${variant} conversion=${orderCents}cents`);
+  const { data: test } = await supabaseAdmin
+    .from("ab_tests")
+    .select("results")
+    .eq("id", testId)
+    .single();
+  if (!test) return;
+
+  const results = ((test.results as Record<string, unknown>) ?? {}) as {
+    a?: { conversions: number; revenue: number; visitors: number };
+    b?: { conversions: number; revenue: number; visitors: number };
+  };
+
+  const side = results[variant] ?? { conversions: 0, revenue: 0, visitors: 0 };
+  side.visitors++;
+  if (orderCents > 0) {
+    side.conversions++;
+    side.revenue += orderCents;
+  }
+  results[variant] = side;
+
+  await supabaseAdmin
+    .from("ab_tests")
+    .update({ results: results as never, updated_at: new Date().toISOString() })
+    .eq("id", testId);
 }
 
 /**
@@ -101,17 +139,41 @@ export async function trackConversion(
 export async function getAbTestResults(
   testId: string,
 ): Promise<{ a: AbResult; b: AbResult } | null> {
-  // TODO: Implement from ab_test_results table
-  return null;
+  const { data: test } = await supabaseAdmin
+    .from("ab_tests")
+    .select("results")
+    .eq("id", testId)
+    .single();
+  if (!test) return null;
+
+  const raw = ((test.results as Record<string, unknown>) ?? {}) as {
+    a?: { conversions: number; revenue: number; visitors: number };
+    b?: { conversions: number; revenue: number; visitors: number };
+  };
+
+  const toResult = (r: { conversions: number; revenue: number; visitors: number } | undefined, v: "a" | "b"): AbResult => {
+    const visitors = r?.visitors ?? 0;
+    const conversions = r?.conversions ?? 0;
+    const revenue = r?.revenue ?? 0;
+    return {
+      variant: v,
+      visitors,
+      conversions,
+      conversion_rate: visitors > 0 ? conversions / visitors : 0,
+      revenue_cents: revenue,
+      avg_order_cents: conversions > 0 ? revenue / conversions : 0,
+    };
+  };
+
+  return { a: toResult(raw.a, "a"), b: toResult(raw.b, "b") };
 }
 
 /**
- * Визначити переможця (статистично значущий).
+ * Визначити переможця (статистично значущий Z-test для пропорцій).
  */
 export function determineWinner(a: AbResult, b: AbResult): "a" | "b" | null {
-  if (a.visitors < 100 || b.visitors < 100) return null; // Недостатньо даних
+  if (a.visitors < 100 || b.visitors < 100) return null;
 
-  // Z-test for proportions
   const pA = a.conversion_rate;
   const pB = b.conversion_rate;
   const nA = a.visitors;
@@ -140,18 +202,11 @@ function simpleHash(str: string): number {
 }
 
 function normalCDF(x: number): number {
-  const a1 = 0.254829592;
-  const a2 = -0.284496736;
-  const a3 = 1.421413741;
-  const a4 = -1.453152027;
-  const a5 = 1.061405429;
-  const p = 0.3275911;
-
+  const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+  const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
   const sign = x < 0 ? -1 : 1;
   x = Math.abs(x) / Math.sqrt(2);
-
   const t = 1 / (1 + p * x);
   const y = 1 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
-
   return 0.5 * (1 + sign * y);
 }

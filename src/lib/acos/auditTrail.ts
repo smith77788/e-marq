@@ -38,12 +38,11 @@ export async function logAuditEntry(
 ): Promise<{ ok: boolean }> {
   const { error } = await supabaseAdmin.from("audit_log").insert({
     tenant_id: tenantId,
-    user_id: options?.userId,
+    actor_user_id: options?.userId ?? null,
     action,
-    resource,
-    resource_id: options?.resourceId,
-    details: options?.details,
-    ip_address: options?.ipAddress,
+    entity_type: resource,
+    entity_id: options?.resourceId ?? null,
+    before: (options?.details ?? null) as never,
   });
 
   return { ok: !error };
@@ -63,5 +62,14 @@ export async function getAuditLog(
     .order("created_at", { ascending: false })
     .limit(limit);
 
-  return (data ?? []) as AuditEntry[];
+  return (data ?? []).map((e) => ({
+    id: String(e.id),
+    tenant_id: e.tenant_id ?? "",
+    user_id: e.actor_user_id ?? undefined,
+    action: e.action,
+    resource: e.entity_type,
+    resource_id: e.entity_id ?? undefined,
+    details: (e.before ?? undefined) as Record<string, unknown> | undefined,
+    created_at: e.created_at,
+  } satisfies AuditEntry));
 }

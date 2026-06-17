@@ -36,12 +36,12 @@ export async function cleanupOldData(
   // 2. Старі логи (>30 днів)
   const days30Ago = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
   const { count: oldLogs } = await supabaseAdmin
-    .from("ingest_logs")
+    .from("ingest_error_logs")
     .delete()
     .eq("tenant_id", tenantId)
     .lt("created_at", days30Ago);
 
-  results.push({ table: "ingest_logs", deleted: oldLogs ?? 0, freed_bytes: 0 });
+  results.push({ table: "ingest_error_logs", deleted: oldLogs ?? 0, freed_bytes: 0 });
 
   return results;
 }
@@ -52,17 +52,19 @@ export async function cleanupOldData(
 export async function getStorageStats(
   tenantId: string,
 ): Promise<Record<string, number>> {
-  const tables = ["events", "orders", "customers", "products"];
   const stats: Record<string, number> = {};
 
-  for (const table of tables) {
-    const { count } = await supabaseAdmin
-      .from(table)
-      .select("*", { count: "exact", head: true })
-      .eq("tenant_id", tenantId);
+  const [eventsRes, ordersRes, customersRes, productsRes] = await Promise.all([
+    supabaseAdmin.from("events").select("*", { count: "exact", head: true }).eq("tenant_id", tenantId),
+    supabaseAdmin.from("orders").select("*", { count: "exact", head: true }).eq("tenant_id", tenantId),
+    supabaseAdmin.from("customers").select("*", { count: "exact", head: true }).eq("tenant_id", tenantId),
+    supabaseAdmin.from("products").select("*", { count: "exact", head: true }).eq("tenant_id", tenantId),
+  ]);
 
-    stats[table] = count ?? 0;
-  }
+  stats["events"] = eventsRes.count ?? 0;
+  stats["orders"] = ordersRes.count ?? 0;
+  stats["customers"] = customersRes.count ?? 0;
+  stats["products"] = productsRes.count ?? 0;
 
   return stats;
 }

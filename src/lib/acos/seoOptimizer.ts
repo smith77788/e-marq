@@ -119,7 +119,7 @@ export async function analyzeKeywords(
     const q = s.query.toLowerCase().trim();
     if (!freq[q]) freq[q] = { count: 0, hasResults: false };
     freq[q].count++;
-    if (s.result_count > 0) freq[q].hasResults = true;
+    if ((s.result_count ?? 0) > 0) freq[q].hasResults = true;
   }
 
   return Object.entries(freq)

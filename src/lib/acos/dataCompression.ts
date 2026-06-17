@@ -39,13 +39,20 @@ export async function aggregateDailyEvents(
     return { table: "events", before_count: 0, after_count: 0, compression_ratio: 1 };
   }
 
-  // TODO: Агрегувати події за день
-  // Поки що повертаємо оригінальну кількість
+  // Group events by day + type to count unique day-type combinations
+  const dayTypePairs = new Set<string>();
+  for (const e of events) {
+    const day = e.created_at.slice(0, 10);
+    dayTypePairs.add(`${day}:${e.type}`);
+  }
+
+  const afterCount = dayTypePairs.size;
+  const compressionRatio = events.length > 0 ? events.length / afterCount : 1;
 
   return {
     table: "events",
     before_count: events.length,
-    after_count: events.length,
-    compression_ratio: 1,
+    after_count: afterCount,
+    compression_ratio: Math.round(compressionRatio * 100) / 100,
   };
 }

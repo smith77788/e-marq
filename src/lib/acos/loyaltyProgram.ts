@@ -77,7 +77,7 @@ export async function getLoyaltyMember(
     .from("orders")
     .select("total_cents")
     .eq("tenant_id", tenantId)
-    .eq("customer_id", customerId)
+    .eq("customer_user_id", customerId)
     .eq("status", "paid")
     .gte("created_at", monthAgo);
 

@@ -85,6 +85,7 @@ export async function exportProductReport(
 
   const salesMap: Record<string, { qty: number; revenue: number }> = {};
   for (const s of sales.data ?? []) {
+    if (!s.product_id) continue;
     if (!salesMap[s.product_id]) salesMap[s.product_id] = { qty: 0, revenue: 0 };
     salesMap[s.product_id].qty += s.quantity;
     salesMap[s.product_id].revenue += s.unit_price_cents * s.quantity;

@@ -25,6 +25,21 @@ export type GatewayRoute = {
   auth?: boolean;
 };
 
+// Simple in-memory rate limiter: requests per minute per IP per route
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(key: string, limit: number): boolean {
+  const now = Date.now();
+  const entry = rateLimitStore.get(key);
+  if (!entry || entry.resetAt < now) {
+    rateLimitStore.set(key, { count: 1, resetAt: now + 60_000 });
+    return true;
+  }
+  if (entry.count >= limit) return false;
+  entry.count++;
+  return true;
+}
+
 export class ApiGateway {
   private routes: GatewayRoute[] = [];
   private config: GatewayConfig;
@@ -53,7 +68,13 @@ export class ApiGateway {
         // Rate limit check
         if (route.rateLimit) {
           const ip = request.headers.get("x-forwarded-for") ?? "unknown";
-          // TODO: Implement rate limiting
+          const rlKey = `${ip}:${route.path}`;
+          if (!checkRateLimit(rlKey, route.rateLimit)) {
+            return Response.json(
+              { error: "Rate limit exceeded" },
+              { status: 429, headers: { "Retry-After": "60" } },
+            );
+          }
         }
 
         // Proxy to upstream

@@ -46,6 +46,7 @@ export async function getBestSellersWidget(
   // Порахувати частоту
   const freq: Record<string, { name: string; price: number; count: number }> = {};
   for (const s of sales) {
+    if (!s.product_id) continue;
     if (!freq[s.product_id]) {
       freq[s.product_id] = { name: s.product_name, price: s.unit_price_cents, count: 0 };
     }

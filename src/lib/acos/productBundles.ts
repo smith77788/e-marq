@@ -45,7 +45,7 @@ export async function findBundleOpportunities(
   const orderItems: Record<string, Array<{ id: string; name: string; price: number }>> = {};
   for (const s of sales) {
     if (!orderItems[s.order_id]) orderItems[s.order_id] = [];
-    orderItems[s.order_id].push({ id: s.product_id, name: s.product_name, price: s.unit_price_cents });
+    orderItems[s.order_id].push({ id: s.product_id ?? "", name: s.product_name, price: s.unit_price_cents });
   }
 
   const pairFreq: Record<string, { count: number; names: string[]; prices: number[] }> = {};

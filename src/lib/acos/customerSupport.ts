@@ -101,7 +101,7 @@ export async function analyzeCsat(
     .from("ugc_items")
     .select("rating")
     .eq("tenant_id", tenantId)
-    .eq("type", "csat")
+    .eq("source", "csat")
     .limit(1000);
 
   if (!ratings || ratings.length === 0) {

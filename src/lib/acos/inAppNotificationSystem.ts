@@ -6,6 +6,8 @@
  * 2. Banner сповіщення
  * 3. Badge лічильник
  * 4. Notification center
+ *
+ * Storage: owner_notifications table
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
@@ -33,15 +35,16 @@ export async function createInAppNotification(
   actionUrl?: string,
 ): Promise<{ ok: boolean; id?: string }> {
   const { data, error } = await supabaseAdmin
-    .from("in_app_notifications")
+    .from("owner_notifications")
     .insert({
       tenant_id: tenantId,
       user_id: userId,
-      type,
+      kind: type,
       title,
-      message,
-      read: false,
-      action_url: actionUrl,
+      body: message,
+      link: actionUrl ?? null,
+      channel: "in_app",
+      is_read: false,
     })
     .select("id")
     .single();
@@ -58,15 +61,25 @@ export async function getUnreadInAppNotifications(
   userId: string,
 ): Promise<InAppNotification[]> {
   const { data } = await supabaseAdmin
-    .from("in_app_notifications")
+    .from("owner_notifications")
     .select("*")
     .eq("tenant_id", tenantId)
     .eq("user_id", userId)
-    .eq("read", false)
+    .eq("is_read", false)
     .order("created_at", { ascending: false })
     .limit(20);
 
-  return (data ?? []) as InAppNotification[];
+  return (data ?? []).map((n) => ({
+    id: n.id,
+    tenant_id: n.tenant_id,
+    user_id: n.user_id ?? "",
+    type: (n.kind ?? "toast") as InAppNotification["type"],
+    title: n.title,
+    message: n.body ?? "",
+    read: n.is_read,
+    action_url: n.link ?? undefined,
+    created_at: n.created_at,
+  }));
 }
 
 /**
@@ -76,8 +89,8 @@ export async function markInAppAsRead(
   notificationId: string,
 ): Promise<{ ok: boolean }> {
   const { error } = await supabaseAdmin
-    .from("in_app_notifications")
-    .update({ read: true })
+    .from("owner_notifications")
+    .update({ is_read: true })
     .eq("id", notificationId);
 
   return { ok: !error };
@@ -91,11 +104,11 @@ export async function markAllInAppAsRead(
   userId: string,
 ): Promise<{ ok: boolean }> {
   const { error } = await supabaseAdmin
-    .from("in_app_notifications")
-    .update({ read: true })
+    .from("owner_notifications")
+    .update({ is_read: true })
     .eq("tenant_id", tenantId)
     .eq("user_id", userId)
-    .eq("read", false);
+    .eq("is_read", false);
 
   return { ok: !error };
 }
@@ -108,11 +121,11 @@ export async function getUnreadCount(
   userId: string,
 ): Promise<number> {
   const { count } = await supabaseAdmin
-    .from("in_app_notifications")
+    .from("owner_notifications")
     .select("*", { count: "exact", head: true })
     .eq("tenant_id", tenantId)
     .eq("user_id", userId)
-    .eq("read", false);
+    .eq("is_read", false);
 
   return count ?? 0;
 }

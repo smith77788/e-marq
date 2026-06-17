@@ -6,6 +6,8 @@
  * 2. Data Sync — синхронізація даних
  * 3. Email Send — відправка листів
  * 4. Agent Run — запуск агентів
+ *
+ * Storage: acos_agent_runs table
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
@@ -31,12 +33,12 @@ export async function createJob(
   payload: unknown,
 ): Promise<{ ok: boolean; id?: string }> {
   const { data, error } = await supabaseAdmin
-    .from("jobs")
+    .from("acos_agent_runs")
     .insert({
       tenant_id: tenantId,
-      type,
+      agent_id: type,
       status: "pending",
-      payload,
+      metadata: { type, payload } as never,
     })
     .select("id")
     .single();
@@ -52,7 +54,7 @@ export async function startJob(
   jobId: string,
 ): Promise<{ ok: boolean }> {
   const { error } = await supabaseAdmin
-    .from("jobs")
+    .from("acos_agent_runs")
     .update({ status: "running", started_at: new Date().toISOString() })
     .eq("id", jobId);
 
@@ -67,11 +69,11 @@ export async function completeJob(
   result: unknown,
 ): Promise<{ ok: boolean }> {
   const { error } = await supabaseAdmin
-    .from("jobs")
+    .from("acos_agent_runs")
     .update({
       status: "completed",
-      result,
-      completed_at: new Date().toISOString(),
+      finished_at: new Date().toISOString(),
+      metadata: { result } as never,
     })
     .eq("id", jobId);
 
@@ -86,11 +88,11 @@ export async function failJob(
   error: string,
 ): Promise<{ ok: boolean }> {
   const { error: updateError } = await supabaseAdmin
-    .from("jobs")
+    .from("acos_agent_runs")
     .update({
       status: "failed",
       error,
-      completed_at: new Date().toISOString(),
+      finished_at: new Date().toISOString(),
     })
     .eq("id", jobId);
 
@@ -106,10 +108,10 @@ export async function getJobs(
   limit: number = 50,
 ): Promise<Job[]> {
   let query = supabaseAdmin
-    .from("jobs")
+    .from("acos_agent_runs")
     .select("*")
     .eq("tenant_id", tenantId)
-    .order("created_at", { ascending: false })
+    .order("started_at", { ascending: false })
     .limit(limit);
 
   if (status) {
@@ -117,5 +119,16 @@ export async function getJobs(
   }
 
   const { data } = await query;
-  return (data ?? []) as Job[];
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    tenant_id: r.tenant_id,
+    type: r.agent_id,
+    status: r.status as Job["status"],
+    payload: (r.metadata as Record<string, unknown>)?.payload,
+    result: (r.metadata as Record<string, unknown>)?.result,
+    error: r.error ?? undefined,
+    started_at: r.started_at ?? undefined,
+    completed_at: r.finished_at ?? undefined,
+    created_at: r.started_at,
+  }));
 }

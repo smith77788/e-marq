@@ -48,16 +48,15 @@ export async function getDataQualityMetrics(
 ): Promise<Record<string, { total: number; complete: number; quality_pct: number }>> {
   const metrics: Record<string, { total: number; complete: number; quality_pct: number }> = {};
 
-  const tables = ["customers", "orders", "products"];
-  for (const table of tables) {
+  // Customers: check email completeness
+  {
     const { count: total } = await supabaseAdmin
-      .from(table)
+      .from("customers")
       .select("*", { count: "exact", head: true })
       .eq("tenant_id", tenantId);
 
-    // Якість = % записів без NULL в критичних полях
     const { count: incomplete } = await supabaseAdmin
-      .from(table)
+      .from("customers")
       .select("*", { count: "exact", head: true })
       .eq("tenant_id", tenantId)
       .is("email", null);
@@ -66,7 +65,55 @@ export async function getDataQualityMetrics(
     const incompleteCount = incomplete ?? 0;
     const qualityPct = totalCount > 0 ? ((totalCount - incompleteCount) / totalCount) * 100 : 100;
 
-    metrics[table] = {
+    metrics["customers"] = {
+      total: totalCount,
+      complete: totalCount - incompleteCount,
+      quality_pct: Math.round(qualityPct),
+    };
+  }
+
+  // Orders: check customer_email completeness
+  {
+    const { count: total } = await supabaseAdmin
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .eq("tenant_id", tenantId);
+
+    const { count: incomplete } = await supabaseAdmin
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .eq("tenant_id", tenantId)
+      .is("customer_email", null);
+
+    const totalCount = total ?? 0;
+    const incompleteCount = incomplete ?? 0;
+    const qualityPct = totalCount > 0 ? ((totalCount - incompleteCount) / totalCount) * 100 : 100;
+
+    metrics["orders"] = {
+      total: totalCount,
+      complete: totalCount - incompleteCount,
+      quality_pct: Math.round(qualityPct),
+    };
+  }
+
+  // Products: check name completeness
+  {
+    const { count: total } = await supabaseAdmin
+      .from("products")
+      .select("*", { count: "exact", head: true })
+      .eq("tenant_id", tenantId);
+
+    const { count: incomplete } = await supabaseAdmin
+      .from("products")
+      .select("*", { count: "exact", head: true })
+      .eq("tenant_id", tenantId)
+      .is("name", null);
+
+    const totalCount = total ?? 0;
+    const incompleteCount = incomplete ?? 0;
+    const qualityPct = totalCount > 0 ? ((totalCount - incompleteCount) / totalCount) * 100 : 100;
+
+    metrics["products"] = {
       total: totalCount,
       complete: totalCount - incompleteCount,
       quality_pct: Math.round(qualityPct),

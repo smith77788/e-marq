@@ -25,14 +25,22 @@ export async function getOptimizationRecommendations(
   const recommendations: OptimizationRecommendation[] = [];
 
   // Перевірити кількість записів у таблицях
-  const tables = ["events", "orders", "customers", "products"];
-  for (const table of tables) {
-    const { count } = await supabaseAdmin
-      .from(table)
-      .select("*", { count: "exact", head: true })
-      .eq("tenant_id", tenantId);
+  const [eventsRes, ordersRes, customersRes, productsRes] = await Promise.all([
+    supabaseAdmin.from("events").select("*", { count: "exact", head: true }).eq("tenant_id", tenantId),
+    supabaseAdmin.from("orders").select("*", { count: "exact", head: true }).eq("tenant_id", tenantId),
+    supabaseAdmin.from("customers").select("*", { count: "exact", head: true }).eq("tenant_id", tenantId),
+    supabaseAdmin.from("products").select("*", { count: "exact", head: true }).eq("tenant_id", tenantId),
+  ]);
 
-    if (count && count > 100000) {
+  const tableCounts: Array<[string, number]> = [
+    ["events", eventsRes.count ?? 0],
+    ["orders", ordersRes.count ?? 0],
+    ["customers", customersRes.count ?? 0],
+    ["products", productsRes.count ?? 0],
+  ];
+
+  for (const [table, count] of tableCounts) {
+    if (count > 100000) {
       recommendations.push({
         type: "index",
         description: `Таблиця ${table} має ${count} записів — додайте індекси`,

@@ -55,13 +55,13 @@ export async function getCartRecommendations(
   if (cartProductIds.length > 0) {
     const { data: coItems } = await supabaseAdmin
       .from("order_items")
-      .select("product_id, product_name, unit_price_cents")
+      .select("order_id, product_id, product_name, unit_price_cents")
       .eq("tenant_id", tenantId)
       .in("product_id", cartProductIds)
       .limit(50);
 
     if (coItems && coItems.length > 0) {
-      const orderIds = [...new Set(coItems.map((i) => i.order_id))];
+      const orderIds = [...new Set(coItems.map((i) => i.order_id).filter(Boolean))];
       const { data: related } = await supabaseAdmin
         .from("order_items")
         .select("product_id, product_name, unit_price_cents")
@@ -73,6 +73,7 @@ export async function getCartRecommendations(
       if (related && related.length > 0) {
         const freq: Record<string, { name: string; price: number; count: number }> = {};
         for (const r of related) {
+          if (!r.product_id) continue;
           if (!freq[r.product_id]) {
             freq[r.product_id] = { name: r.product_name, price: r.unit_price_cents, count: 0 };
           }

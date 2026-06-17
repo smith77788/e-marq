@@ -38,14 +38,14 @@ export async function createNotification(
   channel: Notification["channel"] = "in_app",
 ): Promise<{ ok: boolean; id?: string }> {
   const { data, error } = await supabaseAdmin
-    .from("notifications")
+    .from("owner_notifications")
     .insert({
       tenant_id: tenantId,
-      type,
+      kind: type,
       title,
       body,
       channel,
-      read: false,
+      is_read: false,
     })
     .select("id")
     .single();
@@ -62,14 +62,23 @@ export async function getUnreadNotifications(
   limit: number = 20,
 ): Promise<Notification[]> {
   const { data } = await supabaseAdmin
-    .from("notifications")
+    .from("owner_notifications")
     .select("*")
     .eq("tenant_id", tenantId)
-    .eq("read", false)
+    .eq("is_read", false)
     .order("created_at", { ascending: false })
     .limit(limit);
 
-  return (data ?? []) as Notification[];
+  return (data ?? []).map((n) => ({
+    id: n.id,
+    tenant_id: n.tenant_id,
+    type: n.kind,
+    title: n.title,
+    body: n.body ?? "",
+    channel: (n.channel as Notification["channel"]) ?? "in_app",
+    read: n.is_read ?? false,
+    created_at: n.created_at,
+  }));
 }
 
 /**
@@ -79,8 +88,8 @@ export async function markAsRead(
   notificationId: string,
 ): Promise<{ ok: boolean }> {
   const { error } = await supabaseAdmin
-    .from("notifications")
-    .update({ read: true })
+    .from("owner_notifications")
+    .update({ is_read: true })
     .eq("id", notificationId);
 
   return { ok: !error };
@@ -93,10 +102,10 @@ export async function markAllAsRead(
   tenantId: string,
 ): Promise<{ ok: boolean; count: number }> {
   const { count, error } = await supabaseAdmin
-    .from("notifications")
-    .update({ read: true })
+    .from("owner_notifications")
+    .update({ is_read: true })
     .eq("tenant_id", tenantId)
-    .eq("read", false);
+    .eq("is_read", false);
 
   return { ok: !error, count: count ?? 0 };
 }

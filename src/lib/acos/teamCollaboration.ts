@@ -31,13 +31,33 @@ export async function createTask(
   task: Omit<TeamTask, "id" | "tenant_id" | "created_at">,
 ): Promise<TeamTask | null> {
   const { data, error } = await supabaseAdmin
-    .from("team_tasks")
-    .insert({ ...task, tenant_id: tenantId })
+    .from("bootstrap_facts")
+    .insert({
+      fact_key: `task_${tenantId}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      fact_kind: "team_task",
+      tenant_id: tenantId,
+      confidence: 1.0,
+      source: "team_collaboration",
+      value: { ...task } as never,
+    })
     .select()
     .single();
 
   if (error || !data) return null;
-  return data as TeamTask;
+
+  const v = (data.value ?? {}) as Record<string, unknown>;
+  return {
+    id: data.id,
+    tenant_id: tenantId,
+    title: (v.title as string) ?? task.title,
+    description: v.description as string | undefined,
+    assigned_to: v.assigned_to as string | undefined,
+    status: (v.status as TeamTask["status"]) ?? "todo",
+    priority: (v.priority as TeamTask["priority"]) ?? "medium",
+    due_date: v.due_date as string | undefined,
+    created_by: (v.created_by as string) ?? task.created_by,
+    created_at: data.created_at,
+  };
 }
 
 /**
@@ -47,9 +67,16 @@ export async function updateTaskStatus(
   taskId: string,
   status: TeamTask["status"],
 ): Promise<{ ok: boolean }> {
+  const { data: row } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .select("value")
+    .eq("id", taskId)
+    .single();
+
+  const v = (row?.value ?? {}) as Record<string, unknown>;
   const { error } = await supabaseAdmin
-    .from("team_tasks")
-    .update({ status })
+    .from("bootstrap_facts")
+    .update({ value: { ...v, status } as never })
     .eq("id", taskId);
 
   return { ok: !error };
@@ -62,12 +89,27 @@ export async function getTeamTasks(
   tenantId: string,
 ): Promise<TeamTask[]> {
   const { data } = await supabaseAdmin
-    .from("team_tasks")
+    .from("bootstrap_facts")
     .select("*")
     .eq("tenant_id", tenantId)
+    .eq("fact_kind", "team_task")
     .order("created_at", { ascending: false });
 
-  return (data ?? []) as TeamTask[];
+  return (data ?? []).map((row) => {
+    const v = (row.value ?? {}) as Record<string, unknown>;
+    return {
+      id: row.id,
+      tenant_id: row.tenant_id,
+      title: (v.title as string) ?? "",
+      description: v.description as string | undefined,
+      assigned_to: v.assigned_to as string | undefined,
+      status: (v.status as TeamTask["status"]) ?? "todo",
+      priority: (v.priority as TeamTask["priority"]) ?? "medium",
+      due_date: v.due_date as string | undefined,
+      created_by: (v.created_by as string) ?? "",
+      created_at: row.created_at,
+    } satisfies TeamTask;
+  });
 }
 
 /**
@@ -79,12 +121,16 @@ export async function addInsightComment(
   userId: string,
   comment: string,
 ): Promise<{ ok: boolean }> {
-  const { error } = await supabaseAdmin.from("insight_comments").insert({
-    tenant_id: tenantId,
-    insight_id: insightId,
-    user_id: userId,
-    comment,
-  });
+  const { error } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .insert({
+      fact_key: `insight_comment_${insightId}_${Date.now()}`,
+      fact_kind: "insight_comment",
+      tenant_id: tenantId,
+      confidence: 1.0,
+      source: "team_collaboration",
+      value: { insight_id: insightId, user_id: userId, comment } as never,
+    });
 
   return { ok: !error };
 }

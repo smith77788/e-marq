@@ -138,7 +138,7 @@ function Index() {
               <Link to="/signup">{t("home.heroCtaPrimary")}</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/login">{t("home.heroCtaSecondary")}</Link>
+              <Link to="/login" search={{ error: undefined }}>{t("home.heroCtaSecondary")}</Link>
             </Button>
           </div>
           <p className="mt-6 text-xs text-muted-foreground">{t("home.heroNote")}</p>

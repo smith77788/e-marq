@@ -14,7 +14,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 export type Integration = {
   id: string;
   provider: string;
-  status: "connected" | "disconnected" | "error";
+  is_active: boolean;
   last_sync?: string;
   config: Record<string, unknown>;
 };
@@ -46,8 +46,8 @@ export async function connectIntegration(
     .upsert({
       tenant_id: tenantId,
       provider,
-      status: "connected",
-      config,
+      is_active: true,
+      config: config as never,
     })
     .select("id")
     .single();
@@ -65,7 +65,7 @@ export async function disconnectIntegration(
 ): Promise<{ ok: boolean }> {
   const { error } = await supabaseAdmin
     .from("tenant_integrations")
-    .update({ status: "disconnected" })
+    .update({ is_active: false })
     .eq("tenant_id", tenantId)
     .eq("provider", provider);
 
@@ -77,12 +77,12 @@ export async function disconnectIntegration(
  */
 export async function getIntegrationStatus(
   tenantId: string,
-): Promise<Record<string, string>> {
+): Promise<Record<string, boolean>> {
   const integrations = await getIntegrations(tenantId);
-  const status: Record<string, string> = {};
+  const status: Record<string, boolean> = {};
 
   for (const i of integrations) {
-    status[i.provider] = i.status;
+    status[i.provider] = i.is_active;
   }
 
   return status;

@@ -28,17 +28,29 @@ export async function getTemplates(
   type?: string,
 ): Promise<Template[]> {
   let query = supabaseAdmin
-    .from("templates")
+    .from("bootstrap_facts")
     .select("*")
     .eq("tenant_id", tenantId)
+    .eq("fact_kind", "template")
     .order("created_at", { ascending: false });
 
-  if (type) {
-    query = query.eq("type", type);
-  }
-
   const { data } = await query;
-  return (data ?? []) as Template[];
+
+  return (data ?? [])
+    .map((row) => {
+      const v = (row.value ?? {}) as Record<string, unknown>;
+      return {
+        id: row.id,
+        tenant_id: row.tenant_id,
+        name: (v.name as string) ?? "",
+        type: (v.type as string) ?? "",
+        subject: v.subject as string | undefined,
+        body: (v.body as string) ?? "",
+        variables: (v.variables as string[]) ?? [],
+        created_at: row.created_at,
+      } satisfies Template;
+    })
+    .filter((t) => !type || t.type === type);
 }
 
 /**
@@ -52,14 +64,20 @@ export async function createTemplate(
   options?: { subject?: string; variables?: string[] },
 ): Promise<{ ok: boolean; id?: string }> {
   const { data, error } = await supabaseAdmin
-    .from("templates")
+    .from("bootstrap_facts")
     .insert({
+      fact_key: `template_${tenantId}_${name}`,
+      fact_kind: "template",
       tenant_id: tenantId,
-      name,
-      type,
-      subject: options?.subject,
-      body,
-      variables: options?.variables ?? [],
+      confidence: 1.0,
+      source: "template_system",
+      value: {
+        name,
+        type,
+        subject: options?.subject,
+        body,
+        variables: options?.variables ?? [],
+      } as never,
     })
     .select("id")
     .single();

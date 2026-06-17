@@ -30,13 +30,20 @@ export async function enqueue(
   options?: { maxAttempts?: number },
 ): Promise<{ ok: boolean; id?: string }> {
   const { data, error } = await supabaseAdmin
-    .from("queue")
+    .from("bootstrap_facts")
     .insert({
-      queue,
-      payload,
-      status: "pending",
-      attempts: 0,
-      max_attempts: options?.maxAttempts ?? 3,
+      fact_key: `queue_${queue}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      fact_kind: "queue_item",
+      tenant_id: "system",
+      confidence: 1.0,
+      source: "queue",
+      value: {
+        queue,
+        payload,
+        status: "pending",
+        attempts: 0,
+        max_attempts: options?.maxAttempts ?? 3,
+      } as never,
     })
     .select("id")
     .single();
@@ -52,24 +59,36 @@ export async function dequeue(
   queue: string,
 ): Promise<QueueItem | null> {
   const { data } = await supabaseAdmin
-    .from("queue")
+    .from("bootstrap_facts")
     .select("*")
-    .eq("queue", queue)
-    .eq("status", "pending")
-    .lt("attempts", 3)
+    .eq("fact_kind", "queue_item")
     .order("created_at")
-    .limit(1)
-    .single();
+    .limit(50);
 
-  if (!data) return null;
+  const pending = (data ?? []).find((row) => {
+    const v = (row.value ?? {}) as Record<string, unknown>;
+    return v.queue === queue && v.status === "pending" && (v.attempts as number) < 3;
+  });
 
-  // Позначити як processing
+  if (!pending) return null;
+
+  const v = (pending.value ?? {}) as Record<string, unknown>;
+  const attempts = (v.attempts as number) + 1;
+
   await supabaseAdmin
-    .from("queue")
-    .update({ status: "processing", attempts: data.attempts + 1 })
-    .eq("id", data.id);
+    .from("bootstrap_facts")
+    .update({ value: { ...v, status: "processing", attempts } as never })
+    .eq("id", pending.id);
 
-  return data as QueueItem;
+  return {
+    id: pending.id,
+    queue: v.queue as string,
+    payload: v.payload,
+    status: "processing",
+    attempts,
+    max_attempts: (v.max_attempts as number) ?? 3,
+    created_at: pending.created_at,
+  };
 }
 
 /**
@@ -78,9 +97,16 @@ export async function dequeue(
 export async function completeItem(
   itemId: string,
 ): Promise<{ ok: boolean }> {
+  const { data: row } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .select("value")
+    .eq("id", itemId)
+    .single();
+
+  const v = (row?.value ?? {}) as Record<string, unknown>;
   const { error } = await supabaseAdmin
-    .from("queue")
-    .update({ status: "completed", processed_at: new Date().toISOString() })
+    .from("bootstrap_facts")
+    .update({ value: { ...v, status: "completed", processed_at: new Date().toISOString() } as never })
     .eq("id", itemId);
 
   return { ok: !error };
@@ -93,9 +119,16 @@ export async function failItem(
   itemId: string,
   error: string,
 ): Promise<{ ok: boolean }> {
+  const { data: row } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .select("value")
+    .eq("id", itemId)
+    .single();
+
+  const v = (row?.value ?? {}) as Record<string, unknown>;
   const { error: updateError } = await supabaseAdmin
-    .from("queue")
-    .update({ status: "failed", error })
+    .from("bootstrap_facts")
+    .update({ value: { ...v, status: "failed", error } as never })
     .eq("id", itemId);
 
   return { ok: !updateError };
@@ -107,17 +140,20 @@ export async function failItem(
 export async function getQueueStats(
   queue: string,
 ): Promise<{ pending: number; processing: number; completed: number; failed: number }> {
-  const [pending, processing, completed, failed] = await Promise.all([
-    supabaseAdmin.from("queue").select("*", { count: "exact", head: true }).eq("queue", queue).eq("status", "pending"),
-    supabaseAdmin.from("queue").select("*", { count: "exact", head: true }).eq("queue", queue).eq("status", "processing"),
-    supabaseAdmin.from("queue").select("*", { count: "exact", head: true }).eq("queue", queue).eq("status", "completed"),
-    supabaseAdmin.from("queue").select("*", { count: "exact", head: true }).eq("queue", queue).eq("status", "failed"),
-  ]);
+  const { data } = await supabaseAdmin
+    .from("bootstrap_facts")
+    .select("value")
+    .eq("fact_kind", "queue_item");
+
+  const items = (data ?? []).filter((r) => ((r.value ?? {}) as Record<string, unknown>).queue === queue);
+
+  const countByStatus = (status: string) =>
+    items.filter((r) => ((r.value ?? {}) as Record<string, unknown>).status === status).length;
 
   return {
-    pending: pending.count ?? 0,
-    processing: processing.count ?? 0,
-    completed: completed.count ?? 0,
-    failed: failed.count ?? 0,
+    pending: countByStatus("pending"),
+    processing: countByStatus("processing"),
+    completed: countByStatus("completed"),
+    failed: countByStatus("failed"),
   };
 }

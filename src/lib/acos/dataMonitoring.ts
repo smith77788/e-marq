@@ -27,7 +27,7 @@ export async function getSystemHealth(): Promise<SystemHealth> {
 
   const [events, errors] = await Promise.all([
     supabaseAdmin.from("events").select("id", { count: "exact", head: true }).gte("created_at", today),
-    supabaseAdmin.from("events").select("id", { count: "exact", head: true }).eq("error", true).gte("created_at", today),
+    supabaseAdmin.from("events").select("id", { count: "exact", head: true }).eq("type", "bot_interaction").gte("created_at", today),
   ]);
 
   const eventsCount = events.count ?? 0;

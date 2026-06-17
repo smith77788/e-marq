@@ -260,7 +260,7 @@ function SignupPage() {
           </div>
           <p className="text-center text-sm text-muted-foreground">
             {t("auth.hasAccount")}{" "}
-            <Link to="/login" className="font-medium text-primary hover:underline">
+            <Link to="/login" search={{ error: undefined }} className="font-medium text-primary hover:underline">
               {t("auth.signin")}
             </Link>
           </p>

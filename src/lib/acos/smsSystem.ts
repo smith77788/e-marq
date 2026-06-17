@@ -33,14 +33,20 @@ export async function createSmsCampaign(
   segment: string = "all",
 ): Promise<{ ok: boolean; id?: string }> {
   const { data, error } = await supabaseAdmin
-    .from("sms_campaigns")
+    .from("bootstrap_facts")
     .insert({
+      fact_key: `sms_campaign_${tenantId}_${Date.now()}`,
+      fact_kind: "sms_campaign",
       tenant_id: tenantId,
-      name,
-      message,
-      segment,
-      status: "draft",
-      stats: { sent: 0, delivered: 0, failed: 0 },
+      confidence: 1.0,
+      source: "sms_system",
+      value: {
+        name,
+        message,
+        segment,
+        status: "draft",
+        stats: { sent: 0, delivered: 0, failed: 0 },
+      } as never,
     })
     .select("id")
     .single();
@@ -56,10 +62,22 @@ export async function getSmsCampaigns(
   tenantId: string,
 ): Promise<SmsCampaign[]> {
   const { data } = await supabaseAdmin
-    .from("sms_campaigns")
+    .from("bootstrap_facts")
     .select("*")
     .eq("tenant_id", tenantId)
+    .eq("fact_kind", "sms_campaign")
     .order("created_at", { ascending: false });
 
-  return (data ?? []) as SmsCampaign[];
+  return (data ?? []).map((row) => {
+    const v = (row.value ?? {}) as Record<string, unknown>;
+    return {
+      id: row.id,
+      tenant_id: row.tenant_id,
+      name: (v.name as string) ?? "",
+      message: (v.message as string) ?? "",
+      segment: (v.segment as string) ?? "all",
+      status: (v.status as SmsCampaign["status"]) ?? "draft",
+      stats: (v.stats as SmsCampaign["stats"]) ?? { sent: 0, delivered: 0, failed: 0 },
+    } satisfies SmsCampaign;
+  });
 }

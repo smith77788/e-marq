@@ -49,7 +49,7 @@ export async function generateDailyReport(
 
     <h2>Insights</h2>
     <ul>
-      ${insights.map((i) => `<li><strong>${i.title}</strong>: ${i.recommendation}</li>`).join("")}
+      ${insights.map((i) => `<li><strong>${i.metric}</strong>: ${i.recommendation}</li>`).join("")}
     </ul>
   `;
 
@@ -85,7 +85,7 @@ export async function generateWeeklyReport(
 
     <h2>Рекомендації на наступний тиждень</h2>
     <ul>
-      ${insights.map((i) => `<li><strong>${i.title}</strong>: ${i.recommendation}</li>`).join("")}
+      ${insights.map((i) => `<li><strong>${i.metric}</strong>: ${i.recommendation}</li>`).join("")}
     </ul>
   `;
 

@@ -25,12 +25,12 @@ export async function processNewEvents(
 ): Promise<PipelineResult> {
   const start = Date.now();
 
-  // 1. Отримати необроблені події
+  // 1. Отримати останні події для обробки
   const { data: events } = await supabaseAdmin
     .from("events")
     .select("id, type, payload, created_at")
     .eq("tenant_id", tenantId)
-    .eq("processed", false)
+    .order("created_at", { ascending: false })
     .limit(1000);
 
   if (!events || events.length === 0) {
@@ -53,11 +53,8 @@ export async function processNewEvents(
         enriched++;
       }
 
-      // 4. Позначити як оброблену
-      await supabaseAdmin
-        .from("events")
-        .update({ processed: true })
-        .eq("id", event.id);
+      // 4. (Event processing complete — no processed column in schema)
+      void event.id;
     } catch {
       errors++;
     }

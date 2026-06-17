@@ -65,3 +65,11 @@ export function shortHash(data: string, length: number = 8): string {
 export function verifyIntegrity(data: string, expectedHash: string): boolean {
   return sha256Hash(data) === expectedHash;
 }
+
+/**
+ * Маскувати API ключ — показати тільки перші та останні 4 символи.
+ */
+export function maskApiKey(key: string): string {
+  if (key.length <= 8) return "****";
+  return key.slice(0, 4) + "****" + key.slice(-4);
+}

@@ -45,7 +45,7 @@ export async function analyzeReturnRisk(
     .from("orders")
     .select("*", { count: "exact", head: true })
     .eq("tenant_id", tenantId)
-    .eq("customer_email", order.customer_email)
+    .eq("customer_email", order.customer_email ?? "")
     .eq("status", "refunded");
 
   if (prevReturns && prevReturns > 2) {

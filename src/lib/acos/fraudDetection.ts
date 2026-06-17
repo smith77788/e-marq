@@ -72,9 +72,21 @@ export async function analyzeFraudRisk(
     }
   }
 
-  // 6. Аномальна географія (якщо є адреса)
+  // 6. Аномальна географія — перевіряємо країну/регіон
   if (orderData.shipping_address) {
-    // TODO: Порівняти з типовими регіонами клієнтів
+    const addr = orderData.shipping_address;
+    const country = ((addr.country ?? addr.country_code ?? "") as string).toLowerCase();
+    const UKRAINE_VARIANTS = ["ua", "ukraine", "україна", "украина"];
+    if (country && !UKRAINE_VARIANTS.includes(country)) {
+      score += 20;
+      reasons.push(`Доставка за кордон: ${addr.country ?? country}`);
+    }
+    // Suspicious if city looks like a test value
+    const city = ((addr.city ?? "") as string).toLowerCase();
+    if (["test", "тест", "123", "asdf", "qwerty"].includes(city)) {
+      score += 15;
+      reasons.push("Підозрілий населений пункт");
+    }
   }
 
   // Визначити рівень ризику

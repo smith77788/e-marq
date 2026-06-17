@@ -30,13 +30,14 @@ export async function recordMetric(
   tags?: Record<string, string>,
 ): Promise<{ ok: boolean }> {
   const { error } = await supabaseAdmin
-    .from("metrics")
+    .from("bootstrap_facts")
     .insert({
+      fact_key: `metric_${tenantId}_${name}_${Date.now()}`,
+      fact_kind: "metric",
       tenant_id: tenantId,
-      name,
-      value,
-      type,
-      tags,
+      confidence: 1.0,
+      source: "system",
+      value: { name, metric_value: value, type, tags } as never,
     });
 
   return { ok: !error };
@@ -51,10 +52,10 @@ export async function getMetrics(
   options?: { since?: string; limit?: number },
 ): Promise<Metric[]> {
   let query = supabaseAdmin
-    .from("metrics")
+    .from("bootstrap_facts")
     .select("*")
     .eq("tenant_id", tenantId)
-    .eq("name", name)
+    .eq("fact_kind", "metric")
     .order("created_at", { ascending: false })
     .limit(options?.limit ?? 1000);
 
@@ -63,7 +64,21 @@ export async function getMetrics(
   }
 
   const { data } = await query;
-  return (data ?? []) as Metric[];
+
+  return (data ?? [])
+    .map((row) => {
+      const v = (row.value ?? {}) as Record<string, unknown>;
+      return {
+        id: row.id,
+        tenant_id: row.tenant_id,
+        name: (v.name as string) ?? "",
+        value: (v.metric_value as number) ?? 0,
+        type: (v.type as Metric["type"]) ?? "gauge",
+        tags: v.tags as Record<string, string>,
+        created_at: row.created_at,
+      } satisfies Metric;
+    })
+    .filter((m) => m.name === name);
 }
 
 /**

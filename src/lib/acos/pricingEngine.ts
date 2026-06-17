@@ -51,6 +51,7 @@ export async function analyzePricing(
   // Порахувати швидкість продажу для кожного товару
   const salesSpeed: Record<string, { total: number; revenue: number; avgPrice: number }> = {};
   for (const s of sales ?? []) {
+    if (!s.product_id) continue;
     if (!salesSpeed[s.product_id]) {
       salesSpeed[s.product_id] = { total: 0, revenue: 0, avgPrice: 0 };
     }

@@ -41,11 +41,11 @@ export async function performHealthCheck(): Promise<HealthCheck[]> {
     });
   }
 
-  // 2. Queue status
+  // 2. Queue status (using acos_agent_runs as job queue)
   const { count: pendingJobs } = await supabaseAdmin
-    .from("jobs")
+    .from("acos_agent_runs")
     .select("*", { count: "exact", head: true })
-    .eq("status", "pending");
+    .eq("status", "running");
 
   const queueStatus = (pendingJobs ?? 0) > 100 ? "degraded" : "healthy";
   checks.push({

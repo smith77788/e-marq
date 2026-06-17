@@ -12,6 +12,8 @@
  * Доставка: Telegram + Email + in-app toast.
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { sendTelegramText } from "@/lib/acos/channels";
+import { sendEmailViaGateway } from "@/lib/email/resendGateway";
 
 export type NotificationType =
   | "revenue_alert"
@@ -51,13 +53,12 @@ export async function createNotification(
     .from("owner_notifications")
     .insert({
       tenant_id: tenantId,
-      type,
+      kind: type,
       severity,
       title,
       body,
-      action_url: options?.action_url ?? null,
-      action_label: options?.action_label ?? null,
-      metadata: options?.metadata ?? {},
+      link: options?.action_url ?? null,
+      metadata: (options?.metadata ?? {}) as never,
     })
     .select("id")
     .single();
@@ -145,7 +146,7 @@ export async function monitorStockLevels(tenantId: string): Promise<void> {
     .from("owner_notifications")
     .select("metadata")
     .eq("tenant_id", tenantId)
-    .eq("type", "stock_alert")
+    .eq("kind", "stock_alert")
     .gte("created_at", dayAgo);
 
   const notifiedProductIds = new Set(
@@ -169,22 +170,20 @@ async function sendTelegramNotification(
   body: string,
   actionUrl?: string,
 ): Promise<void> {
-  // Отримати Telegram bot token для тенанта
   const { data: config } = await supabaseAdmin
     .from("tenant_configs")
-    .select("features")
+    .select("owner_telegram_chat_id")
     .eq("tenant_id", tenantId)
     .maybeSingle();
 
-  const features = (config?.features ?? {}) as Record<string, unknown>;
-  const bot = (features.bot ?? {}) as Record<string, unknown>;
-  const botToken = bot.telegram_token as string | undefined;
+  const chatId = config?.owner_telegram_chat_id;
+  if (!chatId) return;
 
-  if (!botToken) return;
+  const appBase = process.env.PUBLIC_APP_URL ?? "https://e-marq.lovable.app";
+  const lines = [`<b>${title}</b>`, body];
+  if (actionUrl) lines.push(`\n👉 ${appBase.replace(/\/$/, "")}${actionUrl}`);
 
-  // TODO: Send via Telegram bot API
-  // For now, just log
-  console.log(`[TG] ${tenantId}: ${title} — ${body}`);
+  await sendTelegramText(chatId, lines.join("\n")).catch(() => {/* non-critical */});
 }
 
 async function sendEmailNotification(
@@ -192,8 +191,25 @@ async function sendEmailNotification(
   title: string,
   body: string,
 ): Promise<void> {
-  // TODO: Send via Resend
-  console.log(`[EMAIL] ${tenantId}: ${title} — ${body}`);
+  const { data: config } = await supabaseAdmin
+    .from("site_brand_profiles")
+    .select("contact_email, brand_name")
+    .eq("tenant_id", tenantId)
+    .maybeSingle();
+
+  const to = config?.contact_email;
+  if (!to) return;
+
+  const brandName = config?.brand_name ?? "MARQ";
+
+  await sendEmailViaGateway({
+    to,
+    subject: `[${brandName}] ${title}`,
+    html: `<h2>${title}</h2><p>${body}</p>`,
+    text: `${title}\n\n${body}`,
+    tenantId,
+    category: "transactional",
+  }).catch(() => {/* non-critical */});
 }
 
 function formatCents(cents: number): string {

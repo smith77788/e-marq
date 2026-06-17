@@ -68,10 +68,10 @@ export async function getLeadStats(
   avg_score: number;
   by_source: Record<string, number>;
 }> {
+  void tenantId; // lead_prospects is a global table without tenant_id
   const { data: leads } = await supabaseAdmin
     .from("lead_prospects")
-    .select("source, score, status")
-    .eq("tenant_id", tenantId)
+    .select("source, fit_score, status")
     .limit(5000);
 
   if (!leads || leads.length === 0) {
@@ -79,7 +79,7 @@ export async function getLeadStats(
   }
 
   const converted = leads.filter((l) => l.status === "converted").length;
-  const avgScore = leads.reduce((s, l) => s + (l.score ?? 0), 0) / leads.length;
+  const avgScore = leads.reduce((s, l) => s + (l.fit_score ?? 0), 0) / leads.length;
 
   const bySource: Record<string, number> = {};
   for (const l of leads) {
