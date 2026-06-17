@@ -46,7 +46,7 @@
 | Обробники для `broadcast_suggestion`, `seo_rewrite_opportunity`, `bootstrap_catalog_*`, `search_gap` | ✅ (нове) | **усі 4 типи тепер виконують реальну дію в `actions.apply.ts`: broadcast → fan-out `outbound_messages` (ліміт 500, канал telegram→email); search_gap → чернетка SEO-лендінгу в `content_pages` (власник публікує сам); seo_rewrite → детермінований rewrite seo_title/seo_description (missing_seo — лише порожні поля); bootstrap_catalog → чек-лист власнику через `owner_notifications` (Telegram push). + захист від повторного apply (`already_applied`).** |
 | `ltv-predictor` churn — хардкод порогів | ✅ | **Замінено на data-driven RFM модель: recency (50%) + frequency (30%) + monetary (20%). Динамічні пороги для сегментації.** |
 | sales-bot AI вимкнено за замовчуванням | 🟡 | свідомий killswitch (економія кредитів); вмикається `ACOS_AI_ENABLED=1` + `LOVABLE_API_KEY` |
-| `acos_agent_runs.status='success'` при 0 дій | 🟡 | прогін без знахідок виглядає як успіх — потрібен окремий стан `noop`/`no_data` |
+| `acos_agent_runs.status='success'` при 0 дій | ✅ | **Додано стан `noop` для прогонів без знахідок. `finishAgentRun` тепер використовує `noop` коли insightsCreated=0.** |
 
 ## 4. Потік даних
 
