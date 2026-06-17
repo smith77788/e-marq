@@ -89,3 +89,16 @@
 > - Оновлено описи тарифів у handbook для відповідності з pricing
 > - Додано інформацію про компанію на сторінку About (юрисдикція, зберігання даних)
 > - Створено підписковий billing: `subscription_payments` таблиця, API init/callback, LiqPay інтеграція
+> - Auth graceful degradation: Supabase client повертає stub замість throw без env vars
+> - Login/callback сторінки обробляють відсутність Supabase конфігурації
+> - Security: subscription.init.ts отримав auth (був unauthenticated — CRITICAL)
+> - Agent runtime: finishAgentRun тепер кидає помилку при невдалому DB update
+> - actions.apply: insights позначаються як 'failed' при помилці side effect (було 'applied')
+> - agents.tick: додано 5-хвилинний overall timeout для tenant loop
+> - SEO: canonical URL тепер використовує SITE_URL env var (було hardcoded)
+> - Sitemap: додано /privacy, /refund, /terms
+> - HTML lang тепер динамічний (оновлюється при зміні мови)
+> - Performance: 6 індексів для критичних запитів
+> - conversations INSERT RLS: обмежено до tenant members (було cross-tenant injection)
+> - Account сторінка: додано noindex robots
+> - FAQ сторінка: додано description + OG meta
