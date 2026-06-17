@@ -15,10 +15,22 @@ type FaqItem = { question: string; answer: string };
 
 export const Route = createFileRoute("/s/$slug/faq")({
   loader: ({ params }) => loadStorefrontShell(params.slug),
-  head: ({ loaderData, params }) => ({
-    links: [{ rel: "canonical", href: canonicalUrl(`/s/${params.slug}/faq`) }],
-    meta: [{ title: `Часті питання — ${loaderData?.config?.brand_name ?? "Магазин"}` }],
-  }),
+  head: ({ loaderData, params }) => {
+    const brand = loaderData?.config?.brand_name ?? "Магазин";
+    const title = `Часті питання — ${brand}`;
+    const description = `Відповіді на поширені питання про магазин ${brand}. Доставка, оплата, повернення.`;
+    const url = canonicalUrl(`/s/${params.slug}/faq`);
+    return {
+      links: [{ rel: "canonical", href: url }],
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:url", content: url },
+      ],
+    };
+  },
   errorComponent: ({ error }: { error: Error }) => (
     <div className="mx-auto max-w-3xl px-4 py-12 text-center">
       <p className="text-sm text-destructive">Помилка: {error.message}</p>

@@ -36,6 +36,12 @@ import { formatMoneyExact } from "@/lib/money";
 
 export const Route = createFileRoute("/s/$slug/account")({
   loader: ({ params }) => loadStorefrontShell(params.slug),
+  head: () => ({
+    meta: [
+      { title: "Мої замовлення" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   notFoundComponent: () => (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
       <p className="text-sm text-muted-foreground">Магазин не знайдено.</p>
