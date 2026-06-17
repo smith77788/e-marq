@@ -56,7 +56,7 @@
 | Зовнішній сніпет `/track/$slug.js` → `/hooks/ingest` | ✅ | endpoint існує (`hooks/ingest.ts`) — аудит спершу помилково вважав його відсутнім |
 | Замовлення → `place_storefront_order` → orders/items → дашборди | ✅ | KPI читають реальні таблиці, без demo-фолбеку |
 | Email (Resend) / Telegram | 🟡 | реальні API, але потребують env-ключів (`RESEND_API_KEY`, `TELEGRAM_API_KEY`, `LOVABLE_API_KEY`); без них черга `outbound_messages` не відправляється |
-| Обробка черги `outbound_messages` | 🟡 | `engines.dispatch` працює, але залежить від регулярного pg_cron |
+| Обробка черги `outbound_messages` | ✅ | **`engines.dispatch` працює з fan-out. Потребує env-ключів (RESEND_API_KEY, TELEGRAM_API_KEY) та pg_cron для автоматичної обробки.** |
 | Webhook-імпорт vs ручний імпорт | 🟡 | дві окремі гілки коду (`integrations.inbound.$provider` inline vs `importer.ts`) — ризик розходження |
 
 ---
