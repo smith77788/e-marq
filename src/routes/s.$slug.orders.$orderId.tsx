@@ -101,12 +101,13 @@ export const Route = createFileRoute("/s/$slug/orders/$orderId")({
 
 function OrderStatusPage() {
   const { slug, orderId } = Route.useParams();
+  const { tok } = Route.useSearch();
   const initial = Route.useLoaderData();
   const search = Route.useSearch();
 
   const { data } = useQuery<Awaited<ReturnType<typeof loadOrder>>>({
-    queryKey: ["order", slug, orderId, search.tok],
-    queryFn: () => loadOrder(slug, orderId, search.tok),
+    queryKey: ["order", slug, orderId, tok],
+    queryFn: () => loadOrder(slug, orderId, tok),
     initialData: initial,
     refetchInterval: initial.order.status === "pending" ? 10_000 : false,
   });

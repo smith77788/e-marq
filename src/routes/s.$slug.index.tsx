@@ -99,8 +99,8 @@ export const Route = createFileRoute("/s/$slug/")({
 
 function StorefrontIndex() {
   const { slug } = Route.useParams();
-  const initial = Route.useLoaderData();
   const navigate = useNavigate();
+  const initial = Route.useLoaderData();
 
   const { data } = useQuery<{ shell: StorefrontShell; collections: CollectionSummary[] }>({
     queryKey: ["storefront-index", slug],
@@ -131,8 +131,8 @@ function StorefrontIndex() {
     queryKey: ["collection-products", slug, filters.collection],
     enabled: !!filters.collection,
     queryFn: async () => {
-      const detail = await loadCollectionProducts(slug, filters.collection!);
-      return new Set(detail.products.map((p) => p.id));
+      const items = await loadCollectionProducts(slug, filters.collection!);
+      return new Set(items.products.map((p) => p.id));
     },
     staleTime: 60_000,
   });
