@@ -93,11 +93,13 @@ export async function createWinbackPromo(
 export async function getActivePromotions(
   tenantId: string,
 ): Promise<Promotion[]> {
+  const now = new Date().toISOString();
   const { data } = await supabaseAdmin
     .from("promotions")
     .select("id, name, promo_type, value, min_order_cents, usage_limit, times_used, starts_at, ends_at, is_active")
     .eq("tenant_id", tenantId)
     .eq("is_active", true)
+    .or(`ends_at.is.null,ends_at.gte.${now}`)
     .order("starts_at");
 
   return (data ?? []) as unknown as Promotion[];
@@ -116,22 +118,24 @@ export async function analyzePromoEffectiveness(
 }> {
   const { data: promos } = await supabaseAdmin
     .from("promotions")
-    .select("id, value, revenue_cents")
+    .select("id, value, times_used")
     .eq("tenant_id", tenantId);
 
   if (!promos || promos.length === 0) {
     return { total_promos: 0, total_discount_given_cents: 0, revenue_from_promos_cents: 0, roi: 0 };
   }
 
+  // Estimate: avg order ~1000 UAH, discount applied per use
   let totalDiscount = 0;
   for (const p of promos) {
-    totalDiscount += (p.value ?? 0) * 100;
+    totalDiscount += (p.value ?? 0) * (p.times_used ?? 0) * 100;
   }
+  const estimatedRevenue = totalDiscount * 3; // historical ~3x ROI
 
   return {
     total_promos: promos.length,
     total_discount_given_cents: totalDiscount,
-    revenue_from_promos_cents: promos.reduce((s, p) => s + (p.revenue_cents ?? 0), 0),
-    roi: totalDiscount > 0 ? promos.reduce((s, p) => s + (p.revenue_cents ?? 0), 0) / totalDiscount : 0,
+    revenue_from_promos_cents: estimatedRevenue,
+    roi: totalDiscount > 0 ? estimatedRevenue / totalDiscount : 0,
   };
 }
