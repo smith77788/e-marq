@@ -102,3 +102,8 @@
 > - conversations INSERT RLS: обмежено до tenant members (було cross-tenant injection)
 > - Account сторінка: додано noindex robots
 > - FAQ сторінка: додано description + OG meta
+> - Winback engine: batch queries (було 250+ sequential, тепер ~5)
+> - CORS: origin whitelist замість wildcard '*'
+> - Rate limiting: ai.ask (5/min), email.campaign-send (2/min)
+> - Checkout: loyalty re-validation при зміні кошика
+> - Monobank: fail on intent creation failure (було duplicate invoices)
