@@ -82,6 +82,7 @@ export async function runWinbackForTenant(
     .order("total_spent_cents", { ascending: false })
     .limit(50);
   if (error) throw error;
+  if (!candidates || candidates.length === 0) return { queued: 0, skipped: 0 };
 
   const { data: cfg } = await supabaseAdmin
     .from("tenant_configs")
@@ -90,28 +91,60 @@ export async function runWinbackForTenant(
     .maybeSingle();
   const brandName = cfg?.brand_name ?? "the brand";
 
+  // Batch: fetch all order items for all candidate emails in ONE query
+  const emails = candidates.map((c) => c.email).filter(Boolean) as string[];
+  const { data: allItems } = await supabaseAdmin
+    .from("order_items")
+    .select("product_name, quantity, orders!inner(customer_email, status)")
+    .eq("tenant_id", tenantId)
+    .in("orders.customer_email", emails)
+    .in("orders.status", ["paid", "fulfilled"])
+    .limit(500);
+
+  // Build favorite product map per email
+  const emailTally: Record<string, Record<string, number>> = {};
+  for (const it of allItems ?? []) {
+    const email = (it.orders as { customer_email: string })?.customer_email;
+    if (!email) continue;
+    if (!emailTally[email]) emailTally[email] = {};
+    emailTally[email][it.product_name] = (emailTally[email][it.product_name] ?? 0) + (it.quantity ?? 1);
+  }
+  const favoriteMap: Record<string, string | null> = {};
+  for (const email of emails) {
+    const tally = emailTally[email] ?? {};
+    favoriteMap[email] = Object.entries(tally).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  }
+
+  // Batch: pick channels for all candidates
+  const channelMap: Record<string, string | null> = {};
+  const channelPromises = candidates.map(async (c) => {
+    channelMap[c.id] = await pickChannelForCustomer(c.id);
+  });
+  await Promise.all(channelPromises);
+
+  // Batch: fetch avg_order_cents for all candidates
+  const customerIds = candidates.map((c) => c.id);
+  const { data: statsRows } = await supabaseAdmin
+    .from("customers")
+    .select("id, avg_order_cents")
+    .in("id", customerIds);
+  const statsMap: Record<string, number | null> = {};
+  for (const s of statsRows ?? []) statsMap[s.id] = s.avg_order_cents ?? null;
+
+  // Process each candidate
   let queued = 0,
     skipped = 0;
-  for (const c of candidates ?? []) {
-    const channel = await pickChannelForCustomer(c.id);
+  const outboundInserts: Array<Record<string, unknown>> = [];
+  const updateIds: string[] = [];
+
+  for (const c of candidates) {
+    const channel = channelMap[c.id];
     if (!channel) {
       skipped++;
       continue;
     }
 
-    // Find favorite product (most-bought)
-    const { data: items } = await supabaseAdmin
-      .from("order_items")
-      .select("product_name, quantity, orders!inner(customer_email, status)")
-      .eq("tenant_id", tenantId)
-      .eq("orders.customer_email", c.email ?? "")
-      .in("orders.status", ["paid", "fulfilled"])
-      .limit(50);
-    const tally: Record<string, number> = {};
-    for (const it of items ?? [])
-      tally[it.product_name] = (tally[it.product_name] ?? 0) + (it.quantity ?? 1);
-    const favorite = Object.entries(tally).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
-
+    const favorite = favoriteMap[c.email ?? ""] ?? null;
     const firstName = (c.name ?? "").split(" ")[0] || "there";
     const daysSince = c.last_order_at
       ? Math.floor((Date.now() - new Date(c.last_order_at).getTime()) / (24 * 3600 * 1000))
@@ -128,15 +161,9 @@ export async function runWinbackForTenant(
       aiBody ??
       `Hey ${firstName}, it's been a while! ${favorite ? `Your ${favorite} must be running low — ` : ""}can I sort you out with something nice this week?`;
 
-    // Expected impact = average historical AOV
-    const { data: stats } = await supabaseAdmin
-      .from("customers")
-      .select("total_orders, avg_order_cents")
-      .eq("id", c.id)
-      .maybeSingle();
-    const expected = stats?.avg_order_cents ?? null;
+    const expected = statsMap[c.id] ?? null;
 
-    const { error: insErr } = await supabaseAdmin.from("outbound_messages").insert({
+    outboundInserts.push({
       tenant_id: tenantId,
       customer_id: c.id,
       channel,
@@ -145,18 +172,33 @@ export async function runWinbackForTenant(
       body,
       status: "pending",
       expected_impact_cents: expected,
-      metadata: { days_since_last_order: daysSince, favorite_product: favorite } as never,
+      metadata: { days_since_last_order: daysSince, favorite_product: favorite },
     });
-    if (!insErr) {
-      queued++;
-      await supabaseAdmin
-        .from("customers")
-        .update({ last_contacted_at: new Date().toISOString() })
-        .eq("id", c.id);
-    } else {
-      skipped++;
+    updateIds.push(c.id);
+  }
+
+  // Batch insert outbound messages
+  if (outboundInserts.length > 0) {
+    // Insert in chunks of 100
+    for (let i = 0; i < outboundInserts.length; i += 100) {
+      const chunk = outboundInserts.slice(i, i + 100);
+      const { error: insErr } = await supabaseAdmin.from("outbound_messages").insert(chunk);
+      if (!insErr) {
+        queued += chunk.length;
+      } else {
+        skipped += chunk.length;
+      }
     }
   }
+
+  // Batch update last_contacted_at
+  if (updateIds.length > 0 && queued > 0) {
+    await supabaseAdmin
+      .from("customers")
+      .update({ last_contacted_at: new Date().toISOString() })
+      .in("id", updateIds.slice(0, queued));
+  }
+
   return { queued, skipped };
 }
 

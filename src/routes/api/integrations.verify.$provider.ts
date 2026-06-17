@@ -28,12 +28,13 @@ const BodySchema = z.object({
   entityKind: z.enum(["products", "customers", "orders"]).default("customers"),
 });
 
-function jsonResponse(body: unknown, status = 200) {
+function jsonResponse(body: unknown, status = 200, request?: Request) {
   return withCors(
     new Response(JSON.stringify(body), {
       status,
       headers: { "Content-Type": "application/json" },
     }),
+    request,
   );
 }
 
