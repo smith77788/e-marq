@@ -80,30 +80,39 @@
 > вітрині, perf-індекси, ліміт sitemap, `get_tenant_by_domain`, неперервний
 > churn у ltv, безпечне очищення кошика при оплаті.
 
-> Зроблено 2026-06-17 (аудит перед 1M):
-> - Покращено обробку помилок на сторінках /s/* (замість технічного повідомлення)
+> Зроблено 2026-06-17 (аудит перед 1M + максимальний буст):
+> **Аудит + фікси:**
+> - Покращено обробку помилок на сторінках /s/*
 > - PWA manifest.json з іконками та темою
 > - Cookie consent banner (GDPR/UA compliance)
 > - Honeypot CAPTCHA на формах contact та signup
 > - Уніфіковано кількість агентів (70+ marketing, 58 catalog)
-> - Оновлено описи тарифів у handbook для відповідності з pricing
-> - Додано інформацію про компанію на сторінку About (юрисдикція, зберігання даних)
-> - Створено підписковий billing: `subscription_payments` таблиця, API init/callback, LiqPay інтеграція
-> - Auth graceful degradation: Supabase client повертає stub замість throw без env vars
-> - Login/callback сторінки обробляють відсутність Supabase конфігурації
-> - Security: subscription.init.ts отримав auth (був unauthenticated — CRITICAL)
-> - Agent runtime: finishAgentRun тепер кидає помилку при невдалому DB update
-> - actions.apply: insights позначаються як 'failed' при помилці side effect (було 'applied')
-> - agents.tick: додано 5-хвилинний overall timeout для tenant loop
-> - SEO: canonical URL тепер використовує SITE_URL env var (було hardcoded)
-> - Sitemap: додано /privacy, /refund, /terms
-> - HTML lang тепер динамічний (оновлюється при зміні мови)
-> - Performance: 6 індексів для критичних запитів
-> - conversations INSERT RLS: обмежено до tenant members (було cross-tenant injection)
-> - Account сторінка: додано noindex robots
-> - FAQ сторінка: додано description + OG meta
-> - Winback engine: batch queries (було 250+ sequential, тепер ~5)
-> - CORS: origin whitelist замість wildcard '*'
+> - Оновлено описи тарифів у handbook
+> - Додано інформацію про компанію на About
+> - Створено підписковий billing: subscription_payments + LiqPay
+> - Auth graceful degradation без env vars
+> - Security: subscription.init.ts auth, RLS conversations, CORS whitelist
 > - Rate limiting: ai.ask (5/min), email.campaign-send (2/min)
-> - Checkout: loyalty re-validation при зміні кошика
-> - Monobank: fail on intent creation failure (було duplicate invoices)
+> - Checkout loyalty re-validation, monobank duplicate invoice fix
+> - SEO: canonical URL, sitemap, dynamic lang, account noindex
+> - Performance: 6 indexes, winback N+1 batch (250→5 queries)
+> - Agent system: finishAgentRun error propagation, actions.apply failure handling
+> - Pre-existing TS errors fixed (RestockSubscribe, navigate, null→undefined)
+> **Smart Engines (для #1 в світі):**
+> - AI Gateway: MiMo Code (безкоштовний) + Lovable fallback
+> - Upsell Engine: market basket analysis + AI personalization
+> - Revenue Recovery: 5 каналів витоків (cart, churn, pricing, products, AOV)
+> - Email Automation: 3 ланцюжки (cart abandonment, winback, post-purchase)
+> - Smart Notifications: revenue alerts + stock monitoring
+> - Pricing Engine: demand-based dynamic pricing
+> - Customer Segmentation: 7 поведінкових сегментів
+> - Inventory Forecasting: попит + reorder рекомендації
+> - A/B Testing: statistical significance + auto-apply
+> - SEO Optimizer: auto meta tags + AI descriptions + keywords
+> - Social Proof: real-time sales data + reviews
+> - Shipping Optimizer: carrier comparison + cost analysis
+> - Fraud Detection: risk scoring + automatic blocking
+> - Recommendation Engine: collaborative + content-based + trending
+> - CLV Predictor: lifetime value + churn scoring
+> - Promotion Engine: auto welcome/winback promos
+> - Analytics Dashboard: агрегація всіх engine
