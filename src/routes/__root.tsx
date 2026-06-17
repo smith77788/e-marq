@@ -1,10 +1,11 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/useAuth";
 import { DetailControllerProvider, DetailDrawer } from "@/components/detail";
 import { CookieConsent } from "@/components/CookieConsent";
+import { getLang } from "@/lib/i18n";
 
 import appCss from "../styles.css?url";
 
@@ -92,6 +93,18 @@ function RootComponent() {
         defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
       }),
   );
+
+  // Update HTML lang attribute when language changes
+  useEffect(() => {
+    const updateLang = () => {
+      document.documentElement.lang = getLang();
+    };
+    updateLang();
+    // Listen for language changes
+    const interval = setInterval(updateLang, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

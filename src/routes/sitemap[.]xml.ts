@@ -29,6 +29,9 @@ const MARKETING_ROUTES = [
   { path: "/about", priority: "0.7", changefreq: "monthly" },
   { path: "/contact", priority: "0.7", changefreq: "monthly" },
   { path: "/handbook", priority: "0.6", changefreq: "monthly" },
+  { path: "/terms", priority: "0.3", changefreq: "yearly" },
+  { path: "/privacy", priority: "0.3", changefreq: "yearly" },
+  { path: "/refund", priority: "0.3", changefreq: "yearly" },
 ];
 
 type SitemapEntry = {

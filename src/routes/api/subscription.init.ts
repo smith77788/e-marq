@@ -6,14 +6,59 @@
  *
  * Body: { tenantId: string, planKey: string, provider?: string }
  * Returns: { ok: true, ... } | { ok: false, error: string }
+ *
+ * Auth: Bearer JWT, roles owner / admin / super_admin.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
+import type { Database } from "@/integrations/supabase/types";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { readGatewayConfig } from "@/lib/payments/types";
 import { buildLiqPayCheckout } from "@/lib/payments/liqpay.server";
 import { clientIp, originUrl, createIpRateLimiter } from "@/lib/http/rateLimit";
 
 const limiter = createIpRateLimiter({ limit: 10 });
+
+const BodySchema = z.object({
+  tenantId: z.string().uuid(),
+  planKey: z.string().min(1).max(50),
+  provider: z.enum(["liqpay", "wayforpay", "monobank"]).default("liqpay"),
+});
+
+async function authUser(
+  req: Request,
+): Promise<{ ok: true; userId: string } | { ok: false; status: number; error: string }> {
+  const auth = req.headers.get("authorization");
+  if (!auth?.startsWith("Bearer ")) return { ok: false, status: 401, error: "missing_bearer" };
+  const token = auth.slice(7).trim();
+  const url = process.env.SUPABASE_URL;
+  const anon = process.env.SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !anon) return { ok: false, status: 500, error: "server_misconfigured" };
+  const sb = createClient<Database>(url, anon, {
+    auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
+  });
+  const { data, error } = await sb.auth.getClaims(token);
+  if (error || !data?.claims?.sub) return { ok: false, status: 401, error: "invalid_token" };
+  return { ok: true, userId: String(data.claims.sub) };
+}
+
+async function userCanManageTenant(userId: string, tenantId: string): Promise<boolean> {
+  const { data: sa } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "super_admin")
+    .maybeSingle();
+  if (sa) return true;
+  const { data: m } = await supabaseAdmin
+    .from("tenant_memberships")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("tenant_id", tenantId)
+    .maybeSingle();
+  return m?.role === "owner" || m?.role === "admin";
+}
 
 export const Route = createFileRoute("/api/subscription/init")({
   server: {
@@ -24,16 +69,29 @@ export const Route = createFileRoute("/api/subscription/init")({
           return Response.json({ ok: false, error: "Rate limit exceeded" }, { status: 429 });
         }
 
-        let body: { tenantId?: string; planKey?: string; provider?: string };
+        // Auth check
+        const auth = await authUser(request);
+        if (!auth.ok) {
+          return Response.json({ ok: false, error: auth.error }, { status: auth.status });
+        }
+
+        let body: unknown;
         try {
           body = await request.json();
         } catch {
           return Response.json({ ok: false, error: "Invalid JSON" }, { status: 400 });
         }
 
-        const { tenantId, planKey, provider = "liqpay" } = body;
-        if (!tenantId || !planKey) {
-          return Response.json({ ok: false, error: "Missing tenantId or planKey" }, { status: 400 });
+        const parsed = BodySchema.safeParse(body);
+        if (!parsed.success) {
+          return Response.json({ ok: false, error: parsed.error.flatten().fieldErrors }, { status: 400 });
+        }
+
+        const { tenantId, planKey, provider } = parsed.data;
+
+        // Tenant membership check
+        if (!(await userCanManageTenant(auth.userId, tenantId))) {
+          return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
         }
 
         // Create payment intent via RPC

@@ -250,7 +250,7 @@ function CheckoutPage() {
 
   // Auto-redirect to home if cart is empty (e.g., after submission or direct link)
   useEffect(() => {
-    if (cart.cartLines.length === 0) {
+    if (cart.cartLines.length === 0 && !orderSubmittedRef.current) {
       const t = setTimeout(() => {
         navigate({ to: "/s/$slug", params: { slug } });
       }, 100);

@@ -105,7 +105,11 @@ export async function finishAgentRun(
       metadata: { trigger: handle.trigger, ...extra },
     })
     .eq("id", handle.runId);
-  if (error) console.error("finishAgentRun update failed:", error.message);
+  if (error) {
+    console.error("finishAgentRun update failed:", error.message);
+    // Re-throw so callers know the status row wasn't updated
+    throw new Error(`Failed to mark agent run as success: ${error.message}`);
+  }
 }
 
 export async function failAgentRun(handle: RunHandle, err: unknown) {
@@ -127,7 +131,7 @@ export async function failAgentRun(handle: RunHandle, err: unknown) {
   } else {
     msg = String(err);
   }
-  await supabaseAdmin
+  const { error: updateError } = await supabaseAdmin
     .from("acos_agent_runs")
     .update({
       status: "failed",
@@ -135,6 +139,10 @@ export async function failAgentRun(handle: RunHandle, err: unknown) {
       error: msg,
     })
     .eq("id", handle.runId);
+  if (updateError) {
+    console.error("failAgentRun update failed:", updateError.message);
+    // Don't throw here — we're already in an error path, but log it
+  }
 }
 
 /**

@@ -1,13 +1,13 @@
 /**
  * SEO helper — produces canonical link + OG meta consistently across routes.
  *
- * Canonical origin is hard-coded to the published URL because TanStack's
- * `head()` runs in both SSR and on the client and has no access to the
- * incoming Request — using window.location during SSR would crash, and a
- * relative href would resolve against preview URLs (id-preview--*.lovable.app)
- * causing duplicate-content signals.
+ * Canonical origin uses SITE_URL env var if set, falling back to the
+ * Lovable preview URL. In production, set SITE_URL to your custom domain.
  */
-const CANONICAL_ORIGIN = "https://e-marq.lovable.app";
+const CANONICAL_ORIGIN =
+  (typeof process !== "undefined" && process.env?.SITE_URL) ||
+  (typeof process !== "undefined" && process.env?.PUBLIC_APP_URL) ||
+  "https://e-marq.lovable.app";
 
 export function canonicalUrl(path: string): string {
   const clean = path.startsWith("/") ? path : `/${path}`;
