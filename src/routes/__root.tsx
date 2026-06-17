@@ -36,21 +36,21 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "MARQ — Merchant Autonomous Revenue Quorum" },
+      { title: "MARQ — Revenue OS for D2C brands" },
       {
         name: "description",
         content:
           "MARQ — автономна команда AI-агентів, які зупиняють витік грошей у вашому магазині 24/7.",
       },
       { name: "author", content: "MARQ" },
-      { property: "og:title", content: "MARQ — Merchant Autonomous Revenue Quorum" },
+      { property: "og:title", content: "MARQ — Revenue OS for D2C brands" },
       {
         property: "og:description",
         content: "Автономна команда AI-агентів, які зупиняють витік грошей у вашому магазині 24/7.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "MARQ — Merchant Autonomous Revenue Quorum" },
+      { name: "twitter:title", content: "MARQ — Revenue OS for D2C brands" },
       {
         name: "twitter:description",
         content: "Автономна команда AI-агентів, які зупиняють витік грошей у вашому магазині 24/7.",
@@ -118,3 +118,4 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+// trigger deploy

@@ -37,6 +37,7 @@ function LoginPage() {
 
   // Show error if Supabase is not configured
   const configError = search.error === "supabase_not_configured";
+  const authTimeout = search.error === "auth_timeout";
 
   function readAndClearDest(): string {
     try {
@@ -86,10 +87,15 @@ function LoginPage() {
       // Lovable proxy works WITHOUT Supabase env vars — try it first
       try {
         const { lovable } = await import("@/integrations/lovable");
+        console.log("[login] Trying Lovable proxy for", provider);
         const result = await lovable.auth.signInWithOAuth(provider, {
           redirect_uri: `${window.location.origin}/auth/callback`,
         });
-        if (result.redirected) return; // browser navigated — we're done
+        console.log("[login] Lovable proxy result:", result);
+        if (result.redirected) {
+          console.log("[login] Redirected to", provider);
+          return; // browser navigated — we're done
+        }
         if (!result.error) {
           window.location.assign("/auth/callback");
           return;
@@ -104,11 +110,24 @@ function LoginPage() {
         } catch {
           // Supabase not configured — that's ok, Lovable proxy should handle it
         }
-      } catch {
-        // Lovable proxy unavailable
+        console.warn("[login] Lovable proxy returned error:", result.error);
+      } catch (e) {
+        console.warn("[login] Lovable proxy unavailable:", e);
       }
 
       // Fallback: direct Supabase OAuth (only if Supabase is configured)
+      const supabaseConfigured = !!(
+        import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL
+      ) && !!(
+        import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY
+      );
+
+      if (!supabaseConfigured) {
+        toast.error("Авторизація тимчасово недоступна. Спробуйте увійти через email.");
+        setSubmitting(null);
+        return;
+      }
+
       try {
         const { error } = await supabase.auth.signInWithOAuth({
           provider,
@@ -119,7 +138,6 @@ function LoginPage() {
           setSubmitting(null);
         }
       } catch {
-        // Supabase not configured
         toast.error("Авторизація тимчасово недоступна. Спробуйте пізніше.");
         setSubmitting(null);
       }
@@ -143,6 +161,11 @@ function LoginPage() {
           {configError && (
             <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
               Сервіс тимчасово недоступний. Спробуйте увійти через email та пароль або зверніться до підтримки.
+            </div>
+          )}
+          {authTimeout && (
+            <div className="rounded-md border border-yellow-500/50 bg-yellow-500/10 p-3 text-sm text-yellow-600">
+              Авторизація через Google/Apple не вдалася. Перевірте налаштування OAuth в Lovable Dashboard або увійдіть через email.
             </div>
           )}
           <form onSubmit={onEmailSubmit} className="space-y-3">

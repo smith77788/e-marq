@@ -96,10 +96,13 @@ export async function finishAgentRun(
   insightsCreated: number,
   extra: Record<string, unknown> = {},
 ) {
+  // Use "noop" status when agent ran but found nothing to do
+  const status = insightsCreated > 0 ? "success" : "noop";
+
   const { error } = await supabaseAdmin
     .from("acos_agent_runs")
     .update({
-      status: "success",
+      status,
       finished_at: new Date().toISOString(),
       insights_created: insightsCreated,
       metadata: { trigger: handle.trigger, ...extra },
