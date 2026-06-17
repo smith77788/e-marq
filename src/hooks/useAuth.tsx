@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
 
 type SignUpResult = { needsEmailConfirmation: boolean };
 
@@ -60,6 +60,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // after 8s — onAuthStateChange will still update state when it eventually
     // arrives, so users can at least see the login screen instead of a frozen app.
     const failsafe = setTimeout(() => setLoading(false), 8_000);
+
+    // If Supabase is not configured, skip auth initialization
+    if (!isSupabaseConfigured()) {
+      console.warn("[auth] Supabase not configured — auth disabled");
+      clearTimeout(failsafe);
+      setLoading(false);
+      return () => {};
+    }
 
     try {
       const {

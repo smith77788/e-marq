@@ -43,6 +43,15 @@ function AuthCallbackPage() {
       return;
     }
 
+    // Check if Supabase is configured before trying to use it
+    const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+    const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
+    if (!SUPABASE_URL || !SUPABASE_KEY) {
+      // Supabase not configured — redirect to login with error
+      window.location.replace("/login?error=supabase_not_configured");
+      return;
+    }
+
     let cancelled = false;
 
     void supabase.auth.getSession().then(

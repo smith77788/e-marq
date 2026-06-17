@@ -10,9 +10,8 @@ function createSupabaseClient() {
     import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-    throw new Error(
-      "Missing Supabase environment variables. Ensure SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY (or VITE_ prefixed versions) are set in your .env file.",
-    );
+    // Return null instead of throwing — allows app to degrade gracefully
+    return null;
   }
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
@@ -26,11 +25,42 @@ function createSupabaseClient() {
 
 let _supabase: ReturnType<typeof createSupabaseClient> | undefined;
 
+function getSupabase() {
+  if (_supabase === undefined) {
+    _supabase = createSupabaseClient();
+  }
+  return _supabase;
+}
+
+// Stub that returns no-op methods when Supabase is not configured.
+// This prevents crashes when env vars are missing while keeping the app usable.
+const stubAuth = {
+  onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+  getSession: async () => ({ data: { session: null }, error: null }),
+  getUser: async () => ({ data: { user: null }, error: null }),
+  signInWithOAuth: async () => ({ data: null, error: new Error("Supabase not configured") }),
+  signUp: async () => ({ data: null, error: new Error("Supabase not configured") }),
+  signInWithPassword: async () => ({ data: null, error: new Error("Supabase not configured") }),
+  signOut: async () => ({ error: null }),
+  resetPasswordForEmail: async () => ({ data: null, error: null }),
+  updateUser: async () => ({ data: null, error: null }),
+  getClaims: async () => ({ data: null, error: new Error("Supabase not configured") }),
+  setSession: async () => ({ data: null, error: null }),
+};
+
+const stubClient = { auth: stubAuth } as unknown as ReturnType<typeof createClient<Database>>;
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
-export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>, {
+export const supabase = new Proxy({} as ReturnType<typeof createClient<Database>>, {
   get(_, prop, receiver) {
-    if (!_supabase) _supabase = createSupabaseClient();
-    return Reflect.get(_supabase, prop, receiver);
+    const client = getSupabase();
+    if (!client) return (stubClient as unknown as Record<string, unknown>)[prop as string];
+    return Reflect.get(client, prop, receiver);
   },
 });
+
+/** Returns true if Supabase env vars are configured. */
+export function isSupabaseConfigured(): boolean {
+  return getSupabase() !== null;
+}

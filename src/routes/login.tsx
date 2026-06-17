@@ -13,6 +13,9 @@ import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 import { NOINDEX_META } from "@/lib/seo";
 
 export const Route = createFileRoute("/login")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    error: typeof s.error === "string" ? s.error : undefined,
+  }),
   head: () => ({
     meta: [
       { title: `${tStatic("auth.signinTitle")} — MARQ` },
@@ -26,10 +29,14 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const { user, loading, signIn } = useAuth();
   const { t } = useT();
+  const search = Route.useSearch();
   const [submitting, setSubmitting] = useState<"google" | "apple" | null>(null);
   const [emailSubmitting, setEmailSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // Show error if Supabase is not configured
+  const configError = search.error === "supabase_not_configured";
 
   function readAndClearDest(): string {
     try {
@@ -70,6 +77,31 @@ function LoginPage() {
   async function onOAuth(provider: "google" | "apple") {
     setSubmitting(provider);
     try {
+      // Check if Supabase is configured
+      const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+      const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
+      
+      if (!SUPABASE_URL || !SUPABASE_KEY) {
+        // Try Lovable proxy only (it may work without Supabase env vars)
+        try {
+          const { lovable } = await import("@/integrations/lovable");
+          const result = await lovable.auth.signInWithOAuth(provider, {
+            redirect_uri: `${window.location.origin}/auth/callback`,
+          });
+          if (result.redirected) return;
+          if (!result.error) {
+            window.location.assign("/auth/callback");
+            return;
+          }
+        } catch {
+          // Lovable proxy unavailable
+        }
+        // Neither Lovable nor Supabase configured
+        toast.error("Авторизація через Google тимчасово недоступна. Увійдіть через email.");
+        setSubmitting(null);
+        return;
+      }
+
       // Try Lovable proxy first (works on lovable.app without any env config).
       // Dynamic import so a proxy init failure doesn't crash the page on load.
       let lovableDone = false;
@@ -125,6 +157,11 @@ function LoginPage() {
           <CardDescription>{t("auth.signinDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {configError && (
+            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+              Сервіс тимчасово недоступний. Спробуйте увійти через email та пароль або зверніться до підтримки.
+            </div>
+          )}
           <form onSubmit={onEmailSubmit} className="space-y-3">
             <div className="space-y-1.5">
               <Label htmlFor="email">{t("auth.email")}</Label>
