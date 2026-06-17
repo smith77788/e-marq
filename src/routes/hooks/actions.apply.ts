@@ -696,7 +696,7 @@ export const Route = createFileRoute("/hooks/actions/apply")({
           action_type: mapping.action_type,
           target_entity: mapping.target_entity ?? null,
           target_id: targetId,
-          status: "applied",
+          status: sideEffect.error ? "failed" : "applied",
           applied_at: new Date().toISOString(),
           expected_impact: ins.expected_impact ?? null,
           parameters: {
@@ -713,11 +713,14 @@ export const Route = createFileRoute("/hooks/actions/apply")({
         if (actErr || !action)
           return jsonError("Failed to log action", 500, { details: actErr?.message });
 
-        const { error: updErr } = await supabaseAdmin
-          .from("ai_insights")
-          .update({ status: "applied" })
-          .eq("id", ins.id);
-        if (updErr) return jsonError("Failed to update insight", 500, { details: updErr.message });
+        // Only mark insight as "applied" if side effect succeeded
+        if (!sideEffect.error) {
+          const { error: updErr } = await supabaseAdmin
+            .from("ai_insights")
+            .update({ status: "applied" })
+            .eq("id", ins.id);
+          if (updErr) return jsonError("Failed to update insight", 500, { details: updErr.message });
+        }
 
         return jsonOk({ action_id: action.id, action_type: mapping.action_type });
       },

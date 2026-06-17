@@ -18,6 +18,9 @@ import { isCronToken } from "@/lib/acos/cronAuth";
 import { withTimeout } from "@/lib/async/withTimeout";
 
 const TENANT_TICK_TIMEOUT_MS = 45_000;
+// Overall timeout for the entire tenant loop — prevents pg_cron from hanging
+// for hours when there are many tenants. 5 minutes is generous but bounded.
+const OVERALL_TICK_TIMEOUT_MS = 5 * 60_000;
 
 const AGENT_ID = "tick";
 
@@ -47,7 +50,15 @@ export const Route = createFileRoute("/hooks/agents/tick")({
         // tick.ts is cron-only — every iteration runs under the same cron context.
         const tickCtx = { kind: "cron" } as const;
         const summary: Record<string, unknown>[] = [];
+        const startTime = Date.now();
+
         for (const t of tenants) {
+          // Overall timeout check — stop processing if we've exceeded the limit
+          if (Date.now() - startTime > OVERALL_TICK_TIMEOUT_MS) {
+            summary.push({ tenant_id: t.id, error: "overall_timeout" });
+            break;
+          }
+
           // Per-tenant agent run so /agents.live and HealthCheckAgent can see the pulse.
           let handle: Awaited<ReturnType<typeof startAgentRun>>;
           try {
