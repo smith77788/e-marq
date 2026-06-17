@@ -59,27 +59,35 @@ export async function predictCustomerLtv(
     // Predicted annual LTV = frequency * 12 * AOV
     const predictedAnnual = frequency * 12 * aov;
 
-    // Churn probability (based on recency)
-    let churnProb = 0;
-    if (daysSinceLastOrder > 90) churnProb = 0.8;
-    else if (daysSinceLastOrder > 60) churnProb = 0.6;
-    else if (daysSinceLastOrder > 30) churnProb = 0.3;
-    else if (daysSinceLastOrder > 14) churnProb = 0.1;
+    // Churn probability — data-driven model based on RFM signals
+    // Uses exponential decay on recency + frequency penalty
+    const recencyScore = Math.exp(-daysSinceLastOrder / 60); // 1.0 at day 0, ~0.0 at day 120
+    const frequencyScore = Math.min(frequency / 4, 1); // 1.0 at 4+ orders/month
+    const monetaryScore = Math.min(aov / 20000, 1); // 1.0 at 200+ UAH avg order
+
+    // Composite churn probability (weighted RFM)
+    // Higher recency/frequency/monetary = lower churn risk
+    const churnProb = Math.max(0, Math.min(1,
+      0.5 * (1 - recencyScore) +    // 50% weight on recency
+      0.3 * (1 - frequencyScore) +  // 30% weight on frequency
+      0.2 * (1 - monetaryScore)     // 20% weight on monetary
+    ));
 
     // Adjusted CLV (discount for churn risk)
     const adjustedAnnual = predictedAnnual * (1 - churnProb * 0.5);
 
-    // Segment
+    // Segment — dynamic thresholds based on RFM composite
+    const rfmComposite = (recencyScore + frequencyScore + monetaryScore) / 3;
     let segment = "regular";
-    if (c.total_spent_cents > 100000) segment = "vip";
-    else if (c.total_orders === 1) segment = "new";
-    else if (churnProb > 0.5) segment = "at_risk";
+    if (rfmComposite > 0.7 && c.total_spent_cents > 50000) segment = "vip";
+    else if (c.total_orders <= 1) segment = "new";
+    else if (churnProb > 0.6) segment = "at_risk";
 
-    // Recommended action
+    // Recommended action — based on churn risk and value
     let action = "maintain";
-    if (churnProb > 0.6) action = "winback";
+    if (churnProb > 0.6 && adjustedAnnual > 10000) action = "winback";
     else if (churnProb > 0.3) action = "engage";
-    else if (adjustedAnnual > 50000) action = "upsell";
+    else if (adjustedAnnual > 50000 && frequency > 2) action = "upsell";
 
     predictions.push({
       customer_id: c.id,

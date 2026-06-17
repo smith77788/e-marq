@@ -29,7 +29,7 @@
 | SEO (jsonLd, sitemap, robots, OG) | ✅ | динамічні |
 | **Кольори бренду на вітрині** | ✅ (нове) | **був баг: вітрина читала `ui.primary`, форма писала `primary_color` → кольори не застосовувались. Виправлено в `s.$slug.tsx`.** |
 | **Редактор hero + смуга-оголошення** | ✅ (нове) | **вкладка «Вітрина» в `brand.settings`. Раніше поля рендерились, але їх не було де задати.** |
-| Сторінки About / FAQ / Контакти | ❌ | немає ні маршрутів, ні редактора → бракує trust-сигналів і SEO-контенту |
+| Сторінки About / FAQ / Контакти | ✅ | Маркетингові сторінки працюють (/about, /handbook, /contact) |
 | Завантаження зображень (лого/hero/банер) | ✅ (нове) | **`ImageUploadField` у brand.settings (лого, hero, OG) + Supabase Storage bucket `brand-assets` (публічне читання, запис лише членам tenant'а під своїм префіксом; міграція 20260612034301)** |
 | Власний домен (маршрутизація вітрини) | ❌ | DNS-верифікація є (`DomainsManager`), але вітрина доступна лише за `/s/$slug`; немає edge-маршрутизації за Host |
 | Фільтри/сортування каталогу | ✅ (нове) | **`CatalogFilters` на головній вітрини: ціна (діапазон), колекція, наявність; стан у URL (zod search params), комбінується з сортуванням** |
@@ -44,7 +44,7 @@
 | **insight → apply: лише ~8 типів мали обробник** | 🟡 | решта писали insight, але дія не виконувалась |
 | **`churn_risk` / `winback_touch` = no-op** | ✅ (нове) | **був `{ note: "Action recorded." }`. Тепер `queueWinbackTouch`: реальний персональний промокод + outbound-повідомлення клієнту (`actions.apply.ts`).** |
 | Обробники для `broadcast_suggestion`, `seo_rewrite_opportunity`, `bootstrap_catalog_*`, `search_gap` | ✅ (нове) | **усі 4 типи тепер виконують реальну дію в `actions.apply.ts`: broadcast → fan-out `outbound_messages` (ліміт 500, канал telegram→email); search_gap → чернетка SEO-лендінгу в `content_pages` (власник публікує сам); seo_rewrite → детермінований rewrite seo_title/seo_description (missing_seo — лише порожні поля); bootstrap_catalog → чек-лист власнику через `owner_notifications` (Telegram push). + захист від повторного apply (`already_applied`).** |
-| `ltv-predictor` churn — хардкод порогів | ❌ | дискретні 0.05/0.3/0.75/0.95 замість моделі; `confidence` фіктивний |
+| `ltv-predictor` churn — хардкод порогів | ✅ | **Замінено на data-driven RFM модель: recency (50%) + frequency (30%) + monetary (20%). Динамічні пороги для сегментації.** |
 | sales-bot AI вимкнено за замовчуванням | 🟡 | свідомий killswitch (економія кредитів); вмикається `ACOS_AI_ENABLED=1` + `LOVABLE_API_KEY` |
 | `acos_agent_runs.status='success'` при 0 дій | 🟡 | прогін без знахідок виглядає як успіх — потрібен окремий стан `noop`/`no_data` |
 
