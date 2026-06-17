@@ -69,7 +69,13 @@ function LoginPage() {
       toast.success(t("auth.welcome"));
       window.location.assign(readAndClearDest());
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t("auth.fail"));
+      const msg = err instanceof Error ? err.message : String(err);
+      // If Supabase not configured, show helpful message
+      if (msg.includes("not configured") || msg.includes("Supabase")) {
+        toast.error("Авторизація через email тимчасово недоступна. Спробуйте Google.");
+      } else {
+        toast.error(msg || t("auth.fail"));
+      }
       setEmailSubmitting(false);
     }
   }
@@ -77,59 +83,33 @@ function LoginPage() {
   async function onOAuth(provider: "google" | "apple") {
     setSubmitting(provider);
     try {
-      // Check if Supabase is configured
-      const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-      const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
-      
-      if (!SUPABASE_URL || !SUPABASE_KEY) {
-        // Try Lovable proxy only (it may work without Supabase env vars)
-        try {
-          const { lovable } = await import("@/integrations/lovable");
-          const result = await lovable.auth.signInWithOAuth(provider, {
-            redirect_uri: `${window.location.origin}/auth/callback`,
-          });
-          if (result.redirected) return;
-          if (!result.error) {
-            window.location.assign("/auth/callback");
-            return;
-          }
-        } catch {
-          // Lovable proxy unavailable
-        }
-        // Neither Lovable nor Supabase configured
-        toast.error("Авторизація через Google тимчасово недоступна. Увійдіть через email.");
-        setSubmitting(null);
-        return;
-      }
-
-      // Try Lovable proxy first (works on lovable.app without any env config).
-      // Dynamic import so a proxy init failure doesn't crash the page on load.
-      let lovableDone = false;
+      // Lovable proxy works WITHOUT Supabase env vars — try it first
       try {
         const { lovable } = await import("@/integrations/lovable");
         const result = await lovable.auth.signInWithOAuth(provider, {
           redirect_uri: `${window.location.origin}/auth/callback`,
         });
         if (result.redirected) return; // browser navigated — we're done
-
         if (!result.error) {
-          // Proxy set the session directly (popup flow)
           window.location.assign("/auth/callback");
           return;
         }
         // Proxy returned error — check if session was somehow set anyway
-        const { data } = await supabase.auth.getSession();
-        if (data.session) {
-          window.location.assign("/auth/callback");
-          return;
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data.session) {
+            window.location.assign("/auth/callback");
+            return;
+          }
+        } catch {
+          // Supabase not configured — that's ok, Lovable proxy should handle it
         }
-        lovableDone = true; // explicit error, fall through to Supabase direct
       } catch {
-        lovableDone = true; // proxy unavailable, fall through
+        // Lovable proxy unavailable
       }
 
-      if (lovableDone) {
-        // Fallback: direct Supabase OAuth (requires Google/Apple configured in Supabase dashboard)
+      // Fallback: direct Supabase OAuth (only if Supabase is configured)
+      try {
         const { error } = await supabase.auth.signInWithOAuth({
           provider,
           options: { redirectTo: `${window.location.origin}/auth/callback` },
@@ -138,7 +118,10 @@ function LoginPage() {
           toast.error(error.message || t(provider === "apple" ? "auth.failApple" : "auth.failGoogle"));
           setSubmitting(null);
         }
-        // On success Supabase navigates — no further action needed
+      } catch {
+        // Supabase not configured
+        toast.error("Авторизація тимчасово недоступна. Спробуйте пізніше.");
+        setSubmitting(null);
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.fail"));
