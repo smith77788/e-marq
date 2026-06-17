@@ -33,6 +33,7 @@ import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
 import { Route as HandbookDntradeWebhookRouteImport } from './routes/handbook.dntrade-webhook'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ApiMarqKeysRouteImport } from './routes/api/marq-keys'
+import { Route as ApiDocsRouteImport } from './routes/api/docs'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -170,8 +171,9 @@ import { Route as HooksAgentsAnomalyDetectorRouteImport } from './routes/hooks/a
 import { Route as HooksAgentsActionWatchdogRouteImport } from './routes/hooks/agents.action-watchdog'
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
 import { Route as ApiTelegramStatusRouteImport } from './routes/api/telegram.status'
+import { Route as ApiSubscriptionInitRouteImport } from './routes/api/subscription.init'
+import { Route as ApiSubscriptionCallbackRouteImport } from './routes/api/subscription.callback'
 import { Route as ApiSiteBuilderBuildRouteImport } from './routes/api/site-builder.build'
-import { Route as ApiPublicRestockSubscribeRouteImport } from './routes/api/public/restock.subscribe'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 import { Route as ApiEmailOrderStatusRouteImport } from './routes/api/email.order-status'
 import { Route as ApiEmailOrderConfirmationRouteImport } from './routes/api/email.order-confirmation'
@@ -180,6 +182,9 @@ import { Route as ApiEmailDomainStatusRouteImport } from './routes/api/email.dom
 import { Route as ApiEmailDomainSetupRouteImport } from './routes/api/email.domain-setup'
 import { Route as ApiEmailCampaignSendRouteImport } from './routes/api/email.campaign-send'
 import { Route as ApiDomainsVerifyRouteImport } from './routes/api/domains.verify'
+import { Route as ApiAnalyticsSmartRouteImport } from './routes/api/analytics.smart'
+import { Route as ApiAnalyticsExportRouteImport } from './routes/api/analytics.export'
+import { Route as ApiAnalyticsDashboardRouteImport } from './routes/api/analytics.dashboard'
 import { Route as ApiAiAskRouteImport } from './routes/api/ai.ask'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedBrandTeamRouteImport } from './routes/_authenticated/brand.team'
@@ -228,6 +233,7 @@ import { Route as ApiTelegramUserQueueActionRouteImport } from './routes/api/tel
 import { Route as ApiSiteBuilderDownloadBuildIdRouteImport } from './routes/api/site-builder.download.$buildId'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram.webhook'
 import { Route as ApiPublicShippingNpRouteImport } from './routes/api/public/shipping.np'
+import { Route as ApiPublicRestockSubscribeRouteImport } from './routes/api/public/restock.subscribe'
 import { Route as ApiPublicPaymentsWayforpayInitRouteImport } from './routes/api/public/payments.wayforpay-init'
 import { Route as ApiPublicPaymentsWayforpayCallbackRouteImport } from './routes/api/public/payments.wayforpay-callback'
 import { Route as ApiPublicPaymentsMonobankInitRouteImport } from './routes/api/public/payments.monobank-init'
@@ -365,6 +371,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
 const ApiMarqKeysRoute = ApiMarqKeysRouteImport.update({
   id: '/api/marq-keys',
   path: '/api/marq-keys',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDocsRoute = ApiDocsRouteImport.update({
+  id: '/api/docs',
+  path: '/api/docs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
@@ -1129,14 +1140,19 @@ const ApiTelegramStatusRoute = ApiTelegramStatusRouteImport.update({
   path: '/api/telegram/status',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSubscriptionInitRoute = ApiSubscriptionInitRouteImport.update({
+  id: '/api/subscription/init',
+  path: '/api/subscription/init',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSubscriptionCallbackRoute = ApiSubscriptionCallbackRouteImport.update({
+  id: '/api/subscription/callback',
+  path: '/api/subscription/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSiteBuilderBuildRoute = ApiSiteBuilderBuildRouteImport.update({
   id: '/api/site-builder/build',
   path: '/api/site-builder/build',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicRestockSubscribeRoute = ApiPublicRestockSubscribeRouteImport.update({
-  id: '/api/public/restock/subscribe',
-  path: '/api/public/restock/subscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
@@ -1178,6 +1194,21 @@ const ApiEmailCampaignSendRoute = ApiEmailCampaignSendRouteImport.update({
 const ApiDomainsVerifyRoute = ApiDomainsVerifyRouteImport.update({
   id: '/api/domains/verify',
   path: '/api/domains/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAnalyticsSmartRoute = ApiAnalyticsSmartRouteImport.update({
+  id: '/api/analytics/smart',
+  path: '/api/analytics/smart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAnalyticsExportRoute = ApiAnalyticsExportRouteImport.update({
+  id: '/api/analytics/export',
+  path: '/api/analytics/export',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAnalyticsDashboardRoute = ApiAnalyticsDashboardRouteImport.update({
+  id: '/api/analytics/dashboard',
+  path: '/api/analytics/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAiAskRoute = ApiAiAskRouteImport.update({
@@ -1454,6 +1485,12 @@ const ApiPublicShippingNpRoute = ApiPublicShippingNpRouteImport.update({
   path: '/api/public/shipping/np',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicRestockSubscribeRoute =
+  ApiPublicRestockSubscribeRouteImport.update({
+    id: '/api/public/restock/subscribe',
+    path: '/api/public/restock/subscribe',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPaymentsWayforpayInitRoute =
   ApiPublicPaymentsWayforpayInitRouteImport.update({
     id: '/api/public/payments/wayforpay-init',
@@ -1587,6 +1624,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/api/docs': typeof ApiDocsRoute
   '/api/marq-keys': typeof ApiMarqKeysRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
@@ -1631,6 +1669,9 @@ export interface FileRoutesByFullPath {
   '/brand/team': typeof AuthenticatedBrandTeamRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/api/ai/ask': typeof ApiAiAskRoute
+  '/api/analytics/dashboard': typeof ApiAnalyticsDashboardRoute
+  '/api/analytics/export': typeof ApiAnalyticsExportRoute
+  '/api/analytics/smart': typeof ApiAnalyticsSmartRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
@@ -1638,9 +1679,10 @@ export interface FileRoutesByFullPath {
   '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
-  '/api/public/restock/subscribe': typeof ApiPublicRestockSubscribeRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
+  '/api/subscription/callback': typeof ApiSubscriptionCallbackRoute
+  '/api/subscription/init': typeof ApiSubscriptionInitRoute
   '/api/telegram/status': typeof ApiTelegramStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
@@ -1793,6 +1835,7 @@ export interface FileRoutesByFullPath {
   '/api/public/payments/monobank-init': typeof ApiPublicPaymentsMonobankInitRoute
   '/api/public/payments/wayforpay-callback': typeof ApiPublicPaymentsWayforpayCallbackRoute
   '/api/public/payments/wayforpay-init': typeof ApiPublicPaymentsWayforpayInitRoute
+  '/api/public/restock/subscribe': typeof ApiPublicRestockSubscribeRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/api/site-builder/download/$buildId': typeof ApiSiteBuilderDownloadBuildIdRoute
@@ -1826,6 +1869,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/api/docs': typeof ApiDocsRoute
   '/api/marq-keys': typeof ApiMarqKeysRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
@@ -1869,6 +1913,9 @@ export interface FileRoutesByTo {
   '/brand/team': typeof AuthenticatedBrandTeamRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/api/ai/ask': typeof ApiAiAskRoute
+  '/api/analytics/dashboard': typeof ApiAnalyticsDashboardRoute
+  '/api/analytics/export': typeof ApiAnalyticsExportRoute
+  '/api/analytics/smart': typeof ApiAnalyticsSmartRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
@@ -1876,9 +1923,10 @@ export interface FileRoutesByTo {
   '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
-  '/api/public/restock/subscribe': typeof ApiPublicRestockSubscribeRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
+  '/api/subscription/callback': typeof ApiSubscriptionCallbackRoute
+  '/api/subscription/init': typeof ApiSubscriptionInitRoute
   '/api/telegram/status': typeof ApiTelegramStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
@@ -2031,6 +2079,7 @@ export interface FileRoutesByTo {
   '/api/public/payments/monobank-init': typeof ApiPublicPaymentsMonobankInitRoute
   '/api/public/payments/wayforpay-callback': typeof ApiPublicPaymentsWayforpayCallbackRoute
   '/api/public/payments/wayforpay-init': typeof ApiPublicPaymentsWayforpayInitRoute
+  '/api/public/restock/subscribe': typeof ApiPublicRestockSubscribeRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/api/site-builder/download/$buildId': typeof ApiSiteBuilderDownloadBuildIdRoute
@@ -2066,6 +2115,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/api/docs': typeof ApiDocsRoute
   '/api/marq-keys': typeof ApiMarqKeysRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
@@ -2110,6 +2160,9 @@ export interface FileRoutesById {
   '/_authenticated/brand/team': typeof AuthenticatedBrandTeamRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/api/ai/ask': typeof ApiAiAskRoute
+  '/api/analytics/dashboard': typeof ApiAnalyticsDashboardRoute
+  '/api/analytics/export': typeof ApiAnalyticsExportRoute
+  '/api/analytics/smart': typeof ApiAnalyticsSmartRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
@@ -2117,9 +2170,10 @@ export interface FileRoutesById {
   '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
-  '/api/public/restock/subscribe': typeof ApiPublicRestockSubscribeRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
+  '/api/subscription/callback': typeof ApiSubscriptionCallbackRoute
+  '/api/subscription/init': typeof ApiSubscriptionInitRoute
   '/api/telegram/status': typeof ApiTelegramStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
@@ -2272,6 +2326,7 @@ export interface FileRoutesById {
   '/api/public/payments/monobank-init': typeof ApiPublicPaymentsMonobankInitRoute
   '/api/public/payments/wayforpay-callback': typeof ApiPublicPaymentsWayforpayCallbackRoute
   '/api/public/payments/wayforpay-init': typeof ApiPublicPaymentsWayforpayInitRoute
+  '/api/public/restock/subscribe': typeof ApiPublicRestockSubscribeRoute
   '/api/public/shipping/np': typeof ApiPublicShippingNpRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/api/site-builder/download/$buildId': typeof ApiSiteBuilderDownloadBuildIdRoute
@@ -2307,6 +2362,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/profile'
+    | '/api/docs'
     | '/api/marq-keys'
     | '/auth/callback'
     | '/handbook/dntrade-webhook'
@@ -2351,6 +2407,9 @@ export interface FileRouteTypes {
     | '/brand/team'
     | '/invite/$token'
     | '/api/ai/ask'
+    | '/api/analytics/dashboard'
+    | '/api/analytics/export'
+    | '/api/analytics/smart'
     | '/api/domains/verify'
     | '/api/email/campaign-send'
     | '/api/email/domain-setup'
@@ -2360,6 +2419,8 @@ export interface FileRouteTypes {
     | '/api/email/order-status'
     | '/api/public/contact'
     | '/api/site-builder/build'
+    | '/api/subscription/callback'
+    | '/api/subscription/init'
     | '/api/telegram/status'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
@@ -2512,6 +2573,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/monobank-init'
     | '/api/public/payments/wayforpay-callback'
     | '/api/public/payments/wayforpay-init'
+    | '/api/public/restock/subscribe'
     | '/api/public/shipping/np'
     | '/api/public/telegram/webhook'
     | '/api/site-builder/download/$buildId'
@@ -2545,6 +2607,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/profile'
+    | '/api/docs'
     | '/api/marq-keys'
     | '/auth/callback'
     | '/handbook/dntrade-webhook'
@@ -2588,6 +2651,9 @@ export interface FileRouteTypes {
     | '/brand/team'
     | '/invite/$token'
     | '/api/ai/ask'
+    | '/api/analytics/dashboard'
+    | '/api/analytics/export'
+    | '/api/analytics/smart'
     | '/api/domains/verify'
     | '/api/email/campaign-send'
     | '/api/email/domain-setup'
@@ -2597,6 +2663,8 @@ export interface FileRouteTypes {
     | '/api/email/order-status'
     | '/api/public/contact'
     | '/api/site-builder/build'
+    | '/api/subscription/callback'
+    | '/api/subscription/init'
     | '/api/telegram/status'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
@@ -2749,6 +2817,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/monobank-init'
     | '/api/public/payments/wayforpay-callback'
     | '/api/public/payments/wayforpay-init'
+    | '/api/public/restock/subscribe'
     | '/api/public/shipping/np'
     | '/api/public/telegram/webhook'
     | '/api/site-builder/download/$buildId'
@@ -2783,6 +2852,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
     | '/_authenticated/profile'
+    | '/api/docs'
     | '/api/marq-keys'
     | '/auth/callback'
     | '/handbook/dntrade-webhook'
@@ -2827,6 +2897,9 @@ export interface FileRouteTypes {
     | '/_authenticated/brand/team'
     | '/_authenticated/invite/$token'
     | '/api/ai/ask'
+    | '/api/analytics/dashboard'
+    | '/api/analytics/export'
+    | '/api/analytics/smart'
     | '/api/domains/verify'
     | '/api/email/campaign-send'
     | '/api/email/domain-setup'
@@ -2836,6 +2909,8 @@ export interface FileRouteTypes {
     | '/api/email/order-status'
     | '/api/public/contact'
     | '/api/site-builder/build'
+    | '/api/subscription/callback'
+    | '/api/subscription/init'
     | '/api/telegram/status'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
@@ -2988,6 +3063,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/monobank-init'
     | '/api/public/payments/wayforpay-callback'
     | '/api/public/payments/wayforpay-init'
+    | '/api/public/restock/subscribe'
     | '/api/public/shipping/np'
     | '/api/public/telegram/webhook'
     | '/api/site-builder/download/$buildId'
@@ -3020,6 +3096,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  ApiDocsRoute: typeof ApiDocsRoute
   ApiMarqKeysRoute: typeof ApiMarqKeysRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   HooksIngestRoute: typeof HooksIngestRoute
@@ -3027,6 +3104,9 @@ export interface RootRouteChildren {
   SSlugRoute: typeof SSlugRouteWithChildren
   TrackSplatRoute: typeof TrackSplatRoute
   ApiAiAskRoute: typeof ApiAiAskRoute
+  ApiAnalyticsDashboardRoute: typeof ApiAnalyticsDashboardRoute
+  ApiAnalyticsExportRoute: typeof ApiAnalyticsExportRoute
+  ApiAnalyticsSmartRoute: typeof ApiAnalyticsSmartRoute
   ApiDomainsVerifyRoute: typeof ApiDomainsVerifyRoute
   ApiEmailCampaignSendRoute: typeof ApiEmailCampaignSendRoute
   ApiEmailDomainSetupRoute: typeof ApiEmailDomainSetupRoute
@@ -3034,9 +3114,10 @@ export interface RootRouteChildren {
   ApiEmailDomainVerifyRoute: typeof ApiEmailDomainVerifyRoute
   ApiEmailOrderConfirmationRoute: typeof ApiEmailOrderConfirmationRoute
   ApiEmailOrderStatusRoute: typeof ApiEmailOrderStatusRoute
-  ApiPublicRestockSubscribeRoute: typeof ApiPublicRestockSubscribeRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiSiteBuilderBuildRoute: typeof ApiSiteBuilderBuildRoute
+  ApiSubscriptionCallbackRoute: typeof ApiSubscriptionCallbackRoute
+  ApiSubscriptionInitRoute: typeof ApiSubscriptionInitRoute
   ApiTelegramStatusRoute: typeof ApiTelegramStatusRoute
   HooksActionsApplyRoute: typeof HooksActionsApplyRoute
   HooksAgentsActionWatchdogRoute: typeof HooksAgentsActionWatchdogRoute
@@ -3176,6 +3257,7 @@ export interface RootRouteChildren {
   ApiPublicPaymentsMonobankInitRoute: typeof ApiPublicPaymentsMonobankInitRoute
   ApiPublicPaymentsWayforpayCallbackRoute: typeof ApiPublicPaymentsWayforpayCallbackRoute
   ApiPublicPaymentsWayforpayInitRoute: typeof ApiPublicPaymentsWayforpayInitRoute
+  ApiPublicRestockSubscribeRoute: typeof ApiPublicRestockSubscribeRoute
   ApiPublicShippingNpRoute: typeof ApiPublicShippingNpRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
   ApiSiteBuilderDownloadBuildIdRoute: typeof ApiSiteBuilderDownloadBuildIdRoute
@@ -3354,6 +3436,13 @@ declare module '@tanstack/react-router' {
       path: '/api/marq-keys'
       fullPath: '/api/marq-keys'
       preLoaderRoute: typeof ApiMarqKeysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/docs': {
+      id: '/api/docs'
+      path: '/api/docs'
+      fullPath: '/api/docs'
+      preLoaderRoute: typeof ApiDocsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/profile': {
@@ -4315,18 +4404,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTelegramStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/subscription/init': {
+      id: '/api/subscription/init'
+      path: '/api/subscription/init'
+      fullPath: '/api/subscription/init'
+      preLoaderRoute: typeof ApiSubscriptionInitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/subscription/callback': {
+      id: '/api/subscription/callback'
+      path: '/api/subscription/callback'
+      fullPath: '/api/subscription/callback'
+      preLoaderRoute: typeof ApiSubscriptionCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/site-builder/build': {
       id: '/api/site-builder/build'
       path: '/api/site-builder/build'
       fullPath: '/api/site-builder/build'
       preLoaderRoute: typeof ApiSiteBuilderBuildRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/restock/subscribe': {
-      id: '/api/public/restock/subscribe'
-      path: '/api/public/restock/subscribe'
-      fullPath: '/api/public/restock/subscribe'
-      preLoaderRoute: typeof ApiPublicRestockSubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/contact': {
@@ -4383,6 +4479,27 @@ declare module '@tanstack/react-router' {
       path: '/api/domains/verify'
       fullPath: '/api/domains/verify'
       preLoaderRoute: typeof ApiDomainsVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analytics/smart': {
+      id: '/api/analytics/smart'
+      path: '/api/analytics/smart'
+      fullPath: '/api/analytics/smart'
+      preLoaderRoute: typeof ApiAnalyticsSmartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analytics/export': {
+      id: '/api/analytics/export'
+      path: '/api/analytics/export'
+      fullPath: '/api/analytics/export'
+      preLoaderRoute: typeof ApiAnalyticsExportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analytics/dashboard': {
+      id: '/api/analytics/dashboard'
+      path: '/api/analytics/dashboard'
+      fullPath: '/api/analytics/dashboard'
+      preLoaderRoute: typeof ApiAnalyticsDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/ai/ask': {
@@ -4721,6 +4838,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicShippingNpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/restock/subscribe': {
+      id: '/api/public/restock/subscribe'
+      path: '/api/public/restock/subscribe'
+      fullPath: '/api/public/restock/subscribe'
+      preLoaderRoute: typeof ApiPublicRestockSubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/wayforpay-init': {
       id: '/api/public/payments/wayforpay-init'
       path: '/api/public/payments/wayforpay-init'
@@ -5057,6 +5181,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  ApiDocsRoute: ApiDocsRoute,
   ApiMarqKeysRoute: ApiMarqKeysRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   HooksIngestRoute: HooksIngestRoute,
@@ -5064,6 +5189,9 @@ const rootRouteChildren: RootRouteChildren = {
   SSlugRoute: SSlugRouteWithChildren,
   TrackSplatRoute: TrackSplatRoute,
   ApiAiAskRoute: ApiAiAskRoute,
+  ApiAnalyticsDashboardRoute: ApiAnalyticsDashboardRoute,
+  ApiAnalyticsExportRoute: ApiAnalyticsExportRoute,
+  ApiAnalyticsSmartRoute: ApiAnalyticsSmartRoute,
   ApiDomainsVerifyRoute: ApiDomainsVerifyRoute,
   ApiEmailCampaignSendRoute: ApiEmailCampaignSendRoute,
   ApiEmailDomainSetupRoute: ApiEmailDomainSetupRoute,
@@ -5071,9 +5199,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiEmailDomainVerifyRoute: ApiEmailDomainVerifyRoute,
   ApiEmailOrderConfirmationRoute: ApiEmailOrderConfirmationRoute,
   ApiEmailOrderStatusRoute: ApiEmailOrderStatusRoute,
-  ApiPublicRestockSubscribeRoute: ApiPublicRestockSubscribeRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiSiteBuilderBuildRoute: ApiSiteBuilderBuildRoute,
+  ApiSubscriptionCallbackRoute: ApiSubscriptionCallbackRoute,
+  ApiSubscriptionInitRoute: ApiSubscriptionInitRoute,
   ApiTelegramStatusRoute: ApiTelegramStatusRoute,
   HooksActionsApplyRoute: HooksActionsApplyRoute,
   HooksAgentsActionWatchdogRoute: HooksAgentsActionWatchdogRoute,
@@ -5222,6 +5351,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicPaymentsWayforpayCallbackRoute:
     ApiPublicPaymentsWayforpayCallbackRoute,
   ApiPublicPaymentsWayforpayInitRoute: ApiPublicPaymentsWayforpayInitRoute,
+  ApiPublicRestockSubscribeRoute: ApiPublicRestockSubscribeRoute,
   ApiPublicShippingNpRoute: ApiPublicShippingNpRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
   ApiSiteBuilderDownloadBuildIdRoute: ApiSiteBuilderDownloadBuildIdRoute,
@@ -5235,3 +5365,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
