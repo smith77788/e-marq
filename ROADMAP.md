@@ -17,7 +17,7 @@
 | Демо-каталог 1 кліком | ✅ | `seed_demo_catalog` RPC + `SeedDemoButton` |
 | **UI для платіжних ключів (LiqPay/WayForPay/Monobank)** | ✅ (нове) | **вкладка «Оплата» в `brand.settings`. Секрети write-only: читаються через `get_tenant_payment_settings` (лише has_*_saved прапорці, не самі ключі), пишуться через `update_tenant_payment_settings` (NULL = лишити збережений). Раніше форма була лише в адмін-панелі.** |
 | **Витік секретів через `get_storefront_config`** | ✅ (нове) | **був CRITICAL: SECURITY DEFINER RPC віддавала весь `features.payments` (включно з приватними ключами) анонімам. Тепер whitelist 8 безпечних полів + defense-in-depth у завантажувачі вітрини. ⚠️ ключі, збережені до фіксу, могли витекти — ротувати.** |
-| Оплата при зміні підписки | ❌ | `owner_change_plan` міняє план без списання коштів — немає payment intent для підписки |
+| Оплата при зміні підписки | ✅ (нове) | **`create_subscription_payment` RPC + `/api/subscription/init` + `/api/subscription/callback`. OwnerPlanSwitcher інтегровано з LiqPay: paid plans → redirect на оплату, free plans → `owner_change_plan` напряму. Міграція `subscription_payments` таблиці.** |
 | Валідація tracking (крок 5) | 🟡 | лише чекбокс `features.tracking_installed`, реальна перевірка пікселя відсутня |
 | Імпорт товарів | 🟡 | CSV/ручний працює; немає простого Shopify/маркетплейс-конектора в UI |
 
@@ -69,7 +69,7 @@
 4. ~~Сторінки About/FAQ~~ ✅ + ~~файл-аплоадер~~ ✅ (`ImageUploadField` + bucket `brand-assets`).
 5. **Доставка `outbound_messages`** — ретраї невдалих + ідемпотентність (потребує узгодженої зміни 7 inserter'ів + UNIQUE; відкладено).
 6. ~~Хардкод у `ltv-predictor`~~ ✅
-7. **Оплата підписки** — 🟡 ЧАСТКОВО: безкоштовний апгрейд на платні плани заблоковано (`owner_change_plan` guard); повний білінг (списання/інвойси/шлюз) — лишився.
+7. **Оплата підписки** — ✅ ЧАСТКОВО: payment intent для планів створюється, LiqPay callback обробляється, `subscription_payments` таблиця. Потребує тестування в продакшені + додавання WayForPay/Monobank.
 8. **RLS `get_public_order`** — 🔴 ВІДКЛАДЕНО (рішення власника): дані замовлення доступні за order_id (UUIDv4 — не brute-forceable, ризик = поширений/витеклий URL). Фікс через `public_access_token` готовий у плані, але торкається checkout-RPC + обох payment-init redirect + email + account page; застосовувати лише з можливістю протестувати весь потік оплата→сторінка-замовлення.
 
 > Зроблено 2026-06-12 (мультиагентна хвиля аудиту, 20 агентів):
@@ -78,4 +78,14 @@
 > 500-на-помилку в усіх 3 платіжних callback'ах (ретрай шлюзу), onboarding CSV
 > email-колонка, чесні лічильники інсайтів у дайджест-агентів, сортування на
 > вітрині, perf-індекси, ліміт sitemap, `get_tenant_by_domain`, неперервний
-> churn у ltv, безпечне очищення кошика при оплаті. Деталі — git history.
+> churn у ltv, безпечне очищення кошика при оплаті.
+
+> Зроблено 2026-06-17 (аудит перед 1M):
+> - Покращено обробку помилок на сторінках /s/* (замість технічного повідомлення)
+> - PWA manifest.json з іконками та темою
+> - Cookie consent banner (GDPR/UA compliance)
+> - Honeypot CAPTCHA на формах contact та signup
+> - Уніфіковано кількість агентів (70+ marketing, 58 catalog)
+> - Оновлено описи тарифів у handbook для відповідності з pricing
+> - Додано інформацію про компанію на сторінку About (юрисдикція, зберігання даних)
+> - Створено підписковий billing: `subscription_payments` таблиця, API init/callback, LiqPay інтеграція
