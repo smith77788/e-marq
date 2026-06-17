@@ -8,7 +8,7 @@
  * Stateless per call — engine is responsible for scheduling.
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { LOVABLE_AI_URL, DEFAULT_AI_MODEL, isLovableAiEnabled } from "@/lib/acos/aiKillswitch";
+import { aiMultiTurn, isAnyAiEnabled } from "@/lib/acos/aiGateway";
 
 const MODEL = DEFAULT_AI_MODEL;
 
@@ -51,9 +51,7 @@ async function aiReply(opts: {
   lastBought: string | null;
   lastInbound: string;
 }): Promise<string | null> {
-  // AI killswitch: за замовчуванням вимкнено → sales bot не відповідає до явного opt-in.
-  if (!isLovableAiEnabled()) return null;
-  const apiKey = process.env.LOVABLE_API_KEY!;
+  if (!isAnyAiEnabled()) return null;
 
   // Heuristic language detection from the latest customer message:
   // default = Ukrainian; switch only when text is clearly English or Russian.
@@ -97,17 +95,15 @@ async function aiReply(opts: {
     })),
   ];
 
-  const res = await fetch(LOVABLE_AI_URL, {
-    method: "POST",
-    signal: AbortSignal.timeout(25_000),
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({ model: MODEL, messages, temperature: 0.4 }),
+  const result = await aiMultiTurn({
+    system: sys,
+    messages: opts.history.slice(-8).map((h) => ({
+      role: h.direction === "inbound" ? "user" : "assistant",
+      content: h.body,
+    })),
+    temperature: 0.4,
   });
-  if (!res.ok) return null;
-  const json = (await res.json().catch(() => ({}))) as {
-    choices?: { message?: { content?: string } }[];
-  };
-  let out = json.choices?.[0]?.message?.content?.trim();
+  let out = result.content;
   if (!out) return null;
 
   // Auto-append shop link when AI mentioned a real product and we know the storefront

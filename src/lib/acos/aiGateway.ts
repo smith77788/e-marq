@@ -20,6 +20,14 @@ export interface AiChatOptions {
   provider?: AiProvider;
 }
 
+export interface AiMultiTurnOptions {
+  system: string;
+  messages: Array<{ role: "system" | "user" | "assistant"; content: string }>;
+  temperature?: number;
+  maxTokens?: number;
+  provider?: AiProvider;
+}
+
 export interface AiChatResult {
   content: string | null;
   provider: AiProvider;
@@ -156,4 +164,54 @@ export async function aiChat(opts: AiChatOptions): Promise<AiChatResult> {
     if (fallback.content) return { ...fallback, provider: "mimo" };
   }
   return result;
+}
+
+/**
+ * Multi-turn AI chat for conversations (sales bot, etc).
+ * Supports message history with system prompt.
+ */
+export async function aiMultiTurn(opts: AiMultiTurnOptions): Promise<AiChatResult> {
+  const preferred = opts.provider ?? (isMimoEnabled() ? "mimo" : "lovable");
+  const allMessages = [{ role: "system" as const, content: opts.system }, ...opts.messages];
+
+  const callProvider = async (provider: AiProvider): Promise<AiChatResult> => {
+    const url = provider === "mimo" ? MIMO_API_URL : LOVABLE_AI_URL;
+    const key = provider === "mimo" ? MIMO_API_KEY : LOVABLE_API_KEY;
+    const model = provider === "mimo" ? MIMO_MODEL : LOVABLE_MODEL;
+
+    if (!key) return { content: null, provider, error: "API key not set" };
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+        body: JSON.stringify({
+          model,
+          messages: allMessages,
+          temperature: opts.temperature ?? 0.4,
+          max_tokens: opts.maxTokens ?? 500,
+        }),
+        signal: AbortSignal.timeout(30_000),
+      });
+      if (!res.ok) return { content: null, provider, error: `HTTP ${res.status}` };
+      const json = (await res.json().catch(() => ({}))) as {
+        choices?: { message?: { content?: string } }[];
+      };
+      return { content: json.choices?.[0]?.message?.content?.trim() ?? null, provider };
+    } catch (e) {
+      return { content: null, provider, error: e instanceof Error ? e.message : String(e) };
+    }
+  };
+
+  const primary = await callProvider(preferred);
+  if (primary.content) return primary;
+
+  // Fallback
+  const fallbackProvider = preferred === "mimo" ? "lovable" : "mimo";
+  const fallbackEnabled = fallbackProvider === "mimo" ? isMimoEnabled() : isLovableAiEnabled();
+  if (fallbackEnabled) {
+    const fallback = await callProvider(fallbackProvider);
+    if (fallback.content) return fallback;
+  }
+  return primary;
 }

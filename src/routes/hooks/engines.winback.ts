@@ -24,9 +24,9 @@ import { dispatchTenantOutbound, pickChannelForCustomer } from "@/lib/acos/chann
 import { getCadenceMultiplier } from "@/lib/acos/policyTuning";
 
 const AGENT_ID = "winback_engine";
-import { LOVABLE_AI_URL, DEFAULT_AI_MODEL, isLovableAiEnabled } from "@/lib/acos/aiKillswitch";
+import { aiChat, isAnyAiEnabled } from "@/lib/acos/aiGateway";
 
-const MODEL = DEFAULT_AI_MODEL;
+const AGENT_ID = "winback_engine";
 
 async function aiOffer(opts: {
   brandName: string;
@@ -35,30 +35,11 @@ async function aiOffer(opts: {
   favoriteProduct: string | null;
   totalSpent: number;
 }): Promise<string | null> {
-  // AI killswitch: за замовчуванням AI-копірайт вимкнено → caller використає
-  // детермінований шаблон. Жодних кредитів не списується.
-  if (!isLovableAiEnabled()) return null;
-  const apiKey = process.env.LOVABLE_API_KEY!;
+  if (!isAnyAiEnabled()) return null;
   const sys = `You write SHORT winback messages for D2C brand "${opts.brandName}". Tone: warm, friendly, never desperate. 1-2 short sentences max. Never say "discount" — say "something on me" or "small treat". Never claim to be AI.`;
   const user = `Customer "${opts.firstName}" hasn't ordered in ${opts.daysSince} days. Lifetime value: $${(opts.totalSpent / 100).toFixed(0)}.${opts.favoriteProduct ? ` Favorite: ${opts.favoriteProduct}.` : ""} Write a personal nudge that mentions the product if known. End with a soft question.`;
-  const res = await fetch(LOVABLE_AI_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: "system", content: sys },
-        { role: "user", content: user },
-      ],
-      temperature: 0.6,
-    }),
-  });
-  if (!res.ok) return null;
-  const json = (await res.json().catch(() => ({}))) as {
-    choices?: { message?: { content?: string } }[];
-  };
-  const out = json.choices?.[0]?.message?.content?.trim();
-  return out && out.length > 0 ? out : null;
+  const result = await aiChat({ system: sys, user, temperature: 0.6 });
+  return result.content;
 }
 
 export async function runWinbackForTenant(

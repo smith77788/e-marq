@@ -18,7 +18,7 @@ import {
 } from "@/lib/outreach/shared";
 import { getChannelHints, type ChannelHints } from "@/lib/outreach/memory";
 
-const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+import { aiChat, isAnyAiEnabled } from "@/lib/acos/aiGateway";
 
 function fallbackDrafts(brandName: string, promo: string, landing: string) {
   return {
@@ -38,8 +38,7 @@ async function generateDrafts(args: {
   landing: string;
   hints: ChannelHints;
 }): Promise<{ primary: string; alt: string }> {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) return fallbackDrafts(args.brandName, args.promo, args.landing);
+  if (!isAnyAiEnabled()) return fallbackDrafts(args.brandName, args.promo, args.landing);
 
   const memoryLines: string[] = [];
   if (args.hints.prefer_length) {
@@ -78,27 +77,17 @@ async function generateDrafts(args: {
     `Повертай JSON без markdown: {"primary":"...","alt":"..."}.${memBlock}`;
 
   try {
-    const res = await fetch(LOVABLE_AI_URL, {
-      method: "POST",
-      signal: AbortSignal.timeout(20_000),
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          {
-            role: "user",
-            content:
-              `КОНТЕКСТ ДОПИСУ (${args.channel}):\n"""${args.lead_text.slice(0, 1500)}"""\n\n` +
-              `Тригери: ${args.matched.join(", ") || "—"}.\nЗгенеруй JSON.`,
-          },
-        ],
-        temperature: 0.6,
-      }),
+    const userPrompt =
+      `КОНТЕКСТ ДОПИСУ (${args.channel}):\n"""${args.lead_text.slice(0, 1500)}"""\n\n` +
+      `Тригери: ${args.matched.join(", ") || "—"}.\nЗгенеруй JSON.`;
+
+    const result = await aiChat({
+      system: systemPrompt,
+      user: userPrompt,
+      temperature: 0.6,
     });
-    if (!res.ok) return fallbackDrafts(args.brandName, args.promo, args.landing);
-    const j = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-    const text = j?.choices?.[0]?.message?.content ?? "";
+
+    const text = result.content ?? "";
     const m = text.match(/\{[\s\S]*\}/);
     if (!m) return fallbackDrafts(args.brandName, args.promo, args.landing);
     const parsed = JSON.parse(m[0]) as { primary?: string; alt?: string };
