@@ -124,6 +124,12 @@ export const Route = createFileRoute("/api/public/payments/monobank-init")({
         );
         if (intentErr) {
           console.error("[monobank-init] create_payment_intent failed:", intentErr.message);
+          // Invoice already created at Monobank but no intent recorded —
+          // return error to prevent duplicate invoice on retry
+          return Response.json(
+            { ok: false, error: "payment_intent_creation_failed" },
+            { status: 500 },
+          );
         }
 
         const intentId = (intentResult as { intent_id?: string } | null)?.intent_id ?? null;

@@ -143,6 +143,15 @@ function CheckoutPage() {
   const discountCents = promoDiscountCents + loyaltyDiscountCents;
   const finalTotalCents = Math.max(0, subtotalCents - discountCents);
 
+  // Re-validate loyalty when cart contents change — discount may exceed new subtotal
+  useEffect(() => {
+    if (redeemApplied && subtotalCents > 0 && redeemApplied.discountCents > subtotalCents - promoDiscountCents) {
+      // Discount exceeds new subtotal — clear loyalty
+      setRedeemApplied(null);
+      toast.info("Бали списання скасовано через зміну кошика");
+    }
+  }, [subtotalCents, promoDiscountCents]);
+
   const projectedEarnPoints = loyalty?.programActive
     ? Math.floor(loyalty.pointsPer100 * (finalTotalCents / 10000))
     : 0;
