@@ -77,7 +77,7 @@ const UpdateBody = z.object({
 
 const Body = z.discriminatedUnion("action", [CreateBody, UpdateBody]);
 
-export const Route = createFileRoute("/api/incidents" as never)({
+export const Route = createFileRoute("/api/incidents")({
   server: {
     handlers: {
       GET: async ({ request }) => {

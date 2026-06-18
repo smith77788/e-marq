@@ -16,7 +16,7 @@ function err(msg: string, status = 400) {
   return Response.json({ ok: false, error: msg }, { status });
 }
 
-export const Route = createFileRoute("/api/analytics/summary" as never)({
+export const Route = createFileRoute("/api/analytics/summary")({
   server: {
     handlers: {
       POST: async ({ request }) => {

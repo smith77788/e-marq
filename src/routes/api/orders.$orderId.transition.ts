@@ -83,7 +83,7 @@ const Body = z.object({
   targetStatus: z.enum(["paid", "fulfilled", "cancelled", "refunded"]),
 });
 
-export const Route = createFileRoute("/api/orders/$orderId/transition" as never)({
+export const Route = createFileRoute("/api/orders/$orderId/transition")({
   server: {
     handlers: {
       POST: async ({ request, params }) => {

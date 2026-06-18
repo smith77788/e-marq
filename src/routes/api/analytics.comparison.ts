@@ -25,7 +25,7 @@ const Body = z.object({
   previousEnd: z.string().datetime(),
 });
 
-export const Route = createFileRoute("/api/analytics/comparison" as never)({
+export const Route = createFileRoute("/api/analytics/comparison")({
   server: {
     handlers: {
       POST: async ({ request }) => {

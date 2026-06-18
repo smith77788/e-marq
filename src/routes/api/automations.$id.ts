@@ -69,7 +69,7 @@ const RunBody = z.object({
 
 const Body = z.discriminatedUnion("action", [ToggleBody, RunBody]);
 
-export const Route = createFileRoute("/api/automations/$id" as never)({
+export const Route = createFileRoute("/api/automations/$id")({
   server: {
     handlers: {
       POST: async ({ request, params }) => {

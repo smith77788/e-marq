@@ -60,7 +60,7 @@ const CompleteBody = z.object({
   stepId: z.enum(["niche", "data_source", "brand", "telegram", "first_agent", "first_insight"]),
 });
 
-export const Route = createFileRoute("/api/onboarding" as never)({
+export const Route = createFileRoute("/api/onboarding")({
   server: {
     handlers: {
       GET: async ({ request }) => {

@@ -61,7 +61,7 @@ const CreateBody = z.object({
   action: z.string().min(1).max(500),
 });
 
-export const Route = createFileRoute("/api/automations" as never)({
+export const Route = createFileRoute("/api/automations")({
   server: {
     handlers: {
       GET: async ({ request }) => {
