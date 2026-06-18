@@ -103,7 +103,7 @@ export async function markAllAsRead(
 ): Promise<{ ok: boolean; count: number }> {
   const { count, error } = await supabaseAdmin
     .from("owner_notifications")
-    .update({ is_read: true })
+    .update({ is_read: true }, { count: "exact" })
     .eq("tenant_id", tenantId)
     .eq("is_read", false);
 

@@ -46,7 +46,7 @@ export async function getAnalyticsSummary(
   const monthAgo = new Date(now.getTime() - 30 * 24 * 3600 * 1000).toISOString();
   const prevWeekAgo = new Date(now.getTime() - 14 * 24 * 3600 * 1000).toISOString();
 
-  const [todayOrders, weekOrders, monthOrders, prevWeekOrders, customers, products] =
+  const [todayOrders, weekOrders, monthOrders, prevWeekOrders, customers, products, topItems] =
     await Promise.all([
       supabaseAdmin.from("orders").select("total_cents").eq("tenant_id", tenantId).eq("status", "paid").gte("created_at", todayStart),
       supabaseAdmin.from("orders").select("total_cents").eq("tenant_id", tenantId).eq("status", "paid").gte("created_at", weekAgo),
@@ -54,6 +54,7 @@ export async function getAnalyticsSummary(
       supabaseAdmin.from("orders").select("total_cents").eq("tenant_id", tenantId).eq("status", "paid").gte("created_at", prevWeekAgo).lt("created_at", weekAgo),
       supabaseAdmin.from("customers").select("id, created_at, last_order_at").eq("tenant_id", tenantId).limit(10000),
       supabaseAdmin.from("products").select("id, is_active").eq("tenant_id", tenantId),
+      supabaseAdmin.from("order_items").select("product_name, quantity").eq("tenant_id", tenantId).gte("created_at", monthAgo).limit(5000),
     ]);
 
   const todayTotal = (todayOrders.data ?? []).reduce((s, o) => s + o.total_cents, 0);
@@ -68,6 +69,16 @@ export async function getAnalyticsSummary(
 
   const allProducts = products.data ?? [];
   const activeProducts = allProducts.filter((p) => p.is_active).length;
+
+  const qtyByName = new Map<string, number>();
+  for (const item of topItems.data ?? []) {
+    qtyByName.set(item.product_name, (qtyByName.get(item.product_name) ?? 0) + item.quantity);
+  }
+  let topSeller = "";
+  let topQty = 0;
+  for (const [name, qty] of qtyByName.entries()) {
+    if (qty > topQty) { topQty = qty; topSeller = name; }
+  }
 
   return {
     revenue: {
@@ -85,7 +96,7 @@ export async function getAnalyticsSummary(
     products: {
       total: allProducts.length,
       active: activeProducts,
-      topSeller: "",
+      topSeller,
     },
     conversion: {
       rate: 0,
