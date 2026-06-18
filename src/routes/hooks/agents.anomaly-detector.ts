@@ -22,6 +22,7 @@ import {
   jsonOk,
   startAgentRun,
 } from "@/lib/acos/agentRuntime";
+import { detectAnomaliesZScore } from "@/lib/acos/anomalyDetection";
 
 export const Route = createFileRoute("/hooks/agents/anomaly-detector")({
   server: {
@@ -99,7 +100,19 @@ export const Route = createFileRoute("/hooks/agents/anomaly-detector")({
 
           const insights = [];
 
-          // Revenue anomaly
+          // Build daily revenue breakdown for Z-score analysis
+          const dailyRevenueMap = new Map<string, number>();
+          for (const o of basePaid) {
+            const day = o.created_at.slice(0, 10);
+            dailyRevenueMap.set(day, (dailyRevenueMap.get(day) ?? 0) + o.total_cents);
+          }
+          const dailyRevenueValues = [...Array.from(dailyRevenueMap.values()), todayRevenue];
+          const zsAnomalies = dailyRevenueValues.length >= 5
+            ? detectAnomaliesZScore(dailyRevenueValues, 2.0)
+            : [];
+          const todayZscore = zsAnomalies.find((a) => a.index === dailyRevenueValues.length - 1);
+
+          // Revenue anomaly (percentage-based)
           if (baseRevenuePerDay >= 1000) {
             const delta = (todayRevenue - baseRevenuePerDay) / baseRevenuePerDay;
             if (Math.abs(delta) >= 0.3) {
@@ -125,6 +138,28 @@ export const Route = createFileRoute("/hooks/agents/anomaly-detector")({
                 dedup_key: `revenue_${direction}::${new Date().toISOString().slice(0, 10)}`,
               } as const);
             }
+          }
+
+          // Z-score revenue anomaly (catches statistical outliers missed by percentage threshold)
+          if (todayZscore && !insights.some((i) => i.dedup_key?.startsWith("revenue_"))) {
+            const direction = todayRevenue > baseRevenuePerDay ? "up" : "down";
+            insights.push({
+              tenant_id: tenantId,
+              insight_type: direction === "down" ? "revenue_drop" : "revenue_spike",
+              affected_layer: "kpi",
+              title: `Статистична аномалія виторгу (Z=${todayZscore.z_score.toFixed(1)})`,
+              description: `Сьогодні ${formatCents(todayRevenue)} — нетипове значення за останні 7 днів (Z-score: ${todayZscore.z_score.toFixed(2)}).`,
+              expected_impact: "Перевір причини нетипового дня — маркетингова акція, збій чи нова точка росту.",
+              confidence: Math.min(0.95, 0.5 + todayZscore.z_score * 0.1),
+              risk_level: direction === "down" ? "medium" : "low",
+              metrics: {
+                today_revenue_cents: todayRevenue,
+                baseline_revenue_cents: Math.round(baseRevenuePerDay),
+                z_score: todayZscore.z_score,
+                direction,
+              },
+              dedup_key: `revenue_zscore_${direction}::${new Date().toISOString().slice(0, 10)}`,
+            } as const);
           }
 
           // Order count anomaly

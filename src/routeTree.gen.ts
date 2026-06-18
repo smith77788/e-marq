@@ -185,6 +185,11 @@ import { Route as ApiDomainsVerifyRouteImport } from './routes/api/domains.verif
 import { Route as ApiAnalyticsSmartRouteImport } from './routes/api/analytics.smart'
 import { Route as ApiAnalyticsExportRouteImport } from './routes/api/analytics.export'
 import { Route as ApiAnalyticsDashboardRouteImport } from './routes/api/analytics.dashboard'
+import { Route as ApiAnalyticsSummaryRouteImport } from './routes/api/analytics.summary'
+import { Route as ApiNotificationsRouteImport } from './routes/api/notifications'
+import { Route as ApiAutomationsRouteImport } from './routes/api/automations'
+import { Route as ApiAutomationsIdRouteImport } from './routes/api/automations.$id'
+import { Route as ApiOnboardingRouteImport } from './routes/api/onboarding'
 import { Route as ApiAiAskRouteImport } from './routes/api/ai.ask'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedBrandTeamRouteImport } from './routes/_authenticated/brand.team'
@@ -1150,6 +1155,31 @@ const ApiSubscriptionCallbackRoute = ApiSubscriptionCallbackRouteImport.update({
   path: '/api/subscription/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAnalyticsSummaryRoute = ApiAnalyticsSummaryRouteImport.update({
+  id: '/api/analytics/summary',
+  path: '/api/analytics/summary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNotificationsRoute = ApiNotificationsRouteImport.update({
+  id: '/api/notifications',
+  path: '/api/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAutomationsRoute = ApiAutomationsRouteImport.update({
+  id: '/api/automations',
+  path: '/api/automations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAutomationsIdRoute = ApiAutomationsIdRouteImport.update({
+  id: '/api/automations/$id',
+  path: '/api/automations/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOnboardingRoute = ApiOnboardingRouteImport.update({
+  id: '/api/onboarding',
+  path: '/api/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSiteBuilderBuildRoute = ApiSiteBuilderBuildRouteImport.update({
   id: '/api/site-builder/build',
   path: '/api/site-builder/build',
@@ -1672,6 +1702,11 @@ export interface FileRoutesByFullPath {
   '/api/analytics/dashboard': typeof ApiAnalyticsDashboardRoute
   '/api/analytics/export': typeof ApiAnalyticsExportRoute
   '/api/analytics/smart': typeof ApiAnalyticsSmartRoute
+  '/api/analytics/summary': typeof ApiAnalyticsSummaryRoute
+  '/api/automations': typeof ApiAutomationsRoute
+  '/api/automations/$id': typeof ApiAutomationsIdRoute
+  '/api/notifications': typeof ApiNotificationsRoute
+  '/api/onboarding': typeof ApiOnboardingRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
@@ -1916,6 +1951,11 @@ export interface FileRoutesByTo {
   '/api/analytics/dashboard': typeof ApiAnalyticsDashboardRoute
   '/api/analytics/export': typeof ApiAnalyticsExportRoute
   '/api/analytics/smart': typeof ApiAnalyticsSmartRoute
+  '/api/analytics/summary': typeof ApiAnalyticsSummaryRoute
+  '/api/automations': typeof ApiAutomationsRoute
+  '/api/automations/$id': typeof ApiAutomationsIdRoute
+  '/api/notifications': typeof ApiNotificationsRoute
+  '/api/onboarding': typeof ApiOnboardingRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
@@ -2163,6 +2203,11 @@ export interface FileRoutesById {
   '/api/analytics/dashboard': typeof ApiAnalyticsDashboardRoute
   '/api/analytics/export': typeof ApiAnalyticsExportRoute
   '/api/analytics/smart': typeof ApiAnalyticsSmartRoute
+  '/api/analytics/summary': typeof ApiAnalyticsSummaryRoute
+  '/api/automations': typeof ApiAutomationsRoute
+  '/api/automations/$id': typeof ApiAutomationsIdRoute
+  '/api/notifications': typeof ApiNotificationsRoute
+  '/api/onboarding': typeof ApiOnboardingRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
@@ -3116,6 +3161,11 @@ export interface RootRouteChildren {
   ApiEmailOrderStatusRoute: typeof ApiEmailOrderStatusRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiSiteBuilderBuildRoute: typeof ApiSiteBuilderBuildRoute
+  ApiAnalyticsSummaryRoute: typeof ApiAnalyticsSummaryRoute
+  ApiAutomationsRoute: typeof ApiAutomationsRoute
+  ApiAutomationsIdRoute: typeof ApiAutomationsIdRoute
+  ApiNotificationsRoute: typeof ApiNotificationsRoute
+  ApiOnboardingRoute: typeof ApiOnboardingRoute
   ApiSubscriptionCallbackRoute: typeof ApiSubscriptionCallbackRoute
   ApiSubscriptionInitRoute: typeof ApiSubscriptionInitRoute
   ApiTelegramStatusRoute: typeof ApiTelegramStatusRoute
@@ -5201,6 +5251,11 @@ const rootRouteChildren: RootRouteChildren = {
   ApiEmailOrderStatusRoute: ApiEmailOrderStatusRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiSiteBuilderBuildRoute: ApiSiteBuilderBuildRoute,
+  ApiAnalyticsSummaryRoute: ApiAnalyticsSummaryRoute,
+  ApiAutomationsRoute: ApiAutomationsRoute,
+  ApiAutomationsIdRoute: ApiAutomationsIdRoute,
+  ApiNotificationsRoute: ApiNotificationsRoute,
+  ApiOnboardingRoute: ApiOnboardingRoute,
   ApiSubscriptionCallbackRoute: ApiSubscriptionCallbackRoute,
   ApiSubscriptionInitRoute: ApiSubscriptionInitRoute,
   ApiTelegramStatusRoute: ApiTelegramStatusRoute,
