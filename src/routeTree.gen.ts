@@ -32,8 +32,13 @@ import { Route as MSlugRouteImport } from './routes/m.$slug'
 import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
 import { Route as HandbookDntradeWebhookRouteImport } from './routes/handbook.dntrade-webhook'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as ApiOnboardingRouteImport } from './routes/api/onboarding'
+import { Route as ApiNotificationsRouteImport } from './routes/api/notifications'
 import { Route as ApiMarqKeysRouteImport } from './routes/api/marq-keys'
+import { Route as ApiInsightsRouteImport } from './routes/api/insights'
+import { Route as ApiIncidentsRouteImport } from './routes/api/incidents'
 import { Route as ApiDocsRouteImport } from './routes/api/docs'
+import { Route as ApiAutomationsRouteImport } from './routes/api/automations'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -182,18 +187,12 @@ import { Route as ApiEmailDomainStatusRouteImport } from './routes/api/email.dom
 import { Route as ApiEmailDomainSetupRouteImport } from './routes/api/email.domain-setup'
 import { Route as ApiEmailCampaignSendRouteImport } from './routes/api/email.campaign-send'
 import { Route as ApiDomainsVerifyRouteImport } from './routes/api/domains.verify'
+import { Route as ApiAutomationsIdRouteImport } from './routes/api/automations.$id'
+import { Route as ApiAnalyticsSummaryRouteImport } from './routes/api/analytics.summary'
 import { Route as ApiAnalyticsSmartRouteImport } from './routes/api/analytics.smart'
 import { Route as ApiAnalyticsExportRouteImport } from './routes/api/analytics.export'
 import { Route as ApiAnalyticsDashboardRouteImport } from './routes/api/analytics.dashboard'
-import { Route as ApiAnalyticsSummaryRouteImport } from './routes/api/analytics.summary'
 import { Route as ApiAnalyticsComparisonRouteImport } from './routes/api/analytics.comparison'
-import { Route as ApiNotificationsRouteImport } from './routes/api/notifications'
-import { Route as ApiAutomationsRouteImport } from './routes/api/automations'
-import { Route as ApiAutomationsIdRouteImport } from './routes/api/automations.$id'
-import { Route as ApiOnboardingRouteImport } from './routes/api/onboarding'
-import { Route as ApiInsightsRouteImport } from './routes/api/insights'
-import { Route as ApiIncidentsRouteImport } from './routes/api/incidents'
-import { Route as ApiOrdersOrderIdTransitionRouteImport } from './routes/api/orders.$orderId.transition'
 import { Route as ApiAiAskRouteImport } from './routes/api/ai.ask'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedBrandTeamRouteImport } from './routes/_authenticated/brand.team'
@@ -254,6 +253,7 @@ import { Route as ApiPublicMarqInsightsRouteImport } from './routes/api/public/m
 import { Route as ApiPublicMarqEventsRouteImport } from './routes/api/public/marq.events'
 import { Route as ApiPublicEmailUnsubscribeRouteImport } from './routes/api/public/email.unsubscribe'
 import { Route as ApiPublicEmailResendWebhookRouteImport } from './routes/api/public/email.resend-webhook'
+import { Route as ApiOrdersOrderIdTransitionRouteImport } from './routes/api/orders.$orderId.transition'
 import { Route as ApiOrdersOrderIdTelegramMessageRouteImport } from './routes/api/orders.$orderId.telegram-message'
 import { Route as ApiIntegrationsVerifyProviderRouteImport } from './routes/api/integrations.verify.$provider'
 import { Route as ApiIntegrationsSyncProviderRouteImport } from './routes/api/integrations.sync.$provider'
@@ -377,14 +377,39 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiOnboardingRoute = ApiOnboardingRouteImport.update({
+  id: '/api/onboarding',
+  path: '/api/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNotificationsRoute = ApiNotificationsRouteImport.update({
+  id: '/api/notifications',
+  path: '/api/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMarqKeysRoute = ApiMarqKeysRouteImport.update({
   id: '/api/marq-keys',
   path: '/api/marq-keys',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiInsightsRoute = ApiInsightsRouteImport.update({
+  id: '/api/insights',
+  path: '/api/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiIncidentsRoute = ApiIncidentsRouteImport.update({
+  id: '/api/incidents',
+  path: '/api/incidents',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiDocsRoute = ApiDocsRouteImport.update({
   id: '/api/docs',
   path: '/api/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAutomationsRoute = ApiAutomationsRouteImport.update({
+  id: '/api/automations',
+  path: '/api/automations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
@@ -1159,51 +1184,6 @@ const ApiSubscriptionCallbackRoute = ApiSubscriptionCallbackRouteImport.update({
   path: '/api/subscription/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAnalyticsSummaryRoute = ApiAnalyticsSummaryRouteImport.update({
-  id: '/api/analytics/summary',
-  path: '/api/analytics/summary',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAnalyticsComparisonRoute = ApiAnalyticsComparisonRouteImport.update({
-  id: '/api/analytics/comparison',
-  path: '/api/analytics/comparison',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiInsightsRoute = ApiInsightsRouteImport.update({
-  id: '/api/insights',
-  path: '/api/insights',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiIncidentsRoute = ApiIncidentsRouteImport.update({
-  id: '/api/incidents',
-  path: '/api/incidents',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiOrdersOrderIdTransitionRoute = ApiOrdersOrderIdTransitionRouteImport.update({
-  id: '/api/orders/$orderId/transition',
-  path: '/api/orders/$orderId/transition',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiNotificationsRoute = ApiNotificationsRouteImport.update({
-  id: '/api/notifications',
-  path: '/api/notifications',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAutomationsRoute = ApiAutomationsRouteImport.update({
-  id: '/api/automations',
-  path: '/api/automations',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAutomationsIdRoute = ApiAutomationsIdRouteImport.update({
-  id: '/api/automations/$id',
-  path: '/api/automations/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiOnboardingRoute = ApiOnboardingRouteImport.update({
-  id: '/api/onboarding',
-  path: '/api/onboarding',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiSiteBuilderBuildRoute = ApiSiteBuilderBuildRouteImport.update({
   id: '/api/site-builder/build',
   path: '/api/site-builder/build',
@@ -1250,6 +1230,16 @@ const ApiDomainsVerifyRoute = ApiDomainsVerifyRouteImport.update({
   path: '/api/domains/verify',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAutomationsIdRoute = ApiAutomationsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiAutomationsRoute,
+} as any)
+const ApiAnalyticsSummaryRoute = ApiAnalyticsSummaryRouteImport.update({
+  id: '/api/analytics/summary',
+  path: '/api/analytics/summary',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAnalyticsSmartRoute = ApiAnalyticsSmartRouteImport.update({
   id: '/api/analytics/smart',
   path: '/api/analytics/smart',
@@ -1263,6 +1253,11 @@ const ApiAnalyticsExportRoute = ApiAnalyticsExportRouteImport.update({
 const ApiAnalyticsDashboardRoute = ApiAnalyticsDashboardRouteImport.update({
   id: '/api/analytics/dashboard',
   path: '/api/analytics/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAnalyticsComparisonRoute = ApiAnalyticsComparisonRouteImport.update({
+  id: '/api/analytics/comparison',
+  path: '/api/analytics/comparison',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAiAskRoute = ApiAiAskRouteImport.update({
@@ -1609,6 +1604,12 @@ const ApiPublicEmailResendWebhookRoute =
     path: '/api/public/email/resend-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiOrdersOrderIdTransitionRoute =
+  ApiOrdersOrderIdTransitionRouteImport.update({
+    id: '/api/orders/$orderId/transition',
+    path: '/api/orders/$orderId/transition',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiOrdersOrderIdTelegramMessageRoute =
   ApiOrdersOrderIdTelegramMessageRouteImport.update({
     id: '/api/orders/$orderId/telegram-message',
@@ -1678,8 +1679,13 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/api/automations': typeof ApiAutomationsRouteWithChildren
   '/api/docs': typeof ApiDocsRoute
+  '/api/incidents': typeof ApiIncidentsRoute
+  '/api/insights': typeof ApiInsightsRoute
   '/api/marq-keys': typeof ApiMarqKeysRoute
+  '/api/notifications': typeof ApiNotificationsRoute
+  '/api/onboarding': typeof ApiOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
@@ -1723,18 +1729,12 @@ export interface FileRoutesByFullPath {
   '/brand/team': typeof AuthenticatedBrandTeamRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/api/ai/ask': typeof ApiAiAskRoute
+  '/api/analytics/comparison': typeof ApiAnalyticsComparisonRoute
   '/api/analytics/dashboard': typeof ApiAnalyticsDashboardRoute
   '/api/analytics/export': typeof ApiAnalyticsExportRoute
   '/api/analytics/smart': typeof ApiAnalyticsSmartRoute
   '/api/analytics/summary': typeof ApiAnalyticsSummaryRoute
-  '/api/automations': typeof ApiAutomationsRoute
   '/api/automations/$id': typeof ApiAutomationsIdRoute
-  '/api/notifications': typeof ApiNotificationsRoute
-  '/api/onboarding': typeof ApiOnboardingRoute
-  '/api/insights': typeof ApiInsightsRoute
-  '/api/incidents': typeof ApiIncidentsRoute
-  '/api/analytics/comparison': typeof ApiAnalyticsComparisonRoute
-  '/api/orders/$orderId/transition': typeof ApiOrdersOrderIdTransitionRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
@@ -1887,6 +1887,7 @@ export interface FileRoutesByFullPath {
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
   '/api/integrations/verify/$provider': typeof ApiIntegrationsVerifyProviderRoute
   '/api/orders/$orderId/telegram-message': typeof ApiOrdersOrderIdTelegramMessageRoute
+  '/api/orders/$orderId/transition': typeof ApiOrdersOrderIdTransitionRoute
   '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
   '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
   '/api/public/marq/events': typeof ApiPublicMarqEventsRoute
@@ -1932,8 +1933,13 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/api/automations': typeof ApiAutomationsRouteWithChildren
   '/api/docs': typeof ApiDocsRoute
+  '/api/incidents': typeof ApiIncidentsRoute
+  '/api/insights': typeof ApiInsightsRoute
   '/api/marq-keys': typeof ApiMarqKeysRoute
+  '/api/notifications': typeof ApiNotificationsRoute
+  '/api/onboarding': typeof ApiOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
@@ -1976,18 +1982,12 @@ export interface FileRoutesByTo {
   '/brand/team': typeof AuthenticatedBrandTeamRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/api/ai/ask': typeof ApiAiAskRoute
+  '/api/analytics/comparison': typeof ApiAnalyticsComparisonRoute
   '/api/analytics/dashboard': typeof ApiAnalyticsDashboardRoute
   '/api/analytics/export': typeof ApiAnalyticsExportRoute
   '/api/analytics/smart': typeof ApiAnalyticsSmartRoute
   '/api/analytics/summary': typeof ApiAnalyticsSummaryRoute
-  '/api/automations': typeof ApiAutomationsRoute
   '/api/automations/$id': typeof ApiAutomationsIdRoute
-  '/api/notifications': typeof ApiNotificationsRoute
-  '/api/onboarding': typeof ApiOnboardingRoute
-  '/api/insights': typeof ApiInsightsRoute
-  '/api/incidents': typeof ApiIncidentsRoute
-  '/api/analytics/comparison': typeof ApiAnalyticsComparisonRoute
-  '/api/orders/$orderId/transition': typeof ApiOrdersOrderIdTransitionRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
@@ -2140,6 +2140,7 @@ export interface FileRoutesByTo {
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
   '/api/integrations/verify/$provider': typeof ApiIntegrationsVerifyProviderRoute
   '/api/orders/$orderId/telegram-message': typeof ApiOrdersOrderIdTelegramMessageRoute
+  '/api/orders/$orderId/transition': typeof ApiOrdersOrderIdTransitionRoute
   '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
   '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
   '/api/public/marq/events': typeof ApiPublicMarqEventsRoute
@@ -2187,8 +2188,13 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/api/automations': typeof ApiAutomationsRouteWithChildren
   '/api/docs': typeof ApiDocsRoute
+  '/api/incidents': typeof ApiIncidentsRoute
+  '/api/insights': typeof ApiInsightsRoute
   '/api/marq-keys': typeof ApiMarqKeysRoute
+  '/api/notifications': typeof ApiNotificationsRoute
+  '/api/onboarding': typeof ApiOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
@@ -2232,18 +2238,12 @@ export interface FileRoutesById {
   '/_authenticated/brand/team': typeof AuthenticatedBrandTeamRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/api/ai/ask': typeof ApiAiAskRoute
+  '/api/analytics/comparison': typeof ApiAnalyticsComparisonRoute
   '/api/analytics/dashboard': typeof ApiAnalyticsDashboardRoute
   '/api/analytics/export': typeof ApiAnalyticsExportRoute
   '/api/analytics/smart': typeof ApiAnalyticsSmartRoute
   '/api/analytics/summary': typeof ApiAnalyticsSummaryRoute
-  '/api/automations': typeof ApiAutomationsRoute
   '/api/automations/$id': typeof ApiAutomationsIdRoute
-  '/api/notifications': typeof ApiNotificationsRoute
-  '/api/onboarding': typeof ApiOnboardingRoute
-  '/api/insights': typeof ApiInsightsRoute
-  '/api/incidents': typeof ApiIncidentsRoute
-  '/api/analytics/comparison': typeof ApiAnalyticsComparisonRoute
-  '/api/orders/$orderId/transition': typeof ApiOrdersOrderIdTransitionRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
@@ -2396,6 +2396,7 @@ export interface FileRoutesById {
   '/api/integrations/sync/$provider': typeof ApiIntegrationsSyncProviderRoute
   '/api/integrations/verify/$provider': typeof ApiIntegrationsVerifyProviderRoute
   '/api/orders/$orderId/telegram-message': typeof ApiOrdersOrderIdTelegramMessageRoute
+  '/api/orders/$orderId/transition': typeof ApiOrdersOrderIdTransitionRoute
   '/api/public/email/resend-webhook': typeof ApiPublicEmailResendWebhookRoute
   '/api/public/email/unsubscribe': typeof ApiPublicEmailUnsubscribeRoute
   '/api/public/marq/events': typeof ApiPublicMarqEventsRoute
@@ -2443,8 +2444,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/profile'
+    | '/api/automations'
     | '/api/docs'
+    | '/api/incidents'
+    | '/api/insights'
     | '/api/marq-keys'
+    | '/api/notifications'
+    | '/api/onboarding'
     | '/auth/callback'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
@@ -2488,9 +2494,12 @@ export interface FileRouteTypes {
     | '/brand/team'
     | '/invite/$token'
     | '/api/ai/ask'
+    | '/api/analytics/comparison'
     | '/api/analytics/dashboard'
     | '/api/analytics/export'
     | '/api/analytics/smart'
+    | '/api/analytics/summary'
+    | '/api/automations/$id'
     | '/api/domains/verify'
     | '/api/email/campaign-send'
     | '/api/email/domain-setup'
@@ -2643,6 +2652,7 @@ export interface FileRouteTypes {
     | '/api/integrations/sync/$provider'
     | '/api/integrations/verify/$provider'
     | '/api/orders/$orderId/telegram-message'
+    | '/api/orders/$orderId/transition'
     | '/api/public/email/resend-webhook'
     | '/api/public/email/unsubscribe'
     | '/api/public/marq/events'
@@ -2688,8 +2698,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/profile'
+    | '/api/automations'
     | '/api/docs'
+    | '/api/incidents'
+    | '/api/insights'
     | '/api/marq-keys'
+    | '/api/notifications'
+    | '/api/onboarding'
     | '/auth/callback'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
@@ -2732,9 +2747,12 @@ export interface FileRouteTypes {
     | '/brand/team'
     | '/invite/$token'
     | '/api/ai/ask'
+    | '/api/analytics/comparison'
     | '/api/analytics/dashboard'
     | '/api/analytics/export'
     | '/api/analytics/smart'
+    | '/api/analytics/summary'
+    | '/api/automations/$id'
     | '/api/domains/verify'
     | '/api/email/campaign-send'
     | '/api/email/domain-setup'
@@ -2887,6 +2905,7 @@ export interface FileRouteTypes {
     | '/api/integrations/sync/$provider'
     | '/api/integrations/verify/$provider'
     | '/api/orders/$orderId/telegram-message'
+    | '/api/orders/$orderId/transition'
     | '/api/public/email/resend-webhook'
     | '/api/public/email/unsubscribe'
     | '/api/public/marq/events'
@@ -2933,8 +2952,13 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
     | '/_authenticated/profile'
+    | '/api/automations'
     | '/api/docs'
+    | '/api/incidents'
+    | '/api/insights'
     | '/api/marq-keys'
+    | '/api/notifications'
+    | '/api/onboarding'
     | '/auth/callback'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
@@ -2978,9 +3002,12 @@ export interface FileRouteTypes {
     | '/_authenticated/brand/team'
     | '/_authenticated/invite/$token'
     | '/api/ai/ask'
+    | '/api/analytics/comparison'
     | '/api/analytics/dashboard'
     | '/api/analytics/export'
     | '/api/analytics/smart'
+    | '/api/analytics/summary'
+    | '/api/automations/$id'
     | '/api/domains/verify'
     | '/api/email/campaign-send'
     | '/api/email/domain-setup'
@@ -3133,6 +3160,7 @@ export interface FileRouteTypes {
     | '/api/integrations/sync/$provider'
     | '/api/integrations/verify/$provider'
     | '/api/orders/$orderId/telegram-message'
+    | '/api/orders/$orderId/transition'
     | '/api/public/email/resend-webhook'
     | '/api/public/email/unsubscribe'
     | '/api/public/marq/events'
@@ -3177,17 +3205,24 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  ApiAutomationsRoute: typeof ApiAutomationsRouteWithChildren
   ApiDocsRoute: typeof ApiDocsRoute
+  ApiIncidentsRoute: typeof ApiIncidentsRoute
+  ApiInsightsRoute: typeof ApiInsightsRoute
   ApiMarqKeysRoute: typeof ApiMarqKeysRoute
+  ApiNotificationsRoute: typeof ApiNotificationsRoute
+  ApiOnboardingRoute: typeof ApiOnboardingRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   HooksIngestRoute: typeof HooksIngestRoute
   MSlugRoute: typeof MSlugRoute
   SSlugRoute: typeof SSlugRouteWithChildren
   TrackSplatRoute: typeof TrackSplatRoute
   ApiAiAskRoute: typeof ApiAiAskRoute
+  ApiAnalyticsComparisonRoute: typeof ApiAnalyticsComparisonRoute
   ApiAnalyticsDashboardRoute: typeof ApiAnalyticsDashboardRoute
   ApiAnalyticsExportRoute: typeof ApiAnalyticsExportRoute
   ApiAnalyticsSmartRoute: typeof ApiAnalyticsSmartRoute
+  ApiAnalyticsSummaryRoute: typeof ApiAnalyticsSummaryRoute
   ApiDomainsVerifyRoute: typeof ApiDomainsVerifyRoute
   ApiEmailCampaignSendRoute: typeof ApiEmailCampaignSendRoute
   ApiEmailDomainSetupRoute: typeof ApiEmailDomainSetupRoute
@@ -3197,15 +3232,6 @@ export interface RootRouteChildren {
   ApiEmailOrderStatusRoute: typeof ApiEmailOrderStatusRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiSiteBuilderBuildRoute: typeof ApiSiteBuilderBuildRoute
-  ApiAnalyticsSummaryRoute: typeof ApiAnalyticsSummaryRoute
-  ApiAnalyticsComparisonRoute: typeof ApiAnalyticsComparisonRoute
-  ApiAutomationsRoute: typeof ApiAutomationsRoute
-  ApiAutomationsIdRoute: typeof ApiAutomationsIdRoute
-  ApiNotificationsRoute: typeof ApiNotificationsRoute
-  ApiOnboardingRoute: typeof ApiOnboardingRoute
-  ApiInsightsRoute: typeof ApiInsightsRoute
-  ApiIncidentsRoute: typeof ApiIncidentsRoute
-  ApiOrdersOrderIdTransitionRoute: typeof ApiOrdersOrderIdTransitionRoute
   ApiSubscriptionCallbackRoute: typeof ApiSubscriptionCallbackRoute
   ApiSubscriptionInitRoute: typeof ApiSubscriptionInitRoute
   ApiTelegramStatusRoute: typeof ApiTelegramStatusRoute
@@ -3336,6 +3362,7 @@ export interface RootRouteChildren {
   ApiIntegrationsSyncProviderRoute: typeof ApiIntegrationsSyncProviderRoute
   ApiIntegrationsVerifyProviderRoute: typeof ApiIntegrationsVerifyProviderRoute
   ApiOrdersOrderIdTelegramMessageRoute: typeof ApiOrdersOrderIdTelegramMessageRoute
+  ApiOrdersOrderIdTransitionRoute: typeof ApiOrdersOrderIdTransitionRoute
   ApiPublicEmailResendWebhookRoute: typeof ApiPublicEmailResendWebhookRoute
   ApiPublicEmailUnsubscribeRoute: typeof ApiPublicEmailUnsubscribeRoute
   ApiPublicMarqEventsRoute: typeof ApiPublicMarqEventsRoute
@@ -3521,6 +3548,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/onboarding': {
+      id: '/api/onboarding'
+      path: '/api/onboarding'
+      fullPath: '/api/onboarding'
+      preLoaderRoute: typeof ApiOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/notifications': {
+      id: '/api/notifications'
+      path: '/api/notifications'
+      fullPath: '/api/notifications'
+      preLoaderRoute: typeof ApiNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/marq-keys': {
       id: '/api/marq-keys'
       path: '/api/marq-keys'
@@ -3528,11 +3569,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMarqKeysRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/insights': {
+      id: '/api/insights'
+      path: '/api/insights'
+      fullPath: '/api/insights'
+      preLoaderRoute: typeof ApiInsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/incidents': {
+      id: '/api/incidents'
+      path: '/api/incidents'
+      fullPath: '/api/incidents'
+      preLoaderRoute: typeof ApiIncidentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/docs': {
       id: '/api/docs'
       path: '/api/docs'
       fullPath: '/api/docs'
       preLoaderRoute: typeof ApiDocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/automations': {
+      id: '/api/automations'
+      path: '/api/automations'
+      fullPath: '/api/automations'
+      preLoaderRoute: typeof ApiAutomationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/profile': {
@@ -4571,6 +4633,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDomainsVerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/automations/$id': {
+      id: '/api/automations/$id'
+      path: '/$id'
+      fullPath: '/api/automations/$id'
+      preLoaderRoute: typeof ApiAutomationsIdRouteImport
+      parentRoute: typeof ApiAutomationsRoute
+    }
+    '/api/analytics/summary': {
+      id: '/api/analytics/summary'
+      path: '/api/analytics/summary'
+      fullPath: '/api/analytics/summary'
+      preLoaderRoute: typeof ApiAnalyticsSummaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/analytics/smart': {
       id: '/api/analytics/smart'
       path: '/api/analytics/smart'
@@ -4590,6 +4666,13 @@ declare module '@tanstack/react-router' {
       path: '/api/analytics/dashboard'
       fullPath: '/api/analytics/dashboard'
       preLoaderRoute: typeof ApiAnalyticsDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analytics/comparison': {
+      id: '/api/analytics/comparison'
+      path: '/api/analytics/comparison'
+      fullPath: '/api/analytics/comparison'
+      preLoaderRoute: typeof ApiAnalyticsComparisonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/ai/ask': {
@@ -5012,6 +5095,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicEmailResendWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/orders/$orderId/transition': {
+      id: '/api/orders/$orderId/transition'
+      path: '/api/orders/$orderId/transition'
+      fullPath: '/api/orders/$orderId/transition'
+      preLoaderRoute: typeof ApiOrdersOrderIdTransitionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/orders/$orderId/telegram-message': {
       id: '/api/orders/$orderId/telegram-message'
       path: '/api/orders/$orderId/telegram-message'
@@ -5225,6 +5315,18 @@ const HandbookRouteWithChildren = HandbookRoute._addFileChildren(
   HandbookRouteChildren,
 )
 
+interface ApiAutomationsRouteChildren {
+  ApiAutomationsIdRoute: typeof ApiAutomationsIdRoute
+}
+
+const ApiAutomationsRouteChildren: ApiAutomationsRouteChildren = {
+  ApiAutomationsIdRoute: ApiAutomationsIdRoute,
+}
+
+const ApiAutomationsRouteWithChildren = ApiAutomationsRoute._addFileChildren(
+  ApiAutomationsRouteChildren,
+)
+
 interface SSlugRouteChildren {
   SSlugAboutRoute: typeof SSlugAboutRoute
   SSlugAccountRoute: typeof SSlugAccountRoute
@@ -5271,17 +5373,24 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  ApiAutomationsRoute: ApiAutomationsRouteWithChildren,
   ApiDocsRoute: ApiDocsRoute,
+  ApiIncidentsRoute: ApiIncidentsRoute,
+  ApiInsightsRoute: ApiInsightsRoute,
   ApiMarqKeysRoute: ApiMarqKeysRoute,
+  ApiNotificationsRoute: ApiNotificationsRoute,
+  ApiOnboardingRoute: ApiOnboardingRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   HooksIngestRoute: HooksIngestRoute,
   MSlugRoute: MSlugRoute,
   SSlugRoute: SSlugRouteWithChildren,
   TrackSplatRoute: TrackSplatRoute,
   ApiAiAskRoute: ApiAiAskRoute,
+  ApiAnalyticsComparisonRoute: ApiAnalyticsComparisonRoute,
   ApiAnalyticsDashboardRoute: ApiAnalyticsDashboardRoute,
   ApiAnalyticsExportRoute: ApiAnalyticsExportRoute,
   ApiAnalyticsSmartRoute: ApiAnalyticsSmartRoute,
+  ApiAnalyticsSummaryRoute: ApiAnalyticsSummaryRoute,
   ApiDomainsVerifyRoute: ApiDomainsVerifyRoute,
   ApiEmailCampaignSendRoute: ApiEmailCampaignSendRoute,
   ApiEmailDomainSetupRoute: ApiEmailDomainSetupRoute,
@@ -5291,15 +5400,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiEmailOrderStatusRoute: ApiEmailOrderStatusRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiSiteBuilderBuildRoute: ApiSiteBuilderBuildRoute,
-  ApiAnalyticsSummaryRoute: ApiAnalyticsSummaryRoute,
-  ApiAnalyticsComparisonRoute: ApiAnalyticsComparisonRoute,
-  ApiAutomationsRoute: ApiAutomationsRoute,
-  ApiAutomationsIdRoute: ApiAutomationsIdRoute,
-  ApiNotificationsRoute: ApiNotificationsRoute,
-  ApiOnboardingRoute: ApiOnboardingRoute,
-  ApiInsightsRoute: ApiInsightsRoute,
-  ApiIncidentsRoute: ApiIncidentsRoute,
-  ApiOrdersOrderIdTransitionRoute: ApiOrdersOrderIdTransitionRoute,
   ApiSubscriptionCallbackRoute: ApiSubscriptionCallbackRoute,
   ApiSubscriptionInitRoute: ApiSubscriptionInitRoute,
   ApiTelegramStatusRoute: ApiTelegramStatusRoute,
@@ -5437,6 +5537,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiIntegrationsSyncProviderRoute: ApiIntegrationsSyncProviderRoute,
   ApiIntegrationsVerifyProviderRoute: ApiIntegrationsVerifyProviderRoute,
   ApiOrdersOrderIdTelegramMessageRoute: ApiOrdersOrderIdTelegramMessageRoute,
+  ApiOrdersOrderIdTransitionRoute: ApiOrdersOrderIdTransitionRoute,
   ApiPublicEmailResendWebhookRoute: ApiPublicEmailResendWebhookRoute,
   ApiPublicEmailUnsubscribeRoute: ApiPublicEmailUnsubscribeRoute,
   ApiPublicMarqEventsRoute: ApiPublicMarqEventsRoute,
