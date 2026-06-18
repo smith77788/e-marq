@@ -186,10 +186,14 @@ import { Route as ApiAnalyticsSmartRouteImport } from './routes/api/analytics.sm
 import { Route as ApiAnalyticsExportRouteImport } from './routes/api/analytics.export'
 import { Route as ApiAnalyticsDashboardRouteImport } from './routes/api/analytics.dashboard'
 import { Route as ApiAnalyticsSummaryRouteImport } from './routes/api/analytics.summary'
+import { Route as ApiAnalyticsComparisonRouteImport } from './routes/api/analytics.comparison'
 import { Route as ApiNotificationsRouteImport } from './routes/api/notifications'
 import { Route as ApiAutomationsRouteImport } from './routes/api/automations'
 import { Route as ApiAutomationsIdRouteImport } from './routes/api/automations.$id'
 import { Route as ApiOnboardingRouteImport } from './routes/api/onboarding'
+import { Route as ApiInsightsRouteImport } from './routes/api/insights'
+import { Route as ApiIncidentsRouteImport } from './routes/api/incidents'
+import { Route as ApiOrdersOrderIdTransitionRouteImport } from './routes/api/orders.$orderId.transition'
 import { Route as ApiAiAskRouteImport } from './routes/api/ai.ask'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedBrandTeamRouteImport } from './routes/_authenticated/brand.team'
@@ -1160,6 +1164,26 @@ const ApiAnalyticsSummaryRoute = ApiAnalyticsSummaryRouteImport.update({
   path: '/api/analytics/summary',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAnalyticsComparisonRoute = ApiAnalyticsComparisonRouteImport.update({
+  id: '/api/analytics/comparison',
+  path: '/api/analytics/comparison',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiInsightsRoute = ApiInsightsRouteImport.update({
+  id: '/api/insights',
+  path: '/api/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiIncidentsRoute = ApiIncidentsRouteImport.update({
+  id: '/api/incidents',
+  path: '/api/incidents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOrdersOrderIdTransitionRoute = ApiOrdersOrderIdTransitionRouteImport.update({
+  id: '/api/orders/$orderId/transition',
+  path: '/api/orders/$orderId/transition',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiNotificationsRoute = ApiNotificationsRouteImport.update({
   id: '/api/notifications',
   path: '/api/notifications',
@@ -1707,6 +1731,10 @@ export interface FileRoutesByFullPath {
   '/api/automations/$id': typeof ApiAutomationsIdRoute
   '/api/notifications': typeof ApiNotificationsRoute
   '/api/onboarding': typeof ApiOnboardingRoute
+  '/api/insights': typeof ApiInsightsRoute
+  '/api/incidents': typeof ApiIncidentsRoute
+  '/api/analytics/comparison': typeof ApiAnalyticsComparisonRoute
+  '/api/orders/$orderId/transition': typeof ApiOrdersOrderIdTransitionRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
@@ -1956,6 +1984,10 @@ export interface FileRoutesByTo {
   '/api/automations/$id': typeof ApiAutomationsIdRoute
   '/api/notifications': typeof ApiNotificationsRoute
   '/api/onboarding': typeof ApiOnboardingRoute
+  '/api/insights': typeof ApiInsightsRoute
+  '/api/incidents': typeof ApiIncidentsRoute
+  '/api/analytics/comparison': typeof ApiAnalyticsComparisonRoute
+  '/api/orders/$orderId/transition': typeof ApiOrdersOrderIdTransitionRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
@@ -2208,6 +2240,10 @@ export interface FileRoutesById {
   '/api/automations/$id': typeof ApiAutomationsIdRoute
   '/api/notifications': typeof ApiNotificationsRoute
   '/api/onboarding': typeof ApiOnboardingRoute
+  '/api/insights': typeof ApiInsightsRoute
+  '/api/incidents': typeof ApiIncidentsRoute
+  '/api/analytics/comparison': typeof ApiAnalyticsComparisonRoute
+  '/api/orders/$orderId/transition': typeof ApiOrdersOrderIdTransitionRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
@@ -3162,10 +3198,14 @@ export interface RootRouteChildren {
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiSiteBuilderBuildRoute: typeof ApiSiteBuilderBuildRoute
   ApiAnalyticsSummaryRoute: typeof ApiAnalyticsSummaryRoute
+  ApiAnalyticsComparisonRoute: typeof ApiAnalyticsComparisonRoute
   ApiAutomationsRoute: typeof ApiAutomationsRoute
   ApiAutomationsIdRoute: typeof ApiAutomationsIdRoute
   ApiNotificationsRoute: typeof ApiNotificationsRoute
   ApiOnboardingRoute: typeof ApiOnboardingRoute
+  ApiInsightsRoute: typeof ApiInsightsRoute
+  ApiIncidentsRoute: typeof ApiIncidentsRoute
+  ApiOrdersOrderIdTransitionRoute: typeof ApiOrdersOrderIdTransitionRoute
   ApiSubscriptionCallbackRoute: typeof ApiSubscriptionCallbackRoute
   ApiSubscriptionInitRoute: typeof ApiSubscriptionInitRoute
   ApiTelegramStatusRoute: typeof ApiTelegramStatusRoute
@@ -5252,10 +5292,14 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiSiteBuilderBuildRoute: ApiSiteBuilderBuildRoute,
   ApiAnalyticsSummaryRoute: ApiAnalyticsSummaryRoute,
+  ApiAnalyticsComparisonRoute: ApiAnalyticsComparisonRoute,
   ApiAutomationsRoute: ApiAutomationsRoute,
   ApiAutomationsIdRoute: ApiAutomationsIdRoute,
   ApiNotificationsRoute: ApiNotificationsRoute,
   ApiOnboardingRoute: ApiOnboardingRoute,
+  ApiInsightsRoute: ApiInsightsRoute,
+  ApiIncidentsRoute: ApiIncidentsRoute,
+  ApiOrdersOrderIdTransitionRoute: ApiOrdersOrderIdTransitionRoute,
   ApiSubscriptionCallbackRoute: ApiSubscriptionCallbackRoute,
   ApiSubscriptionInitRoute: ApiSubscriptionInitRoute,
   ApiTelegramStatusRoute: ApiTelegramStatusRoute,
