@@ -46,13 +46,6 @@ function AuthCallbackPage() {
   const { t } = useT();
   const redirected = useRef(false);
 
-  // Check if Supabase is configured at all
-  const supabaseConfigured = !!(
-    import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL
-  ) && !!(
-    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY
-  );
-
   function doRedirect(dest?: string) {
     if (redirected.current) return;
     redirected.current = true;
@@ -70,21 +63,15 @@ function AuthCallbackPage() {
     // If user is already known, fast path above handles it
     if (user) return;
 
-    // If Supabase is not configured, redirect immediately
-    if (!supabaseConfigured) {
-      doRedirect("/login");
-      return;
-    }
-
     // If the URL contains OAuth tokens, Supabase is still processing them
+    // asynchronously. Subscribe to onAuthStateChange and wait — when Supabase
+    // finishes it fires SIGNED_IN, which also updates useAuth (and triggers the
+    // effect above). Use a direct subscription here as a belt-and-suspenders
+    // measure so we don't miss the event if it fires before the hook re-renders.
     if (hasOAuthParams()) {
       let timeoutId: ReturnType<typeof setTimeout>;
 
-      // Log for debugging
-      console.log("[auth/callback] OAuth params detected, waiting for Supabase...");
-
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        console.log("[auth/callback] Auth state change:", event, !!session?.user);
         if (event === "SIGNED_IN" && session?.user) {
           clearTimeout(timeoutId);
           subscription.unsubscribe();
@@ -92,15 +79,11 @@ function AuthCallbackPage() {
         }
       });
 
-      // Fallback: if nothing happens in 8 s, give up
+      // Fallback: if nothing happens in 10 s, give up
       timeoutId = setTimeout(() => {
-        console.warn("[auth/callback] Timeout — no auth state change after 8s");
         subscription.unsubscribe();
-        if (!redirected.current) {
-          // Show error before redirect
-          window.location.replace("/login?error=auth_timeout");
-        }
-      }, 8_000);
+        if (!redirected.current) window.location.replace("/login");
+      }, 10_000);
 
       return () => {
         clearTimeout(timeoutId);
@@ -130,7 +113,7 @@ function AuthCallbackPage() {
     return () => {
       cancelled = true;
     };
-  }, [loading, user, supabaseConfigured]);
+  }, [loading, user]);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">

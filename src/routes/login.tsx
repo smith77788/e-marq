@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT, tStatic } from "@/lib/i18n";
@@ -14,6 +13,9 @@ import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 import { NOINDEX_META } from "@/lib/seo";
 
 export const Route = createFileRoute("/login")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    error: typeof s.error === "string" ? s.error : undefined,
+  }),
   head: () => ({
     meta: [
       { title: `${tStatic("auth.signinTitle")} — MARQ` },
@@ -27,10 +29,14 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const { user, loading, signIn } = useAuth();
   const { t } = useT();
+  const search = Route.useSearch();
   const [submitting, setSubmitting] = useState<"google" | "apple" | null>(null);
   const [emailSubmitting, setEmailSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // Show error if Supabase is not configured
+  const configError = search.error === "supabase_not_configured";
 
   function readAndClearDest(): string {
     try {
@@ -63,7 +69,13 @@ function LoginPage() {
       toast.success(t("auth.welcome"));
       window.location.assign(readAndClearDest());
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t("auth.fail"));
+      const msg = err instanceof Error ? err.message : String(err);
+      // If Supabase not configured, show helpful message
+      if (msg.includes("not configured") || msg.includes("Supabase")) {
+        toast.error("Авторизація через email тимчасово недоступна. Спробуйте Google.");
+      } else {
+        toast.error(msg || t("auth.fail"));
+      }
       setEmailSubmitting(false);
     }
   }
@@ -71,27 +83,46 @@ function LoginPage() {
   async function onOAuth(provider: "google" | "apple") {
     setSubmitting(provider);
     try {
-      const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: `${window.location.origin}/auth/callback`,
-      });
-      if (result.redirected) return;
-
-      if (result.error) {
-        const { data } = await supabase.auth.getSession();
-        if (data.session) {
+      // Lovable proxy works WITHOUT Supabase env vars — try it first
+      try {
+        const { lovable } = await import("@/integrations/lovable");
+        const result = await lovable.auth.signInWithOAuth(provider, {
+          redirect_uri: `${window.location.origin}/auth/callback`,
+        });
+        if (result.redirected) return; // browser navigated — we're done
+        if (!result.error) {
           window.location.assign("/auth/callback");
           return;
         }
-        const msg = result.error instanceof Error ? result.error.message : String(result.error);
-        if (!/cancel/i.test(msg)) {
-          toast.error(msg || t(provider === "apple" ? "auth.failApple" : "auth.failGoogle"));
+        // Proxy returned error — check if session was somehow set anyway
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data.session) {
+            window.location.assign("/auth/callback");
+            return;
+          }
+        } catch {
+          // Supabase not configured — that's ok, Lovable proxy should handle it
         }
-        setSubmitting(null);
-        return;
+      } catch {
+        // Lovable proxy unavailable
       }
 
-      toast.success(t("auth.welcome"));
-      window.location.assign("/auth/callback");
+      // Fallback: direct Supabase OAuth (only if Supabase is configured)
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: { redirectTo: `${window.location.origin}/auth/callback` },
+        });
+        if (error) {
+          toast.error(error.message || t(provider === "apple" ? "auth.failApple" : "auth.failGoogle"));
+          setSubmitting(null);
+        }
+      } catch {
+        // Supabase not configured
+        toast.error("Авторизація тимчасово недоступна. Спробуйте пізніше.");
+        setSubmitting(null);
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("auth.fail"));
       setSubmitting(null);
@@ -109,6 +140,11 @@ function LoginPage() {
           <CardDescription>{t("auth.signinDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {configError && (
+            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+              Сервіс тимчасово недоступний. Спробуйте увійти через email та пароль або зверніться до підтримки.
+            </div>
+          )}
           <form onSubmit={onEmailSubmit} className="space-y-3">
             <div className="space-y-1.5">
               <Label htmlFor="email">{t("auth.email")}</Label>
