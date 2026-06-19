@@ -515,6 +515,31 @@ export const AGENT_CATALOG: AgentMeta[] = [
     supportsAutoApply: false,
     i18nKey: "dataGapAuditor",
   },
+
+  // === Missing agents (Batch 2-11) ===
+  { id: "onboarding", icon: "Sparkles", category: "operations", defaultRisk: "low", supportsAutoApply: true, i18nKey: "onboarding" },
+  { id: "segmentation", icon: "BarChart3", category: "analytics", defaultRisk: "low", supportsAutoApply: false, i18nKey: "segmentation" },
+  { id: "margin-optimizer", icon: "Coins", category: "growth", defaultRisk: "medium", supportsAutoApply: true, i18nKey: "marginOptimizer" },
+  { id: "promo-fatigue", icon: "Shield", category: "safety", defaultRisk: "medium", supportsAutoApply: true, i18nKey: "promoFatigue" },
+  { id: "nurture-roi", icon: "Activity", category: "retention", defaultRisk: "low", supportsAutoApply: false, i18nKey: "nurtureRoi" },
+  { id: "customer-segments-auto", icon: "Users", category: "analytics", defaultRisk: "low", supportsAutoApply: true, i18nKey: "customerSegmentsAuto" },
+  { id: "product-affinity", icon: "ShoppingCart", category: "growth", defaultRisk: "low", supportsAutoApply: false, i18nKey: "productAffinity" },
+  { id: "social-proof-live", icon: "Megaphone", category: "growth", defaultRisk: "low", supportsAutoApply: true, i18nKey: "socialProofLive" },
+  { id: "broadcast-roi", icon: "BarChart3", category: "communication", defaultRisk: "low", supportsAutoApply: false, i18nKey: "broadcastRoi" },
+  { id: "brand-profile", icon: "Brain", category: "operations", defaultRisk: "low", supportsAutoApply: true, i18nKey: "brandProfile" },
+  { id: "catalog-enricher", icon: "Boxes", category: "operations", defaultRisk: "low", supportsAutoApply: true, i18nKey: "catalogEnricher" },
+  { id: "margin-estimator", icon: "Coins", category: "analytics", defaultRisk: "low", supportsAutoApply: false, i18nKey: "marginEstimator" },
+  { id: "customer-voice", icon: "Users", category: "retention", defaultRisk: "low", supportsAutoApply: false, i18nKey: "customerVoice" },
+  { id: "channel-discovery", icon: "Search", category: "operations", defaultRisk: "low", supportsAutoApply: false, i18nKey: "channelDiscovery" },
+  { id: "integration-scout", icon: "Zap", category: "operations", defaultRisk: "low", supportsAutoApply: false, i18nKey: "integrationScout" },
+  { id: "review-velocity", icon: "Activity", category: "retention", defaultRisk: "low", supportsAutoApply: false, i18nKey: "reviewVelocity" },
+  { id: "time-of-day-pricer", icon: "Tag", category: "growth", defaultRisk: "medium", supportsAutoApply: true, i18nKey: "timeOfDayPricer" },
+  { id: "lifecycle-trigger-tuner", icon: "Sparkles", category: "retention", defaultRisk: "medium", supportsAutoApply: true, i18nKey: "lifecycleTriggerTuner" },
+  { id: "email-abandoned-cart", icon: "Mail", category: "communication", defaultRisk: "low", supportsAutoApply: true, i18nKey: "emailAbandonedCart" },
+  { id: "email-winback", icon: "Mail", category: "communication", defaultRisk: "low", supportsAutoApply: true, i18nKey: "emailWinback" },
+  { id: "email-post-purchase", icon: "Mail", category: "communication", defaultRisk: "low", supportsAutoApply: true, i18nKey: "emailPostPurchase" },
+  { id: "order-status-notifier", icon: "Bell", category: "communication", defaultRisk: "low", supportsAutoApply: true, i18nKey: "orderStatusNotifier" },
+  { id: "restock-notifier", icon: "Boxes", category: "operations", defaultRisk: "low", supportsAutoApply: true, i18nKey: "restockNotifier" },
 ];
 
 export const AGENT_BY_ID = new Map(AGENT_CATALOG.map((a) => [a.id, a]));
