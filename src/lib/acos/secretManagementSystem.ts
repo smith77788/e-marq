@@ -31,7 +31,7 @@ export async function storeSecret(
   type: Secret["type"],
   value: string,
 ): Promise<{ ok: boolean; id?: string }> {
-  const encryptedValue = sha256Hash(value);
+  const encryptedValue = await sha256Hash(value);
 
   const { data, error } = await supabaseAdmin
     .from("bootstrap_facts")
@@ -105,7 +105,7 @@ export async function rotateSecret(
   const { error } = await supabaseAdmin
     .from("bootstrap_facts")
     .update({
-      value: { ...v, encrypted_value: sha256Hash(newValue), rotated_at: new Date().toISOString() } as never,
+      value: { ...v, encrypted_value: await sha256Hash(newValue), rotated_at: new Date().toISOString() } as never,
     })
     .eq("id", secretId);
 

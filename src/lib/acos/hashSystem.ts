@@ -2,45 +2,38 @@
  * Smart Hash System — хешування даних.
  *
  * Алгоритми:
- * 1. MD5 — для хешів (не для безпеки)
- * 2. SHA-1 — для checksums
- * 3. SHA-256 — для безпеки
- * 4. SHA-512 — для криптографічної безпеки
- * 5. MurmurHash3 — для швидкого хешування
+ * 1. SHA-256 через Web Crypto API (async) — для безпеки
+ * 2. MurmurHash3 (pure JS) — для швидкого хешування
+ * 3. Utility: maskApiKey, shortHash, verifyIntegrity
+ *
+ * Сумісно з Cloudflare Workers та браузером (Web Crypto).
  */
-import { createHash } from "crypto";
 
-/**
- * MD5 хеш.
- */
-export function md5(data: string): string {
-  return createHash("md5").update(data).digest("hex");
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
-/**
- * SHA-1 хеш.
- */
-export function sha1(data: string): string {
-  return createHash("sha1").update(data).digest("hex");
+async function webCryptoHash(algo: string, data: string): Promise<string> {
+  const enc = new TextEncoder();
+  const buf = await crypto.subtle.digest(algo, enc.encode(data));
+  return bytesToHex(new Uint8Array(buf));
 }
 
-/**
- * SHA-256 хеш.
- */
-export function sha256Hash(data: string): string {
-  return createHash("sha256").update(data).digest("hex");
+export async function sha256Hash(data: string): Promise<string> {
+  return webCryptoHash("SHA-256", data);
 }
 
-/**
- * SHA-512 хеш.
- */
-export function sha512Hash(data: string): string {
-  return createHash("sha512").update(data).digest("hex");
+export async function sha512Hash(data: string): Promise<string> {
+  return webCryptoHash("SHA-512", data);
 }
 
-/**
- * MurmurHash3 (спрощений).
- */
+export async function sha1(data: string): Promise<string> {
+  return webCryptoHash("SHA-1", data);
+}
+
+/** MurmurHash3 — швидкий синхронний хеш (не криптографічний). */
 export function murmurhash3(data: string, seed: number = 0): number {
   let h = seed;
   for (let i = 0; i < data.length; i++) {
@@ -52,23 +45,14 @@ export function murmurhash3(data: string, seed: number = 0): number {
   return h >>> 0;
 }
 
-/**
- * Генерувати короткий хеш.
- */
-export function shortHash(data: string, length: number = 8): string {
-  return sha256Hash(data).slice(0, length);
+export async function shortHash(data: string, length: number = 8): Promise<string> {
+  return (await sha256Hash(data)).slice(0, length);
 }
 
-/**
- * Перевірити цілісність файлу.
- */
-export function verifyIntegrity(data: string, expectedHash: string): boolean {
-  return sha256Hash(data) === expectedHash;
+export async function verifyIntegrity(data: string, expectedHash: string): Promise<boolean> {
+  return (await sha256Hash(data)) === expectedHash;
 }
 
-/**
- * Маскувати API ключ — показати тільки перші та останні 4 символи.
- */
 export function maskApiKey(key: string): string {
   if (key.length <= 8) return "****";
   return key.slice(0, 4) + "****" + key.slice(-4);

@@ -39,7 +39,7 @@ async function resolveAuth(
   return { ok: true };
 }
 
-export const Route = createFileRoute("/api/data/index")({
+export const Route = createFileRoute("/api/data/")({
   server: {
     handlers: {
       GET: async ({ request }) => {

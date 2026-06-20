@@ -32,17 +32,41 @@ import { Route as MSlugRouteImport } from './routes/m.$slug'
 import { Route as HooksIngestRouteImport } from './routes/hooks/ingest'
 import { Route as HandbookDntradeWebhookRouteImport } from './routes/handbook.dntrade-webhook'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as ApiWorkflowsRouteImport } from './routes/api/workflows'
+import { Route as ApiWebhooksRouteImport } from './routes/api/webhooks'
+import { Route as ApiTemplatesRouteImport } from './routes/api/templates'
+import { Route as ApiTeamRouteImport } from './routes/api/team'
+import { Route as ApiSyncRouteImport } from './routes/api/sync'
+import { Route as ApiSocialProofRouteImport } from './routes/api/social-proof'
+import { Route as ApiSlaRouteImport } from './routes/api/sla'
+import { Route as ApiSearchRouteImport } from './routes/api/search'
+import { Route as ApiSchedulerRouteImport } from './routes/api/scheduler'
+import { Route as ApiReportsRouteImport } from './routes/api/reports'
+import { Route as ApiRecommendationsRouteImport } from './routes/api/recommendations'
+import { Route as ApiPricingRouteImport } from './routes/api/pricing'
+import { Route as ApiPolicyRouteImport } from './routes/api/policy'
 import { Route as ApiOnboardingRouteImport } from './routes/api/onboarding'
 import { Route as ApiNotificationsRouteImport } from './routes/api/notifications'
+import { Route as ApiMlRouteImport } from './routes/api/ml'
+import { Route as ApiMetricsRouteImport } from './routes/api/metrics'
 import { Route as ApiMarqKeysRouteImport } from './routes/api/marq-keys'
+import { Route as ApiLeadsRouteImport } from './routes/api/leads'
+import { Route as ApiJobsRouteImport } from './routes/api/jobs'
+import { Route as ApiIntegrationsRouteImport } from './routes/api/integrations'
 import { Route as ApiInsightsRouteImport } from './routes/api/insights'
 import { Route as ApiIncidentsRouteImport } from './routes/api/incidents'
+import { Route as ApiImportRouteImport } from './routes/api/import'
+import { Route as ApiExportRouteImport } from './routes/api/export'
+import { Route as ApiEventsRouteImport } from './routes/api/events'
+import { Route as ApiDomainsRouteImport } from './routes/api/domains'
 import { Route as ApiDocsRouteImport } from './routes/api/docs'
 import { Route as ApiAutomationsRouteImport } from './routes/api/automations'
+import { Route as ApiAbTestingRouteImport } from './routes/api/ab-testing'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as SSlugIndexRouteImport } from './routes/s.$slug.index'
+import { Route as ApiDataIndexRouteImport } from './routes/api/data.index'
 import { Route as AuthenticatedBrandIndexRouteImport } from './routes/_authenticated/brand.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as SSlugWishlistRouteImport } from './routes/s.$slug.wishlist'
@@ -176,24 +200,75 @@ import { Route as HooksAgentsAnomalyDetectorRouteImport } from './routes/hooks/a
 import { Route as HooksAgentsActionWatchdogRouteImport } from './routes/hooks/agents.action-watchdog'
 import { Route as HooksActionsApplyRouteImport } from './routes/hooks/actions.apply'
 import { Route as ApiTelegramStatusRouteImport } from './routes/api/telegram.status'
+import { Route as ApiSystemDeploymentRouteImport } from './routes/api/system.deployment'
+import { Route as ApiSystemBackupRouteImport } from './routes/api/system.backup'
 import { Route as ApiSubscriptionInitRouteImport } from './routes/api/subscription.init'
 import { Route as ApiSubscriptionCallbackRouteImport } from './routes/api/subscription.callback'
 import { Route as ApiSiteBuilderBuildRouteImport } from './routes/api/site-builder.build'
+import { Route as ApiShippingOptionsRouteImport } from './routes/api/shipping.options'
+import { Route as ApiSeoAnalyzeRouteImport } from './routes/api/seo.analyze'
+import { Route as ApiSalesBotRouteImport } from './routes/api/sales.bot'
+import { Route as ApiReviewsCandidatesRouteImport } from './routes/api/reviews.candidates'
+import { Route as ApiReturnsRiskRouteImport } from './routes/api/returns.risk'
+import { Route as ApiReportsGenerateRouteImport } from './routes/api/reports.generate'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
+import { Route as ApiProductsWidgetsRouteImport } from './routes/api/products.widgets'
+import { Route as ApiProductsCompareRouteImport } from './routes/api/products.compare'
+import { Route as ApiProductsBundlesRouteImport } from './routes/api/products.bundles'
+import { Route as ApiPaymentsRetryRouteImport } from './routes/api/payments.retry'
+import { Route as ApiNotificationsSmsRouteImport } from './routes/api/notifications.sms'
+import { Route as ApiNotificationsSmartRouteImport } from './routes/api/notifications.smart'
+import { Route as ApiNotificationsPushRouteImport } from './routes/api/notifications.push'
+import { Route as ApiNotificationsPreferencesRouteImport } from './routes/api/notifications.preferences'
+import { Route as ApiNotificationsInAppRouteImport } from './routes/api/notifications.in-app'
+import { Route as ApiInventoryOptimizeRouteImport } from './routes/api/inventory.optimize'
+import { Route as ApiInventoryForecastRouteImport } from './routes/api/inventory.forecast'
+import { Route as ApiFraudAnalyzeRouteImport } from './routes/api/fraud.analyze'
 import { Route as ApiEmailOrderStatusRouteImport } from './routes/api/email.order-status'
 import { Route as ApiEmailOrderConfirmationRouteImport } from './routes/api/email.order-confirmation'
 import { Route as ApiEmailDomainVerifyRouteImport } from './routes/api/email.domain-verify'
 import { Route as ApiEmailDomainStatusRouteImport } from './routes/api/email.domain-status'
 import { Route as ApiEmailDomainSetupRouteImport } from './routes/api/email.domain-setup'
+import { Route as ApiEmailCampaignsRouteImport } from './routes/api/email.campaigns'
 import { Route as ApiEmailCampaignSendRouteImport } from './routes/api/email.campaign-send'
+import { Route as ApiEmailAutomationRouteImport } from './routes/api/email.automation'
 import { Route as ApiDomainsVerifyRouteImport } from './routes/api/domains.verify'
+import { Route as ApiDataVisualizeRouteImport } from './routes/api/data.visualize'
+import { Route as ApiDataSyncRouteImport } from './routes/api/data.sync'
+import { Route as ApiDataQualityRouteImport } from './routes/api/data.quality'
+import { Route as ApiDataPipelineRouteImport } from './routes/api/data.pipeline'
+import { Route as ApiDataOptimizeRouteImport } from './routes/api/data.optimize'
+import { Route as ApiDataMonitoringRouteImport } from './routes/api/data.monitoring'
+import { Route as ApiDataMigrationRouteImport } from './routes/api/data.migration'
+import { Route as ApiDataLifecycleRouteImport } from './routes/api/data.lifecycle'
+import { Route as ApiDataGovernanceRouteImport } from './routes/api/data.governance'
+import { Route as ApiDataEnrichmentRouteImport } from './routes/api/data.enrichment'
+import { Route as ApiDataComplianceRouteImport } from './routes/api/data.compliance'
+import { Route as ApiDataCleanupRouteImport } from './routes/api/data.cleanup'
+import { Route as ApiDataAuditRouteImport } from './routes/api/data.audit'
+import { Route as ApiDataArchiveRouteImport } from './routes/api/data.archive'
+import { Route as ApiDataAlertsRouteImport } from './routes/api/data.alerts'
+import { Route as ApiDashboardFullRouteImport } from './routes/api/dashboard.full'
+import { Route as ApiCustomersSupportRouteImport } from './routes/api/customers.support'
+import { Route as ApiCheckoutOptimizeRouteImport } from './routes/api/checkout.optimize'
+import { Route as ApiCartOptimizeRouteImport } from './routes/api/cart.optimize'
+import { Route as ApiBillingOptimizeRouteImport } from './routes/api/billing.optimize'
 import { Route as ApiAutomationsIdRouteImport } from './routes/api/automations.$id'
+import { Route as ApiAuditTrailRouteImport } from './routes/api/audit.trail'
 import { Route as ApiAnalyticsSummaryRouteImport } from './routes/api/analytics.summary'
 import { Route as ApiAnalyticsSmartRouteImport } from './routes/api/analytics.smart'
+import { Route as ApiAnalyticsScheduleRouteImport } from './routes/api/analytics.schedule'
+import { Route as ApiAnalyticsNotificationsRouteImport } from './routes/api/analytics.notifications'
+import { Route as ApiAnalyticsHealthRouteImport } from './routes/api/analytics.health'
 import { Route as ApiAnalyticsExportRouteImport } from './routes/api/analytics.export'
+import { Route as ApiAnalyticsDashboardDataRouteImport } from './routes/api/analytics.dashboard-data'
 import { Route as ApiAnalyticsDashboardRouteImport } from './routes/api/analytics.dashboard'
 import { Route as ApiAnalyticsComparisonRouteImport } from './routes/api/analytics.comparison'
+import { Route as ApiAnalyticsChartsRouteImport } from './routes/api/analytics.charts'
+import { Route as ApiAnalyticsBackupRouteImport } from './routes/api/analytics.backup'
 import { Route as ApiAiAskRouteImport } from './routes/api/ai.ask'
+import { Route as ApiAdminSecretsRouteImport } from './routes/api/admin.secrets'
+import { Route as ApiAccessLogsRouteImport } from './routes/api/access.logs'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedBrandTeamRouteImport } from './routes/_authenticated/brand.team'
 import { Route as AuthenticatedBrandSiteBuilderRouteImport } from './routes/_authenticated/brand.site-builder'
@@ -377,6 +452,71 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWorkflowsRoute = ApiWorkflowsRouteImport.update({
+  id: '/api/workflows',
+  path: '/api/workflows',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWebhooksRoute = ApiWebhooksRouteImport.update({
+  id: '/api/webhooks',
+  path: '/api/webhooks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTemplatesRoute = ApiTemplatesRouteImport.update({
+  id: '/api/templates',
+  path: '/api/templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTeamRoute = ApiTeamRouteImport.update({
+  id: '/api/team',
+  path: '/api/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSyncRoute = ApiSyncRouteImport.update({
+  id: '/api/sync',
+  path: '/api/sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSocialProofRoute = ApiSocialProofRouteImport.update({
+  id: '/api/social-proof',
+  path: '/api/social-proof',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSlaRoute = ApiSlaRouteImport.update({
+  id: '/api/sla',
+  path: '/api/sla',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSearchRoute = ApiSearchRouteImport.update({
+  id: '/api/search',
+  path: '/api/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSchedulerRoute = ApiSchedulerRouteImport.update({
+  id: '/api/scheduler',
+  path: '/api/scheduler',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReportsRoute = ApiReportsRouteImport.update({
+  id: '/api/reports',
+  path: '/api/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRecommendationsRoute = ApiRecommendationsRouteImport.update({
+  id: '/api/recommendations',
+  path: '/api/recommendations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPricingRoute = ApiPricingRouteImport.update({
+  id: '/api/pricing',
+  path: '/api/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPolicyRoute = ApiPolicyRouteImport.update({
+  id: '/api/policy',
+  path: '/api/policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiOnboardingRoute = ApiOnboardingRouteImport.update({
   id: '/api/onboarding',
   path: '/api/onboarding',
@@ -387,9 +527,34 @@ const ApiNotificationsRoute = ApiNotificationsRouteImport.update({
   path: '/api/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMlRoute = ApiMlRouteImport.update({
+  id: '/api/ml',
+  path: '/api/ml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMetricsRoute = ApiMetricsRouteImport.update({
+  id: '/api/metrics',
+  path: '/api/metrics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMarqKeysRoute = ApiMarqKeysRouteImport.update({
   id: '/api/marq-keys',
   path: '/api/marq-keys',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLeadsRoute = ApiLeadsRouteImport.update({
+  id: '/api/leads',
+  path: '/api/leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiJobsRoute = ApiJobsRouteImport.update({
+  id: '/api/jobs',
+  path: '/api/jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiIntegrationsRoute = ApiIntegrationsRouteImport.update({
+  id: '/api/integrations',
+  path: '/api/integrations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiInsightsRoute = ApiInsightsRouteImport.update({
@@ -402,6 +567,26 @@ const ApiIncidentsRoute = ApiIncidentsRouteImport.update({
   path: '/api/incidents',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiImportRoute = ApiImportRouteImport.update({
+  id: '/api/import',
+  path: '/api/import',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiExportRoute = ApiExportRouteImport.update({
+  id: '/api/export',
+  path: '/api/export',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEventsRoute = ApiEventsRouteImport.update({
+  id: '/api/events',
+  path: '/api/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDomainsRoute = ApiDomainsRouteImport.update({
+  id: '/api/domains',
+  path: '/api/domains',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiDocsRoute = ApiDocsRouteImport.update({
   id: '/api/docs',
   path: '/api/docs',
@@ -410,6 +595,11 @@ const ApiDocsRoute = ApiDocsRouteImport.update({
 const ApiAutomationsRoute = ApiAutomationsRouteImport.update({
   id: '/api/automations',
   path: '/api/automations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAbTestingRoute = ApiAbTestingRouteImport.update({
+  id: '/api/ab-testing',
+  path: '/api/ab-testing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
@@ -431,6 +621,11 @@ const SSlugIndexRoute = SSlugIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => SSlugRoute,
+} as any)
+const ApiDataIndexRoute = ApiDataIndexRouteImport.update({
+  id: '/api/data/',
+  path: '/api/data/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedBrandIndexRoute = AuthenticatedBrandIndexRouteImport.update({
   id: '/brand/',
@@ -1174,6 +1369,16 @@ const ApiTelegramStatusRoute = ApiTelegramStatusRouteImport.update({
   path: '/api/telegram/status',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSystemDeploymentRoute = ApiSystemDeploymentRouteImport.update({
+  id: '/api/system/deployment',
+  path: '/api/system/deployment',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSystemBackupRoute = ApiSystemBackupRouteImport.update({
+  id: '/api/system/backup',
+  path: '/api/system/backup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSubscriptionInitRoute = ApiSubscriptionInitRouteImport.update({
   id: '/api/subscription/init',
   path: '/api/subscription/init',
@@ -1189,9 +1394,100 @@ const ApiSiteBuilderBuildRoute = ApiSiteBuilderBuildRouteImport.update({
   path: '/api/site-builder/build',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiShippingOptionsRoute = ApiShippingOptionsRouteImport.update({
+  id: '/api/shipping/options',
+  path: '/api/shipping/options',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSeoAnalyzeRoute = ApiSeoAnalyzeRouteImport.update({
+  id: '/api/seo/analyze',
+  path: '/api/seo/analyze',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSalesBotRoute = ApiSalesBotRouteImport.update({
+  id: '/api/sales/bot',
+  path: '/api/sales/bot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReviewsCandidatesRoute = ApiReviewsCandidatesRouteImport.update({
+  id: '/api/reviews/candidates',
+  path: '/api/reviews/candidates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReturnsRiskRoute = ApiReturnsRiskRouteImport.update({
+  id: '/api/returns/risk',
+  path: '/api/returns/risk',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReportsGenerateRoute = ApiReportsGenerateRouteImport.update({
+  id: '/generate',
+  path: '/generate',
+  getParentRoute: () => ApiReportsRoute,
+} as any)
 const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
   id: '/api/public/contact',
   path: '/api/public/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProductsWidgetsRoute = ApiProductsWidgetsRouteImport.update({
+  id: '/api/products/widgets',
+  path: '/api/products/widgets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProductsCompareRoute = ApiProductsCompareRouteImport.update({
+  id: '/api/products/compare',
+  path: '/api/products/compare',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProductsBundlesRoute = ApiProductsBundlesRouteImport.update({
+  id: '/api/products/bundles',
+  path: '/api/products/bundles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPaymentsRetryRoute = ApiPaymentsRetryRouteImport.update({
+  id: '/api/payments/retry',
+  path: '/api/payments/retry',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNotificationsSmsRoute = ApiNotificationsSmsRouteImport.update({
+  id: '/sms',
+  path: '/sms',
+  getParentRoute: () => ApiNotificationsRoute,
+} as any)
+const ApiNotificationsSmartRoute = ApiNotificationsSmartRouteImport.update({
+  id: '/smart',
+  path: '/smart',
+  getParentRoute: () => ApiNotificationsRoute,
+} as any)
+const ApiNotificationsPushRoute = ApiNotificationsPushRouteImport.update({
+  id: '/push',
+  path: '/push',
+  getParentRoute: () => ApiNotificationsRoute,
+} as any)
+const ApiNotificationsPreferencesRoute =
+  ApiNotificationsPreferencesRouteImport.update({
+    id: '/preferences',
+    path: '/preferences',
+    getParentRoute: () => ApiNotificationsRoute,
+  } as any)
+const ApiNotificationsInAppRoute = ApiNotificationsInAppRouteImport.update({
+  id: '/in-app',
+  path: '/in-app',
+  getParentRoute: () => ApiNotificationsRoute,
+} as any)
+const ApiInventoryOptimizeRoute = ApiInventoryOptimizeRouteImport.update({
+  id: '/api/inventory/optimize',
+  path: '/api/inventory/optimize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiInventoryForecastRoute = ApiInventoryForecastRouteImport.update({
+  id: '/api/inventory/forecast',
+  path: '/api/inventory/forecast',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiFraudAnalyzeRoute = ApiFraudAnalyzeRouteImport.update({
+  id: '/api/fraud/analyze',
+  path: '/api/fraud/analyze',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiEmailOrderStatusRoute = ApiEmailOrderStatusRouteImport.update({
@@ -1220,20 +1516,135 @@ const ApiEmailDomainSetupRoute = ApiEmailDomainSetupRouteImport.update({
   path: '/api/email/domain-setup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiEmailCampaignsRoute = ApiEmailCampaignsRouteImport.update({
+  id: '/api/email/campaigns',
+  path: '/api/email/campaigns',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiEmailCampaignSendRoute = ApiEmailCampaignSendRouteImport.update({
   id: '/api/email/campaign-send',
   path: '/api/email/campaign-send',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiEmailAutomationRoute = ApiEmailAutomationRouteImport.update({
+  id: '/api/email/automation',
+  path: '/api/email/automation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiDomainsVerifyRoute = ApiDomainsVerifyRouteImport.update({
-  id: '/api/domains/verify',
-  path: '/api/domains/verify',
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => ApiDomainsRoute,
+} as any)
+const ApiDataVisualizeRoute = ApiDataVisualizeRouteImport.update({
+  id: '/api/data/visualize',
+  path: '/api/data/visualize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataSyncRoute = ApiDataSyncRouteImport.update({
+  id: '/api/data/sync',
+  path: '/api/data/sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataQualityRoute = ApiDataQualityRouteImport.update({
+  id: '/api/data/quality',
+  path: '/api/data/quality',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataPipelineRoute = ApiDataPipelineRouteImport.update({
+  id: '/api/data/pipeline',
+  path: '/api/data/pipeline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataOptimizeRoute = ApiDataOptimizeRouteImport.update({
+  id: '/api/data/optimize',
+  path: '/api/data/optimize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataMonitoringRoute = ApiDataMonitoringRouteImport.update({
+  id: '/api/data/monitoring',
+  path: '/api/data/monitoring',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataMigrationRoute = ApiDataMigrationRouteImport.update({
+  id: '/api/data/migration',
+  path: '/api/data/migration',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataLifecycleRoute = ApiDataLifecycleRouteImport.update({
+  id: '/api/data/lifecycle',
+  path: '/api/data/lifecycle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataGovernanceRoute = ApiDataGovernanceRouteImport.update({
+  id: '/api/data/governance',
+  path: '/api/data/governance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataEnrichmentRoute = ApiDataEnrichmentRouteImport.update({
+  id: '/api/data/enrichment',
+  path: '/api/data/enrichment',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataComplianceRoute = ApiDataComplianceRouteImport.update({
+  id: '/api/data/compliance',
+  path: '/api/data/compliance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataCleanupRoute = ApiDataCleanupRouteImport.update({
+  id: '/api/data/cleanup',
+  path: '/api/data/cleanup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataAuditRoute = ApiDataAuditRouteImport.update({
+  id: '/api/data/audit',
+  path: '/api/data/audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataArchiveRoute = ApiDataArchiveRouteImport.update({
+  id: '/api/data/archive',
+  path: '/api/data/archive',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataAlertsRoute = ApiDataAlertsRouteImport.update({
+  id: '/api/data/alerts',
+  path: '/api/data/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDashboardFullRoute = ApiDashboardFullRouteImport.update({
+  id: '/api/dashboard/full',
+  path: '/api/dashboard/full',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCustomersSupportRoute = ApiCustomersSupportRouteImport.update({
+  id: '/api/customers/support',
+  path: '/api/customers/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCheckoutOptimizeRoute = ApiCheckoutOptimizeRouteImport.update({
+  id: '/api/checkout/optimize',
+  path: '/api/checkout/optimize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCartOptimizeRoute = ApiCartOptimizeRouteImport.update({
+  id: '/api/cart/optimize',
+  path: '/api/cart/optimize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBillingOptimizeRoute = ApiBillingOptimizeRouteImport.update({
+  id: '/api/billing/optimize',
+  path: '/api/billing/optimize',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAutomationsIdRoute = ApiAutomationsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ApiAutomationsRoute,
+} as any)
+const ApiAuditTrailRoute = ApiAuditTrailRouteImport.update({
+  id: '/api/audit/trail',
+  path: '/api/audit/trail',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAnalyticsSummaryRoute = ApiAnalyticsSummaryRouteImport.update({
   id: '/api/analytics/summary',
@@ -1245,11 +1656,33 @@ const ApiAnalyticsSmartRoute = ApiAnalyticsSmartRouteImport.update({
   path: '/api/analytics/smart',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAnalyticsScheduleRoute = ApiAnalyticsScheduleRouteImport.update({
+  id: '/api/analytics/schedule',
+  path: '/api/analytics/schedule',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAnalyticsNotificationsRoute =
+  ApiAnalyticsNotificationsRouteImport.update({
+    id: '/api/analytics/notifications',
+    path: '/api/analytics/notifications',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAnalyticsHealthRoute = ApiAnalyticsHealthRouteImport.update({
+  id: '/api/analytics/health',
+  path: '/api/analytics/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAnalyticsExportRoute = ApiAnalyticsExportRouteImport.update({
   id: '/api/analytics/export',
   path: '/api/analytics/export',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAnalyticsDashboardDataRoute =
+  ApiAnalyticsDashboardDataRouteImport.update({
+    id: '/api/analytics/dashboard-data',
+    path: '/api/analytics/dashboard-data',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiAnalyticsDashboardRoute = ApiAnalyticsDashboardRouteImport.update({
   id: '/api/analytics/dashboard',
   path: '/api/analytics/dashboard',
@@ -1260,9 +1693,29 @@ const ApiAnalyticsComparisonRoute = ApiAnalyticsComparisonRouteImport.update({
   path: '/api/analytics/comparison',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAnalyticsChartsRoute = ApiAnalyticsChartsRouteImport.update({
+  id: '/api/analytics/charts',
+  path: '/api/analytics/charts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAnalyticsBackupRoute = ApiAnalyticsBackupRouteImport.update({
+  id: '/api/analytics/backup',
+  path: '/api/analytics/backup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAiAskRoute = ApiAiAskRouteImport.update({
   id: '/api/ai/ask',
   path: '/api/ai/ask',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminSecretsRoute = ApiAdminSecretsRouteImport.update({
+  id: '/api/admin/secrets',
+  path: '/api/admin/secrets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAccessLogsRoute = ApiAccessLogsRouteImport.update({
+  id: '/api/access/logs',
+  path: '/api/access/logs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedInviteTokenRoute =
@@ -1618,15 +2071,15 @@ const ApiOrdersOrderIdTelegramMessageRoute =
   } as any)
 const ApiIntegrationsVerifyProviderRoute =
   ApiIntegrationsVerifyProviderRouteImport.update({
-    id: '/api/integrations/verify/$provider',
-    path: '/api/integrations/verify/$provider',
-    getParentRoute: () => rootRouteImport,
+    id: '/verify/$provider',
+    path: '/verify/$provider',
+    getParentRoute: () => ApiIntegrationsRoute,
   } as any)
 const ApiIntegrationsSyncProviderRoute =
   ApiIntegrationsSyncProviderRouteImport.update({
-    id: '/api/integrations/sync/$provider',
-    path: '/api/integrations/sync/$provider',
-    getParentRoute: () => rootRouteImport,
+    id: '/sync/$provider',
+    path: '/sync/$provider',
+    getParentRoute: () => ApiIntegrationsRoute,
   } as any)
 const AuthenticatedBrandProductsProductIdRoute =
   AuthenticatedBrandProductsProductIdRouteImport.update({
@@ -1679,13 +2132,36 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/api/ab-testing': typeof ApiAbTestingRoute
   '/api/automations': typeof ApiAutomationsRouteWithChildren
   '/api/docs': typeof ApiDocsRoute
+  '/api/domains': typeof ApiDomainsRouteWithChildren
+  '/api/events': typeof ApiEventsRoute
+  '/api/export': typeof ApiExportRoute
+  '/api/import': typeof ApiImportRoute
   '/api/incidents': typeof ApiIncidentsRoute
   '/api/insights': typeof ApiInsightsRoute
+  '/api/integrations': typeof ApiIntegrationsRouteWithChildren
+  '/api/jobs': typeof ApiJobsRoute
+  '/api/leads': typeof ApiLeadsRoute
   '/api/marq-keys': typeof ApiMarqKeysRoute
-  '/api/notifications': typeof ApiNotificationsRoute
+  '/api/metrics': typeof ApiMetricsRoute
+  '/api/ml': typeof ApiMlRoute
+  '/api/notifications': typeof ApiNotificationsRouteWithChildren
   '/api/onboarding': typeof ApiOnboardingRoute
+  '/api/policy': typeof ApiPolicyRoute
+  '/api/pricing': typeof ApiPricingRoute
+  '/api/recommendations': typeof ApiRecommendationsRoute
+  '/api/reports': typeof ApiReportsRouteWithChildren
+  '/api/scheduler': typeof ApiSchedulerRoute
+  '/api/search': typeof ApiSearchRoute
+  '/api/sla': typeof ApiSlaRoute
+  '/api/social-proof': typeof ApiSocialProofRoute
+  '/api/sync': typeof ApiSyncRoute
+  '/api/team': typeof ApiTeamRoute
+  '/api/templates': typeof ApiTemplatesRoute
+  '/api/webhooks': typeof ApiWebhooksRoute
+  '/api/workflows': typeof ApiWorkflowsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
@@ -1728,24 +2204,75 @@ export interface FileRoutesByFullPath {
   '/brand/site-builder': typeof AuthenticatedBrandSiteBuilderRoute
   '/brand/team': typeof AuthenticatedBrandTeamRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/api/access/logs': typeof ApiAccessLogsRoute
+  '/api/admin/secrets': typeof ApiAdminSecretsRoute
   '/api/ai/ask': typeof ApiAiAskRoute
+  '/api/analytics/backup': typeof ApiAnalyticsBackupRoute
+  '/api/analytics/charts': typeof ApiAnalyticsChartsRoute
   '/api/analytics/comparison': typeof ApiAnalyticsComparisonRoute
   '/api/analytics/dashboard': typeof ApiAnalyticsDashboardRoute
+  '/api/analytics/dashboard-data': typeof ApiAnalyticsDashboardDataRoute
   '/api/analytics/export': typeof ApiAnalyticsExportRoute
+  '/api/analytics/health': typeof ApiAnalyticsHealthRoute
+  '/api/analytics/notifications': typeof ApiAnalyticsNotificationsRoute
+  '/api/analytics/schedule': typeof ApiAnalyticsScheduleRoute
   '/api/analytics/smart': typeof ApiAnalyticsSmartRoute
   '/api/analytics/summary': typeof ApiAnalyticsSummaryRoute
+  '/api/audit/trail': typeof ApiAuditTrailRoute
   '/api/automations/$id': typeof ApiAutomationsIdRoute
+  '/api/billing/optimize': typeof ApiBillingOptimizeRoute
+  '/api/cart/optimize': typeof ApiCartOptimizeRoute
+  '/api/checkout/optimize': typeof ApiCheckoutOptimizeRoute
+  '/api/customers/support': typeof ApiCustomersSupportRoute
+  '/api/dashboard/full': typeof ApiDashboardFullRoute
+  '/api/data/alerts': typeof ApiDataAlertsRoute
+  '/api/data/archive': typeof ApiDataArchiveRoute
+  '/api/data/audit': typeof ApiDataAuditRoute
+  '/api/data/cleanup': typeof ApiDataCleanupRoute
+  '/api/data/compliance': typeof ApiDataComplianceRoute
+  '/api/data/enrichment': typeof ApiDataEnrichmentRoute
+  '/api/data/governance': typeof ApiDataGovernanceRoute
+  '/api/data/lifecycle': typeof ApiDataLifecycleRoute
+  '/api/data/migration': typeof ApiDataMigrationRoute
+  '/api/data/monitoring': typeof ApiDataMonitoringRoute
+  '/api/data/optimize': typeof ApiDataOptimizeRoute
+  '/api/data/pipeline': typeof ApiDataPipelineRoute
+  '/api/data/quality': typeof ApiDataQualityRoute
+  '/api/data/sync': typeof ApiDataSyncRoute
+  '/api/data/visualize': typeof ApiDataVisualizeRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
+  '/api/email/automation': typeof ApiEmailAutomationRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
+  '/api/email/campaigns': typeof ApiEmailCampaignsRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
   '/api/email/domain-status': typeof ApiEmailDomainStatusRoute
   '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
+  '/api/fraud/analyze': typeof ApiFraudAnalyzeRoute
+  '/api/inventory/forecast': typeof ApiInventoryForecastRoute
+  '/api/inventory/optimize': typeof ApiInventoryOptimizeRoute
+  '/api/notifications/in-app': typeof ApiNotificationsInAppRoute
+  '/api/notifications/preferences': typeof ApiNotificationsPreferencesRoute
+  '/api/notifications/push': typeof ApiNotificationsPushRoute
+  '/api/notifications/smart': typeof ApiNotificationsSmartRoute
+  '/api/notifications/sms': typeof ApiNotificationsSmsRoute
+  '/api/payments/retry': typeof ApiPaymentsRetryRoute
+  '/api/products/bundles': typeof ApiProductsBundlesRoute
+  '/api/products/compare': typeof ApiProductsCompareRoute
+  '/api/products/widgets': typeof ApiProductsWidgetsRoute
   '/api/public/contact': typeof ApiPublicContactRoute
+  '/api/reports/generate': typeof ApiReportsGenerateRoute
+  '/api/returns/risk': typeof ApiReturnsRiskRoute
+  '/api/reviews/candidates': typeof ApiReviewsCandidatesRoute
+  '/api/sales/bot': typeof ApiSalesBotRoute
+  '/api/seo/analyze': typeof ApiSeoAnalyzeRoute
+  '/api/shipping/options': typeof ApiShippingOptionsRoute
   '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
   '/api/subscription/callback': typeof ApiSubscriptionCallbackRoute
   '/api/subscription/init': typeof ApiSubscriptionInitRoute
+  '/api/system/backup': typeof ApiSystemBackupRoute
+  '/api/system/deployment': typeof ApiSystemDeploymentRoute
   '/api/telegram/status': typeof ApiTelegramStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
@@ -1879,6 +2406,7 @@ export interface FileRoutesByFullPath {
   '/s/$slug/wishlist': typeof SSlugWishlistRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/brand/': typeof AuthenticatedBrandIndexRoute
+  '/api/data/': typeof ApiDataIndexRoute
   '/s/$slug/': typeof SSlugIndexRoute
   '/admin/agents/$agentId': typeof AuthenticatedAdminAgentsAgentIdRoute
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
@@ -1933,13 +2461,36 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/api/ab-testing': typeof ApiAbTestingRoute
   '/api/automations': typeof ApiAutomationsRouteWithChildren
   '/api/docs': typeof ApiDocsRoute
+  '/api/domains': typeof ApiDomainsRouteWithChildren
+  '/api/events': typeof ApiEventsRoute
+  '/api/export': typeof ApiExportRoute
+  '/api/import': typeof ApiImportRoute
   '/api/incidents': typeof ApiIncidentsRoute
   '/api/insights': typeof ApiInsightsRoute
+  '/api/integrations': typeof ApiIntegrationsRouteWithChildren
+  '/api/jobs': typeof ApiJobsRoute
+  '/api/leads': typeof ApiLeadsRoute
   '/api/marq-keys': typeof ApiMarqKeysRoute
-  '/api/notifications': typeof ApiNotificationsRoute
+  '/api/metrics': typeof ApiMetricsRoute
+  '/api/ml': typeof ApiMlRoute
+  '/api/notifications': typeof ApiNotificationsRouteWithChildren
   '/api/onboarding': typeof ApiOnboardingRoute
+  '/api/policy': typeof ApiPolicyRoute
+  '/api/pricing': typeof ApiPricingRoute
+  '/api/recommendations': typeof ApiRecommendationsRoute
+  '/api/reports': typeof ApiReportsRouteWithChildren
+  '/api/scheduler': typeof ApiSchedulerRoute
+  '/api/search': typeof ApiSearchRoute
+  '/api/sla': typeof ApiSlaRoute
+  '/api/social-proof': typeof ApiSocialProofRoute
+  '/api/sync': typeof ApiSyncRoute
+  '/api/team': typeof ApiTeamRoute
+  '/api/templates': typeof ApiTemplatesRoute
+  '/api/webhooks': typeof ApiWebhooksRoute
+  '/api/workflows': typeof ApiWorkflowsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
@@ -1981,24 +2532,75 @@ export interface FileRoutesByTo {
   '/brand/site-builder': typeof AuthenticatedBrandSiteBuilderRoute
   '/brand/team': typeof AuthenticatedBrandTeamRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/api/access/logs': typeof ApiAccessLogsRoute
+  '/api/admin/secrets': typeof ApiAdminSecretsRoute
   '/api/ai/ask': typeof ApiAiAskRoute
+  '/api/analytics/backup': typeof ApiAnalyticsBackupRoute
+  '/api/analytics/charts': typeof ApiAnalyticsChartsRoute
   '/api/analytics/comparison': typeof ApiAnalyticsComparisonRoute
   '/api/analytics/dashboard': typeof ApiAnalyticsDashboardRoute
+  '/api/analytics/dashboard-data': typeof ApiAnalyticsDashboardDataRoute
   '/api/analytics/export': typeof ApiAnalyticsExportRoute
+  '/api/analytics/health': typeof ApiAnalyticsHealthRoute
+  '/api/analytics/notifications': typeof ApiAnalyticsNotificationsRoute
+  '/api/analytics/schedule': typeof ApiAnalyticsScheduleRoute
   '/api/analytics/smart': typeof ApiAnalyticsSmartRoute
   '/api/analytics/summary': typeof ApiAnalyticsSummaryRoute
+  '/api/audit/trail': typeof ApiAuditTrailRoute
   '/api/automations/$id': typeof ApiAutomationsIdRoute
+  '/api/billing/optimize': typeof ApiBillingOptimizeRoute
+  '/api/cart/optimize': typeof ApiCartOptimizeRoute
+  '/api/checkout/optimize': typeof ApiCheckoutOptimizeRoute
+  '/api/customers/support': typeof ApiCustomersSupportRoute
+  '/api/dashboard/full': typeof ApiDashboardFullRoute
+  '/api/data/alerts': typeof ApiDataAlertsRoute
+  '/api/data/archive': typeof ApiDataArchiveRoute
+  '/api/data/audit': typeof ApiDataAuditRoute
+  '/api/data/cleanup': typeof ApiDataCleanupRoute
+  '/api/data/compliance': typeof ApiDataComplianceRoute
+  '/api/data/enrichment': typeof ApiDataEnrichmentRoute
+  '/api/data/governance': typeof ApiDataGovernanceRoute
+  '/api/data/lifecycle': typeof ApiDataLifecycleRoute
+  '/api/data/migration': typeof ApiDataMigrationRoute
+  '/api/data/monitoring': typeof ApiDataMonitoringRoute
+  '/api/data/optimize': typeof ApiDataOptimizeRoute
+  '/api/data/pipeline': typeof ApiDataPipelineRoute
+  '/api/data/quality': typeof ApiDataQualityRoute
+  '/api/data/sync': typeof ApiDataSyncRoute
+  '/api/data/visualize': typeof ApiDataVisualizeRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
+  '/api/email/automation': typeof ApiEmailAutomationRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
+  '/api/email/campaigns': typeof ApiEmailCampaignsRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
   '/api/email/domain-status': typeof ApiEmailDomainStatusRoute
   '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
+  '/api/fraud/analyze': typeof ApiFraudAnalyzeRoute
+  '/api/inventory/forecast': typeof ApiInventoryForecastRoute
+  '/api/inventory/optimize': typeof ApiInventoryOptimizeRoute
+  '/api/notifications/in-app': typeof ApiNotificationsInAppRoute
+  '/api/notifications/preferences': typeof ApiNotificationsPreferencesRoute
+  '/api/notifications/push': typeof ApiNotificationsPushRoute
+  '/api/notifications/smart': typeof ApiNotificationsSmartRoute
+  '/api/notifications/sms': typeof ApiNotificationsSmsRoute
+  '/api/payments/retry': typeof ApiPaymentsRetryRoute
+  '/api/products/bundles': typeof ApiProductsBundlesRoute
+  '/api/products/compare': typeof ApiProductsCompareRoute
+  '/api/products/widgets': typeof ApiProductsWidgetsRoute
   '/api/public/contact': typeof ApiPublicContactRoute
+  '/api/reports/generate': typeof ApiReportsGenerateRoute
+  '/api/returns/risk': typeof ApiReturnsRiskRoute
+  '/api/reviews/candidates': typeof ApiReviewsCandidatesRoute
+  '/api/sales/bot': typeof ApiSalesBotRoute
+  '/api/seo/analyze': typeof ApiSeoAnalyzeRoute
+  '/api/shipping/options': typeof ApiShippingOptionsRoute
   '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
   '/api/subscription/callback': typeof ApiSubscriptionCallbackRoute
   '/api/subscription/init': typeof ApiSubscriptionInitRoute
+  '/api/system/backup': typeof ApiSystemBackupRoute
+  '/api/system/deployment': typeof ApiSystemDeploymentRoute
   '/api/telegram/status': typeof ApiTelegramStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
@@ -2132,6 +2734,7 @@ export interface FileRoutesByTo {
   '/s/$slug/wishlist': typeof SSlugWishlistRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/brand': typeof AuthenticatedBrandIndexRoute
+  '/api/data': typeof ApiDataIndexRoute
   '/s/$slug': typeof SSlugIndexRoute
   '/admin/agents/$agentId': typeof AuthenticatedAdminAgentsAgentIdRoute
   '/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
@@ -2188,13 +2791,36 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/api/ab-testing': typeof ApiAbTestingRoute
   '/api/automations': typeof ApiAutomationsRouteWithChildren
   '/api/docs': typeof ApiDocsRoute
+  '/api/domains': typeof ApiDomainsRouteWithChildren
+  '/api/events': typeof ApiEventsRoute
+  '/api/export': typeof ApiExportRoute
+  '/api/import': typeof ApiImportRoute
   '/api/incidents': typeof ApiIncidentsRoute
   '/api/insights': typeof ApiInsightsRoute
+  '/api/integrations': typeof ApiIntegrationsRouteWithChildren
+  '/api/jobs': typeof ApiJobsRoute
+  '/api/leads': typeof ApiLeadsRoute
   '/api/marq-keys': typeof ApiMarqKeysRoute
-  '/api/notifications': typeof ApiNotificationsRoute
+  '/api/metrics': typeof ApiMetricsRoute
+  '/api/ml': typeof ApiMlRoute
+  '/api/notifications': typeof ApiNotificationsRouteWithChildren
   '/api/onboarding': typeof ApiOnboardingRoute
+  '/api/policy': typeof ApiPolicyRoute
+  '/api/pricing': typeof ApiPricingRoute
+  '/api/recommendations': typeof ApiRecommendationsRoute
+  '/api/reports': typeof ApiReportsRouteWithChildren
+  '/api/scheduler': typeof ApiSchedulerRoute
+  '/api/search': typeof ApiSearchRoute
+  '/api/sla': typeof ApiSlaRoute
+  '/api/social-proof': typeof ApiSocialProofRoute
+  '/api/sync': typeof ApiSyncRoute
+  '/api/team': typeof ApiTeamRoute
+  '/api/templates': typeof ApiTemplatesRoute
+  '/api/webhooks': typeof ApiWebhooksRoute
+  '/api/workflows': typeof ApiWorkflowsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/handbook/dntrade-webhook': typeof HandbookDntradeWebhookRoute
   '/hooks/ingest': typeof HooksIngestRoute
@@ -2237,24 +2863,75 @@ export interface FileRoutesById {
   '/_authenticated/brand/site-builder': typeof AuthenticatedBrandSiteBuilderRoute
   '/_authenticated/brand/team': typeof AuthenticatedBrandTeamRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/api/access/logs': typeof ApiAccessLogsRoute
+  '/api/admin/secrets': typeof ApiAdminSecretsRoute
   '/api/ai/ask': typeof ApiAiAskRoute
+  '/api/analytics/backup': typeof ApiAnalyticsBackupRoute
+  '/api/analytics/charts': typeof ApiAnalyticsChartsRoute
   '/api/analytics/comparison': typeof ApiAnalyticsComparisonRoute
   '/api/analytics/dashboard': typeof ApiAnalyticsDashboardRoute
+  '/api/analytics/dashboard-data': typeof ApiAnalyticsDashboardDataRoute
   '/api/analytics/export': typeof ApiAnalyticsExportRoute
+  '/api/analytics/health': typeof ApiAnalyticsHealthRoute
+  '/api/analytics/notifications': typeof ApiAnalyticsNotificationsRoute
+  '/api/analytics/schedule': typeof ApiAnalyticsScheduleRoute
   '/api/analytics/smart': typeof ApiAnalyticsSmartRoute
   '/api/analytics/summary': typeof ApiAnalyticsSummaryRoute
+  '/api/audit/trail': typeof ApiAuditTrailRoute
   '/api/automations/$id': typeof ApiAutomationsIdRoute
+  '/api/billing/optimize': typeof ApiBillingOptimizeRoute
+  '/api/cart/optimize': typeof ApiCartOptimizeRoute
+  '/api/checkout/optimize': typeof ApiCheckoutOptimizeRoute
+  '/api/customers/support': typeof ApiCustomersSupportRoute
+  '/api/dashboard/full': typeof ApiDashboardFullRoute
+  '/api/data/alerts': typeof ApiDataAlertsRoute
+  '/api/data/archive': typeof ApiDataArchiveRoute
+  '/api/data/audit': typeof ApiDataAuditRoute
+  '/api/data/cleanup': typeof ApiDataCleanupRoute
+  '/api/data/compliance': typeof ApiDataComplianceRoute
+  '/api/data/enrichment': typeof ApiDataEnrichmentRoute
+  '/api/data/governance': typeof ApiDataGovernanceRoute
+  '/api/data/lifecycle': typeof ApiDataLifecycleRoute
+  '/api/data/migration': typeof ApiDataMigrationRoute
+  '/api/data/monitoring': typeof ApiDataMonitoringRoute
+  '/api/data/optimize': typeof ApiDataOptimizeRoute
+  '/api/data/pipeline': typeof ApiDataPipelineRoute
+  '/api/data/quality': typeof ApiDataQualityRoute
+  '/api/data/sync': typeof ApiDataSyncRoute
+  '/api/data/visualize': typeof ApiDataVisualizeRoute
   '/api/domains/verify': typeof ApiDomainsVerifyRoute
+  '/api/email/automation': typeof ApiEmailAutomationRoute
   '/api/email/campaign-send': typeof ApiEmailCampaignSendRoute
+  '/api/email/campaigns': typeof ApiEmailCampaignsRoute
   '/api/email/domain-setup': typeof ApiEmailDomainSetupRoute
   '/api/email/domain-status': typeof ApiEmailDomainStatusRoute
   '/api/email/domain-verify': typeof ApiEmailDomainVerifyRoute
   '/api/email/order-confirmation': typeof ApiEmailOrderConfirmationRoute
   '/api/email/order-status': typeof ApiEmailOrderStatusRoute
+  '/api/fraud/analyze': typeof ApiFraudAnalyzeRoute
+  '/api/inventory/forecast': typeof ApiInventoryForecastRoute
+  '/api/inventory/optimize': typeof ApiInventoryOptimizeRoute
+  '/api/notifications/in-app': typeof ApiNotificationsInAppRoute
+  '/api/notifications/preferences': typeof ApiNotificationsPreferencesRoute
+  '/api/notifications/push': typeof ApiNotificationsPushRoute
+  '/api/notifications/smart': typeof ApiNotificationsSmartRoute
+  '/api/notifications/sms': typeof ApiNotificationsSmsRoute
+  '/api/payments/retry': typeof ApiPaymentsRetryRoute
+  '/api/products/bundles': typeof ApiProductsBundlesRoute
+  '/api/products/compare': typeof ApiProductsCompareRoute
+  '/api/products/widgets': typeof ApiProductsWidgetsRoute
   '/api/public/contact': typeof ApiPublicContactRoute
+  '/api/reports/generate': typeof ApiReportsGenerateRoute
+  '/api/returns/risk': typeof ApiReturnsRiskRoute
+  '/api/reviews/candidates': typeof ApiReviewsCandidatesRoute
+  '/api/sales/bot': typeof ApiSalesBotRoute
+  '/api/seo/analyze': typeof ApiSeoAnalyzeRoute
+  '/api/shipping/options': typeof ApiShippingOptionsRoute
   '/api/site-builder/build': typeof ApiSiteBuilderBuildRoute
   '/api/subscription/callback': typeof ApiSubscriptionCallbackRoute
   '/api/subscription/init': typeof ApiSubscriptionInitRoute
+  '/api/system/backup': typeof ApiSystemBackupRoute
+  '/api/system/deployment': typeof ApiSystemDeploymentRoute
   '/api/telegram/status': typeof ApiTelegramStatusRoute
   '/hooks/actions/apply': typeof HooksActionsApplyRoute
   '/hooks/agents/action-watchdog': typeof HooksAgentsActionWatchdogRoute
@@ -2388,6 +3065,7 @@ export interface FileRoutesById {
   '/s/$slug/wishlist': typeof SSlugWishlistRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/brand/': typeof AuthenticatedBrandIndexRoute
+  '/api/data/': typeof ApiDataIndexRoute
   '/s/$slug/': typeof SSlugIndexRoute
   '/_authenticated/admin/agents/$agentId': typeof AuthenticatedAdminAgentsAgentIdRoute
   '/_authenticated/admin/dntrade-health/$tenantId': typeof AuthenticatedAdminDntradeHealthTenantIdRoute
@@ -2444,13 +3122,36 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/profile'
+    | '/api/ab-testing'
     | '/api/automations'
     | '/api/docs'
+    | '/api/domains'
+    | '/api/events'
+    | '/api/export'
+    | '/api/import'
     | '/api/incidents'
     | '/api/insights'
+    | '/api/integrations'
+    | '/api/jobs'
+    | '/api/leads'
     | '/api/marq-keys'
+    | '/api/metrics'
+    | '/api/ml'
     | '/api/notifications'
     | '/api/onboarding'
+    | '/api/policy'
+    | '/api/pricing'
+    | '/api/recommendations'
+    | '/api/reports'
+    | '/api/scheduler'
+    | '/api/search'
+    | '/api/sla'
+    | '/api/social-proof'
+    | '/api/sync'
+    | '/api/team'
+    | '/api/templates'
+    | '/api/webhooks'
+    | '/api/workflows'
     | '/auth/callback'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
@@ -2493,24 +3194,75 @@ export interface FileRouteTypes {
     | '/brand/site-builder'
     | '/brand/team'
     | '/invite/$token'
+    | '/api/access/logs'
+    | '/api/admin/secrets'
     | '/api/ai/ask'
+    | '/api/analytics/backup'
+    | '/api/analytics/charts'
     | '/api/analytics/comparison'
     | '/api/analytics/dashboard'
+    | '/api/analytics/dashboard-data'
     | '/api/analytics/export'
+    | '/api/analytics/health'
+    | '/api/analytics/notifications'
+    | '/api/analytics/schedule'
     | '/api/analytics/smart'
     | '/api/analytics/summary'
+    | '/api/audit/trail'
     | '/api/automations/$id'
+    | '/api/billing/optimize'
+    | '/api/cart/optimize'
+    | '/api/checkout/optimize'
+    | '/api/customers/support'
+    | '/api/dashboard/full'
+    | '/api/data/alerts'
+    | '/api/data/archive'
+    | '/api/data/audit'
+    | '/api/data/cleanup'
+    | '/api/data/compliance'
+    | '/api/data/enrichment'
+    | '/api/data/governance'
+    | '/api/data/lifecycle'
+    | '/api/data/migration'
+    | '/api/data/monitoring'
+    | '/api/data/optimize'
+    | '/api/data/pipeline'
+    | '/api/data/quality'
+    | '/api/data/sync'
+    | '/api/data/visualize'
     | '/api/domains/verify'
+    | '/api/email/automation'
     | '/api/email/campaign-send'
+    | '/api/email/campaigns'
     | '/api/email/domain-setup'
     | '/api/email/domain-status'
     | '/api/email/domain-verify'
     | '/api/email/order-confirmation'
     | '/api/email/order-status'
+    | '/api/fraud/analyze'
+    | '/api/inventory/forecast'
+    | '/api/inventory/optimize'
+    | '/api/notifications/in-app'
+    | '/api/notifications/preferences'
+    | '/api/notifications/push'
+    | '/api/notifications/smart'
+    | '/api/notifications/sms'
+    | '/api/payments/retry'
+    | '/api/products/bundles'
+    | '/api/products/compare'
+    | '/api/products/widgets'
     | '/api/public/contact'
+    | '/api/reports/generate'
+    | '/api/returns/risk'
+    | '/api/reviews/candidates'
+    | '/api/sales/bot'
+    | '/api/seo/analyze'
+    | '/api/shipping/options'
     | '/api/site-builder/build'
     | '/api/subscription/callback'
     | '/api/subscription/init'
+    | '/api/system/backup'
+    | '/api/system/deployment'
     | '/api/telegram/status'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
@@ -2644,6 +3396,7 @@ export interface FileRouteTypes {
     | '/s/$slug/wishlist'
     | '/admin/'
     | '/brand/'
+    | '/api/data/'
     | '/s/$slug/'
     | '/admin/agents/$agentId'
     | '/admin/dntrade-health/$tenantId'
@@ -2698,13 +3451,36 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/profile'
+    | '/api/ab-testing'
     | '/api/automations'
     | '/api/docs'
+    | '/api/domains'
+    | '/api/events'
+    | '/api/export'
+    | '/api/import'
     | '/api/incidents'
     | '/api/insights'
+    | '/api/integrations'
+    | '/api/jobs'
+    | '/api/leads'
     | '/api/marq-keys'
+    | '/api/metrics'
+    | '/api/ml'
     | '/api/notifications'
     | '/api/onboarding'
+    | '/api/policy'
+    | '/api/pricing'
+    | '/api/recommendations'
+    | '/api/reports'
+    | '/api/scheduler'
+    | '/api/search'
+    | '/api/sla'
+    | '/api/social-proof'
+    | '/api/sync'
+    | '/api/team'
+    | '/api/templates'
+    | '/api/webhooks'
+    | '/api/workflows'
     | '/auth/callback'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
@@ -2746,24 +3522,75 @@ export interface FileRouteTypes {
     | '/brand/site-builder'
     | '/brand/team'
     | '/invite/$token'
+    | '/api/access/logs'
+    | '/api/admin/secrets'
     | '/api/ai/ask'
+    | '/api/analytics/backup'
+    | '/api/analytics/charts'
     | '/api/analytics/comparison'
     | '/api/analytics/dashboard'
+    | '/api/analytics/dashboard-data'
     | '/api/analytics/export'
+    | '/api/analytics/health'
+    | '/api/analytics/notifications'
+    | '/api/analytics/schedule'
     | '/api/analytics/smart'
     | '/api/analytics/summary'
+    | '/api/audit/trail'
     | '/api/automations/$id'
+    | '/api/billing/optimize'
+    | '/api/cart/optimize'
+    | '/api/checkout/optimize'
+    | '/api/customers/support'
+    | '/api/dashboard/full'
+    | '/api/data/alerts'
+    | '/api/data/archive'
+    | '/api/data/audit'
+    | '/api/data/cleanup'
+    | '/api/data/compliance'
+    | '/api/data/enrichment'
+    | '/api/data/governance'
+    | '/api/data/lifecycle'
+    | '/api/data/migration'
+    | '/api/data/monitoring'
+    | '/api/data/optimize'
+    | '/api/data/pipeline'
+    | '/api/data/quality'
+    | '/api/data/sync'
+    | '/api/data/visualize'
     | '/api/domains/verify'
+    | '/api/email/automation'
     | '/api/email/campaign-send'
+    | '/api/email/campaigns'
     | '/api/email/domain-setup'
     | '/api/email/domain-status'
     | '/api/email/domain-verify'
     | '/api/email/order-confirmation'
     | '/api/email/order-status'
+    | '/api/fraud/analyze'
+    | '/api/inventory/forecast'
+    | '/api/inventory/optimize'
+    | '/api/notifications/in-app'
+    | '/api/notifications/preferences'
+    | '/api/notifications/push'
+    | '/api/notifications/smart'
+    | '/api/notifications/sms'
+    | '/api/payments/retry'
+    | '/api/products/bundles'
+    | '/api/products/compare'
+    | '/api/products/widgets'
     | '/api/public/contact'
+    | '/api/reports/generate'
+    | '/api/returns/risk'
+    | '/api/reviews/candidates'
+    | '/api/sales/bot'
+    | '/api/seo/analyze'
+    | '/api/shipping/options'
     | '/api/site-builder/build'
     | '/api/subscription/callback'
     | '/api/subscription/init'
+    | '/api/system/backup'
+    | '/api/system/deployment'
     | '/api/telegram/status'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
@@ -2897,6 +3724,7 @@ export interface FileRouteTypes {
     | '/s/$slug/wishlist'
     | '/admin'
     | '/brand'
+    | '/api/data'
     | '/s/$slug'
     | '/admin/agents/$agentId'
     | '/admin/dntrade-health/$tenantId'
@@ -2952,13 +3780,36 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
     | '/_authenticated/profile'
+    | '/api/ab-testing'
     | '/api/automations'
     | '/api/docs'
+    | '/api/domains'
+    | '/api/events'
+    | '/api/export'
+    | '/api/import'
     | '/api/incidents'
     | '/api/insights'
+    | '/api/integrations'
+    | '/api/jobs'
+    | '/api/leads'
     | '/api/marq-keys'
+    | '/api/metrics'
+    | '/api/ml'
     | '/api/notifications'
     | '/api/onboarding'
+    | '/api/policy'
+    | '/api/pricing'
+    | '/api/recommendations'
+    | '/api/reports'
+    | '/api/scheduler'
+    | '/api/search'
+    | '/api/sla'
+    | '/api/social-proof'
+    | '/api/sync'
+    | '/api/team'
+    | '/api/templates'
+    | '/api/webhooks'
+    | '/api/workflows'
     | '/auth/callback'
     | '/handbook/dntrade-webhook'
     | '/hooks/ingest'
@@ -3001,24 +3852,75 @@ export interface FileRouteTypes {
     | '/_authenticated/brand/site-builder'
     | '/_authenticated/brand/team'
     | '/_authenticated/invite/$token'
+    | '/api/access/logs'
+    | '/api/admin/secrets'
     | '/api/ai/ask'
+    | '/api/analytics/backup'
+    | '/api/analytics/charts'
     | '/api/analytics/comparison'
     | '/api/analytics/dashboard'
+    | '/api/analytics/dashboard-data'
     | '/api/analytics/export'
+    | '/api/analytics/health'
+    | '/api/analytics/notifications'
+    | '/api/analytics/schedule'
     | '/api/analytics/smart'
     | '/api/analytics/summary'
+    | '/api/audit/trail'
     | '/api/automations/$id'
+    | '/api/billing/optimize'
+    | '/api/cart/optimize'
+    | '/api/checkout/optimize'
+    | '/api/customers/support'
+    | '/api/dashboard/full'
+    | '/api/data/alerts'
+    | '/api/data/archive'
+    | '/api/data/audit'
+    | '/api/data/cleanup'
+    | '/api/data/compliance'
+    | '/api/data/enrichment'
+    | '/api/data/governance'
+    | '/api/data/lifecycle'
+    | '/api/data/migration'
+    | '/api/data/monitoring'
+    | '/api/data/optimize'
+    | '/api/data/pipeline'
+    | '/api/data/quality'
+    | '/api/data/sync'
+    | '/api/data/visualize'
     | '/api/domains/verify'
+    | '/api/email/automation'
     | '/api/email/campaign-send'
+    | '/api/email/campaigns'
     | '/api/email/domain-setup'
     | '/api/email/domain-status'
     | '/api/email/domain-verify'
     | '/api/email/order-confirmation'
     | '/api/email/order-status'
+    | '/api/fraud/analyze'
+    | '/api/inventory/forecast'
+    | '/api/inventory/optimize'
+    | '/api/notifications/in-app'
+    | '/api/notifications/preferences'
+    | '/api/notifications/push'
+    | '/api/notifications/smart'
+    | '/api/notifications/sms'
+    | '/api/payments/retry'
+    | '/api/products/bundles'
+    | '/api/products/compare'
+    | '/api/products/widgets'
     | '/api/public/contact'
+    | '/api/reports/generate'
+    | '/api/returns/risk'
+    | '/api/reviews/candidates'
+    | '/api/sales/bot'
+    | '/api/seo/analyze'
+    | '/api/shipping/options'
     | '/api/site-builder/build'
     | '/api/subscription/callback'
     | '/api/subscription/init'
+    | '/api/system/backup'
+    | '/api/system/deployment'
     | '/api/telegram/status'
     | '/hooks/actions/apply'
     | '/hooks/agents/action-watchdog'
@@ -3152,6 +4054,7 @@ export interface FileRouteTypes {
     | '/s/$slug/wishlist'
     | '/_authenticated/admin/'
     | '/_authenticated/brand/'
+    | '/api/data/'
     | '/s/$slug/'
     | '/_authenticated/admin/agents/$agentId'
     | '/_authenticated/admin/dntrade-health/$tenantId'
@@ -3205,35 +4108,102 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  ApiAbTestingRoute: typeof ApiAbTestingRoute
   ApiAutomationsRoute: typeof ApiAutomationsRouteWithChildren
   ApiDocsRoute: typeof ApiDocsRoute
+  ApiDomainsRoute: typeof ApiDomainsRouteWithChildren
+  ApiEventsRoute: typeof ApiEventsRoute
+  ApiExportRoute: typeof ApiExportRoute
+  ApiImportRoute: typeof ApiImportRoute
   ApiIncidentsRoute: typeof ApiIncidentsRoute
   ApiInsightsRoute: typeof ApiInsightsRoute
+  ApiIntegrationsRoute: typeof ApiIntegrationsRouteWithChildren
+  ApiJobsRoute: typeof ApiJobsRoute
+  ApiLeadsRoute: typeof ApiLeadsRoute
   ApiMarqKeysRoute: typeof ApiMarqKeysRoute
-  ApiNotificationsRoute: typeof ApiNotificationsRoute
+  ApiMetricsRoute: typeof ApiMetricsRoute
+  ApiMlRoute: typeof ApiMlRoute
+  ApiNotificationsRoute: typeof ApiNotificationsRouteWithChildren
   ApiOnboardingRoute: typeof ApiOnboardingRoute
+  ApiPolicyRoute: typeof ApiPolicyRoute
+  ApiPricingRoute: typeof ApiPricingRoute
+  ApiRecommendationsRoute: typeof ApiRecommendationsRoute
+  ApiReportsRoute: typeof ApiReportsRouteWithChildren
+  ApiSchedulerRoute: typeof ApiSchedulerRoute
+  ApiSearchRoute: typeof ApiSearchRoute
+  ApiSlaRoute: typeof ApiSlaRoute
+  ApiSocialProofRoute: typeof ApiSocialProofRoute
+  ApiSyncRoute: typeof ApiSyncRoute
+  ApiTeamRoute: typeof ApiTeamRoute
+  ApiTemplatesRoute: typeof ApiTemplatesRoute
+  ApiWebhooksRoute: typeof ApiWebhooksRoute
+  ApiWorkflowsRoute: typeof ApiWorkflowsRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   HooksIngestRoute: typeof HooksIngestRoute
   MSlugRoute: typeof MSlugRoute
   SSlugRoute: typeof SSlugRouteWithChildren
   TrackSplatRoute: typeof TrackSplatRoute
+  ApiAccessLogsRoute: typeof ApiAccessLogsRoute
+  ApiAdminSecretsRoute: typeof ApiAdminSecretsRoute
   ApiAiAskRoute: typeof ApiAiAskRoute
+  ApiAnalyticsBackupRoute: typeof ApiAnalyticsBackupRoute
+  ApiAnalyticsChartsRoute: typeof ApiAnalyticsChartsRoute
   ApiAnalyticsComparisonRoute: typeof ApiAnalyticsComparisonRoute
   ApiAnalyticsDashboardRoute: typeof ApiAnalyticsDashboardRoute
+  ApiAnalyticsDashboardDataRoute: typeof ApiAnalyticsDashboardDataRoute
   ApiAnalyticsExportRoute: typeof ApiAnalyticsExportRoute
+  ApiAnalyticsHealthRoute: typeof ApiAnalyticsHealthRoute
+  ApiAnalyticsNotificationsRoute: typeof ApiAnalyticsNotificationsRoute
+  ApiAnalyticsScheduleRoute: typeof ApiAnalyticsScheduleRoute
   ApiAnalyticsSmartRoute: typeof ApiAnalyticsSmartRoute
   ApiAnalyticsSummaryRoute: typeof ApiAnalyticsSummaryRoute
-  ApiDomainsVerifyRoute: typeof ApiDomainsVerifyRoute
+  ApiAuditTrailRoute: typeof ApiAuditTrailRoute
+  ApiBillingOptimizeRoute: typeof ApiBillingOptimizeRoute
+  ApiCartOptimizeRoute: typeof ApiCartOptimizeRoute
+  ApiCheckoutOptimizeRoute: typeof ApiCheckoutOptimizeRoute
+  ApiCustomersSupportRoute: typeof ApiCustomersSupportRoute
+  ApiDashboardFullRoute: typeof ApiDashboardFullRoute
+  ApiDataAlertsRoute: typeof ApiDataAlertsRoute
+  ApiDataArchiveRoute: typeof ApiDataArchiveRoute
+  ApiDataAuditRoute: typeof ApiDataAuditRoute
+  ApiDataCleanupRoute: typeof ApiDataCleanupRoute
+  ApiDataComplianceRoute: typeof ApiDataComplianceRoute
+  ApiDataEnrichmentRoute: typeof ApiDataEnrichmentRoute
+  ApiDataGovernanceRoute: typeof ApiDataGovernanceRoute
+  ApiDataLifecycleRoute: typeof ApiDataLifecycleRoute
+  ApiDataMigrationRoute: typeof ApiDataMigrationRoute
+  ApiDataMonitoringRoute: typeof ApiDataMonitoringRoute
+  ApiDataOptimizeRoute: typeof ApiDataOptimizeRoute
+  ApiDataPipelineRoute: typeof ApiDataPipelineRoute
+  ApiDataQualityRoute: typeof ApiDataQualityRoute
+  ApiDataSyncRoute: typeof ApiDataSyncRoute
+  ApiDataVisualizeRoute: typeof ApiDataVisualizeRoute
+  ApiEmailAutomationRoute: typeof ApiEmailAutomationRoute
   ApiEmailCampaignSendRoute: typeof ApiEmailCampaignSendRoute
+  ApiEmailCampaignsRoute: typeof ApiEmailCampaignsRoute
   ApiEmailDomainSetupRoute: typeof ApiEmailDomainSetupRoute
   ApiEmailDomainStatusRoute: typeof ApiEmailDomainStatusRoute
   ApiEmailDomainVerifyRoute: typeof ApiEmailDomainVerifyRoute
   ApiEmailOrderConfirmationRoute: typeof ApiEmailOrderConfirmationRoute
   ApiEmailOrderStatusRoute: typeof ApiEmailOrderStatusRoute
+  ApiFraudAnalyzeRoute: typeof ApiFraudAnalyzeRoute
+  ApiInventoryForecastRoute: typeof ApiInventoryForecastRoute
+  ApiInventoryOptimizeRoute: typeof ApiInventoryOptimizeRoute
+  ApiPaymentsRetryRoute: typeof ApiPaymentsRetryRoute
+  ApiProductsBundlesRoute: typeof ApiProductsBundlesRoute
+  ApiProductsCompareRoute: typeof ApiProductsCompareRoute
+  ApiProductsWidgetsRoute: typeof ApiProductsWidgetsRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
+  ApiReturnsRiskRoute: typeof ApiReturnsRiskRoute
+  ApiReviewsCandidatesRoute: typeof ApiReviewsCandidatesRoute
+  ApiSalesBotRoute: typeof ApiSalesBotRoute
+  ApiSeoAnalyzeRoute: typeof ApiSeoAnalyzeRoute
+  ApiShippingOptionsRoute: typeof ApiShippingOptionsRoute
   ApiSiteBuilderBuildRoute: typeof ApiSiteBuilderBuildRoute
   ApiSubscriptionCallbackRoute: typeof ApiSubscriptionCallbackRoute
   ApiSubscriptionInitRoute: typeof ApiSubscriptionInitRoute
+  ApiSystemBackupRoute: typeof ApiSystemBackupRoute
+  ApiSystemDeploymentRoute: typeof ApiSystemDeploymentRoute
   ApiTelegramStatusRoute: typeof ApiTelegramStatusRoute
   HooksActionsApplyRoute: typeof HooksActionsApplyRoute
   HooksAgentsActionWatchdogRoute: typeof HooksAgentsActionWatchdogRoute
@@ -3359,8 +4329,7 @@ export interface RootRouteChildren {
   HooksIntegrationsDntradeWeeklyDigestRoute: typeof HooksIntegrationsDntradeWeeklyDigestRoute
   HooksTelegramNotifyOwnerRoute: typeof HooksTelegramNotifyOwnerRoute
   HooksTelegramPollRoute: typeof HooksTelegramPollRoute
-  ApiIntegrationsSyncProviderRoute: typeof ApiIntegrationsSyncProviderRoute
-  ApiIntegrationsVerifyProviderRoute: typeof ApiIntegrationsVerifyProviderRoute
+  ApiDataIndexRoute: typeof ApiDataIndexRoute
   ApiOrdersOrderIdTelegramMessageRoute: typeof ApiOrdersOrderIdTelegramMessageRoute
   ApiOrdersOrderIdTransitionRoute: typeof ApiOrdersOrderIdTransitionRoute
   ApiPublicEmailResendWebhookRoute: typeof ApiPublicEmailResendWebhookRoute
@@ -3548,6 +4517,97 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/workflows': {
+      id: '/api/workflows'
+      path: '/api/workflows'
+      fullPath: '/api/workflows'
+      preLoaderRoute: typeof ApiWorkflowsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/webhooks': {
+      id: '/api/webhooks'
+      path: '/api/webhooks'
+      fullPath: '/api/webhooks'
+      preLoaderRoute: typeof ApiWebhooksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/templates': {
+      id: '/api/templates'
+      path: '/api/templates'
+      fullPath: '/api/templates'
+      preLoaderRoute: typeof ApiTemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/team': {
+      id: '/api/team'
+      path: '/api/team'
+      fullPath: '/api/team'
+      preLoaderRoute: typeof ApiTeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/sync': {
+      id: '/api/sync'
+      path: '/api/sync'
+      fullPath: '/api/sync'
+      preLoaderRoute: typeof ApiSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/social-proof': {
+      id: '/api/social-proof'
+      path: '/api/social-proof'
+      fullPath: '/api/social-proof'
+      preLoaderRoute: typeof ApiSocialProofRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/sla': {
+      id: '/api/sla'
+      path: '/api/sla'
+      fullPath: '/api/sla'
+      preLoaderRoute: typeof ApiSlaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/search': {
+      id: '/api/search'
+      path: '/api/search'
+      fullPath: '/api/search'
+      preLoaderRoute: typeof ApiSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/scheduler': {
+      id: '/api/scheduler'
+      path: '/api/scheduler'
+      fullPath: '/api/scheduler'
+      preLoaderRoute: typeof ApiSchedulerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/reports': {
+      id: '/api/reports'
+      path: '/api/reports'
+      fullPath: '/api/reports'
+      preLoaderRoute: typeof ApiReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/recommendations': {
+      id: '/api/recommendations'
+      path: '/api/recommendations'
+      fullPath: '/api/recommendations'
+      preLoaderRoute: typeof ApiRecommendationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/pricing': {
+      id: '/api/pricing'
+      path: '/api/pricing'
+      fullPath: '/api/pricing'
+      preLoaderRoute: typeof ApiPricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/policy': {
+      id: '/api/policy'
+      path: '/api/policy'
+      fullPath: '/api/policy'
+      preLoaderRoute: typeof ApiPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/onboarding': {
       id: '/api/onboarding'
       path: '/api/onboarding'
@@ -3562,11 +4622,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiNotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ml': {
+      id: '/api/ml'
+      path: '/api/ml'
+      fullPath: '/api/ml'
+      preLoaderRoute: typeof ApiMlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/metrics': {
+      id: '/api/metrics'
+      path: '/api/metrics'
+      fullPath: '/api/metrics'
+      preLoaderRoute: typeof ApiMetricsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/marq-keys': {
       id: '/api/marq-keys'
       path: '/api/marq-keys'
       fullPath: '/api/marq-keys'
       preLoaderRoute: typeof ApiMarqKeysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/leads': {
+      id: '/api/leads'
+      path: '/api/leads'
+      fullPath: '/api/leads'
+      preLoaderRoute: typeof ApiLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/jobs': {
+      id: '/api/jobs'
+      path: '/api/jobs'
+      fullPath: '/api/jobs'
+      preLoaderRoute: typeof ApiJobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/integrations': {
+      id: '/api/integrations'
+      path: '/api/integrations'
+      fullPath: '/api/integrations'
+      preLoaderRoute: typeof ApiIntegrationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/insights': {
@@ -3583,6 +4678,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiIncidentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/import': {
+      id: '/api/import'
+      path: '/api/import'
+      fullPath: '/api/import'
+      preLoaderRoute: typeof ApiImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/export': {
+      id: '/api/export'
+      path: '/api/export'
+      fullPath: '/api/export'
+      preLoaderRoute: typeof ApiExportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/events': {
+      id: '/api/events'
+      path: '/api/events'
+      fullPath: '/api/events'
+      preLoaderRoute: typeof ApiEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/domains': {
+      id: '/api/domains'
+      path: '/api/domains'
+      fullPath: '/api/domains'
+      preLoaderRoute: typeof ApiDomainsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/docs': {
       id: '/api/docs'
       path: '/api/docs'
@@ -3595,6 +4718,13 @@ declare module '@tanstack/react-router' {
       path: '/api/automations'
       fullPath: '/api/automations'
       preLoaderRoute: typeof ApiAutomationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ab-testing': {
+      id: '/api/ab-testing'
+      path: '/api/ab-testing'
+      fullPath: '/api/ab-testing'
+      preLoaderRoute: typeof ApiAbTestingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/profile': {
@@ -3624,6 +4754,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/s/$slug/'
       preLoaderRoute: typeof SSlugIndexRouteImport
       parentRoute: typeof SSlugRoute
+    }
+    '/api/data/': {
+      id: '/api/data/'
+      path: '/api/data'
+      fullPath: '/api/data/'
+      preLoaderRoute: typeof ApiDataIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/brand/': {
       id: '/_authenticated/brand/'
@@ -4556,6 +5693,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTelegramStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/system/deployment': {
+      id: '/api/system/deployment'
+      path: '/api/system/deployment'
+      fullPath: '/api/system/deployment'
+      preLoaderRoute: typeof ApiSystemDeploymentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/system/backup': {
+      id: '/api/system/backup'
+      path: '/api/system/backup'
+      fullPath: '/api/system/backup'
+      preLoaderRoute: typeof ApiSystemBackupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/subscription/init': {
       id: '/api/subscription/init'
       path: '/api/subscription/init'
@@ -4577,11 +5728,137 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSiteBuilderBuildRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/shipping/options': {
+      id: '/api/shipping/options'
+      path: '/api/shipping/options'
+      fullPath: '/api/shipping/options'
+      preLoaderRoute: typeof ApiShippingOptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/seo/analyze': {
+      id: '/api/seo/analyze'
+      path: '/api/seo/analyze'
+      fullPath: '/api/seo/analyze'
+      preLoaderRoute: typeof ApiSeoAnalyzeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/sales/bot': {
+      id: '/api/sales/bot'
+      path: '/api/sales/bot'
+      fullPath: '/api/sales/bot'
+      preLoaderRoute: typeof ApiSalesBotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/reviews/candidates': {
+      id: '/api/reviews/candidates'
+      path: '/api/reviews/candidates'
+      fullPath: '/api/reviews/candidates'
+      preLoaderRoute: typeof ApiReviewsCandidatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/returns/risk': {
+      id: '/api/returns/risk'
+      path: '/api/returns/risk'
+      fullPath: '/api/returns/risk'
+      preLoaderRoute: typeof ApiReturnsRiskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/reports/generate': {
+      id: '/api/reports/generate'
+      path: '/generate'
+      fullPath: '/api/reports/generate'
+      preLoaderRoute: typeof ApiReportsGenerateRouteImport
+      parentRoute: typeof ApiReportsRoute
+    }
     '/api/public/contact': {
       id: '/api/public/contact'
       path: '/api/public/contact'
       fullPath: '/api/public/contact'
       preLoaderRoute: typeof ApiPublicContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/products/widgets': {
+      id: '/api/products/widgets'
+      path: '/api/products/widgets'
+      fullPath: '/api/products/widgets'
+      preLoaderRoute: typeof ApiProductsWidgetsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/products/compare': {
+      id: '/api/products/compare'
+      path: '/api/products/compare'
+      fullPath: '/api/products/compare'
+      preLoaderRoute: typeof ApiProductsCompareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/products/bundles': {
+      id: '/api/products/bundles'
+      path: '/api/products/bundles'
+      fullPath: '/api/products/bundles'
+      preLoaderRoute: typeof ApiProductsBundlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/payments/retry': {
+      id: '/api/payments/retry'
+      path: '/api/payments/retry'
+      fullPath: '/api/payments/retry'
+      preLoaderRoute: typeof ApiPaymentsRetryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/notifications/sms': {
+      id: '/api/notifications/sms'
+      path: '/sms'
+      fullPath: '/api/notifications/sms'
+      preLoaderRoute: typeof ApiNotificationsSmsRouteImport
+      parentRoute: typeof ApiNotificationsRoute
+    }
+    '/api/notifications/smart': {
+      id: '/api/notifications/smart'
+      path: '/smart'
+      fullPath: '/api/notifications/smart'
+      preLoaderRoute: typeof ApiNotificationsSmartRouteImport
+      parentRoute: typeof ApiNotificationsRoute
+    }
+    '/api/notifications/push': {
+      id: '/api/notifications/push'
+      path: '/push'
+      fullPath: '/api/notifications/push'
+      preLoaderRoute: typeof ApiNotificationsPushRouteImport
+      parentRoute: typeof ApiNotificationsRoute
+    }
+    '/api/notifications/preferences': {
+      id: '/api/notifications/preferences'
+      path: '/preferences'
+      fullPath: '/api/notifications/preferences'
+      preLoaderRoute: typeof ApiNotificationsPreferencesRouteImport
+      parentRoute: typeof ApiNotificationsRoute
+    }
+    '/api/notifications/in-app': {
+      id: '/api/notifications/in-app'
+      path: '/in-app'
+      fullPath: '/api/notifications/in-app'
+      preLoaderRoute: typeof ApiNotificationsInAppRouteImport
+      parentRoute: typeof ApiNotificationsRoute
+    }
+    '/api/inventory/optimize': {
+      id: '/api/inventory/optimize'
+      path: '/api/inventory/optimize'
+      fullPath: '/api/inventory/optimize'
+      preLoaderRoute: typeof ApiInventoryOptimizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/inventory/forecast': {
+      id: '/api/inventory/forecast'
+      path: '/api/inventory/forecast'
+      fullPath: '/api/inventory/forecast'
+      preLoaderRoute: typeof ApiInventoryForecastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/fraud/analyze': {
+      id: '/api/fraud/analyze'
+      path: '/api/fraud/analyze'
+      fullPath: '/api/fraud/analyze'
+      preLoaderRoute: typeof ApiFraudAnalyzeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/email/order-status': {
@@ -4619,6 +5896,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiEmailDomainSetupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/email/campaigns': {
+      id: '/api/email/campaigns'
+      path: '/api/email/campaigns'
+      fullPath: '/api/email/campaigns'
+      preLoaderRoute: typeof ApiEmailCampaignsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/email/campaign-send': {
       id: '/api/email/campaign-send'
       path: '/api/email/campaign-send'
@@ -4626,11 +5910,158 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiEmailCampaignSendRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/email/automation': {
+      id: '/api/email/automation'
+      path: '/api/email/automation'
+      fullPath: '/api/email/automation'
+      preLoaderRoute: typeof ApiEmailAutomationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/domains/verify': {
       id: '/api/domains/verify'
-      path: '/api/domains/verify'
+      path: '/verify'
       fullPath: '/api/domains/verify'
       preLoaderRoute: typeof ApiDomainsVerifyRouteImport
+      parentRoute: typeof ApiDomainsRoute
+    }
+    '/api/data/visualize': {
+      id: '/api/data/visualize'
+      path: '/api/data/visualize'
+      fullPath: '/api/data/visualize'
+      preLoaderRoute: typeof ApiDataVisualizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/sync': {
+      id: '/api/data/sync'
+      path: '/api/data/sync'
+      fullPath: '/api/data/sync'
+      preLoaderRoute: typeof ApiDataSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/quality': {
+      id: '/api/data/quality'
+      path: '/api/data/quality'
+      fullPath: '/api/data/quality'
+      preLoaderRoute: typeof ApiDataQualityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/pipeline': {
+      id: '/api/data/pipeline'
+      path: '/api/data/pipeline'
+      fullPath: '/api/data/pipeline'
+      preLoaderRoute: typeof ApiDataPipelineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/optimize': {
+      id: '/api/data/optimize'
+      path: '/api/data/optimize'
+      fullPath: '/api/data/optimize'
+      preLoaderRoute: typeof ApiDataOptimizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/monitoring': {
+      id: '/api/data/monitoring'
+      path: '/api/data/monitoring'
+      fullPath: '/api/data/monitoring'
+      preLoaderRoute: typeof ApiDataMonitoringRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/migration': {
+      id: '/api/data/migration'
+      path: '/api/data/migration'
+      fullPath: '/api/data/migration'
+      preLoaderRoute: typeof ApiDataMigrationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/lifecycle': {
+      id: '/api/data/lifecycle'
+      path: '/api/data/lifecycle'
+      fullPath: '/api/data/lifecycle'
+      preLoaderRoute: typeof ApiDataLifecycleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/governance': {
+      id: '/api/data/governance'
+      path: '/api/data/governance'
+      fullPath: '/api/data/governance'
+      preLoaderRoute: typeof ApiDataGovernanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/enrichment': {
+      id: '/api/data/enrichment'
+      path: '/api/data/enrichment'
+      fullPath: '/api/data/enrichment'
+      preLoaderRoute: typeof ApiDataEnrichmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/compliance': {
+      id: '/api/data/compliance'
+      path: '/api/data/compliance'
+      fullPath: '/api/data/compliance'
+      preLoaderRoute: typeof ApiDataComplianceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/cleanup': {
+      id: '/api/data/cleanup'
+      path: '/api/data/cleanup'
+      fullPath: '/api/data/cleanup'
+      preLoaderRoute: typeof ApiDataCleanupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/audit': {
+      id: '/api/data/audit'
+      path: '/api/data/audit'
+      fullPath: '/api/data/audit'
+      preLoaderRoute: typeof ApiDataAuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/archive': {
+      id: '/api/data/archive'
+      path: '/api/data/archive'
+      fullPath: '/api/data/archive'
+      preLoaderRoute: typeof ApiDataArchiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/alerts': {
+      id: '/api/data/alerts'
+      path: '/api/data/alerts'
+      fullPath: '/api/data/alerts'
+      preLoaderRoute: typeof ApiDataAlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dashboard/full': {
+      id: '/api/dashboard/full'
+      path: '/api/dashboard/full'
+      fullPath: '/api/dashboard/full'
+      preLoaderRoute: typeof ApiDashboardFullRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/customers/support': {
+      id: '/api/customers/support'
+      path: '/api/customers/support'
+      fullPath: '/api/customers/support'
+      preLoaderRoute: typeof ApiCustomersSupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/checkout/optimize': {
+      id: '/api/checkout/optimize'
+      path: '/api/checkout/optimize'
+      fullPath: '/api/checkout/optimize'
+      preLoaderRoute: typeof ApiCheckoutOptimizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cart/optimize': {
+      id: '/api/cart/optimize'
+      path: '/api/cart/optimize'
+      fullPath: '/api/cart/optimize'
+      preLoaderRoute: typeof ApiCartOptimizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/billing/optimize': {
+      id: '/api/billing/optimize'
+      path: '/api/billing/optimize'
+      fullPath: '/api/billing/optimize'
+      preLoaderRoute: typeof ApiBillingOptimizeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/automations/$id': {
@@ -4639,6 +6070,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/automations/$id'
       preLoaderRoute: typeof ApiAutomationsIdRouteImport
       parentRoute: typeof ApiAutomationsRoute
+    }
+    '/api/audit/trail': {
+      id: '/api/audit/trail'
+      path: '/api/audit/trail'
+      fullPath: '/api/audit/trail'
+      preLoaderRoute: typeof ApiAuditTrailRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/analytics/summary': {
       id: '/api/analytics/summary'
@@ -4654,11 +6092,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAnalyticsSmartRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/analytics/schedule': {
+      id: '/api/analytics/schedule'
+      path: '/api/analytics/schedule'
+      fullPath: '/api/analytics/schedule'
+      preLoaderRoute: typeof ApiAnalyticsScheduleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analytics/notifications': {
+      id: '/api/analytics/notifications'
+      path: '/api/analytics/notifications'
+      fullPath: '/api/analytics/notifications'
+      preLoaderRoute: typeof ApiAnalyticsNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analytics/health': {
+      id: '/api/analytics/health'
+      path: '/api/analytics/health'
+      fullPath: '/api/analytics/health'
+      preLoaderRoute: typeof ApiAnalyticsHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/analytics/export': {
       id: '/api/analytics/export'
       path: '/api/analytics/export'
       fullPath: '/api/analytics/export'
       preLoaderRoute: typeof ApiAnalyticsExportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analytics/dashboard-data': {
+      id: '/api/analytics/dashboard-data'
+      path: '/api/analytics/dashboard-data'
+      fullPath: '/api/analytics/dashboard-data'
+      preLoaderRoute: typeof ApiAnalyticsDashboardDataRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/analytics/dashboard': {
@@ -4675,11 +6141,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAnalyticsComparisonRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/analytics/charts': {
+      id: '/api/analytics/charts'
+      path: '/api/analytics/charts'
+      fullPath: '/api/analytics/charts'
+      preLoaderRoute: typeof ApiAnalyticsChartsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analytics/backup': {
+      id: '/api/analytics/backup'
+      path: '/api/analytics/backup'
+      fullPath: '/api/analytics/backup'
+      preLoaderRoute: typeof ApiAnalyticsBackupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/ai/ask': {
       id: '/api/ai/ask'
       path: '/api/ai/ask'
       fullPath: '/api/ai/ask'
       preLoaderRoute: typeof ApiAiAskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/secrets': {
+      id: '/api/admin/secrets'
+      path: '/api/admin/secrets'
+      fullPath: '/api/admin/secrets'
+      preLoaderRoute: typeof ApiAdminSecretsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/access/logs': {
+      id: '/api/access/logs'
+      path: '/api/access/logs'
+      fullPath: '/api/access/logs'
+      preLoaderRoute: typeof ApiAccessLogsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/invite/$token': {
@@ -5111,17 +6605,17 @@ declare module '@tanstack/react-router' {
     }
     '/api/integrations/verify/$provider': {
       id: '/api/integrations/verify/$provider'
-      path: '/api/integrations/verify/$provider'
+      path: '/verify/$provider'
       fullPath: '/api/integrations/verify/$provider'
       preLoaderRoute: typeof ApiIntegrationsVerifyProviderRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ApiIntegrationsRoute
     }
     '/api/integrations/sync/$provider': {
       id: '/api/integrations/sync/$provider'
-      path: '/api/integrations/sync/$provider'
+      path: '/sync/$provider'
       fullPath: '/api/integrations/sync/$provider'
       preLoaderRoute: typeof ApiIntegrationsSyncProviderRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ApiIntegrationsRoute
     }
     '/_authenticated/brand/products/$productId': {
       id: '/_authenticated/brand/products/$productId'
@@ -5327,6 +6821,63 @@ const ApiAutomationsRouteWithChildren = ApiAutomationsRoute._addFileChildren(
   ApiAutomationsRouteChildren,
 )
 
+interface ApiDomainsRouteChildren {
+  ApiDomainsVerifyRoute: typeof ApiDomainsVerifyRoute
+}
+
+const ApiDomainsRouteChildren: ApiDomainsRouteChildren = {
+  ApiDomainsVerifyRoute: ApiDomainsVerifyRoute,
+}
+
+const ApiDomainsRouteWithChildren = ApiDomainsRoute._addFileChildren(
+  ApiDomainsRouteChildren,
+)
+
+interface ApiIntegrationsRouteChildren {
+  ApiIntegrationsSyncProviderRoute: typeof ApiIntegrationsSyncProviderRoute
+  ApiIntegrationsVerifyProviderRoute: typeof ApiIntegrationsVerifyProviderRoute
+}
+
+const ApiIntegrationsRouteChildren: ApiIntegrationsRouteChildren = {
+  ApiIntegrationsSyncProviderRoute: ApiIntegrationsSyncProviderRoute,
+  ApiIntegrationsVerifyProviderRoute: ApiIntegrationsVerifyProviderRoute,
+}
+
+const ApiIntegrationsRouteWithChildren = ApiIntegrationsRoute._addFileChildren(
+  ApiIntegrationsRouteChildren,
+)
+
+interface ApiNotificationsRouteChildren {
+  ApiNotificationsInAppRoute: typeof ApiNotificationsInAppRoute
+  ApiNotificationsPreferencesRoute: typeof ApiNotificationsPreferencesRoute
+  ApiNotificationsPushRoute: typeof ApiNotificationsPushRoute
+  ApiNotificationsSmartRoute: typeof ApiNotificationsSmartRoute
+  ApiNotificationsSmsRoute: typeof ApiNotificationsSmsRoute
+}
+
+const ApiNotificationsRouteChildren: ApiNotificationsRouteChildren = {
+  ApiNotificationsInAppRoute: ApiNotificationsInAppRoute,
+  ApiNotificationsPreferencesRoute: ApiNotificationsPreferencesRoute,
+  ApiNotificationsPushRoute: ApiNotificationsPushRoute,
+  ApiNotificationsSmartRoute: ApiNotificationsSmartRoute,
+  ApiNotificationsSmsRoute: ApiNotificationsSmsRoute,
+}
+
+const ApiNotificationsRouteWithChildren =
+  ApiNotificationsRoute._addFileChildren(ApiNotificationsRouteChildren)
+
+interface ApiReportsRouteChildren {
+  ApiReportsGenerateRoute: typeof ApiReportsGenerateRoute
+}
+
+const ApiReportsRouteChildren: ApiReportsRouteChildren = {
+  ApiReportsGenerateRoute: ApiReportsGenerateRoute,
+}
+
+const ApiReportsRouteWithChildren = ApiReportsRoute._addFileChildren(
+  ApiReportsRouteChildren,
+)
+
 interface SSlugRouteChildren {
   SSlugAboutRoute: typeof SSlugAboutRoute
   SSlugAccountRoute: typeof SSlugAccountRoute
@@ -5373,35 +6924,102 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  ApiAbTestingRoute: ApiAbTestingRoute,
   ApiAutomationsRoute: ApiAutomationsRouteWithChildren,
   ApiDocsRoute: ApiDocsRoute,
+  ApiDomainsRoute: ApiDomainsRouteWithChildren,
+  ApiEventsRoute: ApiEventsRoute,
+  ApiExportRoute: ApiExportRoute,
+  ApiImportRoute: ApiImportRoute,
   ApiIncidentsRoute: ApiIncidentsRoute,
   ApiInsightsRoute: ApiInsightsRoute,
+  ApiIntegrationsRoute: ApiIntegrationsRouteWithChildren,
+  ApiJobsRoute: ApiJobsRoute,
+  ApiLeadsRoute: ApiLeadsRoute,
   ApiMarqKeysRoute: ApiMarqKeysRoute,
-  ApiNotificationsRoute: ApiNotificationsRoute,
+  ApiMetricsRoute: ApiMetricsRoute,
+  ApiMlRoute: ApiMlRoute,
+  ApiNotificationsRoute: ApiNotificationsRouteWithChildren,
   ApiOnboardingRoute: ApiOnboardingRoute,
+  ApiPolicyRoute: ApiPolicyRoute,
+  ApiPricingRoute: ApiPricingRoute,
+  ApiRecommendationsRoute: ApiRecommendationsRoute,
+  ApiReportsRoute: ApiReportsRouteWithChildren,
+  ApiSchedulerRoute: ApiSchedulerRoute,
+  ApiSearchRoute: ApiSearchRoute,
+  ApiSlaRoute: ApiSlaRoute,
+  ApiSocialProofRoute: ApiSocialProofRoute,
+  ApiSyncRoute: ApiSyncRoute,
+  ApiTeamRoute: ApiTeamRoute,
+  ApiTemplatesRoute: ApiTemplatesRoute,
+  ApiWebhooksRoute: ApiWebhooksRoute,
+  ApiWorkflowsRoute: ApiWorkflowsRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   HooksIngestRoute: HooksIngestRoute,
   MSlugRoute: MSlugRoute,
   SSlugRoute: SSlugRouteWithChildren,
   TrackSplatRoute: TrackSplatRoute,
+  ApiAccessLogsRoute: ApiAccessLogsRoute,
+  ApiAdminSecretsRoute: ApiAdminSecretsRoute,
   ApiAiAskRoute: ApiAiAskRoute,
+  ApiAnalyticsBackupRoute: ApiAnalyticsBackupRoute,
+  ApiAnalyticsChartsRoute: ApiAnalyticsChartsRoute,
   ApiAnalyticsComparisonRoute: ApiAnalyticsComparisonRoute,
   ApiAnalyticsDashboardRoute: ApiAnalyticsDashboardRoute,
+  ApiAnalyticsDashboardDataRoute: ApiAnalyticsDashboardDataRoute,
   ApiAnalyticsExportRoute: ApiAnalyticsExportRoute,
+  ApiAnalyticsHealthRoute: ApiAnalyticsHealthRoute,
+  ApiAnalyticsNotificationsRoute: ApiAnalyticsNotificationsRoute,
+  ApiAnalyticsScheduleRoute: ApiAnalyticsScheduleRoute,
   ApiAnalyticsSmartRoute: ApiAnalyticsSmartRoute,
   ApiAnalyticsSummaryRoute: ApiAnalyticsSummaryRoute,
-  ApiDomainsVerifyRoute: ApiDomainsVerifyRoute,
+  ApiAuditTrailRoute: ApiAuditTrailRoute,
+  ApiBillingOptimizeRoute: ApiBillingOptimizeRoute,
+  ApiCartOptimizeRoute: ApiCartOptimizeRoute,
+  ApiCheckoutOptimizeRoute: ApiCheckoutOptimizeRoute,
+  ApiCustomersSupportRoute: ApiCustomersSupportRoute,
+  ApiDashboardFullRoute: ApiDashboardFullRoute,
+  ApiDataAlertsRoute: ApiDataAlertsRoute,
+  ApiDataArchiveRoute: ApiDataArchiveRoute,
+  ApiDataAuditRoute: ApiDataAuditRoute,
+  ApiDataCleanupRoute: ApiDataCleanupRoute,
+  ApiDataComplianceRoute: ApiDataComplianceRoute,
+  ApiDataEnrichmentRoute: ApiDataEnrichmentRoute,
+  ApiDataGovernanceRoute: ApiDataGovernanceRoute,
+  ApiDataLifecycleRoute: ApiDataLifecycleRoute,
+  ApiDataMigrationRoute: ApiDataMigrationRoute,
+  ApiDataMonitoringRoute: ApiDataMonitoringRoute,
+  ApiDataOptimizeRoute: ApiDataOptimizeRoute,
+  ApiDataPipelineRoute: ApiDataPipelineRoute,
+  ApiDataQualityRoute: ApiDataQualityRoute,
+  ApiDataSyncRoute: ApiDataSyncRoute,
+  ApiDataVisualizeRoute: ApiDataVisualizeRoute,
+  ApiEmailAutomationRoute: ApiEmailAutomationRoute,
   ApiEmailCampaignSendRoute: ApiEmailCampaignSendRoute,
+  ApiEmailCampaignsRoute: ApiEmailCampaignsRoute,
   ApiEmailDomainSetupRoute: ApiEmailDomainSetupRoute,
   ApiEmailDomainStatusRoute: ApiEmailDomainStatusRoute,
   ApiEmailDomainVerifyRoute: ApiEmailDomainVerifyRoute,
   ApiEmailOrderConfirmationRoute: ApiEmailOrderConfirmationRoute,
   ApiEmailOrderStatusRoute: ApiEmailOrderStatusRoute,
+  ApiFraudAnalyzeRoute: ApiFraudAnalyzeRoute,
+  ApiInventoryForecastRoute: ApiInventoryForecastRoute,
+  ApiInventoryOptimizeRoute: ApiInventoryOptimizeRoute,
+  ApiPaymentsRetryRoute: ApiPaymentsRetryRoute,
+  ApiProductsBundlesRoute: ApiProductsBundlesRoute,
+  ApiProductsCompareRoute: ApiProductsCompareRoute,
+  ApiProductsWidgetsRoute: ApiProductsWidgetsRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
+  ApiReturnsRiskRoute: ApiReturnsRiskRoute,
+  ApiReviewsCandidatesRoute: ApiReviewsCandidatesRoute,
+  ApiSalesBotRoute: ApiSalesBotRoute,
+  ApiSeoAnalyzeRoute: ApiSeoAnalyzeRoute,
+  ApiShippingOptionsRoute: ApiShippingOptionsRoute,
   ApiSiteBuilderBuildRoute: ApiSiteBuilderBuildRoute,
   ApiSubscriptionCallbackRoute: ApiSubscriptionCallbackRoute,
   ApiSubscriptionInitRoute: ApiSubscriptionInitRoute,
+  ApiSystemBackupRoute: ApiSystemBackupRoute,
+  ApiSystemDeploymentRoute: ApiSystemDeploymentRoute,
   ApiTelegramStatusRoute: ApiTelegramStatusRoute,
   HooksActionsApplyRoute: HooksActionsApplyRoute,
   HooksAgentsActionWatchdogRoute: HooksAgentsActionWatchdogRoute,
@@ -5534,8 +7152,7 @@ const rootRouteChildren: RootRouteChildren = {
     HooksIntegrationsDntradeWeeklyDigestRoute,
   HooksTelegramNotifyOwnerRoute: HooksTelegramNotifyOwnerRoute,
   HooksTelegramPollRoute: HooksTelegramPollRoute,
-  ApiIntegrationsSyncProviderRoute: ApiIntegrationsSyncProviderRoute,
-  ApiIntegrationsVerifyProviderRoute: ApiIntegrationsVerifyProviderRoute,
+  ApiDataIndexRoute: ApiDataIndexRoute,
   ApiOrdersOrderIdTelegramMessageRoute: ApiOrdersOrderIdTelegramMessageRoute,
   ApiOrdersOrderIdTransitionRoute: ApiOrdersOrderIdTransitionRoute,
   ApiPublicEmailResendWebhookRoute: ApiPublicEmailResendWebhookRoute,

@@ -7,14 +7,17 @@
  * 3. Data masking — маскування даних
  * 4. Consent tracking — відстеження згод
  */
-import { createHash } from "crypto";
+function simpleHash(str: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+}
 
-/**
- * Анонімізувати email.
- */
 export function anonymizeEmail(email: string): string {
-  const hash = createHash("sha256").update(email).digest("hex").slice(0, 8);
-  return `user-${hash}@anonymized.com`;
+  return `user-${simpleHash(email)}@anonymized.com`;
 }
 
 /**
