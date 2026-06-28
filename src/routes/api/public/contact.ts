@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { clientIp, createIpRateLimiter } from "@/lib/http/rateLimit";
+
+const limiter = createIpRateLimiter({ limit: 10, windowMs: 60_000 });
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -20,6 +23,13 @@ export const Route = createFileRoute("/api/public/contact")({
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
       POST: async ({ request }) => {
+        const ip = clientIp(request);
+        if (!limiter.check(ip)) {
+          return new Response(JSON.stringify({ ok: false, error: "rate_limit_exceeded" }), {
+            status: 429,
+            headers: { "Content-Type": "application/json", ...CORS },
+          });
+        }
         try {
           const body = await request.json().catch(() => null);
           const parsed = schema.safeParse(body);

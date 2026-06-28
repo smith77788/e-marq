@@ -19,6 +19,9 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { mintApiKey } from "@/lib/marq-public-api/auth";
+import { clientIp, createIpRateLimiter } from "@/lib/http/rateLimit";
+
+const limiter = createIpRateLimiter({ limit: 10, windowMs: 60_000 });
 
 const PostBody = z.object({
   tenant_id: z.string().uuid(),
@@ -57,6 +60,13 @@ export const Route = createFileRoute("/api/marq-keys")({
   server: {
     handlers: {
       GET: async ({ request }) => {
+        const ip = clientIp(request);
+        if (!limiter.check(ip)) {
+          return new Response(JSON.stringify({ error: "rate_limit_exceeded" }), {
+            status: 429,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
         const a = await authedClient(request);
         if ("error" in a) return a.error;
 
@@ -84,6 +94,13 @@ export const Route = createFileRoute("/api/marq-keys")({
         return Response.json({ keys: data ?? [] });
       },
       POST: async ({ request }) => {
+        const ip = clientIp(request);
+        if (!limiter.check(ip)) {
+          return new Response(JSON.stringify({ error: "rate_limit_exceeded" }), {
+            status: 429,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
         const a = await authedClient(request);
         if ("error" in a) return a.error;
 
