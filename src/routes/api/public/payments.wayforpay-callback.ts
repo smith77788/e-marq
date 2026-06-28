@@ -13,14 +13,9 @@ import {
   type WayForPayCallback,
 } from "@/lib/payments/wayforpay.server";
 import { readGatewayConfig } from "@/lib/payments/types";
+import { clientIp, createIpRateLimiter } from "@/lib/http/rateLimit";
 
-function clientIp(req: Request): string {
-  return (
-    req.headers.get("cf-connecting-ip") ||
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    "unknown"
-  );
-}
+const callbackLimiter = createIpRateLimiter({ limit: 30 });
 
 /** PII fields that must never appear in logs or the callbacks audit table. */
 const PII_FIELDS = new Set([

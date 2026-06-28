@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useT, tStatic } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/owner/LanguageSwitcher";
 import { NOINDEX_META } from "@/lib/seo";
+import { readAndClearDest } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -35,21 +36,7 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Show error if Supabase is not configured
   const configError = search.error === "supabase_not_configured";
-
-  function readAndClearDest(): string {
-    try {
-      const dest = window.sessionStorage.getItem("marq.postAuthDest");
-      if (dest) {
-        window.sessionStorage.removeItem("marq.postAuthDest");
-        if (dest.startsWith("/") && !dest.startsWith("//")) return dest;
-      }
-    } catch {
-      /* storage may be blocked */
-    }
-    return "/dashboard";
-  }
 
   useEffect(() => {
     if (!loading && user) {

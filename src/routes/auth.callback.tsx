@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/lib/i18n";
 import { NOINDEX_META } from "@/lib/seo";
+import { readAndClearDest } from "@/lib/auth";
 
 export const Route = createFileRoute("/auth/callback")({
   head: () => ({
@@ -15,19 +16,6 @@ export const Route = createFileRoute("/auth/callback")({
   }),
   component: AuthCallbackPage,
 });
-
-function readAndClearDest(): string {
-  try {
-    const dest = window.sessionStorage.getItem("marq.postAuthDest");
-    if (dest) {
-      window.sessionStorage.removeItem("marq.postAuthDest");
-      if (dest.startsWith("/") && !dest.startsWith("//")) return dest;
-    }
-  } catch {
-    /* storage may be blocked */
-  }
-  return "/dashboard";
-}
 
 /** True when the URL contains OAuth response params (hash or query). */
 function hasOAuthParams(): boolean {
