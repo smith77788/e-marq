@@ -18,6 +18,9 @@ import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { clientIp, createIpRateLimiter } from "@/lib/http/rateLimit";
+
+const limiter = createIpRateLimiter({ limit: 10 });
 import { mintApiKey } from "@/lib/marq-public-api/auth";
 
 const PostBody = z.object({
@@ -84,6 +87,10 @@ export const Route = createFileRoute("/api/marq-keys")({
         return Response.json({ keys: data ?? [] });
       },
       POST: async ({ request }) => {
+        const ip = clientIp(request);
+        if (!limiter.check(ip)) {
+          return Response.json({ error: "rate_limited" }, { status: 429 });
+        }
         const a = await authedClient(request);
         if ("error" in a) return a.error;
 
