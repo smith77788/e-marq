@@ -27,7 +27,8 @@ import { clientIp, createIpRateLimiter } from "@/lib/http/rateLimit";
 
 const MODEL = DEFAULT_AI_MODEL;
 const MAX_QUESTION_LEN = 500;
-const limiter = createIpRateLimiter({ limit: 20, windowMs: 60_000 });
+// AI is expensive — strict rate limit: 5 requests per minute per IP
+const limiter = createIpRateLimiter({ limit: 5, windowMs: 60_000 });
 
 function jsonError(message: string, status = 400) {
   return new Response(JSON.stringify({ error: message }), {
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/api/ai/ask")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        // Rate limit: AI is expensive
         const ip = clientIp(request);
         if (!limiter.check(ip)) {
           return jsonError("Rate limit exceeded. Try again in a minute.", 429);
