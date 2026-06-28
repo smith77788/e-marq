@@ -25,23 +25,35 @@ export async function cleanupOldData(
 
   // 1. Старі події (>90 днів)
   const days90Ago = new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString();
-  const { count: oldEvents } = await supabaseAdmin
+  const { count: oldEventsCount } = await supabaseAdmin
+    .from("events")
+    .select("*", { count: "exact", head: true })
+    .eq("tenant_id", tenantId)
+    .lt("created_at", days90Ago);
+  
+  const { error: deleteEventsError } = await supabaseAdmin
     .from("events")
     .delete()
     .eq("tenant_id", tenantId)
     .lt("created_at", days90Ago);
 
-  results.push({ table: "events", deleted: oldEvents ?? 0, freed_bytes: 0 });
+  results.push({ table: "events", deleted: oldEventsCount ?? 0, freed_bytes: 0 });
 
   // 2. Старі логи (>30 днів)
   const days30Ago = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
-  const { count: oldLogs } = await supabaseAdmin
+  const { count: oldLogsCount } = await supabaseAdmin
+    .from("ingest_error_logs")
+    .select("*", { count: "exact", head: true })
+    .eq("tenant_id", tenantId)
+    .lt("created_at", days30Ago);
+  
+  const { error: deleteLogsError } = await supabaseAdmin
     .from("ingest_error_logs")
     .delete()
     .eq("tenant_id", tenantId)
     .lt("created_at", days30Ago);
 
-  results.push({ table: "ingest_error_logs", deleted: oldLogs ?? 0, freed_bytes: 0 });
+  results.push({ table: "ingest_error_logs", deleted: oldLogsCount ?? 0, freed_bytes: 0 });
 
   return results;
 }

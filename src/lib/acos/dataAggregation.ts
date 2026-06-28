@@ -7,6 +7,8 @@
  * 3. Product metrics (кеш: 30 хв)
  * 4. Agent metrics (кеш: 1 хв)
  */
+// Worker-scoped in-memory cache — stateless on Cloudflare Workers (cold start loses data)
+// Use Supabase-backed cache for production
 const cache = new Map<string, { data: unknown; expires: number }>();
 
 function getCached<T>(key: string): T | null {
