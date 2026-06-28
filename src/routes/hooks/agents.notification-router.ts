@@ -19,6 +19,7 @@ import {
   startAgentRun,
   type AgentInsightInput,
 } from "@/lib/acos/agentRuntime";
+import { analyzeSalesAnomaly, monitorStockLevels } from "@/lib/acos/smartNotifications";
 
 const AGENT_ID = "notification-router";
 
@@ -121,6 +122,12 @@ export const Route = createFileRoute("/hooks/agents/notification-router")({
               });
             }
           }
+
+          // Proactive monitoring: revenue anomaly + low stock (non-blocking)
+          await Promise.allSettled([
+            analyzeSalesAnomaly(tenantId),
+            monitorStockLevels(tenantId),
+          ]);
 
           const created = await insertInsightsDedup(insights);
           await finishAgentRun(handle, created, {

@@ -36,7 +36,6 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Show error if Supabase is not configured
   const configError = search.error === "supabase_not_configured";
 
   useEffect(() => {

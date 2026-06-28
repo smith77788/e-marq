@@ -9,6 +9,8 @@
  *   import { aiChat, isAnyAiEnabled } from "@/lib/acos/aiGateway";
  *   const reply = await aiChat({ system, user, temperature: 0.6 });
  */
+import { CircuitBreaker } from "@/lib/acos/circuitBreaker";
+import { withRetry } from "@/lib/acos/retrySystem";
 
 export type AiProvider = "mimo" | "lovable";
 
@@ -41,6 +43,10 @@ const MIMO_API_URL = process.env.MIMO_API_URL || "https://api.xiaomimimo.com/v1/
 const MIMO_API_KEY = process.env.MIMO_API_KEY || "";
 const MIMO_MODEL = process.env.MIMO_MODEL || "mimo-auto";
 
+// ─── Circuit breakers per provider (module-level; reset on cold start) ────
+const mimoCircuit = new CircuitBreaker({ failureThreshold: 3, recoveryTimeout: 60_000 });
+const lovableCircuit = new CircuitBreaker({ failureThreshold: 3, recoveryTimeout: 60_000 });
+
 // ─── Lovable AI Gateway (fallback) ───────────────────────────
 const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY || "";
@@ -70,23 +76,28 @@ async function callMimo(opts: AiChatOptions): Promise<AiChatResult> {
   if (!MIMO_API_KEY) return { content: null, provider: "mimo", error: "MIMO_API_KEY not set" };
 
   try {
-    const res = await fetch(MIMO_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${MIMO_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: MIMO_MODEL,
-        messages: [
-          { role: "system", content: opts.system },
-          { role: "user", content: opts.user },
-        ],
-        temperature: opts.temperature ?? 0.6,
-        max_tokens: opts.maxTokens ?? 500,
-      }),
-      signal: AbortSignal.timeout(30_000),
-    });
+    const res = await withRetry(
+      () => mimoCircuit.execute(() =>
+        fetch(MIMO_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${MIMO_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: MIMO_MODEL,
+            messages: [
+              { role: "system", content: opts.system },
+              { role: "user", content: opts.user },
+            ],
+            temperature: opts.temperature ?? 0.6,
+            max_tokens: opts.maxTokens ?? 500,
+          }),
+          signal: AbortSignal.timeout(30_000),
+        }),
+      ),
+      { maxRetries: 1, strategy: "exponential", baseDelayMs: 500, maxDelayMs: 2000 },
+    );
 
     if (!res.ok) {
       return { content: null, provider: "mimo", error: `HTTP ${res.status}` };
@@ -106,23 +117,28 @@ async function callLovable(opts: AiChatOptions): Promise<AiChatResult> {
   if (!LOVABLE_API_KEY) return { content: null, provider: "lovable", error: "LOVABLE_API_KEY not set" };
 
   try {
-    const res = await fetch(LOVABLE_AI_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: LOVABLE_MODEL,
-        messages: [
-          { role: "system", content: opts.system },
-          { role: "user", content: opts.user },
-        ],
-        temperature: opts.temperature ?? 0.6,
-        max_tokens: opts.maxTokens ?? 500,
-      }),
-      signal: AbortSignal.timeout(30_000),
-    });
+    const res = await withRetry(
+      () => lovableCircuit.execute(() =>
+        fetch(LOVABLE_AI_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: LOVABLE_MODEL,
+            messages: [
+              { role: "system", content: opts.system },
+              { role: "user", content: opts.user },
+            ],
+            temperature: opts.temperature ?? 0.6,
+            max_tokens: opts.maxTokens ?? 500,
+          }),
+          signal: AbortSignal.timeout(30_000),
+        }),
+      ),
+      { maxRetries: 1, strategy: "exponential", baseDelayMs: 500, maxDelayMs: 2000 },
+    );
 
     if (!res.ok) {
       return { content: null, provider: "lovable", error: `HTTP ${res.status}` };

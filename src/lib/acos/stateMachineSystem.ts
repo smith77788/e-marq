@@ -86,18 +86,3 @@ export class StateMachine<T extends string> {
   }
 }
 
-/**
- * Приклад: Order lifecycle
- */
-export type OrderState = "pending" | "paid" | "processing" | "shipped" | "delivered" | "cancelled";
-
-export function createOrderStateMachine(): StateMachine<OrderState> {
-  return new StateMachine<OrderState>("pending", [
-    { from: "pending", to: "paid" },
-    { from: "pending", to: "cancelled" },
-    { from: "paid", to: "processing" },
-    { from: "paid", to: "cancelled" },
-    { from: "processing", to: "shipped" },
-    { from: "shipped", to: "delivered" },
-  ]);
-}

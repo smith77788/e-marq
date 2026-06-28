@@ -113,10 +113,22 @@ export async function getOnboardingProgress(
 /**
  * Позначити крок онбордингу як виконаний.
  */
+const STEP_KEY: Record<string, string> = {
+  niche: "niche_selected",
+  data_source: "data_connected",
+  brand: "brand_configured",
+  telegram: "telegram_connected",
+  first_agent: "first_agent_run",
+  first_insight: "first_insight",
+};
+
 export async function completeOnboardingStep(
   tenantId: string,
   stepId: string,
 ): Promise<{ ok: boolean }> {
+  const key = STEP_KEY[stepId];
+  if (!key) return { ok: false };
+
   const { data: config } = await supabaseAdmin
     .from("tenant_configs")
     .select("features")
@@ -131,14 +143,7 @@ export async function completeOnboardingStep(
     .update({
       features: {
         ...features,
-        onboarding: {
-          ...onboarding,
-          [`${stepId}_selected`]: true,
-          [`${stepId}_connected`]: true,
-          [`${stepId}_configured`]: true,
-          [`${stepId}_run`]: true,
-          [`${stepId}_completed`]: true,
-        },
+        onboarding: { ...onboarding, [key]: true },
       } as never,
     })
     .eq("tenant_id", tenantId);

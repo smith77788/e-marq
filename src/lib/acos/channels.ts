@@ -143,6 +143,30 @@ async function sendEmail(
   return { ok: true, channel_message_id: result.id };
 }
 
+async function retryOutboundDispatch(
+  row: OutboundRow,
+  attempts = 3,
+  delays = [2_000, 8_000, 30_000],
+): Promise<{ ok: true; channel_message_id: string } | { ok: false; error: string }> {
+  let lastError = "";
+  for (let i = 0; i < attempts; i++) {
+    if (i > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delays[i - 1]));
+    }
+    let result: { ok: true; channel_message_id: string } | { ok: false; error: string };
+    if (row.channel === "telegram") {
+      result = await sendTelegramOutbound(row);
+    } else if (row.channel === "email") {
+      result = await sendEmail(row);
+    } else {
+      return { ok: false, error: `unsupported channel: ${row.channel}` };
+    }
+    if (result.ok) return result;
+    lastError = result.error;
+  }
+  return { ok: false, error: lastError };
+}
+
 /** Process all due outbound messages for a tenant. */
 export async function dispatchTenantOutbound(
   tenantId: string,
@@ -161,15 +185,11 @@ export async function dispatchTenantOutbound(
     failed = 0,
     skipped = 0;
   for (const r of (rows ?? []) as OutboundRow[]) {
-    let result: { ok: true; channel_message_id: string } | { ok: false; error: string };
-    if (r.channel === "telegram") {
-      result = await sendTelegramOutbound(r);
-    } else if (r.channel === "email") {
-      result = await sendEmail(r);
-    } else {
+    if (r.channel !== "telegram" && r.channel !== "email") {
       skipped++;
       continue;
     }
+    const result = await retryOutboundDispatch(r);
     const now = new Date().toISOString();
     if (result.ok) {
       await supabaseAdmin

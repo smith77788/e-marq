@@ -1,46 +1,24 @@
 /**
- * Smart API Endpoints — готові API ендпоінти.
- *
- * Ендпоінти:
- * 1. GET /api/health — перевірка стану
- * 2. GET /api/metrics — метрики системи
- * 3. GET /api/analytics — аналітика
- * 4. POST /api/events — трекінг подій
+ * GET /api/-health — базова перевірка доступності сервісу.
+ * Використовується балансувальниками та моніторингом.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { checkApiHealth } from "@/lib/acos/apiHealthSystem";
 
-/**
- * GET /api/health — Health check endpoint.
- */
-export const HealthRoute = createFileRoute("/api/health" as never)({
+export const Route = createFileRoute("/api/-health")({
   server: {
     handlers: {
       GET: async () => {
-        return Response.json({
-          status: "healthy",
-          version: "1.0.0",
-          timestamp: new Date().toISOString(),
-        });
-      },
-    },
-  },
-});
-
-/**
- * GET /api/metrics — System metrics endpoint.
- */
-export const MetricsRoute = createFileRoute("/api/metrics" as never)({
-  server: {
-    handlers: {
-      GET: async () => {
-        return Response.json({
-          ok: true,
-          data: {
-            uptime: process.uptime(),
-            memory: process.memoryUsage(),
-            timestamp: new Date().toISOString(),
-          },
-        });
+        try {
+          const checks = await checkApiHealth();
+          const allOk = checks.every((c) => c.status === "ok");
+          return Response.json(
+            { status: allOk ? "healthy" : "degraded", checks, timestamp: new Date().toISOString() },
+            { status: allOk ? 200 : 503 },
+          );
+        } catch {
+          return Response.json({ status: "unhealthy", timestamp: new Date().toISOString() }, { status: 503 });
+        }
       },
     },
   },
