@@ -16,34 +16,38 @@ export type ChartDataPoint = {
   secondary?: number;
 };
 
+function buildDayLabels(): Array<{ label: string; key: string }> {
+  return Array.from({ length: 30 }, (_, i) => {
+    const d = new Date(Date.now() - (29 - i) * 24 * 3600 * 1000);
+    const key = d.toISOString().slice(0, 10); // "YYYY-MM-DD"
+    return { label: `${d.getDate()}.${d.getMonth() + 1}`, key };
+  });
+}
+
 /**
  * Дані для графіка виручки за 30 днів.
  */
 export async function getRevenueChartData(
   tenantId: string,
 ): Promise<ChartDataPoint[]> {
-  const days30 = [];
-  for (let i = 29; i >= 0; i--) {
-    const date = new Date(Date.now() - i * 24 * 3600 * 1000);
-    const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString();
-    const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).toISOString();
+  const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+  const { data } = await supabaseAdmin
+    .from("orders")
+    .select("total_cents, created_at")
+    .eq("tenant_id", tenantId)
+    .eq("status", "paid")
+    .gte("created_at", since);
 
-    const { data } = await supabaseAdmin
-      .from("orders")
-      .select("total_cents")
-      .eq("tenant_id", tenantId)
-      .eq("status", "paid")
-      .gte("created_at", dayStart)
-      .lt("created_at", dayEnd);
-
-    const total = (data ?? []).reduce((s, o) => s + o.total_cents, 0);
-    days30.push({
-      label: `${date.getDate()}.${date.getMonth() + 1}`,
-      value: Math.round(total / 100),
-    });
+  const byDay = new Map<string, number>();
+  for (const o of data ?? []) {
+    const day = o.created_at.slice(0, 10);
+    byDay.set(day, (byDay.get(day) ?? 0) + o.total_cents);
   }
 
-  return days30;
+  return buildDayLabels().map(({ label, key }) => ({
+    label,
+    value: Math.round((byDay.get(key) ?? 0) / 100),
+  }));
 }
 
 /**
@@ -52,26 +56,23 @@ export async function getRevenueChartData(
 export async function getCustomerGrowthChartData(
   tenantId: string,
 ): Promise<ChartDataPoint[]> {
-  const days30 = [];
-  for (let i = 29; i >= 0; i--) {
-    const date = new Date(Date.now() - i * 24 * 3600 * 1000);
-    const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString();
-    const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).toISOString();
+  const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+  const { data } = await supabaseAdmin
+    .from("customers")
+    .select("created_at")
+    .eq("tenant_id", tenantId)
+    .gte("created_at", since);
 
-    const { count } = await supabaseAdmin
-      .from("customers")
-      .select("*", { count: "exact", head: true })
-      .eq("tenant_id", tenantId)
-      .gte("created_at", dayStart)
-      .lt("created_at", dayEnd);
-
-    days30.push({
-      label: `${date.getDate()}.${date.getMonth() + 1}`,
-      value: count ?? 0,
-    });
+  const byDay = new Map<string, number>();
+  for (const c of data ?? []) {
+    const day = c.created_at.slice(0, 10);
+    byDay.set(day, (byDay.get(day) ?? 0) + 1);
   }
 
-  return days30;
+  return buildDayLabels().map(({ label, key }) => ({
+    label,
+    value: byDay.get(key) ?? 0,
+  }));
 }
 
 /**

@@ -21,6 +21,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { CORS_HEADERS, withCors } from "@/lib/http/cors";
 import { isConnectorSupported, runConnectorPull } from "@/lib/integrations/connectors";
 import { queuePostImportAgents } from "@/lib/integrations/postImport";
+import { withRetry } from "@/lib/acos/retrySystem";
 import {
   autoMap,
   parsePriceToCents,
@@ -165,16 +166,19 @@ export const Route = createFileRoute("/api/integrations/sync/$provider")({
             return jsonResponse({ ok: true, queued: true, jobId: job.id }, 202);
           }
 
-          // 4. Тягнемо дані з зовнішнього API.
+          // 4. Тягнемо дані з зовнішнього API (з retry на transient-помилки).
           let pulled;
           try {
-            pulled = await runConnectorPull({
-              provider,
-              entityKind: entityKind as EntityKind,
-              credentials: integ.credentials_encrypted,
-              config: (integ.config as Record<string, unknown>) ?? {},
-              limit,
-            });
+            pulled = await withRetry(
+              () => runConnectorPull({
+                provider,
+                entityKind: entityKind as EntityKind,
+                credentials: integ.credentials_encrypted,
+                config: (integ.config as Record<string, unknown>) ?? {},
+                limit,
+              }),
+              { maxRetries: 2, strategy: "exponential", baseDelayMs: 1000, maxDelayMs: 5000 },
+            );
           } catch (e) {
             const msg = e instanceof Error ? e.message : String(e);
             // Mark job failed
