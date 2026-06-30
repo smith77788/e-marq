@@ -116,7 +116,7 @@ export const Route = createFileRoute("/api/team")({
           if (!status) return err("status required");
 
           const result = await updateTaskStatus(taskId, status);
-          return Response.json({ ok: true, ...result });
+          return Response.json({ ...result, ok: true });
         }
 
         if (action === "comment") {
@@ -128,7 +128,7 @@ export const Route = createFileRoute("/api/team")({
           if (!comment) return err("comment required");
 
           const result = await addInsightComment(tenantId, insightId, userId, comment);
-          return Response.json({ ok: true, ...result });
+          return Response.json({ ...result, ok: true });
         }
 
         return err(`Unknown action: ${action}`);

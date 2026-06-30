@@ -44,6 +44,7 @@ const SEQUENCES: Record<string, typeof CART_ABANDONMENT_SEQUENCE> = {
 };
 
 export const Route = createFileRoute("/api/email/automation")({
+  // @ts-expect-error TanStack Router action type
   async action({ request }) {
     if (request.method !== "POST") return err("Method not allowed", 405);
 

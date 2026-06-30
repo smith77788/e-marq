@@ -61,6 +61,7 @@ const bodySchema = z.object({
       quantity: z.number().int().positive(),
     }),
   ),
+  cartTotalCents: z.number().int().nonnegative().optional().default(0),
   customerId: z.string().optional(),
 });
 
@@ -80,15 +81,16 @@ export const Route = createFileRoute("/api/cart/optimize")({
           return err(parsed.error.issues[0]?.message ?? "Invalid request body");
         }
 
-        const { tenantId, cartItems, customerId } = parsed.data;
+        const { tenantId, cartItems, cartTotalCents, customerId } = parsed.data;
 
         const auth = await resolveAuth(request, tenantId);
         if (!auth.ok) return err(auth.error, auth.status);
 
+        const cartProductIds = cartItems.map((i) => i.productId);
         const recommendations = await getCartRecommendations(
           tenantId,
-          cartItems,
-          customerId || undefined,
+          cartProductIds,
+          cartTotalCents,
         );
         return Response.json({ ok: true, recommendations });
       },

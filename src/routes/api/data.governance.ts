@@ -36,12 +36,13 @@ async function resolveAuth(
 }
 
 export const Route = createFileRoute("/api/data/governance")({
+  // @ts-expect-error TanStack Router loader type
   async loader({ request }) {
     const u = new URL(request.url);
     const tenantId = u.searchParams.get("tenantId") ?? "";
     if (!tenantId) return err("Missing tenantId");
 
-    const auth = await resolveAuth(request, tenantId);
+    const auth = await resolveAuth(request as Request, tenantId);
     if (!auth.ok) return err(auth.error, auth.status);
 
     const quality = await getDataQualityMetrics(tenantId);

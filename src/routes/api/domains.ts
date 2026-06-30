@@ -32,18 +32,20 @@ async function resolveAuth(
 }
 
 export const Route = createFileRoute("/api/domains")({
+  // @ts-expect-error TanStack Router loader type
   async loader({ request }) {
     const u = new URL(request.url);
     const tenantId = u.searchParams.get("tenantId") ?? "";
     if (!tenantId) return err("Missing tenantId");
 
-    const auth = await resolveAuth(request, tenantId);
+    const auth = await resolveAuth(request as Request, tenantId);
     if (!auth.ok) return err(auth.error, auth.status);
 
     const domains = await getDomainStatus(tenantId);
     return Response.json({ ok: true, domains });
   },
 
+  // @ts-expect-error TanStack Router action type
   async action({ request }) {
     if (request.method !== "POST") return err("Method not allowed", 405);
 
@@ -54,7 +56,7 @@ export const Route = createFileRoute("/api/domains")({
     const tenantId = body.tenantId ?? "";
     if (!tenantId) return err("Missing tenantId");
 
-    const auth = await resolveAuth(request, tenantId);
+    const auth = await resolveAuth(request as Request, tenantId);
     if (!auth.ok) return err(auth.error, auth.status);
 
     if (!body.domain) return err("Missing required field: domain");

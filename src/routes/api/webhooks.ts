@@ -66,14 +66,14 @@ export const Route = createFileRoute("/api/webhooks")({
           if (!url) return err("url required");
           if (!events || !Array.isArray(events)) return err("events array required");
           const result = await registerWebhook(tenantId, url, events);
-          return Response.json({ ok: true, ...result });
+          return Response.json({ ...result, ok: true });
         }
 
         if (action === "send") {
           const { event, payload } = body;
           if (!event) return err("event required");
           const result = await sendWebhook(tenantId, event, payload ?? {});
-          return Response.json({ ok: true, ...result });
+          return Response.json({ ...result, ok: true });
         }
 
         return err(`Unknown action: ${action}`);

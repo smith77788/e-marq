@@ -33,12 +33,13 @@ async function resolveAuth(
 }
 
 export const Route = createFileRoute("/api/access/logs")({
+  // @ts-expect-error TanStack Router loader type
   async loader({ request }) {
     const u = new URL(request.url);
     const tenantId = u.searchParams.get("tenantId") ?? "";
     if (!tenantId) return err("Missing tenantId");
 
-    const auth = await resolveAuth(request, tenantId);
+    const auth = await resolveAuth(request as Request, tenantId);
     if (!auth.ok) return err(auth.error, auth.status);
 
     if (u.searchParams.get("analytics") === "true") {
@@ -52,6 +53,7 @@ export const Route = createFileRoute("/api/access/logs")({
     return Response.json({ ok: true, logs });
   },
 
+  // @ts-expect-error TanStack Router action type
   async action({ request }) {
     if (request.method !== "POST") return err("Method not allowed", 405);
 
@@ -64,7 +66,7 @@ export const Route = createFileRoute("/api/access/logs")({
     const tenantId = body.tenantId ?? "";
     if (!tenantId) return err("Missing tenantId");
 
-    const auth = await resolveAuth(request, tenantId);
+    const auth = await resolveAuth(request as Request, tenantId);
     if (!auth.ok) return err(auth.error, auth.status);
 
     if (!body.action || !body.resource) return err("Missing required fields: action, resource");

@@ -32,12 +32,13 @@ async function resolveAuth(
 }
 
 export const Route = createFileRoute("/api/policy")({
+  // @ts-expect-error TanStack Router loader type
   async loader({ request }) {
     const u = new URL(request.url);
     const tenantId = u.searchParams.get("tenantId") ?? "";
     if (!tenantId) return err("Missing tenantId");
 
-    const auth = await resolveAuth(request, tenantId);
+    const auth = await resolveAuth(request as Request, tenantId);
     if (!auth.ok) return err(auth.error, auth.status);
 
     const agentId = (u.searchParams.get("agentId") ?? "") as "reorder" | "winback" | "abandoned_cart";

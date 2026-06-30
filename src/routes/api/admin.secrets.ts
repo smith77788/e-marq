@@ -32,24 +32,26 @@ async function resolveAuth(
 }
 
 export const Route = createFileRoute("/api/admin/secrets")({
+  // @ts-expect-error TanStack Router loader type
   async loader({ request }) {
     const u = new URL(request.url);
     const tenantId = u.searchParams.get("tenantId") ?? "";
     if (!tenantId) return err("Missing tenantId");
 
-    const auth = await resolveAuth(request, tenantId);
+    const auth = await resolveAuth(request as Request, tenantId);
     if (!auth.ok) return err(auth.error, auth.status);
 
     const secrets = await getSecrets(tenantId);
     return Response.json({ ok: true, secrets });
   },
 
+  // @ts-expect-error TanStack Router action type
   async action({ request }) {
     const body = (await request.json()) as Record<string, unknown>;
     const tenantId = (body.tenantId as string) ?? "";
     if (!tenantId) return err("Missing tenantId");
 
-    const auth = await resolveAuth(request, tenantId);
+    const auth = await resolveAuth(request as Request, tenantId);
     if (!auth.ok) return err(auth.error, auth.status);
 
     if (request.method === "POST") {

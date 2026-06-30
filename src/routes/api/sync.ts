@@ -67,7 +67,7 @@ export const Route = createFileRoute("/api/sync")({
           const itemsSynced = result?.itemsSynced ?? 0;
           const errors = result?.errors ?? 0;
           const res = await completeSync(syncId, itemsSynced, errors);
-          return Response.json({ ok: true, ...res });
+          return Response.json({ ...res, ok: true });
         }
 
         // Start a new sync job: {tenantId, type}

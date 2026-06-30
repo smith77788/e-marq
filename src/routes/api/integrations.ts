@@ -79,12 +79,12 @@ export const Route = createFileRoute("/api/integrations")({
 
         if (action === "connect") {
           const result = await connectIntegration(tenantId, provider, config ?? {});
-          return Response.json({ ok: true, ...result });
+          return Response.json({ ...result, ok: true });
         }
 
         if (action === "disconnect") {
           const result = await disconnectIntegration(tenantId, provider);
-          return Response.json({ ok: true, ...result });
+          return Response.json({ ...result, ok: true });
         }
 
         return err(`Unknown action: ${action}`);

@@ -75,7 +75,7 @@ export const Route = createFileRoute("/api/events")({
         if (!auth.ok) return err(auth.error, auth.status);
 
         const result = await trackEvent(tenantId, type, "business", data ?? {}, "api");
-        return Response.json({ ok: true, ...result });
+        return Response.json({ ...result, ok: true });
       },
     },
   },
